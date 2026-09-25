@@ -6,7 +6,7 @@ import { Stethoscope, HeartPulse, ClipboardList, UserRound, Briefcase, KeyRound,
 import { api, ApiError, getDeviceId, API_MODE } from "@/lib/api";
 import { usePrefs, useSession } from "@/components/providers";
 import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
-import { A11yButton, LanguageButton, Logo } from "@/components/layout/chrome";
+import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
 import { Button, Card, FieldError, Input, Label, Select, Segmented, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { DEMO_LOGINS } from "@/lib/api/mock/seed";
@@ -321,7 +321,7 @@ function AuthInner() {
 
           {API_MODE === "mock" && (
             <div className="mt-6 rounded-xl border border-dashed border-teal-300 bg-teal-50/60 p-3">
-              <p className="text-xs font-semibold text-teal-800">Demo accounts (synthetic) — OTP is always 123456</p>
+              <p className="text-xs font-semibold text-teal-800">Sample accounts — OTP 123456</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {DEMO_LOGINS.map((d) => (
                   <button key={d.phone} onClick={() => { setPhone(d.phone); setMethod("otp"); setChallenge(null); }} className="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">
@@ -526,27 +526,23 @@ function AuthInner() {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-[calc(100vh-28px)] bg-[radial-gradient(70%_50%_at_100%_0%,var(--color-teal-100),transparent),radial-gradient(60%_50%_at_0%_100%,var(--color-coral-50),transparent)]">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Logo />
-        <div className="flex gap-2">
-          <LanguageButton />
-          <A11yButton />
-        </div>
-      </div>
-      <div className="mx-auto grid max-w-6xl items-start gap-10 px-4 pt-4 pb-16 lg:grid-cols-[1fr_440px]">
+    <div className="min-h-[calc(100vh-28px)] bg-[radial-gradient(60%_50%_at_100%_0%,var(--color-teal-100),transparent),radial-gradient(60%_50%_at_0%_100%,var(--color-coral-50),transparent)]">
+      <SiteHeader />
+      <div className="mx-auto grid max-w-6xl items-start gap-10 px-4 pt-8 pb-20 sm:px-6 lg:grid-cols-[1fr_440px]">
         <div className="hidden pt-8 lg:block">
-          <h1 className="text-4xl font-extrabold tracking-tight text-ink">Secure, role-based access</h1>
+          <h1 className="text-4xl leading-tight font-extrabold tracking-tight text-ink">
+            Secure, <span className="text-gradient">role-based</span> access
+          </h1>
           <p className="mt-3 max-w-md text-lg text-muted">Phone + OTP for first sign-in, then a device-bound PIN for speed at busy counters. Every session is logged.</p>
           <ul className="mt-8 space-y-3 text-sm text-ink-2">
             {[
               [<UserRound key="a" className="size-4" />, "Patients never see triage status — only their own visits and reminders."],
-              [<ShieldCheck key="b" className="size-4" />, "JWT sessions with short expiry and refresh."],
-              [<KeyRound key="c" className="size-4" />, "PIN is hashed with the device id — useless on any other device."],
+              [<ShieldCheck key="b" className="size-4" />, "Short-lived sessions that refresh securely and end on sign-out."],
+              [<KeyRound key="c" className="size-4" />, "Your PIN only works on the device where you created it."],
             ].map(([i, s], k) => (
               <li key={k} className="flex items-start gap-3">
-                <span className="mt-0.5 grid size-7 place-items-center rounded-lg bg-white text-teal-700 shadow-sm">{i}</span>
-                <span className="pt-1">{s}</span>
+                <span className="mt-0.5 grid size-8 place-items-center rounded-xl bg-white text-coral-500 shadow-sm">{i}</span>
+                <span className="pt-1.5">{s}</span>
               </li>
             ))}
           </ul>
@@ -555,6 +551,7 @@ export default function AuthPage() {
           <AuthInner />
         </Suspense>
       </div>
+      <SiteFooter />
     </div>
   );
 }

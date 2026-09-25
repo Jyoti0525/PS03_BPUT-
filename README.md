@@ -1,12 +1,11 @@
 # Jeevia (जीविया)
 
 **Human-in-the-loop multimodal triage assistant for government and institutional health facilities.**
-BPUT Hackathon 2026 · Problem Statement 3 (Cognizant).
 
 > **Educational prototype — triage support only.** Jeevia does not diagnose, prescribe or replace a qualified
 > professional. It uses synthetic data only. Every health-related output is advisory and reviewer-facing.
 
-**Live demo (frontend, mock API):** https://jeevia-triage.vercel.app — sign in with any demo account below; the OTP is always `123456`.
+**Live:** https://jeevia-triage.vercel.app — until the production API is connected, the site runs on a built-in sample dataset. Sample accounts below; the OTP is `123456`.
 
 | Role | Phone | Lands on |
 |---|---|---|

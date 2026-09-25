@@ -111,3 +111,118 @@ body {
     background: #fff;
   }
 }
+
+/* ── Website motion ─────────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(90deg, var(--color-coral-300) 0%, #e79a9c 45%, #8fcfd0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, var(--color-coral-300), var(--color-coral-200));
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float-slow {
+  animation: float-y 6s ease-in-out infinite;
+}
+.float-slower {
+  animation: float-y 8s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 32s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -20px) scale(1.06);
+  }
+  66% {
+    transform: translate(-20px, 15px) scale(0.96);
+  }
+}
+.blob {
+  animation: blob 18s ease-in-out infinite;
+}
+
+@keyframes slide-in-row {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+    background: var(--color-teal-50);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.row-enter {
+  animation: slide-in-row 0.55s ease-out both;
+}
+
+@keyframes ping-dot {
+  75%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+.live-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: ping-dot 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}

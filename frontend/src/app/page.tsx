@@ -1,153 +1,410 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Mic, FileScan, ListOrdered, ShieldCheck, Stethoscope, Tablet, Building2, HeartPulse, Briefcase, Scale, History, Languages, WifiOff, UserCheck } from "lucide-react";
-import { A11yButton, LanguageButton, Logo } from "@/components/layout/chrome";
-import { usePrefs, useSession } from "@/components/providers";
-import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
-import { Button } from "@/components/ui";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight, AudioLines, FileScan, ClipboardList, Languages, UserCheck, ShieldCheck, Building2, Hospital, Tent, Factory, GraduationCap, Briefcase,
+  Stethoscope, Scale, ListOrdered, History, Trash2, ChevronLeft, ChevronRight, AlertTriangle, Activity, HardHat, Thermometer, Baby, HeartPulse, WifiOff,
+  Send, Cpu, Sparkles, Tablet,
+} from "lucide-react";
+import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
+import { CountUp, Reveal, useInView } from "@/components/site/motion";
+import { useSite, type SiteCopy } from "@/lib/i18n/site";
+import { cx } from "@/components/ui";
 
-const PORTALS = [
-  { href: "/kiosk", icon: <Tablet />, title: "Patient intake kiosk", body: "Staff-mediated tablet intake: voice-first, icon mode, reports & photos, works offline.", who: "Nurse / ANM / ASHA" },
-  { href: "/reviewer", icon: <Stethoscope />, title: "Reviewer dashboard", body: "Queue ordered by rules-engine urgency, 4-minute case view with source for every value.", who: "Doctor / Nurse" },
-  { href: "/admin", icon: <Building2 />, title: "Facility admin", body: "Facility type, specialists on duty, kiosk devices, audit trail and data retention.", who: "Receptionist / Supervisor" },
-  { href: "/patient", icon: <HeartPulse />, title: "My health", body: "Add a new problem, upload reports, see visits and check-up reminders.", who: "Patient" },
-  { href: "/employer", icon: <Briefcase />, title: "Employer view", body: "Occupational fitness status by cohort. No clinical records, ever.", who: "Industrial / company HR" },
-];
+const U_STYLE = {
+  red: { pill: "bg-crit-bg text-crit", dot: "bg-crit" },
+  yellow: { pill: "bg-semi-bg text-semi", dot: "bg-amber-400" },
+  green: { pill: "bg-rout-bg text-rout", dot: "bg-rout" },
+} as const;
+const RANK = { red: 0, yellow: 1, green: 2 } as const;
+const AVATAR = ["bg-coral-50 text-coral-500", "bg-teal-50 text-teal-700"];
 
-const PRINCIPLES = [
-  { icon: <Scale />, title: "Non-diagnostic", body: "Organises what the patient said and brought. Never diagnoses, never prescribes." },
-  { icon: <ListOrdered />, title: "Deterministic urgency", body: "Red / yellow / green comes only from hard-coded AIIMS ATP and IMCI rules — not a language model." },
-  { icon: <UserCheck />, title: "Human in the loop", body: "A qualified reviewer confirms every note. Overrides need a written reason and are logged." },
-  { icon: <FileScan />, title: "Source traceability", body: "Each extracted value sits beside the report crop or transcript it came from." },
-  { icon: <History />, title: "Append-only audit", body: "Every view, edit, override and export is hash-chained and cannot be altered." },
-  { icon: <ShieldCheck />, title: "Minimal retention", body: "Raw audio and photos expire automatically. Patients never see triage status." },
-];
+/** Hero visual: a queue that keeps receiving patients and re-sorts them by rules-engine urgency. */
+function LiveQueue({ c }: { c: SiteCopy }) {
+  const pool = c.queue.patients;
+  const [ids, setIds] = useState<number[]>([0, 2, 4, 5]);
+  const [fresh, setFresh] = useState<number | null>(null);
+  const cursor = useRef(0);
+  const label = (u: "red" | "yellow" | "green") => (u === "red" ? c.queue.critical : u === "yellow" ? c.queue.semi : c.queue.routine);
 
-export default function Landing() {
-  const { t } = usePrefs();
-  const { user } = useSession();
+  useEffect(() => {
+    const order = [1, 3, 0, 2, 4, 5];
+    const t = setInterval(() => {
+      const next = order[cursor.current % order.length];
+      cursor.current++;
+      setIds((cur) => {
+        const without = cur.filter((i) => i !== next);
+        const kept = without.length >= 4 ? without.slice(0, 3) : without;
+        return [...kept, next].sort((a, b) => RANK[pool[a].u] - RANK[pool[b].u]);
+      });
+      setFresh(next);
+    }, 3400);
+    return () => clearInterval(t);
+  }, [pool]);
+
+  const critical = ids.filter((i) => pool[i].u === "red").length;
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-line bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
-          <Logo />
-          <div className="ml-auto flex items-center gap-2">
-            <LanguageButton className="hidden sm:block" />
-            <LanguageButton compact className="sm:hidden" />
-            <A11yButton />
-            {user ? (
-              <Link href={HOME_FOR_ROLE[user.role]}>
-                <Button size="md">Open workspace</Button>
-              </Link>
-            ) : (
-              <Link href="/auth">
-                <Button size="md">{t("auth.signin")}</Button>
-              </Link>
-            )}
-          </div>
+    <div className="relative mx-auto w-full max-w-md pt-12 pb-20 lg:max-w-none">
+      <div className="float-slower absolute top-0 left-4 z-10 hidden rounded-2xl border border-line bg-white/95 px-4 py-3 shadow-[var(--shadow-pop)] backdrop-blur sm:block lg:-left-6">
+        <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted">
+          <Cpu className="size-3.5 text-teal-600" /> {c.queue.rules}
+        </p>
+        <p className="mt-0.5 text-sm font-bold text-ink">{c.queue.rulesBody}</p>
+      </div>
+
+      <div className="relative rounded-[28px] border border-white/70 bg-white/90 p-5 shadow-[0_30px_80px_-30px_rgb(22_24_43/0.35)] backdrop-blur sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <p className="flex items-center gap-2 font-bold text-ink">
+            <span className="relative inline-flex size-2.5 rounded-full text-crit live-dot">
+              <span className="size-2.5 rounded-full bg-crit" />
+            </span>
+            {c.queue.title}
+          </p>
+          <span className="rounded-full bg-crit-bg px-3 py-1 text-xs font-bold tracking-wide text-crit uppercase transition-all">
+            {critical} {c.queue.critical}
+          </span>
         </div>
-      </header>
-
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_85%_0%,var(--color-teal-100),transparent),radial-gradient(50%_50%_at_0%_30%,var(--color-coral-50),transparent)]" />
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 lg:grid-cols-[1.15fr_1fr] lg:py-20">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white px-3 py-1 text-xs font-semibold text-teal-700">
-              BPUT Hackathon 2026 · Problem Statement 3
-            </p>
-            <h1 className="mt-4 text-4xl leading-tight font-extrabold tracking-tight text-ink sm:text-5xl">
-              Faster, safer triage review for every kind of Indian health facility.
-            </h1>
-            <p className="mt-4 max-w-xl text-lg text-muted">
-              Jeevia turns what a patient says, the reports they carry and simple photos into a structured, prioritised triage note — for a qualified professional to review in under four minutes.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/kiosk">
-                <Button size="lg" variant="teal" icon={<Tablet className="size-5" />}>
-                  Start patient intake
-                </Button>
-              </Link>
-              <Link href="/auth">
-                <Button size="lg" variant="secondary">
-                  Staff sign in <ArrowRight className="size-4" />
-                </Button>
-              </Link>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
-              <span className="flex items-center gap-1.5"><Mic className="size-4 text-teal-700" /> Voice in 22 languages</span>
-              <span className="flex items-center gap-1.5"><FileScan className="size-4 text-teal-700" /> OCR for lab slips</span>
-              <span className="flex items-center gap-1.5"><WifiOff className="size-4 text-teal-700" /> Offline camp mode</span>
-              <span className="flex items-center gap-1.5"><Languages className="size-4 text-teal-700" /> Hindi · Odia · + 20</span>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-line bg-white p-4 shadow-[var(--shadow-pop)]">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-ink">Triage queue · PHC Manikpur</p>
-              <span className="text-xs text-subtle">ordered by rules engine</span>
-            </div>
-            {[
-              { u: "crit", n: "Radha K., 42F", c: "Chest pain → left arm, sweating", f: "ATP-CARD-01", w: "8m" },
-              { u: "crit", n: "Aarav S., 3M", c: "High fever, one convulsion", f: "IMCI-DANGER-01", w: "11m" },
-              { u: "semi", n: "Lakshmi D., 55F", c: "Thirst, blurred vision (diabetic)", f: "Report: FBS 310", w: "38m" },
-              { u: "rout", n: "Priya S., 24F", c: "Routine ANC, 28 weeks", f: "No red flags", w: "62m" },
-            ].map((r) => (
-              <div key={r.n} className="mb-2 flex items-center gap-3 rounded-2xl border border-line px-3 py-2.5 last:mb-0">
-                <span className={`h-9 w-1.5 rounded-full ${r.u === "crit" ? "bg-crit" : r.u === "semi" ? "bg-amber-500" : "bg-rout"}`} />
+        <ul className="mt-4 divide-y divide-line">
+          {ids.map((i, k) => {
+            const p = pool[i];
+            return (
+              <li key={i} className={cx("flex items-center gap-3 rounded-xl py-3.5 transition-all duration-500", fresh === i && "row-enter")}>
+                <span className={cx("grid size-10 shrink-0 place-items-center rounded-full text-sm font-bold", AVATAR[k % 2])}>{p.name.charAt(0)}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-ink">{r.n}</p>
-                  <p className="truncate text-xs text-muted">{r.c}</p>
+                  <p className="truncate text-sm font-semibold text-ink">{p.name}</p>
+                  <p className="truncate text-xs text-muted">{p.detail}</p>
                 </div>
-                <span className="hidden rounded-md bg-canvas px-2 py-0.5 font-mono text-[11px] text-muted sm:inline">{r.f}</span>
-                <span className="text-xs text-subtle tabular-nums">{r.w}</span>
-              </div>
-            ))}
-          </div>
+                <span className={cx("inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase", U_STYLE[p.u].pill)}>
+                  <span className={cx("size-2 rounded-full", U_STYLE[p.u].dot)} />
+                  <span className="hidden sm:inline">{label(p.u)}</span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="mt-2 flex items-center justify-between border-t border-line pt-4 text-xs">
+          <span className="flex items-center gap-1.5 text-muted">
+            <Sparkles className="size-3.5 text-teal-600" /> {c.queue.footerLeft}
+          </span>
+          <span className="flex items-center gap-1 font-semibold text-coral-500">
+            {c.queue.footerRight} <ArrowRight className="size-3.5" />
+          </span>
         </div>
-      </section>
+      </div>
 
-      <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="text-2xl font-bold text-ink">One system, five workspaces</h2>
-        <p className="mt-1 text-muted">Each role sees only what it needs. Health outputs stay reviewer-facing.</p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PORTALS.map((p) => (
-            <Link key={p.href} href={p.href} className="group rounded-2xl border border-line bg-white p-5 transition-shadow hover:shadow-[var(--shadow-pop)]">
-              <span className="grid size-11 place-items-center rounded-xl bg-teal-50 text-teal-700 [&>svg]:size-5.5">{p.icon}</span>
-              <h3 className="mt-4 font-semibold text-ink">{p.title}</h3>
-              <p className="mt-1 text-sm text-muted">{p.body}</p>
-              <p className="mt-3 flex items-center justify-between text-xs font-medium text-subtle">
-                {p.who} <ArrowRight className="size-4 text-teal-700 transition-transform group-hover:translate-x-1" />
-              </p>
-            </Link>
+      <div className="float-slow absolute right-4 bottom-0 z-10 hidden rounded-2xl border border-line bg-white/95 px-4 py-3 shadow-[var(--shadow-pop)] backdrop-blur sm:block lg:-right-6">
+        <p className="text-[11px] font-medium text-muted">{c.queue.status}</p>
+        <p className="text-lg font-extrabold text-ink tabular-nums">
+          {critical} {c.queue.critical}
+        </p>
+        <p className="flex items-center gap-1 text-[11px] font-semibold text-rout">
+          <Activity className="size-3" /> {c.queue.flagged}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ eyebrow, title, body, light }: { eyebrow: string; title: [string, string]; body?: string; light?: boolean }) {
+  return (
+    <Reveal className="mx-auto max-w-4xl text-center">
+      <p className="text-xs font-bold tracking-[0.18em] text-coral-500 uppercase">{eyebrow}</p>
+      <h2 className={cx("mt-3 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl lg:text-5xl", light ? "text-white" : "text-ink")}>
+        {title[0]} <br className="hidden sm:block" />
+        <span className="text-gradient">{title[1]}</span>
+      </h2>
+      {body && <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">{body}</p>}
+    </Reveal>
+  );
+}
+
+const FEATURE_ICONS = [AudioLines, FileScan, ClipboardList, Languages, UserCheck, ShieldCheck];
+const FACILITY_ICONS = [Hospital, Building2, Tent, Factory, GraduationCap, Briefcase];
+const SCENARIO_ICONS = [ListOrdered, HardHat, Thermometer, Baby, HeartPulse, WifiOff, Send];
+const SAFETY_ICONS = [Scale, ListOrdered, UserCheck, FileScan, History, Trash2];
+
+function Process({ c }: { c: SiteCopy }) {
+  const { ref, inView } = useInView<HTMLDivElement>(0.3);
+  const icons = [Tablet, Cpu, Stethoscope];
+  return (
+    <div ref={ref} className="relative mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+      <div className="absolute top-10 right-[16%] left-[16%] hidden h-0.5 overflow-hidden rounded-full bg-line md:block" aria-hidden>
+        <div className={cx("h-full origin-left bg-gradient-to-r from-coral-300 via-coral-200 to-teal-300 transition-transform duration-[1600ms] ease-out", inView ? "scale-x-100" : "scale-x-0")} />
+      </div>
+      {c.how.steps.map((s, i) => {
+        const Icon = icons[i];
+        return (
+          <Reveal key={s.title} delay={i * 180} className="relative text-center">
+            <div
+              className={cx(
+                "relative mx-auto grid size-20 place-items-center rounded-full text-white shadow-[0_14px_30px_-10px_rgb(242_145_145/0.7)] ring-8 ring-white",
+                i === 0 && "bg-gradient-to-br from-coral-300 to-coral-200",
+                i === 1 && "bg-gradient-to-br from-teal-200 to-teal-100 text-teal-800",
+                i === 2 && "bg-gradient-to-br from-coral-200 to-teal-200",
+              )}
+            >
+              <Icon className="size-8" />
+              <span className="absolute -top-1 -right-1 grid size-7 place-items-center rounded-full bg-ink text-xs font-bold text-white">{i + 1}</span>
+            </div>
+            <h3 className="mt-6 text-xl font-bold text-ink">{s.title}</h3>
+            <p className="mx-auto mt-2 max-w-xs text-[15px] leading-relaxed text-muted">{s.body}</p>
+          </Reveal>
+        );
+      })}
+    </div>
+  );
+}
+
+function Scenarios({ c }: { c: SiteCopy }) {
+  const track = useRef<HTMLDivElement>(null);
+  const [idx, setIdx] = useState(0);
+  const n = c.scenarios.items.length;
+
+  const scrollTo = (i: number) => {
+    const el = track.current;
+    if (!el) return;
+    const card = el.children[Math.max(0, Math.min(n - 1, i))] as HTMLElement | undefined;
+    if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const onScroll = () => {
+      const first = el.children[0] as HTMLElement | undefined;
+      if (!first) return;
+      const w = first.offsetWidth + 20;
+      setIdx(Math.round(el.scrollLeft / w));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div className="mt-12">
+      <div ref={track} className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-4 pt-2 pb-6 sm:-mx-6 sm:px-6">
+        {c.scenarios.items.map((s, i) => {
+          const Icon = SCENARIO_ICONS[i];
+          return (
+            <article
+              key={s.title}
+              className="group w-[82%] shrink-0 snap-start rounded-3xl border border-line bg-white p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-teal-200 hover:shadow-[0_24px_50px_-24px_rgb(22_24_43/0.35)] sm:w-[46%] lg:w-[calc((100%-60px)/4)]"
+            >
+              <span className={cx("grid size-12 place-items-center rounded-2xl transition-transform group-hover:scale-110", i % 2 ? "bg-teal-50 text-teal-700" : "bg-coral-50 text-coral-500")}>
+                <Icon className="size-6" />
+              </span>
+              <p className="mt-6 text-[11px] font-bold tracking-[0.16em] text-coral-500 uppercase">{s.tag}</p>
+              <h3 className="mt-1.5 text-lg font-bold text-ink">{s.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
+            </article>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex items-center justify-center gap-4">
+        <button onClick={() => scrollTo(idx - 1)} disabled={idx <= 0} className="grid size-11 place-items-center rounded-full border border-line bg-white text-ink transition-colors hover:border-coral-200 disabled:opacity-40" aria-label="Previous">
+          <ChevronLeft className="size-5" />
+        </button>
+        <div className="flex gap-1.5">
+          {c.scenarios.items.map((s, i) => (
+            <button key={s.title} onClick={() => scrollTo(i)} aria-label={s.title} className={cx("h-2 rounded-full transition-all", i === idx ? "w-7 bg-coral-300" : "w-2 bg-line hover:bg-coral-100")} />
           ))}
         </div>
-      </section>
+        <button onClick={() => scrollTo(idx + 1)} disabled={idx >= n - 1} className="grid size-11 place-items-center rounded-full border border-line bg-white text-ink transition-colors hover:border-coral-200 disabled:opacity-40" aria-label="Next">
+          <ChevronRight className="size-5" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      <section className="border-y border-line bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-12">
-          <h2 className="text-2xl font-bold text-ink">Safety rules the system is built around</h2>
-          <div className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
-            {PRINCIPLES.map((p) => (
-              <div key={p.title} className="flex gap-3">
-                <span className="mt-0.5 text-coral-600 [&>svg]:size-5">{p.icon}</span>
-                <div>
-                  <h3 className="font-semibold text-ink">{p.title}</h3>
-                  <p className="mt-0.5 text-sm text-muted">{p.body}</p>
-                </div>
-              </div>
-            ))}
+export default function Landing() {
+  const c = useSite();
+
+  return (
+    <div className="min-h-screen bg-[#fbfbfe]">
+      <div className="relative overflow-hidden">
+        {/* soft brand background */}
+        <div className="pointer-events-none absolute inset-0 -z-0" aria-hidden>
+          <div className="blob absolute -top-40 -right-32 size-[520px] rounded-full bg-coral-100/80 blur-3xl" />
+          <div className="blob absolute top-40 -left-40 size-[460px] rounded-full bg-teal-100/70 blur-3xl [animation-delay:-6s]" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[#fbfbfe]" />
+        </div>
+
+        <div className="relative z-10">
+          <SiteHeader />
+
+          {/* Hero */}
+          <section className="mx-auto grid max-w-6xl items-center gap-14 px-4 pt-10 pb-20 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:pt-16 lg:pb-28">
+            <div>
+              <Reveal>
+                <span className="inline-flex items-center gap-2 rounded-full border border-coral-200 bg-white/70 px-4 py-1.5 text-xs font-bold tracking-wider text-coral-500 uppercase backdrop-blur">
+                  <span className="size-1.5 rounded-full bg-coral-300" />
+                  {c.hero.badge}
+                </span>
+              </Reveal>
+              <Reveal delay={80}>
+                <h1 className="mt-6 text-[2.6rem] leading-[1.05] font-extrabold tracking-tight text-ink sm:text-6xl lg:text-[4.2rem]">
+                  {c.hero.title[0]}
+                  <br />
+                  <span className="text-gradient">{c.hero.title[1]}</span>
+                  <br />
+                  {c.hero.title[2]}
+                </h1>
+              </Reveal>
+              <Reveal delay={160}>
+                <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">{c.hero.body}</p>
+              </Reveal>
+              <Reveal delay={240} className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/auth?mode=register" className="bg-brand-gradient group inline-flex h-14 items-center justify-center gap-2 rounded-full px-8 text-base font-semibold text-white shadow-[0_14px_30px_-10px_rgb(242_145_145/0.9)] transition-transform hover:-translate-y-0.5">
+                  {c.hero.primary} <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+                <a href="#how" className="inline-flex h-14 items-center justify-center rounded-full border-2 border-line bg-white/70 px-8 text-base font-semibold text-ink backdrop-blur transition-colors hover:border-coral-200 hover:bg-white">
+                  {c.hero.secondary}
+                </a>
+              </Reveal>
+              <Reveal delay={320} className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-line pt-7">
+                {[
+                  { n: 22, s: "+" },
+                  { n: 4, s: " min" },
+                  { n: 100, s: "%" },
+                ].map((x, i) => (
+                  <div key={i}>
+                    <p className="text-2xl font-extrabold text-ink sm:text-3xl">
+                      <CountUp to={x.n} suffix={x.s} />
+                    </p>
+                    <p className="mt-1 text-xs text-muted sm:text-sm">{c.hero.stats[i]}</p>
+                  </div>
+                ))}
+              </Reveal>
+            </div>
+            <Reveal delay={200}>
+              <LiveQueue c={c} />
+            </Reveal>
+          </section>
+        </div>
+      </div>
+
+      {/* Facility types */}
+      <section className="border-y border-line bg-white py-6" aria-label="Facility types">
+        <div className="marquee overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
+          <div className="marquee-track flex w-max gap-4">
+            {[...c.facilities, ...c.facilities].map((f, i) => {
+              const Icon = FACILITY_ICONS[i % FACILITY_ICONS.length];
+              return (
+                <span key={i} className="flex shrink-0 items-center gap-3 rounded-full border border-line bg-canvas/60 py-2 pr-5 pl-2 text-sm font-semibold text-ink-2">
+                  <span className={cx("grid size-9 place-items-center rounded-full", i % 2 ? "bg-teal-100 text-teal-700" : "bg-coral-100 text-coral-600")}>
+                    <Icon className="size-4.5" />
+                  </span>
+                  {f}
+                </span>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <footer className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted">
-        <p className="font-medium text-ink-2">Clinical safety notice</p>
-        <p className="mt-1 max-w-3xl">
-          Jeevia is an educational prototype for triage support. It uses synthetic data only, does not diagnose or recommend treatment, and every output must be reviewed by a qualified medical professional.
-        </p>
-      </footer>
+      {/* Features */}
+      <section id="features" className="scroll-mt-20 py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionTitle eyebrow={c.features.eyebrow} title={c.features.title} body={c.features.body} />
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {c.features.items.map((f, i) => {
+              const Icon = FEATURE_ICONS[i];
+              return (
+                <Reveal key={f.title} delay={(i % 3) * 100}>
+                  <article className="group relative h-full overflow-hidden rounded-3xl border border-line bg-white p-7 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_28px_60px_-28px_rgb(22_24_43/0.35)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-coral-50 via-transparent to-teal-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" aria-hidden />
+                    <div className="relative">
+                      <span className={cx("grid size-14 place-items-center rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3", i % 2 ? "bg-teal-100 text-teal-700" : "bg-coral-100 text-coral-600")}>
+                        <Icon className="size-7" />
+                      </span>
+                      <h3 className="mt-6 text-xl font-bold text-ink">{f.title}</h3>
+                      <p className="mt-2.5 leading-relaxed text-muted">{f.body}</p>
+                    </div>
+                  </article>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how" className="scroll-mt-20 bg-gradient-to-b from-white to-teal-50/70 py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionTitle eyebrow={c.how.eyebrow} title={c.how.title} body={c.how.body} />
+          <Process c={c} />
+        </div>
+      </section>
+
+      {/* Scenarios */}
+      <section id="scenarios" className="scroll-mt-20 py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionTitle eyebrow={c.scenarios.eyebrow} title={c.scenarios.title} />
+          <Scenarios c={c} />
+        </div>
+      </section>
+
+      {/* Safety */}
+      <section id="safety" className="scroll-mt-20 bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <SectionTitle eyebrow={c.safety.eyebrow} title={c.safety.title} />
+          <div className="mt-14 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+            {c.safety.items.map((s, i) => {
+              const Icon = SAFETY_ICONS[i];
+              return (
+                <Reveal key={s.title} delay={(i % 3) * 90} className="flex gap-4">
+                  <span className={cx("grid size-11 shrink-0 place-items-center rounded-xl", i % 2 ? "bg-teal-50 text-teal-700" : "bg-coral-50 text-coral-500")}>
+                    <Icon className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-ink">{s.title}</h3>
+                    <p className="mt-1 text-[15px] leading-relaxed text-muted">{s.body}</p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t-4 border-amber-400 bg-gradient-to-r from-amber-50 via-coral-50 to-coral-50">
+        <Reveal className="mx-auto flex max-w-6xl gap-4 px-4 py-10 sm:px-6">
+          <AlertTriangle className="mt-1 size-7 shrink-0 text-amber-500" />
+          <div>
+            <h3 className="text-lg font-bold text-amber-800">{c.safety.noticeTitle}</h3>
+            <p className="mt-2 leading-relaxed text-amber-900/90">
+              <strong>{c.safety.noticeLead}</strong> {c.safety.notice}
+            </p>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20">
+        <Reveal className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-coral-300 via-coral-200 to-teal-200 px-6 py-14 text-center sm:px-12">
+            <div className="blob absolute -top-20 -left-10 size-72 rounded-full bg-white/25 blur-2xl" aria-hidden />
+            <div className="blob absolute -right-10 -bottom-24 size-80 rounded-full bg-teal-100/50 blur-2xl [animation-delay:-8s]" aria-hidden />
+            <div className="relative">
+              <h2 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{c.cta.title}</h2>
+              <p className="mx-auto mt-3 max-w-xl text-lg text-ink/75">{c.cta.body}</p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link href="/auth?mode=register" className="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-ink px-7 font-semibold text-white transition-transform hover:-translate-y-0.5">
+                  {c.cta.primary} <ArrowRight className="size-4" />
+                </Link>
+                <Link href="/kiosk" className="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-white/80 px-7 font-semibold text-ink backdrop-blur transition-colors hover:bg-white">
+                  <Tablet className="size-4" /> {c.cta.secondary}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      <SiteFooter />
     </div>
   );
 }
