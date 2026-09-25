@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeevia — Doctor Dashboard</title>
+  <meta name="description" content="Jeevia Doctor Dashboard — Multimodal triage decision-support for qualified medical officers.">
+  <meta name="theme-color" content="#F29191">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/dashboard.css">
+  <link rel="stylesheet" href="styles/doctor.css">
+  <link rel="stylesheet" href="styles/nav.css">
+</head>
+<body>
+
+<div class="dash-shell">
+
+  <!-- ══ SIDEBAR ═══════════════════════════════════════════════ -->
+  <aside class="dash-sidebar" id="dash-sidebar" role="navigation" aria-label="Doctor navigation">
+    <!-- Logo -->
+    <a href="index.html" class="sidebar-logo" aria-label="Jeevia Home">
+      <div class="sidebar-logo-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5"/>
+          <path d="M8 12h8M12 8v8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-text">Jee<span>via</span></span>
+    </a>
+
+    <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Collapse sidebar">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <div class="sidebar-role-badge">Doctor / Medical Officer</div>
+
+    <nav class="sidebar-nav" role="menubar">
+      <a href="#" class="nav-item active" id="nav-queue" role="menuitem" data-view="view-queue" aria-current="page">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <span class="nav-item-label">Triage Queue</span>
+        <span class="nav-badge" id="sidebar-critical-count">3</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-search-menu" role="menuitem" data-view="view-search">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <span class="nav-item-label">Find Patient</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-reviewed" role="menuitem" data-view="view-reviewed">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </span>
+        <span class="nav-item-label">Reviewed Today</span>
+        <span class="nav-badge green" id="sidebar-reviewed-count">12</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-referrals" role="menuitem" data-view="view-referrals">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        </span>
+        <span class="nav-item-label">Referrals</span>
+        <span class="nav-badge yellow" id="sidebar-referral-count">2</span>
+      </a>
+
+      <div class="sidebar-section-title">Clinical Tools</div>
+      <a href="#" class="nav-item" id="nav-qr-scan-side" role="menuitem" data-view="view-qr-scan">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </span>
+        <span class="nav-item-label">Scan Patient QR</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-rules-engine" role="menuitem" data-view="view-rules-engine">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        </span>
+        <span class="nav-item-label">Rules Engine Trace</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-audit-log" role="menuitem" data-view="view-audit-log">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </span>
+        <span class="nav-item-label">Audit Trail Log</span>
+      </a>
+
+      <div class="sidebar-section-title">Account & Facility</div>
+      <a href="#" class="nav-item" id="nav-notifications" role="menuitem" data-view="view-notifications">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </span>
+        <span class="nav-item-label">Notifications</span>
+        <span class="nav-badge" id="sidebar-notif-count">4</span>
+      </a>
+      <a href="#" class="nav-item" id="nav-lang-side" role="menuitem">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </span>
+        <span class="nav-item-label">Language / भाषा (22)</span>
+      </a>
+      <a href="index.html" class="nav-item" id="nav-logout" role="menuitem">
+        <span class="nav-item-icon">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </span>
+        <span class="nav-item-label">Sign Out</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar user footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" aria-hidden="true">DS</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Dr. Deepa Sharma</div>
+          <div class="sidebar-user-role">MO · UPMC-48921</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+
+  <!-- ══ MAIN CONTENT ═════════════════════════════════════════ -->
+  <main class="dash-main" id="dash-main" role="main">
+
+    <!-- ══ TOP GLOBAL ADVISORY BANNER (Inside dash-main for perfect alignment) ══ -->
+    <div class="disclaimer-banner" id="disclaimer-banner" role="alert">
+      <div class="disclaimer-banner-content">
+        <svg class="disclaimer-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span><strong>Educational Prototype — Non-Diagnostic:</strong> AI-generated triage summaries are for qualified reviewer decision-support only. No clinical output should be acted upon without independent medical evaluation.</span>
+      </div>
+      <button class="disclaimer-close-btn" onclick="document.getElementById('disclaimer-banner').style.display='none'" aria-label="Dismiss disclaimer">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="dash-topbar">
+      <button class="topbar-btn" id="mobile-menu-btn" aria-label="Open menu" style="display:none;">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      
+      <div class="topbar-title">
+        <h1 class="topbar-heading">Doctor Dashboard</h1>
+        <div class="topbar-subtext">
+          <span id="topbar-date">Monday, 21 September 2026</span>
+          <span class="topbar-sep">•</span>
+          <span class="topbar-auth">Staff Authenticated</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- Staff Session Tag -->
+        <div class="session-pill" title="Staff-Authenticated Medical Session">
+          <span class="session-dot"></span>
+          <span class="session-id">Session STF-77492</span>
+        </div>
+
+        <!-- Language button -->
+        <button class="topbar-btn" id="lang-toggle-btn" aria-label="Change language (22 Indian Languages)" title="Select from 22 Indian Languages">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </button>
+
+        <!-- Notifications button -->
+        <button class="topbar-btn" id="notif-btn" aria-label="Clinical Notifications" title="Clinical Notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="topbar-notif-dot" id="notif-dot" aria-hidden="true"></span>
+        </button>
+
+        <!-- Profile Avatar & dropdown trigger -->
+        <div class="topbar-avatar" id="topbar-avatar" role="button" tabindex="0" aria-label="Doctor Profile">DS</div>
+
+        <!-- Profile Dropdown -->
+        <div class="profile-dropdown" id="profile-dropdown">
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-name">Dr. Deepa Sharma, MBBS, MD</div>
+            <div class="profile-dropdown-role">Medical Officer · Reg #UPMC-48921</div>
+            <div class="profile-dropdown-facility" id="dropdown-facility-name">PHC Manikpur, Chitrakoot</div>
+          </div>
+          <a href="#" class="profile-dropdown-item" id="dropdown-duty-toggle">
+            <svg class="dash-icon-sm" viewBox="0 0 24 24" style="color:#16A34A;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            <span>Status: On Duty</span>
+          </a>
+          <a href="#" class="profile-dropdown-item" id="dropdown-audit-view">
+            <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>View Clinical Override Audit Trail</span>
+          </a>
+          <a href="#" class="profile-dropdown-item" id="dropdown-credentials">
+            <svg class="dash-icon-sm" viewBox="0 0 24 24" style="color:#16A34A;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            <span>Digital Signature Verified</span>
+          </a>
+          <a href="index.html" class="profile-dropdown-item danger">
+            <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Sign Out Session</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page content wrapper -->
+    <div class="dash-content">
+
+      <!-- ══ 1. FACILITY CONTEXT BANNER (Persists across views) ═ -->
+      <div class="facility-context-bar" id="facility-context-bar">
+        <div class="fac-main-row">
+          <div class="fac-title-group">
+            <div class="fac-type-badge" id="fac-type-badge">Primary Health Center</div>
+            <div class="fac-name" id="fac-name-label">PHC Manikpur — Chitrakoot District</div>
+            <!-- Facility Switcher Dropdown -->
+            <div class="fac-switcher">
+              <label for="facility-selector" style="font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600;">Facility Profile:</label>
+              <select class="fac-switcher-select" id="facility-selector" aria-label="Facility configuration selector">
+                <option value="phc_manikpur" selected>PHC Manikpur (Rural PHC - Limited Specialists)</option>
+                <option value="dh_gorakhpur">District Hospital Gorakhpur (Tertiary Care Center)</option>
+                <option value="campus_iitk">Campus Health Center IITK (Institutional Clinic)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Specialist Availability Badges -->
+          <div class="fac-specialists" id="fac-specialists-chips">
+            <span class="fac-spec-chip unavailable" id="chip-cardio"><span class="spec-status-dot off"></span>Cardiologist: None</span>
+            <span class="fac-spec-chip unavailable" id="chip-obgyn"><span class="spec-status-dot visiting"></span>OB-GYN: Visiting Thu</span>
+            <span class="fac-spec-chip available" id="chip-genmed"><span class="spec-status-dot on"></span>Gen Medicine: Active (You)</span>
+            <span class="fac-spec-chip unavailable" id="chip-pulmo"><span class="spec-status-dot off"></span>Pulmonologist: None</span>
+          </div>
+        </div>
+
+        <div class="fac-sub-row">
+          <div class="fac-location" id="fac-subtext">
+            Operating under National Health Mission · Bed Capacity: 15 (12 Occupied) · Nearest Referral: Gorakhpur DH (42km)
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 1: TRIAGE QUEUE (Default Active View)
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view active" id="view-queue">
+
+        <!-- Stats Row -->
+        <div class="stat-grid" role="list" aria-label="Queue statistics">
+          <div class="stat-card coral" role="listitem">
+            <div class="stat-card-header">
+              <span class="stat-label">Total in Queue</span>
+              <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-total">18</div>
+            <div class="stat-delta up">Capacity: 80% full</div>
+          </div>
+
+          <div class="stat-card red" role="listitem">
+            <div class="stat-card-header">
+              <span class="stat-label">Critical — Immediate</span>
+              <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-critical" style="color: var(--critical);">3</div>
+            <div class="stat-delta down" id="critical-alert-label">Auto-escalate active</div>
+          </div>
+
+          <div class="stat-card amber" role="listitem">
+            <div class="stat-card-header">
+              <span class="stat-label">Semi-Urgent</span>
+              <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-semi" style="color: var(--semi-urgent);">7</div>
+            <div class="stat-delta same">Target: &lt; 30 min</div>
+          </div>
+
+          <div class="stat-card green" role="listitem">
+            <div class="stat-card-header">
+              <span class="stat-label">Routine</span>
+              <div class="stat-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-routine" style="color: var(--routine);">8</div>
+            <div class="stat-delta up">Stable wait queue</div>
+          </div>
+        </div>
+
+        <!-- Engine & Ordering Trace Bar -->
+        <div class="queue-ordering-trace" role="region" aria-label="Deterministic queue ordering rule trace">
+          <span class="trace-label">
+            <svg class="dash-icon-sm" viewBox="0 0 24 24" width="14" height="14"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Rules Engine:
+          </span>
+          <span class="trace-chip">AIIMS Triage Protocol v2.4 (Adults)</span>
+          <span class="trace-chip">IMCI (Pediatrics)</span>
+          <span class="trace-arrow">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+          <span class="trace-label">Queue Order Logic:</span>
+          <span class="trace-chip">Urgency (&gt;&gt;)</span>
+          <span class="trace-arrow">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+          <span class="trace-chip">FIFO Waiting Duration</span>
+          <span class="trace-arrow">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+          <span class="trace-chip">Facility Bed Capacity Filter</span>
+        </div>
+
+        <!-- Two-column main layout -->
+        <div class="doctor-layout">
+
+          <!-- Left Column: Triage Queue -->
+          <div class="queue-panel" role="region" aria-label="Patient triage queue">
+            <div class="queue-panel-header">
+              <div class="queue-panel-title">Live Queue Priority</div>
+              <div class="queue-filter-pills" role="group" aria-label="Filter queue by urgency">
+                <button class="filter-pill active" id="filter-all" data-filter="all">All (10)</button>
+                <button class="filter-pill" id="filter-red" data-filter="red" style="color:#DC2626; border-color: rgba(220,38,38,0.3);"><span class="urgency-label-inline critical">Critical</span> (3)</button>
+                <button class="filter-pill" id="filter-yellow" data-filter="yellow" style="color:#D97706; border-color: rgba(217,119,6,0.3);">Semi (4)</button>
+                <button class="filter-pill" id="filter-green" data-filter="green" style="color:#16A34A; border-color: rgba(22,163,74,0.3);"><span class="urgency-label-inline routine">Routine</span> (3)</button>
+              </div>
+            </div>
+
+            <!-- Search & QR Scan Bar -->
+            <div class="queue-search-bar">
+              <div class="queue-search-input-row">
+                <span class="queue-search-icon-btn" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="search" class="queue-search-main-input" id="queue-search" placeholder="Search Patient ID (e.g. P001), name, or phone…" aria-label="Search patient queue">
+                <button class="queue-qr-btn" id="btn-open-qr-scanner" title="Scan Patient QR Code">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span>Scan QR</span>
+                </button>
+              </div>
+              <div class="search-audit-notice" id="search-audit-notice">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span><strong>Audit notice:</strong> Phone search restricted to registered facility patients. Query logged to audit log for compliance.</span>
+              </div>
+            </div>
+
+            <!-- Patient rows list -->
+            <div id="patient-list" role="list" aria-label="Patient list">
+              <!-- P001: Radha Kumari -->
+              <div class="patient-row urgent-red selected" data-urgency="red" data-patient="P001" id="row-P001" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-coral" aria-hidden="true">R</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Radha Kumari, 42F</div>
+                  <div class="patient-complaint">Chest pain 2h · Radiating · Hypertensive · BP 160/100</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">AIIMS ATP: Chest pain + Diaphoresis</span>
+                    <span class="escalation-countdown" id="countdown-P001" title="Unreviewed RED flag auto-escalates to Senior MO"><svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; vertical-align:-1px; margin-right:3px;" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="countdown-val">Auto-escalates: 07:42</span></span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-red"><span class="urgency-label-inline critical">Critical</span></span>
+                  <span class="patient-row-time">8 min ago</span>
+                  <button class="review-btn" aria-label="Review Radha Kumari">Review</button>
+                </div>
+              </div>
+
+              <!-- P002: Suresh Babu -->
+              <div class="patient-row urgent-red" data-urgency="red" data-patient="P002" id="row-P002" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-purple" aria-hidden="true">S</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Suresh Babu, 68M</div>
+                  <div class="patient-complaint">Breathlessness · SpO₂ 89% · Known COPD exacerbation</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">AIIMS ATP: SpO₂ &lt;90% Emergency</span>
+                    <span class="escalation-countdown" id="countdown-P002" title="Unreviewed RED flag auto-escalates to Senior MO"><svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; vertical-align:-1px; margin-right:3px;" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="countdown-val">Auto-escalates: 04:15</span></span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-red"><span class="urgency-label-inline critical">Critical</span></span>
+                  <span class="patient-row-time">14 min ago</span>
+                  <button class="review-btn" aria-label="Review Suresh Babu">Review</button>
+                </div>
+              </div>
+
+              <!-- P003: Ananya Roy -->
+              <div class="patient-row urgent-red" data-urgency="red" data-patient="P003" id="row-P003" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-coral" aria-hidden="true">A</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Ananya Roy, 26F (Maternal 32w)</div>
+                  <div class="patient-complaint">Severe headache · Blurred vision · Oedema · BP 148/96</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">AIIMS ATP: Pre-eclampsia Red Flag</span>
+                    <span class="escalation-countdown" id="countdown-P003" title="Unreviewed RED flag auto-escalates to Senior MO"><svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; vertical-align:-1px; margin-right:3px;" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="countdown-val">Auto-escalates: 11:30</span></span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-red"><span class="urgency-label-inline critical">Critical</span></span>
+                  <span class="patient-row-time">22 min ago</span>
+                  <button class="review-btn" aria-label="Review Ananya Roy">Review</button>
+                </div>
+              </div>
+
+              <!-- P004: Mohammed Rafiq -->
+              <div class="patient-row urgent-yellow" data-urgency="yellow" data-patient="P004" id="row-P004" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-teal" aria-hidden="true">M</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Mohammed Rafiq, 28M</div>
+                  <div class="patient-complaint">Fever 102°F · 3 days · Severe myalgia · Dengue endemic zone</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">ATP: Prolonged Febrile Illness</span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-yellow"><span class="urgency-label-inline semi">Semi-urgent</span></span>
+                  <span class="patient-row-time">31 min ago</span>
+                  <button class="review-btn secondary" aria-label="Review Mohammed Rafiq">Review</button>
+                </div>
+              </div>
+
+              <!-- P005: Lakshmi Devi -->
+              <div class="patient-row urgent-yellow" data-urgency="yellow" data-patient="P005" id="row-P005" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-mint" aria-hidden="true">L</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Lakshmi Devi, 55F (Chronic)</div>
+                  <div class="patient-complaint">Glucose 310 mg/dL · HbA1c 9.8% · Blurred vision · Polyuria</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">ATP: Glycaemic Crisis Worsening</span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-yellow"><span class="urgency-label-inline semi">Semi-urgent</span></span>
+                  <span class="patient-row-time">38 min ago</span>
+                  <button class="review-btn secondary" aria-label="Review Lakshmi Devi">Review</button>
+                </div>
+              </div>
+
+              <!-- P006: Ravi Tiwari -->
+              <div class="patient-row urgent-yellow" data-urgency="yellow" data-patient="P006" id="row-P006" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-purple" aria-hidden="true">R</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Ravi Tiwari, 45M</div>
+                  <div class="patient-complaint">Industrial silica exposure · Chronic productive cough 4w</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">ATP: Occupational Lung Screening</span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-yellow"><span class="urgency-label-inline semi">Semi-urgent</span></span>
+                  <span class="patient-row-time">45 min ago</span>
+                  <button class="review-btn secondary" aria-label="Review Ravi Tiwari">Review</button>
+                </div>
+              </div>
+
+              <!-- P007: Geeta Patel -->
+              <div class="patient-row urgent-yellow" data-urgency="yellow" data-patient="P007" id="row-P007" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-teal" aria-hidden="true">G</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Geeta Patel, 32F</div>
+                  <div class="patient-complaint">Acute RLQ abdominal pain · Nausea · Low grade fever</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">ATP: Acute Abdomen Evaluation</span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-yellow"><span class="urgency-label-inline semi">Semi-urgent</span></span>
+                  <span class="patient-row-time">52 min ago</span>
+                  <button class="review-btn secondary" aria-label="Review Geeta Patel">Review</button>
+                </div>
+              </div>
+
+              <!-- P008: Priya Sharma -->
+              <div class="patient-row urgent-green" data-urgency="green" data-patient="P008" id="row-P008" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-mint" aria-hidden="true">P</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Priya Sharma, 24F (Maternal 28w)</div>
+                  <div class="patient-complaint">Mild tension headache · Routine 3rd trimester ANC · BP 118/76</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">ATP: Stable Antenatal Visit</span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-green"><span class="urgency-label-inline routine">Routine</span></span>
+                  <span class="patient-row-time">1h 2m ago</span>
+                  <button class="review-btn secondary" aria-label="Review Priya Sharma">Review</button>
+                </div>
+              </div>
+
+              <!-- P009: Arjun Nair -->
+              <div class="patient-row urgent-green" data-urgency="green" data-patient="P009" id="row-P009" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-coral" aria-hidden="true">A</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Arjun Nair, 65M (Chronic)</div>
+                  <div class="patient-complaint">Diabetes follow-up · Fasting glucose 118 mg/dL (Improving)</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">ATP: Routine Chronic Review</span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-green"><span class="urgency-label-inline routine">Routine</span></span>
+                  <span class="patient-row-time">1h 18m ago</span>
+                  <button class="review-btn secondary" aria-label="Review Arjun Nair">Review</button>
+                </div>
+              </div>
+
+              <!-- P010: Kavya Menon -->
+              <div class="patient-row urgent-green" data-urgency="green" data-patient="P010" id="row-P010" role="listitem" tabindex="0">
+                <div class="patient-avatar pa-teal" aria-hidden="true">K</div>
+                <div class="patient-row-info-stack">
+                  <div class="patient-name">Kavya Menon, 19F</div>
+                  <div class="patient-complaint">Mild cold · Sore throat 1 day · Student campus clinic</div>
+                  <div class="patient-row-tags">
+                    <span class="priority-reason">ATP: Minor Upper Respiratory</span>
+                  </div>
+                </div>
+                <div class="patient-row-meta">
+                  <span class="triage-badge triage-green"><span class="urgency-label-inline routine">Routine</span></span>
+                  <span class="patient-row-time">1h 35m ago</span>
+                  <button class="review-btn secondary" aria-label="Review Kavya Menon">Review</button>
+                </div>
+              </div>
+
+            </div><!-- /patient-list -->
+          </div><!-- /queue-panel -->
+
+
+          <!-- Right Column: AI Summary Case Panel -->
+          <div class="detail-panel" id="detail-panel" role="complementary" aria-label="Patient case view">
+
+            <div class="detail-panel-placeholder" id="detail-placeholder" style="display: none;">
+              <div class="ph-icon">
+                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              </div>
+              <div class="ph-text">Select a patient to review</div>
+              <div class="ph-sub">Click any patient row in the live queue to open the comprehensive clinical decision-support panel.</div>
+            </div>
+
+            <!-- Active Case Content -->
+            <div class="detail-panel-content active" id="detail-content">
+
+              <!-- Clinical Disclaimer Banner -->
+              <div class="clinical-disclaimer" role="alert">
+                <div class="clinical-disclaimer-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="clinical-disclaimer-text">
+                  <strong>CLINICAL DECISION-SUPPORT ONLY — NON-DIAGNOSTIC PROTOTYPE</strong>
+                  This AI-generated structured triage note is designed exclusively for qualified medical officer evaluation. Diagnostic judgment remains the sole legal and clinical responsibility of the reviewing physician.
+                </div>
+              </div>
+
+              <!-- Patient Header -->
+              <div class="detail-header">
+                <div class="detail-patient-row">
+                  <div class="detail-avatar pa-coral" id="detail-avatar" aria-hidden="true">R</div>
+                  <div>
+                    <div class="detail-name" id="detail-name">Radha Kumari</div>
+                    <div class="detail-meta" id="detail-meta">42F · Patient ID: JVA-P001 · Intake: 8 min ago</div>
+                  </div>
+                </div>
+
+                <div class="detail-badges">
+                  <span class="triage-badge triage-red" id="detail-triage-badge"><span class="urgency-label-inline critical">Critical</span></span>
+                  <span class="detail-id-badge" id="detail-pid">ID: JVA-P001</span>
+                  <span class="chip chip-teal" id="detail-lang">
+                    <svg class="dash-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span>Hindi</span>
+                  </span>
+                  <span class="chip chip-coral" id="detail-intake-mode">
+                    <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                    <span>Voice + OCR Intake</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Consent Context Block -->
+              <div class="consent-context-block" id="detail-consent-block">
+                <span style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Consent Provenance:</span>
+                <span class="consent-detail-chip proxy-consent" id="detail-consent-chip">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                  <span id="detail-consent-text">Proxy Consent by Ramesh Kumari (Husband) — Recorded at Manikpur Kiosk</span>
+                </span>
+                <span class="consent-detail-chip lang-chip" id="detail-consent-lang">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>Consent given in Hindi (Audio Recorded)</span>
+                </span>
+              </div>
+
+              <!-- Cross-Engine Conflict Banner -->
+              <div class="conflict-banner show" id="conflict-banner">
+                <svg class="dash-icon" viewBox="0 0 24 24" style="color:#DC2626;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div style="flex:1;">
+                  <div class="conflict-title">Cross-Engine Disagreement Detected</div>
+                  <div id="conflict-text">
+                    PaddleOCR reading from physical lab slip shows <strong>BP 170/105 mmHg</strong>, whereas patient's recorded voice response indicated <strong>160/100 mmHg</strong>.
+                  </div>
+                  <div class="conflict-needs-check">
+                    <svg class="dash-icon-sm" viewBox="0 0 24 24" style="color:#DC2626;"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                    <span>Action Required: needs checking by clinician during exam</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AI Structured Summary -->
+              <div class="ai-summary-block">
+                <div class="ai-summary-label">
+                  <span class="ai-advisory-label">
+                    <svg class="dash-icon-sm" viewBox="0 0 24 24" style="color:var(--coral);"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    AI Structured Triage Note
+                  </span>
+                  <span style="font-size:11px; color: var(--muted); margin-left: auto;">Model: Jeevia-BioMistral-7B-v2</span>
+                </div>
+                <div class="ai-summary-text" id="detail-summary">
+                  Patient presents with acute-onset retrosternal chest pain of 2 hours duration, radiating down the left arm. Known hypertensive for 5 years on irregular medication. Patient appears anxious, pale, and diaphoretic. Pain onset was at rest and has not responded to home remedies. No cough, fever, or prior anginal episodes reported. <strong>Urgency signals: Acute chest pain + radiation pattern + diaphoresis + hypertensive crisis (AIIMS ATP Tier 1 Red Flag).</strong>
+                </div>
+              </div>
+
+              <!-- Rules Engine Trace -->
+              <div class="rules-trace-block" id="rules-trace-block">
+                <div class="rules-trace-title">
+                  <span>Deterministic Rule Matches (AIIMS Triage Protocol)</span>
+                </div>
+                <div id="rules-trace-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+
+              <!-- Extracted Vitals Grid with Source Traceability Tags -->
+              <div class="vitals-section">
+                <div class="vitals-section-title">Extracted Vitals &amp; Source Traceability (Click tag to inspect raw evidence)</div>
+                <div class="vitals-grid" id="detail-vitals">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+
+              <!-- OCR Report Section -->
+              <div class="ocr-section" id="detail-ocr">
+                <div class="vitals-section-title">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  OCR Lab Extract &amp; Pixel Traceability
+                </div>
+                <div class="ocr-report-card">
+                  <div class="ocr-report-header">
+                    <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span id="ocr-filename">Blood_report_Radha_P001.jpg — PaddleOCR v2.6</span>
+                    <button class="review-btn secondary" id="btn-view-full-ocr" style="margin-left:auto; padding:3px 8px; font-size:11px;">Inspect Crop</button>
+                  </div>
+                  <div id="ocr-findings-list">
+                    <!-- Populated via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Longitudinal Trending Table -->
+              <div class="trending-section" id="detail-trending">
+                <div class="trending-header">
+                  <div class="trending-title">Longitudinal Clinical Trending (Past 3 Visits)</div>
+                  <span style="font-size:11px; color:var(--coral); font-weight:700;">Chronic/Maternal Track</span>
+                </div>
+                <table class="trending-table" id="trending-table">
+                  <thead>
+                    <tr>
+                      <th>Clinical Parameter</th>
+                      <th>6 Mo Ago</th>
+                      <th>3 Mo Ago</th>
+                      <th class="today-col">Today</th>
+                      <th>Trend</th>
+                      <th>Visual Direction</th>
+                    </tr>
+                  </thead>
+                  <tbody id="trending-table-body">
+                    <!-- Populated via JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Missing Info Checklist -->
+              <div class="flags-section" id="detail-flags">
+                <div class="vitals-section-title">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Missing Intake Info &amp; Recommended Orders
+                </div>
+                <div id="flags-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+
+              <!-- Follow-up Questions -->
+              <div class="followup-section" id="detail-followup">
+                <div class="vitals-section-title">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Recommended Physician Interview Questions
+                </div>
+                <div id="followup-list">
+                  <!-- Populated via JS -->
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="detail-actions">
+                <div class="action-row">
+                  <button class="btn btn-approve" id="btn-approve" style="width:100%; padding:14px; font-size:14px;" aria-label="Approve note">
+                    Approve Note
+                  </button>
+                  <button class="btn btn-escalate" id="btn-escalate" style="width:100%; padding:14px; font-size:14px;" aria-label="Escalate case">
+                    Escalate Case
+                  </button>
+                </div>
+
+                <div class="action-row">
+                  <button class="btn btn-referral" id="btn-referral" style="width:100%; padding:12px; font-size:13px;" aria-label="Generate referral note">
+                    Generate Referral
+                  </button>
+                  <button class="btn btn-secondary" id="btn-edit" style="width:100%; padding:12px; font-size:13px;" aria-label="Edit triage note">
+                    <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                    Edit Note
+                  </button>
+                </div>
+
+                <button class="btn-override" id="btn-override-flag" aria-label="Override and downgrade red flag">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                  Override / Downgrade Red Flag (Requires Mandatory Justification)
+                </button>
+              </div>
+
+            </div><!-- /detail-content -->
+          </div><!-- /detail-panel -->
+
+        </div><!-- /doctor-layout -->
+
+      </div><!-- /view-queue -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 2: FIND PATIENT (Safety Phone Disambiguation)
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view" id="view-search">
+        <div class="view-header-card">
+          <div class="view-header-title-group">
+            <div class="view-header-icon"></div>
+            <div>
+              <div class="view-header-title">Find Patient &amp; Offline Intake Retrieval</div>
+              <div class="view-header-sub">Lookup by system Patient ID or Mobile Number with multi-member household safety disambiguation</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="switchView('view-queue')">← Back to Queue</button>
+        </div>
+
+        <div class="search-view-container">
+          <!-- Safety Rule Banner -->
+          <div class="safety-phone-rule-banner">
+            <span style="font-size: 20px;"><svg class="dash-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <div>
+              <strong>Rural Household Phone Safety Rule:</strong>
+              Because phone numbers are frequently shared by entire joint households in rural India, a phone number search <strong>never auto-opens the first match</strong>. It presents all matching candidate profiles for explicit manual clinician verification.
+            </div>
+          </div>
+
+          <!-- Privacy Constraint Notice -->
+          <div class="search-audit-notice show" style="margin-bottom: 16px;">
+            <span></span>
+            <span><strong>Facility Privacy Boundary:</strong> Search queries are restricted strictly to records at <strong>PHC Manikpur</strong>. Every query and record view is permanently logged to the compliance audit log.</span>
+          </div>
+
+          <!-- Search Input Box -->
+          <div class="search-hero-box">
+            <label for="find-patient-input" style="font-size: 13px; font-weight: 700; color: var(--dark); display: block; margin-bottom: 8px;">
+              Enter Patient ID, Name, or 10-Digit Mobile Number:
+            </label>
+            <div class="queue-search-input-row" style="padding: 12px 16px;">
+              <span style="font-size: 20px; color: var(--muted);"></span>
+              <input type="text" id="find-patient-input" class="queue-search-main-input" style="font-size: 15px;" placeholder="e.g. 9876543210 or JVA-P001 or Radha..." value="+91 98765 43210">
+              <button class="btn btn-primary btn-sm" id="btn-execute-find-search">Search Facility</button>
+            </div>
+
+            <!-- Quick Demo Prompts -->
+            <div style="margin-top: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--muted);">Demo Lookups:</span>
+              <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 8px;" onclick="triggerDemoSearch('phone')">
+                Shared Household Phone (+91 98765 43210)
+              </button>
+              <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 8px;" onclick="triggerDemoSearch('P001')">
+                ID: JVA-P001 (Radha)
+              </button>
+              <button class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 8px;" onclick="triggerDemoSearch('P005')">
+                ID: JVA-P005 (Lakshmi)
+              </button>
+            </div>
+          </div>
+
+          <!-- Candidate Matches Results -->
+          <div class="candidate-results-container" id="candidate-results-container">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="font-size: 14px; font-weight: 800; color: var(--dark);">
+                Candidate Household Matches for <span style="color: var(--coral);" id="candidate-search-query">+91 98765 43210</span> (3 Members Found)
+              </div>
+              <span style="font-size: 11px; color: var(--muted);">Select the specific patient presenting at today's OPD:</span>
+            </div>
+
+            <div class="candidate-grid" id="candidate-cards-grid">
+              <!-- Card 1: Ramesh Kumar -->
+              <div class="candidate-card">
+                <div class="candidate-header">
+                  <div class="patient-avatar pa-purple" style="width:36px; height:36px; font-size:14px;">R</div>
+                  <div>
+                    <div style="font-weight: 800; font-size: 14px; color: var(--dark);">Ramesh Kumar</div>
+                    <div style="font-size: 11px; color: var(--muted);">46M · Patient ID: JVA-P044</div>
+                  </div>
+                  <span class="candidate-relation-tag" style="margin-left: auto;">Head / Husband</span>
+                </div>
+                <div class="candidate-meta">
+                  <div><strong>Last Visit:</strong> 12-Jul-2026 (69 days ago)</div>
+                  <div><strong>Diagnosis:</strong> Essential Hypertension follow-up</div>
+                  <div><strong>Registered Facility:</strong> PHC Manikpur OPD #1</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="openPatientFromCandidate('P001')">
+                  Confirm &amp; Open Ramesh's Record
+                </button>
+              </div>
+
+              <!-- Card 2: Radha Kumari (Presenting Today) -->
+              <div class="candidate-card" style="border-color: var(--critical); background: rgba(220,38,38,0.02);">
+                <div class="candidate-header">
+                  <div class="patient-avatar pa-coral" style="width:36px; height:36px; font-size:14px;">R</div>
+                  <div>
+                    <div style="font-weight: 800; font-size: 14px; color: var(--dark);">Radha Kumari</div>
+                    <div style="font-size: 11px; color: var(--muted);">42F · Patient ID: JVA-P001</div>
+                  </div>
+                  <span class="candidate-relation-tag" style="background:#FEE2E2; border-color:#FCA5A5; color:#991B1B; margin-left:auto;">
+                    Spouse / Wife (Active Intake Today)
+                  </span>
+                </div>
+                <div class="candidate-meta">
+                  <div><strong>Last Visit:</strong> Today, 20-Sep-2026 09:12 AM</div>
+                  <div><strong>Active Complaint:</strong> Retrosternal Chest Pain (2 hours)</div>
+                  <div><strong>Triage Assigned:</strong> <span class="urgency-label-inline critical">Critical</span> (AIIMS ATP Tier 1)</div>
+                </div>
+                <button class="btn btn-escalate btn-sm" style="width: 100%;" onclick="openPatientFromCandidate('P001')">
+                  Confirm Radha &amp; Open Live Triage Case
+                </button>
+              </div>
+
+              <!-- Card 3: Priya Kumar -->
+              <div class="candidate-card">
+                <div class="candidate-header">
+                  <div class="patient-avatar pa-mint" style="width:36px; height:36px; font-size:14px;">P</div>
+                  <div>
+                    <div style="font-weight: 800; font-size: 14px; color: var(--dark);">Priya Kumar</div>
+                    <div style="font-size: 11px; color: var(--muted);">18F · Patient ID: JVA-P089</div>
+                  </div>
+                  <span class="candidate-relation-tag" style="margin-left: auto;">Daughter</span>
+                </div>
+                <div class="candidate-meta">
+                  <div><strong>Last Visit:</strong> 04-Aug-2026 (47 days ago)</div>
+                  <div><strong>Diagnosis:</strong> Seasonal allergic rhinitis</div>
+                  <div><strong>Immunization:</strong> Td booster complete</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="openPatientFromCandidate('P008')">
+                  Confirm &amp; Open Priya's Record
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /view-search -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 3: REVIEWED TODAY (Shift History & Overrides)
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view" id="view-reviewed">
+        <div class="view-header-card">
+          <div class="view-header-title-group">
+            <div class="view-header-icon"></div>
+            <div>
+              <div class="view-header-title">Reviewed Today — Completed Shift Queue</div>
+              <div class="view-header-sub">Session history of all cases confirmed, escalated, referred, or overridden during this duty shift</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-print-shift-summary"><svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Shift Log</button>
+            <button class="btn btn-primary btn-sm" id="btn-export-shift-fhir">Export JSON / FHIR</button>
+          </div>
+        </div>
+
+        <!-- Filter pills for reviewed cases -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+          <button class="filter-pill active" id="filter-rev-all">All Reviewed (12)</button>
+          <button class="filter-pill" id="filter-rev-confirmed">Confirmed Sign-Offs (8)</button>
+          <button class="filter-pill" id="filter-rev-escalated" style="color:#DC2626;">Escalated (2)</button>
+          <button class="filter-pill" id="filter-rev-referred" style="color:#D97706;">Referred (2)</button>
+          <button class="filter-pill" id="filter-rev-overridden" style="color:#92400E; background:#FEF3C7;">Overridden RED Flags (1)</button>
+        </div>
+
+        <!-- Table of reviewed patients -->
+        <div class="reviewed-table-card">
+          <table class="reviewed-table" id="reviewed-patients-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Patient Name &amp; ID</th>
+                <th>Initial Triage</th>
+                <th>Final Disposition</th>
+                <th>Clinician Action &amp; Justification</th>
+                <th>Note Signature</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reviewed-patients-tbody">
+              <!-- Case with Override Justification -->
+              <tr style="background: rgba(245, 158, 11, 0.05);">
+                <td><strong>09:48 AM</strong></td>
+                <td>
+                  <div style="font-weight: 800; color: var(--dark);">Radha Kumari</div>
+                  <div style="font-size: 11px; color: var(--muted);">42F · JVA-P001</div>
+                </td>
+                <td><span class="triage-badge triage-red" style="font-size: 10px;"><span class="urgency-label-inline critical">Critical</span></span></td>
+                <td><span class="triage-badge triage-yellow" style="font-size: 10px;">Downgraded</span></td>
+                <td>
+                  <div style="font-weight: 700; color: #92400E;"><svg class="dash-icon-sm" viewBox="0 0 24 24" style="color:#92400E;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg> Clinician Override Applied</div>
+                  <div class="override-justification-badge">
+                    <strong>Reason:</strong> "Repeat ECG normal, musculoskeletal tenderness on chest palpation, BP settled to 130/84 after rest."
+                  </div>
+                </td>
+                <td><span style="font-size: 11px; color: #15803D;"><svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; color:#15803D; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Signed (UPMC-48921)</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="renderPatientDetail('P001'); switchView('view-queue');">View Note</button>
+                </td>
+              </tr>
+
+              <!-- Confirmed Routine -->
+              <tr>
+                <td>09:35 AM</td>
+                <td>
+                  <div style="font-weight: 800; color: var(--dark);">Sunil Verma</div>
+                  <div style="font-size: 11px; color: var(--muted);">58M · JVA-P012</div>
+                </td>
+                <td><span class="triage-badge triage-green" style="font-size: 10px;"><span class="urgency-label-inline routine">Routine</span></span></td>
+                <td><span style="font-weight: 700; color: #15803D;">Prescription Signed</span></td>
+                <td>Confirmed OA knee management; Paracetamol + Physiotherapy advised</td>
+                <td><span style="font-size: 11px; color: #15803D;"><svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; color:#15803D; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Signed (UPMC-48921)</span></td>
+                <td><button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;">View Slip</button></td>
+              </tr>
+
+              <!-- Escalated Case -->
+              <tr>
+                <td>09:18 AM</td>
+                <td>
+                  <div style="font-weight: 800; color: var(--dark);">Suresh Babu</div>
+                  <div style="font-size: 11px; color: var(--muted);">68M · JVA-P002</div>
+                </td>
+                <td><span class="triage-badge triage-red" style="font-size: 10px;"><span class="urgency-label-inline critical">Critical</span></span></td>
+                <td><span class="triage-badge triage-red" style="font-size: 10px;">Escalated</span></td>
+                <td>Transferred to Tertiary On-Call; SpO₂ 89% COPD exacerbation oxygenated</td>
+                <td><span style="font-size: 11px; color: #DC2626;">Handover Dispatched</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="renderPatientDetail('P002'); switchView('view-queue');">View Handover</button>
+                </td>
+              </tr>
+
+              <!-- Referred Case -->
+              <tr>
+                <td>08:52 AM</td>
+                <td>
+                  <div style="font-weight: 800; color: var(--dark);">Ananya Roy</div>
+                  <div style="font-size: 11px; color: var(--muted);">26F · JVA-P003</div>
+                </td>
+                <td><span class="triage-badge triage-red" style="font-size: 10px;"><span class="urgency-label-inline critical">Critical</span></span></td>
+                <td><span class="triage-badge triage-yellow" style="font-size: 10px;">Referred</span></td>
+                <td>Pre-eclampsia transfer dossier generated for District Hospital Gorakhpur</td>
+                <td><span style="font-size: 11px; color: #15803D;"><svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; color:#15803D; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Signed Dossier</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="renderPatientDetail('P003'); switchView('view-queue');">View Dossier</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /view-reviewed -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 4: REFERRALS (Outgoing & Incoming MO Workflows)
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view" id="view-referrals">
+        <div class="view-header-card">
+          <div class="view-header-title-group">
+            <div class="view-header-icon"></div>
+            <div>
+              <div class="view-header-title">Inter-Hospital Referral Dossier Management</div>
+              <div class="view-header-sub">Packaging structured notes, timelines, and lab extracts for higher facilities (Scenario D7) &amp; accepting incoming transfers</div>
+            </div>
+          </div>
+          <button class="btn btn-escalate btn-sm" id="btn-call-108-dispatch"><svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Request 108 Ambulance Dispatch</button>
+        </div>
+
+        <!-- Sub-tabs: Outgoing vs Incoming -->
+        <div class="referral-nav-pills">
+          <button class="referral-tab-btn active" id="tab-referral-outgoing">
+            <span>Outgoing Referrals (2 Active)</span>
+          </button>
+          <button class="referral-tab-btn" id="tab-referral-incoming">
+            <span>Incoming Referrals — Medical Officer Role Authorized (2 Pending)</span>
+          </button>
+        </div>
+
+        <!-- Outgoing Referrals Panel -->
+        <div id="referrals-outgoing-panel">
+          <!-- Outgoing Case 1: Ananya Roy -->
+          <div class="dossier-card">
+            <div class="dossier-header">
+              <div>
+                <span style="font-size: 16px; font-weight: 800; color: var(--dark);">Ananya Roy, 26F (Maternal 32 Weeks)</span>
+                <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">Patient ID: JVA-P003 · Referred 22 min ago</span>
+              </div>
+              <span class="transfer-route-badge">PHC Manikpur → District Hospital Gorakhpur (OB-GYN)</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); line-height: 1.6; margin-bottom: 12px;">
+              <strong>Clinical Indication:</strong> Pre-eclampsia with BP 148/96 mmHg, severe frontal headache, proteinuria 2+, and blurred vision. Transferred because PHC Manikpur lacks on-site Obstetrician / CTG monitoring.
+            </div>
+            <div style="background: var(--bg); padding: 10px 14px; border-radius: var(--r-md); font-size: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span><svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> <strong>Packaged Dossier:</strong> AI Structured Note + PaddleOCR Urine Protein Slip + 3-Visit Maternal BP Trend</span>
+              <span style="color: #15803D; font-weight: 700;">Ambulance UP-108-EMR-8839 En Route (ETA 12 min)</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary btn-sm" onclick="renderPatientDetail('P003'); btnReferral.click();">Open Full Transfer Dossier</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast(' Printing 3-layer carbon transfer slip...', 'info')"><svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Transfer Slip</button>
+            </div>
+          </div>
+
+          <!-- Outgoing Case 2: Suresh Babu -->
+          <div class="dossier-card">
+            <div class="dossier-header">
+              <div>
+                <span style="font-size: 16px; font-weight: 800; color: var(--dark);">Suresh Babu, 68M (Severe COPD Exacerbation)</span>
+                <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">Patient ID: JVA-P002 · Referred 14 min ago</span>
+              </div>
+              <span class="transfer-route-badge">PHC Manikpur → District Hospital Gorakhpur (Pulmonology ICU)</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); line-height: 1.6; margin-bottom: 12px;">
+              <strong>Clinical Indication:</strong> Hypoxemic respiratory failure with room air SpO₂ 89%, tachypnea 28/min. Transferred due to lack of Arterial Blood Gas (ABG) and high-flow nasal cannula at PHC.
+            </div>
+            <div style="background: var(--bg); padding: 10px 14px; border-radius: var(--r-md); font-size: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <span><svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> <strong>Packaged Dossier:</strong> AI Note + SpO₂ Telemetry Waveform + Inhaler Adherence History</span>
+              <span style="color: #2563EB; font-weight: 700;">Acknowledged by Receiving Duty MO (Dr. M. Khan)</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary btn-sm" onclick="renderPatientDetail('P002'); btnReferral.click();">Open Full Transfer Dossier</button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast(' Printing transfer slip...', 'info')"><svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Transfer Slip</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incoming Referrals Panel (Medical Officer Specific Workflow) -->
+        <div id="referrals-incoming-panel" style="display: none;">
+          <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--r-md); padding: 12px 16px; font-size: 12px; color: #1E40AF; margin-bottom: 16px;">
+            <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <strong>Medical Officer Role Authorized:</strong> Dr. Deepa Sharma holds credentialed authority under NHM protocol to triage and admit incoming patient referrals arriving from peripheral Sub-Centers and Mobile Health Camps.
+          </div>
+
+          <!-- Incoming Case 1 -->
+          <div class="dossier-card" style="border-left: 4px solid var(--teal-dark);">
+            <div class="dossier-header">
+              <div>
+                <span style="font-weight: 800; font-size: 16px; color: var(--dark);">Kailash Chand, 62M (Suspected Acute Abdomen)</span>
+                <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">Origin: Sub-Center Bargarh (18 km away)</span>
+              </div>
+              <span class="triage-badge triage-yellow">Incoming Transfer</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); margin-bottom: 10px;">
+              ANM Pre-triage: Severe RLQ tenderness, voluntary guarding, low grade fever 101.4°F for 24h. ANM mobile note packaged and forwarded for Doctor evaluation.
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-approve btn-sm" onclick="showToast('Accepted incoming referral for Kailash Chand. Bed assigned in Ward B.', 'success')">
+                Accept &amp; Admit to Inpatient Bed
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast(' Patient routed for immediate ultrasound pre-exam.', 'info')">
+                <svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Re-Triage / Order Diagnostic
+              </button>
+            </div>
+          </div>
+
+          <!-- Incoming Case 2 -->
+          <div class="dossier-card" style="border-left: 4px solid var(--critical);">
+            <div class="dossier-header">
+              <div>
+                <span style="font-weight: 800; font-size: 16px; color: var(--dark);">Baby Aarav, 18mo (Severe Pediatric Pneumonia)</span>
+                <span style="font-size: 12px; color: var(--muted); margin-left: 8px;">Origin: Raipura Health Camp Mobile Unit</span>
+              </div>
+              <span class="triage-badge triage-red">Priority Transfer</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); margin-bottom: 10px;">
+              IMCI Rule Match: Chest indrawing + Respiratory Rate 56/min + Inability to breastfeed. First dose amoxicillin administered by camp nurse at 08:30.
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-approve btn-sm" onclick="showToast('Accepted incoming pediatric emergency. Pediatric oxygen bed prepared.', 'success')">
+                Accept &amp; Admit to Pediatric Resuscitation
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Viewing camp nurse intake record...', 'info')">
+                Review Camp Intake Slip
+              </button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /view-referrals -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 5: SCAN PATIENT QR (High-Speed Retrieval)
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view" id="view-qr-scan">
+        <div class="view-header-card">
+          <div class="view-header-title-group">
+            <div class="view-header-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            <div>
+              <div class="view-header-title">High-Speed Patient Intake QR Scanner</div>
+              <div class="view-header-sub">Scan physical triage slips, Ayushman Bharat ABHA QR, or kiosk token to instantly pull patient cards</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="switchView('view-queue')">← Back to Queue</button>
+        </div>
+
+        <div style="max-width: 640px; margin: 0 auto;">
+          <div style="background: var(--white); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--s-6); box-shadow: var(--shadow-md); text-align: center;">
+            <div style="font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 4px;">Camera Optical Viewfinder</div>
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Align printed QR code inside the reticle frame for sub-second recognition</div>
+
+            <div class="qr-viewfinder" style="height: 300px;">
+              <div class="qr-laser-line"></div>
+              <div class="qr-target-box" style="width: 180px; height: 180px;">
+                <div class="qr-corner tl"></div>
+                <div class="qr-corner tr"></div>
+                <div class="qr-corner bl"></div>
+                <div class="qr-corner br"></div>
+              </div>
+              <span style="position:absolute; bottom:16px; font-size:12px; color:rgba(255,255,255,0.8); background:rgba(0,0,0,0.5); padding:4px 12px; border-radius:9999px;">
+                <svg class="dash-icon-sm" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> 30 FPS · Auto-Macro Active · 640x480
+              </span>
+            </div>
+
+            <!-- Instant Demo Scan Buttons -->
+            <div style="margin-top: 20px; text-align: left;">
+              <div style="font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">Simulate Barcode Detection (High-Volume Queue Demo):</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" onclick="simulateScan('P001'); switchView('view-queue');">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Scan Token: Radha Kumari (P001)
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="simulateScan('P002'); switchView('view-queue');">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Scan Token: Suresh Babu (P002)
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="simulateScan('P003'); switchView('view-queue');">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Scan Token: Ananya Roy (P003)
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="simulateScan('P005'); switchView('view-queue');">
+                  <svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Scan Token: Lakshmi Devi (P005)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /view-qr-scan -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 6: RULES ENGINE TRACE (Clinical Defensibility)
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view" id="view-rules-engine">
+        <div class="view-header-card">
+          <div class="view-header-title-group">
+            <div class="view-header-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
+            <div>
+              <div class="view-header-title">Rules Engine Explainability &amp; Versioning Trace</div>
+              <div class="view-header-sub">Deterministic YAML protocol defensibility — "Reconstruct exactly why a flag fired six months later"</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('Exporting AIIMS_ATP_v2.4.yaml protocol definition...', 'info')">
+            Download Protocol YAML
+          </button>
+        </div>
+
+        <div class="rules-container-grid">
+          <!-- Left: Active Rules Definitions -->
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--dark); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span>Active Rulebook: AIIMS Triage Protocol (Adults)</span>
+              <span class="trace-chip">Version: ATP-v2.4-2026.08</span>
+            </div>
+
+            <!-- Rule 1 -->
+            <div class="rule-definition-card">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span class="rule-code-badge">ATP-CARD-01</span>
+                <span class="triage-badge triage-red" style="font-size: 10px;">Tier 1 Critical</span>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 4px;">Acute Coronary Syndrome Rule</div>
+              <div style="font-size: 12px; color: var(--mid); line-height: 1.5;">
+                <code>IF: chest_pain.location == "retrosternal" AND chest_pain.duration &gt; 20m AND (radiation == "left_arm" OR diaphoresis == true) THEN: urgency = RED; auto_escalate_timer = 15m; ecg_mandatory = true;</code>
+              </div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                <svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; color:#15803D; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Triggered in current queue on: <strong>Radha Kumari (JVA-P001)</strong>
+              </div>
+            </div>
+
+            <!-- Rule 2 -->
+            <div class="rule-definition-card">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span class="rule-code-badge">ATP-RESP-02</span>
+                <span class="triage-badge triage-red" style="font-size: 10px;">Tier 1 Critical</span>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 4px;">Severe Hypoxemia Rule</div>
+              <div style="font-size: 12px; color: var(--mid); line-height: 1.5;">
+                <code>IF: vitals.spo2 &lt; 90% on room_air AND history.chronic_lung == true THEN: urgency = RED; oxygen_protocol = "high_flow"; doctor_notification = "immediate";</code>
+              </div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                <svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; color:#15803D; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Triggered in current queue on: <strong>Suresh Babu (JVA-P002)</strong>
+              </div>
+            </div>
+
+            <!-- Rule 3 -->
+            <div class="rule-definition-card">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span class="rule-code-badge">ATP-MAT-01</span>
+                <span class="triage-badge triage-red" style="font-size: 10px;">Tier 1 Critical</span>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 4px;">Severe Pre-Eclampsia Safety Rule</div>
+              <div style="font-size: 12px; color: var(--mid); line-height: 1.5;">
+                <code>IF: pregnancy.gestational_weeks &gt;= 20 AND vitals.systolic_bp &gt;= 140 AND (symptoms.severe_headache == true OR symptoms.visual_aura == true OR labs.proteinuria &gt;= "2+") THEN: urgency = RED; specialist_required = "obgyn";</code>
+              </div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                <svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; color:#15803D; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Triggered in current queue on: <strong>Ananya Roy (JVA-P003)</strong>
+              </div>
+            </div>
+
+            <!-- Rule 4 (Pediatric IMCI) -->
+            <div class="rule-definition-card" style="border-left-color: var(--coral);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span class="rule-code-badge">IMCI-PEDI-03</span>
+                <span class="triage-badge triage-red" style="font-size: 10px;">Pediatric Emergency</span>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 4px;">WHO-IMCI Severe Pneumonia Rule</div>
+              <div style="font-size: 12px; color: var(--mid); line-height: 1.5;">
+                <code>IF: age &lt; 5y AND (vitals.respiratory_rate &gt; 50 OR signs.chest_indrawing == true) THEN: urgency = RED; admission = "immediate_pediatric";</code>
+              </div>
+              <div style="font-size: 11px; color: var(--muted); margin-top: 6px;">
+                <svg class="dash-icon-sm" viewBox="0 0 24 24" style="width:12px; height:12px; color:#15803D; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Triggered on incoming referral: <strong>Baby Aarav (Raipura Mobile Unit)</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Audit Reconstruction Box -->
+          <div class="rules-reconstruct-box">
+            <div style="font-size: 15px; font-weight: 800; margin-bottom: 4px;">6-Month Defensibility Simulator</div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 16px; line-height: 1.5;">
+              Reconstruct the exact input parameters, rule tree evaluation path, and rules version attached to any past clinical decision.
+            </div>
+
+            <label for="reconstruct-pid-input" style="font-size: 12px; font-weight: 700; display: block; margin-bottom: 6px;">
+              Enter Case Hash or Patient ID:
+            </label>
+            <input type="text" id="reconstruct-pid-input" style="width:100%; padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.1); color:white; font-family:'Courier New', monospace; font-size:13px; margin-bottom:12px;" value="JVA-P001">
+
+            <button class="btn btn-primary btn-sm" style="width:100%; margin-bottom:16px;" id="btn-run-reconstruct">
+              Reconstruct Decision Tree
+            </button>
+
+            <div id="reconstruction-output" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.6; color: #CCFBFA; max-height: 240px; overflow-y: auto;">
+              [AUDIT RECONSTRUCTION TRACE]<br>
+              TIMESTAMP: 2026-09-20 09:12:44 IST<br>
+              TARGET: JVA-P001 (Radha Kumari, 42F)<br>
+              FACILITY: PHC Manikpur (L2-PHC)<br>
+              PROTOCOL: AIIMS_ATP_v2.4_2026.08.yaml<br>
+              --------------------------------<br>
+              INPUT VECTOR EVALUATED:<br>
+                - retrosternal_pain = TRUE (Speech: 98%)<br>
+                - left_arm_radiation = TRUE (Speech: 96%)<br>
+                - systolic_bp = 160 (OCR: 170 / Audio: 160)<br>
+                - diaphoresis = TRUE<br>
+              --------------------------------<br>
+              RULE EVALUATION:<br>
+                1. Match ATP-CARD-01 → [RED]<br>
+                2. Match ATP-VITAL-04 → [RED]<br>
+              RESULT: Urgency RED confirmed.<br>
+              OVERRIDE: Permitted to Doctor role only.
+            </div>
+          </div>
+        </div>
+      </div><!-- /view-rules-engine -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 7: AUDIT TRAIL LOG (Regulatory G4 Compliance)
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view" id="view-audit-log">
+        <div class="view-header-card">
+          <div class="view-header-title-group">
+            <div class="view-header-icon"></div>
+            <div>
+              <div class="view-header-title">Regulatory Compliance &amp; Clinical Audit Log (G4)</div>
+              <div class="view-header-sub">Append-only, immutable activity register tracking AI models, human verifications, and non-destructive corrections</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-primary btn-sm" id="btn-export-audit-csv">Export CSV Log</button>
+            <button class="btn btn-secondary btn-sm" onclick="showToast(' All 8 audit block cryptographic hashes verified intact.', 'success')"> Verify SHA256 Hashes</button>
+          </div>
+        </div>
+
+        <!-- Filter and Search Row -->
+        <div class="audit-controls-row">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="filter-pill active" id="audit-filter-all">All Events (8)</button>
+            <button class="filter-pill" id="audit-filter-override" style="color:#DC2626;">Overrides (1)</button>
+            <button class="filter-pill" id="audit-filter-disagree" style="color:#9333EA;">AI Disagreements (1)</button>
+            <button class="filter-pill" id="audit-filter-views" style="color:#2563EB;">Patient Views (2)</button>
+            <button class="filter-pill" id="audit-filter-approvals" style="color:#16A34A;">Sign-Offs (2)</button>
+          </div>
+          <span style="font-size: 11px; color: var(--muted);">Compliance Standard: DISHA Act 2026 / NABH Digital Tier 3</span>
+        </div>
+
+        <!-- Audit Table -->
+        <div class="audit-log-card">
+          <table class="audit-table" id="audit-table-full">
+            <thead>
+              <tr>
+                <th>Timestamp (IST)</th>
+                <th>Actor (Human / Model)</th>
+                <th>Event Type</th>
+                <th>Patient ID</th>
+                <th>Clinical Action Details</th>
+                <th>Data Provenance &amp; Superseded Tag</th>
+                <th>Integrity Hash</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-tbody">
+              <!-- Log 1: Override -->
+              <tr>
+                <td>2026-09-20 09:48:12</td>
+                <td><strong>Dr. Deepa Sharma (MO)</strong></td>
+                <td><span class="audit-badge override">URGENCY_OVERRIDE</span></td>
+                <td>JVA-P001</td>
+                <td>Downgraded RED to Semi. Rationale: "Repeat ECG normal, musculoskeletal tenderness on chest palpation"</td>
+                <td><span class="superseded-tag">ATP-CARD-01 superseded_by Dr. Deepa</span></td>
+                <td><code style="font-size: 10px; color: var(--muted);">SHA256:7f49c0...</code></td>
+              </tr>
+
+              <!-- Log 2: Disagreement -->
+              <tr>
+                <td>2026-09-20 09:40:05</td>
+                <td><strong>Engine Arbiter (YAML)</strong></td>
+                <td><span class="audit-badge disagree">ENGINE_DISAGREE</span></td>
+                <td>JVA-P001</td>
+                <td>Disagreement: PaddleOCR BP (170/105) vs. Parrotlet Audio (160/100). Flagged for doctor check.</td>
+                <td>PaddleOCR-v2.6 vs. Parrotlet-v3</td>
+                <td><code style="font-size: 10px; color: var(--muted);">SHA256:a18e9d...</code></td>
+              </tr>
+
+              <!-- Log 3: Note Approval -->
+              <tr>
+                <td>2026-09-20 09:35:10</td>
+                <td><strong>Dr. Deepa Sharma (MO)</strong></td>
+                <td><span class="audit-badge approve">NOTE_APPROVED</span></td>
+                <td>JVA-P012</td>
+                <td>Electronically signed triage note and dispatched routine medication prescription</td>
+                <td>Human Verified &amp; Signed</td>
+                <td><code style="font-size: 10px; color: var(--muted);">SHA256:bb4012...</code></td>
+              </tr>
+
+              <!-- Log 4: Cross Referral -->
+              <tr>
+                <td>2026-09-20 09:22:45</td>
+                <td><strong>Dr. Deepa Sharma (MO)</strong></td>
+                <td><span class="audit-badge referral">REFERRAL_ISSUED</span></td>
+                <td>JVA-P003</td>
+                <td>Inter-hospital transfer note generated for District Hospital Gorakhpur (Obstetrics)</td>
+                <td>Auto-routed via specialist rule</td>
+                <td><code style="font-size: 10px; color: var(--muted);">SHA256:ec9941...</code></td>
+              </tr>
+
+              <!-- Log 5: Phone View -->
+              <tr>
+                <td>2026-09-20 09:16:30</td>
+                <td><strong>Dr. Deepa Sharma (MO)</strong></td>
+                <td><span class="audit-badge view">RECORD_VIEW</span></td>
+                <td>JVA-P001</td>
+                <td>Patient card viewed via phone query (+91 98765 43210). Household disambiguation selected.</td>
+                <td>Explicit Doctor VIEW logged</td>
+                <td><code style="font-size: 10px; color: var(--muted);">SHA256:99f012...</code></td>
+              </tr>
+
+              <!-- Log 6: Session Auth -->
+              <tr>
+                <td>2026-09-20 09:15:22</td>
+                <td><strong>Auth Subsystem</strong></td>
+                <td><span class="audit-badge view">SESSION_START</span></td>
+                <td>SYS</td>
+                <td>Medical Officer session authenticated. Registration UPMC-48921 verified with state registry.</td>
+                <td>Digital Credential STF-77492</td>
+                <td><code style="font-size: 10px; color: var(--muted);">SHA256:11a4bb...</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /view-audit-log -->
+
+
+      <!-- ══════════════════════════════════════════════════════
+           VIEW 8: NOTIFICATIONS & FOLLOW-UPS
+           ══════════════════════════════════════════════════════ -->
+      <div class="doctor-view" id="view-notifications">
+        <div class="view-header-card">
+          <div class="view-header-title-group">
+            <div class="view-header-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div>
+              <div class="view-header-title">Clinical Alerts &amp; Longitudinal Care Reminders</div>
+              <div class="view-header-sub">Auto-escalations for unacknowledged RED flags &amp; missed-visit alerts from ASHA / automated calling agents</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="showToast('All notification alerts marked acknowledged.', 'success')">
+            Mark All Acknowledged
+          </button>
+        </div>
+
+        <!-- Section 1: Auto-Escalations -->
+        <div class="notif-section-title">
+          <span>Auto-Escalation Alerts (Unacknowledged RED Flags)</span>
+        </div>
+
+        <!-- Alert 1 -->
+        <div class="notif-card-full critical">
+          <div style="font-size: 28px;"></div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 800; font-size: 14px; color: #DC2626;">Radha Kumari (JVA-P001) — RED Flag Waiting &gt; 8 min</span>
+              <span style="font-size: 11px; color: var(--muted);">Countdown: 07:42 remaining</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); margin: 4px 0 8px;">
+              Acute chest pain with radiation and BP 160/100. If not opened and reviewed before timer reaches zero, protocol triggers automatic SMS/WhatsApp dispatch to District Hospital Emergency On-Call.
+            </div>
+            <button class="btn btn-escalate btn-sm" onclick="renderPatientDetail('P001'); switchView('view-queue');">
+              Review Radha Kumari Case Now
+            </button>
+          </div>
+        </div>
+
+        <!-- Alert 2 -->
+        <div class="notif-card-full critical">
+          <div style="font-size: 28px;"></div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 800; font-size: 14px; color: #DC2626;">Suresh Babu (JVA-P002) — SpO₂ 89% Critical Hypoxemia</span>
+              <span style="font-size: 11px; color: var(--muted);">Countdown: 04:15 remaining</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); margin: 4px 0 8px;">
+              COPD exacerbation with room air saturation below 90%. Immediate high-flow oxygen protocol required.
+            </div>
+            <button class="btn btn-escalate btn-sm" onclick="renderPatientDetail('P002'); switchView('view-queue');">
+              Review Suresh Babu Case Now
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 2: Longitudinal Follow-ups (Maternal & Chronic) -->
+        <div class="notif-section-title">
+          <span>Longitudinal Care Reminders (Automated Calling &amp; ASHA Upward Routing)</span>
+        </div>
+
+        <!-- Follow-up 1 -->
+        <div class="notif-card-full maternal">
+          <div class="notif-icon-circle" style="width:44px; height:44px; border-radius:50%; background:rgba(217,119,6,0.12); display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#D97706" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 800; font-size: 14px; color: var(--dark);">Savitri Devi, 28F — Missed Antenatal Visit (ANC-3)</span>
+              <span style="font-size: 11px; color: var(--coral); font-weight: 700;">Overdue by 4 days</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); margin: 4px 0 8px;">
+              Automated IVR calling agent reached family phone today at 08:45 AM. Mother-in-law confirmed knee swelling. ASHA Worker Rekha alerted for home visit.
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Automated WhatsApp reminder with ANC guidelines dispatched to family phone.', 'success')">
+                Dispatch WhatsApp Reminder
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Connecting Doctor audio call to ASHA Rekha...', 'info')">
+                Call ASHA Worker Rekha
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Follow-up 2 -->
+        <div class="notif-card-full chronic">
+          <div class="notif-icon-circle" style="width:44px; height:44px; border-radius:50%; background:rgba(22,163,74,0.12); display:flex; align-items:center; justify-content:center;"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16A34A" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg></div>
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 800; font-size: 14px; color: var(--dark);">Ram Prasad, 64M — Chronic Type-2 Diabetes Refill Overdue</span>
+              <span style="font-size: 11px; color: #D97706; font-weight: 700;">Overdue by 9 days</span>
+            </div>
+            <div style="font-size: 13px; color: var(--mid); margin: 4px 0 8px;">
+              Last HbA1c: 9.2%. Patient reported through interactive voice response that supply of Metformin 500mg ran out last Tuesday. High risk of hyperosmolar crisis.
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Tele-prescription renewal queued at Manikpur PHC Pharmacy.', 'success')">
+                Queue Emergency Refill
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Automated IVR callback scheduled for 02:00 PM.', 'info')">
+                Schedule IVR Callback
+              </button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /view-notifications -->
+
+    </div><!-- /dash-content -->
+  </main>
+</div><!-- /dash-shell -->
+
+
+<!-- ══ 3. MODALS & POPUPS ═══════════════════════════════════════ -->
+
+<!-- OVERRIDE REASON MODAL -->
+<div class="override-modal-overlay" id="override-modal" role="dialog" aria-modal="true" aria-labelledby="override-title">
+  <div class="override-modal">
+    <div class="override-modal-header">
+      <div class="override-modal-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
+      <div>
+        <div class="override-modal-title" id="override-title">Override Locked RED Flag</div>
+        <div class="override-modal-sub">Downgrade clinical urgency tier with permanent audit attribution.</div>
+      </div>
+    </div>
+
+    <div class="override-audit-notice">
+      <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <strong>Regulatory Audit Trail Warning:</strong>
+      Downgrading a deterministic rules engine RED flag is logged permanently to the compliance registry under <code>urgency.overridden_by = Dr. Deepa Sharma (UPMC-48921)</code>. The original signal is never erased.
+    </div>
+
+    <label for="override-category" style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:6px;">
+      Primary Clinical Justification Category <span style="color:var(--critical);">*</span>
+    </label>
+    <select id="override-category" class="override-reason-textarea" style="min-height:auto; height:42px; margin-bottom:12px; padding:8px 12px;">
+      <option value="">-- Select reason category --</option>
+      <option value="benign_etiology">Alternative benign etiology clinically confirmed</option>
+      <option value="vitals_normalized">Vitals re-measured and normalized upon resting</option>
+      <option value="medication_stabilized">Patient stabilized post-initial acute stabilization dose</option>
+      <option value="artefact_conflict">Discredited OCR/Sensor artefact after direct manual exam</option>
+      <option value="other_clinical">Other clinical judgment (detailed below)</option>
+    </select>
+
+    <label for="override-reason" style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:6px;">
+      Detailed Medical Rationale (Minimum 15 characters required) <span style="color:var(--critical);">*</span>
+    </label>
+    <textarea id="override-reason" class="override-reason-textarea" placeholder="Enter clinical rationale for downgrading the AIIMS ATP urgency signal (e.g., Repeat ECG normal, musculoskeletal tenderness on palpation, BP settled to 130/84 after rest)..."></textarea>
+    <div class="override-reason-counter" id="override-char-counter">0 / 15 chars min</div>
+
+    <div style="display:flex; gap:12px; justify-content:flex-end;">
+      <button class="btn btn-secondary" id="btn-cancel-override">Cancel</button>
+      <button class="btn btn-escalate" id="btn-submit-override" disabled style="opacity:0.5; cursor:not-allowed;">
+        Confirm Downgrade &amp; Log
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- REFERRAL NOTE MODAL -->
+<div class="referral-modal-overlay" id="referral-modal" role="dialog" aria-modal="true" aria-labelledby="referral-title">
+  <div class="referral-modal">
+    <div class="referral-modal-header">
+      <div class="referral-modal-title" id="referral-title">Facility-Aware Inter-Hospital Referral Note</div>
+      <button class="referral-modal-close" id="btn-close-referral" aria-label="Close referral note"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="referral-modal-body">
+      <div class="referral-specialist-unavail" id="referral-facility-notice">
+        <svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg> <strong>Facility Capacity Trigger:</strong> PHC Manikpur has <strong>NO on-site Cardiologist</strong>. The rules engine auto-routes this case to <strong>District Hospital Gorakhpur (Tertiary Referral Center, 42 km)</strong>.
+      </div>
+      <div class="referral-note-box" id="referral-note-text"></div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="btn btn-primary" id="btn-copy-referral" style="flex:1;">Copy Referral Note</button>
+        <button class="btn btn-secondary" id="btn-print-referral" style="flex:1;"><svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Transfer Slip</button>
+        <button class="btn btn-escalate" id="btn-dispatch-ambulance" style="flex:1;"><svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Dispatch 108 Ambulance</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ESCALATION MODAL -->
+<div class="escalation-modal-overlay" id="escalation-modal" role="dialog" aria-modal="true" aria-labelledby="escalate-title">
+  <div class="escalation-modal">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <div style="font-size:32px;"></div>
+      <div>
+        <div style="font-size:18px; font-weight:800; color:#DC2626;" id="escalate-title">Escalate Critical Case</div>
+        <div style="font-size:12px; color:var(--muted);">Cross-facility handover to Tertiary On-Call Specialist</div>
+      </div>
+    </div>
+    <div style="background:#FEE2E2; border:1px solid rgba(220,38,38,0.3); border-radius:8px; padding:12px; font-size:12px; color:#991B1B; margin-bottom:16px;">
+      <strong>Duty Medical Officer Protocol:</strong> Escalating transfers active supervisory control to the District Hospital Emergency Dept. An urgent WhatsApp &amp; SMS telemetry dispatch will be transmitted.
+    </div>
+    <label for="escalate-notes" style="font-size:12px; font-weight:700; display:block; margin-bottom:6px;">
+      Handover Clinical Notes for Receiving MO:
+    </label>
+    <textarea id="escalate-notes" class="override-reason-textarea" style="min-height:75px;" placeholder="Patient pre-medicated with Aspirin 300mg stat. IV line 18G secured. Oxygen initiated..."></textarea>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-secondary" id="btn-cancel-escalate">Cancel</button>
+      <button class="btn btn-escalate" id="btn-confirm-escalate">Confirm Immediate Escalation</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- EDIT NOTE MODAL -->
+<div class="edit-modal-overlay" id="edit-note-modal" role="dialog" aria-modal="true" aria-labelledby="edit-note-title">
+  <div class="edit-modal">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+      <div style="font-size:17px; font-weight:800; color:var(--dark);" id="edit-note-title">Edit Clinical Triage Note</div>
+      <button class="referral-modal-close" id="btn-close-edit" aria-label="Close edit modal"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+      Editing triage note for <strong id="edit-patient-name">Radha Kumari</strong>. Changes will be stamped with digital signature.
+    </div>
+    <label for="edit-summary-textarea" style="font-size:12px; font-weight:700; color:var(--dark); display:block; margin-bottom:6px;">
+      Clinical Triage Narrative:
+    </label>
+    <textarea id="edit-summary-textarea" class="override-reason-textarea" style="min-height:140px;"></textarea>
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-secondary" id="btn-cancel-edit">Cancel</button>
+      <button class="btn btn-primary" id="btn-save-edit">Save Changes &amp; Sign</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- QR CODE SCANNER MODAL -->
+<div class="qr-modal-overlay" id="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-scanner-title">
+  <div class="qr-modal">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-size:16px; font-weight:800; color:var(--dark);" id="qr-scanner-title"><svg class="dash-icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Scan Patient Intake Token QR</div>
+      <button class="referral-modal-close" id="btn-close-qr" aria-label="Close QR scanner"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="qr-viewfinder">
+      <div class="qr-laser-line"></div>
+      <div class="qr-target-box">
+        <div class="qr-corner tl"></div>
+        <div class="qr-corner tr"></div>
+        <div class="qr-corner bl"></div>
+        <div class="qr-corner br"></div>
+      </div>
+      <span style="position:absolute; bottom:12px; font-size:11px; color:rgba(255,255,255,0.7);">
+        Center paper kiosk intake QR code in reticle
+      </span>
+    </div>
+    <div style="margin-top:12px;">
+      <div style="font-size:11px; font-weight:700; color:var(--muted); margin-bottom:6px;">Simulate Barcode Detection:</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="simulateScan('P001')">Radha (P001)</button>
+        <button class="btn btn-secondary btn-sm" onclick="simulateScan('P002')">Suresh (P002)</button>
+        <button class="btn btn-secondary btn-sm" onclick="simulateScan('P003')">Ananya (P003)</button>
+        <button class="btn btn-secondary btn-sm" onclick="simulateScan('P005')">Lakshmi (P005)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SOURCE TRACEABILITY EVIDENCE MODAL -->
+<div class="crop-modal-overlay" id="crop-modal" role="dialog" aria-modal="true" aria-labelledby="crop-title">
+  <div class="crop-modal">
+    <div style="padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-size:15px; font-weight:800; color:var(--dark);" id="crop-title"><svg class="dash-icon-sm" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Raw Intake Traceability Evidence</div>
+        <div style="font-size:11px; color:var(--muted);" id="crop-subtitle">Cropped pixel region extracted by PaddleOCR</div>
+      </div>
+      <button class="referral-modal-close" id="btn-close-crop" aria-label="Close evidence preview"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="crop-preview-box" id="crop-preview-container"></div>
+    <div style="padding:14px 20px; background:var(--bg); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+      <span style="font-size:11px; color:var(--muted);" id="crop-confidence-tag">Model: PaddleOCR-v2.6 · Confidence: 94.2%</span>
+      <button class="btn btn-secondary btn-sm" id="btn-dismiss-crop">Dismiss Evidence</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- NOTIFICATIONS SLIDE-OUT DRAWER -->
+<div class="notif-drawer-overlay" id="notif-drawer-overlay"></div>
+<div class="notif-drawer" id="notif-drawer" role="dialog" aria-labelledby="notif-title">
+  <div class="notif-drawer-header">
+    <div class="notif-drawer-title" id="notif-title"><svg class="dash-icon-sm" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg> Clinical Alerts (4)</div>
+    <button class="notif-drawer-close" id="btn-close-notif" aria-label="Close notifications"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="notif-drawer-list">
+    <div class="notif-item unread" onclick="selectAndReview('P001')">
+      <div class="notif-icon"></div>
+      <div class="notif-body">
+        <div class="notif-title">Auto-Escalation Warning: Radha Kumari (P001)</div>
+        <div class="notif-desc">Unreviewed RED flag chest pain patient waiting &gt;8 min. Countdown expiring soon.</div>
+        <div class="notif-time">2 min ago · Critical Alert</div>
+      </div>
+    </div>
+    <div class="notif-item unread" onclick="selectAndReview('P005')">
+      <div class="notif-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="notif-body">
+        <div class="notif-title">OCR Lab Processed: Lakshmi Devi (P005)</div>
+        <div class="notif-desc">HbA1c test report parsed: 9.8% (Severe glycaemic elevation). Trend table updated.</div>
+        <div class="notif-time">12 min ago · Lab Extract</div>
+      </div>
+    </div>
+    <div class="notif-item unread" onclick="selectAndReview('P003')">
+      <div class="notif-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+      <div class="notif-body">
+        <div class="notif-title">Cross-Facility Referral Accepted</div>
+        <div class="notif-desc">District Hospital Gorakhpur OB-GYN unit acknowledged maternal pre-eclampsia case.</div>
+        <div class="notif-time">25 min ago · Referral Update</div>
+      </div>
+    </div>
+    <div class="notif-item" onclick="switchView('view-notifications')">
+      <div class="notif-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></div>
+      <div class="notif-body">
+        <div class="notif-title">Maternal Follow-Up Alert: Savitri Devi</div>
+        <div class="notif-desc">Missed ANC-3 check-up by 4 days. ASHA worker alert generated.</div>
+        <div class="notif-time">1h ago · Longitudinal Care</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- LANGUAGE SWITCHER MODAL (All 22 Scheduled Indian Languages) -->
+<div class="lang-modal-overlay" id="lang-modal" role="dialog" aria-modal="true" aria-labelledby="lang-modal-title">
+  <div class="lang-modal" style="max-width: 680px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <div>
+        <h3 class="lang-modal-title" id="lang-modal-title" style="margin-bottom:2px;"><svg class="dash-icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Select Language / भाषा चुनें</h3>
+        <span style="font-size:11px; color:var(--muted);">Supports all 22 Official Eighth Schedule Indian Languages for nationwide public health deployment</span>
+      </div>
+      <button class="referral-modal-close" id="lang-close-x" aria-label="Close language modal"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="lang-22-grid" role="list">
+      <button class="lang-option active" data-lang="en" role="listitem"><span class="lang-native">English</span><span class="lang-english">English</span></button>
+      <button class="lang-option" data-lang="hi" role="listitem"><span class="lang-native">हिन्दी</span><span class="lang-english">Hindi</span></button>
+      <button class="lang-option" data-lang="bn" role="listitem"><span class="lang-native">বাংলা</span><span class="lang-english">Bengali</span></button>
+      <button class="lang-option" data-lang="te" role="listitem"><span class="lang-native">తెలుగు</span><span class="lang-english">Telugu</span></button>
+      <button class="lang-option" data-lang="mr" role="listitem"><span class="lang-native">मराठी</span><span class="lang-english">Marathi</span></button>
+      <button class="lang-option" data-lang="ta" role="listitem"><span class="lang-native">தமிழ்</span><span class="lang-english">Tamil</span></button>
+      <button class="lang-option" data-lang="ur" role="listitem"><span class="lang-native">اُردُو</span><span class="lang-english">Urdu</span></button>
+      <button class="lang-option" data-lang="gu" role="listitem"><span class="lang-native">ગુજરાતી</span><span class="lang-english">Gujarati</span></button>
+      <button class="lang-option" data-lang="kn" role="listitem"><span class="lang-native">ಕನ್ನಡ</span><span class="lang-english">Kannada</span></button>
+      <button class="lang-option" data-lang="ml" role="listitem"><span class="lang-native">മലയാളം</span><span class="lang-english">Malayalam</span></button>
+      <button class="lang-option" data-lang="or" role="listitem"><span class="lang-native">ଓଡ଼ିଆ</span><span class="lang-english">Odia</span></button>
+      <button class="lang-option" data-lang="pa" role="listitem"><span class="lang-native">ਪੰਜਾਬੀ</span><span class="lang-english">Punjabi</span></button>
+      <button class="lang-option" data-lang="as" role="listitem"><span class="lang-native">অসমীয়া</span><span class="lang-english">Assamese</span></button>
+      <button class="lang-option" data-lang="mai" role="listitem"><span class="lang-native">मैथिली</span><span class="lang-english">Maithili</span></button>
+      <button class="lang-option" data-lang="sat" role="listitem"><span class="lang-native">ᱥᱟᱱᱛᱟᱲᱤ</span><span class="lang-english">Santali</span></button>
+      <button class="lang-option" data-lang="ks" role="listitem"><span class="lang-native">كٲشُر</span><span class="lang-english">Kashmiri</span></button>
+      <button class="lang-option" data-lang="ne" role="listitem"><span class="lang-native">नेपाली</span><span class="lang-english">Nepali</span></button>
+      <button class="lang-option" data-lang="kok" role="listitem"><span class="lang-native">कोंकणी</span><span class="lang-english">Konkani</span></button>
+      <button class="lang-option" data-lang="sd" role="listitem"><span class="lang-native">سنڌي</span><span class="lang-english">Sindhi</span></button>
+      <button class="lang-option" data-lang="doi" role="listitem"><span class="lang-native">डोगरी</span><span class="lang-english">Dogri</span></button>
+      <button class="lang-option" data-lang="mni" role="listitem"><span class="lang-native">মৈতৈলোন্</span><span class="lang-english">Manipuri</span></button>
+      <button class="lang-option" data-lang="brx" role="listitem"><span class="lang-native">बड़ो</span><span class="lang-english">Bodo</span></button>
+      <button class="lang-option" data-lang="sa" role="listitem"><span class="lang-native">संस्कृतम्</span><span class="lang-english">Sanskrit</span></button>
+    </div>
+
+    <div style="display:flex; gap:12px; margin-top: 16px;">
+      <button class="btn btn-primary" style="flex:1" id="lang-confirm">Confirm Language &amp; Localize</button>
+      <button class="btn btn-secondary" id="lang-close">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ 4. MOBILE BOTTOM TAB NAVIGATION (Universal Centric Horizontal Slider) ══ -->
+<nav class="doctor-bottom-nav jeevia-slider-nav dock-bottom" role="navigation" aria-label="Doctor mobile navigation">
+  <div class="jeevia-slider-track">
+    <button class="jeevia-slider-item doc-tab-item active" id="tab-queue" data-view="view-queue" aria-label="Triage Queue">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 5h6M9 12h6M9 16h4"/></svg>
+      </span>
+      <span>Live Queue</span>
+      <span class="jeevia-slider-badge" id="mobile-badge-critical">3</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-search" data-view="view-search" aria-label="Find Patient">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+      <span>Find Patient</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-reviewed" data-view="view-reviewed" aria-label="Reviewed Today">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </span>
+      <span>Reviewed</span>
+      <span class="jeevia-slider-badge green" id="mobile-badge-reviewed">12</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-referrals" data-view="view-referrals" aria-label="Referrals">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </span>
+      <span>Referrals</span>
+      <span class="jeevia-slider-badge yellow" id="mobile-badge-referral">2</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-qr" data-view="view-qr-scan" aria-label="Scan Patient QR">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </span>
+      <span>Scan QR</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-rules" data-view="view-rules-engine" aria-label="Rules Engine">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </span>
+      <span>Rules Engine</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-audit" data-view="view-audit-log" aria-label="Audit Log">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </span>
+      <span>Audit Log</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-notif" data-view="view-notifications" aria-label="Alerts">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </span>
+      <span>Alerts</span>
+      <span class="jeevia-slider-badge" id="mobile-badge-notif">4</span>
+    </button>
+    <button class="jeevia-slider-item doc-tab-item" id="tab-lang" onclick="document.getElementById('lang-modal').classList.add('open')" aria-label="Change Language">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </span>
+      <span>भाषा (22)</span>
+    </button>
+    <a href="supervisor-dashboard.html" class="jeevia-slider-item" aria-label="Supervisor Portal">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </span>
+      <span>Supervisor</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Mobile drawer overlay -->
+<div class="detail-overlay" id="detail-overlay" aria-hidden="true"></div>
+
+<!-- Toast notifications container -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+<script src="js/nav.js"></script>
+<script src="js/doctor.js"></script>
+</body>
+</html>

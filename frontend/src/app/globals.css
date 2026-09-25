@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/* Icon mode: bigger pictograms, fewer words, for low-literacy users at the kiosk. */
+@custom-variant iconmode (&:where([data-icon-mode="true"] *));
+
+@theme {
+  --font-sans: var(--font-inter), "Noto Sans", "Noto Sans Devanagari", "Noto Sans Oriya", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-ink: #16182b;
+  --color-ink-2: #2d2d44;
+  --color-muted: #5f607a;
+  --color-subtle: #8a8ba3;
+  --color-line: #e5e6ef;
+  --color-canvas: #f6f6fa;
+  --color-surface: #ffffff;
+
+  /* Brand — carried over from the prototype (coral + teal), darkened for text contrast */
+  --color-coral-50: #fff3f2;
+  --color-coral-100: #ffe3e1;
+  --color-coral-200: #f7adad;
+  --color-coral-300: #f29191;
+  --color-coral-500: #e07070;
+  --color-coral-600: #c9534f;
+  --color-coral-700: #a63d3a;
+  --color-teal-50: #ecfbfb;
+  --color-teal-100: #ccfbfa;
+  --color-teal-200: #b1e5e6;
+  --color-teal-300: #80c8ca;
+  --color-teal-600: #23878a;
+  --color-teal-700: #1b6b6d;
+  --color-teal-800: #154f51;
+
+  /* Triage urgency — reviewer-facing only */
+  --color-crit: #dc2626;
+  --color-crit-bg: #fef2f2;
+  --color-crit-line: #fecaca;
+  --color-semi: #b45309;
+  --color-semi-bg: #fffbeb;
+  --color-semi-line: #fcd34d;
+  --color-rout: #15803d;
+  --color-rout-bg: #f0fdf4;
+  --color-rout-line: #bbf7d0;
+
+  --radius-card: 14px;
+  --shadow-card: 0 1px 2px rgb(22 24 43 / 0.04), 0 2px 10px rgb(22 24 43 / 0.05);
+  --shadow-pop: 0 10px 40px rgb(22 24 43 / 0.18);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+html[data-large-text="true"] {
+  font-size: 118.75%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-teal-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(220 38 38 / 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 22px rgb(220 38 38 / 0);
+  }
+}
+
+.recording-pulse {
+  animation: pulse-ring 1.2s ease-out infinite;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.25s ease-out both;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

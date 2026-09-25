@@ -1,0 +1,36 @@
+# Maternal red flags (applies when the visit category is maternal).
+protocol: MATERNAL
+rules:
+  - id: MAT-01
+    description: Pregnant, BP ≥ 140/90 with headache or blurred vision
+    urgency: red
+    when:
+      all:
+        - category: maternal
+        - any:
+            - vital_gte: { field: bp_systolic, value: 140 }
+            - vital_gte: { field: bp_diastolic, value: 90 }
+        - text_any: ["headache", "blurred", "vision"]
+  - id: MAT-02
+    description: Pregnant with vaginal bleeding
+    urgency: red
+    when:
+      all:
+        - category: maternal
+        - text_any: ["bleeding", "spotting"]
+  - id: MAT-03
+    description: Pregnant with reduced fetal movement
+    urgency: red
+    when:
+      all:
+        - category: maternal
+        - text_any: ["reduced movement", "baby not moving", "less movement", "fetal movement reduced"]
+  - id: MAT-04
+    description: Pregnant with BP ≥ 140/90
+    urgency: yellow
+    when:
+      all:
+        - category: maternal
+        - any:
+            - vital_gte: { field: bp_systolic, value: 140 }
+            - vital_gte: { field: bp_diastolic, value: 90 }

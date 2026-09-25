@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supervisor Dashboard — Jeevia Healthcare</title>
+  <meta name="description" content="Jeevia Supervisor Dashboard — facility configuration, system audit log, staff management, and RBAC access control for government health facilities.">
+  <meta name="theme-color" content="#1C1C2E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/supervisor.css">
+  <link rel="stylesheet" href="styles/nav.css">
+</head>
+<body>
+
+<!-- ══ ADVISORY BANNER ═══════════════════════════════════════ -->
+<div class="adv-banner" id="adv-banner" role="alert">
+  <div class="adv-banner-dot"></div>
+  <span><strong>Supervisor View:</strong> All AI-generated triage outputs are advisory. Ensure all queue decisions are reviewed by qualified medical staff. This system is an educational prototype — not for clinical deployment.</span>
+  <button class="adv-banner-close" onclick="document.getElementById('adv-banner').style.display='none'" aria-label="Dismiss">×</button>
+</div>
+
+<!-- ══ SHELL ══════════════════════════════════════════════════ -->
+<div class="sv-shell">
+
+  <!-- ═══ GLOBAL HEADER ═══════════════════════════════════════ -->
+  <header class="sv-header" role="banner">
+    <div class="sv-header-left">
+      <a href="index.html" class="sv-logo" aria-label="Jeevia Home">
+        <div class="sv-logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-linecap="round"/></svg>
+        </div>
+        <span class="sv-logo-text">Jee<em>via</em></span>
+      </a>
+      <div class="sv-role-separator" aria-hidden="true"></div>
+      <div class="sv-role-block">
+        <div class="sv-role-label">Supervisor Dashboard</div>
+        <div class="sv-role-facility" id="sv-facility-name">PHC Manikpur · Chitrakoot, UP</div>
+      </div>
+    </div>
+
+    <div class="sv-header-center">
+      <div class="sv-status-row">
+        <div class="sv-status-chip online"><span class="sv-status-dot"></span>System Online</div>
+        <div class="sv-status-chip"><span class="sv-status-dot amber"></span>Sync 2m ago</div>
+        <div class="sv-status-chip">Network: 4G</div>
+        <div class="sv-status-chip">OPD Day</div>
+        <div class="sv-status-chip active-staff">5 Staff Active</div>
+      </div>
+    </div>
+
+    <div class="sv-header-right">
+      <div class="sv-header-date" id="sv-header-date">Saturday, 21 September 2026</div>
+      <button class="sv-lang-btn" id="sv-lang-btn" aria-label="Change interface language" aria-haspopup="dialog">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="sv-lang-current">English</span>
+      </button>
+      <div class="sv-alert-btn-wrap">
+        <button class="sv-alert-btn" id="sv-alert-btn" aria-label="System alerts — 3 active">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="sv-alert-count" id="sv-alert-count">3</span>
+        </button>
+      </div>
+      <div class="sv-user-chip">
+        <div class="sv-avatar" aria-hidden="true">KM</div>
+        <div class="sv-user-info">
+          <div class="sv-user-name">Kavitha Murthy</div>
+          <div class="sv-user-role">Supervisor · Admin</div>
+        </div>
+      </div>
+      <a href="index.html" class="sv-signout-btn" title="Sign out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══ SECTION TABS ═══════════════════════════════════════ -->
+  <nav class="sv-tabs" role="tablist" aria-label="Dashboard sections">
+    <button class="sv-tab active" id="tab-config" role="tab" aria-selected="true"  aria-controls="view-config">Facility Setup</button>
+    <button class="sv-tab" id="tab-audit"  role="tab" aria-selected="false" aria-controls="view-audit">Audit &amp; Logs</button>
+    <button class="sv-tab" id="tab-staff"  role="tab" aria-selected="false" aria-controls="view-staff">Staff &amp; Kiosks</button>
+    <button class="sv-tab" id="tab-queue"  role="tab" aria-selected="false" aria-controls="view-queue">Queue Monitor</button>
+    <div class="sv-tabs-right">
+      <a href="patient-intake.html" class="sv-action-link">New Patient Intake</a>
+      <a href="doctor-dashboard.html" class="sv-action-link">Doctor Dashboard</a>
+      <button class="sv-export-btn" id="sv-export-btn" aria-label="Export full day report">Export Report</button>
+    </div>
+  </nav>
+
+  <!-- ═══ STATS BAR ══════════════════════════════════════════ -->
+  <div class="sv-stats-bar" role="complementary" aria-label="Today's key metrics">
+    <div class="sv-stat">
+      <div class="sv-stat-val" id="sv-stat-patients">47</div>
+      <div class="sv-stat-lbl">Patients Today</div>
+      <div class="sv-stat-delta up">+12 vs yesterday</div>
+    </div>
+    <div class="sv-stat-divider"></div>
+    <div class="sv-stat">
+      <div class="sv-stat-val critical" id="sv-stat-queue">18</div>
+      <div class="sv-stat-lbl">In Queue</div>
+      <div class="sv-stat-delta down">3 critical pending</div>
+    </div>
+    <div class="sv-stat-divider"></div>
+    <div class="sv-stat">
+      <div class="sv-stat-val" id="sv-stat-wait">23</div>
+      <div class="sv-stat-lbl">Avg Wait (min)</div>
+      <div class="sv-stat-delta down">+5 min today</div>
+    </div>
+    <div class="sv-stat-divider"></div>
+    <div class="sv-stat">
+      <div class="sv-stat-val ok" id="sv-stat-reviewed">29</div>
+      <div class="sv-stat-lbl">Reviewed &amp; Cleared</div>
+      <div class="sv-stat-delta up">Good throughput</div>
+    </div>
+    <div class="sv-stat-divider"></div>
+    <div class="sv-stat">
+      <div class="sv-stat-val" id="sv-stat-referrals">4</div>
+      <div class="sv-stat-lbl">Referrals Issued</div>
+      <div class="sv-stat-delta">2 ambulance dispatched</div>
+    </div>
+    <div class="sv-stat-divider"></div>
+    <div class="sv-stat">
+      <div class="sv-stat-val" id="sv-stat-overrides">1</div>
+      <div class="sv-stat-lbl">Red Flag Overrides</div>
+      <div class="sv-stat-delta down">Requires audit review</div>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN BODY ══════════════════════════════════════════ -->
+  <div class="sv-body">
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW 1: FACILITY SETUP & CONFIGURATION
+    ════════════════════════════════════════════════════════ -->
+    <section class="sv-view active" id="view-config" role="tabpanel" aria-labelledby="tab-config">
+      <div class="config-layout">
+
+        <!-- ── LEFT: Facility Setup ──────────────────────── -->
+        <aside class="config-left" aria-label="Facility configuration">
+
+          <div class="config-section-head">
+            <div class="config-section-title">Facility Context</div>
+            <div class="config-section-sub">Changes apply globally across all kiosks and doctor dashboards</div>
+          </div>
+
+          <!-- Facility Type -->
+          <div class="config-block" id="cblock-type">
+            <div class="config-block-label">Facility Type</div>
+            <select class="sv-select" id="facility-type-select" aria-label="Select facility type">
+              <option value="phc" selected>Primary Health Centre (PHC)</option>
+              <option value="govt-hospital">Government Hospital (District / Taluk)</option>
+              <option value="camp">Public Health Camp (Mobile / Offline)</option>
+              <option value="company">Company Clinic</option>
+              <option value="industrial">Industrial-Estate Health Unit</option>
+              <option value="campus">Campus Health Centre</option>
+            </select>
+            <div class="config-block-hint" id="facility-type-hint">PHC — limited specialists. Referral routing to District Hospital Chitrakoot is active.</div>
+          </div>
+
+          <!-- Referral Facility -->
+          <div class="config-block">
+            <div class="config-block-label">Higher Referral Facility</div>
+            <input type="text" class="sv-input" id="referral-facility" value="District Hospital Chitrakoot" placeholder="e.g., District Hospital XYZ" aria-label="Higher referral facility name">
+            <div class="config-block-hint">Patients escalated when no on-site specialist is available are routed here.</div>
+          </div>
+
+          <!-- Capacity -->
+          <div class="config-block">
+            <div class="config-block-label">Daily Patient Throughput Capacity</div>
+            <div class="config-inline-row">
+              <input type="number" class="sv-input sv-input-sm" id="daily-capacity" value="80" min="1" max="500" inputmode="numeric" aria-label="Daily patient capacity">
+              <span class="config-unit">patients/day</span>
+            </div>
+            <div class="config-progress-wrap">
+              <div class="config-progress-bar">
+                <div class="config-progress-fill" id="capacity-fill" style="width:58.75%"></div>
+              </div>
+              <div class="config-progress-label">47 of 80 today (58.75%)</div>
+            </div>
+          </div>
+
+          <!-- Offline Mode -->
+          <div class="config-block">
+            <div class="config-block-label">Connectivity Mode</div>
+            <div class="config-toggle-row">
+              <div class="config-toggle-info">
+                <div class="config-toggle-title">Offline / Camp Mode</div>
+                <div class="config-toggle-sub">Enables local-only storage. Sync queued for when network available.</div>
+              </div>
+              <label class="sv-toggle" for="offline-mode-tog">
+                <input type="checkbox" id="offline-mode-tog">
+                <span class="sv-toggle-track"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Specialist Availability Matrix -->
+          <div class="config-block">
+            <div class="config-block-label">Specialist Availability Matrix</div>
+            <div class="config-block-hint" style="margin-bottom:12px;">Toggle which specialists are on-site. This drives referral routing — unavailable specialists trigger automatic referral to <strong id="specialist-referral-target">District Hospital Chitrakoot</strong>.</div>
+            <div class="specialist-matrix" id="specialist-matrix" role="group" aria-label="Specialist availability toggles">
+
+              <div class="spec-row" id="spec-gp">
+                <div class="spec-indicator on" id="spec-gp-dot"></div>
+                <div class="spec-info">
+                  <div class="spec-name">General Physician</div>
+                  <div class="spec-note" id="spec-gp-note">On duty today</div>
+                </div>
+                <label class="sv-toggle" for="spec-gp-tog" aria-label="Toggle General Physician availability">
+                  <input type="checkbox" id="spec-gp-tog" checked data-spec="gp">
+                  <span class="sv-toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="spec-row" id="spec-obgyn">
+                <div class="spec-indicator off" id="spec-obgyn-dot"></div>
+                <div class="spec-info">
+                  <div class="spec-name">OB/GYN (Obstetrics &amp; Gynaecology)</div>
+                  <div class="spec-note" id="spec-obgyn-note">Not on site — maternal cases referred</div>
+                </div>
+                <label class="sv-toggle" for="spec-obgyn-tog" aria-label="Toggle OB/GYN availability">
+                  <input type="checkbox" id="spec-obgyn-tog" data-spec="obgyn">
+                  <span class="sv-toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="spec-row" id="spec-cardio">
+                <div class="spec-indicator off" id="spec-cardio-dot"></div>
+                <div class="spec-info">
+                  <div class="spec-name">Cardiologist</div>
+                  <div class="spec-note" id="spec-cardio-note">Not on site — cardiac cases referred</div>
+                </div>
+                <label class="sv-toggle" for="spec-cardio-tog" aria-label="Toggle Cardiologist availability">
+                  <input type="checkbox" id="spec-cardio-tog" data-spec="cardio">
+                  <span class="sv-toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="spec-row" id="spec-pulmo">
+                <div class="spec-indicator off" id="spec-pulmo-dot"></div>
+                <div class="spec-info">
+                  <div class="spec-name">Pulmonologist</div>
+                  <div class="spec-note" id="spec-pulmo-note">Not on site — respiratory cases referred</div>
+                </div>
+                <label class="sv-toggle" for="spec-pulmo-tog" aria-label="Toggle Pulmonologist availability">
+                  <input type="checkbox" id="spec-pulmo-tog" data-spec="pulmo">
+                  <span class="sv-toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="spec-row" id="spec-diab">
+                <div class="spec-indicator visiting" id="spec-diab-dot"></div>
+                <div class="spec-info">
+                  <div class="spec-name">Diabetologist / Endocrinologist</div>
+                  <div class="spec-note" id="spec-diab-note">Visiting Wed &amp; Fri only</div>
+                </div>
+                <label class="sv-toggle" for="spec-diab-tog" aria-label="Toggle Diabetologist availability">
+                  <input type="checkbox" id="spec-diab-tog" data-spec="diab">
+                  <span class="sv-toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="spec-row" id="spec-anm">
+                <div class="spec-indicator on" id="spec-anm-dot"></div>
+                <div class="spec-info">
+                  <div class="spec-name">ANM / Nursing Staff</div>
+                  <div class="spec-note" id="spec-anm-note">2 on duty today</div>
+                </div>
+                <label class="sv-toggle" for="spec-anm-tog" aria-label="Toggle ANM/Nursing availability">
+                  <input type="checkbox" id="spec-anm-tog" checked data-spec="anm">
+                  <span class="sv-toggle-track"></span>
+                </label>
+              </div>
+
+              <div class="spec-row" id="spec-asha">
+                <div class="spec-indicator on" id="spec-asha-dot"></div>
+                <div class="spec-info">
+                  <div class="spec-name">ASHA / Community Health Worker</div>
+                  <div class="spec-note" id="spec-asha-note">3 workers active</div>
+                </div>
+                <label class="sv-toggle" for="spec-asha-tog" aria-label="Toggle ASHA worker availability">
+                  <input type="checkbox" id="spec-asha-tog" checked data-spec="asha">
+                  <span class="sv-toggle-track"></span>
+                </label>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Regional Settings -->
+          <div class="config-block">
+            <div class="config-block-label">Active Languages at This Facility</div>
+            <div class="lang-tag-grid" id="lang-tag-grid" role="group" aria-label="Active facility languages">
+              <button class="lang-tag selected" data-lang="hi">Hindi</button>
+              <button class="lang-tag selected" data-lang="en">English</button>
+              <button class="lang-tag" data-lang="bh">Bhojpuri</button>
+              <button class="lang-tag" data-lang="ur">Urdu</button>
+              <button class="lang-tag" data-lang="aw">Awadhi</button>
+              <button class="lang-tag" data-lang="bn">Bengali</button>
+              <button class="lang-tag" data-lang="ta">Tamil</button>
+              <button class="lang-tag" data-lang="te">Telugu</button>
+              <button class="lang-tag" data-lang="mr">Marathi</button>
+              <button class="lang-tag" data-lang="gu">Gujarati</button>
+            </div>
+            <div class="config-block-hint">Selected languages are enabled in voice capture and patient-facing kiosks.</div>
+          </div>
+
+          <!-- Festival / Season Calendar -->
+          <div class="config-block">
+            <div class="config-block-label">Regional Calendar Reference</div>
+            <div class="config-block-hint" style="margin-bottom:10px;">Enables the AI to parse temporal symptom descriptions like "since Diwali" or "since harvest season".</div>
+            <div class="festival-grid" id="festival-grid" role="group" aria-label="Regional calendar events">
+              <button class="festival-tag selected" data-event="diwali">Diwali</button>
+              <button class="festival-tag selected" data-event="holi">Holi</button>
+              <button class="festival-tag selected" data-event="eid">Eid</button>
+              <button class="festival-tag" data-event="onam">Onam</button>
+              <button class="festival-tag selected" data-event="harvest">Harvest Season</button>
+              <button class="festival-tag" data-event="monsoon">Monsoon Peak</button>
+              <button class="festival-tag" data-event="navratri">Navratri</button>
+              <button class="festival-tag" data-event="christmas">Christmas</button>
+            </div>
+          </div>
+
+          <!-- Healthcare Worker Cadres -->
+          <div class="config-block">
+            <div class="config-block-label">Local Healthcare Worker Cadres</div>
+            <div class="cadre-list" id="cadre-list" role="list">
+              <div class="cadre-row" role="listitem">
+                <div class="cadre-tag">ASHA</div>
+                <div class="cadre-info">Accredited Social Health Activist</div>
+                <div class="cadre-count" id="cadre-asha">3 active</div>
+              </div>
+              <div class="cadre-row" role="listitem">
+                <div class="cadre-tag">ANM</div>
+                <div class="cadre-info">Auxiliary Nurse Midwife</div>
+                <div class="cadre-count" id="cadre-anm">2 active</div>
+              </div>
+              <div class="cadre-row" role="listitem">
+                <div class="cadre-tag">MPW</div>
+                <div class="cadre-info">Multi-Purpose Worker</div>
+                <div class="cadre-count" id="cadre-mpw">1 active</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <button class="sv-save-btn" id="save-facility-btn" aria-label="Save facility configuration and push to all connected devices">
+            Save &amp; Push Configuration to All Kiosks
+          </button>
+          <div class="sv-save-confirm" id="sv-save-confirm" style="display:none;">Configuration saved and broadcast to 3 connected kiosks and 1 doctor dashboard.</div>
+
+        </aside>
+
+        <!-- ── RIGHT: Privacy & Data Compliance ──────────── -->
+        <div class="config-right" aria-label="Privacy and data compliance">
+
+          <div class="config-section-head">
+            <div class="config-section-title">Privacy &amp; Data Compliance</div>
+            <div class="config-section-sub">DPDP Act 2023 · DISHA · Responsible AI criteria</div>
+          </div>
+
+          <!-- Compliance matrix -->
+          <div class="compliance-matrix">
+            <div class="compliance-row">
+              <div class="compliance-key">Data Retention Period</div>
+              <div class="compliance-val">72 hours (audio/images) · 30 days (text)</div>
+              <div class="compliance-status pass">Pass</div>
+            </div>
+            <div class="compliance-row">
+              <div class="compliance-key">Patient ID Anonymization</div>
+              <div class="compliance-val">Active — name decoupled from clinical data</div>
+              <div class="compliance-status pass">Active</div>
+            </div>
+            <div class="compliance-row">
+              <div class="compliance-key">Audit Log Retention</div>
+              <div class="compliance-val">180 days — immutable, append-only</div>
+              <div class="compliance-status pass">Active</div>
+            </div>
+            <div class="compliance-row">
+              <div class="compliance-key">Encryption at Rest</div>
+              <div class="compliance-val">AES-256 — all patient records</div>
+              <div class="compliance-status pass">Active</div>
+            </div>
+            <div class="compliance-row">
+              <div class="compliance-key">Consent Gate</div>
+              <div class="compliance-val">Required at kiosk intake — logged</div>
+              <div class="compliance-status pass">Active</div>
+            </div>
+            <div class="compliance-row">
+              <div class="compliance-key">RBAC Matrix</div>
+              <div class="compliance-val">4 role tiers — enforced server-side</div>
+              <div class="compliance-status pass">Active</div>
+            </div>
+            <div class="compliance-row">
+              <div class="compliance-key">Raw Audio Purge</div>
+              <div class="compliance-val">Auto-purge 24h post-extraction</div>
+              <div class="compliance-status warn">Scheduled</div>
+            </div>
+            <div class="compliance-row">
+              <div class="compliance-key">Real Patient Data</div>
+              <div class="compliance-val">None — prototype uses synthetic data only</div>
+              <div class="compliance-status pass">Compliant</div>
+            </div>
+          </div>
+
+          <!-- Retention schedule -->
+          <div class="retention-block">
+            <div class="config-block-label">Scheduled Purge Log</div>
+            <div class="retention-row"><span class="retention-time">Today 02:00 AM</span><span class="retention-action">Raw audio recordings (14 files) deleted after text extraction — confirmed</span><span class="retention-badge purge">Purged</span></div>
+            <div class="retention-row"><span class="retention-time">Yesterday 02:00 AM</span><span class="retention-action">Uploaded lab images (6 files) deleted after OCR extraction — confirmed</span><span class="retention-badge purge">Purged</span></div>
+            <div class="retention-row"><span class="retention-time">Scheduled: 20 Dec 2026</span><span class="retention-action">Patient text data older than 30 days — scheduled auto-deletion</span><span class="retention-badge scheduled">Pending</span></div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="config-quick-actions">
+            <button class="sv-action-btn primary" id="run-manual-purge" aria-label="Run manual data purge">Run Manual Purge</button>
+            <button class="sv-action-btn" id="view-privacy-policy" aria-label="View full privacy policy">View Privacy Policy</button>
+            <button class="sv-action-btn" id="download-dpia" aria-label="Download DPIA report">Download DPIA</button>
+          </div>
+
+          <!-- System Alerts Panel -->
+          <div class="config-section-head" style="margin-top:28px;">
+            <div class="config-section-title">System Alerts</div>
+            <div class="alert-count-badge" id="alert-count-badge">3 Active</div>
+          </div>
+
+          <div class="alert-list" id="alert-list">
+            <div class="sv-alert critical" role="alert">
+              <div class="sv-alert-bar"></div>
+              <div class="sv-alert-body">
+                <div class="sv-alert-title">3 Critical Patients Unreviewed</div>
+                <div class="sv-alert-desc">Radha Kumari, Suresh Babu, and Ananya Roy have been waiting over 8 minutes without doctor review. Auto-escalation pending.</div>
+                <div class="sv-alert-meta">Now · Patient queue</div>
+              </div>
+              <button class="sv-alert-dismiss" aria-label="Dismiss alert">×</button>
+            </div>
+
+            <div class="sv-alert warning" role="alert">
+              <div class="sv-alert-bar"></div>
+              <div class="sv-alert-body">
+                <div class="sv-alert-title">OCR Cross-Engine Conflict — JVA-P001</div>
+                <div class="sv-alert-desc">BP reading mismatch: PaddleOCR extracted 170/105, manual entry 160/100. Needs clinician verification before note approval.</div>
+                <div class="sv-alert-meta">12 min ago · AI system</div>
+              </div>
+              <button class="sv-alert-dismiss" aria-label="Dismiss alert">×</button>
+            </div>
+
+            <div class="sv-alert info" role="status">
+              <div class="sv-alert-bar"></div>
+              <div class="sv-alert-body">
+                <div class="sv-alert-title">Offline Sync Pending — Camp Session</div>
+                <div class="sv-alert-desc">2 intake forms from Tent B morning session are queued for upload. Network is available — sync when ready.</div>
+                <div class="sv-alert-meta">48 min ago · Camp data</div>
+              </div>
+              <button class="sv-alert-dismiss" aria-label="Dismiss alert">×</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW 2: AUDIT & LOGS
+    ════════════════════════════════════════════════════════ -->
+    <section class="sv-view" id="view-audit" role="tabpanel" aria-labelledby="tab-audit">
+      <div class="audit-layout">
+
+        <div class="audit-header-bar">
+          <div>
+            <div class="audit-title">Regulatory Audit Trail</div>
+            <div class="audit-subtitle">Append-only, immutable log · DPDP Act 2023 / DISHA compliant · Clinical content masked per RBAC</div>
+          </div>
+          <div class="audit-header-actions">
+            <div class="audit-filter-row">
+              <select class="sv-select sv-select-sm" id="audit-filter-type" aria-label="Filter by event type">
+                <option value="all">All Events</option>
+                <option value="record_view">Record View</option>
+                <option value="note_approved">Note Approved</option>
+                <option value="urgency_override">Urgency Override</option>
+                <option value="engine_disagreement">Engine Disagreement</option>
+                <option value="cross_referral">Cross-Referral</option>
+                <option value="login">Staff Login</option>
+                <option value="purge">Data Purge</option>
+              </select>
+              <select class="sv-select sv-select-sm" id="audit-filter-actor" aria-label="Filter by actor">
+                <option value="all">All Actors</option>
+                <option value="human">Human Only</option>
+                <option value="ai">AI Engine Only</option>
+              </select>
+              <input type="date" class="sv-input sv-input-sm" id="audit-date-filter" aria-label="Filter by date">
+            </div>
+            <button class="sv-export-btn" id="audit-csv-btn" aria-label="Download audit log as CSV">Download CSV</button>
+          </div>
+        </div>
+
+        <!-- Privacy notice -->
+        <div class="audit-privacy-notice" role="note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span><strong>Privacy Wall Active:</strong> This table displays metadata only — timestamps, actor IDs, event types, and patient reference IDs. All clinical findings, symptom descriptions, and AI summaries are masked per the RBAC matrix. Supervisor-level access does not include clinical content.</span>
+        </div>
+
+        <!-- Audit table -->
+        <div class="audit-table-wrap">
+          <table class="audit-table" role="grid" aria-label="Facility audit log">
+            <thead>
+              <tr>
+                <th scope="col">Timestamp</th>
+                <th scope="col">Event Type</th>
+                <th scope="col">Actor</th>
+                <th scope="col">Actor Role</th>
+                <th scope="col">Patient Ref</th>
+                <th scope="col">Detail</th>
+                <th scope="col">Hash / Record ID</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody">
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:42:18 AM</td>
+                <td><span class="audit-badge escalate">ESCALATION</span></td>
+                <td>Dr. Deepa Sharma</td>
+                <td class="audit-role">Doctor</td>
+                <td class="audit-patient">JVA-P002</td>
+                <td class="audit-detail">Case escalated to on-call Medical Officer · Reason: SpO₂ 89%, COPD exacerbation</td>
+                <td class="audit-hash">#A8F2C91D</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:38:05 AM</td>
+                <td><span class="audit-badge approved">NOTE_APPROVED</span></td>
+                <td>Dr. Deepa Sharma</td>
+                <td class="audit-role">Doctor</td>
+                <td class="audit-patient">JVA-P009</td>
+                <td class="audit-detail">Triage note approved. Clinical summary: <span class="audit-masked">[MASKED — Supervisor access]</span></td>
+                <td class="audit-hash">#B1E4A07C</td>
+              </tr>
+
+              <tr class="audit-tr highlight-override">
+                <td class="audit-ts">09:35:52 AM</td>
+                <td><span class="audit-badge override">URGENCY_OVERRIDE</span></td>
+                <td>Dr. Deepa Sharma</td>
+                <td class="audit-role">Doctor</td>
+                <td class="audit-patient">JVA-P004</td>
+                <td class="audit-detail">RED flag downgraded to YELLOW. Justification logged. AI signal preserved as <em>superseded_by</em> — not erased. Reason: <span class="audit-masked">[MASKED]</span></td>
+                <td class="audit-hash">#C3D91B22</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:35:11 AM</td>
+                <td><span class="audit-badge intake">PATIENT_INTAKE</span></td>
+                <td>Nurse Priya Nair</td>
+                <td class="audit-role">Nurse</td>
+                <td class="audit-patient">JVA-P010</td>
+                <td class="audit-detail">Intake submitted via voice · Language: Hindi · Input method: IndicConformer</td>
+                <td class="audit-hash">#D7F03E55</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:31:44 AM</td>
+                <td><span class="audit-badge referral">CROSS_REFERRAL</span></td>
+                <td>Dr. Deepa Sharma</td>
+                <td class="audit-role">Doctor</td>
+                <td class="audit-patient">JVA-P003</td>
+                <td class="audit-detail">Patient referred to District Hospital Chitrakoot · Reason: OB/GYN not on site · 108 ambulance dispatched</td>
+                <td class="audit-hash">#E2A15F80</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:30:22 AM</td>
+                <td><span class="audit-badge view">RECORD_VIEW</span></td>
+                <td>Nurse Kavitha Pillai</td>
+                <td class="audit-role">Nurse</td>
+                <td class="audit-patient">JVA-P010</td>
+                <td class="audit-detail">Patient record accessed · Station A · Access logged for DISHA compliance</td>
+                <td class="audit-hash">#F0C88291</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:28:03 AM</td>
+                <td><span class="audit-badge intake">PATIENT_INTAKE</span></td>
+                <td>Nurse Kavitha Pillai</td>
+                <td class="audit-role">Nurse</td>
+                <td class="audit-patient">JVA-P009</td>
+                <td class="audit-detail">Intake submitted via text · Language: English · Vitals entered by ANM</td>
+                <td class="audit-hash">#G1D47B34</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:22:41 AM</td>
+                <td><span class="audit-badge approved">NOTE_APPROVED</span></td>
+                <td>Dr. Deepa Sharma</td>
+                <td class="audit-role">Doctor</td>
+                <td class="audit-patient">JVA-P005</td>
+                <td class="audit-detail">Triage note approved. Clinical summary: <span class="audit-masked">[MASKED — Supervisor access]</span></td>
+                <td class="audit-hash">#H5E29C67</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:15:09 AM</td>
+                <td><span class="audit-badge engine">ENGINE_DISAGREEMENT</span></td>
+                <td>PaddleOCR-v2.6</td>
+                <td class="audit-role">AI Engine</td>
+                <td class="audit-patient">JVA-P001</td>
+                <td class="audit-detail">BP value conflict detected · OCR: 170/105 · Manual: 160/100 · Flagged for clinician verification</td>
+                <td class="audit-hash">#I9B31A44</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">09:00:00 AM</td>
+                <td><span class="audit-badge purge">DATA_PURGE</span></td>
+                <td>System (Auto)</td>
+                <td class="audit-role">System</td>
+                <td class="audit-patient">—</td>
+                <td class="audit-detail">14 raw audio files purged post-extraction · 6 uploaded images purged post-OCR · Minimal retention policy enforced</td>
+                <td class="audit-hash">#J2C40D88</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">08:57:33 AM</td>
+                <td><span class="audit-badge login">STAFF_LOGIN</span></td>
+                <td>Dr. Deepa Sharma</td>
+                <td class="audit-role">Doctor</td>
+                <td class="audit-patient">—</td>
+                <td class="audit-detail">Authenticated via SMS OTP · Device: Chrome Android · IP: 192.168.1.45</td>
+                <td class="audit-hash">#K4A82F16</td>
+              </tr>
+
+              <tr class="audit-tr">
+                <td class="audit-ts">08:45:10 AM</td>
+                <td><span class="audit-badge login">STAFF_LOGIN</span></td>
+                <td>Kavitha Murthy</td>
+                <td class="audit-role">Supervisor</td>
+                <td class="audit-patient">—</td>
+                <td class="audit-detail">Authenticated via SMS OTP · Device: Desktop Chrome · IP: 192.168.1.12</td>
+                <td class="audit-hash">#L6D93E72</td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <div class="audit-footer">
+          <span class="audit-footer-count">Showing 12 of 84 events today</span>
+          <button class="sv-load-more-btn" id="audit-load-more">Load older records</button>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW 3: STAFF & KIOSK MANAGEMENT
+    ════════════════════════════════════════════════════════ -->
+    <section class="sv-view" id="view-staff" role="tabpanel" aria-labelledby="tab-staff">
+      <div class="staff-layout">
+
+        <!-- Left: Staff roster -->
+        <div class="staff-panel">
+          <div class="staff-panel-header">
+            <div>
+              <div class="staff-panel-title">Staff Directory</div>
+              <div class="staff-panel-sub">Enrolled users with role assignments for this facility</div>
+            </div>
+            <button class="sv-action-btn primary" id="enroll-staff-btn" aria-label="Enroll new staff member via SMS OTP">Enroll New Staff</button>
+          </div>
+
+          <div class="staff-search-row">
+            <input type="search" class="sv-input sv-input-sm" id="staff-search" placeholder="Search by name or role…" aria-label="Search staff">
+            <select class="sv-select sv-select-sm" id="staff-filter-role" aria-label="Filter by role">
+              <option value="all">All Roles</option>
+              <option value="doctor">Doctor</option>
+              <option value="nurse">Nurse / ANM</option>
+              <option value="health_worker">Health Worker</option>
+              <option value="receptionist">Receptionist</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="medical_officer">Medical Officer</option>
+            </select>
+          </div>
+
+          <div class="staff-table-wrap">
+            <table class="staff-table" role="grid" aria-label="Staff members">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Last Active</th>
+                  <th scope="col">Device</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staff-tbody">
+                <tr class="staff-tr">
+                  <td><div class="staff-name-cell"><div class="sv-avatar sm coral">DS</div><div><div class="sn-name">Dr. Deepa Sharma</div><div class="sn-id">STF-77492</div></div></div></td>
+                  <td><span class="role-tag doctor">Doctor</span></td>
+                  <td><span class="status-dot online"></span>Online</td>
+                  <td class="audit-ts">09:42 AM</td>
+                  <td class="staff-device">Chrome · Android</td>
+                  <td class="staff-actions"><button class="sv-action-btn tiny" aria-label="Edit Dr. Deepa Sharma">Edit</button><button class="sv-action-btn tiny danger" aria-label="Revoke access for Dr. Deepa Sharma">Revoke</button></td>
+                </tr>
+                <tr class="staff-tr">
+                  <td><div class="staff-name-cell"><div class="sv-avatar sm teal">KP</div><div><div class="sn-name">Kavitha Pillai</div><div class="sn-id">STF-88201</div></div></div></td>
+                  <td><span class="role-tag nurse">Nurse / ANM</span></td>
+                  <td><span class="status-dot online"></span>Online</td>
+                  <td class="audit-ts">09:38 AM</td>
+                  <td class="staff-device">Kiosk A · Tablet</td>
+                  <td class="staff-actions"><button class="sv-action-btn tiny" aria-label="Edit Kavitha Pillai">Edit</button><button class="sv-action-btn tiny danger" aria-label="Revoke access">Revoke</button></td>
+                </tr>
+                <tr class="staff-tr">
+                  <td><div class="staff-name-cell"><div class="sv-avatar sm teal">PN</div><div><div class="sn-name">Priya Nair</div><div class="sn-id">STF-88202</div></div></div></td>
+                  <td><span class="role-tag nurse">Nurse / ANM</span></td>
+                  <td><span class="status-dot online"></span>Online</td>
+                  <td class="audit-ts">09:35 AM</td>
+                  <td class="staff-device">Kiosk B · Tablet</td>
+                  <td class="staff-actions"><button class="sv-action-btn tiny" aria-label="Edit Priya Nair">Edit</button><button class="sv-action-btn tiny danger" aria-label="Revoke access">Revoke</button></td>
+                </tr>
+                <tr class="staff-tr">
+                  <td><div class="staff-name-cell"><div class="sv-avatar sm purple">RK</div><div><div class="sn-name">Rajesh Kumar</div><div class="sn-id">STF-90112</div></div></div></td>
+                  <td><span class="role-tag receptionist">Receptionist</span></td>
+                  <td><span class="status-dot away"></span>Away</td>
+                  <td class="audit-ts">09:00 AM</td>
+                  <td class="staff-device">Desktop · Chrome</td>
+                  <td class="staff-actions"><button class="sv-action-btn tiny" aria-label="Edit Rajesh Kumar">Edit</button><button class="sv-action-btn tiny danger" aria-label="Revoke access">Revoke</button></td>
+                </tr>
+                <tr class="staff-tr">
+                  <td><div class="staff-name-cell"><div class="sv-avatar sm gradient-km">KM</div><div><div class="sn-name">Kavitha Murthy</div><div class="sn-id">STF-60001</div></div></div></td>
+                  <td><span class="role-tag supervisor">Supervisor</span></td>
+                  <td><span class="status-dot online"></span>Online</td>
+                  <td class="audit-ts">Now</td>
+                  <td class="staff-device">Desktop · Chrome</td>
+                  <td class="staff-actions"><button class="sv-action-btn tiny" aria-label="Edit Kavitha Murthy">Edit</button><span class="staff-actions-self-note">You</span></td>
+                </tr>
+                <tr class="staff-tr">
+                  <td><div class="staff-name-cell"><div class="sv-avatar sm coral">SP</div><div><div class="sn-name">Sudhir Patel</div><div class="sn-id">STF-77811</div></div></div></td>
+                  <td><span class="role-tag hw">Health Worker</span></td>
+                  <td><span class="status-dot offline"></span>Offline</td>
+                  <td class="audit-ts">08:30 AM</td>
+                  <td class="staff-device">Feature phone · SMS</td>
+                  <td class="staff-actions"><button class="sv-action-btn tiny" aria-label="Edit Sudhir Patel">Edit</button><button class="sv-action-btn tiny danger" aria-label="Revoke access">Revoke</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Enroll + RBAC + Kiosks -->
+        <div class="staff-right-panels">
+
+          <!-- RBAC matrix -->
+          <div class="rbac-panel">
+            <div class="staff-panel-title">RBAC Permission Matrix</div>
+            <div class="staff-panel-sub" style="margin-bottom:14px;">Role-based access control — what each role can see and do</div>
+            <div class="rbac-table-wrap">
+              <table class="rbac-table" role="grid" aria-label="Role permissions matrix">
+                <thead>
+                  <tr>
+                    <th scope="col">Permission</th>
+                    <th scope="col">Health Worker</th>
+                    <th scope="col">Nurse</th>
+                    <th scope="col">Doctor</th>
+                    <th scope="col">Med Officer</th>
+                    <th scope="col">Supervisor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Patient Intake (Voice/Text)</td><td class="perm yes">Yes</td><td class="perm yes">Yes</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td></tr>
+                  <tr><td>View Triage Queue</td><td class="perm no">No</td><td class="perm limited">Limited</td><td class="perm yes">Yes</td><td class="perm yes">Yes</td><td class="perm yes">Yes</td></tr>
+                  <tr><td>View Clinical Summary</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm yes">Yes</td><td class="perm yes">Yes</td><td class="perm no">No *</td></tr>
+                  <tr><td>Override RED Flag</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm yes">Yes</td><td class="perm yes">Yes</td><td class="perm no">No</td></tr>
+                  <tr><td>Issue Referral</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm yes">Yes</td><td class="perm yes">Yes</td><td class="perm no">No</td></tr>
+                  <tr><td>Accept Incoming Referral</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm yes">Yes</td><td class="perm no">No</td></tr>
+                  <tr><td>View Audit Log (Metadata)</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm yes">Yes</td></tr>
+                  <tr><td>Facility Configuration</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm yes">Yes</td></tr>
+                  <tr><td>Enroll Staff / Devices</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm no">No</td><td class="perm yes">Yes</td></tr>
+                </tbody>
+              </table>
+              <div class="rbac-footnote">* Supervisor sees metadata only — clinical content masked per RBAC privacy wall.</div>
+            </div>
+          </div>
+
+          <!-- Kiosk device management -->
+          <div class="kiosk-panel">
+            <div class="staff-panel-title">Kiosk &amp; Device Registry</div>
+            <div class="staff-panel-sub" style="margin-bottom:14px;">Connected intake kiosks and registered staff devices</div>
+            <div class="kiosk-list" id="kiosk-list" role="list">
+              <div class="kiosk-row" role="listitem">
+                <div class="kiosk-indicator online"></div>
+                <div class="kiosk-info">
+                  <div class="kiosk-name">Kiosk A — Station Reception</div>
+                  <div class="kiosk-meta">Samsung Tab A8 · Android 13 · Last sync: 2m ago</div>
+                </div>
+                <span class="kiosk-status online">Online</span>
+                <button class="sv-action-btn tiny" aria-label="Manage Kiosk A">Manage</button>
+              </div>
+              <div class="kiosk-row" role="listitem">
+                <div class="kiosk-indicator online"></div>
+                <div class="kiosk-info">
+                  <div class="kiosk-name">Kiosk B — Nurse Station B</div>
+                  <div class="kiosk-meta">Lenovo Tab M10 · Android 12 · Last sync: 5m ago</div>
+                </div>
+                <span class="kiosk-status online">Online</span>
+                <button class="sv-action-btn tiny" aria-label="Manage Kiosk B">Manage</button>
+              </div>
+              <div class="kiosk-row" role="listitem">
+                <div class="kiosk-indicator offline"></div>
+                <div class="kiosk-info">
+                  <div class="kiosk-name">Camp Tablet — Field Unit</div>
+                  <div class="kiosk-meta">Redmi Tab · Android 12 · Last sync: 48m ago · Offline mode</div>
+                </div>
+                <span class="kiosk-status offline">Offline</span>
+                <button class="sv-action-btn tiny" aria-label="Manage Camp Tablet">Manage</button>
+              </div>
+            </div>
+            <button class="sv-action-btn" id="enroll-device-btn" style="margin-top:12px;">+ Enroll New Device via OTP</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW 4: QUEUE MONITOR
+    ════════════════════════════════════════════════════════ -->
+    <section class="sv-view" id="view-queue" role="tabpanel" aria-labelledby="tab-queue">
+      <div class="queue-layout">
+
+        <div class="queue-monitor-header">
+          <div class="queue-monitor-title">Live Queue Monitor</div>
+          <div class="queue-filter-row">
+            <button class="qf-pill active" data-filter="all" id="qf-all">All (18)</button>
+            <button class="qf-pill critical" data-filter="red" id="qf-red">Critical — 3</button>
+            <button class="qf-pill semi" data-filter="yellow" id="qf-yellow">Semi-urgent — 7</button>
+            <button class="qf-pill routine" data-filter="green" id="qf-green">Routine — 8</button>
+          </div>
+        </div>
+
+        <div class="queue-monitor-table-wrap">
+          <table class="queue-monitor-table" role="grid" aria-label="Live patient queue">
+            <thead>
+              <tr>
+                <th scope="col">Priority</th>
+                <th scope="col">Token</th>
+                <th scope="col">Patient</th>
+                <th scope="col">Chief Complaint</th>
+                <th scope="col">Wait</th>
+                <th scope="col">Protocol Trigger</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="queue-monitor-tbody">
+              <tr class="qm-row" data-urgency="red">
+                <td><span class="urgency-dot red"></span><span class="urgency-label red">Critical</span></td>
+                <td class="qm-token">A-001</td>
+                <td class="qm-patient">Radha Kumari, 42F</td>
+                <td class="qm-complaint">Retrosternal chest pain, BP 160/100</td>
+                <td class="qm-wait">8m</td>
+                <td class="qm-rule"><span class="rule-tag">AIIMS ATP v2.4 · Rule C-4</span></td>
+                <td class="qm-actions"><button class="sv-action-btn tiny" aria-label="Assign Radha Kumari">Assign</button><button class="sv-action-btn tiny danger" aria-label="Escalate Radha Kumari">Escalate</button></td>
+              </tr>
+              <tr class="qm-row" data-urgency="red">
+                <td><span class="urgency-dot red"></span><span class="urgency-label red">Critical</span></td>
+                <td class="qm-token">A-002</td>
+                <td class="qm-patient">Suresh Babu, 68M</td>
+                <td class="qm-complaint">Breathlessness, SpO₂ 89%, COPD</td>
+                <td class="qm-wait">14m</td>
+                <td class="qm-rule"><span class="rule-tag">AIIMS ATP v2.4 · Rule R-2</span></td>
+                <td class="qm-actions"><button class="sv-action-btn tiny" aria-label="Assign Suresh Babu">Assign</button><button class="sv-action-btn tiny danger" aria-label="Escalate">Escalate</button></td>
+              </tr>
+              <tr class="qm-row" data-urgency="red">
+                <td><span class="urgency-dot red"></span><span class="urgency-label red">Critical</span></td>
+                <td class="qm-token">A-003</td>
+                <td class="qm-patient">Ananya Roy, 26F · Maternal</td>
+                <td class="qm-complaint">Severe headache, pedal oedema, 32w</td>
+                <td class="qm-wait">22m</td>
+                <td class="qm-rule"><span class="rule-tag">AIIMS ATP v2.4 · Rule M-1</span></td>
+                <td class="qm-actions"><button class="sv-action-btn tiny" aria-label="Assign Ananya Roy">Assign</button><button class="sv-action-btn tiny danger" aria-label="Escalate">Escalate</button></td>
+              </tr>
+              <tr class="qm-row" data-urgency="yellow">
+                <td><span class="urgency-dot yellow"></span><span class="urgency-label yellow">Semi-urgent</span></td>
+                <td class="qm-token">B-001</td>
+                <td class="qm-patient">Mohammed Rafiq, 28M</td>
+                <td class="qm-complaint">Fever 102°F, 3 days, endemic area</td>
+                <td class="qm-wait">31m</td>
+                <td class="qm-rule"><span class="rule-tag">AIIMS ATP v2.4 · Rule F-3</span></td>
+                <td class="qm-actions"><button class="sv-action-btn tiny" aria-label="Assign Mohammed Rafiq">Assign</button></td>
+              </tr>
+              <tr class="qm-row" data-urgency="yellow">
+                <td><span class="urgency-dot yellow"></span><span class="urgency-label yellow">Semi-urgent</span></td>
+                <td class="qm-token">B-002</td>
+                <td class="qm-patient">Lakshmi Devi, 55F</td>
+                <td class="qm-complaint">Uncontrolled DM, glucose 310 mg/dL</td>
+                <td class="qm-wait">38m</td>
+                <td class="qm-rule"><span class="rule-tag">AIIMS ATP v2.4 · Rule D-1</span></td>
+                <td class="qm-actions"><button class="sv-action-btn tiny" aria-label="Assign Lakshmi Devi">Assign</button></td>
+              </tr>
+              <tr class="qm-row" data-urgency="green">
+                <td><span class="urgency-dot green"></span><span class="urgency-label green">Routine</span></td>
+                <td class="qm-token">C-001</td>
+                <td class="qm-patient">Priya Sharma, 24F · ANC</td>
+                <td class="qm-complaint">Routine ANC visit, 28 weeks, mild headache</td>
+                <td class="qm-wait">1h 2m</td>
+                <td class="qm-rule"><span class="rule-tag">IMCI · ANC Protocol</span></td>
+                <td class="qm-actions"><button class="sv-action-btn tiny" aria-label="Assign Priya Sharma">Assign</button></td>
+              </tr>
+              <tr class="qm-row" data-urgency="green">
+                <td><span class="urgency-dot green"></span><span class="urgency-label green">Routine</span></td>
+                <td class="qm-token">C-002</td>
+                <td class="qm-patient">Arjun Nair, 65M</td>
+                <td class="qm-complaint">Chronic DM follow-up, stable</td>
+                <td class="qm-wait">1h 18m</td>
+                <td class="qm-rule"><span class="rule-tag">AIIMS ATP v2.4 · Chronic</span></td>
+                <td class="qm-actions"><button class="sv-action-btn tiny" aria-label="Assign Arjun Nair">Assign</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="queue-footer">
+          <button class="sv-load-more-btn" id="queue-load-more">Load remaining 11 patients</button>
+          <div class="queue-sort-note">Sorted by: AIIMS ATP / IMCI urgency tier → FIFO wait time → Facility bed capacity</div>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /sv-body -->
+
+</div><!-- /sv-shell -->
+
+
+<!-- ══ ENROLL STAFF MODAL ════════════════════════════════════ -->
+<div class="sv-modal-overlay" id="enroll-modal" role="dialog" aria-modal="true" aria-labelledby="enroll-modal-title" style="display:none;">
+  <div class="sv-modal">
+    <div class="sv-modal-header">
+      <div class="sv-modal-title" id="enroll-modal-title">Enroll New Staff Member</div>
+      <button class="sv-modal-close" id="enroll-modal-close" aria-label="Close modal">×</button>
+    </div>
+    <div class="sv-mform">
+      <div class="sv-mfield">
+        <label class="sv-mlabel" for="enroll-name">Full Name</label>
+        <input type="text" class="sv-input" id="enroll-name" placeholder="e.g., Dr. Aruna Patel">
+      </div>
+      <div class="sv-mrow">
+        <div class="sv-mfield">
+          <label class="sv-mlabel" for="enroll-phone">Mobile Number</label>
+          <input type="tel" class="sv-input" id="enroll-phone" placeholder="+91 98765 43210" inputmode="tel">
+        </div>
+        <div class="sv-mfield">
+          <label class="sv-mlabel" for="enroll-role">Assign Role</label>
+          <select class="sv-select" id="enroll-role">
+            <option value="">Select role…</option>
+            <option value="health_worker">Health Worker</option>
+            <option value="nurse">Nurse / ANM</option>
+            <option value="doctor">Doctor</option>
+            <option value="medical_officer">Medical Officer</option>
+            <option value="supervisor">Supervisor</option>
+          </select>
+        </div>
+      </div>
+      <div class="sv-mfield">
+        <label class="sv-mlabel" for="enroll-reg">Registration / Staff ID</label>
+        <input type="text" class="sv-input" id="enroll-reg" placeholder="e.g., UPMC-12345">
+      </div>
+      <div class="enroll-otp-section" id="enroll-otp-section" style="display:none;">
+        <div class="enroll-otp-label">OTP sent to mobile. Enter below to confirm enrollment:</div>
+        <div class="sv-mrow">
+          <input type="text" class="sv-input" id="enroll-otp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric">
+          <button class="sv-action-btn" id="resend-otp-btn">Resend OTP</button>
+        </div>
+      </div>
+    </div>
+    <div class="sv-modal-actions">
+      <button class="sv-action-btn" id="enroll-cancel-btn">Cancel</button>
+      <button class="sv-action-btn primary" id="enroll-send-otp-btn">Send OTP to Mobile</button>
+    </div>
+    <div class="enroll-confirm" id="enroll-confirm" style="display:none;">Staff member enrolled successfully. They will receive login credentials via SMS.</div>
+  </div>
+</div>
+
+
+<!-- ══ LANGUAGE MODAL ════════════════════════════════════════ -->
+<div class="sv-modal-overlay" id="sv-lang-modal" role="dialog" aria-modal="true" aria-labelledby="sv-lang-modal-title" style="display:none;">
+  <div class="sv-modal sv-modal-wide">
+    <div class="sv-modal-header">
+      <div class="sv-modal-title" id="sv-lang-modal-title">Interface Language</div>
+      <button class="sv-modal-close" id="sv-lang-modal-close" aria-label="Close">×</button>
+    </div>
+    <div class="sv-lang-grid" id="sv-lang-grid" role="list">
+      <button class="sv-lang-opt active" data-lang="en" role="listitem"><span class="sl-native">English</span><span class="sl-name">English</span></button>
+      <button class="sv-lang-opt" data-lang="hi" role="listitem"><span class="sl-native">हिन्दी</span><span class="sl-name">Hindi</span></button>
+      <button class="sv-lang-opt" data-lang="ta" role="listitem"><span class="sl-native">தமிழ்</span><span class="sl-name">Tamil</span></button>
+      <button class="sv-lang-opt" data-lang="te" role="listitem"><span class="sl-native">తెలుగు</span><span class="sl-name">Telugu</span></button>
+      <button class="sv-lang-opt" data-lang="bn" role="listitem"><span class="sl-native">বাংলা</span><span class="sl-name">Bengali</span></button>
+      <button class="sv-lang-opt" data-lang="kn" role="listitem"><span class="sl-native">ಕನ್ನಡ</span><span class="sl-name">Kannada</span></button>
+      <button class="sv-lang-opt" data-lang="ml" role="listitem"><span class="sl-native">മലയാളം</span><span class="sl-name">Malayalam</span></button>
+      <button class="sv-lang-opt" data-lang="mr" role="listitem"><span class="sl-native">मराठी</span><span class="sl-name">Marathi</span></button>
+      <button class="sv-lang-opt" data-lang="gu" role="listitem"><span class="sl-native">ગુજરાતી</span><span class="sl-name">Gujarati</span></button>
+      <button class="sv-lang-opt" data-lang="pa" role="listitem"><span class="sl-native">ਪੰਜਾਬੀ</span><span class="sl-name">Punjabi</span></button>
+      <button class="sv-lang-opt" data-lang="ur" role="listitem"><span class="sl-native">اردو</span><span class="sl-name">Urdu</span></button>
+      <button class="sv-lang-opt" data-lang="or" role="listitem"><span class="sl-native">ଓଡ଼ିଆ</span><span class="sl-name">Odia</span></button>
+    </div>
+    <div class="sv-modal-actions">
+      <button class="sv-action-btn" id="sv-lang-cancel">Cancel</button>
+      <button class="sv-action-btn primary" id="sv-lang-confirm">Apply Language</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MOBILE BOTTOM TAB NAVIGATION (Universal Centric Horizontal Slider) ══ -->
+<nav class="sv-mobile-nav jeevia-slider-nav dock-bottom" role="navigation" aria-label="Supervisor mobile navigation">
+  <div class="jeevia-slider-track">
+    <button class="jeevia-slider-item sv-slider-tab active" data-target="view-config" aria-label="Facility Setup">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </span>
+      <span>Facility Setup</span>
+    </button>
+    <button class="jeevia-slider-item sv-slider-tab" data-target="view-audit" aria-label="Audit and Logs">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </span>
+      <span>Audit &amp; Logs</span>
+    </button>
+    <button class="jeevia-slider-item sv-slider-tab" data-target="view-staff" aria-label="Staff and Kiosks">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </span>
+      <span>Staff &amp; Kiosks</span>
+    </button>
+    <button class="jeevia-slider-item sv-slider-tab" data-target="view-queue" aria-label="Queue Monitor">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </span>
+      <span>Queue Monitor</span>
+      <span class="jeevia-slider-badge">18</span>
+    </button>
+    <a href="patient-intake.html" class="jeevia-slider-item" aria-label="New Patient Intake">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </span>
+      <span>New Intake</span>
+    </a>
+    <a href="doctor-dashboard.html" class="jeevia-slider-item" aria-label="Doctor Dashboard">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </span>
+      <span>Doctor View</span>
+    </a>
+    <button class="jeevia-slider-item" id="sv-mobile-export-btn" aria-label="Export Report">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </span>
+      <span>Export</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══ TOAST CONTAINER ══════════════════════════════════════ -->
+<div class="sv-toast-container" id="sv-toast-container" aria-live="polite"></div>
+
+<script src="js/nav.js"></script>
+<script src="js/supervisor.js"></script>
+</body>
+</html>

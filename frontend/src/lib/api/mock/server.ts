@@ -1,0 +1,913 @@
+/**
+ * In-browser mock of the Jeevia API. Persists to IndexedDB so a kiosk intake shows up in the
+ * reviewer queue in another tab. Enforces the same role rules as the FastAPI backend:
+ *  - patients never receive urgency or the AI note
+ *  - facility admins (receptionist/supervisor) cannot read clinical notes
+ *  - every read of a patient record writes a VIEW audit event
+ */
+import { get, set, del } from "idb-keyval";
+import type { JeeviaApi } from "../contract";
+import { ApiError } from "../contract";
+import { getDeviceId, getTokens, setTokens } from "../tokens";
+import type {
+  AuditAction,
+  AuditEvent,
+  Consent,
+  Device,
+  Encounter,
+  Escalation,
+  Facility,
+  FileObject,
+  IntakePayload,
+  Patient,
+  Referral,
+  Reminder,
+  Role,
+  Tokens,
+  Urgency,
+  User,
+  Cohort,
+} from "@/lib/types";
+import { ADMIN_ROLES, REVIEWER_ROLES, STAFF_ROLES } from "@/lib/types";
+import { evaluate } from "./rules";
+import { buildNote, sampleReportImage, type UploadedForNote } from "./note";
+import { DEMO_OTP, SEED_COHORTS, SEED_FACILITIES, SEED_HISTORY, SEED_PATIENTS, SEED_TODAY, SEED_USERS } from "./seed";
+import { buildExport } from "@/lib/export";
+
+const DB_KEY = "jeevia.mockdb.v3";
+const ESCALATE_AFTER_MIN: Record<Urgency, number | null> = { red: 15, yellow: 60, green: null };
+const RETENTION_HOURS = { audio: 24, image: 72, report: 168 };
+
+interface StoredFile extends FileObject {
+  data_url: string | null;
+  sample_key?: string | null;
+  boxes?: [number, number, number, number][] | null;
+}
+
+interface DB {
+  facilities: Facility[];
+  users: (User & { pins?: Record<string, string> })[];
+  devices: Device[];
+  patients: Patient[];
+  encounters: Encounter[];
+  consents: Consent[];
+  escalations: Escalation[];
+  referrals: Referral[];
+  files: StoredFile[];
+  audit: AuditEvent[];
+  reminders: Reminder[];
+  cohorts: Cohort[];
+  otps: Record<string, { phone: string; code: string; exp: number }>;
+  registrations: Record<string, { phone: string; exp: number }>;
+  seq: number;
+}
+
+let db: DB | null = null;
+let loading: Promise<DB> | null = null;
+
+const uid = (p: string) => `${p}_${crypto.randomUUID().replace(/-/g, "").slice(0, 12)}`;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x));
+
+async function sha256(s: string) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function persist() {
+  if (db) await set(DB_KEY, db);
+}
+
+async function load(): Promise<DB> {
+  if (db) return db;
+  if (!loading)
+    loading = (async () => {
+      const stored = (await get(DB_KEY)) as DB | undefined;
+      db = stored ?? (await seed());
+      if (!stored) await persist();
+      return db;
+    })();
+  return loading;
+}
+
+export async function resetMockData() {
+  await del(DB_KEY);
+  db = null;
+  loading = null;
+  setTokens(null);
+}
+
+/* ── Audit (append-only, hash-chained) ─────────────────── */
+
+async function audit(
+  d: DB,
+  actor: User | null,
+  action: AuditAction,
+  resource_type: string,
+  resource_id: string | null,
+  detail: string,
+  patient_code: string | null = null,
+  ts = new Date().toISOString(),
+) {
+  const prev = d.audit[d.audit.length - 1]?.hash ?? "GENESIS";
+  const id = (d.audit[d.audit.length - 1]?.id ?? 0) + 1;
+  const body = { id, ts, actor_id: actor?.id ?? null, actor_name: actor?.name ?? "System", actor_role: actor?.role ?? "system", action, resource_type, resource_id, patient_code, detail };
+  const hash = await sha256(prev + JSON.stringify(body));
+  d.audit.push({ ...body, prev_hash: prev, hash });
+}
+
+/* ── Seeding ──────────────────────────────────────────── */
+
+async function seed(): Promise<DB> {
+  const d: DB = {
+    facilities: clone(SEED_FACILITIES),
+    users: clone(SEED_USERS),
+    devices: [
+      { id: "dev_kiosk_manikpur_1", label: "OPD entrance tablet", facility_id: "fac_phc_manikpur", bound_by: "Meera Nair", bound_at: new Date(Date.now() - 20 * 86400000).toISOString(), last_seen_at: new Date().toISOString(), revoked: false },
+    ],
+    patients: clone(SEED_PATIENTS),
+    encounters: [],
+    consents: [],
+    escalations: [],
+    referrals: [],
+    files: [],
+    audit: [],
+    reminders: [],
+    cohorts: clone(SEED_COHORTS),
+    otps: {},
+    registrations: {},
+    seq: 20,
+  };
+  const system = null;
+  await audit(d, system, "CONFIG", "system", null, "Demo database seeded with synthetic data", null, new Date(Date.now() - 86400000).toISOString());
+
+  const all = [...SEED_HISTORY, ...SEED_TODAY];
+  for (const s of all) {
+    const patient = d.patients.find((p) => p.id === s.patient_id)!;
+    const created = new Date(Date.now() - s.minutes_ago * 60000).toISOString();
+    const file_ids: string[] = [];
+    for (const key of s.sample_reports ?? []) {
+      const img = sampleReportImage(key, patient.name);
+      const f: StoredFile = {
+        id: uid("file"),
+        filename: `${key}_report_${patient.code}.svg`,
+        content_type: "image/svg+xml",
+        size: img.dataUrl.length,
+        kind: "report",
+        encounter_id: null,
+        uploaded_at: created,
+        expires_at: new Date(Date.parse(created) + RETENTION_HOURS.report * 3600000).toISOString(),
+        purged_at: null,
+        data_url: img.dataUrl,
+        sample_key: key,
+        boxes: img.boxes,
+      };
+      d.files.push(f);
+      file_ids.push(f.id);
+    }
+    let consentId: string | null = null;
+    const consent: Consent = {
+      id: uid("con"),
+      patient_id: patient.id,
+      mode: s.proxy ? "proxy" : "self",
+      proxy_name: s.proxy?.name ?? null,
+      proxy_relation: s.proxy?.relation ?? null,
+      privacy_context: "private",
+      language: s.language,
+      scopes: ["triage", "share_with_treating_team"],
+      captured_by: "Sunita Yadav (ANM)",
+      captured_at: created,
+    };
+    d.consents.push(consent);
+    consentId = consent.id;
+    const payload: IntakePayload = {
+      patient_id: patient.id,
+      facility_id: s.facility_id ?? "fac_phc_manikpur",
+      category: s.category,
+      language: s.language,
+      chief_complaint: s.chief_complaint,
+      symptoms: s.symptoms,
+      selected_symptoms: s.selected_symptoms,
+      duration: s.duration,
+      severity: s.severity,
+      answers: s.answers,
+      file_ids,
+      vitals: s.vitals,
+      maternal: s.maternal ?? null,
+      chronic: s.chronic ?? null,
+      consent_id: consentId,
+      client_ref: uid("ref"),
+    };
+    const enc = buildEncounter(d, payload, patient, created);
+    if (s.status === "closed") {
+      enc.status = "closed";
+      enc.reviewed_by = "Dr. Deepa Sharma";
+      enc.reviewed_at = created;
+    }
+    d.encounters.push(enc);
+    for (const id of file_ids) d.files.find((f) => f.id === id)!.encounter_id = enc.id;
+    await audit(d, null, "CREATE", "encounter", enc.id, `Intake captured (${s.category}); rules engine: ${enc.urgency}`, patient.code, created);
+    if (enc.note?.disagreements.length)
+      await audit(d, null, "DISAGREEMENT", "encounter", enc.id, enc.note.disagreements.map((x) => `${x.field}: ${x.values.map((v) => v.value).join(" vs ")}`).join("; "), patient.code, created);
+  }
+
+  // Maternal and chronic reminders (auto-fired via SMS / voice agent by the backend scheduler)
+  const inDays = (n: number) => new Date(Date.now() + n * 86400000).toISOString();
+  d.reminders.push(
+    { id: uid("rem"), patient_id: "pat_008", kind: "anc_checkup", due_at: inDays(14), channel: "sms", status: "scheduled", message: "ANC check-up at PHC Manikpur (30 weeks). Bring your MCP card." },
+    { id: uid("rem"), patient_id: "pat_008", kind: "anc_checkup", due_at: inDays(-14), channel: "voice", status: "done", message: "ANC check-up (26 weeks) — completed." },
+    { id: uid("rem"), patient_id: "pat_003", kind: "anc_checkup", due_at: inDays(7), channel: "voice", status: "scheduled", message: "ANC check-up (33 weeks) — voice call in Bengali." },
+    { id: uid("rem"), patient_id: "pat_005", kind: "chronic_checkin", due_at: inDays(30), channel: "sms", status: "scheduled", message: "Monthly sugar check-in. Bring your glucometer diary." },
+  );
+
+  // A couple of expired raw uploads for the retention view
+  const old = new Date(Date.now() - 4 * 86400000).toISOString();
+  d.files.push(
+    { id: uid("file"), filename: "voice_intake_JVA-P002.webm", content_type: "audio/webm", size: 182_000, kind: "audio", encounter_id: null, uploaded_at: old, expires_at: new Date(Date.parse(old) + RETENTION_HOURS.audio * 3600000).toISOString(), purged_at: new Date(Date.parse(old) + 25 * 3600000).toISOString(), data_url: null },
+    { id: uid("file"), filename: "rash_photo_JVA-P012.jpg", content_type: "image/jpeg", size: 412_000, kind: "image", encounter_id: null, uploaded_at: old, expires_at: new Date(Date.parse(old) + RETENTION_HOURS.image * 3600000).toISOString(), purged_at: null, data_url: null },
+  );
+  await audit(d, null, "PURGE", "file", null, "Raw audio voice_intake_JVA-P002.webm deleted after transcript confirmation (24h policy)", "JVA-P002", new Date(Date.parse(old) + 25 * 3600000).toISOString());
+  await audit(d, null, "DEVICE", "device", "dev_kiosk_manikpur_1", "Kiosk device 'OPD entrance tablet' bound by Meera Nair", null, new Date(Date.now() - 20 * 86400000).toISOString());
+  // Keep audit strictly chronological for the chain display
+  return d;
+}
+
+function buildEncounter(d: DB, payload: IntakePayload, patient: Patient, created = new Date().toISOString()): Encounter {
+  const history = d.encounters
+    .filter((e) => e.patient.id === patient.id)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const files: UploadedForNote[] = payload.file_ids
+    .map((id) => d.files.find((f) => f.id === id))
+    .filter((f): f is StoredFile => !!f)
+    .map((f) => ({ id: f.id, kind: f.kind, filename: f.filename, sample_key: f.sample_key, boxes: f.boxes }));
+  const { urgency, hits } = evaluate(payload, patient.age);
+  const consent = d.consents.find((c) => c.id === payload.consent_id) ?? null;
+  const note = buildNote({ intake: payload, patient, hits, files, history, proxy: consent?.mode === "proxy" });
+  const specialist = inferSpecialist(payload, patient);
+  const facility = d.facilities.find((f) => f.id === payload.facility_id);
+  const onSite = facility?.specialists.find((s) => s.key === specialist)?.available ?? false;
+  const esc = ESCALATE_AFTER_MIN[urgency];
+  return {
+    id: uid("enc"),
+    patient: clone(patient),
+    facility_id: payload.facility_id,
+    category: payload.category,
+    status: "queued",
+    chief_complaint: payload.chief_complaint,
+    created_at: created,
+    urgency,
+    urgency_source: "rules",
+    note,
+    intake: payload,
+    override: null,
+    reviewed_by: null,
+    reviewed_at: null,
+    referral_needed: urgency === "red" && !onSite ? true : null,
+    specialist_required: specialist,
+    escalation_due_at: esc ? new Date(Date.parse(created) + esc * 60000).toISOString() : null,
+    consent,
+  };
+}
+
+function inferSpecialist(p: IntakePayload, patient: Patient): string {
+  const t = [p.chief_complaint, ...p.symptoms.map((s) => s.text)].join(" ").toLowerCase();
+  if (patient.age < 12) return "paeds";
+  if (p.category === "maternal") return "obgyn";
+  if (/chest/.test(t)) return "cardio";
+  if (/breath|copd|asthma/.test(t)) return "pulmo";
+  if (/diabet|sugar|thirst/.test(t)) return "endo";
+  if (/burn/.test(t)) return "burns";
+  if (/fracture|fall/.test(t)) return "ortho";
+  return "genmed";
+}
+
+/* ── Session helpers ──────────────────────────────────── */
+
+function issueTokens(user: User): Tokens {
+  const exp = Date.now() + 8 * 3600000;
+  const tok = `mock.${btoa(JSON.stringify({ sub: user.id, role: user.role, exp }))}`;
+  return { access_token: tok, refresh_token: tok + ".r", token_type: "bearer", expires_in: 8 * 3600 };
+}
+
+function publicUser(u: DB["users"][number]): User {
+  const { pins, ...rest } = u;
+  return { ...rest, has_pin: !!pins && Object.keys(pins).length > 0 };
+}
+
+async function current(d: DB): Promise<User> {
+  const t = getTokens();
+  if (!t) throw new ApiError(401, "Not signed in");
+  try {
+    const payload = JSON.parse(atob(t.access_token.split(".")[1])) as { sub: string; exp: number };
+    if (payload.exp < Date.now()) throw new Error("expired");
+    const u = d.users.find((x) => x.id === payload.sub);
+    if (!u) throw new Error("gone");
+    return publicUser(u);
+  } catch {
+    setTokens(null);
+    throw new ApiError(401, "Session expired — please sign in again");
+  }
+}
+
+/** A patient account is linked to exactly one patient record (phone + name), even on a shared household phone. */
+function ownPatient(d: DB, me: User): Patient | undefined {
+  return d.patients.find((p) => p.phone === me.phone && p.name === me.name);
+}
+
+function requireRole(u: User, roles: Role[]) {
+  if (!roles.includes(u.role)) throw new ApiError(403, `This action is not available to the ${u.role} role`);
+}
+
+function forRole(e: Encounter, u: User): Encounter {
+  if (u.role === "patient") {
+    // Health outputs stay reviewer-facing: strip urgency, note and override.
+    return { ...clone(e), urgency: null, note: null, override: null, escalation_due_at: null, specialist_required: null, referral_needed: null };
+  }
+  return clone(e);
+}
+
+async function autoEscalate(d: DB) {
+  const now = Date.now();
+  let changed = false;
+  for (const e of d.encounters) {
+    if (e.status !== "queued" || !e.escalation_due_at || !e.urgency) continue;
+    if (Date.parse(e.escalation_due_at) > now) continue;
+    if (d.escalations.some((x) => x.encounter_id === e.id)) continue;
+    const esc: Escalation = {
+      id: uid("esc"),
+      encounter_id: e.id,
+      patient_name: e.patient.name,
+      urgency: e.urgency,
+      raised_by: "Escalation timer",
+      raised_at: e.escalation_due_at,
+      to_role: "senior_mo",
+      reason: `Unreviewed ${e.urgency === "red" ? "critical" : "semi-urgent"} case past ${ESCALATE_AFTER_MIN[e.urgency]} min`,
+      auto: true,
+      status: "open",
+    };
+    d.escalations.push(esc);
+    e.status = "escalated";
+    await audit(d, null, "ESCALATE", "encounter", e.id, esc.reason, e.patient.code);
+    changed = true;
+  }
+  if (changed) await persist();
+}
+
+function sanitizeFile(f: StoredFile): FileObject {
+  const { data_url, ...rest } = f;
+  delete (rest as Partial<StoredFile>).sample_key;
+  delete (rest as Partial<StoredFile>).boxes;
+  return { ...rest, url: f.purged_at ? null : data_url };
+}
+
+const LAT = 180;
+
+async function withDb<T>(fn: (d: DB) => Promise<T>): Promise<T> {
+  const d = await load();
+  await sleep(LAT);
+  const out = await fn(d);
+  await persist();
+  return out;
+}
+
+/* ── API implementation ──────────────────────────────── */
+
+export const mockApi: JeeviaApi = {
+  mode: "mock",
+
+  requestOtp: (phone) =>
+    withDb(async (d) => {
+      if (!/^\d{10}$/.test(phone)) throw new ApiError(422, "Enter a valid 10-digit mobile number");
+      const id = uid("otp");
+      d.otps[id] = { phone, code: DEMO_OTP, exp: Date.now() + 5 * 60000 };
+      return { challenge_id: id, expires_in: 300, dev_code: DEMO_OTP };
+    }),
+
+  verifyOtp: (challengeId, code) =>
+    withDb(async (d) => {
+      const c = d.otps[challengeId];
+      if (!c || c.exp < Date.now()) throw new ApiError(400, "OTP expired — request a new one");
+      if (c.code !== code) throw new ApiError(400, "Incorrect OTP");
+      delete d.otps[challengeId];
+      const u = d.users.find((x) => x.phone === c.phone);
+      if (!u) {
+        const token = uid("reg");
+        d.registrations[token] = { phone: c.phone, exp: Date.now() + 15 * 60000 };
+        return { status: "new_user" as const, registration_token: token };
+      }
+      const tokens = issueTokens(publicUser(u));
+      setTokens(tokens);
+      await audit(d, publicUser(u), "LOGIN", "user", u.id, "Signed in with phone + OTP");
+      return { status: "authenticated" as const, tokens, user: publicUser(u) };
+    }),
+
+  register: (input) =>
+    withDb(async (d) => {
+      const r = d.registrations[input.registration_token];
+      if (!r || r.exp < Date.now()) throw new ApiError(400, "Registration session expired — verify your phone again");
+      if (!input.accepted_terms) throw new ApiError(422, "Terms must be accepted");
+      const user: User = {
+        id: uid("usr"),
+        phone: r.phone,
+        name: input.name,
+        role: input.role,
+        facility_id: input.facility_id,
+        registration_no: input.registration_no ?? null,
+        language: input.language,
+        has_pin: false,
+        created_at: new Date().toISOString(),
+      };
+      d.users.push(user);
+      delete d.registrations[input.registration_token];
+      if (input.role === "patient" && !d.patients.some((p) => p.phone === r.phone && p.name === input.name)) {
+        d.patients.push({ id: uid("pat"), code: `JVA-P${String(++d.seq).padStart(3, "0")}`, name: input.name, age: 30, sex: "O", phone: r.phone, language: input.language, category: "normal", created_at: user.created_at });
+      }
+      await audit(d, user, "CREATE", "user", user.id, `Registered as ${input.role}; terms accepted`);
+      const tokens = issueTokens(user);
+      setTokens(tokens);
+      return { tokens, user };
+    }),
+
+  loginWithPin: (phone, pin, deviceId) =>
+    withDb(async (d) => {
+      const u = d.users.find((x) => x.phone === phone);
+      const stored = u?.pins?.[deviceId];
+      if (!u || !stored) throw new ApiError(400, "PIN login is not set up on this device — use OTP");
+      if (stored !== (await sha256(pin + deviceId))) throw new ApiError(400, "Incorrect PIN");
+      const user = publicUser(u);
+      const tokens = issueTokens(user);
+      setTokens(tokens);
+      await audit(d, user, "LOGIN", "user", u.id, "Signed in with device-bound PIN");
+      return { tokens, user };
+    }),
+
+  setPin: (pin, deviceId) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (!/^\d{4,6}$/.test(pin)) throw new ApiError(422, "PIN must be 4–6 digits");
+      const u = d.users.find((x) => x.id === me.id)!;
+      u.pins = { ...(u.pins ?? {}), [deviceId]: await sha256(pin + deviceId) };
+      await audit(d, me, "DEVICE", "user", me.id, "PIN set and bound to this device");
+    }),
+
+  me: () => withDb(async (d) => current(d)),
+
+  logout: async () => {
+    setTokens(null);
+  },
+
+  listDevices: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, STAFF_ROLES);
+      return d.devices.filter((x) => x.facility_id === me.facility_id);
+    }),
+
+  bindDevice: (label, deviceId) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, STAFF_ROLES);
+      const existing = d.devices.find((x) => x.id === deviceId);
+      if (existing) {
+        existing.revoked = false;
+        existing.label = label;
+        existing.last_seen_at = new Date().toISOString();
+        await audit(d, me, "DEVICE", "device", deviceId, `Kiosk device '${label}' re-bound`);
+        return existing;
+      }
+      const dev: Device = { id: deviceId, label, facility_id: me.facility_id!, bound_by: me.name, bound_at: new Date().toISOString(), last_seen_at: new Date().toISOString(), revoked: false };
+      d.devices.push(dev);
+      await audit(d, me, "DEVICE", "device", deviceId, `Kiosk device '${label}' bound to facility`);
+      return dev;
+    }),
+
+  revokeDevice: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      const dev = d.devices.find((x) => x.id === id);
+      if (!dev) throw new ApiError(404, "Device not found");
+      dev.revoked = true;
+      await audit(d, me, "DEVICE", "device", id, `Kiosk device '${dev.label}' revoked`);
+    }),
+
+  listFacilities: () => withDb(async (d) => clone(d.facilities)),
+
+  getFacility: (id) =>
+    withDb(async (d) => {
+      const f = d.facilities.find((x) => x.id === id);
+      if (!f) throw new ApiError(404, "Facility not found");
+      return clone(f);
+    }),
+
+  updateFacility: (id, patch) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      const f = d.facilities.find((x) => x.id === id);
+      if (!f) throw new ApiError(404, "Facility not found");
+      const changed = Object.keys(patch).filter((k) => JSON.stringify((f as never)[k]) !== JSON.stringify((patch as never)[k]));
+      Object.assign(f, patch, { id });
+      await audit(d, me, "CONFIG", "facility", id, `Facility configuration updated: ${changed.join(", ") || "no changes"}`);
+      return clone(f);
+    }),
+
+  facilityStats: (id) =>
+    withDb(async (d) => {
+      await current(d);
+      await autoEscalate(d);
+      const today = new Date().toDateString();
+      const list = d.encounters.filter((e) => e.facility_id === id && new Date(e.created_at).toDateString() === today);
+      const waiting = list.filter((e) => ["queued", "escalated"].includes(e.status));
+      return {
+        facility_id: id,
+        today_total: list.length,
+        by_urgency: {
+          red: list.filter((e) => e.urgency === "red").length,
+          yellow: list.filter((e) => e.urgency === "yellow").length,
+          green: list.filter((e) => e.urgency === "green").length,
+        },
+        avg_wait_minutes: waiting.length ? Math.round(waiting.reduce((s, e) => s + (Date.now() - Date.parse(e.created_at)) / 60000, 0) / waiting.length) : 0,
+        open_escalations: d.escalations.filter((x) => x.status === "open" && list.some((e) => e.id === x.encounter_id)).length,
+        referrals_today: d.referrals.filter((r) => list.some((e) => e.id === r.encounter_id)).length,
+        offline_synced_today: list.filter((e) => e.intake?.captured_offline).length,
+      };
+    }),
+
+  listUsers: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      return d.users.filter((u) => u.facility_id === me.facility_id).map(publicUser);
+    }),
+
+  searchPatients: (q) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, STAFF_ROLES);
+      const s = q.trim().toLowerCase().replace(/\s|\+91/g, "");
+      if (!s) return [];
+      const hits = d.patients.filter((p) => p.code.toLowerCase() === s || p.code.toLowerCase().includes(s) || (p.phone ?? "").includes(s) || p.name.toLowerCase().includes(s));
+      await audit(d, me, "VIEW", "patient_search", null, `Searched patients: "${q}" (${hits.length} candidates)`);
+      return hits.map((p) => {
+        const last = d.encounters.filter((e) => e.patient.id === p.id).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+        const reason = p.code.toLowerCase() === s ? "Exact patient ID" : (p.phone ?? "").includes(s) ? "Shared household phone" : "Name match";
+        return { patient: clone(p), last_visit_at: last?.created_at ?? null, match_reason: reason };
+      });
+    }),
+
+  getPatient: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      const p = d.patients.find((x) => x.id === id);
+      if (!p) throw new ApiError(404, "Patient not found");
+      if (me.role === "patient" && ownPatient(d, me)?.id !== p.id) throw new ApiError(403, "Not your record");
+      await audit(d, me, "VIEW", "patient", id, "Patient identity viewed", p.code);
+      return clone(p);
+    }),
+
+  getPatientByCode: (code) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, STAFF_ROLES);
+      const p = d.patients.find((x) => x.code.toLowerCase() === code.trim().toLowerCase());
+      if (!p) throw new ApiError(404, `No patient with ID ${code}`);
+      await audit(d, me, "VIEW", "patient", p.id, "Patient opened by ID / QR scan", p.code);
+      return clone(p);
+    }),
+
+  createPatient: (input) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, STAFF_ROLES);
+      const p: Patient = { ...input, id: uid("pat"), code: `JVA-P${String(++d.seq).padStart(3, "0")}`, created_at: new Date().toISOString() };
+      d.patients.push(p);
+      await audit(d, me, "CREATE", "patient", p.id, "Patient registered at intake", p.code);
+      return clone(p);
+    }),
+
+  patientEncounters: (patientId) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (ADMIN_ROLES.includes(me.role)) throw new ApiError(403, "Facility admins cannot read clinical records");
+      const p = d.patients.find((x) => x.id === patientId);
+      if (me.role === "patient" && ownPatient(d, me)?.id !== patientId) throw new ApiError(403, "Not your record");
+      const list = d.encounters.filter((e) => e.patient.id === patientId).sort((a, b) => b.created_at.localeCompare(a.created_at));
+      await audit(d, me, "VIEW", "patient", patientId, `Encounter history viewed (${list.length})`, p?.code ?? null);
+      return list.map((e) => forRole(e, me));
+    }),
+
+  captureConsent: (input) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (input.mode === "proxy" && (!input.proxy_name || !input.proxy_relation)) throw new ApiError(422, "Proxy name and relationship are required");
+      const c: Consent = { ...input, id: uid("con"), captured_by: me.name, captured_at: new Date().toISOString() };
+      d.consents.push(c);
+      const p = d.patients.find((x) => x.id === input.patient_id);
+      await audit(d, me, "CONSENT", "consent", c.id, `${input.mode === "proxy" ? `Proxy consent by ${input.proxy_name} (${input.proxy_relation})` : "Self consent"}; privacy: ${input.privacy_context}; scopes: ${input.scopes.join(", ")}`, p?.code ?? null);
+      return c;
+    }),
+
+  submitIntake: (payload) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (!["nurse", "doctor", "receptionist", "supervisor", "patient", "kiosk"].includes(me.role)) throw new ApiError(403, "Not allowed");
+      const dup = d.encounters.find((e) => e.intake?.client_ref === payload.client_ref);
+      if (dup) return forRole(dup, me); // idempotent offline replay
+      const p = d.patients.find((x) => x.id === payload.patient_id);
+      if (!p) throw new ApiError(404, "Patient not found");
+      if (me.role === "patient" && ownPatient(d, me)?.id !== p.id) throw new ApiError(403, "Patients can only submit their own intake");
+      if (me.role !== "patient") {
+        if (payload.facility_id !== me.facility_id) throw new ApiError(403, "Staff can only submit intakes for their own facility");
+        const dev = d.devices.find((x) => x.id === getDeviceId());
+        if (!dev || dev.revoked || dev.facility_id !== me.facility_id) throw new ApiError(403, "This device is not bound to your facility — bind it from the kiosk screen");
+        dev.last_seen_at = new Date().toISOString();
+      }
+      if (!payload.consent_id) throw new ApiError(422, "Consent must be captured before intake");
+      const captured = payload.captured_at && Date.parse(payload.captured_at) < Date.now() ? payload.captured_at : undefined;
+      const enc = buildEncounter(d, payload, p, captured);
+      d.encounters.push(enc);
+      for (const id of payload.file_ids) {
+        const f = d.files.find((x) => x.id === id);
+        if (f) f.encounter_id = enc.id;
+      }
+      if (payload.maternal?.next_checkup && payload.maternal.reminder_channel !== "none")
+        d.reminders.push({ id: uid("rem"), patient_id: p.id, kind: "anc_checkup", due_at: new Date(payload.maternal.next_checkup).toISOString(), channel: payload.maternal.reminder_channel ?? "sms", status: "scheduled", message: `ANC check-up reminder for ${p.name}` });
+      await audit(d, me, "CREATE", "encounter", enc.id, `Intake submitted${payload.captured_offline ? " (offline, synced)" : ""}; rules engine: ${enc.urgency}`, p.code);
+      if (enc.note?.disagreements.length)
+        await audit(d, null, "DISAGREEMENT", "encounter", enc.id, enc.note.disagreements.map((x) => `${x.field}: ${x.values.map((v) => v.value).join(" vs ")}`).join("; "), p.code);
+      return forRole(enc, me);
+    }),
+
+  queue: (facilityId) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      await autoEscalate(d);
+      const rank: Record<Urgency, number> = { red: 0, yellow: 1, green: 2 };
+      return d.encounters
+        .filter((e) => e.facility_id === facilityId && ["queued", "in_review", "escalated"].includes(e.status))
+        .map((e) => ({
+          encounter_id: e.id,
+          patient_code: e.patient.code,
+          patient_name: e.patient.name,
+          age: e.patient.age,
+          sex: e.patient.sex,
+          category: e.category,
+          chief_complaint: e.chief_complaint,
+          urgency: e.urgency!,
+          status: e.status,
+          created_at: e.created_at,
+          wait_minutes: Math.max(0, Math.round((Date.now() - Date.parse(e.created_at)) / 60000)),
+          flag_count: e.note?.flags.filter((f) => f.severity !== "info").length ?? 0,
+          needs_check_count: [...(e.note?.vitals ?? []), ...(e.note?.labs ?? [])].filter((v) => v.needs_check).length,
+          language: e.patient.language,
+          escalation_due_at: e.escalation_due_at ?? null,
+        }))
+        .sort((a, b) => rank[a.urgency] - rank[b.urgency] || b.wait_minutes - a.wait_minutes);
+    }),
+
+  getEncounter: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (ADMIN_ROLES.includes(me.role) || me.role === "employer") throw new ApiError(403, "This role cannot read clinical notes");
+      const e = d.encounters.find((x) => x.id === id);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      if (me.role === "patient" && ownPatient(d, me)?.id !== e.patient.id) throw new ApiError(403, "Not your record");
+      if (e.status === "queued" && REVIEWER_ROLES.includes(me.role)) e.status = "in_review";
+      await audit(d, me, "VIEW", "encounter", id, "Triage note viewed", e.patient.code);
+      return forRole(e, me);
+    }),
+
+  confirmEncounter: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor"]);
+      const e = d.encounters.find((x) => x.id === id);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      e.status = "confirmed";
+      e.reviewed_by = me.name;
+      e.reviewed_at = new Date().toISOString();
+      await audit(d, me, "CONFIRM", "encounter", id, "Triage note reviewed and confirmed", e.patient.code);
+      return clone(e);
+    }),
+
+  editNote: (id, patch) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      const e = d.encounters.find((x) => x.id === id);
+      if (!e?.note) throw new ApiError(404, "Encounter not found");
+      Object.assign(e.note, patch, { edited_by: me.name, edited_at: new Date().toISOString() });
+      await audit(d, me, "UPDATE", "encounter", id, `Note edited: ${Object.keys(patch).join(", ")}`, e.patient.code);
+      return clone(e);
+    }),
+
+  overrideUrgency: (id, to, category, reason) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor"]);
+      if (reason.trim().length < 15) throw new ApiError(422, "A written reason of at least 15 characters is required");
+      const e = d.encounters.find((x) => x.id === id);
+      if (!e || !e.urgency) throw new ApiError(404, "Encounter not found");
+      e.override = { from_urgency: e.urgency, to_urgency: to, category, reason: reason.trim(), by: me.name, at: new Date().toISOString() };
+      e.urgency = to;
+      e.urgency_source = "override";
+      const esc = ESCALATE_AFTER_MIN[to];
+      e.escalation_due_at = esc ? new Date(Date.parse(e.created_at) + esc * 60000).toISOString() : null;
+      await audit(d, me, "OVERRIDE", "encounter", id, `Urgency ${e.override.from_urgency} → ${to} (${category}). Reason: "${reason.trim()}". Rules-engine output retained for audit.`, e.patient.code);
+      return clone(e);
+    }),
+
+  setReferralNeeded: (id, needed) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      const e = d.encounters.find((x) => x.id === id);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      e.referral_needed = needed;
+      await audit(d, me, "UPDATE", "encounter", id, `Referral needed: ${needed ? "yes" : "no"}`, e.patient.code);
+      return clone(e);
+    }),
+
+  exportEncounter: (id, format) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      const e = d.encounters.find((x) => x.id === id);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      await audit(d, me, "EXPORT", "encounter", id, `Triage note exported as ${format.toUpperCase()}`, e.patient.code);
+      return buildExport(e, format, d.facilities.find((f) => f.id === e.facility_id));
+    }),
+
+  escalate: (encounterId, toRole, reason) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      const e = d.encounters.find((x) => x.id === encounterId);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      if (reason.trim().length < 5) throw new ApiError(422, "Give a short reason for escalation");
+      const esc: Escalation = { id: uid("esc"), encounter_id: e.id, patient_name: e.patient.name, urgency: e.urgency!, raised_by: me.name, raised_at: new Date().toISOString(), to_role: toRole, reason: reason.trim(), auto: false, status: "open" };
+      d.escalations.push(esc);
+      e.status = "escalated";
+      await audit(d, me, "ESCALATE", "encounter", e.id, `Escalated to ${toRole}: ${reason.trim()}`, e.patient.code);
+      return esc;
+    }),
+
+  listEscalations: (status) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      await autoEscalate(d);
+      const facilityEnc = new Set(d.encounters.filter((e) => e.facility_id === me.facility_id).map((e) => e.id));
+      return clone(d.escalations.filter((x) => facilityEnc.has(x.encounter_id) && (!status || x.status === status)).sort((a, b) => b.raised_at.localeCompare(a.raised_at)));
+    }),
+
+  acknowledgeEscalation: (id, note) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor"]);
+      const esc = d.escalations.find((x) => x.id === id);
+      if (!esc) throw new ApiError(404, "Escalation not found");
+      esc.status = "acknowledged";
+      esc.acknowledged_by = me.name;
+      esc.acknowledged_at = new Date().toISOString();
+      esc.ack_note = note;
+      const e = d.encounters.find((x) => x.id === esc.encounter_id);
+      if (e && e.status === "escalated") e.status = "in_review";
+      await audit(d, me, "ACKNOWLEDGE", "escalation", id, `Escalation acknowledged${note ? `: ${note}` : ""}`, e?.patient.code ?? null);
+      return clone(esc);
+    }),
+
+  createReferral: (encounterId, input) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor"]);
+      const e = d.encounters.find((x) => x.id === encounterId);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      const r: Referral = { ...input, id: uid("ref"), encounter_id: e.id, patient_name: e.patient.name, created_by: me.name, created_at: new Date().toISOString(), status: "sent" };
+      d.referrals.push(r);
+      e.status = "referred";
+      e.referral_needed = true;
+      e.reviewed_by ??= me.name;
+      e.reviewed_at ??= r.created_at;
+      await audit(d, me, "REFERRAL", "encounter", e.id, `Referral to ${input.destination} (${input.specialty}); transport: ${input.transport}`, e.patient.code);
+      return r;
+    }),
+
+  listReferrals: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      return clone(d.referrals).sort((a, b) => b.created_at.localeCompare(a.created_at));
+    }),
+
+  uploadFile: (file, kind, encounterId, sampleKey) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (file.size > 8 * 1024 * 1024) throw new ApiError(413, "File too large (max 8 MB)");
+      const sample = sampleKey ?? null;
+      const boxes = sample ? sampleReportImage(sample, "").boxes : null;
+      const dataUrl: string = await new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => res(fr.result as string);
+        fr.onerror = () => rej(fr.error);
+        fr.readAsDataURL(file);
+      });
+      const now = new Date();
+      const f: StoredFile = {
+        id: uid("file"),
+        filename: file.name,
+        content_type: file.type || "application/octet-stream",
+        size: file.size,
+        kind,
+        encounter_id: encounterId ?? null,
+        uploaded_at: now.toISOString(),
+        expires_at: new Date(now.getTime() + RETENTION_HOURS[kind] * 3600000).toISOString(),
+        purged_at: null,
+        data_url: dataUrl,
+        sample_key: sample,
+        boxes,
+      };
+      d.files.push(f);
+      await audit(d, me, "UPLOAD", "file", f.id, `${kind} uploaded (${file.name}, ${Math.round(file.size / 1024)} KB); expires ${f.expires_at.slice(0, 16).replace("T", " ")}`);
+      return sanitizeFile(f);
+    }),
+
+  getFile: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (ADMIN_ROLES.includes(me.role) || me.role === "employer") throw new ApiError(403, "This role cannot open clinical files");
+      const f = d.files.find((x) => x.id === id);
+      if (!f) throw new ApiError(404, "File not found");
+      return sanitizeFile(f);
+    }),
+
+  listAudit: (filter) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, [...ADMIN_ROLES, "doctor"]);
+      const q = filter?.q?.toLowerCase() ?? "";
+      return clone(d.audit)
+        .filter((a) => (!filter?.action || a.action === filter.action) && (!q || `${a.actor_name} ${a.detail} ${a.patient_code ?? ""}`.toLowerCase().includes(q)))
+        .reverse();
+    }),
+
+  verifyAudit: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, [...ADMIN_ROLES, "doctor"]);
+      let prev = "GENESIS";
+      for (const a of d.audit) {
+        const { prev_hash, hash, ...body } = a;
+        if (prev_hash !== prev || hash !== (await sha256(prev + JSON.stringify(body)))) return { ok: false, checked: a.id, broken_at: a.id };
+        prev = hash;
+      }
+      return { ok: true, checked: d.audit.length, broken_at: null };
+    }),
+
+  exportAuditCsv: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, [...ADMIN_ROLES, "doctor"]);
+      await audit(d, me, "EXPORT", "audit", null, "Audit log exported as CSV");
+      const rows = [["id", "ts", "actor", "role", "action", "resource", "patient", "detail", "hash"], ...d.audit.map((a) => [a.id, a.ts, a.actor_name, a.actor_role, a.action, `${a.resource_type}:${a.resource_id ?? ""}`, a.patient_code ?? "", a.detail, a.hash].map(String))];
+      const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+      return { filename: "jeevia-audit-log.csv", mime: "text/csv", blob: new Blob([csv], { type: "text/csv" }) };
+    }),
+
+  retentionStatus: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      const now = Date.now();
+      return {
+        policy_hours: RETENTION_HOURS,
+        active: d.files.filter((f) => !f.purged_at && Date.parse(f.expires_at) > now).length,
+        pending_purge: d.files.filter((f) => !f.purged_at && Date.parse(f.expires_at) <= now).length,
+        purged_last_7d: d.files.filter((f) => f.purged_at && now - Date.parse(f.purged_at) < 7 * 86400000).length,
+        files: d.files.map(sanitizeFile).map((f) => ({ ...f, url: null })).sort((a, b) => a.expires_at.localeCompare(b.expires_at)),
+      };
+    }),
+
+  myRecord: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["patient"]);
+      const patient = ownPatient(d, me);
+      if (!patient) throw new ApiError(404, "No patient record linked to this phone yet");
+      const encounters = d.encounters.filter((e) => e.patient.id === patient.id).sort((a, b) => b.created_at.localeCompare(a.created_at)).map((e) => forRole(e, me));
+      await audit(d, me, "VIEW", "patient", patient.id, "Patient viewed own record", patient.code);
+      return { patient: clone(patient), encounters, reminders: clone(d.reminders.filter((r) => r.patient_id === patient.id)) };
+    }),
+
+  listCohorts: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["employer"]);
+      await audit(d, me, "VIEW", "cohort", null, "Employer viewed fitness cohorts (no clinical records)");
+      return clone(d.cohorts);
+    }),
+};

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Intake — Jeevia Healthcare Triage</title>
+  <meta name="description" content="Jeevia multimodal patient intake — speak, upload, or type your symptoms. Kiosk-optimised for India's primary health centres, camps, and hospitals.">
+  <meta name="theme-color" content="#F29191">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/patient.css">
+  <link rel="stylesheet" href="styles/nav.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CONSENT + IDENTITY MODAL (appears before kiosk)
+════════════════════════════════════════════════════════════════════ -->
+<div class="pi-modal-overlay active" id="consent-modal" role="dialog" aria-modal="true" aria-labelledby="consent-modal-title">
+  <div class="pi-modal" id="consent-modal-inner">
+
+    <!-- Step indicator inside modal -->
+    <div class="pi-modal-steps">
+      <div class="pi-mstep active" id="ms-1" aria-label="Step 1: Consent">1</div>
+      <div class="pi-mstep-line"></div>
+      <div class="pi-mstep" id="ms-2" aria-label="Step 2: Identity">2</div>
+      <div class="pi-mstep-line"></div>
+      <div class="pi-mstep" id="ms-3" aria-label="Step 3: Visit type">3</div>
+    </div>
+
+    <!-- ── Modal Page 1: Consent ── -->
+    <div class="pi-mpage active" id="mpage-1">
+      <div class="pi-modal-logo">
+        <div class="pi-logo-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-linecap="round"/></svg>
+        </div>
+        <span class="pi-logo-text">Jee<span>via</span></span>
+      </div>
+      <h1 class="pi-modal-title" id="consent-modal-title">Welcome 🙏</h1>
+      <p class="pi-modal-sub">We'll help you share your symptoms with the doctor here. First, a quick consent notice.</p>
+
+      <!-- Consent box -->
+      <div class="pi-consent-box">
+        <div class="pi-consent-header">🔒 Data Consent Notice</div>
+        <ul class="pi-consent-list">
+          <li>✅ Information is stored securely with an anonymised ID</li>
+          <li>✅ Shared only with authorised medical staff at this facility</li>
+          <li>✅ Not shared outside without your permission</li>
+          <li>✅ This system does <strong>not diagnose</strong> — outputs are advisory</li>
+        </ul>
+      </div>
+
+      <!-- Language picker -->
+      <div class="pi-lang-quick" role="group" aria-label="Quick language selection">
+        <div class="pi-lang-label">🌐 Choose your language:</div>
+        <div class="pi-lang-quick-grid" id="consent-lang-grid">
+          <button class="pi-lang-quick-btn selected" data-lang="en" id="ql-en">English</button>
+          <button class="pi-lang-quick-btn" data-lang="hi" id="ql-hi">हिंदी</button>
+          <button class="pi-lang-quick-btn" data-lang="ta" id="ql-ta">தமிழ்</button>
+          <button class="pi-lang-quick-btn" data-lang="te" id="ql-te">తెలుగు</button>
+          <button class="pi-lang-quick-btn" data-lang="bn" id="ql-bn">বাংলা</button>
+          <button class="pi-lang-quick-btn" data-lang="kn" id="ql-kn">ಕನ್ನಡ</button>
+          <button class="pi-lang-quick-btn" data-lang="ml" id="ql-ml">മലയാളം</button>
+          <button class="pi-lang-quick-btn" data-lang="mr" id="ql-mr">मराठी</button>
+          <button class="pi-lang-quick-btn" data-lang="gu" id="ql-gu">ગુજરાતી</button>
+          <button class="pi-lang-quick-btn" data-lang="pa" id="ql-pa">ਪੰਜਾਬੀ</button>
+          <button class="pi-lang-quick-btn" data-lang="or" id="ql-or">ଓଡ଼ିଆ</button>
+          <button class="pi-lang-quick-btn" data-lang="ur" id="ql-ur">اردو</button>
+        </div>
+      </div>
+
+      <!-- Accessibility toggles -->
+      <div class="pi-access-row">
+        <span>🔠 Large Text</span>
+        <label class="pi-toggle" for="large-text-tog"><input type="checkbox" id="large-text-tog"><span class="pi-toggle-track"></span></label>
+        <span style="margin-left:16px;">🎙️ Voice Mode</span>
+        <label class="pi-toggle" for="voice-mode-tog"><input type="checkbox" id="voice-mode-tog"><span class="pi-toggle-track"></span></label>
+      </div>
+
+      <!-- Consent toggle -->
+      <div class="pi-consent-agree">
+        <label class="pi-toggle" for="consent-tog">
+          <input type="checkbox" id="consent-tog">
+          <span class="pi-toggle-track"></span>
+        </label>
+        <span class="pi-consent-agree-text" id="consent-agree-label">I understand and agree to share my information for triage purposes</span>
+      </div>
+
+      <button class="pi-modal-btn" id="consent-next-btn" disabled>Continue →</button>
+    </div>
+
+    <!-- ── Modal Page 2: Identity ── -->
+    <div class="pi-mpage" id="mpage-2">
+      <div class="pi-modal-icon">👤</div>
+      <h2 class="pi-modal-title">Who Are You Here For?</h2>
+      <p class="pi-modal-sub">Please share some basic details for the doctor.</p>
+      <div class="pi-mform">
+        <div class="pi-mfield">
+          <label class="pi-mlabel" for="pi-name">Full Name <span style="font-weight:400;color:var(--muted);">(or Anonymous)</span></label>
+          <input type="text" id="pi-name" class="pi-minput" placeholder="e.g., Radha Kumari" autocomplete="name" maxlength="80">
+        </div>
+        <div class="pi-mrow">
+          <div class="pi-mfield">
+            <label class="pi-mlabel" for="pi-age">Age</label>
+            <input type="number" id="pi-age" class="pi-minput" placeholder="e.g., 35" min="0" max="120" inputmode="numeric">
+          </div>
+          <div class="pi-mfield">
+            <label class="pi-mlabel" for="pi-gender">Gender</label>
+            <select id="pi-gender" class="pi-minput">
+              <option value="">Select…</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="other">Other / Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        <div class="pi-mfield">
+          <label class="pi-mlabel" for="pi-phone">Mobile (optional — for SMS reminder)</label>
+          <input type="tel" id="pi-phone" class="pi-minput" placeholder="+91 98765 43210" maxlength="14" inputmode="tel">
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button class="pi-modal-btn-ghost" id="identity-back-btn">← Back</button>
+        <button class="pi-modal-btn" id="identity-next-btn">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ── Modal Page 3: Visit Type ── -->
+    <div class="pi-mpage" id="mpage-3">
+      <div class="pi-modal-icon">🏥</div>
+      <h2 class="pi-modal-title">Type of Visit</h2>
+      <p class="pi-modal-sub">This helps us show the most relevant information.</p>
+
+      <div class="pi-type-grid">
+        <button class="pi-type-card" data-type="new" id="pt-new">
+          <div class="pi-type-check">✓</div>
+          <span class="pi-type-emoji">🆕</span>
+          <div class="pi-type-title">New Patient</div>
+          <div class="pi-type-sub">First visit today</div>
+        </button>
+        <button class="pi-type-card" data-type="returning" id="pt-returning">
+          <div class="pi-type-check">✓</div>
+          <span class="pi-type-emoji">🔄</span>
+          <div class="pi-type-title">Returning</div>
+          <div class="pi-type-sub">Was here before</div>
+        </button>
+        <button class="pi-type-card" data-type="maternal" id="pt-maternal">
+          <div class="pi-type-check">✓</div>
+          <span class="pi-type-emoji">🤱</span>
+          <div class="pi-type-title">Maternal</div>
+          <div class="pi-type-sub">Pregnancy related</div>
+        </button>
+        <button class="pi-type-card" data-type="chronic" id="pt-chronic">
+          <div class="pi-type-check">✓</div>
+          <span class="pi-type-emoji">💊</span>
+          <div class="pi-type-title">Chronic Follow-up</div>
+          <div class="pi-type-sub">Diabetes, BP, TB…</div>
+        </button>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button class="pi-modal-btn-ghost" id="type-back-btn">← Back</button>
+        <button class="pi-modal-btn" id="type-next-btn" disabled>Start →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN KIOSK LAYOUT
+════════════════════════════════════════════════════════════════════ -->
+<div class="kiosk-shell" id="kiosk" style="display:none;">
+
+  <!-- ── DISCLAIMER BANNER ───────────────────────────────────── -->
+  <div class="kiosk-disclaimer" role="alert">
+    <span>⚠️</span>
+    <span><strong>Important:</strong> This system is for triage support only. All information is reviewed by a qualified medical professional. Jeevia does not diagnose or prescribe treatment.</span>
+  </div>
+
+  <!-- ── GLOBAL TOP BAR ──────────────────────────────────────── -->
+  <header class="kiosk-topbar" role="banner">
+    <a href="index.html" class="kiosk-logo" aria-label="Jeevia Home">
+      <div class="kiosk-logo-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke-linecap="round"/></svg>
+      </div>
+      <span class="kiosk-logo-text">Jee<span>via</span></span>
+    </a>
+
+    <!-- Facility tag -->
+    <div class="kiosk-facility-tag" id="kiosk-facility-tag">
+      <span class="kiosk-facility-dot"></span>
+      <span id="kiosk-facility-name">PHC Manikpur · OPD Queue</span>
+    </div>
+
+    <!-- Patient identity chip -->
+    <div class="kiosk-patient-chip" id="kiosk-patient-chip">
+      <span>👤</span>
+      <div>
+        <div class="kiosk-patient-name" id="kiosk-patient-name-display">Patient</div>
+        <div class="kiosk-patient-meta" id="kiosk-patient-meta-display">—</div>
+      </div>
+    </div>
+
+    <!-- Center language selector (prominent) -->
+    <button class="kiosk-lang-btn" id="kiosk-lang-btn" aria-label="Change language" aria-haspopup="dialog">
+      <span>🌐</span>
+      <span id="kiosk-lang-label">English</span>
+      <span style="font-size:10px;opacity:0.6;">▼</span>
+    </button>
+
+    <!-- Add New Problem -->
+    <button class="kiosk-add-problem-btn" id="add-problem-btn" aria-label="Add a new complaint">
+      <span>＋</span> Add Problem
+    </button>
+  </header>
+
+  <!-- ── ACTIVE PROBLEMS STRIP ───────────────────────────────── -->
+  <div class="kiosk-problems-strip" id="problems-strip" role="list" aria-label="Active complaints">
+    <div class="kiosk-problem-chip active" id="problem-chip-0" role="listitem">
+      <span class="problem-num">1</span>
+      <span class="problem-label" id="problem-label-0">Primary Complaint</span>
+    </div>
+  </div>
+
+  <!-- ── THREE-PANEL BODY ─────────────────────────────────────── -->
+  <main class="kiosk-body" role="main">
+
+    <!-- ══════════════ LEFT PANEL: INPUT CLUSTER ═══════════════ -->
+    <section class="kiosk-panel panel-left" aria-label="Input methods">
+      <div class="panel-header">
+        <div class="panel-title">📥 Tell Us Your Symptoms</div>
+        <div class="panel-sub">Use any method below</div>
+      </div>
+
+      <div class="input-cluster-grid">
+
+        <!-- Card 1: Voice / Text -->
+        <div class="input-card active-card" id="ic-voice-card" role="region" aria-label="Voice and text input">
+          <div class="input-card-header">
+            <span class="input-card-emoji">🎙️</span>
+            <div>
+              <div class="input-card-title">Speak or Write</div>
+              <div class="input-card-sub">IndicConformer voice capture</div>
+            </div>
+          </div>
+          <!-- Voice area -->
+          <div class="voice-capture-area" id="voice-capture-area">
+            <button class="big-mic-btn" id="big-mic-btn" aria-label="Tap to record your symptoms">
+              <span id="mic-icon">🎙️</span>
+              <div class="mic-ring" id="mic-ring"></div>
+            </button>
+            <div class="mic-status" id="mic-status">Tap to Speak</div>
+            <div class="mic-hint">Describe symptoms in your language</div>
+            <div class="voice-transcript-box" id="voice-transcript-box" aria-live="polite" role="status"></div>
+          </div>
+          <!-- Text fallback toggle -->
+          <button class="text-fallback-toggle" id="text-fallback-toggle" aria-label="Switch to typing">✍️ Prefer to type instead?</button>
+          <div class="text-fallback-area" id="text-fallback-area" style="display:none;">
+            <textarea class="kiosk-textarea" id="kiosk-symptom-text" placeholder="Describe your symptoms here… (e.g., Fever since 3 days, headache, weakness)" aria-label="Type your symptoms"></textarea>
+            <div class="text-char-hint" id="text-char-hint">0 characters</div>
+          </div>
+        </div>
+
+        <!-- Card 2: Upload Reports -->
+        <div class="input-card" id="ic-upload-card" role="region" aria-label="Upload lab reports">
+          <div class="input-card-header">
+            <span class="input-card-emoji">📄</span>
+            <div>
+              <div class="input-card-title">Upload Reports</div>
+              <div class="input-card-sub">Lab tests, prescriptions</div>
+            </div>
+          </div>
+          <div class="upload-drop-zone" id="upload-drop-zone" role="button" tabindex="0" aria-label="Click to upload lab report">
+            <div class="upload-drop-icon">📋</div>
+            <div class="upload-drop-title">Click or drop your report here</div>
+            <div class="upload-drop-formats">JPG · PNG · PDF · Max 10MB</div>
+            <input type="file" id="report-file-input" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" aria-label="Select report file">
+          </div>
+          <div class="ocr-processing" id="ocr-processing" style="display:none;">
+            <div class="ocr-spinner"></div>
+            <span>PaddleOCR analyzing… please wait</span>
+          </div>
+          <div class="ocr-result" id="ocr-result" style="display:none;">
+            <div class="ocr-result-title">✅ Report Extracted</div>
+            <div class="ocr-row"><span class="ocr-key">Haemoglobin</span><span class="ocr-val warn">9.2 g/dL ↓ Low</span></div>
+            <div class="ocr-row"><span class="ocr-key">Blood Glucose</span><span class="ocr-val critical">310 mg/dL ↑ High</span></div>
+            <div class="ocr-row"><span class="ocr-key">WBC Count</span><span class="ocr-val ok">8,200 /μL Normal</span></div>
+            <div class="ocr-row"><span class="ocr-key">Platelets</span><span class="ocr-val ok">2.1 Lakh Normal</span></div>
+            <div class="ocr-disclaimer">⚠️ Values shown for doctor review only — not a diagnosis</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Basic Images -->
+        <div class="input-card" id="ic-image-card" role="region" aria-label="Upload symptom photos">
+          <div class="input-card-header">
+            <span class="input-card-emoji">🖼️</span>
+            <div>
+              <div class="input-card-title">Basic Images</div>
+              <div class="input-card-sub">Rash, medicine strip, wound</div>
+            </div>
+          </div>
+          <div class="upload-drop-zone" id="photo-drop-zone" role="button" tabindex="0" aria-label="Click to capture or upload a symptom photo">
+            <div class="upload-drop-icon">📸</div>
+            <div class="upload-drop-title">Capture or Upload Photo</div>
+            <div class="upload-drop-formats">JPG · PNG · Max 5MB</div>
+            <input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display:none;" aria-label="Capture or upload photo">
+          </div>
+          <div class="photo-preview-grid" id="photo-preview-grid"></div>
+        </div>
+
+        <!-- Card 4: Timeline -->
+        <div class="input-card" id="ic-timeline-card" role="region" aria-label="Symptom timeline">
+          <div class="input-card-header">
+            <span class="input-card-emoji">📅</span>
+            <div>
+              <div class="input-card-title">When Did It Start?</div>
+              <div class="input-card-sub">Select the closest option</div>
+            </div>
+          </div>
+          <div class="timeline-chips" role="group" aria-label="Symptom duration">
+            <button class="timeline-chip" data-value="today" id="tl-today">Today</button>
+            <button class="timeline-chip" data-value="2-3 days" id="tl-2days">2–3 Days</button>
+            <button class="timeline-chip" data-value="since last week" id="tl-week">Since Last Week</button>
+            <button class="timeline-chip" data-value="since last month" id="tl-month">Last Month</button>
+            <button class="timeline-chip" data-value="since Diwali" id="tl-diwali">Since Diwali</button>
+            <button class="timeline-chip" data-value="more than a month" id="tl-long">More Than a Month</button>
+          </div>
+          <div class="timeline-selected-label" id="timeline-selected-label" style="display:none;"></div>
+          <!-- Severity scale -->
+          <div class="severity-section" id="severity-section" style="display:none;">
+            <div class="severity-label">Severity (1 = mild, 10 = very severe):</div>
+            <div class="severity-scale" role="group" aria-label="Pain severity 1 to 10">
+              <button class="severity-btn" data-val="1">1</button>
+              <button class="severity-btn" data-val="2">2</button>
+              <button class="severity-btn" data-val="3">3</button>
+              <button class="severity-btn" data-val="4">4</button>
+              <button class="severity-btn" data-val="5">5</button>
+              <button class="severity-btn" data-val="6">6</button>
+              <button class="severity-btn" data-val="7">7</button>
+              <button class="severity-btn" data-val="8">8</button>
+              <button class="severity-btn" data-val="9">9</button>
+              <button class="severity-btn" data-val="10">10</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /input-cluster-grid -->
+    </section>
+
+
+    <!-- ════════════ CENTER PANEL: CONTEXT ENGINE ═════════════ -->
+    <section class="kiosk-panel panel-center" aria-label="Follow-up questions">
+      <div class="panel-header">
+        <div class="panel-title">🤔 Follow-up Questions</div>
+        <div class="panel-sub">For better clinical context</div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="context-empty" id="context-empty">
+        <div class="context-empty-icon">🩺</div>
+        <div class="context-empty-title">Waiting for symptoms…</div>
+        <div class="context-empty-sub">As you speak or type, targeted questions will appear here to help the doctor get a clearer picture.</div>
+      </div>
+
+      <!-- Questions container -->
+      <div class="context-questions" id="context-questions"></div>
+
+      <!-- Progress tracker -->
+      <div class="context-progress-bar" id="context-progress-bar" style="display:none;">
+        <div class="cpb-label"><span id="cpb-answered">0</span> of <span id="cpb-total">0</span> answered</div>
+        <div class="cpb-track"><div class="cpb-fill" id="cpb-fill" style="width:0%"></div></div>
+      </div>
+    </section>
+
+
+    <!-- ══════════ RIGHT PANEL: PATIENT NOTE BUILDER ══════════ -->
+    <section class="kiosk-panel panel-right" aria-label="Your summary note">
+      <div class="panel-header">
+        <div class="panel-title">📋 Your Summary Note</div>
+        <div class="panel-live-indicator" id="note-live-indicator">
+          <span class="live-dot"></span> Building…
+        </div>
+      </div>
+
+      <!-- Safety badge -->
+      <div class="note-safety-badge">
+        <span>🛡️</span>
+        <span>This note only shows <strong>what you told us</strong>. No medical conclusions are shown here.</span>
+      </div>
+
+      <!-- Note entries -->
+      <div class="note-entries" id="note-entries">
+        <div class="note-empty" id="note-empty">
+          <div style="font-size:32px;margin-bottom:8px;">📝</div>
+          <div>Your symptoms will appear here as you enter them</div>
+        </div>
+      </div>
+
+      <!-- Confirm strip at bottom -->
+      <div class="note-confirm-strip">
+        <div class="note-confirm-text">Please review the above, then confirm to join the queue</div>
+        <button class="note-confirm-btn" id="confirm-queue-btn" disabled>
+          ✅ Confirm &amp; Join Queue
+        </button>
+      </div>
+    </section>
+
+  </main><!-- /kiosk-body -->
+
+
+  <!-- ══ BOTTOM BAR: Nurse Vitals + Scenario Indicator ═════════ -->
+  <footer class="kiosk-footer">
+    <div class="kiosk-footer-left">
+      <button class="kiosk-vitals-btn" id="kiosk-vitals-btn" aria-label="Enter vitals — nurse only" aria-haspopup="dialog">
+        📊 Enter Vitals <span class="vitals-badge" id="vitals-badge">Nurse</span>
+      </button>
+    </div>
+    <div class="kiosk-footer-center" id="footer-scenario-indicator" style="display:none;"></div>
+    <div class="kiosk-footer-right">
+      <span class="kiosk-session-tag">🔒 Kiosk Session</span>
+      <a href="doctor-dashboard.html" class="kiosk-staff-link" aria-label="Staff — Go to Doctor Dashboard">Staff →</a>
+    </div>
+  </footer>
+
+</div><!-- /kiosk-shell -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MATERNAL SCENARIO DRAWER
+════════════════════════════════════════════════════════════════ -->
+<div class="scenario-drawer" id="maternal-drawer" role="dialog" aria-modal="true" aria-label="Maternal health information" style="display:none;">
+  <div class="scenario-drawer-inner">
+    <div class="scenario-drawer-handle"></div>
+    <div class="scenario-drawer-header maternal-header">
+      <span style="font-size:28px;">🤱</span>
+      <div>
+        <div class="scenario-drawer-title">Maternal Health Module</div>
+        <div class="scenario-drawer-sub">ANC Schedule &amp; Reminders</div>
+      </div>
+      <button class="scenario-drawer-close" id="maternal-drawer-close" aria-label="Close maternal panel">✕</button>
+    </div>
+
+    <div class="maternal-body">
+      <div class="maternal-anc-section">
+        <div class="anc-header">📋 ANC Checkup Schedule</div>
+        <div class="anc-grid">
+          <div class="anc-card completed"><div class="anc-visit">1st Visit</div><div class="anc-detail">Registration, Blood group, Hb</div><div class="anc-status">✅ Done</div></div>
+          <div class="anc-card completed"><div class="anc-visit">2nd Visit</div><div class="anc-detail">BP, Weight, Urine test</div><div class="anc-status">✅ Done</div></div>
+          <div class="anc-card current"><div class="anc-visit">3rd Visit ← Now</div><div class="anc-detail">Fundal height, Foetal heart</div><div class="anc-status">📅 Due Today</div></div>
+          <div class="anc-card upcoming"><div class="anc-visit">4th Visit</div><div class="anc-detail">Pelvic exam, Birth plan</div><div class="anc-status">📅 36 Weeks</div></div>
+        </div>
+      </div>
+
+      <div class="maternal-gestation">
+        <label class="pi-mlabel" for="gestational-weeks">Gestational Age (Weeks):</label>
+        <input type="number" id="gestational-weeks" class="pi-minput" placeholder="e.g., 28" min="4" max="42" style="max-width:160px;" inputmode="numeric">
+      </div>
+
+      <div class="maternal-actions">
+        <button class="maternal-action-btn sms-btn" id="maternal-sms-btn">
+          <span>📲</span> Fire SMS Reminder
+        </button>
+        <button class="maternal-action-btn voice-agent-btn" id="maternal-voice-btn">
+          <span>📞</span> Schedule Voice Agent Call
+        </button>
+      </div>
+
+      <div class="maternal-sms-confirm" id="maternal-sms-confirm" style="display:none;">
+        ✅ SMS reminder scheduled! Patient will receive ANC visit reminder 24hrs before next appointment.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHRONIC DISEASE DRAWER
+════════════════════════════════════════════════════════════════ -->
+<div class="scenario-drawer" id="chronic-drawer" role="dialog" aria-modal="true" aria-label="Chronic disease check-in" style="display:none;">
+  <div class="scenario-drawer-inner">
+    <div class="scenario-drawer-handle"></div>
+    <div class="scenario-drawer-header chronic-header">
+      <span style="font-size:28px;">💊</span>
+      <div>
+        <div class="scenario-drawer-title">Chronic Disease Follow-up</div>
+        <div class="scenario-drawer-sub">Historical comparison check-in</div>
+      </div>
+      <button class="scenario-drawer-close" id="chronic-drawer-close" aria-label="Close chronic panel">✕</button>
+    </div>
+
+    <div class="chronic-body">
+      <!-- Historical vs current -->
+      <div class="chronic-compare-header">📊 Last Visit vs. Today</div>
+      <div class="chronic-compare-grid">
+        <div class="chronic-compare-col">
+          <div class="compare-col-title">Last Visit (14 Aug 2026)</div>
+          <div class="compare-row"><span class="compare-key">Blood Glucose</span><span class="compare-val warn">290 mg/dL</span></div>
+          <div class="compare-row"><span class="compare-key">HbA1c</span><span class="compare-val warn">9.1%</span></div>
+          <div class="compare-row"><span class="compare-key">BP</span><span class="compare-val warn">148/92 mmHg</span></div>
+          <div class="compare-row"><span class="compare-key">Medications</span><span class="compare-val">Metformin 500mg, Amlodipine 5mg</span></div>
+        </div>
+        <div class="chronic-compare-col today">
+          <div class="compare-col-title">Today (via OCR / Self-report)</div>
+          <div class="compare-row"><span class="compare-key">Blood Glucose</span><span class="compare-val critical" id="ch-glucose-today">310 mg/dL ↑</span></div>
+          <div class="compare-row"><span class="compare-key">HbA1c</span><span class="compare-val muted">Pending lab</span></div>
+          <div class="compare-row"><span class="compare-key">BP</span><span class="compare-val muted">Not measured yet</span></div>
+          <div class="compare-row"><span class="compare-key">Medications</span><span class="compare-val muted" id="ch-meds-today">Not answered yet</span></div>
+        </div>
+      </div>
+
+      <!-- Improvement question -->
+      <div class="chronic-improvement-q">
+        <div class="ciq-title">Compared to your last visit, how is your condition?</div>
+        <div class="ciq-options" role="group" aria-label="Improvement compared to last visit">
+          <button class="ciq-btn better" data-val="better" id="ciq-better">😊 Better</button>
+          <button class="ciq-btn same"   data-val="same"   id="ciq-same">😐 Same</button>
+          <button class="ciq-btn worse"  data-val="worse"  id="ciq-worse">😟 Worse</button>
+        </div>
+        <div class="ciq-selected" id="ciq-selected" style="display:none;"></div>
+      </div>
+
+      <!-- Medication adherence -->
+      <div class="chronic-med-adherence">
+        <div class="cma-title">Are you taking your medications regularly?</div>
+        <div class="cma-options" role="group">
+          <button class="cma-btn" data-val="yes" id="cma-yes">✅ Yes, regularly</button>
+          <button class="cma-btn" data-val="sometimes" id="cma-sometimes">⚠️ Sometimes</button>
+          <button class="cma-btn" data-val="no" id="cma-no">❌ No / Ran out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     NURSE VITALS SLIDE-UP PANEL
+════════════════════════════════════════════════════════════════ -->
+<div class="vitals-panel-overlay" id="vitals-overlay" role="dialog" aria-modal="true" aria-labelledby="vitals-panel-title" style="display:none;">
+  <div class="vitals-panel">
+    <div class="vitals-panel-handle"></div>
+    <div class="vitals-panel-header">
+      <div>
+        <div class="vitals-panel-title" id="vitals-panel-title">📊 Vitals Entry</div>
+        <div class="vitals-panel-sub">🔒 For authorized nursing staff only</div>
+      </div>
+      <button class="vitals-panel-close" id="vitals-panel-close" aria-label="Close vitals panel">✕</button>
+    </div>
+
+    <div class="vitals-grid">
+      <div class="vital-card">
+        <div class="vital-icon">🌡️</div>
+        <div class="vital-label">Temperature</div>
+        <input type="number" class="vital-input" id="vit-temp" placeholder="98.6" step="0.1" min="90" max="110" inputmode="decimal" aria-label="Temperature in Fahrenheit">
+        <div class="vital-unit">°F</div>
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon">🩸</div>
+        <div class="vital-label">Blood Pressure</div>
+        <input type="text" class="vital-input" id="vit-bp" placeholder="120/80" aria-label="Blood pressure">
+        <div class="vital-unit">mmHg</div>
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon">💨</div>
+        <div class="vital-label">SpO₂</div>
+        <input type="number" class="vital-input" id="vit-spo2" placeholder="98" min="70" max="100" inputmode="numeric" aria-label="Oxygen saturation">
+        <div class="vital-unit">%</div>
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon">❤️</div>
+        <div class="vital-label">Pulse Rate</div>
+        <input type="number" class="vital-input" id="vit-pulse" placeholder="72" min="30" max="220" inputmode="numeric" aria-label="Pulse rate">
+        <div class="vital-unit">bpm</div>
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon">⚖️</div>
+        <div class="vital-label">Weight</div>
+        <input type="number" class="vital-input" id="vit-weight" placeholder="65" step="0.1" min="1" max="300" inputmode="decimal" aria-label="Weight in kg">
+        <div class="vital-unit">kg</div>
+      </div>
+      <div class="vital-card">
+        <div class="vital-icon">📏</div>
+        <div class="vital-label">Height</div>
+        <input type="number" class="vital-input" id="vit-height" placeholder="165" min="50" max="250" inputmode="numeric" aria-label="Height in cm">
+        <div class="vital-unit">cm</div>
+      </div>
+    </div>
+
+    <!-- Internal urgency preview (for nurse only — NOT shown to patient in note) -->
+    <div class="vitals-urgency-preview" id="vitals-urgency-preview">
+      <span style="font-size:20px;">🟢</span>
+      <div>
+        <div class="vup-label" id="vup-label">Vitals within normal range</div>
+        <div class="vup-sub" id="vup-sub">Staff-only pre-tag · Not visible to patient</div>
+      </div>
+    </div>
+
+    <div class="vitals-panel-actions">
+      <button class="pi-modal-btn-ghost" id="vitals-cancel-btn">Cancel</button>
+      <button class="pi-modal-btn" id="vitals-save-btn">Save Vitals ✓</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     LANGUAGE MODAL (22 Scheduled Indian Languages)
+════════════════════════════════════════════════════════════════ -->
+<div class="lang-modal-overlay" id="kiosk-lang-modal" role="dialog" aria-modal="true" aria-labelledby="kiosk-lang-modal-title">
+  <div class="lang-modal-box">
+    <div class="lang-modal-header">
+      <h2 class="lang-modal-title" id="kiosk-lang-modal-title">🌐 Select Language / भाषा चुनें</h2>
+      <button class="lang-modal-close" id="kiosk-lang-modal-close" aria-label="Close language selector">✕</button>
+    </div>
+    <div class="lang-22-grid" role="list">
+      <button class="lang-22-btn active" data-lang="en" role="listitem"><span class="l22-native">English</span><span class="l22-name">English</span></button>
+      <button class="lang-22-btn" data-lang="hi" role="listitem"><span class="l22-native">हिन्दी</span><span class="l22-name">Hindi</span></button>
+      <button class="lang-22-btn" data-lang="ta" role="listitem"><span class="l22-native">தமிழ்</span><span class="l22-name">Tamil</span></button>
+      <button class="lang-22-btn" data-lang="te" role="listitem"><span class="l22-native">తెలుగు</span><span class="l22-name">Telugu</span></button>
+      <button class="lang-22-btn" data-lang="bn" role="listitem"><span class="l22-native">বাংলা</span><span class="l22-name">Bengali</span></button>
+      <button class="lang-22-btn" data-lang="kn" role="listitem"><span class="l22-native">ಕನ್ನಡ</span><span class="l22-name">Kannada</span></button>
+      <button class="lang-22-btn" data-lang="ml" role="listitem"><span class="l22-native">മലയാളം</span><span class="l22-name">Malayalam</span></button>
+      <button class="lang-22-btn" data-lang="mr" role="listitem"><span class="l22-native">मराठी</span><span class="l22-name">Marathi</span></button>
+      <button class="lang-22-btn" data-lang="gu" role="listitem"><span class="l22-native">ગુજરાતી</span><span class="l22-name">Gujarati</span></button>
+      <button class="lang-22-btn" data-lang="pa" role="listitem"><span class="l22-native">ਪੰਜਾਬੀ</span><span class="l22-name">Punjabi</span></button>
+      <button class="lang-22-btn" data-lang="or" role="listitem"><span class="l22-native">ଓଡ଼ିଆ</span><span class="l22-name">Odia</span></button>
+      <button class="lang-22-btn" data-lang="as" role="listitem"><span class="l22-native">অসমীয়া</span><span class="l22-name">Assamese</span></button>
+      <button class="lang-22-btn" data-lang="mai" role="listitem"><span class="l22-native">मैथिली</span><span class="l22-name">Maithili</span></button>
+      <button class="lang-22-btn" data-lang="ur" role="listitem"><span class="l22-native">اردو</span><span class="l22-name">Urdu</span></button>
+      <button class="lang-22-btn" data-lang="ne" role="listitem"><span class="l22-native">नेपाली</span><span class="l22-name">Nepali</span></button>
+      <button class="lang-22-btn" data-lang="ks" role="listitem"><span class="l22-native">کٲشُر</span><span class="l22-name">Kashmiri</span></button>
+      <button class="lang-22-btn" data-lang="sa" role="listitem"><span class="l22-native">संस्कृतम्</span><span class="l22-name">Sanskrit</span></button>
+      <button class="lang-22-btn" data-lang="kok" role="listitem"><span class="l22-native">कोंकणी</span><span class="l22-name">Konkani</span></button>
+      <button class="lang-22-btn" data-lang="doi" role="listitem"><span class="l22-native">डोगरी</span><span class="l22-name">Dogri</span></button>
+      <button class="lang-22-btn" data-lang="mni" role="listitem"><span class="l22-native">মণিপুরী</span><span class="l22-name">Manipuri</span></button>
+      <button class="lang-22-btn" data-lang="sat" role="listitem"><span class="l22-native">संथाली</span><span class="l22-name">Santali</span></button>
+      <button class="lang-22-btn" data-lang="sd" role="listitem"><span class="l22-native">سنڌي</span><span class="l22-name">Sindhi</span></button>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:20px;">
+      <button class="pi-modal-btn" style="flex:1;" id="kiosk-lang-confirm">Confirm Language</button>
+      <button class="pi-modal-btn-ghost" id="kiosk-lang-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     QUEUE TOKEN OVERLAY (appears on "Confirm & Join Queue")
+════════════════════════════════════════════════════════════════ -->
+<div class="token-overlay" id="token-overlay" role="dialog" aria-modal="true" aria-labelledby="token-overlay-title" style="display:none;">
+  <div class="token-overlay-card">
+    <div class="token-overlay-burst">🎉</div>
+    <h2 class="token-overlay-title" id="token-overlay-title">You're in the Queue!</h2>
+    <p class="token-overlay-sub">Your triage summary is ready for the doctor. Keep this token.</p>
+
+    <div class="token-display">
+      <div class="token-display-label">Queue Token</div>
+      <div class="token-display-number" id="token-display-number">A-047</div>
+      <div class="token-display-facility">PHC Manikpur · OPD</div>
+      <div class="token-display-wait">⏱️ Estimated Wait: <strong id="token-display-wait">~18 minutes</strong></div>
+    </div>
+
+    <div class="token-qr-box" aria-label="QR code for doctor scan">
+      <div class="token-qr-graphic">▣</div>
+      <div class="token-qr-label">Scan at doctor's counter</div>
+    </div>
+
+    <!-- Safety note: NO triage urgency shown to patient -->
+    <div class="token-safety-note">
+      🛡️ Your summary is ready for the doctor's review. If you feel worse, please inform the nurse immediately.
+    </div>
+
+    <!-- SMS opt-in -->
+    <div class="token-sms-row">
+      <input type="tel" class="pi-minput" id="token-sms-phone" placeholder="+91 98765 43210" inputmode="tel" aria-label="Phone for SMS">
+      <button class="pi-modal-btn" id="token-sms-btn" style="flex-shrink:0;padding:14px 20px;">📲 SMS Me</button>
+    </div>
+    <div class="token-sms-confirm" id="token-sms-confirm" style="display:none;">✅ SMS will be sent when it's your turn.</div>
+
+    <div class="token-overlay-actions">
+      <a href="index.html" class="pi-modal-btn-ghost">← Home</a>
+      <button class="pi-modal-btn" onclick="location.reload()">+ New Patient</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MOBILE CENTRIC HORIZONTAL SLIDER NAVIGATION BAR (Kiosk Nav) ══ -->
+<nav class="patient-slider-nav jeevia-slider-nav dock-bottom" role="navigation" aria-label="Patient Kiosk Navigation">
+  <div class="jeevia-slider-track">
+    <button class="jeevia-slider-item active" onclick="document.querySelector('.panel-left').scrollIntoView({behavior:'smooth'})" aria-label="Input Symptoms">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </span>
+      <span>1. Symptoms</span>
+    </button>
+    <button class="jeevia-slider-item" onclick="document.querySelector('.panel-center').scrollIntoView({behavior:'smooth'})" aria-label="Clinical Note">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </span>
+      <span>2. Note</span>
+    </button>
+    <button class="jeevia-slider-item" onclick="document.querySelector('.panel-right').scrollIntoView({behavior:'smooth'})" aria-label="Summary and Queue">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </span>
+      <span>3. Queue</span>
+    </button>
+    <button class="jeevia-slider-item" onclick="document.getElementById('kiosk-lang-btn').click()" aria-label="Language Selector">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </span>
+      <span>Language</span>
+    </button>
+    <a href="doctor-dashboard.html" class="jeevia-slider-item" aria-label="Doctor Portal Exit">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </span>
+      <span>Doctor View</span>
+    </a>
+    <a href="index.html" class="jeevia-slider-item" aria-label="Back to Home">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </span>
+      <span>Exit Kiosk</span>
+    </a>
+  </div>
+</nav>
+
+<script src="js/nav.js"></script>
+<script src="js/patient.js"></script>
+</body>
+</html>

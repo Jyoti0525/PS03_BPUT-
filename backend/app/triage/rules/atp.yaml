@@ -1,0 +1,107 @@
+# AIIMS Triage Protocol (adult) — deterministic urgency rules.
+# Urgency is ONLY ever assigned by these rules; the language model never sets or lowers it.
+# Condition keys: all / any (nested), text_any, age_gte, age_lt, category,
+#                 vital_lt / vital_gte / vital_between {field, value|min|max}, severity_gte, duration_long
+protocol: ATP
+rules:
+  - id: ATP-CARD-01
+    description: Chest pain with radiation or sweating
+    urgency: red
+    when:
+      all:
+        - age_gte: 12
+        - text_any: ["chest pain", "chest heaviness", "सीने"]
+        - text_any: ["arm", "jaw", "sweat", "radiat"]
+  - id: ATP-CARD-02
+    description: Chest pain reported
+    urgency: yellow
+    when:
+      all:
+        - age_gte: 12
+        - text_any: ["chest pain", "chest heaviness", "सीने"]
+  - id: ATP-RESP-01
+    description: SpO₂ below 90% on room air
+    urgency: red
+    when: { vital_lt: { field: spo2, value: 90 } }
+  - id: ATP-RESP-02
+    description: SpO₂ 90–93% on room air
+    urgency: yellow
+    when: { vital_between: { field: spo2, min: 90, max: 93 } }
+  - id: ATP-RESP-03
+    description: Respiratory rate ≥ 30/min
+    urgency: red
+    when:
+      all:
+        - age_gte: 12
+        - vital_gte: { field: resp_rate, value: 30 }
+  - id: ATP-RESP-04
+    description: Breathlessness reported
+    urgency: yellow
+    when: { text_any: ["breathless", "short of breath", "difficulty breathing", "सांस"] }
+  - id: ATP-VITAL-01
+    description: Systolic ≥ 180 or diastolic ≥ 120 mmHg
+    urgency: red
+    when:
+      any:
+        - vital_gte: { field: bp_systolic, value: 180 }
+        - vital_gte: { field: bp_diastolic, value: 120 }
+  - id: ATP-VITAL-02
+    description: Systolic ≥ 160 or diastolic ≥ 100 mmHg
+    urgency: yellow
+    when:
+      any:
+        - vital_gte: { field: bp_systolic, value: 160 }
+        - vital_gte: { field: bp_diastolic, value: 100 }
+  - id: ATP-VITAL-03
+    description: Systolic below 90 mmHg
+    urgency: red
+    when: { vital_lt: { field: bp_systolic, value: 90 } }
+  - id: ATP-VITAL-04
+    description: Pulse above 130 or below 40 bpm
+    urgency: red
+    when:
+      any:
+        - vital_gte: { field: pulse, value: 130.01 }
+        - vital_lt: { field: pulse, value: 40 }
+  - id: ATP-NEURO-01
+    description: Seizure, unconsciousness or one-sided weakness
+    urgency: red
+    when: { text_any: ["seizure", "fits", "unconscious", "fainted", "slurred", "one side", "stroke", "convulsion"] }
+  - id: ATP-BLEED-01
+    description: Heavy bleeding or vomiting blood
+    urgency: red
+    when: { text_any: ["heavy bleeding", "vomiting blood", "blood in vomit", "coughing blood"] }
+  - id: ATP-ENDO-01
+    description: Blood glucose below 70 mg/dL
+    urgency: red
+    when: { vital_lt: { field: glucose, value: 70 } }
+  - id: ATP-ENDO-02
+    description: Blood glucose above 300 mg/dL
+    urgency: yellow
+    when: { vital_gte: { field: glucose, value: 300.01 } }
+  - id: ATP-FEVER-01
+    description: Temperature ≥ 103°F
+    urgency: yellow
+    when: { vital_gte: { field: temp_f, value: 103 } }
+  - id: ATP-FEVER-02
+    description: Fever for 3 days or more
+    urgency: yellow
+    when:
+      all:
+        - text_any: ["fever", "बुखार", "ଜ୍ୱର"]
+        - duration_long: true
+  - id: ATP-TRAUMA-01
+    description: Injury, burn or fall
+    urgency: yellow
+    when: { text_any: ["injury", "burn", "fall", "fracture", "cut ", "accident"] }
+  - id: ATP-ABD-01
+    description: Severe abdominal pain
+    urgency: yellow
+    when:
+      all:
+        - text_any: ["abdominal pain", "stomach pain", "pet dard"]
+        - severity_gte: 7
+  - id: ATP-PAIN-01
+    description: Self-reported pain score 8 or above
+    urgency: yellow
+    when: { severity_gte: 8 }

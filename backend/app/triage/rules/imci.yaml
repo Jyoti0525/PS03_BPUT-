@@ -1,0 +1,34 @@
+# Integrated Management of Childhood Illness — children under 5.
+protocol: IMCI
+rules:
+  - id: IMCI-DANGER-01
+    description: "General danger sign: convulsions, lethargy, unable to drink, vomits everything"
+    urgency: red
+    when:
+      all:
+        - age_lt: 5
+        - text_any: ["convulsion", "fits", "lethargic", "unable to drink", "not feeding", "vomits everything"]
+  - id: IMCI-RESP-01
+    description: Fast breathing or chest indrawing
+    urgency: yellow
+    when:
+      all:
+        - age_lt: 5
+        - any:
+            - vital_gte: { field: resp_rate, value: 40 }
+            - text_any: ["chest indrawing", "fast breathing"]
+  - id: IMCI-FEVER-01
+    description: Fever in a child under 5
+    urgency: yellow
+    when:
+      all:
+        - age_lt: 5
+        - text_any: ["fever", "बुखार", "ଜ୍ୱର"]
+  - id: IMCI-DIARR-01
+    description: Diarrhoea with signs of dehydration
+    urgency: yellow
+    when:
+      all:
+        - age_lt: 5
+        - text_any: ["diarrhoea", "diarrhea", "loose motion"]
+        - text_any: ["sunken", "dry mouth", "no urine"]

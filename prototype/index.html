@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeevia — AI-Powered Healthcare Triage Assistant for India</title>
+  <meta name="description" content="Jeevia is a multimodal, human-in-the-loop healthcare triage assistant designed for government hospitals, primary health centers, public health camps, and institutional facilities across India.">
+  <meta property="og:title" content="Jeevia — Healthcare Triage Assistant">
+  <meta property="og:description" content="Helping nurses, doctors, and health workers triage smarter with AI-powered symptom collection, OCR report analysis, and multilingual support.">
+  <meta name="theme-color" content="#F29191">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/landing.css">
+  <link rel="stylesheet" href="styles/nav.css">
+</head>
+<body class="has-landing-slider">
+
+  <!-- ═══════════════════════════════════════════
+       NAVIGATION
+  ═══════════════════════════════════════════ -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+
+      <!-- Logo -->
+      <a href="index.html" class="nav-logo" id="nav-logo" aria-label="Jeevia Home">
+        <div class="nav-logo-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5"/>
+            <path d="M8 12h8M12 8v8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="nav-logo-text">Jee<span>via</span></span>
+      </a>
+
+      <!-- Center nav links -->
+      <div class="nav-center" role="menubar">
+        <a href="#features"    class="nav-link" id="nav-features"    role="menuitem">Features</a>
+        <a href="#how-it-works" class="nav-link" id="nav-how"        role="menuitem">How it Works</a>
+        <a href="#scenarios"   class="nav-link" id="nav-scenarios"   role="menuitem">Scenarios</a>
+        <a href="#disclaimer"  class="nav-link" id="nav-disclaimer"  role="menuitem">Safety</a>
+      </div>
+
+      <!-- Right CTAs -->
+      <div class="nav-right">
+        <button class="nav-lang-btn" id="nav-lang-btn" aria-label="Select language" aria-haspopup="dialog">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          English
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <a href="auth.html" class="btn btn-secondary btn-sm" id="nav-signin">Sign In</a>
+        <a href="auth.html#signup" class="btn btn-primary btn-sm" id="nav-get-started">Get Started</a>
+      </div>
+
+      <!-- Hamburger -->
+      <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="nav-mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="nav-mobile-menu" id="nav-mobile-menu" role="menu" aria-hidden="true">
+      <a href="#features"     class="nav-link" role="menuitem">Features</a>
+      <a href="#how-it-works" class="nav-link" role="menuitem">How it Works</a>
+      <a href="#scenarios"    class="nav-link" role="menuitem">Scenarios</a>
+      <a href="#disclaimer"   class="nav-link" role="menuitem">Safety</a>
+      <button class="nav-lang-btn" id="mobile-lang-btn" aria-label="Select language">English</button>
+      <a href="auth.html" class="btn btn-secondary">Sign In</a>
+      <a href="auth.html#signup" class="btn btn-primary">Get Started Free</a>
+    </div>
+  </nav>
+
+
+  <!-- ═══════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════ -->
+  <section class="hero" id="home" aria-label="Hero section">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+      <!-- Left: content -->
+      <div class="hero-content">
+        <div class="hero-badge animate-fade-in-up delay-1" role="note">
+          <span class="hero-badge-dot" aria-hidden="true"></span>
+          India's Healthcare Triage AI — Educational Prototype
+        </div>
+
+        <h1 class="hero-title animate-fade-in-up delay-2">
+          Smarter Triage,<br>
+          <span class="accent">Faster Care</span><br>
+          Across India
+        </h1>
+
+        <p class="hero-subtitle animate-fade-in-up delay-3">
+          Jeevia helps doctors, nurses, and health workers at government hospitals, PHCs, and health camps collect, summarize, and prioritize patient symptoms — safely and multilingually.
+        </p>
+
+        <div class="hero-ctas animate-fade-in-up delay-4">
+          <a href="auth.html#signup" class="btn btn-primary btn-lg" id="hero-cta-primary">
+            Get Started Free
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M3 9h12M9 3l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="#how-it-works" class="btn btn-secondary btn-lg" id="hero-cta-secondary">
+            See How It Works
+          </a>
+        </div>
+
+        <div class="hero-stats animate-fade-in-up delay-5" role="list" aria-label="Platform statistics">
+          <div class="hero-stat" role="listitem">
+            <span class="hero-stat-value">22+</span>
+            <span class="hero-stat-label">Indian Languages</span>
+          </div>
+          <div class="hero-stat" role="listitem">
+            <span class="hero-stat-value">4 min</span>
+            <span class="hero-stat-label">Avg. Triage Review</span>
+          </div>
+          <div class="hero-stat" role="listitem">
+            <span class="hero-stat-value">100%</span>
+            <span class="hero-stat-label">Human Reviewed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: visual -->
+      <div class="hero-visual animate-fade-in delay-3" aria-hidden="true">
+        <!-- Floating mini-cards -->
+        <div class="hero-float-card hero-float-card-1">
+          <div class="float-card-label">AI Confidence</div>
+          <div class="float-card-value">94.2%</div>
+          <div class="float-card-meta">↑ High Accuracy</div>
+        </div>
+
+        <div class="hero-float-card hero-float-card-2">
+          <div class="float-card-label">Queue Status</div>
+          <div class="float-card-value">3 Critical</div>
+          <div class="float-card-meta">↑ Flagged for review</div>
+        </div>
+
+        <!-- Main triage card -->
+        <div class="hero-card-stack">
+          <div class="hero-main-card">
+            <div class="hero-card-header">
+              <span class="hero-card-title">Today's Triage Queue</span>
+              <span class="triage-badge triage-red">3 Critical</span>
+            </div>
+
+            <div class="hero-patient-row">
+              <div class="hero-avatar avatar-coral">R</div>
+              <div class="hero-patient-info">
+                <div class="hero-patient-name">Radha Kumari, 42F</div>
+                <div class="hero-patient-detail">Chest pain · 2h duration · Hypertensive</div>
+              </div>
+              <span class="triage-badge triage-red">Critical</span>
+            </div>
+
+            <div class="hero-patient-row">
+              <div class="hero-avatar avatar-teal">M</div>
+              <div class="hero-patient-info">
+                <div class="hero-patient-name">Mohammed Rafiq, 28M</div>
+                <div class="hero-patient-detail">Fever 102°F · 3 days · Fatigue</div>
+              </div>
+              <span class="triage-badge triage-yellow">Semi-urgent</span>
+            </div>
+
+            <div class="hero-patient-row">
+              <div class="hero-avatar avatar-mint">P</div>
+              <div class="hero-patient-info">
+                <div class="hero-patient-name">Priya Sharma, 24F</div>
+                <div class="hero-patient-detail">Mild headache · Antenatal checkup</div>
+              </div>
+              <span class="triage-badge triage-green">Routine</span>
+            </div>
+
+            <div class="hero-patient-row">
+              <div class="hero-avatar avatar-coral">A</div>
+              <div class="hero-patient-info">
+                <div class="hero-patient-name">Arjun Nair, 65M</div>
+                <div class="hero-patient-detail">Chronic diabetes · Follow-up</div>
+              </div>
+              <span class="triage-badge triage-green">Routine</span>
+            </div>
+
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; color: var(--muted);">AI Summarized</span>
+              <span style="flex:1"></span>
+              <span style="font-size: 12px; font-weight: 600; color: var(--coral);">Reviewed by Dr. Sharma →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       TRUST BAR
+  ═══════════════════════════════════════════ -->
+  <div class="trust-bar" role="complementary" aria-label="Supported facility types">
+    <div class="container">
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h6M12 6v6"/></svg>
+        </div>
+        Government Hospitals
+      </div>
+      <div class="trust-divider" aria-hidden="true"></div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        Primary Health Centers
+      </div>
+      <div class="trust-divider" aria-hidden="true"></div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+        </div>
+        Public Health Camps
+      </div>
+      <div class="trust-divider" aria-hidden="true"></div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M7 20V4l6 4v4l6 4v4"/></svg>
+        </div>
+        Industrial Health Units
+      </div>
+      <div class="trust-divider" aria-hidden="true"></div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        Campus Health Centers
+      </div>
+      <div class="trust-divider" aria-hidden="true"></div>
+      <div class="trust-item">
+        <div class="trust-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        Company Clinics
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       FEATURES
+  ═══════════════════════════════════════════ -->
+  <section class="features" id="features" aria-labelledby="features-heading">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">What Jeevia Does</span>
+        <h2 class="section-title" id="features-heading">
+          Everything a Health Worker Needs,<br>
+          <span class="gradient-text">Nothing They Don't</span>
+        </h2>
+        <p class="section-desc">Designed for the realities of Indian healthcare — variable connectivity, multilingual patients, high patient load, and minimal specialist availability.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal delay-1">
+          <div class="feature-icon icon-coral" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </div>
+          <h3 class="feature-title">Multimodal Symptom Intake</h3>
+          <p class="feature-desc">Patients can speak, type, or dictate symptoms in their native language. Works in Hindi, Tamil, Telugu, Bengali, and 18+ other languages via Bhashini & IndicConformer.</p>
+        </div>
+
+        <div class="feature-card reveal delay-2">
+          <div class="feature-icon icon-teal" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="12" cy="14" r="3"/><line x1="14.5" y1="16.5" x2="17" y2="19"/></svg>
+          </div>
+          <h3 class="feature-title">OCR Lab Report Analysis</h3>
+          <p class="feature-desc">Upload handwritten or printed lab reports. PaddleOCR extracts values, flags abnormals, and structures findings into the triage note automatically.</p>
+        </div>
+
+        <div class="feature-card reveal delay-3">
+          <div class="feature-icon icon-blend" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <h3 class="feature-title">AI Triage Summarization</h3>
+          <p class="feature-desc">Lightweight LLM (BioMistral-7B) generates a structured narrative summary — never a diagnosis — to support the reviewing clinician's decision.</p>
+        </div>
+
+        <div class="feature-card reveal delay-4">
+          <div class="feature-icon icon-teal" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <h3 class="feature-title">22-Language Support</h3>
+          <p class="feature-desc">IndicTrans2 translation ensures every patient can communicate in their native tongue, and every clinician sees notes in their preferred language.</p>
+        </div>
+
+        <div class="feature-card reveal delay-5">
+          <div class="feature-icon icon-coral" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h3 class="feature-title">Human-Review Workflow</h3>
+          <p class="feature-desc">Every AI output goes to a qualified reviewer. Red/Yellow/Green triage queue keeps critical patients at the front. Zero autonomous decisions.</p>
+        </div>
+
+        <div class="feature-card reveal delay-6">
+          <div class="feature-icon icon-blend" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="feature-title">Privacy-First Design</h3>
+          <p class="feature-desc">Consent-gated intake, anonymized IDs, minimal data retention, immutable audit logs, and role-based access controls — compliant with DPDP Act 2023.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       HOW IT WORKS
+  ═══════════════════════════════════════════ -->
+  <section class="how-it-works" id="how-it-works" aria-labelledby="how-heading">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">The Process</span>
+        <h2 class="section-title" id="how-heading">From Symptom to<br><span class="gradient-text">Structured Review</span></h2>
+        <p class="section-desc">A clear, three-step pipeline designed to be completed in under 4 minutes, keeping clinicians in full control.</p>
+      </div>
+
+      <div class="steps-row" role="list">
+        <div class="step step-1 reveal delay-1" role="listitem">
+          <div class="step-number" aria-hidden="true">1</div>
+          <h3 class="step-title">Patient Intake</h3>
+          <p class="step-desc">Patient speaks or types symptoms in any language. Uploads lab reports or images. System collects timeline, identifies missing info, and asks follow-up questions.</p>
+        </div>
+
+        <div class="step step-2 reveal delay-3" role="listitem">
+          <div class="step-number" aria-hidden="true">2</div>
+          <h3 class="step-title">AI Summarization</h3>
+          <p class="step-desc">Rules engine tags urgency (Red/Yellow/Green) using AIIMS ATP thresholds. LLM writes a structured triage note. OCR extracts lab values. Everything is clearly advisory.</p>
+        </div>
+
+        <div class="step step-3 reveal delay-5" role="listitem">
+          <div class="step-number" aria-hidden="true">3</div>
+          <h3 class="step-title">Doctor Review</h3>
+          <p class="step-desc">Clinician sees prioritized queue, reads the note, reviews conflicts, approves or edits, then decides on referral or treatment. AI only supports — never decides.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       SCENARIOS
+  ═══════════════════════════════════════════ -->
+  <section class="scenarios" id="scenarios" aria-labelledby="scenarios-heading">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-eyebrow">India-Wide Scenarios</span>
+        <h2 class="section-title" id="scenarios-heading">Built for Every<br><span class="gradient-text">Indian Healthcare Setting</span></h2>
+      </div>
+
+      <div class="scenarios-scroll" role="list" aria-label="Supported healthcare scenarios">
+        <div class="scenario-card" role="listitem">
+          <div class="scenario-emoji" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h6M12 6v6"/></svg>
+          </div>
+          <div class="scenario-tag">Outpatient</div>
+          <h3 class="scenario-title">OPD Queue Triage</h3>
+          <p class="scenario-desc">Prioritize high patient loads at government OPDs by urgency, not just arrival order. Reduce wait times for critical cases.</p>
+        </div>
+
+        <div class="scenario-card" role="listitem">
+          <div class="scenario-emoji" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </div>
+          <div class="scenario-tag">Maternal Health</div>
+          <h3 class="scenario-title">Antenatal Follow-up</h3>
+          <p class="scenario-desc">Auto-fire SMS and voice reminders for checkup schedules. Flag danger signs in maternal patients for immediate escalation.</p>
+        </div>
+
+        <div class="scenario-card" role="listitem">
+          <div class="scenario-emoji" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div class="scenario-tag">Campus</div>
+          <h3 class="scenario-title">Campus Fever Triage</h3>
+          <p class="scenario-desc">Screen students with fever symptoms quickly. Identify outbreak clusters and escalate to campus health authority with structured notes.</p>
+        </div>
+
+        <div class="scenario-card" role="listitem">
+          <div class="scenario-emoji" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M7 20V4l6 4v4l6 4v4"/></svg>
+          </div>
+          <div class="scenario-tag">Industrial</div>
+          <h3 class="scenario-title">Occupational Health Screening</h3>
+          <p class="scenario-desc">Periodic check-ins for factory workers. Log occupational exposure history and flag respiratory or musculoskeletal complaints for review.</p>
+        </div>
+
+        <div class="scenario-card" role="listitem">
+          <div class="scenario-emoji" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </div>
+          <div class="scenario-tag">Chronic Disease</div>
+          <h3 class="scenario-title">Chronic Disease Check-in</h3>
+          <p class="scenario-desc">Compare current vitals against previous records for diabetes, hypertension, and TB patients. Flag worsening trends for the doctor.</p>
+        </div>
+
+        <div class="scenario-card" role="listitem">
+          <div class="scenario-emoji" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+          </div>
+          <div class="scenario-tag">Health Camps</div>
+          <h3 class="scenario-title">Public Camp Screening</h3>
+          <p class="scenario-desc">Works offline for remote health camps. Queue syncs when connectivity returns. Generates referral notes for higher-level facilities.</p>
+        </div>
+
+        <div class="scenario-card" role="listitem">
+          <div class="scenario-emoji" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          </div>
+          <div class="scenario-tag">Referral</div>
+          <h3 class="scenario-title">Referral Note Prep</h3>
+          <p class="scenario-desc">Auto-generate structured referral notes for patients being transferred to higher facilities, capturing all collected context in one document.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       DISCLAIMER
+  ═══════════════════════════════════════════ -->
+  <section class="disclaimer" id="disclaimer" role="note" aria-labelledby="disclaimer-heading">
+    <div class="container">
+      <div class="disclaimer-inner">
+        <div class="disclaimer-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div>
+          <h2 class="disclaimer-title" id="disclaimer-heading">Important Safety Disclaimer</h2>
+          <p class="disclaimer-text">
+            <strong>Jeevia is an educational prototype for triage-support purposes only.</strong> It is explicitly non-diagnostic: it organizes patient-provided information, highlights urgency signals, and supports faster qualified review — but does not prescribe treatment or replace a qualified medical professional. All AI-generated content is advisory and must be reviewed by licensed healthcare staff before any clinical decision is made. This system uses synthetic or public sample data only; no real patient records are used. Outputs must never be acted upon without professional medical judgment.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-top">
+        <!-- Brand -->
+        <div class="footer-brand">
+          <div class="nav-logo" style="margin-bottom:0">
+            <div class="nav-logo-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5"/>
+                <path d="M8 12h8M12 8v8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span class="nav-logo-text">Jee<span>via</span></span>
+          </div>
+          <p class="footer-tagline">Multimodal Healthcare Triage Assistant for Government and Institutional Health Facilities across India.</p>
+          <div style="display:flex; gap: 12px;">
+            <span class="chip chip-coral">Educational Prototype</span>
+            <span class="chip chip-teal">Non-Diagnostic</span>
+          </div>
+        </div>
+
+        <!-- Product links -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Product</h4>
+          <ul class="footer-links">
+            <li><a href="#features"     class="footer-link">Features</a></li>
+            <li><a href="#how-it-works" class="footer-link">How it Works</a></li>
+            <li><a href="#scenarios"    class="footer-link">Scenarios</a></li>
+            <li><a href="auth.html"     class="footer-link">Sign In</a></li>
+            <li><a href="auth.html#signup" class="footer-link">Get Started</a></li>
+          </ul>
+        </div>
+
+        <!-- Roles -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">For Teams</h4>
+          <ul class="footer-links">
+            <li><a href="auth.html" class="footer-link">Doctors</a></li>
+            <li><a href="auth.html" class="footer-link">Nurses</a></li>
+            <li><a href="auth.html" class="footer-link">Supervisors</a></li>
+            <li><a href="auth.html" class="footer-link">Facility Admins</a></li>
+          </ul>
+        </div>
+
+        <!-- Legal -->
+        <div class="footer-col">
+          <h4 class="footer-col-title">Legal & Safety</h4>
+          <ul class="footer-links">
+            <li><a href="#disclaimer" class="footer-link">Disclaimer</a></li>
+            <li><a href="#"           class="footer-link">Privacy Policy</a></li>
+            <li><a href="#"           class="footer-link">Data Retention</a></li>
+            <li><a href="#"           class="footer-link">DPDP Compliance</a></li>
+            <li><a href="#"           class="footer-link">Audit Logs</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2025 Jeevia. Educational Prototype — Not for clinical deployment.</p>
+        <p class="footer-disclaimer-mini">All health-related outputs are advisory and reviewer-facing only. No real patient data is used.</p>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════
+       MOBILE BOTTOM CTA BAR
+  ═══════════════════════════════════════════ -->
+  <div class="mobile-cta-bar" aria-label="Mobile call to action" role="complementary">
+    <a href="auth.html" class="btn btn-secondary" id="mobile-signin">Sign In</a>
+    <a href="auth.html#signup" class="btn btn-primary" id="mobile-signup">Get Started</a>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       LANGUAGE MODAL
+  ═══════════════════════════════════════════ -->
+  <div class="lang-modal-overlay" id="lang-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="lang-modal-title">
+    <div class="lang-modal">
+      <h3 class="lang-modal-title" id="lang-modal-title">Select Language / भाषा चुनें</h3>
+      <div class="lang-grid" role="list">
+        <button class="lang-option active" data-lang="en" role="listitem">
+          <span class="lang-native">English</span>
+          <span class="lang-english">English</span>
+        </button>
+        <button class="lang-option" data-lang="hi" role="listitem">
+          <span class="lang-native">हिंदी</span>
+          <span class="lang-english">Hindi</span>
+        </button>
+        <button class="lang-option" data-lang="ta" role="listitem">
+          <span class="lang-native">தமிழ்</span>
+          <span class="lang-english">Tamil</span>
+        </button>
+        <button class="lang-option" data-lang="te" role="listitem">
+          <span class="lang-native">తెలుగు</span>
+          <span class="lang-english">Telugu</span>
+        </button>
+        <button class="lang-option" data-lang="bn" role="listitem">
+          <span class="lang-native">বাংলা</span>
+          <span class="lang-english">Bengali</span>
+        </button>
+        <button class="lang-option" data-lang="kn" role="listitem">
+          <span class="lang-native">ಕನ್ನಡ</span>
+          <span class="lang-english">Kannada</span>
+        </button>
+        <button class="lang-option" data-lang="ml" role="listitem">
+          <span class="lang-native">മലയാളം</span>
+          <span class="lang-english">Malayalam</span>
+        </button>
+        <button class="lang-option" data-lang="mr" role="listitem">
+          <span class="lang-native">मराठी</span>
+          <span class="lang-english">Marathi</span>
+        </button>
+        <button class="lang-option" data-lang="gu" role="listitem">
+          <span class="lang-native">ગુજરાતી</span>
+          <span class="lang-english">Gujarati</span>
+        </button>
+      </div>
+      <div style="display:flex; gap:12px; margin-top: 20px;">
+        <button class="btn btn-primary" style="flex:1" id="lang-confirm">Confirm</button>
+        <button class="btn btn-secondary" id="lang-close">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MOBILE HORIZONTAL SLIDER NAVIGATION BAR (Centric Mobile Nav) ══ -->
+  <nav class="landing-slider-nav jeevia-slider-nav dock-bottom" role="navigation" aria-label="Mobile slider navigation">
+    <div class="jeevia-slider-track">
+      <a href="#home" class="jeevia-slider-item active" aria-label="Home">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </span>
+        <span>Home</span>
+      </a>
+      <a href="#features" class="jeevia-slider-item" aria-label="Features">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </span>
+        <span>Features</span>
+      </a>
+      <a href="#how-it-works" class="jeevia-slider-item" aria-label="How it Works">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+        </span>
+        <span>Workflow</span>
+      </a>
+      <a href="#scenarios" class="jeevia-slider-item" aria-label="Facility Scenarios">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 21h18M3 7v14M21 7v14M6 7V3h12v4M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>
+        </span>
+        <span>Facilities</span>
+      </a>
+      <a href="#disclaimer" class="jeevia-slider-item" aria-label="Safety &amp; AI Ethics">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </span>
+        <span>Safety</span>
+      </a>
+      <a href="doctor-dashboard.html" class="jeevia-slider-item active-teal" aria-label="Doctor Dashboard">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </span>
+        <span>Doctor</span>
+      </a>
+      <a href="supervisor-dashboard.html" class="jeevia-slider-item" aria-label="Supervisor Portal">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </span>
+        <span>Supervisor</span>
+      </a>
+      <a href="patient-intake.html" class="jeevia-slider-item" aria-label="Patient Kiosk">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <span>Patient Kiosk</span>
+      </a>
+      <a href="auth.html" class="jeevia-slider-item" aria-label="Staff Sign In">
+        <span class="jeevia-slider-icon">
+          <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+        </span>
+        <span>Sign In</span>
+      </a>
+    </div>
+  </nav>
+
+  <script src="js/nav.js"></script>
+  <script src="js/landing.js"></script>
+</body>
+</html>

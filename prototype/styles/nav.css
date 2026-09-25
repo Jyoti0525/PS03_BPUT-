@@ -1,0 +1,457 @@
+/* ============================================================
+   JEEVIA — Universal Responsive Navigation System
+   Horizontal Slider Nav on Mobile (<900px)
+   Sidewise Panel or Centered Header on Desktop (≥901px)
+   ============================================================ */
+
+/* ── Mobile Horizontal Slider Navigation Bar ────────────────── */
+.jeevia-slider-nav {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 950;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* Bottom dock positioning (default for dashboards) */
+.jeevia-slider-nav.dock-bottom {
+  bottom: 0;
+  padding: 0 0 env(safe-area-inset-bottom, 8px) 0;
+  background: linear-gradient(180deg, rgba(28,28,46,0) 0%, rgba(28,28,46,0.92) 20%, #1C1C2E 100%);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 -8px 32px rgba(10, 10, 20, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Floating centered pill dock variant */
+.jeevia-slider-nav.floating-dock {
+  bottom: 12px;
+  padding: 0 12px;
+  background: none;
+  border-top: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.jeevia-slider-nav.floating-dock .jeevia-slider-track {
+  background: rgba(28, 28, 46, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(242, 145, 145, 0.15);
+  padding: 6px 8px;
+  max-width: 96vw;
+  margin: 0 auto;
+}
+
+/* Top sticky slider variant (e.g. for landing & kiosk) */
+.jeevia-slider-nav.dock-top {
+  top: 56px;
+  bottom: auto;
+  padding: 8px 0;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid rgba(232, 232, 240, 0.9);
+  box-shadow: 0 4px 20px rgba(28, 28, 46, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* The Horizontal Slider Track: Single row, smooth swipe/scroll */
+.jeevia-slider-track {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  pointer-events: all;
+  padding: 8px 16px;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+/* Hide scrollbar completely */
+.jeevia-slider-track::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Edge fade gradients indicating more items to swipe */
+.jeevia-slider-container {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+}
+
+.jeevia-slider-nav::before,
+.jeevia-slider-nav::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.jeevia-slider-nav.dock-bottom::before {
+  left: 0;
+  background: linear-gradient(90deg, #1C1C2E 0%, rgba(28,28,46,0) 100%);
+}
+.jeevia-slider-nav.dock-bottom::after {
+  right: 0;
+  background: linear-gradient(270deg, #1C1C2E 0%, rgba(28,28,46,0) 100%);
+}
+
+.jeevia-slider-nav.dock-top::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0) 100%);
+}
+.jeevia-slider-nav.dock-top::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* Individual Slider Item (Centric Pill Design) */
+.jeevia-slider-item {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  min-height: 42px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Light mode slider items (for dock-top or light backgrounds) */
+.jeevia-slider-nav.dock-top .jeevia-slider-item,
+.jeevia-slider-nav.light-theme .jeevia-slider-item {
+  background: rgba(28, 28, 46, 0.04);
+  border: 1px solid rgba(28, 28, 46, 0.08);
+  color: #4A4A6A;
+}
+
+.jeevia-slider-item:hover,
+.jeevia-slider-item:focus-visible {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.jeevia-slider-nav.dock-top .jeevia-slider-item:hover,
+.jeevia-slider-nav.light-theme .jeevia-slider-item:hover {
+  color: #1C1C2E;
+  background: rgba(242, 145, 145, 0.12);
+  border-color: rgba(242, 145, 145, 0.35);
+}
+
+/* Active Slider Item */
+.jeevia-slider-item.active {
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #F29191 0%, #E07070 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 14px rgba(242, 145, 145, 0.45);
+  font-weight: 700;
+}
+
+.jeevia-slider-item.active-teal {
+  color: #1C1C2E;
+  background: linear-gradient(135deg, #B1E5E6 0%, #80C8CA 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 14px rgba(177, 229, 230, 0.4);
+  font-weight: 700;
+}
+
+/* Slider Item Icon */
+.jeevia-slider-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 13px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.jeevia-slider-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Slider Item Badge */
+.jeevia-slider-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: white;
+  background: #DC2626;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+  margin-left: 2px;
+}
+
+.jeevia-slider-badge.green {
+  background: #16A34A;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4);
+}
+
+.jeevia-slider-badge.yellow {
+  background: #D97706;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4);
+}
+
+.jeevia-slider-badge.teal {
+  background: #0F766E;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.4);
+}
+
+/* Centric layout on mobile when items don't overflow */
+@media (max-width: 900px) {
+  .jeevia-slider-nav {
+    display: block;
+  }
+
+  /* Body / main content offset to prevent mobile bar overlap */
+  body.has-slider-bottom {
+    padding-bottom: 74px !important;
+  }
+
+  body.has-slider-top {
+    padding-top: 108px !important;
+  }
+
+  /* Auto-centering if items fit within viewport */
+  .jeevia-slider-track.centered {
+    justify-content: center;
+  }
+}
+
+/* ── Desktop View (≥901px): Shift to Sidewise Panel or Centered Layout ── */
+@media (min-width: 901px) {
+  .jeevia-slider-nav {
+    display: none !important;
+  }
+
+  /* Desktop Centered Header Navigation Layout */
+  .jeevia-desktop-centered-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .jeevia-desktop-centered-nav .nav-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mid, #4A4A6A);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .jeevia-desktop-centered-nav .nav-pill:hover {
+    color: var(--dark, #1C1C2E);
+    background: rgba(242, 145, 145, 0.1);
+    border-color: rgba(242, 145, 145, 0.25);
+  }
+
+  .jeevia-desktop-centered-nav .nav-pill.active {
+    color: #FFFFFF;
+    background: var(--coral, #F29191);
+    box-shadow: 0 2px 10px rgba(242, 145, 145, 0.35);
+  }
+
+  /* Desktop Sidewise Navigation Panel */
+  .jeevia-desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    flex-shrink: 0;
+    background: #FFFFFF;
+    border-right: 1px solid var(--border, #E8E8F0);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+}
+
+/* ── Swipe / Drag Indicator Animation ───────────────────────── */
+@keyframes pulseHorizontal {
+  0%, 100% { transform: translateX(0); opacity: 0.8; }
+  50% { transform: translateX(4px); opacity: 1; }
+}
+
+.jeevia-slider-hint {
+  display: none;
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+@media (max-width: 480px) {
+  .jeevia-slider-hint {
+    display: block;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE-SPECIFIC INTEGRATIONS FOR JEEVIA SLIDER NAVIGATION
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Doctor Dashboard Integration ── */
+@media (max-width: 900px) {
+  .doctor-bottom-nav.jeevia-slider-nav {
+    display: block !important;
+    height: auto;
+    background: #1C1C2E;
+    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.45);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .doctor-bottom-nav .jeevia-slider-track {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .doctor-bottom-nav .doc-tab-item {
+    min-height: 44px;
+    height: 44px;
+    padding: 0 14px;
+    flex-direction: row;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+  .doctor-bottom-nav .doc-tab-item::before {
+    display: none;
+  }
+  .dash-main {
+    padding-bottom: 74px !important;
+  }
+}
+
+/* ── Supervisor Dashboard Integration ── */
+@media (min-width: 901px) {
+  .sv-tabs {
+    justify-content: center;
+    gap: 16px;
+    padding: 0 32px;
+  }
+  .sv-mobile-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .sv-tabs {
+    display: none !important; /* Replaced by bottom centric slider bar */
+  }
+  .sv-body {
+    padding-bottom: 84px !important;
+  }
+  .sv-mobile-nav.jeevia-slider-nav {
+    display: block !important;
+    background: #1C1C2E;
+    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.45);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .sv-mobile-nav .jeevia-slider-track {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .sv-mobile-nav .sv-slider-tab {
+    min-height: 44px;
+    height: 44px;
+    padding: 0 14px;
+    flex-direction: row;
+    gap: 6px;
+  }
+}
+
+/* ── Landing Page Integration ── */
+@media (min-width: 901px) {
+  .landing-slider-nav {
+    display: none !important;
+  }
+  .navbar .nav-center {
+    display: flex !important;
+    justify-content: center;
+    flex: 1;
+    margin: 0 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar .nav-center {
+    display: none !important;
+  }
+  .landing-slider-nav.jeevia-slider-nav {
+    display: block !important;
+  }
+  body.has-landing-slider {
+    padding-bottom: 74px !important;
+  }
+}
+
+/* ── Patient Intake Kiosk Integration ── */
+@media (max-width: 900px) {
+  .patient-slider-nav.jeevia-slider-nav {
+    display: block !important;
+  }
+  .pi-body {
+    padding-bottom: 80px !important;
+  }
+}
+
+/* ── Auth Integration ── */
+@media (max-width: 900px) {
+  .auth-slider-nav.jeevia-slider-nav {
+    display: block !important;
+  }
+  .auth-page {
+    padding-bottom: 74px !important;
+  }
+}
+

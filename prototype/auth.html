@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In / Sign Up — Jeevia Healthcare</title>
+  <meta name="description" content="Sign in or create your Jeevia account to access the healthcare triage assistant for your facility.">
+  <meta name="theme-color" content="#F29191">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/auth.css">
+  <link rel="stylesheet" href="styles/nav.css">
+</head>
+<body>
+<div class="auth-page">
+
+  <!-- ═══════════════════════════════════════════
+       LEFT — BRAND PANEL
+  ═══════════════════════════════════════════ -->
+  <aside class="auth-brand-panel" aria-label="Jeevia brand information">
+    <div class="auth-brand-blobs" aria-hidden="true">
+      <div class="auth-blob auth-blob-1"></div>
+      <div class="auth-blob auth-blob-2"></div>
+    </div>
+
+    <!-- Logo -->
+    <a href="index.html" class="auth-brand-logo" aria-label="Back to Jeevia home">
+      <div class="auth-brand-logo-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5" fill="none"/>
+          <path d="M8 12h8M12 8v8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="auth-brand-logo-text">Jee<span>via</span></span>
+    </a>
+
+    <!-- Brand content -->
+    <div class="auth-brand-content">
+      <h1 class="auth-brand-heading">
+        Triage Smarter.<br>
+        Review <span class="accent">Faster.</span><br>
+        Help More.
+      </h1>
+      <p class="auth-brand-desc">
+        Join doctors, nurses, and health supervisors using Jeevia's AI-powered triage assistant across India's government hospitals, PHCs, and health camps.
+      </p>
+
+      <!-- Role pills -->
+      <div class="auth-role-pills" role="list" aria-label="Available user roles">
+        <div class="auth-role-pill" role="listitem">
+          <div class="auth-role-pill-icon pill-doctor" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="auth-role-pill-info">
+            <div class="auth-role-pill-title">Doctor / Medical Officer</div>
+            <div class="auth-role-pill-sub">Review queue · Approve triage · Referrals</div>
+          </div>
+          <span class="auth-role-pill-arrow" aria-hidden="true">›</span>
+        </div>
+
+        <div class="auth-role-pill" role="listitem">
+          <div class="auth-role-pill-icon pill-patient" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="auth-role-pill-info">
+            <div class="auth-role-pill-title">Patient</div>
+            <div class="auth-role-pill-sub">Submit symptoms · Upload reports · Follow-up</div>
+          </div>
+          <span class="auth-role-pill-arrow" aria-hidden="true">›</span>
+        </div>
+
+        <div class="auth-role-pill" role="listitem">
+          <div class="auth-role-pill-icon pill-supervisor" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="auth-role-pill-info">
+            <div class="auth-role-pill-title">Supervisor / Admin</div>
+            <div class="auth-role-pill-sub">Facility setup · Audit logs · Oversight</div>
+          </div>
+          <span class="auth-role-pill-arrow" aria-hidden="true">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brand footer note -->
+    <div class="auth-brand-footer">
+      Educational prototype. All outputs are advisory and reviewer-facing only. Not for clinical deployment.
+    </div>
+  </aside>
+
+
+  <!-- ═══════════════════════════════════════════
+       RIGHT — FORM PANEL
+  ═══════════════════════════════════════════ -->
+  <main class="auth-form-panel" id="auth-main" aria-label="Authentication form">
+
+    <!-- Mobile logo (shown only on small screens) -->
+    <div class="auth-mobile-logo" aria-hidden="false">
+      <a href="index.html" class="auth-brand-logo">
+        <div class="auth-brand-logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke-width="1.5" fill="none"/>
+            <path d="M8 12h8M12 8v8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="auth-brand-logo-text">Jee<span>via</span></span>
+      </a>
+    </div>
+
+    <div class="auth-form-box">
+
+      <!-- ── TABS ────────────────────────────── -->
+      <div class="auth-tabs" role="tablist" aria-label="Authentication options">
+        <button class="auth-tab active" id="tab-signin" role="tab" aria-selected="true" aria-controls="panel-signin">Sign In</button>
+        <button class="auth-tab" id="tab-signup" role="tab" aria-selected="false" aria-controls="panel-signup">Sign Up</button>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           SIGN IN PANEL
+      ══════════════════════════════════════ -->
+      <div id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+        <div class="form-heading">
+          <h2>Welcome back</h2>
+          <p>Sign in to your Jeevia account</p>
+        </div>
+
+        <form id="signin-form" novalidate aria-label="Sign in form">
+          <div style="display:flex; flex-direction:column; gap: 20px;">
+
+            <div class="form-group">
+              <label class="form-label" for="signin-phone">Phone Number</label>
+              <div class="phone-input-group">
+                <div class="phone-prefix" aria-label="India country code">+91</div>
+                <input
+                  type="tel"
+                  id="signin-phone"
+                  class="form-input"
+                  placeholder="98765 43210"
+                  maxlength="10"
+                  inputmode="numeric"
+                  autocomplete="tel"
+                  aria-required="true"
+                  aria-describedby="signin-phone-help"
+                >
+              </div>
+              <span id="signin-phone-help" class="sr-only">Enter your 10-digit mobile number</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="signin-password">Password</label>
+              <div class="input-with-icon" style="position:relative;">
+                <input
+                  type="password"
+                  id="signin-password"
+                  class="form-input"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  aria-required="true"
+                  style="padding-right: 48px;"
+                >
+                <button type="button" class="password-toggle" id="signin-pwd-toggle" aria-label="Toggle password visibility">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div style="text-align: right; margin-top: -12px;">
+              <a href="#" id="forgot-pwd-link" style="font-size: 13px; color: var(--coral); font-weight: 600;">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; padding: 16px;" id="signin-submit-btn">
+              Sign In
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path d="M3 9h12M9 3l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+          </div>
+        </form>
+
+        <p class="auth-bottom-link">
+          New to Jeevia? <button type="button" id="goto-signup-btn">Create account →</button>
+        </p>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           SIGN UP PANEL
+      ══════════════════════════════════════ -->
+      <div id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" style="display:none;">
+
+        <!-- Step progress dots -->
+        <div class="step-indicator" id="signup-step-indicator" aria-label="Sign up progress" role="progressbar" aria-valuenow="1" aria-valuemax="5">
+          <div class="step-dot active" id="dot-1" aria-label="Step 1: Select role"></div>
+          <div class="step-dot" id="dot-2" aria-label="Step 2: Personal info"></div>
+          <div class="step-dot" id="dot-3" aria-label="Step 3: OTP verification"></div>
+          <div class="step-dot" id="dot-4" aria-label="Step 4: Account setup"></div>
+          <div class="step-dot" id="dot-5" aria-label="Step 5: Complete"></div>
+        </div>
+
+        <div class="auth-steps-container">
+
+          <!-- ── STEP 1 — Role Selection ────── -->
+          <div class="auth-step-panel active" id="step-1" aria-label="Step 1: Select your role">
+            <div class="form-heading">
+              <h2>Select Your Role</h2>
+              <p>Select your role to personalize your experience</p>
+            </div>
+
+            <div class="role-grid" role="group" aria-label="Select your role">
+              <button type="button" class="role-card role-doctor" id="role-doctor" data-role="doctor" aria-pressed="false">
+                <span class="role-check" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></span>
+                <span class="role-emoji" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </span>
+                <span class="role-title">Doctor</span>
+                <span class="role-sub">Medical Officer · Specialist</span>
+              </button>
+
+              <button type="button" class="role-card role-patient" id="role-patient" data-role="patient" aria-pressed="false">
+                <span class="role-check" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></span>
+                <span class="role-emoji" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                <span class="role-title">Patient</span>
+                <span class="role-sub">Outpatient · Resident</span>
+              </button>
+
+              <button type="button" class="role-card role-supervisor" id="role-supervisor" data-role="supervisor" aria-pressed="false">
+                <span class="role-check" aria-hidden="true"><svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg></span>
+                <span class="role-emoji" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </span>
+                <span class="role-title">Supervisor</span>
+                <span class="role-sub">Admin · Nurse-in-charge</span>
+              </button>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%; padding:16px;" id="step1-next" disabled aria-disabled="true">
+              Continue
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+
+
+          <!-- ── STEP 2 — Personal Info ─────── -->
+          <div class="auth-step-panel" id="step-2" aria-label="Step 2: Personal information">
+            <div class="form-heading">
+              <h2>Personal Info</h2>
+              <p>We need a few details to set up your account</p>
+            </div>
+
+            <form id="signup-info-form" novalidate style="display:flex; flex-direction:column; gap:18px;">
+              <div class="form-group">
+                <label class="form-label" for="signup-name">Full Name</label>
+                <input
+                  type="text"
+                  id="signup-name"
+                  class="form-input"
+                  placeholder="e.g., Dr. Priya Sharma"
+                  autocomplete="name"
+                  aria-required="true"
+                  maxlength="80"
+                >
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="signup-phone">Phone Number</label>
+                <div class="phone-input-group">
+                  <div class="phone-prefix" aria-label="Country code India">+91</div>
+                  <div class="input-with-suffix" style="flex:1; position:relative;">
+                    <input
+                      type="tel"
+                      id="signup-phone"
+                      class="form-input"
+                      placeholder="98765 43210"
+                      maxlength="10"
+                      inputmode="numeric"
+                      autocomplete="tel"
+                      aria-required="true"
+                      style="padding-right: 90px;"
+                    >
+                    <button type="button" class="input-suffix-btn" id="send-otp-btn">Send OTP</button>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-primary" style="width:100%; padding:16px;" id="step2-next">
+                Send OTP & Continue
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+
+              <button type="button" class="btn btn-ghost" id="step2-back">← Back</button>
+            </form>
+          </div>
+
+
+          <!-- ── STEP 3 — OTP Verification ──── -->
+          <div class="auth-step-panel" id="step-3" aria-label="Step 3: OTP verification">
+            <div class="form-heading">
+              <h2>Verify Number</h2>
+              <p>Enter the 6-digit OTP sent to your phone</p>
+            </div>
+
+            <div class="otp-info">
+              <div class="otp-phone-display">OTP sent to <span id="otp-phone-display">+91 XXXXX XXXXX</span></div>
+            </div>
+
+            <div class="otp-group" role="group" aria-label="OTP input fields">
+              <input type="number" class="otp-input" id="otp-1" maxlength="1" inputmode="numeric" aria-label="OTP digit 1" min="0" max="9">
+              <input type="number" class="otp-input" id="otp-2" maxlength="1" inputmode="numeric" aria-label="OTP digit 2" min="0" max="9">
+              <input type="number" class="otp-input" id="otp-3" maxlength="1" inputmode="numeric" aria-label="OTP digit 3" min="0" max="9">
+              <input type="number" class="otp-input" id="otp-4" maxlength="1" inputmode="numeric" aria-label="OTP digit 4" min="0" max="9">
+              <input type="number" class="otp-input" id="otp-5" maxlength="1" inputmode="numeric" aria-label="OTP digit 5" min="0" max="9">
+              <input type="number" class="otp-input" id="otp-6" maxlength="1" inputmode="numeric" aria-label="OTP digit 6" min="0" max="9">
+            </div>
+
+            <div class="otp-resend" aria-live="polite">
+              Resend OTP in <span class="otp-timer" id="otp-timer" aria-label="Resend timer">60s</span>
+              <button type="button" class="otp-resend-btn" id="otp-resend-btn" aria-label="Resend OTP">Resend</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top: 20px;">
+              <button class="btn btn-primary" style="width:100%; padding:16px;" id="step3-next">
+                Verify OTP
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+              <button type="button" class="btn btn-ghost" id="step3-back">← Back</button>
+            </div>
+          </div>
+
+
+          <!-- ── STEP 4 — Account Setup ─────── -->
+          <div class="auth-step-panel" id="step-4" aria-label="Step 4: Account setup">
+            <div class="form-heading">
+              <h2>Set Up Account</h2>
+              <p>Create a secure password for your Jeevia account</p>
+            </div>
+
+            <form id="signup-account-form" novalidate style="display:flex; flex-direction:column; gap:18px;">
+              <div class="form-group">
+                <label class="form-label" for="signup-password">Password</label>
+                <div style="position:relative;">
+                  <input
+                    type="password"
+                    id="signup-password"
+                    class="form-input"
+                    placeholder="Min. 8 characters"
+                    autocomplete="new-password"
+                    aria-required="true"
+                    style="padding-right: 48px;"
+                  >
+                  <button type="button" class="password-toggle" id="signup-pwd-toggle" aria-label="Toggle password visibility">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="signup-confirm-password">Confirm Password</label>
+                <div style="position:relative;">
+                  <input
+                    type="password"
+                    id="signup-confirm-password"
+                    class="form-input"
+                    placeholder="Re-enter password"
+                    autocomplete="new-password"
+                    aria-required="true"
+                    style="padding-right: 48px;"
+                  >
+                  <button type="button" class="password-toggle" id="signup-confirm-pwd-toggle" aria-label="Toggle confirm password visibility">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Professional verification (Doctor/Supervisor only) -->
+              <div id="professional-section" class="verification-section" style="display:none;" aria-label="Professional verification">
+                <div class="verification-title">
+                  Professional Verification
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="signup-reg-id" id="reg-id-label">Registration / Employee ID</label>
+                  <input
+                    type="text"
+                    id="signup-reg-id"
+                    class="form-input teal-focus"
+                    placeholder="e.g., MCI-XXXX-YYYY or EMP-001"
+                    aria-describedby="reg-id-desc"
+                  >
+                  <span id="reg-id-desc" style="font-size: 12px; color: var(--muted);">Doctors: MCI Registration No. | Supervisors: Employee ID</span>
+                </div>
+                <div class="form-group" style="margin-top: 12px;">
+                  <label class="form-label">Facility / Institution</label>
+                  <input
+                    type="text"
+                    id="signup-facility"
+                    class="form-input teal-focus"
+                    placeholder="e.g., PHC Manikpur, UP"
+                  >
+                </div>
+              </div>
+
+              <!-- Terms -->
+              <label class="terms-row" for="terms-check">
+                <div class="terms-checkbox" id="terms-check" role="checkbox" aria-checked="false" tabindex="0" aria-required="true"></div>
+                <span class="terms-text">
+                  I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I understand Jeevia is an educational prototype and all outputs require qualified human review.
+                </span>
+              </label>
+
+              <button type="button" class="btn btn-primary" style="width:100%; padding:16px;" id="step4-next">
+                Create Account
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+
+              <button type="button" class="btn btn-ghost" id="step4-back">← Back</button>
+            </form>
+          </div>
+
+
+          <!-- ── STEP 5 — Success ───────────── -->
+          <div class="auth-step-panel" id="step-5" aria-label="Step 5: Registration complete">
+            <div class="success-screen">
+              <div class="success-icon" role="img" aria-label="Success checkmark">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--routine)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <h2 class="success-title">You're all set!</h2>
+              <p class="success-desc" id="success-desc">
+                Welcome to Jeevia, <strong id="success-name">Doctor</strong>!<br>
+                Your account has been created successfully.<br>
+                Redirecting to your dashboard...
+              </p>
+
+              <div style="display:flex; flex-direction:column; gap:12px; max-width: 300px; margin: 0 auto;">
+                <a href="index.html" class="btn btn-primary" style="padding: 16px;" id="go-to-dashboard">
+                  Go to Dashboard →
+                </a>
+                <a href="index.html" class="btn btn-secondary" style="padding: 12px; font-size: 13px;">
+                  Back to Home
+                </a>
+              </div>
+
+              <div style="margin-top: 24px; padding: 16px; background: var(--teal-light); border-radius: var(--r-md); font-size: 12px; color: var(--teal-dark); text-align: left;">
+                <strong>Reminder:</strong> All AI outputs in Jeevia are advisory. Every triage note must be reviewed by a qualified medical professional before any clinical action.
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /auth-steps-container -->
+
+        <p class="auth-bottom-link" id="signup-bottom-link">
+          Already have an account? <button type="button" id="goto-signin-btn">Sign In →</button>
+        </p>
+
+      </div><!-- /panel-signup -->
+
+    </div><!-- /auth-form-box -->
+  </main>
+</div><!-- /auth-page -->
+
+
+<!-- ── Language Floating Button ─────────────────────────────── -->
+<button class="lang-float-btn" id="auth-lang-btn" aria-label="Change language" aria-haspopup="dialog">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+</button>
+
+<!-- ── Language Modal ───────────────────────────────────────── -->
+<div class="lang-modal-overlay" id="auth-lang-modal" role="dialog" aria-modal="true" aria-labelledby="auth-lang-title">
+  <div class="lang-modal">
+    <h3 class="lang-modal-title" id="auth-lang-title">Select Language / भाषा चुनें</h3>
+    <div class="lang-grid" role="list">
+      <button class="lang-option active" data-lang="en" role="listitem"><span class="lang-native">English</span><span class="lang-english">English</span></button>
+      <button class="lang-option" data-lang="hi" role="listitem"><span class="lang-native">हिंदी</span><span class="lang-english">Hindi</span></button>
+      <button class="lang-option" data-lang="ta" role="listitem"><span class="lang-native">தமிழ்</span><span class="lang-english">Tamil</span></button>
+      <button class="lang-option" data-lang="te" role="listitem"><span class="lang-native">తెలుగు</span><span class="lang-english">Telugu</span></button>
+      <button class="lang-option" data-lang="bn" role="listitem"><span class="lang-native">বাংলা</span><span class="lang-english">Bengali</span></button>
+      <button class="lang-option" data-lang="kn" role="listitem"><span class="lang-native">ಕನ್ನಡ</span><span class="lang-english">Kannada</span></button>
+      <button class="lang-option" data-lang="ml" role="listitem"><span class="lang-native">മലയാളം</span><span class="lang-english">Malayalam</span></button>
+      <button class="lang-option" data-lang="mr" role="listitem"><span class="lang-native">मराठी</span><span class="lang-english">Marathi</span></button>
+      <button class="lang-option" data-lang="gu" role="listitem"><span class="lang-native">ગુજરાતી</span><span class="lang-english">Gujarati</span></button>
+    </div>
+    <div style="display:flex; gap:12px; margin-top: 20px;">
+      <button class="btn btn-primary" style="flex:1" id="auth-lang-confirm">Confirm</button>
+      <button class="btn btn-secondary" id="auth-lang-close">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MOBILE CENTRIC HORIZONTAL SLIDER NAVIGATION BAR ══ -->
+<nav class="auth-slider-nav jeevia-slider-nav dock-bottom" role="navigation" aria-label="Portal Navigation">
+  <div class="jeevia-slider-track">
+    <a href="index.html" class="jeevia-slider-item" aria-label="Home">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </span>
+      <span>Home</span>
+    </a>
+    <button class="jeevia-slider-item active" onclick="document.querySelector('.auth-role-tab[data-role=\'doctor\']')?.click()" aria-label="Doctor Login">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </span>
+      <span>Doctor</span>
+    </button>
+    <button class="jeevia-slider-item" onclick="document.querySelector('.auth-role-tab[data-role=\'supervisor\']')?.click()" aria-label="Supervisor Login">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </span>
+      <span>Supervisor</span>
+    </button>
+    <button class="jeevia-slider-item" onclick="document.querySelector('.auth-role-tab[data-role=\'nurse\']')?.click()" aria-label="Health Worker Login">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      </span>
+      <span>Nurse / ANM</span>
+    </button>
+    <a href="patient-intake.html" class="jeevia-slider-item" aria-label="Patient Kiosk">
+      <span class="jeevia-slider-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </span>
+      <span>Patient Kiosk</span>
+    </a>
+  </div>
+</nav>
+
+<script src="js/nav.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>
