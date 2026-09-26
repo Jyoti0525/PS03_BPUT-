@@ -2,8 +2,8 @@
 
 **Human-in-the-loop multimodal triage assistant for government and institutional health facilities.**
 
-> **Educational prototype — triage support only.** Jeevia does not diagnose, prescribe or replace a qualified
-> professional. It uses synthetic data only. Every health-related output is advisory and reviewer-facing.
+> **Triage support only.** Jeevia does not diagnose, prescribe or replace a qualified
+> professional. Every health-related output is advisory and reviewer-facing. The three sample patients are fictional.
 
 **Live:** https://jeevia-triage.vercel.app (web) · https://jeevia-api.onrender.com/docs (API) · sample kiosk link https://jeevia-triage.vercel.app/k/MANIKPUR
 
