@@ -89,18 +89,28 @@ If the network is down, the intake is saved on the device and sent automatically
    - **Export** — PDF, print, JSON, CSV or FHIR R4.
 4. **Safety nets** — unreviewed *Critical* cases auto-escalate after 15 minutes (*Semi-urgent* after 60).
 
-### 4.7 After the visit
+### 4.7 Referral hand-off with a QR summary
+1. On the case, the doctor presses **Share QR** (or keeps **Attach QR summary** ticked when sending a referral).
+2. Jeevia creates a link valid for 24 hours to 30 days and shows a **QR code** plus a **6-digit access code** (shown once). **Print slip** gives a one-page slip with both.
+3. The receiving clinician scans the QR (`/s/…`), enters the code and sees: patient details, token, urgency and any override, the reviewed summary, flags, vitals and report values, the referral, and the **uploaded documents** (prescriptions, lab slips, photos) to view or print.
+4. Eight wrong codes lock the link; the doctor can revoke it any time from the same dialog; every opening is in the audit log.
+
+### 4.8 After the visit
 - The patient sees the visit as *Reviewed by a doctor* or *Referred* in `/patient`, plus any check-up reminders (SMS or voice).
-- Raw voice recordings are deleted after 24 hours, photos after 3 days and reports after 7 days (`/admin/retention`); the structured note stays.
+- Raw voice recordings are deleted after 24 hours, photos after 3 days and reports after 30 days (`/admin/retention`); the structured note stays.
 - Every view, edit, override, referral and export is in the hash-chained audit log (`/admin/audit` → *Verify chain*).
 
-## 5. Signing in
+## 5. System status
+
+The landing page shows live status (checked every 20 seconds) for the website, API server, database, SMS codes and document storage, and the header shows a coloured dot. On the free Render plan the API sleeps after 15 idle minutes; **Wake server** brings it back in 30–60 seconds, and a scheduled GitHub workflow pings it every 10 minutes to keep it awake. Signed-in supervisors also get **Restart server** once a Render API key is configured.
+
+## 6. Signing in
 
 - **First time:** phone → one-time code by SMS (Twilio Verify) → register → optional PIN.
 - **Next time:** phone + code, or phone + PIN on the same device (a PIN only works on the device where it was created).
 - **Sample walkthrough accounts** (code `123456`): doctor 9000000001, nurse 9000000002, receptionist 9000000003, supervisor 9000000004, employer 9000000005, patient 9876543210. They belong to the sample facility *PHC Manikpur*, whose kiosk link is `/k/MANIKPUR`.
 
-## 6. Where things run
+## 7. Where things run
 
 | Part | Where |
 |---|---|
@@ -108,4 +118,4 @@ If the network is down, the intake is saved on the device and sent automatically
 | API | Render web service `jeevia-api` |
 | Database | Render PostgreSQL `jeevia-db` (locally: Homebrew Postgres 15, database `jeevia`) |
 | SMS one-time codes | Twilio Verify |
-| Uploaded reports and photos | Cloudflare R2 bucket (S3-compatible) |
+| Uploaded reports and photos | Cloudinary (private, `jeevia/<facility>/<yyyy-mm>/<kind>/`), served only through the API with signed downloads |
