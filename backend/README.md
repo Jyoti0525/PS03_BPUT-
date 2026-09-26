@@ -1,6 +1,6 @@
 # Jeevia API
 
-FastAPI + SQLAlchemy 2. PostgreSQL in Docker (JSONB notes, append-only audit trigger); SQLite for quick local runs and tests.
+FastAPI + SQLAlchemy 2 on PostgreSQL (Neon in production; JSONB notes, append-only audit trigger); SQLite for quick tests. Files in Cloudinary, SMS codes via Twilio Verify. See the root README for configuration and ../docs/OPERATIONS.md for running it.
 
 ```bash
 python3.12 -m venv .venv

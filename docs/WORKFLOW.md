@@ -116,6 +116,6 @@ The landing page shows live status (checked every 20 seconds) for the website, A
 |---|---|
 | Website, dashboards, kiosk | Vercel — `https://jeevia-triage.vercel.app` |
 | API | Render web service `jeevia-api` |
-| Database | Render PostgreSQL `jeevia-db` (locally: Homebrew Postgres 15, database `jeevia`) |
+| Database | Neon serverless PostgreSQL, project `jeevia`, Singapore (locally: Homebrew Postgres 15, database `jeevia`) |
 | SMS one-time codes | Twilio Verify |
 | Uploaded reports and photos | Cloudinary (private, `jeevia/<facility>/<yyyy-mm>/<kind>/`), served only through the API with signed downloads |

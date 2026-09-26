@@ -1,11 +1,6 @@
-# Render blueprint — Jeevia API + Postgres. Secrets marked sync:false are set in the Render dashboard.
-databases:
-  - name: jeevia-db
-    plan: free
-    region: singapore
-    databaseName: jeevia
-    user: jeevia
-    postgresMajorVersion: "16"
+# Render blueprint — Jeevia API. Secrets marked sync:false are set in the Render dashboard.
+# Database: Neon serverless PostgreSQL (project "jeevia", aws-ap-southeast-1).
+# Its connection string is set as JEEVIA_DATABASE_URL in the Render dashboard.
 
 services:
   - type: web
@@ -22,7 +17,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.8
       - key: JEEVIA_DATABASE_URL
-        fromDatabase: { name: jeevia-db, property: connectionString }
+        sync: false
       - key: JEEVIA_JWT_SECRET
         generateValue: true
       - key: JEEVIA_ENV
@@ -42,7 +37,13 @@ services:
       - key: JEEVIA_TWILIO_VERIFY_SERVICE_SID
         sync: false
       - key: JEEVIA_STORAGE_BACKEND
-        value: local
+        value: cloudinary
+      - key: JEEVIA_CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: JEEVIA_CLOUDINARY_API_KEY
+        sync: false
+      - key: JEEVIA_CLOUDINARY_API_SECRET
+        sync: false
       - key: JEEVIA_S3_ENDPOINT
         sync: false
       - key: JEEVIA_S3_BUCKET

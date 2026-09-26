@@ -18,8 +18,10 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
          ATP · IMCI · maternal    ML track: ASR, IndicTrans2,   (expiry timestamps,
          → urgency, rules trace   PaddleOCR + parrotlet, LLM)   signed URLs)
                      │                     │
-                     └──────────► PostgreSQL: relational identity, facilities, users, audit_events (append-only
-                                  trigger + hash chain); JSONB for intake and triage notes
+                     └──────────► PostgreSQL on Neon: relational identity, facilities, users, audit_events
+                                  (append-only trigger + hash chain); JSONB for intake and triage notes
+ Hosting: web on Vercel · API on Render (Singapore) · DB on Neon (Singapore) · files on Cloudinary (private)
+          · SMS codes via Twilio Verify · CI + keep-alive on GitHub Actions
 ```
 
 ### Request lifecycle for one intake
@@ -49,6 +51,13 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
 | `src/app/reviewer/*` | Queue, case view (confirm / edit / override / escalate / referral / export), lookup by ID · QR · phone, escalations with acknowledgement, referrals. |
 | `src/app/admin/*` | Overview (counts only), facility setup wizard, kiosk devices, staff, audit log (verify chain, CSV), data retention. |
 | `src/app/patient/*`, `src/app/employer/*` | Patient self-service (no urgency), employer cohorts (no records). |
+| `src/app/k/[code]` | Public kiosk link: intake-only session per facility, token on completion, auto-reset for shared tablets. Kiosk tabs keep their own session (`lib/api/tokens.ts` scopes by path). |
+| `src/app/s/[token]` | QR summary page for receiving clinicians (access code → patient, note, referral, documents). |
+| `src/app/admin/kiosk-links`, `components/triage/token-board.tsx` | Kiosk link management with QR posters; today's tokens for the front desk. |
+| `components/triage/share-qr.tsx` | Create/revoke QR summaries and print hand-off slips. |
+| `lib/status.ts`, `components/site/system-status.tsx` | Shared live status store (polls `/health`), status panel, header dot, wake and restart. |
+| `src/app/api/ops/restart/route.ts` | Server-only route: verifies a supervisor JWT and asks Render to restart the API. |
+| `lib/image.ts` | In-browser photo compression before upload. |
 | `src/lib/i18n/*` | 22 scheduled languages + English in the picker; full UI strings for English, Hindi, Odia. |
 
 Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
@@ -64,7 +73,10 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | `triage/pipeline.py` | Note-generation interface + deterministic stub — **replace internals here** with the ML pipeline. |
 | `triage/reports.py` | Synthetic lab slips rendered to SVG with per-row bounding boxes (drives the traceability crops). |
 | `services.py` | Encounter creation, role-aware serialisation, patient ownership, lazy auto-escalation. |
-| `storage.py` | Local object storage with expiry; `purge_expired()` hook for the retention job. |
+| `storage.py` | Pluggable object storage — local disk, Cloudinary (authenticated assets, signed downloads) or S3/R2 — with expiry and `purge_expired()`. |
+| `otp.py` | OTP delivery: mock (dev) or Twilio Verify; sample accounts keep a fixed code. |
+| `routers/kiosk.py` | Kiosk links (create/revoke), public kiosk session and returning-patient identify, token board. |
+| `routers/shares.py` | QR summary links: create/list/revoke, public meta, open with access code (lockout, expiry, audit). |
 | `exports.py` | PDF (fpdf2), print HTML, JSON, CSV, FHIR R4 document bundle. |
 | `observability.py` | JSON logs with request id (no request bodies → no PHI in logs), `/metrics` in Prometheus text format, `/health`. |
 | `seed.py` | Synthetic facilities, staff, patients and encounters (same scenarios as the frontend mock). |
@@ -81,6 +93,8 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | Escalation / referral | `POST /encounters/{id}/escalations`, `GET /escalations`, `POST /escalations/{id}/acknowledge`, `POST /encounters/{id}/referrals`, `GET /referrals` |
 | Files | `POST /files` (multipart, `kind`, optional `sample_key`), `GET /files/{id}`, `GET /files/{id}/content?sig=` |
 | Governance | `GET /audit`, `GET /audit/verify`, `GET /audit/export`, `GET /retention`, `GET /me/record`, `GET /employer/cohorts` |
+| Kiosk links and tokens | `GET/POST /kiosk-links`, `DELETE /kiosk-links/{id}`, `GET /kiosk/{code}`, `POST /kiosk/{code}/session`, `POST /kiosk/identify`, `GET /facilities/{id}/tokens` |
+| QR summaries | `POST/GET /encounters/{id}/shares`, `DELETE /shares/{id}`, `GET /share/{token}`, `POST /share/{token}/open` |
 | Ops | `GET /health`, `GET /metrics` |
 
 ### Role matrix
@@ -137,7 +151,7 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 ## 5. Verification done
 
-* Backend: 26 pytest tests (rules, auth incl. OTP lockout / PIN device binding / refresh rotation / logout revocation,
+* Backend: 38 pytest tests (rules, auth incl. OTP lockout / PIN device binding / refresh rotation / logout revocation,
   bound-device intake, idempotent replay, override rules, escalation acknowledgement, exports, RBAC for every role,
   patient isolation on a shared household phone, audit VIEW logging, chain verification, append-only guard, signed file
   URLs, concurrency) — passing on SQLite and on PostgreSQL 16.

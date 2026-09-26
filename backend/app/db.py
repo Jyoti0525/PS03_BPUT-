@@ -59,7 +59,9 @@ def _make_engine():
             dbapi_conn.execute("PRAGMA foreign_keys=ON")
 
         return eng
-    return create_engine(url, pool_pre_ping=True)
+    # Neon (serverless Postgres) suspends idle compute and may drop idle connections:
+    # check connections before use and recycle them well inside its idle window.
+    return create_engine(url, pool_pre_ping=True, pool_recycle=240, pool_size=5, max_overflow=5, pool_timeout=30)
 
 
 engine = _make_engine()
