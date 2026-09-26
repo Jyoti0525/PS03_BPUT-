@@ -5,7 +5,9 @@
 > **Educational prototype — triage support only.** Jeevia does not diagnose, prescribe or replace a qualified
 > professional. It uses synthetic data only. Every health-related output is advisory and reviewer-facing.
 
-**Live:** https://jeevia-triage.vercel.app — until the production API is connected, the site runs on a built-in sample dataset. Sample accounts below; the OTP is `123456`.
+**Live:** https://jeevia-triage.vercel.app (web) · https://jeevia-api.onrender.com/docs (API) · sample kiosk link https://jeevia-triage.vercel.app/k/MANIKPUR
+
+How every role and dashboard fits together: **[docs/WORKFLOW.md](docs/WORKFLOW.md)**. Sample walkthrough accounts (code `123456`):
 
 | Role | Phone | Lands on |
 |---|---|---|
