@@ -12,6 +12,7 @@ import { Button, Card, FieldError, Input, Label, Select, Textarea, cx } from "@/
 import { toast } from "@/components/ui/toast";
 import { canRecognise, speak, startCapture, stopSpeaking, type Recorder } from "@/lib/speech";
 import { enqueue } from "@/lib/offline/outbox";
+import { compressImage } from "@/lib/image";
 import { SAMPLE_REPORTS, sampleReportImage } from "@/lib/api/mock/note";
 import { langByCode } from "@/lib/i18n/languages";
 import type { DictKey } from "@/lib/i18n/dict";
@@ -284,7 +285,8 @@ export function IntakeFlow({
     setBusy(true);
     try {
       for (const f of Array.from(list)) {
-        const up = await api.uploadFile(f, kind);
+        if (f.size > 20 * 1024 * 1024) throw new Error("File too large (max 20 MB before compression)");
+        const up = await api.uploadFile(await compressImage(f), kind);
         setFiles((cur) => [...cur, up]);
       }
       toast("Uploaded");

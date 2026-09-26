@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { A11yButton, LanguageButton, Logo } from "@/components/layout/chrome";
+import { StatusPill } from "@/components/site/system-status";
 import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
 import { useSession } from "@/components/providers";
 import { useSite } from "@/lib/i18n/site";
@@ -82,6 +83,7 @@ export function SiteHeader() {
           </ul>
         </nav>
         <div className="flex items-center justify-end gap-2">
+          <StatusPill className="hidden md:inline-flex" />
           <LanguageButton className="hidden sm:block" />
           <LanguageButton compact className="sm:hidden" />
           <A11yButton className="hidden md:inline-flex" />
@@ -138,6 +140,7 @@ export function SiteFooter() {
         { label: c.nav.how, href: "/#how" },
         { label: c.nav.scenarios, href: "/#scenarios" },
         { label: f.kiosk, href: "/kiosk" },
+        { label: c.status.eyebrow, href: "/#status" },
         { label: c.nav.signIn, href: "/auth" },
       ],
     },

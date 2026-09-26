@@ -49,8 +49,11 @@ async def upload(
     f = FileObject(filename=(file.filename or "upload")[:255], content_type=ctype, size=len(data), kind=kind, encounter_id=encounter_id, uploaded_by=user.id, expires_at=storage.expiry_for(kind), sample_key=sample_key, boxes=boxes)
     db.add(f)
     db.flush()
-    f.storage_key = f.id
-    storage.put(f.id, data, ctype)
+    try:
+        f.storage_key = storage.put(f.id, data, ctype, storage.folder_for(user.facility_id, kind))
+    except Exception:
+        db.rollback()
+        raise HTTPException(502, "File storage is unavailable — please try again")
     audit.record(db, user, "UPLOAD", "file", f.id, f"{kind} uploaded ({f.filename}, {max(1, len(data) // 1024)} KB); expires {f.expires_at:%Y-%m-%d %H:%M} UTC")
     return file_out(f, request, user)
 

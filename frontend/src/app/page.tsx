@@ -8,6 +8,7 @@ import {
   Send, Cpu, Sparkles, Tablet,
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
+import { StatusPanel } from "@/components/site/system-status";
 import { CountUp, Reveal, useInView } from "@/components/site/motion";
 import { useSite, type SiteCopy } from "@/lib/i18n/site";
 import { cx } from "@/components/ui";
@@ -380,6 +381,16 @@ export default function Landing() {
             </p>
           </div>
         </Reveal>
+      </section>
+
+      {/* Live status */}
+      <section id="status" className="scroll-mt-20 bg-gradient-to-b from-white to-teal-50/60 py-20 sm:py-24">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <SectionTitle eyebrow={c.status.eyebrow} title={c.status.title} body={c.status.body} />
+          <Reveal className="mt-10">
+            <StatusPanel />
+          </Reveal>
+        </div>
       </section>
 
       {/* CTA */}

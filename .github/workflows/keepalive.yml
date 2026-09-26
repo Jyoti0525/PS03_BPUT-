@@ -1,0 +1,22 @@
+name: Keep API awake
+
+# Render's free web services sleep after 15 idle minutes. A ping every 10 minutes keeps the
+# Jeevia API responsive for clinics. Remove this once the service is on a paid instance.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping /health
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 https://jeevia-api.onrender.com/health) && echo "health: $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "::warning::Jeevia API did not answer /health"

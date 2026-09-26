@@ -370,6 +370,45 @@ export interface KioskLink {
   intakes_today: number;
 }
 
+export interface ShareLink {
+  id: string;
+  url: string;
+  /** Only present right after creation — print it next to the QR. */
+  access_code: string | null;
+  purpose: "referral" | "handoff";
+  created_by: string;
+  created_at: string;
+  expires_at: string;
+  revoked: boolean;
+  views: number;
+}
+
+export interface SharedSummary {
+  facility: { name?: string; district?: string; state?: string; type?: string };
+  patient: { name: string; code: string; age: number; sex: string; language: string; phone: string | null };
+  encounter: {
+    token: string | null;
+    created_at: string;
+    category: PatientCategory;
+    chief_complaint: string;
+    status: EncounterStatus;
+    urgency: Urgency | null;
+    urgency_source: string;
+    override: Override | null;
+    reviewed_by: string | null;
+    reviewed_at: string | null;
+    maternal: MaternalIntake | null;
+    chronic: ChronicIntake | null;
+    consent: { mode: ConsentMode; proxy_name: string | null; proxy_relation: string | null } | null;
+  };
+  note: Pick<TriageNote, "summary" | "flags" | "vitals" | "labs" | "timeline" | "missing_info" | "disagreements" | "rules_fired"> | null;
+  referral: { destination: string; specialty: string; reason: string; transport: string; created_by: string; created_at: string; note_text: string } | null;
+  documents: { id: string; filename: string; kind: string; content_type: string; uploaded_at: string; url: string | null }[];
+  shared_by: string;
+  expires_at: string;
+  disclaimer: string;
+}
+
 export interface KioskInfo {
   code: string;
   label: string;

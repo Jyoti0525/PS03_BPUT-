@@ -36,10 +36,13 @@ class Settings(BaseSettings):
     s3_access_key_id: str | None = None
     s3_secret_access_key: str | None = None
     s3_region: str = "auto"
+    cloudinary_cloud_name: str | None = None
+    cloudinary_api_key: str | None = None
+    cloudinary_api_secret: str | None = None
     max_upload_mb: int = 8
     retention_hours_audio: int = 24
     retention_hours_image: int = 72
-    retention_hours_report: int = 168
+    retention_hours_report: int = 720  # 30 days, so reports travel with referrals
 
     escalate_red_min: int = 15
     escalate_yellow_min: int = 60

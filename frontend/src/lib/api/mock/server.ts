@@ -54,6 +54,7 @@ interface DB {
   facilities: Facility[];
   users: (User & { pins?: Record<string, string>; active?: boolean })[];
   kioskLinks: StoredKioskLink[];
+  shares?: { id: string; token: string; code: string; encounter_id: string; purpose: "referral" | "handoff"; created_by: string; created_at: string; expires_at: string; revoked: boolean; views: number; failed: number }[];
   devices: Device[];
   patients: Patient[];
   encounters: Encounter[];
@@ -652,6 +653,74 @@ export const mockApi: JeeviaApi = {
       if (!p) throw new ApiError(404, "No match — check the ID and phone, or register as new");
       await audit(d, me, "VIEW", "patient", p.id, "Returning patient identified at kiosk (ID + phone)", p.code);
       return clone(p);
+    }),
+
+  createShare: (encounterId, hours, purpose = "referral") =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      const e = d.encounters.find((x) => x.id === encounterId);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      d.shares ??= [];
+      const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000).padStart(6, "0");
+      const s = { id: uid("shr"), token: crypto.randomUUID().replace(/-/g, ""), code, encounter_id: e.id, purpose, created_by: me.name, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + hours * 3600000).toISOString(), revoked: false, views: 0, failed: 0 };
+      d.shares.push(s);
+      await audit(d, me, "EXPORT", "share", s.id, `QR summary link created (${purpose}, valid ${hours}h)`, e.patient.code);
+      return { id: s.id, url: `${window.location.origin}/s/${s.token}`, access_code: code, purpose, created_by: s.created_by, created_at: s.created_at, expires_at: s.expires_at, revoked: false, views: 0 };
+    }),
+
+  listShares: (encounterId) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      return (d.shares ?? []).filter((s) => s.encounter_id === encounterId).reverse().map((s) => ({ id: s.id, url: `${window.location.origin}/s/${s.token}`, access_code: null, purpose: s.purpose, created_by: s.created_by, created_at: s.created_at, expires_at: s.expires_at, revoked: s.revoked, views: s.views }));
+    }),
+
+  revokeShare: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      const s = (d.shares ?? []).find((x) => x.id === id);
+      if (!s) throw new ApiError(404, "Share link not found");
+      s.revoked = true;
+    }),
+
+  shareMeta: (token) =>
+    withDb(async (d) => {
+      const s = (d.shares ?? []).find((x) => x.token === token && !x.revoked);
+      if (!s) throw new ApiError(404, "This summary link is not valid.");
+      if (Date.parse(s.expires_at) < Date.now()) throw new ApiError(410, "This summary link has expired.");
+      const e = d.encounters.find((x) => x.id === s.encounter_id)!;
+      return { facility_name: d.facilities.find((f) => f.id === e.facility_id)?.name ?? "", purpose: s.purpose, expires_at: s.expires_at };
+    }),
+
+  openShare: (token, accessCode) =>
+    withDb(async (d) => {
+      const s = (d.shares ?? []).find((x) => x.token === token && !x.revoked);
+      if (!s) throw new ApiError(404, "This summary link is not valid.");
+      if (s.failed >= 8) throw new ApiError(423, "Locked after too many wrong codes.");
+      if (s.code !== accessCode) {
+        s.failed++;
+        throw new ApiError(403, `Wrong access code. ${8 - s.failed} attempts left.`);
+      }
+      s.views++;
+      const e = d.encounters.find((x) => x.id === s.encounter_id)!;
+      const f = d.facilities.find((x) => x.id === e.facility_id);
+      const ref = d.referrals.filter((r) => r.encounter_id === e.id).pop() ?? null;
+      const docs = (e.intake?.file_ids ?? []).map((id) => d.files.find((x) => x.id === id)).filter((x): x is StoredFile => !!x && x.kind !== "audio");
+      await audit(d, null, "VIEW", "share", s.id, `QR summary opened (view ${s.views})`, e.patient.code);
+      const n = e.note;
+      return {
+        facility: { name: f?.name, district: f?.district, state: f?.state, type: f?.type },
+        patient: { name: e.patient.name, code: e.patient.code, age: e.patient.age, sex: e.patient.sex, language: e.patient.language, phone: e.patient.phone },
+        encounter: { token: e.token ?? null, created_at: e.created_at, category: e.category, chief_complaint: e.chief_complaint, status: e.status, urgency: e.urgency, urgency_source: e.urgency_source, override: e.override ?? null, reviewed_by: e.reviewed_by ?? null, reviewed_at: e.reviewed_at ?? null, maternal: e.intake?.maternal ?? null, chronic: e.intake?.chronic ?? null, consent: e.consent ? { mode: e.consent.mode, proxy_name: e.consent.proxy_name ?? null, proxy_relation: e.consent.proxy_relation ?? null } : null },
+        note: n ? { summary: n.summary, flags: n.flags, vitals: n.vitals, labs: n.labs, timeline: n.timeline, missing_info: n.missing_info, disagreements: n.disagreements, rules_fired: n.rules_fired } : null,
+        referral: ref ? { destination: ref.destination, specialty: ref.specialty, reason: ref.reason, transport: ref.transport, created_by: ref.created_by, created_at: ref.created_at, note_text: ref.note_text } : null,
+        documents: docs.map((x) => ({ id: x.id, filename: x.filename, kind: x.kind, content_type: x.content_type, uploaded_at: x.uploaded_at, url: x.purged_at ? null : x.data_url })),
+        shared_by: s.created_by,
+        expires_at: s.expires_at,
+        disclaimer: "Triage support only. Not a diagnosis.",
+      };
     }),
 
   listUsers: () =>

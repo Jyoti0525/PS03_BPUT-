@@ -109,8 +109,7 @@ def seed(db) -> None:
             f = FileObject(filename=f"{key}_report_{p.code}.svg", content_type="image/svg+xml", size=len(svg), kind="report", uploaded_at=created, expires_at=storage.expiry_for("report", NOW), sample_key=key, boxes=boxes)
             db.add(f)
             db.flush()
-            f.storage_key = f.id
-            storage.put(f.id, svg.encode(), "image/svg+xml")
+            f.storage_key = storage.put(f.id, svg.encode(), "image/svg+xml", storage.folder_for("fac_phc_manikpur", "report"))
             file_ids.append(f.id)
         proxy = s.get("proxy")
         con = Consent(patient_id=p.id, mode="proxy" if proxy else "self", proxy_name=proxy[0] if proxy else None, proxy_relation=proxy[1] if proxy else None,

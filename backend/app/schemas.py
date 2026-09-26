@@ -444,6 +444,50 @@ class KioskIdentifyIn(BaseModel):
     phone: str = Field(pattern=r"^\d{10}$")
 
 
+class ShareIn(BaseModel):
+    hours: int = Field(default=72, ge=1, le=24 * 30)
+    purpose: Literal["referral", "handoff"] = "referral"
+
+
+class ShareOut(BaseModel):
+    id: str
+    url: str
+    access_code: str | None = None  # returned only once, at creation
+    purpose: str
+    created_by: str
+    created_at: datetime
+    expires_at: datetime
+    revoked: bool
+    views: int
+
+
+class ShareOpenIn(BaseModel):
+    access_code: str = Field(pattern=r"^\d{6}$")
+
+
+class SharedDocument(BaseModel):
+    id: str
+    filename: str
+    kind: str
+    content_type: str
+    uploaded_at: datetime
+    url: str | None
+
+
+class SharedSummary(BaseModel):
+    """What a receiving clinician sees after scanning the QR. Clinician-facing by design."""
+
+    facility: dict[str, Any]
+    patient: dict[str, Any]
+    encounter: dict[str, Any]
+    note: dict[str, Any] | None
+    referral: dict[str, Any] | None
+    documents: list[SharedDocument]
+    shared_by: str
+    expires_at: datetime
+    disclaimer: str
+
+
 class FileOut(BaseModel):
     id: str
     filename: str

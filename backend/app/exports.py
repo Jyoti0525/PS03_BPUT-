@@ -9,8 +9,8 @@ from html import escape
 from fpdf import FPDF
 
 DISCLAIMER = (
-    "Educational prototype for triage support only. Not a diagnosis. All content must be reviewed "
-    "by a qualified medical professional. Synthetic data."
+    "Triage support only. Not a diagnosis. All content must be reviewed by a qualified medical "
+    "professional before any clinical decision."
 )
 LABEL = {"red": "Critical", "yellow": "Semi-urgent", "green": "Routine"}
 

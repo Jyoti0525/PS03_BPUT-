@@ -165,6 +165,25 @@ class KioskLink(Base):
     sessions: Mapped[int] = mapped_column(Integer, default=0)
 
 
+class ShareLink(Base):
+    """Time-limited summary link behind a QR code (for referral hand-off). Opening it needs the
+    6-digit access code printed beside the QR; every opening is audited."""
+
+    __tablename__ = "share_links"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("shr"))
+    token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    code_hash: Mapped[str] = mapped_column(String(200))
+    encounter_id: Mapped[str] = mapped_column(ForeignKey("encounters.id"), index=True)
+    purpose: Mapped[str] = mapped_column(String(20), default="referral")
+    created_by: Mapped[str] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+    views: Mapped[int] = mapped_column(Integer, default=0)
+    failed_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    encounter: Mapped["Encounter"] = relationship(lazy="joined")
+
+
 class Escalation(Base):
     __tablename__ = "escalations"
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("esc"))

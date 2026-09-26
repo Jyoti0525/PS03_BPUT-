@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
   ArrowLeft, CheckCircle2, Pencil, ShieldAlert, Siren, Send, Download, Printer, FileJson, FileSpreadsheet, FileText, Stethoscope, Baby, HeartPulse,
-  UserRoundCheck, Users, Timer, Paperclip, Copy, Ambulance, ChevronDown, Eye,
+  UserRoundCheck, Users, Timer, Paperclip, Copy, Ambulance, ChevronDown, Eye, QrCode,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { useAsync, useNow, timeAgo } from "@/lib/hooks";
@@ -14,7 +14,8 @@ import { Badge, Button, Card, CardHeader, ErrorNote, FieldError, Label, Modal, S
 import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
 import { useFile } from "@/components/triage/source";
-import type { Encounter, ExportFormat, Facility, Urgency } from "@/lib/types";
+import type { Encounter, ExportFormat, Facility, ShareLink, Urgency } from "@/lib/types";
+import { ShareQrModal } from "@/components/triage/share-qr";
 import { URGENCY_LABEL, downloadBlob, referralText } from "@/lib/export";
 import { langByCode } from "@/lib/i18n/languages";
 
@@ -64,7 +65,8 @@ export default function CasePage() {
   const [density, setDensity] = useState<"doctor" | "nurse">(isDoctor ? "doctor" : "nurse");
   const [start] = useState(() => Date.now());
   const now = useNow(1000);
-  const [modal, setModal] = useState<null | "override" | "escalate" | "referral" | "edit">(null);
+  const [modal, setModal] = useState<null | "override" | "escalate" | "referral" | "edit" | "share">(null);
+  const [freshShare, setFreshShare] = useState<ShareLink | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -202,6 +204,9 @@ export default function CasePage() {
               Referral note
             </Button>
           )}
+          <Button variant="secondary" onClick={() => { setFreshShare(null); setModal("share"); }} icon={<QrCode className="size-4" />}>
+            Share QR
+          </Button>
           <div className="relative">
             <Button variant="secondary" onClick={() => setExportOpen((o) => !o)} icon={<Download className="size-4" />}>
               Export <ChevronDown className="size-3.5" />
@@ -278,7 +283,25 @@ export default function CasePage() {
       {modal === "override" && <OverrideModal open enc={enc} onClose={() => setModal(null)} onDone={(e) => { setData(e); setModal(null); }} />}
       {modal === "escalate" && <EscalateModal open enc={enc} onClose={() => setModal(null)} onDone={() => { setModal(null); reload(); }} />}
       {modal === "edit" && <EditModal open enc={enc} onClose={() => setModal(null)} onDone={(e) => { setData(e); setModal(null); }} />}
-      {modal === "referral" && <ReferralModal open enc={enc} facility={facility ?? null} onClose={() => setModal(null)} onDone={() => { setModal(null); router.push("/reviewer/referrals"); }} />}
+      {modal === "referral" && (
+        <ReferralModal
+          open
+          enc={enc}
+          facility={facility ?? null}
+          onClose={() => setModal(null)}
+          onDone={(share) => {
+            reload();
+            if (share) {
+              setFreshShare(share);
+              setModal("share");
+            } else {
+              setModal(null);
+              router.push("/reviewer/referrals");
+            }
+          }}
+        />
+      )}
+      {modal === "share" && <ShareQrModal enc={enc} facilityName={facility?.name} initial={freshShare} onClose={() => setModal(null)} />}
     </div>
   );
 }
@@ -436,7 +459,7 @@ function EditModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encount
   );
 }
 
-function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean; enc: Encounter; facility: Facility | null; onClose: () => void; onDone: () => void }) {
+function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean; enc: Encounter; facility: Facility | null; onClose: () => void; onDone: (share: ShareLink | null) => void }) {
   const spec = facility?.specialists.find((s) => s.key === enc.specialist_required);
   const defaultDest = spec?.available ? `${facility?.name} — ${spec.label} (in-house)` : facility?.referral_destination ?? "";
   const [destination, setDestination] = useState(defaultDest);
@@ -444,6 +467,7 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
   const [reason, setReason] = useState("");
   const [transport, setTransport] = useState<"self" | "ambulance_108" | "facility_vehicle">(enc.urgency === "red" ? "ambulance_108" : "self");
   const [edited, setEdited] = useState<string | null>(null);
+  const [withQr, setWithQr] = useState(true);
   const [busy, setBusy] = useState(false);
 
   const generated = useMemo(() => referralText(enc, facility, destination, specialty, reason || enc.chief_complaint), [enc, facility, destination, specialty, reason]);
@@ -482,9 +506,13 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
             onClick={async () => {
               setBusy(true);
               try {
-                await api.createReferral(enc.id, { destination, specialty, reason: reason || enc.chief_complaint, transport, note_text: text });
-                toast("Referral sent and logged");
-                onDone();
+                const share = withQr ? await api.createShare(enc.id, 168, "referral") : null;
+                const note = share
+                  ? `${text}\n\nPatient summary and documents (scan QR or open): ${share.url}\nAccess code: ${share.access_code} · valid until ${new Date(share.expires_at).toLocaleString("en-IN")}`
+                  : text;
+                await api.createReferral(enc.id, { destination, specialty, reason: reason || enc.chief_complaint, transport, note_text: note });
+                toast(share ? "Referral sent — print the QR slip for the patient" : "Referral sent and logged");
+                onDone(share);
               } catch (e) {
                 toast(e instanceof Error ? e.message : "Failed", "error");
               } finally {
@@ -518,6 +546,13 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
             <Label htmlFor="rf-reason">Reason</Label>
             <Textarea id="rf-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={enc.chief_complaint} />
           </div>
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-teal-200 bg-teal-50/60 p-3 text-sm">
+            <input type="checkbox" checked={withQr} onChange={(e) => setWithQr(e.target.checked)} className="mt-0.5 size-4 accent-teal-700" />
+            <span>
+              <span className="font-semibold text-ink">Attach QR summary</span>
+              <span className="block text-xs text-muted">Receiving team scans it for details and uploaded documents (valid 7 days, needs access code).</span>
+            </span>
+          </label>
           <div>
             <Label htmlFor="rf-tr">Transport</Label>
             <Select id="rf-tr" value={transport} onChange={(e) => setTransport(e.target.value as typeof transport)}>

@@ -1,4 +1,5 @@
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -9,7 +10,7 @@ from sqlalchemy import text
 from .config import get_settings
 from .db import SessionLocal, engine, init_db
 from .observability import RequestContextMiddleware, metrics_endpoint, setup_logging
-from .routers import admin, auth, encounters, facilities, files, kiosk, patients
+from .routers import admin, auth, encounters, facilities, files, kiosk, patients, shares
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -47,7 +48,7 @@ app.add_middleware(
 )
 
 API = "/api/v1"
-for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router):
+for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router, shares.router):
     app.include_router(r, prefix=API)
 
 
@@ -62,14 +63,33 @@ async def _unhandled(_: Request, exc: Exception):
     return JSONResponse({"detail": "Internal error"}, status_code=500)
 
 
+STARTED = time.time()
+
+
 @app.get("/health", tags=["ops"])
 def health():
-    with engine.connect() as c:
-        c.execute(text("SELECT 1"))
+    """Public status for the website's status panel. Never includes secrets or data."""
     from . import storage
 
     s = get_settings()
-    return {"status": "ok", "db": engine.dialect.name, "storage": s.storage_backend, "otp": s.otp_provider, "version": app.version}
+    t0 = time.perf_counter()
+    db_ok = True
+    try:
+        with engine.connect() as c:
+            c.execute(text("SELECT 1"))
+    except Exception:
+        db_ok = False
+    db_ms = round((time.perf_counter() - t0) * 1000, 1)
+    otp_ready = s.otp_provider != "twilio" or all([s.twilio_account_sid, s.twilio_api_key_sid, s.twilio_api_key_secret, s.twilio_verify_service_sid])
+    body = {
+        "status": "ok" if db_ok else "degraded",
+        "version": app.version,
+        "uptime_s": int(time.time() - STARTED),
+        "db": {"engine": engine.dialect.name, "ok": db_ok, "latency_ms": db_ms},
+        "storage": storage.health(),
+        "otp": {"provider": s.otp_provider, "configured": otp_ready},
+    }
+    return JSONResponse(body, status_code=200 if db_ok else 503, headers={"Cache-Control": "no-store"})
 
 
 app.add_api_route("/metrics", metrics_endpoint, methods=["GET"], tags=["ops"], include_in_schema=False)

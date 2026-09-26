@@ -3,7 +3,8 @@ import { ApiError } from "./contract";
 import { getDeviceId, getTokens, setTokens } from "./tokens";
 import type { Tokens } from "@/lib/types";
 
-const BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "") + "/api/v1";
+export const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const BASE = API_ORIGIN + "/api/v1";
 
 async function refresh(): Promise<boolean> {
   const t = getTokens();
@@ -105,6 +106,12 @@ export const liveApi: JeeviaApi = {
     return r;
   },
   kioskIdentify: (patient_code, phone) => post("/kiosk/identify", { patient_code, phone }),
+
+  createShare: (id, hours, purpose = "referral") => post(`/encounters/${id}/shares`, { hours, purpose }),
+  listShares: (id) => json(`/encounters/${id}/shares`),
+  revokeShare: (id) => json(`/shares/${id}`, { method: "DELETE" }),
+  shareMeta: (token) => json(`/share/${encodeURIComponent(token)}`),
+  openShare: (token, access_code) => post(`/share/${encodeURIComponent(token)}/open`, { access_code }),
 
   listUsers: () => json("/users"),
 

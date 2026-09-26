@@ -32,6 +32,32 @@ export interface SiteCopy {
   scenarios: { eyebrow: string; title: [string, string]; items: (Item & { tag: string })[] };
   safety: { eyebrow: string; title: [string, string]; items: Item[]; noticeTitle: string; noticeLead: string; notice: string };
   cta: { title: string; body: string; primary: string; secondary: string };
+  status: {
+    eyebrow: string;
+    title: [string, string];
+    body: string;
+    allOk: string;
+    degraded: string;
+    offline: string;
+    waking: string;
+    checking: string;
+    demo: string;
+    website: string;
+    api: string;
+    database: string;
+    sms: string;
+    storage: string;
+    online: string;
+    asleep: string;
+    ready: string;
+    notReady: string;
+    uptime: string;
+    checked: string;
+    checkNow: string;
+    wake: string;
+    restart: string;
+    sleepHint: string;
+  };
   footer: {
     blurb: string;
     badges: [string, string];
@@ -129,6 +155,32 @@ const en: SiteCopy = {
     notice: "It organises patient-provided information, highlights urgency signals and speeds up qualified review. It does not diagnose or prescribe. Every output is advisory and must be reviewed by licensed healthcare staff before any clinical decision.",
   },
   cta: { title: "Ready to shorten your queue?", body: "Set up your facility, bind a kiosk tablet and start your first intake in minutes.", primary: "Create an account", secondary: "Open the kiosk" },
+  status: {
+    eyebrow: "Live system status",
+    title: ["Is everything", "up and running?"],
+    body: "Checked every 20 seconds from your browser. The API server sleeps after 15 idle minutes to save resources \u2014 wake it with one tap.",
+    allOk: "All systems operational",
+    degraded: "Partly degraded",
+    offline: "Server is asleep or unreachable",
+    waking: "Waking the server\u2026",
+    checking: "Checking\u2026",
+    demo: "Local demo mode \u2014 no server",
+    website: "Website",
+    api: "API server",
+    database: "Database",
+    sms: "SMS sign-in codes",
+    storage: "Document storage",
+    online: "Online",
+    asleep: "Asleep",
+    ready: "Ready",
+    notReady: "Not configured",
+    uptime: "up",
+    checked: "checked",
+    checkNow: "Check now",
+    wake: "Wake server",
+    restart: "Restart server",
+    sleepHint: "Waking usually takes 30\u201360 seconds.",
+  },
   footer: {
     blurb: "Multimodal triage assistant for government and institutional health facilities across India.",
     badges: ["Human reviewed", "Non-diagnostic"],
@@ -226,6 +278,32 @@ const hi: SiteCopy = {
     notice: "यह मरीज़ की दी जानकारी को व्यवस्थित करता है और तात्कालिकता के संकेत दिखाता है। यह निदान या दवा नहीं देता। हर परिणाम सलाह मात्र है और किसी भी निर्णय से पहले लाइसेंस प्राप्त स्वास्थ्य कर्मी द्वारा देखा जाना चाहिए।",
   },
   cta: { title: "अपनी कतार छोटी करें", body: "अपनी सुविधा सेट करें, कियोस्क टैबलेट जोड़ें और कुछ ही मिनटों में पहली जानकारी दर्ज करें।", primary: "खाता बनाएँ", secondary: "कियोस्क खोलें" },
+  status: {
+    eyebrow: "\u0938\u093f\u0938\u094d\u091f\u092e \u0915\u0940 \u0932\u093e\u0907\u0935 \u0938\u094d\u0925\u093f\u0924\u093f",
+    title: ["क्या सब कुछ", "चल रहा है?"],
+    body: "\u0906\u092a\u0915\u0947 \u092c\u094d\u0930\u093e\u0909\u091c\u093c\u0930 \u0938\u0947 \u0939\u0930 20 \u0938\u0947\u0915\u0902\u0921 \u092e\u0947\u0902 \u091c\u093e\u0901\u091a\u0964 API \u0938\u0930\u094d\u0935\u0930 15 \u092e\u093f\u0928\u091f \u0916\u093e\u0932\u0940 \u0930\u0939\u0928\u0947 \u092a\u0930 \u0938\u094b \u091c\u093e\u0924\u093e \u0939\u0948 \u2014 \u090f\u0915 \u091f\u0948\u092a \u0938\u0947 \u091c\u0917\u093e\u090f\u0901\u0964",
+    allOk: "\u0938\u092d\u0940 \u0938\u093f\u0938\u094d\u091f\u092e \u091a\u093e\u0932\u0942 \u0939\u0948\u0902",
+    degraded: "\u0906\u0902\u0936\u093f\u0915 \u0938\u092e\u0938\u094d\u092f\u093e",
+    offline: "\u0938\u0930\u094d\u0935\u0930 \u0938\u094b \u0930\u0939\u093e \u0939\u0948 \u092f\u093e \u092a\u0939\u0941\u0901\u091a \u0938\u0947 \u092c\u093e\u0939\u0930 \u0939\u0948",
+    waking: "\u0938\u0930\u094d\u0935\u0930 \u091c\u0917\u093e\u092f\u093e \u091c\u093e \u0930\u0939\u093e \u0939\u0948\u2026",
+    checking: "\u091c\u093e\u0901\u091a \u0939\u094b \u0930\u0939\u0940 \u0939\u0948\u2026",
+    demo: "\u0932\u094b\u0915\u0932 \u0921\u0947\u092e\u094b \u092e\u094b\u0921 \u2014 \u0938\u0930\u094d\u0935\u0930 \u0928\u0939\u0940\u0902",
+    website: "\u0935\u0947\u092c\u0938\u093e\u0907\u091f",
+    api: "API \u0938\u0930\u094d\u0935\u0930",
+    database: "\u0921\u0947\u091f\u093e\u092c\u0947\u0938",
+    sms: "SMS \u0938\u093e\u0907\u0928-\u0907\u0928 \u0915\u094b\u0921",
+    storage: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c\u093c \u092d\u0902\u0921\u093e\u0930\u0923",
+    online: "\u0911\u0928\u0932\u093e\u0907\u0928",
+    asleep: "\u0938\u094b \u0930\u0939\u093e \u0939\u0948",
+    ready: "\u0924\u0948\u092f\u093e\u0930",
+    notReady: "\u0938\u0947\u091f \u0928\u0939\u0940\u0902",
+    uptime: "\u091a\u093e\u0932\u0942",
+    checked: "\u091c\u093e\u0901\u091a\u093e",
+    checkNow: "\u0905\u092d\u0940 \u091c\u093e\u0901\u091a\u0947\u0902",
+    wake: "\u0938\u0930\u094d\u0935\u0930 \u091c\u0917\u093e\u090f\u0901",
+    restart: "\u0938\u0930\u094d\u0935\u0930 \u0930\u0940\u0938\u094d\u091f\u093e\u0930\u094d\u091f \u0915\u0930\u0947\u0902",
+    sleepHint: "\u091c\u0917\u093e\u0928\u0947 \u092e\u0947\u0902 \u0906\u092e\u0924\u094c\u0930 \u092a\u0930 30\u201360 \u0938\u0947\u0915\u0902\u0921 \u0932\u0917\u0924\u0947 \u0939\u0948\u0902\u0964",
+  },
   footer: {
     blurb: "भारत भर के सरकारी और संस्थागत स्वास्थ्य केंद्रों के लिए बहु-माध्यम ट्रायेज सहायक।",
     badges: ["मानव समीक्षा", "निदान नहीं"],
@@ -323,6 +401,32 @@ const or: SiteCopy = {
     notice: "ଏହା ରୋଗୀଙ୍କ ଦିଆଯାଇଥିବା ତଥ୍ୟ ସଜାଏ ଓ ଜରୁରୀତା ସଙ୍କେତ ଦେଖାଏ। ଏହା ରୋଗ ନିର୍ଣ୍ଣୟ ବା ଔଷଧ ଦିଏ ନାହିଁ। ପ୍ରତ୍ୟେକ ଫଳାଫଳ କେବଳ ପରାମର୍ଶ ଏବଂ ଯେକୌଣସି ନିଷ୍ପତ୍ତି ପୂର୍ବରୁ ଅନୁମତିପ୍ରାପ୍ତ ସ୍ୱାସ୍ଥ୍ୟକର୍ମୀ ଦେଖିବା ଆବଶ୍ୟକ।",
   },
   cta: { title: "ଆପଣଙ୍କ ଧାଡ଼ି ଛୋଟ କରନ୍ତୁ", body: "ଆପଣଙ୍କ କେନ୍ଦ୍ର ସେଟ୍ କରନ୍ତୁ, କିଓସ୍କ ଟାବଲେଟ୍ ଯୋଡନ୍ତୁ ଓ କିଛି ମିନିଟରେ ପ୍ରଥମ ତଥ୍ୟ ସଂଗ୍ରହ କରନ୍ତୁ।", primary: "ଆକାଉଣ୍ଟ ତିଆରି କରନ୍ତୁ", secondary: "କିଓସ୍କ ଖୋଲନ୍ତୁ" },
+  status: {
+    eyebrow: "\u0b38\u0b3f\u0b37\u0b4d\u0b1f\u0b2e\u0b30 \u0b32\u0b3e\u0b07\u0b2d\u0b4d \u0b38\u0b4d\u0b25\u0b3f\u0b24\u0b3f",
+    title: ["ସବୁକିଛି", "ଚାଲୁଛି କି?"],
+    body: "\u0b06\u0b2a\u0b23\u0b19\u0b4d\u0b15 \u0b2c\u0b4d\u0b30\u0b3e\u0b09\u0b1c\u0b30\u0b30\u0b41 \u0b2a\u0b4d\u0b30\u0b24\u0b3f 20 \u0b38\u0b47\u0b15\u0b47\u0b23\u0b4d\u0b21\u0b30\u0b47 \u0b2f\u0b3e\u0b1e\u0b4d\u0b1a\u0964 API \u0b38\u0b30\u0b4d\u0b2d\u0b30 15 \u0b2e\u0b3f\u0b28\u0b3f\u0b1f\u0b4d \u0b16\u0b3e\u0b32\u0b3f \u0b30\u0b39\u0b3f\u0b32\u0b47 \u0b36\u0b4b\u0b07\u0b2f\u0b3e\u0b0f \u2014 \u0b17\u0b4b\u0b1f\u0b3f\u0b0f \u0b1f\u0b4d\u0b5f\u0b3e\u0b2a\u0b30\u0b47 \u0b1c\u0b17\u0b3e\u0b28\u0b4d\u0b24\u0b41\u0964",
+    allOk: "\u0b38\u0b2e\u0b38\u0b4d\u0b24 \u0b38\u0b3f\u0b37\u0b4d\u0b1f\u0b2e \u0b1a\u0b3e\u0b32\u0b41\u0b1b\u0b3f",
+    degraded: "\u0b06\u0b02\u0b36\u0b3f\u0b15 \u0b38\u0b2e\u0b38\u0b4d\u0b5f\u0b3e",
+    offline: "\u0b38\u0b30\u0b4d\u0b2d\u0b30 \u0b36\u0b4b\u0b07\u0b1b\u0b3f \u0b2c\u0b3e \u0b2a\u0b39\u0b1e\u0b4d\u0b1a \u0b2c\u0b3e\u0b39\u0b3e\u0b30\u0b47",
+    waking: "\u0b38\u0b30\u0b4d\u0b2d\u0b30 \u0b1c\u0b17\u0b3e\u0b2f\u0b3e\u0b09\u0b1b\u0b3f\u2026",
+    checking: "\u0b2f\u0b3e\u0b1e\u0b4d\u0b1a \u0b39\u0b47\u0b09\u0b1b\u0b3f\u2026",
+    demo: "\u0b32\u0b4b\u0b15\u0b3e\u0b32\u0b4d \u0b21\u0b47\u0b2e\u0b4b \u0b2e\u0b4b\u0b21\u0b4d \u2014 \u0b38\u0b30\u0b4d\u0b2d\u0b30 \u0b28\u0b3e\u0b39\u0b3f\u0b01",
+    website: "\u0b71\u0b47\u0b2c\u0b38\u0b3e\u0b07\u0b1f\u0b4d",
+    api: "API \u0b38\u0b30\u0b4d\u0b2d\u0b30",
+    database: "\u0b21\u0b3e\u0b1f\u0b3e\u0b2c\u0b47\u0b38\u0b4d",
+    sms: "SMS \u0b38\u0b3e\u0b07\u0b28\u0b4d-\u0b07\u0b28\u0b4d \u0b15\u0b4b\u0b21\u0b4d",
+    storage: "\u0b26\u0b38\u0b4d\u0b24\u0b3e\u0b2c\u0b3f\u0b1c \u0b38\u0b02\u0b30\u0b15\u0b4d\u0b37\u0b23",
+    online: "\u0b05\u0b28\u0b32\u0b3e\u0b07\u0b28\u0b4d",
+    asleep: "\u0b36\u0b4b\u0b07\u0b1b\u0b3f",
+    ready: "\u0b2a\u0b4d\u0b30\u0b38\u0b4d\u0b24\u0b41\u0b24",
+    notReady: "\u0b38\u0b47\u0b1f\u0b4d \u0b39\u0b4b\u0b07\u0b28\u0b3e\u0b39\u0b3f\u0b01",
+    uptime: "\u0b1a\u0b3e\u0b32\u0b41",
+    checked: "\u0b2f\u0b3e\u0b1e\u0b4d\u0b1a",
+    checkNow: "\u0b0f\u0b2c\u0b47 \u0b2f\u0b3e\u0b1e\u0b4d\u0b1a",
+    wake: "\u0b38\u0b30\u0b4d\u0b2d\u0b30 \u0b1c\u0b17\u0b3e\u0b28\u0b4d\u0b24\u0b41",
+    restart: "\u0b38\u0b30\u0b4d\u0b2d\u0b30 \u0b30\u0b3f\u0b37\u0b4d\u0b1f\u0b3e\u0b30\u0b4d\u0b1f",
+    sleepHint: "\u0b1c\u0b17\u0b3e\u0b07\u0b2c\u0b3e\u0b15\u0b41 \u0b38\u0b3e\u0b27\u0b3e\u0b30\u0b23\u0b24\u0b03 30\u201360 \u0b38\u0b47\u0b15\u0b47\u0b23\u0b4d\u0b21 \u0b32\u0b3e\u0b17\u0b47\u0964",
+  },
   footer: {
     blurb: "ସାରା ଭାରତର ସରକାରୀ ଓ ଅନୁଷ୍ଠାନିକ ସ୍ୱାସ୍ଥ୍ୟ କେନ୍ଦ୍ର ପାଇଁ ବହୁ-ମାଧ୍ୟମ ଟ୍ରାଇଏଜ୍ ସହାୟକ।",
     badges: ["ମଣିଷ ସମୀକ୍ଷା", "ରୋଗ ନିର୍ଣ୍ଣୟ ନୁହେଁ"],

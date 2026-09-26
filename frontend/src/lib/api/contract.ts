@@ -12,6 +12,8 @@ import type {
   FacilityStats,
   KioskInfo,
   KioskLink,
+  ShareLink,
+  SharedSummary,
   TokenBoardItem,
   FileObject,
   IntakePayload,
@@ -73,6 +75,13 @@ export interface JeeviaApi {
   /** Starts a kiosk session for this browser tab (role = kiosk, intake-only). */
   kioskSession(code: string, deviceId: string): Promise<{ tokens: Tokens; user: User }>;
   kioskIdentify(patientCode: string, phone: string): Promise<Patient>;
+
+  // QR summary links (referral hand-off)
+  createShare(encounterId: string, hours: number, purpose?: ShareLink["purpose"]): Promise<ShareLink>;
+  listShares(encounterId: string): Promise<ShareLink[]>;
+  revokeShare(id: string): Promise<void>;
+  shareMeta(token: string): Promise<{ facility_name: string; purpose: string; expires_at: string }>;
+  openShare(token: string, accessCode: string): Promise<SharedSummary>;
 
   // Users
   listUsers(): Promise<User[]>;

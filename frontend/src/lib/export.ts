@@ -3,7 +3,7 @@ import type { Encounter, ExportFormat, Facility } from "@/lib/types";
 export const URGENCY_LABEL = { red: "Critical", yellow: "Semi-urgent", green: "Routine" } as const;
 
 export const DISCLAIMER =
-  "Educational prototype for triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional. Synthetic data.";
+  "Triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional before any clinical decision.";
 
 /** Plain-text lines of a triage note; the base for PDF, print and referral text. */
 export function noteLines(e: Encounter, facility?: Facility | null): string[] {
