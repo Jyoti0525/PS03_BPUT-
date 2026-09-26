@@ -37,8 +37,17 @@ class Base(DeclarativeBase):
     pass
 
 
+def normalize_db_url(url: str) -> str:
+    """Hosted Postgres (Render, Heroku) hands out postgres:// URLs; SQLAlchemy + psycopg3 needs postgresql+psycopg://."""
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://") :]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    return url
+
+
 def _make_engine():
-    url = get_settings().database_url
+    url = normalize_db_url(get_settings().database_url)
     if url.startswith("sqlite"):
         path = url.split("///", 1)[-1]
         if path and path != ":memory:":

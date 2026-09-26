@@ -92,7 +92,10 @@ export default function QueuePage() {
               <li key={i.encounter_id}>
                 <Link href={`/reviewer/case/${i.encounter_id}`} className="flex items-stretch gap-3 px-3 py-3 transition-colors hover:bg-canvas sm:px-4">
                   <span className={cx("w-1.5 shrink-0 rounded-full", urgencyBar(i.urgency))} />
-                  <span className="hidden w-6 pt-0.5 text-sm font-semibold text-subtle tabular-nums sm:block">{idx + 1}</span>
+                  <span className="hidden w-14 shrink-0 pt-0.5 sm:block">
+                    <span className="block rounded-md bg-coral-50 py-0.5 text-center font-mono text-xs font-bold text-coral-700">{i.token ?? idx + 1}</span>
+                    {i.channel === "kiosk_link" && <span className="mt-1 block text-center text-[10px] text-subtle">kiosk link</span>}
+                  </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-semibold text-ink">{i.patient_name}</span>

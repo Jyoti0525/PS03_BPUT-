@@ -93,6 +93,19 @@ export const liveApi: JeeviaApi = {
   updateFacility: (id, p) => patch(`/facilities/${id}`, p),
   facilityStats: (id) => json(`/facilities/${id}/stats`),
 
+  facilityTokens: (id) => json(`/facilities/${id}/tokens`),
+
+  listKioskLinks: () => json("/kiosk-links"),
+  createKioskLink: (label) => post("/kiosk-links", { label }),
+  revokeKioskLink: (id) => json(`/kiosk-links/${id}`, { method: "DELETE" }),
+  kioskInfo: (code) => json(`/kiosk/${encodeURIComponent(code)}`),
+  kioskSession: async (code, device_id) => {
+    const r = await post<{ tokens: Tokens; user: import("@/lib/types").User }>(`/kiosk/${encodeURIComponent(code)}/session`, { device_id });
+    setTokens(r.tokens);
+    return r;
+  },
+  kioskIdentify: (patient_code, phone) => post("/kiosk/identify", { patient_code, phone }),
+
   listUsers: () => json("/users"),
 
   searchPatients: (q) => json(`/patients?q=${encodeURIComponent(q)}`),

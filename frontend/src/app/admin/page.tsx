@@ -9,6 +9,7 @@ import { useSession } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Button, Card, CardHeader, ErrorNote, Spinner, Stat } from "@/components/ui";
 import { resetMockData } from "@/lib/api/mock/server";
+import { TokenBoard } from "@/components/triage/token-board";
 import { API_MODE } from "@/lib/api";
 
 export default function AdminHome() {
@@ -40,6 +41,8 @@ export default function AdminHome() {
       )}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-4">
+        <TokenBoard facilityId={fid} />
         <Card>
           <CardHeader title="Recent activity" subtitle="From the append-only audit log" action={<Link href="/admin/audit" className="text-sm font-semibold text-teal-700">View all</Link>} />
           <ul className="divide-y divide-line">
@@ -54,7 +57,13 @@ export default function AdminHome() {
             ))}
           </ul>
         </Card>
+        </div>
         <div className="space-y-4">
+          <Card className="p-4">
+            <p className="font-semibold text-ink">Patient check-in links</p>
+            <p className="mt-1 text-sm text-muted">Give each waiting area its own kiosk link or QR poster. Check-ins show up in the tokens list instantly.</p>
+            <Link href="/admin/kiosk-links"><Button className="mt-3 w-full" variant="secondary">Manage kiosk links <ArrowRight className="size-4" /></Button></Link>
+          </Card>
           <Card className="p-4">
             <div className="flex items-start gap-3">
               <EyeOff className="mt-0.5 size-5 text-coral-600" />

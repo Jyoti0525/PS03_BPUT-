@@ -1,7 +1,16 @@
 import type { Tokens } from "@/lib/types";
 
-const KEY = "jeevia.tokens";
 const DEVICE_KEY = "jeevia.device_id";
+
+/**
+ * Sessions are scoped: a public kiosk tab (/k/CODE) keeps its own kiosk token, so opening a kiosk
+ * link never signs a doctor out of another tab — and a doctor's session never leaks into a kiosk.
+ */
+function scopeKey(): string {
+  if (typeof window === "undefined") return "jeevia.tokens";
+  const m = /^\/k\/([^/]+)/.exec(window.location.pathname);
+  return m ? `jeevia.tokens.kiosk.${m[1].toUpperCase()}` : "jeevia.tokens";
+}
 
 function safeGet(key: string): string | null {
   try {
@@ -20,23 +29,26 @@ function safeSet(key: string, value: string | null) {
   }
 }
 
-let memoryTokens: Tokens | null = null;
+const memory = new Map<string, Tokens | null>();
 
 export function getTokens(): Tokens | null {
-  if (memoryTokens) return memoryTokens;
-  const raw = safeGet(KEY);
+  const key = scopeKey();
+  if (memory.has(key)) return memory.get(key) ?? null;
+  const raw = safeGet(key);
   if (!raw) return null;
   try {
-    memoryTokens = JSON.parse(raw) as Tokens;
-    return memoryTokens;
+    const t = JSON.parse(raw) as Tokens;
+    memory.set(key, t);
+    return t;
   } catch {
     return null;
   }
 }
 
 export function setTokens(tokens: Tokens | null) {
-  memoryTokens = tokens;
-  safeSet(KEY, tokens ? JSON.stringify(tokens) : null);
+  const key = scopeKey();
+  memory.set(key, tokens);
+  safeSet(key, tokens ? JSON.stringify(tokens) : null);
 }
 
 /** Stable per-browser id used for device binding and PIN login. */

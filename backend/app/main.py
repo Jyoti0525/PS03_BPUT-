@@ -9,7 +9,7 @@ from sqlalchemy import text
 from .config import get_settings
 from .db import SessionLocal, engine, init_db
 from .observability import RequestContextMiddleware, metrics_endpoint, setup_logging
-from .routers import admin, auth, encounters, facilities, files, patients
+from .routers import admin, auth, encounters, facilities, files, kiosk, patients
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -47,7 +47,7 @@ app.add_middleware(
 )
 
 API = "/api/v1"
-for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router):
+for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router):
     app.include_router(r, prefix=API)
 
 
@@ -66,7 +66,10 @@ async def _unhandled(_: Request, exc: Exception):
 def health():
     with engine.connect() as c:
         c.execute(text("SELECT 1"))
-    return {"status": "ok", "db": engine.dialect.name, "version": app.version}
+    from . import storage
+
+    s = get_settings()
+    return {"status": "ok", "db": engine.dialect.name, "storage": s.storage_backend, "otp": s.otp_provider, "version": app.version}
 
 
 app.add_api_route("/metrics", metrics_endpoint, methods=["GET"], tags=["ops"], include_in_schema=False)

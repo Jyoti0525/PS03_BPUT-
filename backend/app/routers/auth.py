@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 from typing import Annotated
 
@@ -9,7 +10,8 @@ from .. import audit
 from ..config import get_settings
 from ..models import Facility, OtpChallenge, Patient, RevokedToken, User, UserPin
 from ..schemas import AuthResult, OtpChallengeOut, OtpRequest, OtpVerify, OtpVerifyOut, PinLogin, PinSet, RefreshIn, RegisterIn, UserOut
-from ..security import DB, CurrentUser, bearer, decode, hash_secret, issue_tokens, new_otp, registration_token, verify_secret
+from .. import otp
+from ..security import DB, CurrentUser, bearer, decode, hash_secret, issue_tokens, registration_token, verify_secret
 from ..services import aware, next_patient_code, now
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -23,11 +25,14 @@ def user_out(db, u: User) -> UserOut:
 @router.post("/otp/request", response_model=OtpChallengeOut)
 def request_otp(body: OtpRequest, db: DB):
     s = get_settings()
-    code = new_otp()
-    ch = OtpChallenge(phone=body.phone, code_hash=hash_secret(code, body.phone), expires_at=now() + timedelta(seconds=s.otp_ttl_sec))
+    local = otp.uses_local_code(body.phone)
+    code = otp.local_code(body.phone) if local else ""
+    if not local:
+        otp.send(body.phone)
+    ch = OtpChallenge(phone=body.phone, code_hash=hash_secret(code, body.phone) if local else "twilio", expires_at=now() + timedelta(seconds=s.otp_ttl_sec))
     db.add(ch)
     db.commit()
-    # Production: hand `code` to the SMS provider here. The mock provider returns it for the demo.
+    # The code is only returned for local-dev mock mode; sample accounts are documented separately.
     return OtpChallengeOut(challenge_id=ch.id, expires_in=s.otp_ttl_sec, dev_code=code if s.otp_provider == "mock" else None)
 
 
@@ -39,7 +44,8 @@ def verify_otp(body: OtpVerify, db: DB):
         raise HTTPException(400, "OTP expired — request a new one")
     if ch.attempts >= s.otp_max_attempts:
         raise HTTPException(429, "Too many attempts — request a new OTP")
-    if not verify_secret(body.code, ch.phone, ch.code_hash):
+    ok = otp.check(ch.phone, body.code) if ch.code_hash == "twilio" else verify_secret(body.code, ch.phone, ch.code_hash)
+    if not ok:
         ch.attempts += 1
         db.commit()
         raise HTTPException(400, "Incorrect OTP")
@@ -59,6 +65,18 @@ def register(body: RegisterIn, db: DB):
         raise HTTPException(422, "Terms must be accepted")
     if db.scalar(select(User).where(User.phone == phone)):
         raise HTTPException(409, "This phone is already registered")
+    if body.role == "supervisor" and body.new_facility and not body.facility_id:
+        nf = body.new_facility
+        slug = "".join(ch for ch in nf.name.lower() if ch.isalnum())[:20] or "facility"
+        fac = Facility(
+            id=f"fac_{slug}_{uuid.uuid4().hex[:6]}", name=nf.name.strip(), type=nf.type, district=nf.district.strip(), state=nf.state.strip(),
+            languages=[body.language, "en"] if body.language != "en" else ["en", "hi"],
+            specialists=[{"key": "genmed", "label": "General Medicine", "available": True, "schedule": None}],
+            referral_destination=nf.referral_destination or "", beds_total=0, beds_occupied=0, offline_mode=nf.type == "health_camp", capabilities={},
+        )
+        db.add(fac)
+        db.flush()
+        body.facility_id = fac.id
     if body.role not in ("patient",) and not body.facility_id:
         raise HTTPException(422, "Staff must select a facility")
     if body.facility_id and not db.get(Facility, body.facility_id):

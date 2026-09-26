@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Building2, TabletSmartphone, Users, ScrollText, Trash2, Tablet } from "lucide-react";
+import { LayoutDashboard, Building2, TabletSmartphone, Users, ScrollText, Trash2, Tablet, Link2 } from "lucide-react";
 import { RoleGate } from "@/components/layout/role-gate";
 import { AppShell } from "@/components/layout/app-shell";
 
@@ -12,11 +12,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         nav={[
           { href: "/admin", label: "Overview", icon: <LayoutDashboard />, exact: true },
           { href: "/admin/facility", label: "Facility setup", icon: <Building2 /> },
-          { href: "/admin/devices", label: "Kiosk devices", icon: <TabletSmartphone /> },
+          { href: "/admin/kiosk-links", label: "Kiosk links", icon: <Link2 /> },
+          { href: "/admin/devices", label: "Staff devices", icon: <TabletSmartphone /> },
           { href: "/admin/staff", label: "Staff", icon: <Users /> },
           { href: "/admin/audit", label: "Audit log", icon: <ScrollText /> },
           { href: "/admin/retention", label: "Data retention", icon: <Trash2 /> },
-          { href: "/kiosk", label: "Open kiosk", icon: <Tablet /> },
+          { href: "/kiosk", label: "Staff kiosk", icon: <Tablet /> },
         ]}
       >
         {children}

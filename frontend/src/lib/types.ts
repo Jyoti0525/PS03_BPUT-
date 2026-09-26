@@ -78,6 +78,8 @@ export interface RegisterInput {
   language: string;
   accepted_terms: boolean;
   device_id?: string | null;
+  /** A supervisor may create their facility while registering. */
+  new_facility?: { name: string; type: FacilityType; district: string; state: string; referral_destination?: string | null } | null;
 }
 
 export interface Specialist {
@@ -334,11 +336,54 @@ export interface Encounter {
   referral_needed?: boolean | null;
   specialist_required?: string | null;
   escalation_due_at?: string | null;
+  /** Daily queue token shown to the patient, e.g. T-014. */
+  token?: string | null;
+  channel?: IntakeChannel;
   consent?: Consent | null;
+}
+
+export type IntakeChannel = "staff_kiosk" | "kiosk_link" | "patient_app";
+
+/** Front-desk view of today's tokens — no clinical content. */
+export interface TokenBoardItem {
+  encounter_id: string;
+  token: string | null;
+  patient_name: string;
+  patient_code: string;
+  status: EncounterStatus;
+  channel: IntakeChannel;
+  created_at: string;
+  wait_minutes: number;
+}
+
+export interface KioskLink {
+  id: string;
+  code: string;
+  label: string;
+  facility_id: string;
+  url: string;
+  created_by: string;
+  created_at: string;
+  revoked: boolean;
+  last_used_at: string | null;
+  sessions: number;
+  intakes_today: number;
+}
+
+export interface KioskInfo {
+  code: string;
+  label: string;
+  facility_id: string;
+  facility_name: string;
+  district: string;
+  state: string;
+  languages: string[];
 }
 
 export interface QueueItem {
   encounter_id: string;
+  token?: string | null;
+  channel?: IntakeChannel;
   patient_code: string;
   patient_name: string;
   age: number;

@@ -13,9 +13,12 @@ from ..services import aware, encounter_out, next_patient_code, own_patient
 
 router = APIRouter(tags=["patients"])
 Staff = Annotated[User, Depends(require(*STAFF_ROLES))]
+Registrar = Annotated[User, Depends(require(*STAFF_ROLES, "kiosk"))]
 
 
-def _check_patient_access(db, user: User, p: Patient):
+def _check_patient_access(db, user: User, p: Patient, *, kiosk_ok: bool = False):
+    if user.role == "kiosk" and kiosk_ok:
+        return
     if user.role == "patient":
         mine = own_patient(db, user)
         if not mine or mine.id != p.id:
@@ -50,7 +53,7 @@ def by_code(code: str, user: Staff, db: DB):
 
 
 @router.post("/patients", response_model=PatientOut)
-def create_patient(body: PatientIn, user: Staff, db: DB):
+def create_patient(body: PatientIn, user: Registrar, db: DB):
     p = Patient(code=next_patient_code(db), **body.model_dump())
     db.add(p)
     db.flush()
@@ -86,7 +89,7 @@ def capture_consent(body: ConsentIn, user: CurrentUser, db: DB):
     p = db.get(Patient, body.patient_id)
     if not p:
         raise HTTPException(404, "Patient not found")
-    _check_patient_access(db, user, p)
+    _check_patient_access(db, user, p, kiosk_ok=True)
     if body.mode == "proxy" and not (body.proxy_name and body.proxy_relation):
         raise HTTPException(422, "Proxy name and relationship are required")
     c = Consent(**body.model_dump(), captured_by=user.name)

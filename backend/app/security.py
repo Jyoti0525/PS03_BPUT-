@@ -33,13 +33,6 @@ def verify_secret(secret: str, salt: str, expected: str) -> bool:
     return hmac.compare_digest(hash_secret(secret, salt), expected)
 
 
-def new_otp() -> str:
-    s = get_settings()
-    if s.otp_provider == "mock" and s.demo_otp:
-        return s.demo_otp
-    return f"{secrets.randbelow(10**6):06d}"
-
-
 def _encode(payload: dict, ttl: timedelta) -> str:
     s = get_settings()
     now = _now()

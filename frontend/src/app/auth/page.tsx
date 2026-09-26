@@ -3,7 +3,10 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Stethoscope, HeartPulse, ClipboardList, UserRound, Briefcase, KeyRound, Smartphone, CheckCircle2, ShieldCheck, ArrowLeft, Syringe } from "lucide-react";
-import { api, ApiError, getDeviceId, API_MODE } from "@/lib/api";
+import { api, ApiError, getDeviceId } from "@/lib/api";
+
+/** The six walkthrough accounts work in every environment (OTP 123456); hide with NEXT_PUBLIC_HIDE_SAMPLES=1. */
+const SHOW_SAMPLES = process.env.NEXT_PUBLIC_HIDE_SAMPLES !== "1";
 import { usePrefs, useSession } from "@/components/providers";
 import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
 import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
@@ -11,7 +14,7 @@ import { Button, Card, FieldError, Input, Label, Select, Segmented, cx } from "@
 import { toast } from "@/components/ui/toast";
 import { DEMO_LOGINS } from "@/lib/api/mock/seed";
 import { LANGUAGES } from "@/lib/i18n/languages";
-import type { Facility, OtpChallenge, Role, User } from "@/lib/types";
+import type { Facility, FacilityType, OtpChallenge, Role, User } from "@/lib/types";
 import { useAsync } from "@/lib/hooks";
 
 type RegRole = Exclude<Role, "kiosk">;
@@ -100,6 +103,8 @@ function AuthInner() {
   const [prefLang, setPrefLang] = useState(lang);
   const [regToken, setRegToken] = useState<string | null>(null);
   const [terms, setTerms] = useState(false);
+  const [newFac, setNewFac] = useState({ name: "", type: "phc" as FacilityType, district: "", state: "" });
+  const creatingFacility = role === "supervisor" && facilityId === "__new__";
   const { data: facilities } = useAsync<Facility[]>(() => api.listFacilities(), []);
 
   useEffect(() => {
@@ -202,7 +207,8 @@ function AuthInner() {
         registration_token: regToken,
         name: role === "doctor" && !/^dr\.?\s/i.test(name) ? `Dr. ${name}` : name,
         role,
-        facility_id: role === "patient" ? null : facilityId || null,
+        facility_id: role === "patient" || creatingFacility ? null : facilityId || null,
+        new_facility: creatingFacility ? newFac : null,
         registration_no: regNo || null,
         language: prefLang,
         accepted_terms: true,
@@ -319,7 +325,7 @@ function AuthInner() {
             </div>
           )}
 
-          {API_MODE === "mock" && (
+          {SHOW_SAMPLES && (
             <div className="mt-6 rounded-xl border border-dashed border-teal-300 bg-teal-50/60 p-3">
               <p className="text-xs font-semibold text-teal-800">Sample accounts — OTP 123456</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -380,7 +386,36 @@ function AuthInner() {
                         {f.name} — {f.district}
                       </option>
                     ))}
+                    {role === "supervisor" && <option value="__new__">+ Register a new facility</option>}
                   </Select>
+                </div>
+              )}
+              {creatingFacility && (
+                <div className="grid gap-3 rounded-xl border border-coral-200 bg-coral-50/40 p-3 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="nf-name">Facility name</Label>
+                    <Input id="nf-name" value={newFac.name} onChange={(e) => setNewFac({ ...newFac, name: e.target.value })} placeholder="e.g. CHC Balipatna" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="nf-type">Type</Label>
+                    <Select id="nf-type" value={newFac.type} onChange={(e) => setNewFac({ ...newFac, type: e.target.value as FacilityType })}>
+                      <option value="phc">Primary Health Centre</option>
+                      <option value="chc">Community Health Centre</option>
+                      <option value="district_hospital">District / Government Hospital</option>
+                      <option value="health_camp">Public Health Camp</option>
+                      <option value="company_clinic">Company Clinic</option>
+                      <option value="industrial_unit">Industrial Estate Health Unit</option>
+                      <option value="campus">Campus Health Centre</option>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="nf-dist">District</Label>
+                    <Input id="nf-dist" value={newFac.district} onChange={(e) => setNewFac({ ...newFac, district: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label htmlFor="nf-state">State</Label>
+                    <Input id="nf-state" value={newFac.state} onChange={(e) => setNewFac({ ...newFac, state: e.target.value })} />
+                  </div>
                 </div>
               )}
               {CLINICAL.includes(role) && (
@@ -411,6 +446,7 @@ function AuthInner() {
                     setErr(null);
                     if (name.trim().length < 2) return setErr("Enter your full name");
                     if (role !== "patient" && !facilityId) return setErr("Select your facility");
+                    if (creatingFacility && (newFac.name.trim().length < 3 || newFac.district.trim().length < 2 || newFac.state.trim().length < 2)) return setErr("Enter the facility name, district and state");
                     if (CLINICAL.includes(role) && regNo.trim().length < 4) return setErr("Registration number is required for clinical staff");
                     setStep(regToken ? 5 : 3);
                   }}
@@ -503,7 +539,7 @@ function AuthInner() {
                 <p className="font-semibold text-ink">{name || "—"}</p>
                 <p className="text-muted">
                   {ROLE_CARDS.find((c) => c.role === role)?.label} · +91 {phone}
-                  {facilityId && ` · ${facilities?.find((f) => f.id === facilityId)?.name}`}
+                  {facilityId && ` · ${creatingFacility ? `${newFac.name} (new)` : facilities?.find((f) => f.id === facilityId)?.name}`}
                 </p>
               </div>
               <FieldError>{err}</FieldError>

@@ -27,6 +27,8 @@ import type {
   Urgency,
   User,
   Cohort,
+  IntakeChannel,
+  KioskLink,
 } from "@/lib/types";
 import { ADMIN_ROLES, REVIEWER_ROLES, STAFF_ROLES } from "@/lib/types";
 import { evaluate } from "./rules";
@@ -34,7 +36,7 @@ import { buildNote, sampleReportImage, type UploadedForNote } from "./note";
 import { DEMO_OTP, SEED_COHORTS, SEED_FACILITIES, SEED_HISTORY, SEED_PATIENTS, SEED_TODAY, SEED_USERS } from "./seed";
 import { buildExport } from "@/lib/export";
 
-const DB_KEY = "jeevia.mockdb.v3";
+const DB_KEY = "jeevia.mockdb.v4";
 const ESCALATE_AFTER_MIN: Record<Urgency, number | null> = { red: 15, yellow: 60, green: null };
 const RETENTION_HOURS = { audio: 24, image: 72, report: 168 };
 
@@ -44,9 +46,14 @@ interface StoredFile extends FileObject {
   boxes?: [number, number, number, number][] | null;
 }
 
+interface StoredKioskLink extends Omit<KioskLink, "url" | "intakes_today"> {
+  user_id: string;
+}
+
 interface DB {
   facilities: Facility[];
-  users: (User & { pins?: Record<string, string> })[];
+  users: (User & { pins?: Record<string, string>; active?: boolean })[];
+  kioskLinks: StoredKioskLink[];
   devices: Device[];
   patients: Patient[];
   encounters: Encounter[];
@@ -124,6 +131,7 @@ async function seed(): Promise<DB> {
   const d: DB = {
     facilities: clone(SEED_FACILITIES),
     users: clone(SEED_USERS),
+    kioskLinks: [],
     devices: [
       { id: "dev_kiosk_manikpur_1", label: "OPD entrance tablet", facility_id: "fac_phc_manikpur", bound_by: "Meera Nair", bound_at: new Date(Date.now() - 20 * 86400000).toISOString(), last_seen_at: new Date().toISOString(), revoked: false },
     ],
@@ -138,7 +146,7 @@ async function seed(): Promise<DB> {
     cohorts: clone(SEED_COHORTS),
     otps: {},
     registrations: {},
-    seq: 20,
+    seq: 3,
   };
   const system = null;
   await audit(d, system, "CONFIG", "system", null, "Demo database seeded with synthetic data", null, new Date(Date.now() - 86400000).toISOString());
@@ -205,6 +213,8 @@ async function seed(): Promise<DB> {
       enc.status = "closed";
       enc.reviewed_by = "Dr. Deepa Sharma";
       enc.reviewed_at = created;
+    } else {
+      assignToken(d, enc, "staff_kiosk");
     }
     d.encounters.push(enc);
     for (const id of file_ids) d.files.find((f) => f.id === id)!.encounter_id = enc.id;
@@ -215,21 +225,10 @@ async function seed(): Promise<DB> {
 
   // Maternal and chronic reminders (auto-fired via SMS / voice agent by the backend scheduler)
   const inDays = (n: number) => new Date(Date.now() + n * 86400000).toISOString();
-  d.reminders.push(
-    { id: uid("rem"), patient_id: "pat_008", kind: "anc_checkup", due_at: inDays(14), channel: "sms", status: "scheduled", message: "ANC check-up at PHC Manikpur (30 weeks). Bring your MCP card." },
-    { id: uid("rem"), patient_id: "pat_008", kind: "anc_checkup", due_at: inDays(-14), channel: "voice", status: "done", message: "ANC check-up (26 weeks) — completed." },
-    { id: uid("rem"), patient_id: "pat_003", kind: "anc_checkup", due_at: inDays(7), channel: "voice", status: "scheduled", message: "ANC check-up (33 weeks) — voice call in Bengali." },
-    { id: uid("rem"), patient_id: "pat_005", kind: "chronic_checkin", due_at: inDays(30), channel: "sms", status: "scheduled", message: "Monthly sugar check-in. Bring your glucometer diary." },
-  );
+  d.reminders.push({ id: uid("rem"), patient_id: "pat_003", kind: "anc_checkup", due_at: inDays(14), channel: "sms", status: "scheduled", message: "ANC check-up at PHC Manikpur (30 weeks). Bring your MCP card." });
 
-  // A couple of expired raw uploads for the retention view
-  const old = new Date(Date.now() - 4 * 86400000).toISOString();
-  d.files.push(
-    { id: uid("file"), filename: "voice_intake_JVA-P002.webm", content_type: "audio/webm", size: 182_000, kind: "audio", encounter_id: null, uploaded_at: old, expires_at: new Date(Date.parse(old) + RETENTION_HOURS.audio * 3600000).toISOString(), purged_at: new Date(Date.parse(old) + 25 * 3600000).toISOString(), data_url: null },
-    { id: uid("file"), filename: "rash_photo_JVA-P012.jpg", content_type: "image/jpeg", size: 412_000, kind: "image", encounter_id: null, uploaded_at: old, expires_at: new Date(Date.parse(old) + RETENTION_HOURS.image * 3600000).toISOString(), purged_at: null, data_url: null },
-  );
-  await audit(d, null, "PURGE", "file", null, "Raw audio voice_intake_JVA-P002.webm deleted after transcript confirmation (24h policy)", "JVA-P002", new Date(Date.parse(old) + 25 * 3600000).toISOString());
   await audit(d, null, "DEVICE", "device", "dev_kiosk_manikpur_1", "Kiosk device 'OPD entrance tablet' bound by Meera Nair", null, new Date(Date.now() - 20 * 86400000).toISOString());
+  makeKioskLink(d, "fac_phc_manikpur", "OPD waiting area", "Meera Nair", "MANIKPUR");
   // Keep audit strictly chronological for the chain display
   return d;
 }
@@ -271,6 +270,41 @@ function buildEncounter(d: DB, payload: IntakePayload, patient: Patient, created
   };
 }
 
+function dayKey(iso = new Date().toISOString()) {
+  return new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+}
+
+/** Daily running token per facility: T-001, T-002 … */
+function assignToken(d: DB, enc: Encounter & { token_date?: string }, channel: IntakeChannel) {
+  const day = dayKey();
+  const n = d.encounters.filter((e) => e.facility_id === enc.facility_id && (e as Encounter & { token_date?: string }).token_date === day).length;
+  enc.token_date = day;
+  enc.token = `T-${String(n + 1).padStart(3, "0")}`;
+  enc.channel = channel;
+}
+
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function makeKioskLink(d: DB, facility_id: string, label: string, createdBy: string, code?: string): StoredKioskLink {
+  const c = code ?? Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+  const user = { id: uid("usr"), phone: `kiosk-${c}`, name: `Kiosk · ${label}`, role: "kiosk" as const, facility_id, registration_no: null, language: "en", has_pin: false, created_at: new Date().toISOString(), active: true };
+  d.users.push(user);
+  const link: StoredKioskLink = { id: uid("kl"), code: c, label, facility_id, user_id: user.id, created_by: createdBy, created_at: new Date().toISOString(), revoked: false, last_used_at: null, sessions: 0 };
+  d.kioskLinks.push(link);
+  return link;
+}
+
+function linkOut(d: DB, k: StoredKioskLink): KioskLink {
+  const day = dayKey();
+  const { user_id: _u, ...rest } = k;
+  void _u;
+  return {
+    ...rest,
+    url: `${window.location.origin}/k/${k.code}`,
+    intakes_today: d.encounters.filter((e) => e.facility_id === k.facility_id && e.channel === "kiosk_link" && (e as Encounter & { token_date?: string }).token_date === day).length,
+  };
+}
+
 function inferSpecialist(p: IntakePayload, patient: Patient): string {
   const t = [p.chief_complaint, ...p.symptoms.map((s) => s.text)].join(" ").toLowerCase();
   if (patient.age < 12) return "paeds";
@@ -292,7 +326,8 @@ function issueTokens(user: User): Tokens {
 }
 
 function publicUser(u: DB["users"][number]): User {
-  const { pins, ...rest } = u;
+  const { pins, active: _a, ...rest } = u;
+  void _a;
   return { ...rest, has_pin: !!pins && Object.keys(pins).length > 0 };
 }
 
@@ -303,7 +338,7 @@ async function current(d: DB): Promise<User> {
     const payload = JSON.parse(atob(t.access_token.split(".")[1])) as { sub: string; exp: number };
     if (payload.exp < Date.now()) throw new Error("expired");
     const u = d.users.find((x) => x.id === payload.sub);
-    if (!u) throw new Error("gone");
+    if (!u || u.active === false) throw new Error("gone");
     return publicUser(u);
   } catch {
     setTokens(null);
@@ -321,7 +356,7 @@ function requireRole(u: User, roles: Role[]) {
 }
 
 function forRole(e: Encounter, u: User): Encounter {
-  if (u.role === "patient") {
+  if (u.role === "patient" || u.role === "kiosk") {
     // Health outputs stay reviewer-facing: strip urgency, note and override.
     return { ...clone(e), urgency: null, note: null, override: null, escalation_due_at: null, specialist_required: null, referral_needed: null };
   }
@@ -408,12 +443,24 @@ export const mockApi: JeeviaApi = {
       const r = d.registrations[input.registration_token];
       if (!r || r.exp < Date.now()) throw new ApiError(400, "Registration session expired — verify your phone again");
       if (!input.accepted_terms) throw new ApiError(422, "Terms must be accepted");
+      let facilityId = input.facility_id;
+      if (input.role === "supervisor" && input.new_facility && !facilityId) {
+        const nf = input.new_facility;
+        const f: Facility = {
+          id: uid("fac"), name: nf.name.trim(), type: nf.type, district: nf.district.trim(), state: nf.state.trim(),
+          languages: input.language === "en" ? ["en", "hi"] : [input.language, "en"],
+          specialists: [{ key: "genmed", label: "General Medicine", available: true, schedule: null }],
+          referral_destination: nf.referral_destination ?? "", beds_total: 0, beds_occupied: 0, offline_mode: nf.type === "health_camp", capabilities: {},
+        };
+        d.facilities.push(f);
+        facilityId = f.id;
+      }
       const user: User = {
         id: uid("usr"),
         phone: r.phone,
         name: input.name,
         role: input.role,
-        facility_id: input.facility_id,
+        facility_id: facilityId,
         registration_no: input.registration_no ?? null,
         language: input.language,
         has_pin: false,
@@ -536,6 +583,77 @@ export const mockApi: JeeviaApi = {
       };
     }),
 
+  facilityTokens: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (!STAFF_ROLES.includes(me.role) || me.facility_id !== id) throw new ApiError(403, "Not allowed");
+      const day = dayKey();
+      return d.encounters
+        .filter((e) => e.facility_id === id && (e as Encounter & { token_date?: string }).token_date === day)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .map((e) => ({ encounter_id: e.id, token: e.token ?? null, patient_name: e.patient.name, patient_code: e.patient.code, status: e.status, channel: e.channel ?? "staff_kiosk", created_at: e.created_at, wait_minutes: Math.max(0, Math.round((Date.now() - Date.parse(e.created_at)) / 60000)) }));
+    }),
+
+  listKioskLinks: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      return d.kioskLinks.filter((k) => k.facility_id === me.facility_id).map((k) => linkOut(d, k)).reverse();
+    }),
+
+  createKioskLink: (label) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      const k = makeKioskLink(d, me.facility_id!, label.trim(), me.name);
+      await audit(d, me, "DEVICE", "kiosk_link", k.id, `Kiosk link '${k.label}' created (${k.code})`);
+      return linkOut(d, k);
+    }),
+
+  revokeKioskLink: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      const k = d.kioskLinks.find((x) => x.id === id && x.facility_id === me.facility_id);
+      if (!k) throw new ApiError(404, "Kiosk link not found");
+      k.revoked = true;
+      const u = d.users.find((x) => x.id === k.user_id);
+      if (u) u.active = false;
+      await audit(d, me, "DEVICE", "kiosk_link", k.id, `Kiosk link '${k.label}' revoked`);
+    }),
+
+  kioskInfo: (code) =>
+    withDb(async (d) => {
+      const k = d.kioskLinks.find((x) => x.code === code.toUpperCase() && !x.revoked);
+      if (!k) throw new ApiError(404, "This kiosk link is not active. Ask the facility for a new one.");
+      const f = d.facilities.find((x) => x.id === k.facility_id)!;
+      return { code: k.code, label: k.label, facility_id: f.id, facility_name: f.name, district: f.district, state: f.state, languages: f.languages };
+    }),
+
+  kioskSession: (code, deviceId) =>
+    withDb(async (d) => {
+      const k = d.kioskLinks.find((x) => x.code === code.toUpperCase() && !x.revoked);
+      const u = k && d.users.find((x) => x.id === k.user_id && x.active !== false);
+      if (!k || !u) throw new ApiError(404, "This kiosk link is not active.");
+      k.sessions++;
+      k.last_used_at = new Date().toISOString();
+      const user = publicUser(u);
+      const tokens = issueTokens(user);
+      setTokens(tokens);
+      await audit(d, user, "LOGIN", "kiosk_link", k.id, `Kiosk session opened on device ${deviceId.slice(0, 12)}`);
+      return { tokens, user };
+    }),
+
+  kioskIdentify: (patientCode, phone) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["kiosk"]);
+      const p = d.patients.find((x) => x.code.toLowerCase() === patientCode.trim().toLowerCase() && x.phone === phone);
+      if (!p) throw new ApiError(404, "No match — check the ID and phone, or register as new");
+      await audit(d, me, "VIEW", "patient", p.id, "Returning patient identified at kiosk (ID + phone)", p.code);
+      return clone(p);
+    }),
+
   listUsers: () =>
     withDb(async (d) => {
       const me = await current(d);
@@ -581,7 +699,7 @@ export const mockApi: JeeviaApi = {
   createPatient: (input) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, STAFF_ROLES);
+      requireRole(me, [...STAFF_ROLES, "kiosk"]);
       const p: Patient = { ...input, id: uid("pat"), code: `JVA-P${String(++d.seq).padStart(3, "0")}`, created_at: new Date().toISOString() };
       d.patients.push(p);
       await audit(d, me, "CREATE", "patient", p.id, "Patient registered at intake", p.code);
@@ -620,7 +738,9 @@ export const mockApi: JeeviaApi = {
       if (!p) throw new ApiError(404, "Patient not found");
       if (me.role === "patient" && ownPatient(d, me)?.id !== p.id) throw new ApiError(403, "Patients can only submit their own intake");
       if (me.role !== "patient") {
-        if (payload.facility_id !== me.facility_id) throw new ApiError(403, "Staff can only submit intakes for their own facility");
+        if (payload.facility_id !== me.facility_id) throw new ApiError(403, "Intakes can only be submitted for your own facility");
+      }
+      if (!["patient", "kiosk"].includes(me.role)) {
         const dev = d.devices.find((x) => x.id === getDeviceId());
         if (!dev || dev.revoked || dev.facility_id !== me.facility_id) throw new ApiError(403, "This device is not bound to your facility — bind it from the kiosk screen");
         dev.last_seen_at = new Date().toISOString();
@@ -628,6 +748,7 @@ export const mockApi: JeeviaApi = {
       if (!payload.consent_id) throw new ApiError(422, "Consent must be captured before intake");
       const captured = payload.captured_at && Date.parse(payload.captured_at) < Date.now() ? payload.captured_at : undefined;
       const enc = buildEncounter(d, payload, p, captured);
+      assignToken(d, enc, me.role === "kiosk" ? "kiosk_link" : me.role === "patient" ? "patient_app" : "staff_kiosk");
       d.encounters.push(enc);
       for (const id of payload.file_ids) {
         const f = d.files.find((x) => x.id === id);
@@ -665,6 +786,8 @@ export const mockApi: JeeviaApi = {
           needs_check_count: [...(e.note?.vitals ?? []), ...(e.note?.labs ?? [])].filter((v) => v.needs_check).length,
           language: e.patient.language,
           escalation_due_at: e.escalation_due_at ?? null,
+          token: e.token ?? null,
+          channel: e.channel,
         }))
         .sort((a, b) => rank[a.urgency] - rank[b.urgency] || b.wait_minutes - a.wait_minutes);
     }),
@@ -672,7 +795,7 @@ export const mockApi: JeeviaApi = {
   getEncounter: (id) =>
     withDb(async (d) => {
       const me = await current(d);
-      if (ADMIN_ROLES.includes(me.role) || me.role === "employer") throw new ApiError(403, "This role cannot read clinical notes");
+      if (ADMIN_ROLES.includes(me.role) || me.role === "employer" || me.role === "kiosk") throw new ApiError(403, "This role cannot read clinical notes");
       const e = d.encounters.find((x) => x.id === id);
       if (!e) throw new ApiError(404, "Encounter not found");
       if (me.role === "patient" && ownPatient(d, me)?.id !== e.patient.id) throw new ApiError(403, "Not your record");

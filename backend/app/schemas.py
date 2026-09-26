@@ -67,6 +67,14 @@ class OtpVerifyOut(BaseModel):
     registration_token: str | None = None
 
 
+class NewFacility(BaseModel):
+    name: str = Field(min_length=3, max_length=200)
+    type: Literal["phc", "chc", "district_hospital", "health_camp", "company_clinic", "industrial_unit", "campus"]
+    district: str = Field(min_length=2, max_length=100)
+    state: str = Field(min_length=2, max_length=100)
+    referral_destination: str | None = None
+
+
 class RegisterIn(BaseModel):
     registration_token: str
     name: str = Field(min_length=2, max_length=200)
@@ -76,6 +84,7 @@ class RegisterIn(BaseModel):
     language: str = "en"
     accepted_terms: bool
     device_id: str | None = None
+    new_facility: NewFacility | None = None
 
 
 class PinSet(BaseModel):
@@ -290,11 +299,15 @@ class EncounterOut(BaseModel):
     referral_needed: bool | None = None
     specialist_required: str | None = None
     escalation_due_at: datetime | None = None
+    token: str | None = None
+    channel: str = "staff_kiosk"
     consent: ConsentOut | None = None
 
 
 class QueueItem(BaseModel):
     encounter_id: str
+    token: str | None = None
+    channel: str = "staff_kiosk"
     patient_code: str
     patient_name: str
     age: int
@@ -379,6 +392,56 @@ class ReferralOut(BaseModel):
     created_by: str
     created_at: datetime
     status: str
+
+
+class TokenBoardItem(BaseModel):
+    """Operational view of today's tokens — no clinical content, safe for front-desk staff."""
+
+    encounter_id: str
+    token: str | None
+    patient_name: str
+    patient_code: str
+    status: str
+    channel: str
+    created_at: datetime
+    wait_minutes: int
+
+
+class KioskLinkIn(BaseModel):
+    label: str = Field(min_length=2, max_length=120)
+
+
+class KioskLinkOut(BaseModel):
+    id: str
+    code: str
+    label: str
+    facility_id: str
+    url: str
+    created_by: str
+    created_at: datetime
+    revoked: bool
+    last_used_at: datetime | None
+    sessions: int
+    intakes_today: int
+
+
+class KioskInfo(BaseModel):
+    code: str
+    label: str
+    facility_id: str
+    facility_name: str
+    district: str
+    state: str
+    languages: list[str]
+
+
+class KioskSessionIn(BaseModel):
+    device_id: str = Field(min_length=4, max_length=64)
+
+
+class KioskIdentifyIn(BaseModel):
+    patient_code: str = Field(min_length=4, max_length=20)
+    phone: str = Field(pattern=r"^\d{10}$")
 
 
 class FileOut(BaseModel):

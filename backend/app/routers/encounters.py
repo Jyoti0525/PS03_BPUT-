@@ -38,7 +38,7 @@ RANK = {"red": 0, "yellow": 1, "green": 2}
 
 @router.post("/encounters", response_model=EncounterOut)
 def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHeader = None):
-    if user.role not in ("nurse", "doctor", "receptionist", "supervisor", "patient"):
+    if user.role not in ("nurse", "doctor", "receptionist", "supervisor", "patient", "kiosk"):
         raise HTTPException(403, "Not allowed")
     dup = db.scalar(select(Encounter).where(Encounter.client_ref == body.client_ref))
     if dup:
@@ -54,8 +54,8 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
             raise HTTPException(403, "Patients can only submit their own intake")
     else:
         if body.facility_id != user.facility_id:
-            raise HTTPException(403, "Staff can only submit intakes for their own facility")
-        if get_settings().require_bound_device:
+            raise HTTPException(403, "Intakes can only be submitted for your own facility")
+        if user.role != "kiosk" and get_settings().require_bound_device:
             dev = db.get(Device, device_id) if device_id else None
             if not dev or dev.revoked or dev.facility_id != user.facility_id:
                 raise HTTPException(403, "This device is not bound to your facility — bind it from the kiosk screen")
@@ -65,7 +65,8 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
     intake = body.model_dump(mode="json")
     captured = body.captured_at if body.captured_at and body.captured_at < now() else None
     try:
-        enc = create_encounter(db, intake, p, captured)
+        channel = {"kiosk": "kiosk_link", "patient": "patient_app"}.get(user.role, "staff_kiosk")
+        enc = create_encounter(db, intake, p, captured, channel)
     except IntegrityError:
         db.rollback()
         dup = db.scalar(select(Encounter).where(Encounter.client_ref == body.client_ref))
@@ -100,6 +101,8 @@ def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
         items.append(
             QueueItem(
                 encounter_id=e.id,
+                token=e.token,
+                channel=e.channel,
                 patient_code=e.patient.code,
                 patient_name=e.patient.name,
                 age=e.patient.age,

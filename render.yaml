@@ -1,0 +1,53 @@
+# Render blueprint — Jeevia API + Postgres. Secrets marked sync:false are set in the Render dashboard.
+databases:
+  - name: jeevia-db
+    plan: free
+    region: singapore
+    databaseName: jeevia
+    user: jeevia
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: jeevia-api
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: JEEVIA_DATABASE_URL
+        fromDatabase: { name: jeevia-db, property: connectionString }
+      - key: JEEVIA_JWT_SECRET
+        generateValue: true
+      - key: JEEVIA_ENV
+        value: production
+      - key: JEEVIA_CORS_ORIGINS
+        value: https://jeevia-triage.vercel.app
+      - key: JEEVIA_WEB_BASE_URL
+        value: https://jeevia-triage.vercel.app
+      - key: JEEVIA_OTP_PROVIDER
+        value: twilio
+      - key: JEEVIA_TWILIO_ACCOUNT_SID
+        sync: false
+      - key: JEEVIA_TWILIO_API_KEY_SID
+        sync: false
+      - key: JEEVIA_TWILIO_API_KEY_SECRET
+        sync: false
+      - key: JEEVIA_TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: JEEVIA_STORAGE_BACKEND
+        value: local
+      - key: JEEVIA_S3_ENDPOINT
+        sync: false
+      - key: JEEVIA_S3_BUCKET
+        sync: false
+      - key: JEEVIA_S3_ACCESS_KEY_ID
+        sync: false
+      - key: JEEVIA_S3_SECRET_ACCESS_KEY
+        sync: false

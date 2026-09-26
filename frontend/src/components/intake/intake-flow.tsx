@@ -64,7 +64,8 @@ export function IntakeFlow({
   onFinished,
   onReset,
 }: {
-  mode: "kiosk" | "patient";
+  /** kiosk = staff-unlocked tablet · link = public kiosk link (/k/CODE) · patient = patient's own account */
+  mode: "kiosk" | "patient" | "link";
   facilityId: string;
   fixedPatient?: Patient | null;
   offline: boolean;
@@ -74,7 +75,12 @@ export function IntakeFlow({
 }) {
   const { t, lang, readAloud } = usePrefs();
   const steps: Step[] = useMemo(
-    () => (mode === "kiosk" ? ["consent", "identity", "visit", "symptoms", "details", "uploads", "followup", "vitals", "review"] : ["consent", "visit", "symptoms", "details", "uploads", "followup", "review"]),
+    () =>
+      mode === "kiosk"
+        ? ["consent", "identity", "visit", "symptoms", "details", "uploads", "followup", "vitals", "review"]
+        : mode === "link"
+          ? ["consent", "identity", "visit", "symptoms", "details", "uploads", "followup", "review"]
+          : ["consent", "visit", "symptoms", "details", "uploads", "followup", "review"],
     [mode],
   );
   const [step, setStep] = useState<Step>("consent");
@@ -90,6 +96,7 @@ export function IntakeFlow({
   const [proxyName, setProxyName] = useState("");
   const [proxyRel, setProxyRel] = useState("");
   const [privacy, setPrivacy] = useState<PrivacyContext>(mode === "kiosk" ? "assisted" : "private");
+  const [returning, setReturning] = useState({ code: "", phone: "" });
   const [agreed, setAgreed] = useState(false);
 
   // identity
@@ -144,6 +151,13 @@ export function IntakeFlow({
     vitals: "kiosk.identity.title",
     review: "kiosk.review.title",
   };
+
+  // Shared tablets: return to the start screen a minute after the token is shown.
+  useEffect(() => {
+    if (!result || !onReset || mode === "patient") return;
+    const id = setTimeout(onReset, 60_000);
+    return () => clearTimeout(id);
+  }, [result, onReset, mode]);
 
   useEffect(() => {
     if (readAloud && step !== "vitals") speak(step === "consent" ? `${t("kiosk.welcome")} ${t("kiosk.consent.body")}` : t(STEP_TITLE[step]), lang);
@@ -356,7 +370,7 @@ export function IntakeFlow({
       const p = patient ?? (await api.createPatient(newPatient!));
       const c = await api.captureConsent({ ...consent, patient_id: p.id });
       const enc = await api.submitIntake({ ...intake, patient_id: p.id, consent_id: c.id });
-      const r = { token: `A-${enc.id.slice(-3).toUpperCase()}`, patientCode: p.code, offline: false };
+      const r = { token: enc.token ?? `A-${enc.id.slice(-3).toUpperCase()}`, patientCode: p.code, offline: false };
       setResult(r);
       onFinished?.(r);
     } catch (e) {
@@ -498,8 +512,43 @@ export function IntakeFlow({
                   <Input id="np-phone" inputMode="numeric" value={newP.phone} onChange={(e) => setNewP({ ...newP, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} className="h-13 text-lg" />
                 </div>
                 <Button variant="ghost" className="sm:col-span-2" onClick={() => { setIsNew(false); setCandidates(null); }} icon={<Search className="size-4" />} disabled={offline}>
-                  Search existing patients instead
+                  {mode === "link" ? "I have visited before" : "Search existing patients instead"}
                 </Button>
+              </div>
+            ) : mode === "link" ? (
+              <div className="space-y-5">
+                <Button variant="teal" size="xl" className="w-full" onClick={() => setIsNew(true)} icon={<UserPlus className="size-6" />}>
+                  First visit — register
+                </Button>
+                <div className="rounded-2xl border-2 border-line p-4">
+                  <p className="font-semibold text-ink">Been here before?</p>
+                  <p className="text-sm text-muted">Enter the ID printed on your old token and your phone number.</p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                    <Input value={returning.code} onChange={(e) => setReturning({ ...returning, code: e.target.value.toUpperCase().trim() })} placeholder="JVA-P012" aria-label="Patient ID" className="h-12 text-lg" disabled={offline} />
+                    <Input value={returning.phone} inputMode="numeric" onChange={(e) => setReturning({ ...returning, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} placeholder="Phone" aria-label="Phone" className="h-12 text-lg" disabled={offline} />
+                    <Button
+                      size="lg"
+                      className="h-12"
+                      loading={busy}
+                      disabled={offline}
+                      onClick={async () => {
+                        setErr(null);
+                        if (!/^JVA-/i.test(returning.code) || !/^\d{10}$/.test(returning.phone)) return setErr("Enter your Jeevia ID (JVA-…) and 10-digit phone");
+                        setBusy(true);
+                        try {
+                          setPatient(await api.kioskIdentify(returning.code, returning.phone));
+                        } catch (e) {
+                          setErr(e instanceof Error ? e.message : "Not found");
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                  {offline && <p className="mt-2 text-sm text-semi">Offline — register as new; records are matched when synced.</p>}
+                </div>
               </div>
             ) : (
               <>

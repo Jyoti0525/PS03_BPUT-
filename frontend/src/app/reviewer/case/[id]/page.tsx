@@ -122,6 +122,7 @@ export default function CasePage() {
               <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-coral-100 text-xl font-bold text-coral-700">{p.name.charAt(0)}</div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
+                  {enc.token && <span className="rounded-lg bg-coral-50 px-2 py-0.5 font-mono text-sm font-bold text-coral-700">{enc.token}</span>}
                   <h1 className="text-xl font-bold text-ink sm:text-2xl">{p.name}</h1>
                   <UrgencyBadge u={enc.urgency} size="lg" />
                   {enc.urgency_source === "override" && <Badge tone="coral">Overridden</Badge>}

@@ -50,7 +50,7 @@ async def upload(
     db.add(f)
     db.flush()
     f.storage_key = f.id
-    storage.put(f.id, data)
+    storage.put(f.id, data, ctype)
     audit.record(db, user, "UPLOAD", "file", f.id, f"{kind} uploaded ({f.filename}, {max(1, len(data) // 1024)} KB); expires {f.expires_at:%Y-%m-%d %H:%M} UTC")
     return file_out(f, request, user)
 
@@ -64,6 +64,8 @@ def get_file(fid: str, request: Request, user: CurrentUser, db: DB):
         raise HTTPException(404, "File not found")
     enc = db.get(Encounter, f.encounter_id) if f.encounter_id else None
     if f.uploaded_by != user.id:
+        if user.role == "kiosk":
+            raise HTTPException(403, "Not your file")
         if user.role == "patient":
             mine = own_patient(db, user)
             if not enc or not mine or enc.patient_id != mine.id:

@@ -10,6 +10,9 @@ import type {
   ExportFormat,
   Facility,
   FacilityStats,
+  KioskInfo,
+  KioskLink,
+  TokenBoardItem,
   FileObject,
   IntakePayload,
   OtpChallenge,
@@ -59,6 +62,17 @@ export interface JeeviaApi {
   getFacility(id: string): Promise<Facility>;
   updateFacility(id: string, patch: Partial<Facility>): Promise<Facility>;
   facilityStats(id: string): Promise<FacilityStats>;
+
+  facilityTokens(id: string): Promise<TokenBoardItem[]>;
+
+  // Public kiosk links
+  listKioskLinks(): Promise<KioskLink[]>;
+  createKioskLink(label: string): Promise<KioskLink>;
+  revokeKioskLink(id: string): Promise<void>;
+  kioskInfo(code: string): Promise<KioskInfo>;
+  /** Starts a kiosk session for this browser tab (role = kiosk, intake-only). */
+  kioskSession(code: string, deviceId: string): Promise<{ tokens: Tokens; user: User }>;
+  kioskIdentify(patientCode: string, phone: string): Promise<Patient>;
 
   // Users
   listUsers(): Promise<User[]>;

@@ -36,7 +36,7 @@ class Facility(Base):
 class User(Base):
     __tablename__ = "users"
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("usr"))
-    phone: Mapped[str] = mapped_column(String(15), unique=True, index=True)
+    phone: Mapped[str] = mapped_column(String(24), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(200))
     role: Mapped[str] = mapped_column(String(20))
     facility_id: Mapped[str | None] = mapped_column(ForeignKey("facilities.id"), nullable=True)
@@ -140,8 +140,29 @@ class Encounter(Base):
     escalation_due_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     consent_id: Mapped[str | None] = mapped_column(ForeignKey("consents.id"), nullable=True)
     client_ref: Mapped[str] = mapped_column(String(80), unique=True)
+    # Queue token printed for the patient, e.g. T-014; restarts daily per facility.
+    token: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    token_date: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
+    channel: Mapped[str] = mapped_column(String(16), default="staff_kiosk")  # staff_kiosk | kiosk_link | patient_app
     patient: Mapped[Patient] = relationship(lazy="joined")
     consent: Mapped[Consent | None] = relationship(lazy="joined")
+
+
+class KioskLink(Base):
+    """A public intake link for one facility. Opening it starts a kiosk session (role=kiosk) that can
+    only register patients, capture consent, upload files and submit intakes."""
+
+    __tablename__ = "kiosk_links"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("kl"))
+    code: Mapped[str] = mapped_column(String(16), unique=True, index=True)
+    label: Mapped[str] = mapped_column(String(120))
+    facility_id: Mapped[str] = mapped_column(ForeignKey("facilities.id"))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    created_by: Mapped[str] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+    last_used_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    sessions: Mapped[int] = mapped_column(Integer, default=0)
 
 
 class Escalation(Base):

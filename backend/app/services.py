@@ -2,6 +2,7 @@
 
 import threading
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
 from sqlalchemy import func, select
@@ -44,7 +45,25 @@ def own_patient(db: Session, user: User) -> Patient | None:
     return db.scalar(select(Patient).where(Patient.phone == user.phone, Patient.name == user.name))
 
 
-def create_encounter(db: Session, intake: dict, patient: Patient, created: datetime | None = None) -> Encounter:
+_token_lock = threading.Lock()
+
+
+def local_day(d: datetime) -> str:
+    return d.astimezone(ZoneInfo(get_settings().timezone)).date().isoformat()
+
+
+def next_token(db: Session, facility_id: str, day: str) -> str:
+    """Daily running number per facility: T-001, T-002 … (resets at local midnight)."""
+    n = db.scalar(select(func.count(Encounter.id)).where(Encounter.facility_id == facility_id, Encounter.token_date == day)) or 0
+    return f"T-{n + 1:03d}"
+
+
+def create_encounter(db: Session, intake: dict, patient: Patient, created: datetime | None = None, channel: str = "staff_kiosk") -> Encounter:
+    with _token_lock:
+        return _create_encounter(db, intake, patient, created, channel)
+
+
+def _create_encounter(db: Session, intake: dict, patient: Patient, created: datetime | None, channel: str) -> Encounter:
     created = created or now()
     history = list(
         db.scalars(select(Encounter).where(Encounter.patient_id == patient.id).order_by(Encounter.created_at.desc()))
@@ -74,7 +93,11 @@ def create_encounter(db: Session, intake: dict, patient: Patient, created: datet
         escalation_due_at=created + timedelta(minutes=esc) if esc else None,
         consent_id=intake.get("consent_id"),
         client_ref=intake["client_ref"],
+        channel=channel,
     )
+    day = local_day(now())
+    enc.token_date = day
+    enc.token = next_token(db, intake["facility_id"], day)
     db.add(enc)
     db.flush()
     for f in files:
@@ -101,9 +124,11 @@ def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
         referral_needed=e.referral_needed,
         specialist_required=e.specialist_required,
         escalation_due_at=aware(e.escalation_due_at),
+        token=e.token,
+        channel=e.channel,
         consent=ConsentOut.model_validate(e.consent) if e.consent else None,
     )
-    if viewer.role == "patient":
+    if viewer.role in ("patient", "kiosk"):
         # Health outputs stay reviewer-facing: no urgency, no AI note, no override.
         out.urgency = None
         out.note = None
@@ -115,7 +140,7 @@ def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
 
 
 def load_encounter(db: Session, eid: str, user: User, *, clinical: bool = True) -> Encounter:
-    if clinical and (user.role in ADMIN_ROLES or user.role == "employer"):
+    if clinical and (user.role in ADMIN_ROLES or user.role in ("employer", "kiosk")):
         raise HTTPException(403, "This role cannot read clinical notes")
     e = db.get(Encounter, eid)
     if not e:
