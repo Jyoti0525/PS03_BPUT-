@@ -14,6 +14,13 @@ import type {
   KioskLink,
   ShareLink,
   SharedSummary,
+  DirectoryHit,
+  Organisation,
+  Worker,
+  WorkerInput,
+  FitnessRecord,
+  FitnessStatus,
+  NewFacilityInput,
   TokenBoardItem,
   FileObject,
   IntakePayload,
@@ -24,6 +31,7 @@ import type {
   QueueItem,
   Referral,
   RegisterInput,
+  Role,
   Reminder,
   RetentionStatus,
   Tokens,
@@ -49,8 +57,12 @@ export interface JeeviaApi {
   requestOtp(phone: string): Promise<OtpChallenge>;
   verifyOtp(challengeId: string, code: string): Promise<OtpVerifyResult>;
   register(input: RegisterInput): Promise<{ tokens: Tokens; user: User }>;
-  loginWithPin(phone: string, pin: string, deviceId: string): Promise<{ tokens: Tokens; user: User }>;
-  setPin(pin: string, deviceId: string): Promise<void>;
+  /** Second factor after OTP for staff and employers. */
+  verifyPin(pinToken: string, pin: string): Promise<{ tokens: Tokens; user: User }>;
+  setupPin(pinToken: string, pin: string): Promise<{ tokens: Tokens; user: User }>;
+  forgotPin(pinToken: string): Promise<OtpVerifyResult>;
+  changePin(currentPin: string, newPin: string): Promise<void>;
+  resetStaffPin(userId: string): Promise<void>;
   me(): Promise<User>;
   logout(): Promise<void>;
 
@@ -82,6 +94,26 @@ export interface JeeviaApi {
   revokeShare(id: string): Promise<void>;
   shareMeta(token: string): Promise<{ facility_name: string; purpose: string; expires_at: string }>;
   openShare(token: string, accessCode: string): Promise<SharedSummary>;
+
+  // National facility directory (public, used at sign-up)
+  searchDirectory(q: string, state?: string | null): Promise<DirectoryHit[]>;
+  directoryStates(): Promise<{ state: string; facilities: number }[]>;
+
+  // Organisations (employer portal)
+  myOrganisation(): Promise<{ organisation: Organisation; facilities: Facility[] }>;
+  updateOrganisation(patch: Partial<Pick<Organisation, "name" | "registration_no" | "address" | "contact_phone">>): Promise<Organisation>;
+  addOrganisationFacility(input: NewFacilityInput): Promise<Facility>;
+  listWorkers(): Promise<Worker[]>;
+  addWorker(input: WorkerInput): Promise<Worker>;
+  importWorkers(csv: string): Promise<{ created: number; updated: number; errors: string[] }>;
+  removeWorker(employeeCode: string): Promise<void>;
+
+  // Occupational fitness (doctor)
+  recordFitness(encounterId: string, input: { status: FitnessStatus; restrictions?: string | null; valid_until?: string | null }): Promise<FitnessRecord>;
+
+  // Staff and identity management
+  updateUser(id: string, patch: { role?: Role; is_active?: boolean }): Promise<User>;
+  correctPatient(id: string, patch: Partial<Pick<Patient, "name" | "age" | "sex" | "phone" | "language" | "village">>): Promise<Patient>;
 
   // Users
   listUsers(): Promise<User[]>;

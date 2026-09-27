@@ -27,20 +27,33 @@ One idea runs through everything: **the system organises and prioritises; a qual
 
 | Role | Signs in at | Main screen | What they do | What they can never see |
 |---|---|---|---|---|
-| **Supervisor** | `/auth` | `/admin` | Registers the facility, sets facility type and specialists on duty, creates kiosk links / QR posters, watches today's tokens, reviews the audit log and data retention | Symptoms, triage notes, reports |
-| **Receptionist** | `/auth` | `/admin` | Watches the token board, calls patients by token, manages kiosk links and staff devices | Symptoms, triage notes, reports |
+| **Supervisor** | `/auth` | `/admin` | Picks the facility from the national directory (or adds a missing public one), sets facility type and specialists on duty, creates kiosk links / QR posters, watches today's tokens, manages staff (role, deactivate, **reset PIN**), reviews the audit log and data retention | Symptoms, triage notes, reports, patient documents |
+| **Receptionist** | `/auth` | `/admin` | Watches the token board, calls patients by token, corrects registration mistakes, manages kiosk links and staff devices | Symptoms, triage notes, reports, patient documents |
 | **Nurse / ANM** | `/auth` | `/reviewer` (nurse view) and `/kiosk` | Runs assisted intake on the staff kiosk (and adds vitals), works the "Do now" checklist, asks follow-up questions, escalates | Cannot override urgency, confirm notes or send referrals |
 | **Doctor / MO** | `/auth` | `/reviewer` | Works the queue top-down, reviews the note with its sources, confirms or edits, overrides urgency with a written reason, acknowledges escalations, sends referrals, exports | — |
 | **Patient** | `/auth` | `/patient` | Adds a new problem before arriving, sees own visits, tokens and check-up reminders | Urgency, triage notes, other family members' records |
-| **Employer / HR** | `/auth` | `/employer` | Sees fitness status of worker cohorts (fit / restricted / unfit / pending) | Any clinical record |
+| **Employer / organisation** | `/auth` | `/employer` | Registers the organisation and its workplaces (company clinic, industrial unit, campus, health camp), keeps the worker roster, sees each worker's fitness outcome (fit / restricted / unfit / pending) | Symptoms, notes, documents — any clinical record |
 | **Kiosk link** (no login) | opens `/k/CODE` | intake only | Registers a patient, records consent, takes symptoms and reports, issues a token | Everything else — it cannot read any data |
 
-## 3. Setting up a new facility (once)
+## 3. Setting up a facility (once)
 
-1. **Supervisor registers** at `/auth → Register`: role *Supervisor* → name → choose **"+ Register a new facility"** (name, type, district, state) → phone → OTP → accept terms → optional PIN.
+### 3.1 Government and private health facilities
+Jeevia ships with a **directory of India's health facilities** — sub-centres, PHCs, CHCs, district and sub-district hospitals, medical colleges, ESI dispensaries, AYUSH centres, private hospitals and clinics in all 36 states and UTs (from OpenStreetMap, © OpenStreetMap contributors, ODbL). Staff search it by name, district or PIN code when they register.
+
+1. **Supervisor registers** at `/auth → Register`: role *Supervisor* → name → **Workplace**: search the directory and pick the facility. If a public facility is missing, the supervisor adds it (name, type, state, district, PIN code); it is marked *self-registered* until verified → phone → OTP → **create PIN** → accept terms. The facility becomes active on Jeevia the moment its first staff member joins.
+
+### 3.2 Company clinics, industrial units, campuses and health camps
+These are **not** in the public list. They appear only after their organisation registers:
+
+1. **Employer registers** at `/auth → Register`: role *Employer / Organisation* → name → organisation (name, type, CIN, state, district) and its **first workplace health centre** → phone → OTP → create PIN → terms.
+2. The workplace is now searchable. The organisation's doctors, nurses, receptionists and supervisor register and pick it.
+3. In `/employer` the employer adds more workplaces, keeps the **worker roster** (one by one or CSV import: `employee_code, name, age, sex, department, phone`) and edits the organisation profile.
+4. When a worker checks in at that workplace, the kiosk asks for the **employee / student ID**; the visit is linked to the roster entry (same name or phone), and the doctor records the fitness outcome on the case.
+
+### 3.3 Then, for every facility
 2. **Facility setup** (`/admin/facility`): pick the facility type, answer the "what is available here" questions (lab, ECG, X-ray, oxygen…), switch specialists on/off as they arrive or leave, set the default referral hospital and kiosk languages. Referral notes use this automatically.
 3. **Kiosk links** (`/admin/kiosk-links`): create one link per place patients check in ("OPD waiting area", "Camp tablet 2"). Each link has a URL like `https://jeevia-triage.vercel.app/k/7QX4MPA2`, a short code and a printable QR poster. Revoking a link stops every device using it immediately.
-4. **Staff join**: doctors, nurses and receptionists register themselves at `/auth`, choosing this facility (doctors and nurses give their council registration number). The supervisor sees them under **Staff**.
+4. **Staff join**: doctors, nurses and receptionists register themselves at `/auth`, searching for this facility (doctors and nurses give their council registration number) and creating their PIN. The supervisor sees them under **Staff**, where they can change a role, deactivate or reactivate an account, and reset a forgotten PIN.
 
 ## 4. A patient's journey, step by step
 
@@ -72,7 +85,7 @@ If the network is down, the intake is saved on the device and sent automatically
 5. **Audit** — the intake, consent and any source disagreement are written to the audit log.
 
 ### 4.4 Front desk (receptionist / supervisor)
-`/admin` → **Today's tokens** updates every 10 seconds: token, name, patient ID, how they checked in, waiting time and status (*Waiting → With doctor → Seen / Referred / Escalated*). Staff call patients by token. The front desk never sees symptoms or urgency.
+`/admin` → **Today's tokens** updates every 10 seconds: token, name, patient ID, how they checked in, waiting time and status (*Waiting → With doctor → Seen / Referred / Escalated*). Staff call patients by token. The pencil on each row corrects a registration mistake (name, age, sex, phone, language, village); the audit log records which fields changed. The front desk never sees symptoms, urgency or documents.
 
 ### 4.5 Nurse
 `/reviewer` shows the same queue. Opening a case gives the **nurse view**: *Do now* (flags), vitals to re-measure, questions to ask, missing information. A nurse can edit the note and **escalate** ("SpO₂ dropping — needs senior review now").
@@ -87,6 +100,8 @@ If the network is down, the intake is saved on the device and sent automatically
    - **Escalate** to a senior MO / specialist; the receiver must **acknowledge** it in *Escalations*.
    - **Referral note** — destination is suggested from the facility's specialist settings; choose transport (108 / facility vehicle / self), edit, send, print.
    - **Export** — PDF, print, JSON, CSV or FHIR R4.
+   - **Edit details** — correct the patient's registration details.
+   - **Record fitness** — for workers on an organisation's roster: fit / fit with restrictions / temporarily unfit / pending, restrictions and a validity date. The employer sees only this outcome.
 4. **Safety nets** — unreviewed *Critical* cases auto-escalate after 15 minutes (*Semi-urgent* after 60).
 
 ### 4.7 Referral hand-off with a QR summary
@@ -95,7 +110,15 @@ If the network is down, the intake is saved on the device and sent automatically
 3. The receiving clinician scans the QR (`/s/…`), enters the code and sees: patient details, token, urgency and any override, the reviewed summary, flags, vitals and report values, the referral, and the **uploaded documents** (prescriptions, lab slips, photos) to view or print.
 4. Eight wrong codes lock the link; the doctor can revoke it any time from the same dialog; every opening is in the audit log.
 
-### 4.8 After the visit
+### 4.8 Who can open a patient's documents and photos
+Reports, prescriptions and photos a patient uploads open only for:
+- the **doctors and nurses at the facility treating that visit**,
+- the **patient** (their own files),
+- whoever holds a **QR summary link and its access code** (§4.7).
+
+Receptionists, supervisors, employers and staff at other facilities get *"Only the doctors and nurses treating this patient can open their documents"*. Every opening is written to the audit log.
+
+### 4.9 After the visit
 - The patient sees the visit as *Reviewed by a doctor* or *Referred* in `/patient`, plus any check-up reminders (SMS or voice).
 - Raw voice recordings are deleted after 24 hours, photos after 3 days and reports after 30 days (`/admin/retention`); the structured note stays.
 - Every view, edit, override, referral and export is in the hash-chained audit log (`/admin/audit` → *Verify chain*).
@@ -104,13 +127,23 @@ If the network is down, the intake is saved on the device and sent automatically
 
 The landing page shows live status (checked every 20 seconds) for the website, API server, database, SMS codes and document storage, and the header shows a coloured dot. On the free Render plan the API sleeps after 15 idle minutes; **Wake server** brings it back in 30–60 seconds, and a scheduled GitHub workflow pings it every 10 minutes to keep it awake. Signed-in supervisors also get **Restart server** once a Render API key is configured.
 
-## 6. Signing in
+## 6. Signing in (two-factor for staff and employers)
 
-- **First time:** phone → one-time code by SMS (Twilio Verify) → register → optional PIN.
-- **Next time:** phone + code, or phone + PIN on the same device (a PIN only works on the device where it was created).
-- **Sample walkthrough accounts** (code `123456`): doctor 9000000001, nurse 9000000002, receptionist 9000000003, supervisor 9000000004, employer 9000000005, patient 9876543210. They belong to the sample facility *PHC Manikpur*, whose kiosk link is `/k/MANIKPUR`.
+- **Patients:** phone → one-time code by SMS. That is all.
+- **Doctors, nurses, receptionists, supervisors and employers:** two factors every time —
+  1. phone → one-time code (proves the phone), then
+  2. their **account PIN** (4–6 digits, chosen at registration; proves the person).
+- **PIN rules:** easy PINs (1234, 0000, 1111, 2580, birthdays-style repeats, straight sequences) are refused. Five wrong PINs lock the account for 15 minutes.
+- **Change PIN:** the key icon in the dashboard header (needs the current PIN).
+- **Forgot PIN:** supervisors and employers reset it themselves after the OTP (*Forgot PIN?*). Doctors, nurses and receptionists ask their supervisor (**Admin → Staff → Reset PIN**); they then create a new PIN after their next OTP.
+- **Rate limits:** 3 codes per phone per 10 minutes, 10 per day, 30 per network address per hour.
+- **Sample walkthrough accounts** (code `123456`, staff PIN `4826`): doctor 9000000001, nurse 9000000002, receptionist 9000000003, supervisor 9000000004, employer 9000000005, patient 9876543210. They belong to the sample facility *PHC Manikpur* (kiosk link `/k/MANIKPUR`) and the sample organisation *Kalinga Steel Works*.
 
-## 7. Where things run
+## 7. Kiosk links offline
+
+Open a kiosk link once with internet and it keeps working without it: the page, the facility details and the kiosk session stay on the device. Intakes made offline get an `OFF-xxxx` slip, wait in that link's own queue on the device, and are sent automatically — with that kiosk's session — as soon as the connection returns.
+
+## 8. Where things run
 
 | Part | Where |
 |---|---|

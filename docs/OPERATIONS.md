@@ -52,7 +52,9 @@ Nothing secret is committed. Local development uses `backend/.env` (git-ignored)
 ## Database (Neon)
 
 - **Connection**: the API uses Neon's direct endpoint with `sslmode=require`; connections are health-checked and recycled every 4 minutes because Neon suspends idle compute (first query after a pause takes well under a second).
-- **Schema**: created and kept up to date by the API on start-up (`init_db`), including the trigger that makes `audit_events` append-only.
+- **Schema**: managed by **Alembic** (`backend/migrations/`). On start-up the API runs `alembic upgrade head` under a Postgres advisory lock (only one instance migrates), then re-applies the trigger that makes `audit_events` append-only. A database created before Alembic is stamped at `0001` first.
+  - New migration: change `app/models.py`, then `cd backend && JEEVIA_DATABASE_URL=<local pg> .venv/bin/alembic revision --autogenerate -m "…"`, review it, and check with `alembic check`.
+  - Rehearse risky migrations on a Neon branch: `neonctl branches create --project-id empty-dream-42914552 --name mig-test`, run `alembic upgrade head` against the branch URL, inspect, then delete the branch.
 - **Backups**: Neon keeps point-in-time history (restore window per plan). For an extra copy:
   ```bash
   pg_dump "$NEON_URL" --no-owner --no-privileges -f jeevia-$(date +%F).sql
@@ -64,15 +66,39 @@ Nothing secret is committed. Local development uses `backend/.env` (git-ignored)
 History: the database moved from Render PostgreSQL to Neon on 27 Sep 2026 (row counts and the audit chain verified
 identical after the move). The old Render database `jeevia-db` is no longer used and can be deleted.
 
+## Facility directory (all of India)
+
+- Source: OpenStreetMap health facilities (`amenity=hospital|clinic|doctors`, `healthcare=*`), © OpenStreetMap contributors, ODbL. Credit is shown in the sign-up workplace search.
+- Refresh (a few hours, polite to the public Overpass servers):
+  ```bash
+  cd backend && .venv/bin/python scripts/fetch_directory.py      # writes directory_data/facilities_in.jsonl.gz
+  .venv/bin/python -m app.directory load                         # upsert into the database (idempotent)
+  .venv/bin/python -m app.directory stats
+  ```
+  Commit the new snapshot; on an empty `facility_directory` table the API loads it in the background at start-up.
+- OSM coverage of small sub-centres varies by state. Supervisors can add a missing public facility at sign-up (marked *self-registered*, `verified=false`); company clinics, industrial units, campuses and camps come only from organisations that register.
+
+## Security settings
+
+| Setting (env) | Default | Meaning |
+|---|---|---|
+| `JEEVIA_OTP_PER_PHONE_10MIN` / `JEEVIA_OTP_PER_PHONE_DAY` | 3 / 10 | OTP requests per phone (sample phones exempt) |
+| `JEEVIA_OTP_PER_IP_HOUR` | 30 | OTP requests per client address |
+| `JEEVIA_PIN_MAX_ATTEMPTS` / `JEEVIA_PIN_LOCK_MINUTES` | 5 / 15 | Wrong PINs before a temporary lock |
+| `JEEVIA_DEMO_PIN` | 4826 | PIN of the sample staff/employer accounts |
+
+A forgotten staff PIN is reset by the facility supervisor (Admin → Staff → Reset PIN); supervisors and employers reset their own after the phone OTP.
+
 ## Sample data
 
-`JEEVIA_SEED_DEMO=true` seeds an **empty** database with two facilities, six sample staff/patient accounts, three
-fictional patients and the kiosk link `MANIKPUR`. It never touches a database that already has facilities.
+`JEEVIA_SEED_DEMO=true` seeds an **empty** database with two facilities, six sample staff/patient accounts (OTP `123456`,
+staff PIN `4826`), three fictional patients, the sample organisation *Kalinga Steel Works* with three roster workers,
+and the kiosk link `MANIKPUR`. It never touches a database that already has facilities.
 
 To reset production to the sample state (destructive — removes all real records):
 1. Take a `pg_dump` first.
 2. Drop all tables (`Base.metadata.drop_all`) against the production URL.
-3. Restart the API; it recreates the schema and seeds.
+3. Restart the API; it runs the migrations, seeds, and reloads the facility directory in the background.
 4. Delete orphaned files under `jeevia/` in Cloudinary (the API only deletes files through the retention purge).
 
 ## Twilio trial
@@ -84,6 +110,9 @@ sample accounts use the fixed code `123456` and never send SMS.
 ## Data retention
 
 Uploads carry an expiry at creation: voice 24 h, photos 72 h, reports 720 h (30 days, so they travel with referrals).
-Expired files stop being served immediately. `storage.purge_expired(db)` deletes the bytes, keeps the metadata and
-writes a `PURGE` audit event — schedule it (e.g. a daily Render cron job running
-`python -c "from app.db import SessionLocal; from app.storage import purge_expired; purge_expired(SessionLocal())"`).
+Expired files stop being served immediately. The API runs `storage.purge_expired(db)` every hour (one instance at a
+time via an advisory lock): it deletes the bytes, keeps the metadata and writes a `PURGE` audit event. The same loop
+deletes OTP challenges older than a day.
+
+Documents and photos are only served to the doctors and nurses of the facility that holds the visit, the patient
+themself, or through a QR summary link with its access code. Every opening is audited.

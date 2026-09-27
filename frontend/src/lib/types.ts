@@ -33,11 +33,19 @@ export type EncounterStatus =
 export type FacilityType =
   | "phc"
   | "chc"
+  | "sub_centre"
   | "district_hospital"
+  | "hospital"
+  | "clinic"
   | "health_camp"
   | "company_clinic"
   | "industrial_unit"
   | "campus";
+
+/** Workplaces that exist only after their organisation registers them. */
+export const ORG_FACILITY_TYPES: FacilityType[] = ["company_clinic", "industrial_unit", "campus", "health_camp"];
+
+export type OrgKind = "company" | "industrial" | "campus" | "ngo" | "government_programme";
 
 export interface User {
   id: string;
@@ -48,6 +56,8 @@ export interface User {
   registration_no?: string | null;
   language: string;
   has_pin: boolean;
+  is_active?: boolean;
+  organisation_id?: string | null;
   created_at: string;
 }
 
@@ -67,7 +77,12 @@ export interface OtpChallenge {
 
 export type OtpVerifyResult =
   | { status: "authenticated"; tokens: Tokens; user: User }
-  | { status: "new_user"; registration_token: string };
+  | { status: "new_user"; registration_token: string }
+  /** Staff and employers: phone verified, now the account PIN (second factor). */
+  | { status: "pin_required" | "pin_setup_required"; pin_token: string; name: string; can_reset_pin: boolean };
+
+/** Roles that sign in with phone OTP + PIN. */
+export const PIN_ROLES: Role[] = ["doctor", "nurse", "receptionist", "supervisor", "employer"];
 
 export interface RegisterInput {
   registration_token: string;
@@ -78,8 +93,103 @@ export interface RegisterInput {
   language: string;
   accepted_terms: boolean;
   device_id?: string | null;
-  /** A supervisor may create their facility while registering. */
-  new_facility?: { name: string; type: FacilityType; district: string; state: string; referral_destination?: string | null } | null;
+  /** Account PIN (second factor) — required for staff and employers. */
+  pin?: string | null;
+  /** Where the user works — exactly one of facility_id, directory_ref, new_facility (supervisor), new_organisation (employer). */
+  directory_ref?: string | null;
+  new_facility?: NewFacilityInput | null;
+  new_organisation?: NewOrganisationInput | null;
+}
+
+export interface NewFacilityInput {
+  name: string;
+  type: FacilityType;
+  district: string;
+  state: string;
+  pincode?: string | null;
+  address?: string | null;
+  referral_destination?: string | null;
+}
+
+export interface NewOrganisationInput {
+  name: string;
+  kind: OrgKind;
+  registration_no?: string | null;
+  state: string;
+  district: string;
+  address?: string | null;
+  contact_phone?: string | null;
+  facility: NewFacilityInput;
+}
+
+/** One result in the workplace search (national directory or a registered workplace). */
+export interface DirectoryHit {
+  key: string;
+  name: string;
+  kind: string;
+  kind_label: string;
+  type: FacilityType;
+  ownership: "public" | "private" | "unknown";
+  state: string;
+  district: string | null;
+  city: string | null;
+  pincode: string | null;
+  source: "directory" | "organisation" | "user_added" | "sample";
+  directory_ref: string | null;
+  facility_id: string | null;
+  organisation_name: string | null;
+  verified: boolean;
+}
+
+export interface Organisation {
+  id: string;
+  name: string;
+  kind: OrgKind;
+  registration_no: string | null;
+  state: string;
+  district: string;
+  address: string | null;
+  contact_phone: string | null;
+  verified: boolean;
+  created_at: string;
+}
+
+export interface Worker {
+  employee_code: string;
+  name: string;
+  department: string | null;
+  patient_code: string;
+  fitness_status: FitnessStatus;
+  restrictions: string | null;
+  valid_until: string | null;
+  last_assessed_at: string | null;
+  assessed_by: string | null;
+}
+
+export interface WorkerInput {
+  employee_code: string;
+  name: string;
+  age: number;
+  sex: "F" | "M" | "O";
+  department?: string | null;
+  phone?: string | null;
+}
+
+export interface FitnessRecord {
+  id: string;
+  status: FitnessStatus;
+  restrictions: string | null;
+  valid_until: string | null;
+  assessed_by: string;
+  assessed_at: string;
+}
+
+export interface WorkerInfo {
+  organisation_id: string;
+  organisation_name: string;
+  employee_code: string | null;
+  department: string | null;
+  latest: FitnessRecord | null;
 }
 
 export interface Specialist {
@@ -103,6 +213,12 @@ export interface Facility {
   offline_mode: boolean;
   /** Answers to the "what services do you have" setup questions. */
   capabilities: Record<string, boolean>;
+  source?: "sample" | "directory" | "organisation" | "user_added";
+  verified?: boolean;
+  organisation_id?: string | null;
+  directory_ref?: string | null;
+  pincode?: string | null;
+  address?: string | null;
 }
 
 export interface Device {
@@ -126,6 +242,9 @@ export interface Patient {
   category: PatientCategory;
   village?: string | null;
   employer_id?: string | null;
+  organisation_id?: string | null;
+  employee_code?: string | null;
+  department?: string | null;
   created_at: string;
 }
 
@@ -339,6 +458,8 @@ export interface Encounter {
   /** Daily queue token shown to the patient, e.g. T-014. */
   token?: string | null;
   channel?: IntakeChannel;
+  /** Present when the patient is on an employer's roster (never sent to patient/kiosk sessions). */
+  worker?: WorkerInfo | null;
   consent?: Consent | null;
 }
 
@@ -348,6 +469,7 @@ export type IntakeChannel = "staff_kiosk" | "kiosk_link" | "patient_app";
 export interface TokenBoardItem {
   encounter_id: string;
   token: string | null;
+  patient_id: string;
   patient_name: string;
   patient_code: string;
   status: EncounterStatus;
@@ -414,6 +536,7 @@ export interface KioskInfo {
   label: string;
   facility_id: string;
   facility_name: string;
+  organisation_name?: string | null;
   district: string;
   state: string;
   languages: string[];

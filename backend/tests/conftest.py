@@ -9,6 +9,8 @@ _tmp = tempfile.mkdtemp(prefix="jeevia-test-")
 os.environ.setdefault("JEEVIA_DATABASE_URL", f"sqlite:///{_tmp}/test.db")
 os.environ["JEEVIA_STORAGE_DIR"] = f"{_tmp}/uploads"
 os.environ["JEEVIA_LOG_LEVEL"] = "WARNING"
+os.environ["JEEVIA_DIRECTORY_AUTOLOAD"] = "false"  # tests load their own small directory fixture
+os.environ["JEEVIA_OTP_PER_IP_HOUR"] = "100000"  # the whole test session shares one client address
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402
@@ -17,6 +19,8 @@ from app.main import app  # noqa: E402
 
 API = "/api/v1"
 DEVICE = "dev_kiosk_manikpur_1"  # seeded, bound to PHC Manikpur
+SAMPLE_PIN = "4826"  # sample accounts' PIN (JEEVIA_DEMO_PIN)
+GOOD_PIN = "7391"
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +32,10 @@ def client():
 def login(client, phone: str) -> dict:
     ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
     r = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
-    assert r["status"] == "authenticated", r
+    if r["status"] == "pin_required":  # staff and employers: second factor
+        r = client.post(f"{API}/auth/pin/verify", json={"pin_token": r["pin_token"], "pin": SAMPLE_PIN}).json()
+    else:
+        assert r["status"] == "authenticated", r
     return {"Authorization": f"Bearer {r['tokens']['access_token']}"}
 
 

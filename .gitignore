@@ -28,3 +28,6 @@ node_modules/
 out/
 .vercel/
 *.tsbuildinfo
+
+# raw per-state downloads (the merged snapshot is committed)
+backend/directory_data/parts/

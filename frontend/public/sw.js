@@ -5,7 +5,7 @@
  *    Background Sync wakes the page to flush them when connectivity returns.
  *  - API calls are never cached (clinical data must not linger in caches).
  */
-const VERSION = "jeevia-v1";
+const VERSION = "jeevia-v2";
 const SHELL = ["/kiosk", "/offline", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -84,6 +84,23 @@ self.addEventListener("fetch", (event) => {
         .catch(() => hit);
       return hit || net;
     }),
+  );
+});
+
+// Pages ask us to keep what they need for offline use (see lib/offline/precache.ts).
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "precache" || !Array.isArray(event.data.urls)) return;
+  const urls = event.data.urls.filter((u) => typeof u === "string" && u.startsWith("/") && !u.startsWith("/api/")).slice(0, 300);
+  event.waitUntil(
+    caches.open(VERSION).then((c) =>
+      Promise.all(
+        urls.map(async (u) => {
+          if (!u.startsWith("/_next/static/") && !u.startsWith("/k/") && !u.startsWith("/kiosk")) return u.includes(".") ? c.add(u).catch(() => null) : null;
+          if (u.startsWith("/_next/static/") && (await c.match(u))) return null;
+          return c.add(new Request(u, { cache: "reload" })).catch(() => null);
+        }),
+      ),
+    ),
   );
 });
 

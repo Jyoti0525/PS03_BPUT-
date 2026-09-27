@@ -64,7 +64,8 @@ Everything anyone views or changes is written to a tamper-evident audit log.
 | Urgency only from fixed rules | `backend/app/triage/rules/*.yaml`, evaluated by `rules.py`. The note pipeline cannot set or lower urgency. |
 | Human in the loop | Only doctors confirm, override (≥ 15-character written reason; the original rules result is kept) and refer. Escalations must be acknowledged. |
 | Patients never see triage status | The API strips urgency and notes from every response to patient and kiosk sessions. |
-| Least privilege | Front-desk staff see names, tokens and status only; employers see fitness status only; kiosk links can only submit check-ins. |
+| Least privilege | Front-desk staff see names, tokens and status only; employers see fitness status only; kiosk links can only submit check-ins. Patient documents and photos open only for the doctors and nurses treating that visit (or via a QR summary with its code). |
+| Two-factor staff sign-in | Doctors, nurses, receptionists, supervisors and employers need a phone OTP **and** their personal 4–6 digit PIN; weak PINs refused, lock after 5 wrong tries, OTP rate limits per phone and per address. |
 | Consent first | An intake cannot be submitted without a consent record (self or proxy, with privacy context). |
 | Tamper-evident audit | Every view, edit, override, export and share opening is hash-chained; the database rejects updates and deletes on the audit table. |
 | Minimal retention | Voice recordings 24 h, photos 3 days, reports 30 days; files are private and served only through the API. |
@@ -73,12 +74,12 @@ Everything anyone views or changes is written to a tamper-evident audit log.
 
 | Role | Main screen | Does | Never sees |
 |---|---|---|---|
-| **Supervisor** | `/admin` | Registers the facility, sets specialists on duty, creates kiosk links and QR posters, watches the token board, audits activity, can restart the server | Symptoms, notes, reports |
-| **Receptionist** | `/admin` | Watches today's tokens, calls patients, manages kiosk links and staff devices | Symptoms, notes, reports |
+| **Supervisor** | `/admin` | Joins a facility from the all-India directory (or adds a missing public one), sets specialists on duty, creates kiosk links and QR posters, manages staff (role, deactivate, reset PIN), audits activity, can restart the server | Symptoms, notes, documents |
+| **Receptionist** | `/admin` | Watches today's tokens, calls patients, corrects registration details, manages kiosk links and staff devices | Symptoms, notes, documents |
 | **Nurse / ANM** | `/reviewer` (nurse view), `/kiosk` | Assisted intake with vitals, "do now" checklist, follow-up questions, escalation | — (cannot override or refer) |
 | **Doctor / Medical Officer** | `/reviewer` | Reviews the queue, confirms/edits notes, overrides with a reason, acknowledges escalations, refers, exports, shares QR summaries | — |
 | **Patient** | `/patient` | Adds a problem before visiting, sees own visits and reminders | Urgency, notes, family members' records |
-| **Employer / HR** | `/employer` | Sees worker fitness status by cohort | Any clinical record |
+| **Employer / organisation** | `/employer` | Registers the organisation and its workplaces (company clinic, industrial unit, campus, health camp), keeps the worker roster, sees fitness outcomes | Any clinical record |
 | **Kiosk link** (no login) | `/k/<code>` | Registers a patient, captures consent and symptoms, uploads reports, issues a token | Everything else |
 | **Receiving clinician** (no login) | `/s/<token>` | Opens a referral summary by QR + 6-digit access code | Anything outside that one visit |
 
@@ -152,7 +153,8 @@ real capture time so waiting time is never understated.
 - Staff kiosk on bound tablets with patient search (household-phone disambiguation) and vitals entry.
 - Voice-first intake with spoken read-back, icon mode, large text, 22 languages (full screens in English, Hindi, Odia).
 - Maternal and chronic-disease branches; follow-up questions generated from what is still missing.
-- Photo capture with in-browser compression; offline queue with automatic sync.
+- Photo capture with in-browser compression; offline queue with automatic sync. Kiosk links keep working offline after one online visit (page, facility and session cached on the device).
+- At organisation workplaces the kiosk asks for the employee / student ID and links the visit to the roster.
 - Daily running tokens per facility.
 
 **Clinical review**
@@ -161,14 +163,19 @@ real capture time so waiting time is never understated.
 - Doctor and nurse views of the same note.
 - Confirm, edit, override with reason, escalate and acknowledge, refer (destination suggested from on-duty specialists).
 - Export as PDF, print, JSON, CSV or FHIR R4.
+- Record occupational fitness (fit / restrictions / temporarily unfit) for rostered workers; correct patient details.
 - **QR summary**: time-limited link + 6-digit code showing patient details, the reviewed note, the referral and uploaded documents; locks after 8 wrong codes; revocable; every opening audited.
 
 **Administration**
-- Supervisors can register a new facility while signing up; facility setup covers type, services, specialists on duty, referral hospital and kiosk languages.
-- Token board, kiosk links, staff list, staff devices, audit log with chain verification and CSV export, data-retention view.
+- **All-India facility directory** (sub-centres to medical colleges, government and private, from OpenStreetMap) searchable by name, district or PIN code at sign-up; supervisors can add a missing public facility.
+- **Organisation-first onboarding** for company clinics, industrial units, campuses and health camps: they appear in the directory only after the employer registers the organisation.
+- Employer portal: fitness overview by department, worker roster with CSV import, workplaces, organisation profile.
+- Facility setup covers type, services, specialists on duty, referral hospital and kiosk languages.
+- Token board (with patient correction), kiosk links, staff management (role, deactivate, reset PIN), staff devices, audit log with chain verification and CSV export, data-retention view.
 
 **Platform**
-- Phone + OTP sign-in, device-bound PIN, rotating refresh tokens, sign-out revocation.
+- Phone OTP sign-in; staff and employers add a personal PIN (two factors), change it from the dashboard; rotating refresh tokens, sign-out revocation, OTP rate limits.
+- Alembic migrations run automatically at start-up; hourly retention purge inside the API.
 - Live system status on the website (API, database, SMS, storage) with **Wake server** and supervisor-only **Restart server**.
 - JSON logs with request ids and no request bodies; Prometheus-format `/metrics`.
 
@@ -177,7 +184,7 @@ real capture time so waiting time is never understated.
 ```
 Jeevia/
 ├── frontend/                 Next.js app (all user interfaces)
-│   ├── src/app/              Routes: /, /auth, /k/[code], /kiosk, /reviewer/*, /admin/*, /patient/*, /employer, /s/[token], /api/ops/restart
+│   ├── src/app/              Routes: /, /auth, /k/[code], /kiosk, /reviewer/*, /admin/*, /patient/*, /employer/*, /s/[token], /api/ops/restart
 │   ├── src/components/       UI kit, site chrome, intake flow, triage note views, share QR, status panel
 │   ├── src/lib/              API contract + live/mock adapters, i18n, offline outbox, speech, status, exports
 │   └── public/sw.js          Service worker (offline kiosk)
@@ -252,17 +259,20 @@ Secrets live only in the Render and Vercel dashboards — never in the repositor
 ## 10. Testing
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 38 tests
+cd backend && .venv/bin/pytest -q                  # 50 tests
 cd frontend && npm run lint && npx tsc --noEmit && npm run build
 ```
-Backend tests cover the rules engine, OTP (including lockout and the Twilio path), device-bound PINs, token rotation
+Backend tests cover the rules engine, OTP (including lockout, rate limits and the Twilio path), the two-factor PIN
+(setup, lockout, forgot, change, supervisor reset), document access, directory search, organisations, rosters and
+fitness, staff management, token rotation
 and revocation, bound-device intake, idempotent offline replay, consent enforcement, overrides, escalations, referrals,
 exports, kiosk links and tokens, QR shares (codes, lockout, expiry, revocation), role isolation for every role,
 patient isolation on shared household phones, audit logging and chain verification, the append-only guard, signed file
 URLs, health reporting and concurrent audit writes. They run on SQLite and on PostgreSQL.
 
-Browser end-to-end runs (Playwright) cover the full staff journey, kiosk links on tablet and phone, offline capture
-and sync, QR summaries with document viewing, and the status panel's wake flow — against local and production.
+Browser end-to-end runs (Playwright) cover the full staff journey with OTP + PIN, organisation onboarding through to
+the employer's fitness view, kiosk links on tablet and phone, a true-offline kiosk-link reload with queued intake and
+sync, QR summaries with document viewing, and the status panel's wake flow — against local and production.
 
 ## 11. Deployment and operations
 
@@ -270,7 +280,7 @@ and sync, QR summaries with document viewing, and the status panel's wake flow �
 |---|---|
 | API | Push to `main` → Render builds `backend/` and deploys automatically. |
 | Web app | `vercel deploy --prod` from `frontend/` (project `jeevia-triage`). |
-| Database | Neon project `jeevia`; the API creates the schema on start-up. |
+| Database | Neon project `jeevia`; the API applies Alembic migrations on start-up. |
 | CI | GitHub Actions on every push, in both repositories. |
 
 Day-to-day tasks — checking status, waking or restarting the server, rotating keys, backing up and restoring the
@@ -278,8 +288,8 @@ database, resetting sample data, Twilio trial limits — are in **[docs/OPERATIO
 
 ## 12. Sample accounts
 
-Three fictional patients and these walkthrough accounts exist in production (sign-in code `123456`). Everything else is
-created by real use.
+Three fictional patients, the sample organisation *Kalinga Steel Works* and these walkthrough accounts exist in
+production (sign-in code `123456`, then staff PIN `4826`). Everything else is created by real use.
 
 | Role | Phone | Opens |
 |---|---|---|
@@ -290,14 +300,15 @@ created by real use.
 | Employer | 9000000005 | `/employer` |
 | Patient | 9876543210 | `/patient` |
 
-Real staff register at `/auth` with their own phone; a supervisor can create a new facility while registering.
+Real staff register at `/auth` with their own phone and pick their workplace from the national directory; employers
+register their organisation first so its clinics appear.
 
 ## 13. Limits and next steps
 
 - **Twilio trial:** SMS codes reach only numbers verified in the Twilio console until the account is upgraded.
 - **Render free instance:** may sleep when idle; the keep-alive workflow and the **Wake server** button cover this. A paid instance removes it.
 - **Note pipeline:** summaries use a deterministic template; server-side Indic ASR (IndicConformer / Bhashini), translation (IndicTrans2), OCR (PaddleOCR) and a bounded summariser plug in behind `backend/app/triage/pipeline.py` without changing the note format.
-- **Retention purge:** `storage.purge_expired()` is ready to be scheduled.
+- **Facility directory coverage:** OpenStreetMap is thorough for hospitals and PHCs but uneven for village sub-centres; supervisors can add missing public facilities. The official NHM/HFR registry can be loaded into the same table when access is available.
 
 | Area | Owner |
 |---|---|

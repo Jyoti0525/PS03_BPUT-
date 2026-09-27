@@ -13,7 +13,8 @@ import { toast } from "@/components/ui/toast";
 import { canRecognise, speak, startCapture, stopSpeaking, type Recorder } from "@/lib/speech";
 import { enqueue } from "@/lib/offline/outbox";
 import { compressImage } from "@/lib/image";
-import { SAMPLE_REPORTS, sampleReportImage } from "@/lib/api/mock/note";
+import { SAMPLE_FACILITY_ID, SAMPLE_REPORTS, sampleReportImage } from "@/lib/sample-reports";
+import { API_MODE } from "@/lib/api";
 import { langByCode } from "@/lib/i18n/languages";
 import type { DictKey } from "@/lib/i18n/dict";
 import type { ConsentMode, FileObject, IntakeAnswer, Patient, PatientCandidate, PatientCategory, PrivacyContext, SymptomEntry, VitalsInput } from "@/lib/types";
@@ -64,6 +65,7 @@ export function IntakeFlow({
   offline,
   onFinished,
   onReset,
+  organisationName,
 }: {
   /** kiosk = staff-unlocked tablet · link = public kiosk link (/k/CODE) · patient = patient's own account */
   mode: "kiosk" | "patient" | "link";
@@ -73,6 +75,8 @@ export function IntakeFlow({
   onFinished?: (r: IntakeResult) => void;
   /** Start a fresh intake (next patient) without reloading, so kiosk state such as offline mode survives. */
   onReset?: () => void;
+  /** Set when the facility is an organisation's workplace (company clinic, campus…): asks for the employee / student ID. */
+  organisationName?: string | null;
 }) {
   const { t, lang, readAloud } = usePrefs();
   const steps: Step[] = useMemo(
@@ -104,7 +108,7 @@ export function IntakeFlow({
   const [lookupPhone, setLookupPhone] = useState("");
   const [candidates, setCandidates] = useState<PatientCandidate[] | null>(null);
   const [patient, setPatient] = useState<Patient | null>(fixedPatient ?? null);
-  const [newP, setNewP] = useState({ name: "", age: "", sex: "" as "" | "F" | "M" | "O", phone: "" });
+  const [newP, setNewP] = useState({ name: "", age: "", sex: "" as "" | "F" | "M" | "O", phone: "", employee_code: "" });
   const [isNew, setIsNew] = useState(false);
 
   // visit & symptoms
@@ -358,7 +362,7 @@ export function IntakeFlow({
       scopes: ["triage", "share_with_treating_team", "store_reports_until_expiry"],
     };
     const newPatient = isNew
-      ? { name: newP.name.trim(), age: Number(newP.age), sex: newP.sex as "F" | "M" | "O", phone: newP.phone || null, language: lang, category: category!, village: null }
+      ? { name: newP.name.trim(), age: Number(newP.age), sex: newP.sex as "F" | "M" | "O", phone: newP.phone || null, language: lang, category: category!, village: null, employee_code: (organisationName && newP.employee_code.trim()) || null }
       : null;
 
     try {
@@ -513,6 +517,12 @@ export function IntakeFlow({
                   <Label htmlFor="np-phone">{t("kiosk.identity.phone")}</Label>
                   <Input id="np-phone" inputMode="numeric" value={newP.phone} onChange={(e) => setNewP({ ...newP, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} className="h-13 text-lg" />
                 </div>
+                {organisationName && (
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="np-emp" hint="(optional)">{organisationName} employee / student ID</Label>
+                    <Input id="np-emp" value={newP.employee_code} onChange={(e) => setNewP({ ...newP, employee_code: e.target.value.toUpperCase().slice(0, 40) })} className="h-13 text-lg" placeholder="e.g. KSW-1041" />
+                  </div>
+                )}
                 <Button variant="ghost" className="sm:col-span-2" onClick={() => { setIsNew(false); setCandidates(null); }} icon={<Search className="size-4" />} disabled={offline}>
                   {mode === "link" ? "I have visited before" : "Search existing patients instead"}
                 </Button>
@@ -776,6 +786,7 @@ export function IntakeFlow({
                 <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => onPick(e.target.files, "image")} />
               </label>
             </div>
+            {(API_MODE === "mock" || facilityId === SAMPLE_FACILITY_ID) && (
             <div>
               <p className="mb-2 text-sm font-semibold text-ink-2">{t("kiosk.upload.sample")} <span className="font-normal text-muted">(synthetic, for the demo — OCR values are traced to the image)</span></p>
               <div className="flex flex-wrap gap-2">
@@ -786,6 +797,7 @@ export function IntakeFlow({
                 ))}
               </div>
             </div>
+            )}
             {files.filter((f) => f.kind !== "audio").length > 0 && (
               <div className="flex flex-wrap gap-3">
                 {files.filter((f) => f.kind !== "audio").map((f) => (

@@ -12,6 +12,12 @@ FileKind = Literal["report", "image", "audio"]
 ExportFormat = Literal["pdf", "json", "csv", "fhir", "print"]
 
 STAFF_ROLES = {"doctor", "nurse", "receptionist", "supervisor"}
+FacilityType = Literal[
+    "phc", "chc", "sub_centre", "district_hospital", "hospital", "clinic", "health_camp", "company_clinic", "industrial_unit", "campus"
+]
+ORG_FACILITY_TYPES = {"company_clinic", "industrial_unit", "campus", "health_camp"}
+OrgKind = Literal["company", "industrial", "campus", "ngo", "government_programme"]
+FitnessStatus = Literal["fit", "fit_with_restrictions", "temporarily_unfit", "pending_review"]
 REVIEWER_ROLES = {"doctor", "nurse"}
 ADMIN_ROLES = {"receptionist", "supervisor"}
 
@@ -30,6 +36,8 @@ class UserOut(ORM):
     registration_no: str | None = None
     language: str
     has_pin: bool = False
+    is_active: bool = True
+    organisation_id: str | None = None
     created_at: datetime
 
 
@@ -61,18 +69,34 @@ class AuthResult(BaseModel):
 
 
 class OtpVerifyOut(BaseModel):
-    status: Literal["authenticated", "new_user"]
+    status: Literal["authenticated", "new_user", "pin_required", "pin_setup_required"]
     tokens: Tokens | None = None
     user: UserOut | None = None
     registration_token: str | None = None
+    pin_token: str | None = None  # for the PIN step (valid a few minutes)
+    name: str | None = None
+    can_reset_pin: bool | None = None  # supervisors and employers may reset their own PIN after OTP
 
 
 class NewFacility(BaseModel):
     name: str = Field(min_length=3, max_length=200)
-    type: Literal["phc", "chc", "district_hospital", "health_camp", "company_clinic", "industrial_unit", "campus"]
+    type: FacilityType
     district: str = Field(min_length=2, max_length=100)
     state: str = Field(min_length=2, max_length=100)
+    pincode: str | None = Field(default=None, pattern=r"^\d{6}$")
+    address: str | None = Field(default=None, max_length=300)
     referral_destination: str | None = None
+
+
+class NewOrganisation(BaseModel):
+    name: str = Field(min_length=3, max_length=200)
+    kind: OrgKind
+    registration_no: str | None = Field(default=None, max_length=64)
+    state: str = Field(min_length=2, max_length=100)
+    district: str = Field(min_length=2, max_length=100)
+    address: str | None = Field(default=None, max_length=300)
+    contact_phone: str | None = Field(default=None, pattern=r"^\d{10}$")
+    facility: NewFacility
 
 
 class RegisterIn(BaseModel):
@@ -84,18 +108,25 @@ class RegisterIn(BaseModel):
     language: str = "en"
     accepted_terms: bool
     device_id: str | None = None
-    new_facility: NewFacility | None = None
+    pin: str | None = Field(default=None, pattern=r"^\d{4,6}$")  # required for staff and employers
+    # Where the user works — exactly one of these:
+    directory_ref: str | None = None  # a facility from the national directory (activated on first join)
+    new_facility: NewFacility | None = None  # supervisor adds a missing public facility
+    new_organisation: NewOrganisation | None = None  # employer registers their organisation and first workplace
 
 
-class PinSet(BaseModel):
+class PinStepIn(BaseModel):
+    pin_token: str
     pin: str = Field(pattern=r"^\d{4,6}$")
-    device_id: str = Field(min_length=4, max_length=64)
 
 
-class PinLogin(BaseModel):
-    phone: str = Field(pattern=r"^\d{10}$")
-    pin: str = Field(pattern=r"^\d{4,6}$")
-    device_id: str
+class PinForgotIn(BaseModel):
+    pin_token: str
+
+
+class PinChangeIn(BaseModel):
+    current_pin: str = Field(pattern=r"^\d{4,6}$")
+    new_pin: str = Field(pattern=r"^\d{4,6}$")
 
 
 class RefreshIn(BaseModel):
@@ -114,6 +145,12 @@ class FacilityOut(ORM):
     id: str
     name: str
     type: str
+    source: str = "sample"
+    verified: bool = False
+    organisation_id: str | None = None
+    directory_ref: str | None = None
+    pincode: str | None = None
+    address: str | None = None
     district: str
     state: str
     languages: list[str]
@@ -127,7 +164,7 @@ class FacilityOut(ORM):
 
 class FacilityPatch(BaseModel):
     name: str | None = None
-    type: Literal["phc", "chc", "district_hospital", "health_camp", "company_clinic", "industrial_unit", "campus"] | None = None
+    type: FacilityType | None = None
     district: str | None = None
     state: str | None = None
     languages: list[str] | None = None
@@ -174,6 +211,16 @@ class PatientIn(BaseModel):
     category: Category = "normal"
     village: str | None = None
     employer_id: str | None = None
+    employee_code: str | None = Field(default=None, max_length=40)
+
+
+class PatientPatch(BaseModel):
+    name: str | None = Field(default=None, min_length=2, max_length=200)
+    age: int | None = Field(default=None, ge=0, le=120)
+    sex: Literal["F", "M", "O"] | None = None
+    phone: str | None = Field(default=None, pattern=r"^\d{10}$")
+    language: str | None = None
+    village: str | None = Field(default=None, max_length=120)
 
 
 class PatientOut(ORM):
@@ -187,6 +234,9 @@ class PatientOut(ORM):
     category: Category
     village: str | None = None
     employer_id: str | None = None
+    organisation_id: str | None = None
+    employee_code: str | None = None
+    department: str | None = None
     created_at: datetime
 
 
@@ -301,6 +351,7 @@ class EncounterOut(BaseModel):
     escalation_due_at: datetime | None = None
     token: str | None = None
     channel: str = "staff_kiosk"
+    worker: "WorkerInfo | None" = None
     consent: ConsentOut | None = None
 
 
@@ -394,11 +445,122 @@ class ReferralOut(BaseModel):
     status: str
 
 
+class UserPatch(BaseModel):
+    role: Literal["doctor", "nurse", "receptionist", "supervisor"] | None = None
+    is_active: bool | None = None
+
+
+class DirectoryHit(BaseModel):
+    key: str
+    name: str
+    kind: str
+    kind_label: str
+    type: str
+    ownership: str
+    state: str
+    district: str | None
+    city: str | None
+    pincode: str | None
+    source: str
+    directory_ref: str | None
+    facility_id: str | None
+    organisation_name: str | None
+    verified: bool
+
+
+class OrganisationOut(ORM):
+    id: str
+    name: str
+    kind: str
+    registration_no: str | None
+    state: str
+    district: str
+    address: str | None
+    contact_phone: str | None
+    verified: bool
+    created_at: datetime
+
+
+class OrganisationPatch(BaseModel):
+    name: str | None = Field(default=None, min_length=3, max_length=200)
+    registration_no: str | None = Field(default=None, max_length=64)
+    address: str | None = Field(default=None, max_length=300)
+    contact_phone: str | None = Field(default=None, pattern=r"^\d{10}$")
+
+
+class OrganisationHome(BaseModel):
+    organisation: OrganisationOut
+    facilities: list[FacilityOut]
+
+
+class WorkerIn(BaseModel):
+    employee_code: str = Field(min_length=1, max_length=40)
+    name: str = Field(min_length=2, max_length=200)
+    age: int = Field(ge=14, le=100)
+    sex: Literal["F", "M", "O"]
+    department: str | None = Field(default=None, max_length=120)
+    phone: str | None = Field(default=None, pattern=r"^\d{10}$")
+    language: str = "en"
+
+
+class WorkerPatch(BaseModel):
+    department: str | None = Field(default=None, max_length=120)
+    name: str | None = Field(default=None, min_length=2, max_length=200)
+    phone: str | None = Field(default=None, pattern=r"^\d{10}$")
+    active: bool | None = None  # false removes the worker from the roster (the health record stays)
+
+
+class WorkerOut(BaseModel):
+    employee_code: str
+    name: str
+    department: str | None
+    patient_code: str
+    fitness_status: str
+    restrictions: str | None
+    valid_until: str | None
+    last_assessed_at: datetime | None
+    assessed_by: str | None
+
+
+class WorkerImportIn(BaseModel):
+    csv: str = Field(max_length=500_000)
+
+
+class WorkerImportOut(BaseModel):
+    created: int
+    updated: int
+    errors: list[str]
+
+
+class FitnessIn(BaseModel):
+    status: FitnessStatus
+    restrictions: str | None = Field(default=None, max_length=300)
+    valid_until: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+
+
+class FitnessOut(ORM):
+    id: str
+    status: str
+    restrictions: str | None
+    valid_until: str | None
+    assessed_by: str
+    assessed_at: datetime
+
+
+class WorkerInfo(BaseModel):
+    organisation_id: str
+    organisation_name: str
+    employee_code: str | None
+    department: str | None
+    latest: FitnessOut | None
+
+
 class TokenBoardItem(BaseModel):
     """Operational view of today's tokens — no clinical content, safe for front-desk staff."""
 
     encounter_id: str
     token: str | None
+    patient_id: str
     patient_name: str
     patient_code: str
     status: str
@@ -430,6 +592,7 @@ class KioskInfo(BaseModel):
     label: str
     facility_id: str
     facility_name: str
+    organisation_name: str | None = None
     district: str
     state: str
     languages: list[str]
@@ -552,3 +715,6 @@ class CohortOut(ORM):
     employer_name: str
     screening_type: str
     workers: list[dict[str, Any]]
+
+
+EncounterOut.model_rebuild()

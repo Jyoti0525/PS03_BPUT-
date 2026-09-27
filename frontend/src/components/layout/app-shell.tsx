@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
-import { LogOut, Building2 } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { LogOut, Building2, KeyRound } from "lucide-react";
 import { useSession } from "@/components/providers";
 import { A11yButton, LanguageButton, Logo } from "./chrome";
 import { cx } from "@/components/ui";
 import { useAsync } from "@/lib/hooks";
 import { api } from "@/lib/api";
+import { PIN_ROLES } from "@/lib/types";
+import { ChangePinModal } from "@/components/auth/change-pin";
 
 export interface NavItem {
   href: string;
@@ -32,6 +34,7 @@ export function AppShell({ nav, children, section }: { nav: NavItem[]; children:
   const router = useRouter();
   const { user, signOut } = useSession();
   const { data: facility } = useAsync(() => (user?.facility_id ? api.getFacility(user.facility_id) : Promise.resolve(null)), [user?.facility_id]);
+  const [pinOpen, setPinOpen] = useState(false);
   const active = (n: NavItem) => (n.exact ? path === n.href : path === n.href || path.startsWith(n.href + "/"));
 
   return (
@@ -93,6 +96,16 @@ export function AppShell({ nav, children, section }: { nav: NavItem[]; children:
                   </div>
                 </div>
               )}
+              {user && PIN_ROLES.includes(user.role) && (
+                <button
+                  onClick={() => setPinOpen(true)}
+                  className="inline-flex size-9 items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink"
+                  aria-label="Change PIN"
+                  title="Change PIN"
+                >
+                  <KeyRound className="size-4.5" />
+                </button>
+              )}
               <button
                 onClick={async () => {
                   await signOut();
@@ -124,6 +137,7 @@ export function AppShell({ nav, children, section }: { nav: NavItem[]; children:
           </nav>
         </header>
         <main className="min-w-0 flex-1 p-4 lg:p-6">{children}</main>
+        <ChangePinModal open={pinOpen} onClose={() => setPinOpen(false)} />
       </div>
     </div>
   );

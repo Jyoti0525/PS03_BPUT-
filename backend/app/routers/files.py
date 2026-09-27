@@ -66,15 +66,18 @@ def get_file(fid: str, request: Request, user: CurrentUser, db: DB):
     if not f:
         raise HTTPException(404, "File not found")
     enc = db.get(Encounter, f.encounter_id) if f.encounter_id else None
+    # Patient documents are for the treating team only: doctors and nurses at the facility where
+    # the patient was seen, the patient themself, and whoever uploaded the file before submission.
+    # Front desk, supervisors, employers and kiosks never open them. (QR summaries use their own links.)
     if f.uploaded_by != user.id:
-        if user.role == "kiosk":
-            raise HTTPException(403, "Not your file")
         if user.role == "patient":
             mine = own_patient(db, user)
             if not enc or not mine or enc.patient_id != mine.id:
                 raise HTTPException(403, "Not your file")
-        elif enc and enc.facility_id != user.facility_id:
-            raise HTTPException(403, "File belongs to another facility")
+        elif user.role not in ("doctor", "nurse") or not enc or enc.facility_id != user.facility_id:
+            raise HTTPException(403, "Only the doctors and nurses treating this patient can open their documents")
+    if enc and user.role in ("doctor", "nurse", "patient"):
+        audit.record(db, user, "VIEW", "file", f.id, f"Document opened: {f.kind} {f.filename}", enc.patient.code, enc.facility_id)
     return file_out(f, request, user)
 
 

@@ -5,8 +5,13 @@
 import { get, set } from "idb-keyval";
 import type { IntakePayload, ConsentInput, Patient } from "@/lib/types";
 import { api } from "@/lib/api";
+import { scopeKey } from "@/lib/api/tokens";
 
-const KEY = "jeevia.outbox.v1";
+/** One outbox per session scope, so a kiosk link's queue is replayed with that kiosk's own session. */
+function outboxKey(): string {
+  const scope = scopeKey();
+  return scope === "jeevia.tokens" ? "jeevia.outbox.v1" : `jeevia.outbox.v1.${scope.slice("jeevia.tokens.".length)}`;
+}
 
 export interface OutboxItem {
   client_ref: string;
@@ -23,11 +28,11 @@ type Listener = (items: OutboxItem[]) => void;
 const listeners = new Set<Listener>();
 
 export async function readOutbox(): Promise<OutboxItem[]> {
-  return ((await get(KEY)) as OutboxItem[] | undefined) ?? [];
+  return ((await get(outboxKey())) as OutboxItem[] | undefined) ?? [];
 }
 
 async function write(items: OutboxItem[]) {
-  await set(KEY, items);
+  await set(outboxKey(), items);
   listeners.forEach((l) => l(items));
 }
 

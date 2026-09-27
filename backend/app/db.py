@@ -88,11 +88,38 @@ CREATE TRIGGER audit_no_update BEFORE UPDATE OR DELETE ON audit_events
 """
 
 
+def _alembic_config(connection):
+    from pathlib import Path
+
+    from alembic.config import Config
+
+    cfg = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
+    cfg.set_main_option("script_location", str(Path(__file__).resolve().parents[1] / "migrations"))
+    cfg.attributes["configure_logger"] = False
+    cfg.attributes["connection"] = connection
+    return cfg
+
+
 def init_db() -> None:
+    """Bring the schema to the latest version.
+
+    PostgreSQL: Alembic migrations (a database created before migrations existed is stamped at
+    the baseline first). SQLite (tests, quick local runs): create tables directly.
+    """
     from . import models  # noqa: F401  (register tables)
 
-    Base.metadata.create_all(engine)
-    if engine.dialect.name == "postgresql":
-        # Database-level guarantee on top of the ORM guard in models.py.
-        with engine.begin() as conn:
-            conn.execute(text(APPEND_ONLY_SQL))
+    if engine.dialect.name != "postgresql":
+        Base.metadata.create_all(engine)
+        return
+
+    from alembic import command
+    from sqlalchemy import inspect
+
+    with engine.begin() as conn:
+        conn.execute(text("SELECT pg_advisory_xact_lock(7274422)"))  # one migrator at a time
+        cfg = _alembic_config(conn)
+        tables = set(inspect(conn).get_table_names())
+        if "alembic_version" not in tables and "facilities" in tables:
+            command.stamp(cfg, "0001")
+        command.upgrade(cfg, "head")
+        conn.execute(text(APPEND_ONLY_SQL))

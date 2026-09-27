@@ -1,73 +1,218 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Stethoscope, HeartPulse, ClipboardList, UserRound, Briefcase, KeyRound, Smartphone, CheckCircle2, ShieldCheck, ArrowLeft, Syringe } from "lucide-react";
+import { Stethoscope, HeartPulse, ClipboardList, UserRound, Briefcase, KeyRound, CheckCircle2, ShieldCheck, ArrowLeft, Syringe, LockKeyhole, Building2 } from "lucide-react";
 import { api, ApiError, getDeviceId } from "@/lib/api";
-
-/** The six walkthrough accounts work in every environment (OTP 123456); hide with NEXT_PUBLIC_HIDE_SAMPLES=1. */
-const SHOW_SAMPLES = process.env.NEXT_PUBLIC_HIDE_SAMPLES !== "1";
 import { usePrefs, useSession } from "@/components/providers";
 import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
 import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
 import { Button, Card, FieldError, Input, Label, Select, Segmented, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
-import { DEMO_LOGINS } from "@/lib/api/mock/seed";
+import { OtpBoxes, PinInput, NewPinFields, newPinError } from "@/components/auth/fields";
+import { WorkplacePicker, workplaceLabel, type Workplace } from "@/components/auth/workplace-picker";
+import { DEMO_LOGINS } from "@/lib/samples";
+import { SAMPLE_PIN } from "@/lib/pin";
 import { LANGUAGES } from "@/lib/i18n/languages";
-import type { Facility, FacilityType, OtpChallenge, Role, User } from "@/lib/types";
-import { useAsync } from "@/lib/hooks";
+import { PIN_ROLES, type FacilityType, type NewOrganisationInput, type OrgKind, type OtpChallenge, type OtpVerifyResult, type Role, type User } from "@/lib/types";
+import { INDIAN_STATES } from "@/lib/india";
+
+/** The walkthrough accounts work in every environment (OTP 123456, PIN 4826); hide with NEXT_PUBLIC_HIDE_SAMPLES=1. */
+const SHOW_SAMPLES = process.env.NEXT_PUBLIC_HIDE_SAMPLES !== "1";
 
 type RegRole = Exclude<Role, "kiosk">;
+type PinGate = Extract<OtpVerifyResult, { pin_token: string }>;
+type StepKey = "role" | "info" | "workplace" | "phone" | "otp" | "pin" | "terms";
 
 const ROLE_CARDS: { role: RegRole; label: string; body: string; icon: React.ReactNode }[] = [
   { role: "doctor", label: "Doctor / Medical Officer", body: "Review triage notes, override, refer", icon: <Stethoscope /> },
   { role: "nurse", label: "Nurse / ANM", body: "Run the kiosk, record vitals, follow-ups", icon: <Syringe /> },
   { role: "receptionist", label: "Receptionist", body: "Register patients, manage kiosk devices", icon: <ClipboardList /> },
-  { role: "supervisor", label: "Supervisor", body: "Facility setup, specialists, audit", icon: <ShieldCheck /> },
+  { role: "supervisor", label: "Supervisor", body: "Facility setup, staff, audit", icon: <ShieldCheck /> },
   { role: "patient", label: "Patient", body: "Add problems, upload reports, reminders", icon: <HeartPulse /> },
-  { role: "employer", label: "Employer / HR", body: "Cohort fitness status only", icon: <Briefcase /> },
+  { role: "employer", label: "Employer / Organisation", body: "Register your company, campus or camp", icon: <Briefcase /> },
 ];
+
+const STEP_LABEL: Record<StepKey, string> = { role: "User type", info: "Personal info", workplace: "Workplace", phone: "Phone", otp: "OTP", pin: "PIN", terms: "Terms" };
 
 const CLINICAL: RegRole[] = ["doctor", "nurse"];
 
-function OtpBoxes({ value, onChange, autoFocus }: { value: string; onChange: (v: string) => void; autoFocus?: boolean }) {
-  const refs = useRef<(HTMLInputElement | null)[]>([]);
-  useEffect(() => {
-    if (autoFocus) refs.current[0]?.focus();
-  }, [autoFocus]);
+const ORG_KINDS: { v: OrgKind; label: string }[] = [
+  { v: "company", label: "Company" },
+  { v: "industrial", label: "Industrial estate / unit" },
+  { v: "campus", label: "College / school campus" },
+  { v: "ngo", label: "NGO / health camp organiser" },
+  { v: "government_programme", label: "Government programme" },
+];
+
+const ORG_FAC_TYPES: { v: FacilityType; label: string }[] = [
+  { v: "company_clinic", label: "Company clinic / OHC" },
+  { v: "industrial_unit", label: "Industrial unit health centre" },
+  { v: "campus", label: "Campus health centre" },
+  { v: "health_camp", label: "Health camp" },
+];
+
+const EMPTY_ORG: NewOrganisationInput = { name: "", kind: "company", registration_no: "", state: "", district: "", facility: { name: "", type: "company_clinic", district: "", state: "" } };
+
+const errMsg = (e: unknown) => (e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Something went wrong");
+
+function PhoneField({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
   return (
-    <div className="flex gap-2" onPaste={(e) => {
-      const digits = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-      if (digits) {
-        e.preventDefault();
-        onChange(digits);
-        refs.current[Math.min(digits.length, 5)]?.focus();
+    <div className="flex gap-2">
+      <span className="inline-flex h-11 items-center rounded-xl border border-line bg-canvas px-3 text-sm font-medium text-muted">+91</span>
+      <Input id={id} inputMode="numeric" autoComplete="tel-national" placeholder="98765 43210" value={value} onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, 10))} />
+    </div>
+  );
+}
+
+/** Second factor: after the phone OTP, staff and employers enter (or create) their account PIN. */
+function PinStep({ gate, onGate, onDone, onCancel }: { gate: PinGate; onGate: (g: PinGate) => void; onDone: (r: { tokens: Parameters<ReturnType<typeof useSession>["signIn"]>[0]; user: User }) => void; onCancel: () => void }) {
+  const [pin, setPin] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [askSupervisor, setAskSupervisor] = useState(false);
+  const setup = gate.status === "pin_setup_required";
+
+  async function submit() {
+    setErr(null);
+    if (setup) {
+      const p = newPinError(pin, confirm);
+      if (p) return setErr(p);
+    } else if (!/^\d{4,6}$/.test(pin)) return setErr("Your PIN is 4–6 digits");
+    setBusy(true);
+    try {
+      onDone(setup ? await api.setupPin(gate.pin_token, pin) : await api.verifyPin(gate.pin_token, pin));
+    } catch (e) {
+      setErr(errMsg(e));
+      setPin("");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function forgot() {
+    setErr(null);
+    if (!gate.can_reset_pin) return setAskSupervisor(true);
+    setBusy(true);
+    try {
+      const r = await api.forgotPin(gate.pin_token);
+      if ("pin_token" in r) {
+        setPin("");
+        setConfirm("");
+        onGate(r);
+        toast("Phone verified — choose a new PIN", "info");
       }
-    }}>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <input
-          key={i}
-          ref={(el) => {
-            refs.current[i] = el;
-          }}
-          inputMode="numeric"
-          autoComplete={i === 0 ? "one-time-code" : "off"}
-          aria-label={`OTP digit ${i + 1}`}
-          maxLength={1}
-          value={value[i] ?? ""}
-          onChange={(e) => {
-            const d = e.target.value.replace(/\D/g, "").slice(-1);
-            const arr = value.padEnd(6, " ").split("");
-            arr[i] = d || " ";
-            onChange(arr.join("").trimEnd());
-            if (d && i < 5) refs.current[i + 1]?.focus();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Backspace" && !value[i] && i > 0) refs.current[i - 1]?.focus();
-          }}
-          className="h-13 w-11 rounded-xl border border-line bg-white text-center text-xl font-bold text-ink focus:border-teal-600 focus:ring-4 focus:ring-teal-100 focus:outline-none sm:w-12"
-        />
-      ))}
+    } catch (e) {
+      setErr(errMsg(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-teal-50 text-teal-700">
+        <LockKeyhole className="size-6" />
+      </div>
+      <p className="text-xs font-semibold tracking-wide text-teal-700 uppercase">Step 2 of 2 · Account PIN</p>
+      <h2 className="mt-1 text-xl font-bold text-ink">{setup ? `Create your PIN, ${gate.name.split(" ")[0]}` : `Welcome back, ${gate.name.split(" ")[0]}`}</h2>
+      <p className="mt-1 text-sm text-muted">
+        {setup ? "Your dashboard is protected by two factors: your phone OTP and a PIN only you know. You will need it every time you sign in." : "Phone verified. Enter your 4–6 digit account PIN to open your dashboard."}
+      </p>
+      <div className="mt-5">
+        {setup ? (
+          <NewPinFields pin={pin} confirm={confirm} onPin={setPin} onConfirm={setConfirm} />
+        ) : (
+          <>
+            <Label htmlFor="pin">Account PIN</Label>
+            <PinInput id="pin" value={pin} onChange={setPin} autoFocus onEnter={submit} label="Account PIN" />
+          </>
+        )}
+        <FieldError>{err}</FieldError>
+      </div>
+      <Button className="mt-5 w-full" size="lg" onClick={submit} loading={busy} icon={<KeyRound className="size-4" />}>
+        {setup ? "Save PIN & continue" : "Unlock dashboard"}
+      </Button>
+      <div className="mt-3 flex items-center justify-between text-sm">
+        <button onClick={onCancel} className="inline-flex items-center gap-1 font-medium text-muted hover:text-ink">
+          <ArrowLeft className="size-4" /> Use another number
+        </button>
+        {!setup && (
+          <button onClick={forgot} className="font-semibold text-teal-700 hover:underline">
+            Forgot PIN?
+          </button>
+        )}
+      </div>
+      {askSupervisor && <p className="mt-3 rounded-xl bg-coral-50 p-3 text-sm text-ink-2">For your security, only your facility supervisor can reset a doctor, nurse or receptionist PIN. Ask them to open Admin → Staff → Reset PIN, then sign in again to create a new one.</p>}
+    </Card>
+  );
+}
+
+function OrganisationForm({ value, onChange }: { value: NewOrganisationInput; onChange: (o: NewOrganisationInput) => void }) {
+  const set = (p: Partial<NewOrganisationInput>) => onChange({ ...value, ...p });
+  const setFac = (p: Partial<NewOrganisationInput["facility"]>) => onChange({ ...value, facility: { ...value.facility, ...p } });
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label htmlFor="org-name">Organisation name</Label>
+        <Input id="org-name" value={value.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Kalinga Steel Works Ltd." />
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="org-kind">Type</Label>
+          <Select id="org-kind" value={value.kind} onChange={(e) => set({ kind: e.target.value as OrgKind })}>
+            {ORG_KINDS.map((k) => (
+              <option key={k.v} value={k.v}>
+                {k.label}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="org-reg" hint="(optional)">CIN / registration no.</Label>
+          <Input id="org-reg" value={value.registration_no ?? ""} onChange={(e) => set({ registration_no: e.target.value })} />
+        </div>
+        <div>
+          <Label htmlFor="org-state">State</Label>
+          <Select id="org-state" value={value.state} onChange={(e) => onChange({ ...value, state: e.target.value, facility: { ...value.facility, state: value.facility.state || e.target.value } })}>
+            <option value="">Select</option>
+            {INDIAN_STATES.map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="org-dist">District</Label>
+          <Input id="org-dist" value={value.district} onChange={(e) => onChange({ ...value, district: e.target.value, facility: { ...value.facility, district: e.target.value } })} />
+        </div>
+      </div>
+      <div className="space-y-3 rounded-xl border border-coral-200 bg-coral-50/40 p-3">
+        <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+          <Building2 className="size-4 text-coral-600" /> First workplace health centre
+        </p>
+        <div>
+          <Label htmlFor="of-name">Name</Label>
+          <Input id="of-name" value={value.facility.name} onChange={(e) => setFac({ name: e.target.value })} placeholder="e.g. KSW Occupational Health Centre" />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="of-type">Type</Label>
+            <Select id="of-type" value={value.facility.type} onChange={(e) => setFac({ type: e.target.value as FacilityType })}>
+              {ORG_FAC_TYPES.map((k) => (
+                <option key={k.v} value={k.v}>
+                  {k.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="of-pin" hint="(optional)">PIN code</Label>
+            <Input id="of-pin" inputMode="numeric" value={value.facility.pincode ?? ""} onChange={(e) => setFac({ pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} />
+          </div>
+        </div>
+        <p className="text-xs text-muted">Once registered, your doctors, nurses and workers can pick this workplace when they sign up. Add more sites later from the employer portal.</p>
+      </div>
     </div>
   );
 }
@@ -82,33 +227,52 @@ function AuthInner() {
 
   const go = (u: User) => router.replace(next && next.startsWith("/") ? next : HOME_FOR_ROLE[u.role]);
 
-  /* ── Sign-in state ── */
-  const [method, setMethod] = useState<"otp" | "pin">("otp");
+  /* ── Shared phone/OTP state ── */
   const [phone, setPhone] = useState("");
   const [challenge, setChallenge] = useState<OtpChallenge | null>(null);
   const [otp, setOtp] = useState("");
-  const [pin, setPin] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [pinStep, setPinStep] = useState<User | null>(null);
-  const [newPin, setNewPin] = useState("");
   const [countdown, setCountdown] = useState(0);
+  const [gate, setGate] = useState<PinGate | null>(null);
 
   /* ── Registration state ── */
-  const [step, setStep] = useState(1);
+  const [stepKey, setStepKey] = useState<StepKey>("role");
   const [role, setRole] = useState<RegRole | null>(null);
   const [name, setName] = useState("");
-  const [facilityId, setFacilityId] = useState("");
   const [regNo, setRegNo] = useState("");
   const [prefLang, setPrefLang] = useState(lang);
   const [regToken, setRegToken] = useState<string | null>(null);
   const [terms, setTerms] = useState(false);
-  const [newFac, setNewFac] = useState({ name: "", type: "phc" as FacilityType, district: "", state: "" });
-  const creatingFacility = role === "supervisor" && facilityId === "__new__";
-  const { data: facilities } = useAsync<Facility[]>(() => api.listFacilities(), []);
+  const [workplace, setWorkplace] = useState<Workplace>(null);
+  const [org, setOrg] = useState<NewOrganisationInput>(EMPTY_ORG);
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+
+  const steps = useMemo<StepKey[]>(() => {
+    const s: StepKey[] = ["role", "info"];
+    if (role && role !== "patient") s.push("workplace");
+    s.push("phone", "otp");
+    if (role && PIN_ROLES.includes(role)) s.push("pin");
+    s.push("terms");
+    return s;
+  }, [role]);
+  const stepIdx = steps.indexOf(stepKey);
+  const nextStep = () => {
+    let i = stepIdx + 1;
+    while (regToken && (steps[i] === "phone" || steps[i] === "otp")) i++;
+    setErr(null);
+    setStepKey(steps[i]);
+  };
+  const prevStep = () => {
+    let i = stepIdx - 1;
+    while (regToken && (steps[i] === "phone" || steps[i] === "otp")) i--;
+    setErr(null);
+    setStepKey(steps[Math.max(0, i)]);
+  };
 
   useEffect(() => {
-    if (user && !pinStep) go(user);
+    if (user) go(user);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -118,11 +282,12 @@ function AuthInner() {
     return () => clearTimeout(id);
   }, [countdown]);
 
-  const errMsg = (e: unknown) => (e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Something went wrong");
-
-  async function sendOtp() {
+  async function sendOtp(): Promise<boolean> {
     setErr(null);
-    if (!/^\d{10}$/.test(phone)) return setErr("Enter a valid 10-digit mobile number");
+    if (!/^\d{10}$/.test(phone)) {
+      setErr("Enter a valid 10-digit mobile number");
+      return false;
+    }
     setBusy(true);
     try {
       const c = await api.requestOtp(phone);
@@ -130,71 +295,69 @@ function AuthInner() {
       setOtp("");
       setCountdown(30);
       toast(c.dev_code ? `OTP sent. Demo code: ${c.dev_code}` : `OTP sent to +91 ${phone}`, "info");
+      return true;
     } catch (e) {
       setErr(errMsg(e));
+      return false;
     } finally {
       setBusy(false);
+    }
+  }
+
+  /** Verify the OTP; returns the result for the caller to route. */
+  async function verify(): Promise<OtpVerifyResult | null> {
+    if (!challenge) return null;
+    setErr(null);
+    if (otp.length !== 6) {
+      setErr("Enter all 6 digits");
+      return null;
+    }
+    setBusy(true);
+    try {
+      return await api.verifyOtp(challenge.challenge_id, otp);
+    } catch (e) {
+      setErr(errMsg(e));
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function routeExisting(r: OtpVerifyResult) {
+    if (r.status === "authenticated") {
+      signIn(r.tokens, r.user);
+      toast(`Welcome, ${r.user.name}`);
+    } else if (r.status === "pin_required" || r.status === "pin_setup_required") {
+      setGate(r);
     }
   }
 
   async function verifySignIn() {
-    if (!challenge) return;
-    setErr(null);
-    if (otp.length !== 6) return setErr("Enter all 6 digits");
-    setBusy(true);
-    try {
-      const r = await api.verifyOtp(challenge.challenge_id, otp);
-      if (r.status === "new_user") {
-        setRegToken(r.registration_token);
-        setMode("register");
-        setStep(1);
-        toast("Phone verified. This number is new — please register.", "info");
-        return;
-      }
-      if (!r.user.has_pin) {
-        setPinStep(r.user);
-        signIn(r.tokens, r.user);
-        return;
-      }
-      signIn(r.tokens, r.user);
-      toast(`Welcome, ${r.user.name}`);
-    } catch (e) {
-      setErr(errMsg(e));
-    } finally {
-      setBusy(false);
+    const r = await verify();
+    if (!r) return;
+    if (r.status === "new_user") {
+      setRegToken(r.registration_token);
+      setMode("register");
+      setStepKey("role");
+      toast("Phone verified. This number is new — please register.", "info");
+      return;
     }
+    routeExisting(r);
   }
 
-  async function pinLogin() {
-    setErr(null);
-    if (!/^\d{10}$/.test(phone)) return setErr("Enter a valid 10-digit mobile number");
-    if (!/^\d{4,6}$/.test(pin)) return setErr("PIN is 4–6 digits");
-    setBusy(true);
-    try {
-      const r = await api.loginWithPin(phone, pin, getDeviceId());
-      signIn(r.tokens, r.user);
-      toast(`Welcome back, ${r.user.name}`);
-    } catch (e) {
-      setErr(errMsg(e));
-    } finally {
-      setBusy(false);
+  function validateWorkplace(): string | null {
+    if (role === "employer") {
+      if (org.name.trim().length < 3) return "Enter your organisation’s name";
+      if (!org.state || org.district.trim().length < 2) return "Select the state and enter the district";
+      if (org.facility.name.trim().length < 3) return "Name your first workplace health centre";
+      return null;
     }
-  }
-
-  async function savePin() {
-    if (!pinStep) return;
-    setErr(null);
-    if (!/^\d{4,6}$/.test(newPin)) return setErr("PIN must be 4–6 digits");
-    setBusy(true);
-    try {
-      await api.setPin(newPin, getDeviceId());
-      toast("PIN set for this device");
-      go(pinStep);
-    } catch (e) {
-      setErr(errMsg(e));
-    } finally {
-      setBusy(false);
+    if (!workplace) return "Search and select your workplace";
+    if (workplace.kind === "new") {
+      const f = workplace.facility;
+      if (f.name.trim().length < 3 || !f.state || f.district.trim().length < 2) return "Enter the facility name, state and district";
     }
+    return null;
   }
 
   async function register() {
@@ -205,17 +368,19 @@ function AuthInner() {
     try {
       const r = await api.register({
         registration_token: regToken,
-        name: role === "doctor" && !/^dr\.?\s/i.test(name) ? `Dr. ${name}` : name,
+        name: role === "doctor" && !/^dr\.?\s/i.test(name) ? `Dr. ${name.trim()}` : name.trim(),
         role,
-        facility_id: role === "patient" || creatingFacility ? null : facilityId || null,
-        new_facility: creatingFacility ? newFac : null,
+        facility_id: workplace?.kind === "existing" && role !== "employer" ? workplace.facility_id : null,
+        directory_ref: workplace?.kind === "directory" && role !== "employer" ? workplace.directory_ref : null,
+        new_facility: workplace?.kind === "new" && role === "supervisor" ? workplace.facility : null,
+        new_organisation: role === "employer" ? { ...org, registration_no: org.registration_no || null, facility: { ...org.facility, state: org.facility.state || org.state, district: org.facility.district || org.district } } : null,
         registration_no: regNo || null,
+        pin: PIN_ROLES.includes(role) ? newPin : null,
         language: prefLang,
         accepted_terms: true,
         device_id: getDeviceId(),
       });
       signIn(r.tokens, r.user);
-      setPinStep(r.user);
       toast("Registration complete");
     } catch (e) {
       setErr(errMsg(e));
@@ -224,33 +389,31 @@ function AuthInner() {
     }
   }
 
-  const regSteps = ["User type", "Personal info", "Phone", "OTP", "Terms"];
-
-  /* ── PIN setup (after first OTP login / registration) ── */
-  if (pinStep) {
+  if (gate) {
     return (
-      <Card className="p-6">
-        <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-teal-50 text-teal-700">
-          <KeyRound className="size-6" />
-        </div>
-        <h2 className="text-xl font-bold text-ink">Set a PIN for this device</h2>
-        <p className="mt-1 text-sm text-muted">Next time, sign in with your phone and PIN on this device — no OTP needed. The PIN only works on this device.</p>
-        <div className="mt-5">
-          <Label htmlFor="new-pin">4–6 digit PIN</Label>
-          <Input id="new-pin" type="password" inputMode="numeric" maxLength={6} value={newPin} onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ""))} className="tracking-[0.5em]" />
-          <FieldError>{err}</FieldError>
-        </div>
-        <div className="mt-5 flex gap-2">
-          <Button onClick={savePin} loading={busy} className="flex-1" size="lg">
-            Save PIN
-          </Button>
-          <Button variant="ghost" size="lg" onClick={() => go(pinStep)}>
-            {t("common.skip")}
-          </Button>
-        </div>
-      </Card>
+      <PinStep
+        gate={gate}
+        onGate={setGate}
+        onDone={(r) => {
+          signIn(r.tokens, r.user);
+          toast(`Welcome, ${r.user.name}`);
+        }}
+        onCancel={() => {
+          setGate(null);
+          setChallenge(null);
+          setOtp("");
+          setMode("signin");
+        }}
+      />
     );
   }
+
+  const roleLabel = ROLE_CARDS.find((c) => c.role === role)?.label;
+  const back = (
+    <Button variant="secondary" size="lg" onClick={prevStep} icon={<ArrowLeft className="size-4" />}>
+      {t("common.back")}
+    </Button>
+  );
 
   return (
     <Card className="overflow-hidden">
@@ -272,65 +435,63 @@ function AuthInner() {
       {mode === "signin" ? (
         <div className="p-6">
           <h2 className="text-xl font-bold text-ink">Welcome back</h2>
-          <p className="mt-1 text-sm text-muted">Sign in with your mobile number.</p>
-
-          <div className="mt-4 flex gap-2">
-            {(["otp", "pin"] as const).map((m) => (
-              <button key={m} onClick={() => { setMethod(m); setErr(null); }} className={cx("flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium", method === m ? "border-teal-600 bg-teal-50 text-teal-800" : "border-line text-muted")}>
-                {m === "otp" ? <Smartphone className="size-4" /> : <KeyRound className="size-4" />}
-                {m === "otp" ? "OTP" : "PIN (this device)"}
-              </button>
-            ))}
-          </div>
+          <p className="mt-1 text-sm text-muted">Sign in with your mobile number. Staff and employers then enter their account PIN.</p>
 
           <div className="mt-5">
             <Label htmlFor="phone">{t("auth.phone")}</Label>
-            <div className="flex gap-2">
-              <span className="inline-flex h-11 items-center rounded-xl border border-line bg-canvas px-3 text-sm font-medium text-muted">+91</span>
-              <Input id="phone" inputMode="numeric" autoComplete="tel-national" placeholder="98765 43210" value={phone} onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); setChallenge(null); }} />
-            </div>
+            <PhoneField
+              id="phone"
+              value={phone}
+              onChange={(v) => {
+                setPhone(v);
+                setChallenge(null);
+              }}
+            />
           </div>
 
-          {method === "otp" ? (
-            challenge ? (
-              <div className="mt-5">
-                <Label>{t("auth.otp")}</Label>
-                <OtpBoxes value={otp} onChange={setOtp} autoFocus />
-                <p className="mt-2 text-xs text-muted">
-                  {countdown > 0 ? `Resend in ${countdown}s` : <button className="font-semibold text-teal-700" onClick={sendOtp}>Resend OTP</button>}
-                  {challenge.dev_code && <span className="ml-2 rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">demo code {challenge.dev_code}</span>}
-                </p>
-                <FieldError>{err}</FieldError>
-                <Button className="mt-5 w-full" size="lg" onClick={verifySignIn} loading={busy}>
-                  {t("auth.verify")} & {t("auth.signin")}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <FieldError>{err}</FieldError>
-                <Button className="mt-5 w-full" size="lg" onClick={sendOtp} loading={busy}>
-                  {t("auth.sendOtp")}
-                </Button>
-              </>
-            )
-          ) : (
-            <div className="mt-4">
-              <Label htmlFor="pin">PIN</Label>
-              <Input id="pin" type="password" inputMode="numeric" maxLength={6} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} className="tracking-[0.5em]" />
-              <p className="mt-1.5 text-xs text-muted">PINs are bound to the device they were created on.</p>
+          {challenge ? (
+            <div className="mt-5">
+              <Label>{t("auth.otp")}</Label>
+              <OtpBoxes value={otp} onChange={setOtp} autoFocus />
+              <p className="mt-2 text-xs text-muted">
+                {countdown > 0 ? (
+                  `Resend in ${countdown}s`
+                ) : (
+                  <button className="font-semibold text-teal-700" onClick={sendOtp}>
+                    Resend OTP
+                  </button>
+                )}
+                {challenge.dev_code && <span className="ml-2 rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">demo code {challenge.dev_code}</span>}
+              </p>
               <FieldError>{err}</FieldError>
-              <Button className="mt-5 w-full" size="lg" onClick={pinLogin} loading={busy}>
-                {t("auth.signin")}
+              <Button className="mt-5 w-full" size="lg" onClick={verifySignIn} loading={busy}>
+                {t("auth.verify")} & continue
               </Button>
             </div>
+          ) : (
+            <>
+              <FieldError>{err}</FieldError>
+              <Button className="mt-5 w-full" size="lg" onClick={sendOtp} loading={busy}>
+                {t("auth.sendOtp")}
+              </Button>
+            </>
           )}
 
           {SHOW_SAMPLES && (
             <div className="mt-6 rounded-xl border border-dashed border-teal-300 bg-teal-50/60 p-3">
-              <p className="text-xs font-semibold text-teal-800">Sample accounts — OTP 123456</p>
+              <p className="text-xs font-semibold text-teal-800">
+                Sample accounts — OTP 123456 · staff PIN {SAMPLE_PIN}
+              </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {DEMO_LOGINS.map((d) => (
-                  <button key={d.phone} onClick={() => { setPhone(d.phone); setMethod("otp"); setChallenge(null); }} className="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100">
+                  <button
+                    key={d.phone}
+                    onClick={() => {
+                      setPhone(d.phone);
+                      setChallenge(null);
+                    }}
+                    className="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100"
+                  >
                     {d.role}
                   </button>
                 ))}
@@ -341,15 +502,15 @@ function AuthInner() {
       ) : (
         <div className="p-6">
           <ol className="mb-5 flex items-center gap-1.5" aria-label="Registration progress">
-            {regSteps.map((s, i) => (
+            {steps.map((s, i) => (
               <li key={s} className="flex flex-1 flex-col gap-1">
-                <span className={cx("h-1.5 rounded-full", i + 1 < step ? "bg-teal-600" : i + 1 === step ? "bg-coral-500" : "bg-line")} />
-                <span className={cx("hidden text-[11px] sm:block", i + 1 === step ? "font-semibold text-ink" : "text-subtle")}>{s}</span>
+                <span className={cx("h-1.5 rounded-full", i < stepIdx ? "bg-teal-600" : i === stepIdx ? "bg-coral-500" : "bg-line")} />
+                <span className={cx("hidden text-[11px] sm:block", i === stepIdx ? "font-semibold text-ink" : "text-subtle")}>{STEP_LABEL[s]}</span>
               </li>
             ))}
           </ol>
 
-          {step === 1 && (
+          {stepKey === "role" && (
             <div className="fade-up">
               <h2 className="text-xl font-bold text-ink">{t("auth.userType")}</h2>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -363,61 +524,20 @@ function AuthInner() {
                   </button>
                 ))}
               </div>
-              <Button className="mt-5 w-full" size="lg" disabled={!role} onClick={() => setStep(2)}>
+              <Button className="mt-5 w-full" size="lg" disabled={!role} onClick={nextStep}>
                 {t("common.next")}
               </Button>
+              {regToken && <p className="mt-3 text-center text-xs text-teal-700">Phone +91 {phone} already verified.</p>}
             </div>
           )}
 
-          {step === 2 && role && (
+          {stepKey === "info" && role && (
             <div className="fade-up space-y-4">
               <h2 className="text-xl font-bold text-ink">Personal info</h2>
               <div>
-                <Label htmlFor="name">Full name</Label>
+                <Label htmlFor="name">{role === "employer" ? "Your full name (HR / admin contact)" : "Full name"}</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={role === "doctor" ? "Deepa Sharma" : "Your name"} />
               </div>
-              {role !== "patient" && (
-                <div>
-                  <Label htmlFor="facility">Facility</Label>
-                  <Select id="facility" value={facilityId} onChange={(e) => setFacilityId(e.target.value)}>
-                    <option value="">Select your facility</option>
-                    {facilities?.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.name} — {f.district}
-                      </option>
-                    ))}
-                    {role === "supervisor" && <option value="__new__">+ Register a new facility</option>}
-                  </Select>
-                </div>
-              )}
-              {creatingFacility && (
-                <div className="grid gap-3 rounded-xl border border-coral-200 bg-coral-50/40 p-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="nf-name">Facility name</Label>
-                    <Input id="nf-name" value={newFac.name} onChange={(e) => setNewFac({ ...newFac, name: e.target.value })} placeholder="e.g. CHC Balipatna" />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="nf-type">Type</Label>
-                    <Select id="nf-type" value={newFac.type} onChange={(e) => setNewFac({ ...newFac, type: e.target.value as FacilityType })}>
-                      <option value="phc">Primary Health Centre</option>
-                      <option value="chc">Community Health Centre</option>
-                      <option value="district_hospital">District / Government Hospital</option>
-                      <option value="health_camp">Public Health Camp</option>
-                      <option value="company_clinic">Company Clinic</option>
-                      <option value="industrial_unit">Industrial Estate Health Unit</option>
-                      <option value="campus">Campus Health Centre</option>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="nf-dist">District</Label>
-                    <Input id="nf-dist" value={newFac.district} onChange={(e) => setNewFac({ ...newFac, district: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label htmlFor="nf-state">State</Label>
-                    <Input id="nf-state" value={newFac.state} onChange={(e) => setNewFac({ ...newFac, state: e.target.value })} />
-                  </div>
-                </div>
-              )}
               {CLINICAL.includes(role) && (
                 <div>
                   <Label htmlFor="regno" hint="(State medical / nursing council)">Registration number</Label>
@@ -436,19 +556,15 @@ function AuthInner() {
               </div>
               <FieldError>{err}</FieldError>
               <div className="flex gap-2 pt-1">
-                <Button variant="secondary" size="lg" onClick={() => setStep(1)} icon={<ArrowLeft className="size-4" />}>
-                  {t("common.back")}
-                </Button>
+                {back}
                 <Button
                   className="flex-1"
                   size="lg"
                   onClick={() => {
                     setErr(null);
                     if (name.trim().length < 2) return setErr("Enter your full name");
-                    if (role !== "patient" && !facilityId) return setErr("Select your facility");
-                    if (creatingFacility && (newFac.name.trim().length < 3 || newFac.district.trim().length < 2 || newFac.state.trim().length < 2)) return setErr("Enter the facility name, district and state");
                     if (CLINICAL.includes(role) && regNo.trim().length < 4) return setErr("Registration number is required for clinical staff");
-                    setStep(regToken ? 5 : 3);
+                    nextStep();
                   }}
                 >
                   {t("common.next")}
@@ -457,62 +573,78 @@ function AuthInner() {
             </div>
           )}
 
-          {step === 3 && (
+          {stepKey === "workplace" && role && (
+            <div className="fade-up space-y-4">
+              <div>
+                <h2 className="text-xl font-bold text-ink">{role === "employer" ? "Register your organisation" : "Where do you work?"}</h2>
+                <p className="mt-1 text-sm text-muted">{role === "employer" ? "Company clinics, industrial units, campuses and health camps are listed on Jeevia only after their organisation registers." : "Search any health facility in India by name, district or PIN code."}</p>
+              </div>
+              {role === "employer" ? <OrganisationForm value={org} onChange={setOrg} /> : <WorkplacePicker role={role} value={workplace} onChange={setWorkplace} />}
+              <FieldError>{err}</FieldError>
+              <div className="flex gap-2 pt-1">
+                {back}
+                <Button
+                  className="flex-1"
+                  size="lg"
+                  onClick={() => {
+                    const p = validateWorkplace();
+                    if (p) return setErr(p);
+                    nextStep();
+                  }}
+                >
+                  {t("common.next")}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {stepKey === "phone" && (
             <div className="fade-up">
               <h2 className="text-xl font-bold text-ink">{t("auth.phone")}</h2>
               <p className="mt-1 text-sm text-muted">We will send a one-time code to verify it.</p>
-              <div className="mt-4 flex gap-2">
-                <span className="inline-flex h-11 items-center rounded-xl border border-line bg-canvas px-3 text-sm font-medium text-muted">+91</span>
-                <Input inputMode="numeric" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))} placeholder="98765 43210" />
+              <div className="mt-4">
+                <PhoneField id="reg-phone" value={phone} onChange={setPhone} />
               </div>
               <FieldError>{err}</FieldError>
               <div className="mt-5 flex gap-2">
-                <Button variant="secondary" size="lg" onClick={() => setStep(2)} icon={<ArrowLeft className="size-4" />}>
-                  {t("common.back")}
-                </Button>
-                <Button className="flex-1" size="lg" loading={busy} onClick={async () => { await sendOtp(); if (/^\d{10}$/.test(phone)) setStep(4); }}>
+                {back}
+                <Button className="flex-1" size="lg" loading={busy} onClick={async () => (await sendOtp()) && setStepKey("otp")}>
                   {t("auth.sendOtp")}
                 </Button>
               </div>
             </div>
           )}
 
-          {step === 4 && (
+          {stepKey === "otp" && (
             <div className="fade-up">
               <h2 className="text-xl font-bold text-ink">OTP verification</h2>
               <p className="mt-1 text-sm text-muted">Sent to +91 {phone.slice(0, 5)}•••••</p>
               <div className="mt-4">
                 <OtpBoxes value={otp} onChange={setOtp} autoFocus />
-                {challenge?.dev_code && <p className="mt-2 text-xs"><span className="rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">demo code {challenge.dev_code}</span></p>}
+                {challenge?.dev_code && (
+                  <p className="mt-2 text-xs">
+                    <span className="rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">demo code {challenge.dev_code}</span>
+                  </p>
+                )}
               </div>
               <FieldError>{err}</FieldError>
               <div className="mt-5 flex gap-2">
-                <Button variant="secondary" size="lg" onClick={() => setStep(3)} icon={<ArrowLeft className="size-4" />}>
-                  {t("common.back")}
-                </Button>
+                {back}
                 <Button
                   className="flex-1"
                   size="lg"
                   loading={busy}
                   onClick={async () => {
-                    if (!challenge) return;
-                    setErr(null);
-                    if (otp.length !== 6) return setErr("Enter all 6 digits");
-                    setBusy(true);
-                    try {
-                      const r = await api.verifyOtp(challenge.challenge_id, otp);
-                      if (r.status === "authenticated") {
-                        toast("This number is already registered — signed you in.", "info");
-                        signIn(r.tokens, r.user);
-                        return;
-                      }
+                    const r = await verify();
+                    if (!r) return;
+                    if (r.status === "new_user") {
                       setRegToken(r.registration_token);
-                      setStep(5);
-                    } catch (e) {
-                      setErr(errMsg(e));
-                    } finally {
-                      setBusy(false);
+                      setErr(null);
+                      setStepKey(steps[stepIdx + 1]);
+                      return;
                     }
+                    toast("This number is already registered — continue signing in.", "info");
+                    routeExisting(r);
                   }}
                 >
                   {t("auth.verify")}
@@ -521,15 +653,41 @@ function AuthInner() {
             </div>
           )}
 
-          {step === 5 && role && (
+          {stepKey === "pin" && (
+            <div className="fade-up">
+              <div className="mb-3 grid size-11 place-items-center rounded-2xl bg-teal-50 text-teal-700">
+                <LockKeyhole className="size-5" />
+              </div>
+              <h2 className="text-xl font-bold text-ink">Create your account PIN</h2>
+              <p className="mt-1 mb-4 text-sm text-muted">Signing in to your dashboard will need both an OTP on this phone and this PIN. You can change it later from your dashboard.</p>
+              <NewPinFields pin={newPin} confirm={confirmPin} onPin={setNewPin} onConfirm={setConfirmPin} />
+              <FieldError>{err}</FieldError>
+              <div className="mt-5 flex gap-2">
+                {back}
+                <Button
+                  className="flex-1"
+                  size="lg"
+                  onClick={() => {
+                    const p = newPinError(newPin, confirmPin);
+                    if (p) return setErr(p);
+                    nextStep();
+                  }}
+                >
+                  {t("common.next")}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {stepKey === "terms" && role && (
             <div className="fade-up">
               <h2 className="text-xl font-bold text-ink">Terms & privacy</h2>
               <div className="mt-3 max-h-52 space-y-2 overflow-y-auto rounded-xl border border-line bg-canvas p-3 text-sm text-muted">
-                <p><strong className="text-ink">Educational prototype.</strong> Jeevia supports triage review. It does not diagnose, prescribe or replace a qualified professional.</p>
-                <p><strong className="text-ink">Role-based access.</strong> You will only see what your role needs. Facility admins cannot read clinical notes; employers see fitness status only.</p>
+                <p><strong className="text-ink">Triage support, not diagnosis.</strong> Jeevia supports triage review. It does not diagnose, prescribe or replace a qualified professional.</p>
+                <p><strong className="text-ink">Role-based access.</strong> You only see what your role needs. Patient documents and photos open only for the doctors and nurses treating that patient. Employers see fitness status only.</p>
+                <p><strong className="text-ink">Two-factor sign-in.</strong> Staff and employer dashboards need a phone OTP and your account PIN. Never share your PIN.</p>
                 <p><strong className="text-ink">Audit.</strong> Every record you view, edit, override or export is written to an append-only audit log with your name.</p>
                 <p><strong className="text-ink">Retention.</strong> Raw voice recordings and photos are deleted automatically after the retention window.</p>
-                <p><strong className="text-ink">Synthetic data only.</strong> Do not enter real patient information into this prototype.</p>
               </div>
               <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3">
                 <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-0.5 size-5 accent-teal-700" />
@@ -538,22 +696,20 @@ function AuthInner() {
               <div className="mt-4 rounded-xl bg-canvas p-3 text-sm">
                 <p className="font-semibold text-ink">{name || "—"}</p>
                 <p className="text-muted">
-                  {ROLE_CARDS.find((c) => c.role === role)?.label} · +91 {phone}
-                  {facilityId && ` · ${creatingFacility ? `${newFac.name} (new)` : facilities?.find((f) => f.id === facilityId)?.name}`}
+                  {roleLabel} · +91 {phone}
+                  {role === "employer" ? ` · ${org.name}` : workplace ? ` · ${workplaceLabel(workplace)}` : ""}
+                  {PIN_ROLES.includes(role) && " · PIN set"}
                 </p>
               </div>
               <FieldError>{err}</FieldError>
               <div className="mt-5 flex gap-2">
-                <Button variant="secondary" size="lg" onClick={() => setStep(2)} icon={<ArrowLeft className="size-4" />}>
-                  {t("common.back")}
-                </Button>
+                {back}
                 <Button className="flex-1" size="lg" variant="teal" onClick={register} loading={busy} disabled={!terms} icon={<CheckCircle2 className="size-5" />}>
                   {t("auth.register")}
                 </Button>
               </div>
             </div>
           )}
-          {step === 1 && regToken && <p className="mt-3 text-center text-xs text-teal-700">Phone +91 {phone} already verified.</p>}
         </div>
       )}
     </Card>
@@ -564,17 +720,18 @@ export default function AuthPage() {
   return (
     <div className="min-h-[calc(100vh-28px)] bg-[radial-gradient(60%_50%_at_100%_0%,var(--color-teal-100),transparent),radial-gradient(60%_50%_at_0%_100%,var(--color-coral-50),transparent)]">
       <SiteHeader />
-      <div className="mx-auto grid max-w-6xl items-start gap-10 px-4 pt-8 pb-20 sm:px-6 lg:grid-cols-[1fr_440px]">
+      <div className="mx-auto grid max-w-6xl items-start gap-10 px-4 pt-8 pb-20 sm:px-6 lg:grid-cols-[1fr_460px]">
         <div className="hidden pt-8 lg:block">
           <h1 className="text-4xl leading-tight font-extrabold tracking-tight text-ink">
             Secure, <span className="text-gradient">role-based</span> access
           </h1>
-          <p className="mt-3 max-w-md text-lg text-muted">Phone + OTP for first sign-in, then a device-bound PIN for speed at busy counters. Every session is logged.</p>
+          <p className="mt-3 max-w-md text-lg text-muted">Phone OTP plus a personal PIN for every staff and employer dashboard. Every session is logged.</p>
           <ul className="mt-8 space-y-3 text-sm text-ink-2">
             {[
               [<UserRound key="a" className="size-4" />, "Patients never see triage status — only their own visits and reminders."],
-              [<ShieldCheck key="b" className="size-4" />, "Short-lived sessions that refresh securely and end on sign-out."],
-              [<KeyRound key="c" className="size-4" />, "Your PIN only works on the device where you created it."],
+              [<LockKeyhole key="b" className="size-4" />, "Two-factor sign-in: the OTP proves your phone, the PIN proves it’s you."],
+              [<ShieldCheck key="c" className="size-4" />, "Patient documents open only for the doctors and nurses treating them."],
+              [<Building2 key="d" className="size-4" />, "Every health facility in India, plus company and campus clinics registered by their organisation."],
             ].map(([i, s], k) => (
               <li key={k} className="flex items-start gap-3">
                 <span className="mt-0.5 grid size-8 place-items-center rounded-xl bg-white text-coral-500 shadow-sm">{i}</span>

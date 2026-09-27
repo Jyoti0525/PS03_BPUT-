@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 from .. import audit, exports
 from ..config import get_settings
-from ..models import Device, Encounter, Escalation, Facility, Patient, Referral, Reminder, User
+from ..models import Device, Encounter, Escalation, Facility, FitnessAssessment, Patient, Referral, Reminder, User
 from ..schemas import (
     REVIEWER_ROLES,
     AckIn,
@@ -19,6 +19,8 @@ from ..schemas import (
     EscalationIn,
     EscalationOut,
     ExportFormat,
+    FitnessIn,
+    FitnessOut,
     IntakeIn,
     NotePatch,
     OverrideIn,
@@ -182,6 +184,23 @@ def export(eid: str, user: Reviewer, db: DB, format: ExportFormat = "pdf"):
     audit.record(db, user, "EXPORT", "encounter", eid, f"Triage note exported as {format.upper()}", e.patient.code, e.facility_id)
     disp = "inline" if format == "print" else "attachment"
     return Response(body, media_type=mime, headers={"Content-Disposition": f'{disp}; filename="{name}"'})
+
+
+@router.post("/encounters/{eid}/fitness", response_model=FitnessOut)
+def record_fitness(eid: str, body: FitnessIn, user: Doctor, db: DB):
+    """Occupational fitness outcome for a worker. The employer sees this outcome only."""
+    e = load_encounter(db, eid, user)
+    if not e.patient.organisation_id:
+        raise HTTPException(422, "This patient is not on an employer's roster")
+    a = FitnessAssessment(
+        patient_id=e.patient_id, organisation_id=e.patient.organisation_id, encounter_id=e.id, status=body.status,
+        restrictions=(body.restrictions or "").strip() or None, valid_until=body.valid_until, assessed_by=user.name, assessed_by_id=user.id,
+    )
+    db.add(a)
+    db.flush()
+    audit.record(db, user, "UPDATE", "fitness", a.id, f"Fitness recorded: {body.status}{' until ' + body.valid_until if body.valid_until else ''}", e.patient.code, e.facility_id)
+    db.refresh(a)
+    return a
 
 
 # ── Escalations ───────────────────────────────────────

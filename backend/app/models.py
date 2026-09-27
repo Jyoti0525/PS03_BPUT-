@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, UniqueConstraint, event
+from sqlalchemy import Boolean, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base, JSONType, UTCDateTime
@@ -15,6 +15,48 @@ def utcnow() -> datetime:
 
 def new_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:12]}"
+
+
+class Organisation(Base):
+    """An employer or institution (company, industrial estate, campus, NGO / camp organiser).
+    Its clinics, units, campus centres and camps appear in the workplace list only after it registers."""
+
+    __tablename__ = "organisations"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("org"))
+    name: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(24))  # company | industrial | campus | ngo | government_programme
+    registration_no: Mapped[str | None] = mapped_column(String(64), nullable=True)  # GSTIN / CIN / AISHE / NGO reg.
+    state: Mapped[str] = mapped_column(String(100))
+    district: Mapped[str] = mapped_column(String(100))
+    address: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    contact_phone: Mapped[str | None] = mapped_column(String(15), nullable=True)
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+
+class DirectoryFacility(Base):
+    """Reference list of India's health facilities (OpenStreetMap import). Read-only for the app;
+    a row becomes an operational Facility when the first staff member joins it."""
+
+    __tablename__ = "facility_directory"
+    __table_args__ = (Index("ix_facility_directory_state_district", "state", "district"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    ref: Mapped[str] = mapped_column(String(40), unique=True)
+    name: Mapped[str] = mapped_column(String(300), index=True)
+    name_local: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    kind: Mapped[str] = mapped_column(String(24), index=True)
+    ownership: Mapped[str] = mapped_column(String(10), default="unknown")  # public | private | unknown
+    state: Mapped[str] = mapped_column(String(100))
+    district: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    pincode: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
+    address: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    beds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    source: Mapped[str] = mapped_column(String(16), default="osm")
 
 
 class Facility(Base):
@@ -31,6 +73,17 @@ class Facility(Base):
     beds_occupied: Mapped[int] = mapped_column(Integer, default=0)
     offline_mode: Mapped[bool] = mapped_column(Boolean, default=False)
     capabilities: Mapped[dict] = mapped_column(JSONType, default=dict)
+    # Provenance: sample | directory (national list) | organisation (registered by an employer) | user_added
+    source: Mapped[str] = mapped_column(String(16), default="sample", server_default="sample")
+    directory_ref: Mapped[str | None] = mapped_column(String(40), nullable=True, unique=True)
+    organisation_id: Mapped[str | None] = mapped_column(ForeignKey("organisations.id"), nullable=True, index=True)
+    verified: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    pincode: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    address: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    lon: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True, default=utcnow)
 
 
 class User(Base):
@@ -43,22 +96,13 @@ class User(Base):
     registration_no: Mapped[str | None] = mapped_column(String(64), nullable=True)
     language: Mapped[str] = mapped_column(String(8), default="en")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    organisation_id: Mapped[str | None] = mapped_column(ForeignKey("organisations.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
-    pins: Mapped[list["UserPin"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-
-
-class UserPin(Base):
-    """A PIN is bound to one device: the hash includes the device id."""
-
-    __tablename__ = "user_pins"
-    __table_args__ = (UniqueConstraint("user_id", "device_id"),)
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
-    device_id: Mapped[str] = mapped_column(String(64))
-    pin_hash: Mapped[str] = mapped_column(String(200))
-    failed_attempts: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
-    user: Mapped[User] = relationship(back_populates="pins")
+    # Second sign-in factor for staff and employers (after phone OTP). Hash is salted per user.
+    pin_hash: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    pin_set_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    pin_failed_attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    pin_locked_until: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
 
 
 class OtpChallenge(Base):
@@ -66,6 +110,8 @@ class OtpChallenge(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("otp"))
     phone: Mapped[str] = mapped_column(String(15), index=True)
     code_hash: Mapped[str] = mapped_column(String(200))
+    created_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True, default=utcnow, index=True)
+    ip: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     consumed: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -91,6 +137,7 @@ class Device(Base):
 
 class Patient(Base):
     __tablename__ = "patients"
+    __table_args__ = (UniqueConstraint("organisation_id", "employee_code", name="uq_patient_employee_code"),)
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("pat"))
     code: Mapped[str] = mapped_column(String(20), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(200))
@@ -100,8 +147,28 @@ class Patient(Base):
     language: Mapped[str] = mapped_column(String(8), default="en")
     category: Mapped[str] = mapped_column(String(16), default="normal")
     village: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    employer_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    employer_id: Mapped[str | None] = mapped_column(String(64), nullable=True)  # legacy, superseded by organisation_id
+    # Workers: linked to their employer's roster
+    organisation_id: Mapped[str | None] = mapped_column(ForeignKey("organisations.id"), nullable=True, index=True)
+    employee_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    department: Mapped[str | None] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+
+class FitnessAssessment(Base):
+    """Occupational fitness outcome recorded by a doctor. The employer sees only this, never the visit."""
+
+    __tablename__ = "fitness_assessments"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("fit"))
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"), index=True)
+    organisation_id: Mapped[str] = mapped_column(ForeignKey("organisations.id"), index=True)
+    encounter_id: Mapped[str | None] = mapped_column(ForeignKey("encounters.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(24))  # fit | fit_with_restrictions | temporarily_unfit | pending_review
+    restrictions: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    valid_until: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    assessed_by: Mapped[str] = mapped_column(String(200))
+    assessed_by_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    assessed_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
 
 
 class Consent(Base):
@@ -267,13 +334,3 @@ class Reminder(Base):
     channel: Mapped[str] = mapped_column(String(8))
     status: Mapped[str] = mapped_column(String(12), default="scheduled")
     message: Mapped[str] = mapped_column(Text)
-
-
-class Cohort(Base):
-    __tablename__ = "cohorts"
-    id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    name: Mapped[str] = mapped_column(String(200))
-    employer_name: Mapped[str] = mapped_column(String(200))
-    screening_type: Mapped[str] = mapped_column(String(200))
-    facility_id: Mapped[str | None] = mapped_column(ForeignKey("facilities.id"), nullable=True)
-    workers: Mapped[list] = mapped_column(JSONType, default=list)

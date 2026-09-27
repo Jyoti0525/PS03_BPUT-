@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import or_, select
 
 from .. import audit
-from ..models import Consent, Encounter, Patient, User
-from ..schemas import ADMIN_ROLES, STAFF_ROLES, ConsentIn, ConsentOut, EncounterOut, PatientCandidate, PatientIn, PatientOut
+from ..models import Consent, Encounter, Facility, Patient, User
+from ..schemas import ADMIN_ROLES, STAFF_ROLES, ConsentIn, ConsentOut, EncounterOut, PatientCandidate, PatientIn, PatientOut, PatientPatch
 from ..security import DB, CurrentUser, require
 from ..services import aware, encounter_out, next_patient_code, own_patient
 
@@ -54,10 +54,39 @@ def by_code(code: str, user: Staff, db: DB):
 
 @router.post("/patients", response_model=PatientOut)
 def create_patient(body: PatientIn, user: Registrar, db: DB):
-    p = Patient(code=next_patient_code(db), **body.model_dump())
+    data = body.model_dump(exclude={"employee_code"})
+    fac = db.get(Facility, user.facility_id) if user.facility_id else None
+    code = (body.employee_code or "").strip()
+    if code and fac and fac.organisation_id:
+        # Worker check-in at an organisation's workplace: link to the roster entry if it is the same person.
+        existing = db.scalar(select(Patient).where(Patient.organisation_id == fac.organisation_id, Patient.employee_code == code))
+        if existing:
+            same = (body.phone and existing.phone == body.phone) or existing.name.strip().lower() == body.name.strip().lower()
+            if not same:
+                raise HTTPException(409, "That employee code belongs to someone else — check it or leave it blank")
+            audit.record(db, user, "VIEW", "patient", existing.id, f"Worker {code} matched at check-in", existing.code)
+            return existing
+        data.update(organisation_id=fac.organisation_id, employee_code=code)
+    p = Patient(code=next_patient_code(db), **data)
     db.add(p)
     db.flush()
     audit.record(db, user, "CREATE", "patient", p.id, "Patient registered at intake", p.code)
+    return p
+
+
+@router.patch("/patients/{pid}", response_model=PatientOut)
+def correct_patient(pid: str, body: PatientPatch, user: Staff, db: DB):
+    """Front desk or clinicians correct identity details (name, age, sex, phone, language, village)."""
+    p = db.get(Patient, pid)
+    if not p:
+        raise HTTPException(404, "Patient not found")
+    seen_here = db.scalar(select(Encounter.id).where(Encounter.patient_id == pid, Encounter.facility_id == user.facility_id).limit(1))
+    if not seen_here:
+        raise HTTPException(403, "Only facilities that have seen this patient can correct their details")
+    changed = [k for k, v in body.model_dump(exclude_unset=True).items() if v is not None and getattr(p, k) != v]
+    for k in changed:
+        setattr(p, k, getattr(body, k))
+    audit.record(db, user, "UPDATE", "patient", pid, f"Patient details corrected: {', '.join(changed) or 'no changes'}", p.code)
     return p
 
 

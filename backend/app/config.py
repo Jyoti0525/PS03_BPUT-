@@ -27,6 +27,14 @@ class Settings(BaseSettings):
     sms_country_code: str = "+91"
     otp_ttl_sec: int = 300
     otp_max_attempts: int = 5
+    otp_per_phone_10min: int = 3
+    otp_per_phone_day: int = 10
+    otp_per_ip_hour: int = 30
+    # PIN (second factor) for sample walkthrough accounts only.
+    demo_pin: str = "4826"
+    pin_max_attempts: int = 5
+    pin_lock_minutes: int = 15
+    pin_step_ttl_min: int = 5
 
     # Object storage: "local" disk, or "s3" for any S3-compatible store (Cloudflare R2).
     storage_backend: str = "local"
@@ -43,6 +51,7 @@ class Settings(BaseSettings):
     retention_hours_audio: int = 24
     retention_hours_image: int = 72
     retention_hours_report: int = 720  # 30 days, so reports travel with referrals
+    directory_autoload: bool = True  # load directory_data/ snapshot into an empty facility_directory at start-up
 
     escalate_red_min: int = 15
     escalate_yellow_min: int = 60

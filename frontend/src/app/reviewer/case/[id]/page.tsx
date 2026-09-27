@@ -16,6 +16,8 @@ import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
 import { useFile } from "@/components/triage/source";
 import type { Encounter, ExportFormat, Facility, ShareLink, Urgency } from "@/lib/types";
 import { ShareQrModal } from "@/components/triage/share-qr";
+import { PatientEditModal } from "@/components/triage/patient-edit";
+import { WorkerPanel } from "@/components/triage/worker-panel";
 import { URGENCY_LABEL, downloadBlob, referralText } from "@/lib/export";
 import { langByCode } from "@/lib/i18n/languages";
 
@@ -65,7 +67,7 @@ export default function CasePage() {
   const [density, setDensity] = useState<"doctor" | "nurse">(isDoctor ? "doctor" : "nurse");
   const [start] = useState(() => Date.now());
   const now = useNow(1000);
-  const [modal, setModal] = useState<null | "override" | "escalate" | "referral" | "edit" | "share">(null);
+  const [modal, setModal] = useState<null | "override" | "escalate" | "referral" | "edit" | "share" | "patient">(null);
   const [freshShare, setFreshShare] = useState<ShareLink | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -128,6 +130,9 @@ export default function CasePage() {
                   <h1 className="text-xl font-bold text-ink sm:text-2xl">{p.name}</h1>
                   <UrgencyBadge u={enc.urgency} size="lg" />
                   {enc.urgency_source === "override" && <Badge tone="coral">Overridden</Badge>}
+                  <button onClick={() => setModal("patient")} className="inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-xs font-medium text-muted hover:bg-canvas hover:text-ink" title="Correct name, age, phone…">
+                    <Pencil className="size-3.5" /> Edit details
+                  </button>
                 </div>
                 <p className="mt-0.5 text-sm text-muted">
                   {p.age} y · {p.sex === "F" ? "Female" : p.sex === "M" ? "Male" : "Other"} · <span className="font-mono">{p.code}</span> · {langByCode(p.language).name} · intake {timeAgo(enc.created_at, now)}
@@ -266,6 +271,8 @@ export default function CasePage() {
         </Card>
       )}
 
+      {enc.worker && <WorkerPanel encounterId={enc.id} worker={enc.worker} canRecord={isDoctor} onRecorded={reload} />}
+
       <div className="mt-4">{n ? <NoteView enc={enc} density={density} /> : <p className="text-sm text-muted">No note generated.</p>}</div>
 
       {!!enc.intake?.file_ids.length && (
@@ -301,6 +308,7 @@ export default function CasePage() {
           }}
         />
       )}
+      {modal === "patient" && <PatientEditModal patient={p} onClose={() => setModal(null)} onDone={() => { setModal(null); reload(); }} />}
       {modal === "share" && <ShareQrModal enc={enc} facilityName={facility?.name} initial={freshShare} onClose={() => setModal(null)} />}
     </div>
   );

@@ -12,7 +12,9 @@ from sqlalchemy import select
 
 from . import audit, storage
 from .db import Base, SessionLocal, engine, init_db
-from .models import Cohort, Consent, Device, Facility, FileObject, Patient, Reminder, User
+from .models import Consent, Device, Facility, FileObject, FitnessAssessment, Organisation, Patient, Reminder, User
+from .config import get_settings
+from .security import PIN_ROLES, hash_pin
 from .services import create_encounter, local_day
 from .triage.reports import render
 
@@ -77,10 +79,11 @@ TODAY = [
          maternal={"gestation_weeks": 28, "anc_visits": 3, "next_checkup": (NOW + 14 * DAY).date().isoformat(), "reminder_channel": "sms"}),
 ]
 
-COHORTS = [
-    dict(id="coh_furnace", name="Blast furnace — Shift A", employer_name="Kalinga Steel Works (sample)", screening_type="Periodic occupational health screening", facility_id="fac_kalinganagar",
-         workers=[{"worker_code": c, "department": "Furnace", "fitness_status": st, "last_screened_at": (NOW - d * DAY).isoformat() if d is not None else None}
-                  for c, st, d in [("KSW-1041", "fit", 12), ("KSW-1043", "fit_with_restrictions", 11), ("KSW-1045", "pending_review", None)]]),
+SAMPLE_ORG = dict(id="org_kalinganagar", name="Kalinga Steel Works (sample)", kind="industrial", state="Odisha", district="Jajpur", verified=False)
+SAMPLE_WORKERS = [  # employee code, department, fitness status (None = not yet assessed), days since assessment
+    ("KSW-1041", "Furnace", "fit", 12),
+    ("KSW-1043", "Furnace", "fit_with_restrictions", 11),
+    ("KSW-1045", "Furnace", None, None),
 ]
 
 
@@ -88,16 +91,27 @@ def seed(db) -> None:
     if db.scalar(select(Facility.id).limit(1)):
         return
     audit.record(db, None, "CONFIG", "system", None, "Demo database seeded with synthetic data", ts=NOW - DAY)
+    db.add(Organisation(**SAMPLE_ORG))
+    db.flush()
     for f in FACILITIES:
-        db.add(Facility(**f))
+        org = {"organisation_id": SAMPLE_ORG["id"], "source": "organisation"} if f["id"] == "fac_kalinganagar" else {"source": "sample"}
+        db.add(Facility(**f, **org))
     db.flush()
     for uid, phone, name, role, fac, reg, lang in USERS:
-        db.add(User(id=uid, phone=phone, name=name, role=role, facility_id=fac, registration_no=reg, language=lang, created_at=NOW - 60 * DAY))
+        u = User(id=uid, phone=phone, name=name, role=role, facility_id=fac, registration_no=reg, language=lang, created_at=NOW - 60 * DAY, organisation_id=SAMPLE_ORG["id"] if role == "employer" else None)
+        if role in PIN_ROLES:
+            u.pin_hash, u.pin_set_at = hash_pin(get_settings().demo_pin, uid), NOW
+        db.add(u)
     for pid, code, name, age, sex, phone, lang, cat, village, emp in PATIENTS:
         db.add(Patient(id=pid, code=code, name=name, age=age, sex=sex, phone=phone, language=lang, category=cat, village=village, employer_id=emp, created_at=NOW - 100 * DAY))
     db.add(Device(id="dev_kiosk_manikpur_1", label="OPD entrance tablet", facility_id="fac_phc_manikpur", bound_by="Meera Nair", bound_by_id="usr_sup1", bound_at=NOW - 20 * DAY, last_seen_at=NOW))
-    for c in COHORTS:
-        db.add(Cohort(**c))
+    db.flush()
+    for code, dept, status, days in SAMPLE_WORKERS:
+        pid = f"pat_w_{code.lower().replace('-', '_')}"
+        db.add(Patient(id=pid, code=f"JVA-{code}", name=f"Worker {code} (sample)", age=30, sex="M", phone=None, language="or", category="normal", organisation_id=SAMPLE_ORG["id"], employee_code=code, department=dept, created_at=NOW - 100 * DAY))
+        db.flush()
+        if status:
+            db.add(FitnessAssessment(patient_id=pid, organisation_id=SAMPLE_ORG["id"], status=status, restrictions="No work at height" if status == "fit_with_restrictions" else None, assessed_by="Occupational Health Physician (sample)", assessed_at=NOW - days * DAY))
     db.flush()
 
     for i, s in enumerate(HISTORY + TODAY):

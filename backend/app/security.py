@@ -68,6 +68,31 @@ def registration_token(phone: str) -> str:
     return _encode({"typ": "register", "phone": phone}, timedelta(minutes=get_settings().registration_ttl_min))
 
 
+PIN_ROLES = {"doctor", "nurse", "receptionist", "supervisor", "employer"}
+_WEAK = {"1234", "12345", "123456", "4321", "54321", "654321", "1212", "121212", "1122", "112233", "2580", "0852", "1111", "0000", "123123", "147258", "159753"}
+
+
+def pin_problem(pin: str) -> str | None:
+    """Reject PINs that are trivially guessable."""
+    if not pin.isdigit() or not 4 <= len(pin) <= 6:
+        return "PIN must be 4 to 6 digits"
+    if pin in _WEAK or len(set(pin)) == 1:
+        return "That PIN is too easy to guess — choose a less obvious one"
+    steps = {int(b) - int(a) for a, b in zip(pin, pin[1:])}
+    if steps in ({1}, {-1}):
+        return "Avoid sequences like 3456 — choose a less obvious PIN"
+    return None
+
+
+def hash_pin(pin: str, user_id: str) -> str:
+    return hash_secret(pin, f"pin:{user_id}")
+
+
+def pin_step_token(user: "User") -> str:
+    """Issued after a successful OTP when the account also needs its PIN. Grants nothing else."""
+    return _encode({"typ": "pin", "sub": user.id}, timedelta(minutes=get_settings().pin_step_ttl_min))
+
+
 def file_token(file_id: str, user_id: str) -> str:
     """Short-lived signed URL token so <img> tags can load a file without an auth header."""
     return _encode({"typ": "file", "fid": file_id, "sub": user_id}, timedelta(minutes=get_settings().file_url_ttl_min))

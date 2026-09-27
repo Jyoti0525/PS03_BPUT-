@@ -9,8 +9,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import or_, select
 
 from .. import audit, storage
-from ..models import AuditEvent, Cohort, Encounter, FileObject, Reminder, User
-from ..schemas import ADMIN_ROLES, AuditOut, AuditVerify, CohortOut, MyRecord, PatientOut, ReminderOut, RetentionOut
+from ..models import AuditEvent, Encounter, FileObject, Reminder, User
+from ..schemas import ADMIN_ROLES, AuditOut, AuditVerify, MyRecord, PatientOut, ReminderOut, RetentionOut
 from ..security import DB, require
 from ..services import encounter_out, now, own_patient
 from .files import file_out
@@ -66,13 +66,7 @@ def my_record(user: Annotated[User, Depends(require("patient"))], db: DB):
     p = own_patient(db, user)
     if not p:
         raise HTTPException(404, "No patient record linked to this phone yet")
-    encs = db.scalars(select(Encounter).where(Encounter.patient_id == p.id).order_by(Encounter.created_at.desc()))
-    rems = db.scalars(select(Reminder).where(Reminder.patient_id == p.id).order_by(Reminder.due_at))
+    encs = list(db.scalars(select(Encounter).where(Encounter.patient_id == p.id).order_by(Encounter.created_at.desc())))
+    rems = list(db.scalars(select(Reminder).where(Reminder.patient_id == p.id).order_by(Reminder.due_at)))
     audit.record(db, user, "VIEW", "patient", p.id, "Patient viewed own record", p.code)
     return MyRecord(patient=PatientOut.model_validate(p), encounters=[encounter_out(e, user) for e in encs], reminders=[ReminderOut.model_validate(r) for r in rems])
-
-
-@router.get("/employer/cohorts", response_model=list[CohortOut])
-def cohorts(user: Annotated[User, Depends(require("employer"))], db: DB):
-    audit.record(db, user, "VIEW", "cohort", None, "Employer viewed fitness cohorts (no clinical records)")
-    return list(db.scalars(select(Cohort).where(Cohort.facility_id == user.facility_id)))

@@ -1,6 +1,6 @@
 import uuid
 
-from conftest import API, DEVICE, login
+from conftest import API, DEVICE, GOOD_PIN, login
 
 
 def new_intake(client, headers, **kw):
@@ -23,25 +23,50 @@ def test_wrong_otp_rejected_and_attempts_limited(client):
     assert client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).status_code == 429
 
 
-def test_register_new_user_then_pin_login_is_device_bound(client):
+def test_register_requires_a_strong_pin_and_login_needs_otp_plus_pin(client):
     phone = "7" + uuid.uuid4().int.__str__()[:9]
     ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
-    assert v["status"] == "new_user"
-    reg = {"registration_token": v["registration_token"], "name": "New Nurse", "role": "nurse", "facility_id": "fac_phc_manikpur", "language": "hi", "accepted_terms": True}
-    assert client.post(f"{API}/auth/register", json=reg).status_code == 422  # nurse needs registration number
-    r = client.post(f"{API}/auth/register", json={**reg, "registration_no": "UPNC-1111"})
+    reg = {"registration_token": v["registration_token"], "name": "New Nurse", "role": "nurse", "facility_id": "fac_phc_manikpur", "language": "hi", "accepted_terms": True, "registration_no": "UPNC-1111"}
+    assert client.post(f"{API}/auth/register", json=reg).status_code == 422  # PIN required
+    assert "easy to guess" in client.post(f"{API}/auth/register", json={**reg, "pin": "1234"}).json()["detail"]
+    assert client.post(f"{API}/auth/register", json={**reg, "pin": "4567"}).status_code == 422  # sequence
+    r = client.post(f"{API}/auth/register", json={**reg, "pin": GOOD_PIN})
     assert r.status_code == 200, r.text
-    h = {"Authorization": f"Bearer {r.json()['tokens']['access_token']}"}
-    assert client.post(f"{API}/auth/pin", json={"pin": "4321", "device_id": "device-A"}, headers=h).status_code == 204
-    assert client.post(f"{API}/auth/pin/login", json={"phone": phone, "pin": "4321", "device_id": "device-A"}).status_code == 200
-    assert client.post(f"{API}/auth/pin/login", json={"phone": phone, "pin": "4321", "device_id": "device-B"}).status_code == 400
-    assert client.post(f"{API}/auth/pin/login", json={"phone": phone, "pin": "0000", "device_id": "device-A"}).status_code == 400
+    assert r.json()["user"]["has_pin"]
+    # next sign-in: OTP alone gives no session
+    ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
+    v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
+    assert v["status"] == "pin_required" and "tokens" not in v and v["can_reset_pin"] is False
+    assert client.get(f"{API}/auth/me", headers={"Authorization": f"Bearer {v['pin_token']}"}).status_code == 401  # step token is not a session
+    bad = client.post(f"{API}/auth/pin/verify", json={"pin_token": v["pin_token"], "pin": "0000"})
+    assert bad.status_code == 400 and "4 tries left" in bad.json()["detail"]
+    ok = client.post(f"{API}/auth/pin/verify", json={"pin_token": v["pin_token"], "pin": GOOD_PIN})
+    assert ok.status_code == 200 and ok.json()["tokens"]["access_token"]
+    h = {"Authorization": f"Bearer {ok.json()['tokens']['access_token']}"}
+    # change PIN from the dashboard
+    assert client.post(f"{API}/auth/pin/change", json={"current_pin": "0000", "new_pin": "8264"}, headers=h).status_code == 400
+    assert client.post(f"{API}/auth/pin/change", json={"current_pin": GOOD_PIN, "new_pin": "8264"}, headers=h).status_code == 204
+    # nurses cannot reset their own PIN
+    assert client.post(f"{API}/auth/pin/forgot", json={"pin_token": v["pin_token"]}).status_code == 403
+
+
+def test_pin_lockout(client):
+    phone = "7" + uuid.uuid4().int.__str__()[:9]
+    ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
+    v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
+    client.post(f"{API}/auth/register", json={"registration_token": v["registration_token"], "name": "Lock Test", "role": "receptionist", "facility_id": "fac_phc_manikpur", "language": "en", "accepted_terms": True, "pin": GOOD_PIN})
+    ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
+    v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
+    codes = [client.post(f"{API}/auth/pin/verify", json={"pin_token": v["pin_token"], "pin": "9999"}).status_code for _ in range(5)]
+    assert codes == [400, 400, 400, 400, 423]
+    assert client.post(f"{API}/auth/pin/verify", json={"pin_token": v["pin_token"], "pin": GOOD_PIN}).status_code == 423  # locked even with the right PIN
 
 
 def test_refresh_rotates_and_logout_revokes(client):
     ch = client.post(f"{API}/auth/otp/request", json={"phone": "9000000003"}).json()
-    t = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()["tokens"]
+    step = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
+    t = client.post(f"{API}/auth/pin/verify", json={"pin_token": step["pin_token"], "pin": "4826"}).json()["tokens"]
     new = client.post(f"{API}/auth/refresh", json={"refresh_token": t["refresh_token"]})
     assert new.status_code == 200
     assert client.post(f"{API}/auth/refresh", json={"refresh_token": t["refresh_token"]}).status_code == 401  # single use

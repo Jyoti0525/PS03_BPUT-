@@ -8,13 +8,46 @@ import { useSession, usePrefs } from "@/components/providers";
 import { useOnline } from "@/lib/hooks";
 import { A11yButton, LanguageButton, Logo } from "@/components/layout/chrome";
 import { Badge, Button, Card } from "@/components/ui";
-import { IntakeFlow } from "@/components/intake/intake-flow";
+import dynamic from "next/dynamic";
 import { subscribeOutbox, type OutboxItem } from "@/lib/offline/outbox";
+import { precacheCurrentPage } from "@/lib/offline/precache";
 import type { KioskInfo } from "@/lib/types";
+
+/** The intake wizard loads after the start screen; it is fetched (and cached for offline) as soon as the kiosk activates. */
+const loadIntake = () => import("@/components/intake/intake-flow");
+const IntakeFlow = dynamic(() => loadIntake().then((m) => m.IntakeFlow), {
+  loading: () => (
+    <div className="flex items-center justify-center gap-2 py-24 text-muted">
+      <Loader2 className="size-5 animate-spin" /> Loading…
+    </div>
+  ),
+});
+
+const infoKey = (code: string) => `jeevia.kiosk.info.${code.toUpperCase()}`;
+
+function cachedInfo(code: string): KioskInfo | null {
+  try {
+    const raw = localStorage.getItem(infoKey(code));
+    return raw ? (JSON.parse(raw) as KioskInfo) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveInfo(code: string, info: KioskInfo | null) {
+  try {
+    if (info) localStorage.setItem(infoKey(code), JSON.stringify(info));
+    else localStorage.removeItem(infoKey(code));
+  } catch {
+    /* storage blocked */
+  }
+}
 
 /**
  * Public kiosk: opens on any tab or device from a link the facility shares (or a QR on the wall).
  * No staff login — the link itself grants an intake-only session for that facility.
+ * Once opened online, the link keeps working offline: facility info and the kiosk session are kept
+ * on the device, intakes queue in the outbox, and the page itself is cached by the service worker.
  */
 export default function PublicKiosk() {
   const { code } = useParams<{ code: string }>();
@@ -34,14 +67,30 @@ export default function PublicKiosk() {
     let live = true;
     (async () => {
       try {
-        const i = await api.kioskInfo(code);
+        let i: KioskInfo;
+        let reachable = true;
+        try {
+          i = await api.kioskInfo(code);
+          saveInfo(code, i);
+        } catch (e) {
+          const status = (e as { status?: number }).status;
+          const cached = cachedInfo(code);
+          if (status || !cached) {
+            if (status === 404) saveInfo(code, null);
+            throw e;
+          }
+          i = cached; // offline: reuse what this device saw last time
+          reachable = false;
+        }
         if (!live) return;
         setInfo(i);
         const valid = user && user.role === "kiosk" && user.facility_id === i.facility_id;
         if (!valid) {
+          if (!reachable) throw new Error("This kiosk needs an internet connection once to activate on this device. Connect and reload.");
           const r = await api.kioskSession(code, getDeviceId());
           if (live) signIn(r.tokens, r.user);
         }
+        if (reachable) loadIntake().then(() => precacheCurrentPage(), () => precacheCurrentPage());
       } catch (e) {
         if (live) setError(e instanceof Error ? e.message : "This kiosk link could not be opened.");
       }
@@ -129,6 +178,7 @@ export default function PublicKiosk() {
             key={round}
             mode="link"
             facilityId={info.facility_id}
+            organisationName={info.organisation_name}
             offline={!online}
             onReset={() => {
               setRound((n) => n + 1);

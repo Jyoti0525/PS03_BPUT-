@@ -4,3 +4,4 @@ __pycache__
 *.pyc
 tests
 .env
+directory_data/parts/

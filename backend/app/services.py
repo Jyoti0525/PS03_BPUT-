@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from . import audit
 from .config import get_settings
 from .models import Consent, Encounter, Escalation, Facility, FileObject, Patient, User
-from .schemas import ADMIN_ROLES, ConsentOut, EncounterOut, PatientOut
+from .schemas import ADMIN_ROLES, ConsentOut, EncounterOut, FitnessOut, PatientOut, WorkerInfo
 from .triage.pipeline import build_note, infer_specialist
 from .triage.rules import evaluate
 
@@ -126,6 +126,7 @@ def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
         escalation_due_at=aware(e.escalation_due_at),
         token=e.token,
         channel=e.channel,
+        worker=_worker_info(e) if viewer.role not in ("patient", "kiosk") else None,
         consent=ConsentOut.model_validate(e.consent) if e.consent else None,
     )
     if viewer.role in ("patient", "kiosk"):
@@ -137,6 +138,23 @@ def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
         out.specialist_required = None
         out.referral_needed = None
     return out
+
+
+def _worker_info(e: Encounter) -> WorkerInfo | None:
+    p = e.patient
+    if not p.organisation_id:
+        return None
+    from sqlalchemy.orm import object_session
+
+    from .models import FitnessAssessment, Organisation
+
+    db = object_session(e)
+    org = db.get(Organisation, p.organisation_id) if db else None
+    latest = db.scalar(select(FitnessAssessment).where(FitnessAssessment.patient_id == p.id).order_by(FitnessAssessment.assessed_at.desc()).limit(1)) if db else None
+    return WorkerInfo(
+        organisation_id=p.organisation_id, organisation_name=org.name if org else "", employee_code=p.employee_code, department=p.department,
+        latest=FitnessOut.model_validate(latest) if latest else None,
+    )
 
 
 def load_encounter(db: Session, eid: str, user: User, *, clinical: bool = True) -> Encounter:

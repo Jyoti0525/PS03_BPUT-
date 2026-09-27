@@ -13,6 +13,7 @@ import { toast } from "@/components/ui/toast";
 import { IntakeFlow } from "@/components/intake/intake-flow";
 import { flushOutbox, isSimulatedOffline, setSimulatedOffline, subscribeOutbox, type OutboxItem } from "@/lib/offline/outbox";
 import { STAFF_ROLES } from "@/lib/types";
+import { precacheCurrentPage } from "@/lib/offline/precache";
 
 export default function KioskPage() {
   const { user, loading, signOut } = useSession();
@@ -35,6 +36,9 @@ export default function KioskPage() {
   const offline = !online || simOffline;
 
   useEffect(() => subscribeOutbox(setOutbox), []);
+  useEffect(() => {
+    precacheCurrentPage();
+  }, []);
 
   useEffect(() => {
     if (!simOffline && online && outbox.length) {
@@ -136,7 +140,7 @@ export default function KioskPage() {
         </div>
       </header>
       <main className="px-4 py-6">
-        {user?.facility_id && <IntakeFlow key={session} mode="kiosk" facilityId={user.facility_id} offline={offline} onReset={() => setSession((n) => n + 1)} />}
+        {user?.facility_id && <IntakeFlow key={session} mode="kiosk" facilityId={user.facility_id} organisationName={facility?.organisation_id ? facility.name : null} offline={offline} onReset={() => setSession((n) => n + 1)} />}
         <div className="no-print mx-auto mt-8 max-w-3xl rounded-2xl border border-dashed border-line bg-white/70 p-4">
           <Toggle
             checked={simOffline}

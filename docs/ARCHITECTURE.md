@@ -25,7 +25,7 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
 ```
 
 ### Request lifecycle for one intake
-1. A nurse signs in (phone + OTP, later device PIN) and opens `/kiosk`. The tablet must be **bound** to her facility
+1. A nurse signs in (phone OTP + account PIN — two factors) and opens `/kiosk`. The tablet must be **bound** to her facility
    (`POST /devices`); staff intake submissions without a bound `X-Device-Id` are rejected.
 2. Consent is captured first (`POST /consents`: self or proxy + relationship, privacy context, scopes).
 3. Voice: Web Speech API gives a live transcript; the kiosk **reads it back aloud** (TTS) and the patient confirms.
@@ -45,13 +45,17 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
 | `src/lib/api/contract.ts` | `JeeviaApi` interface — every call the UI makes. |
 | `src/lib/api/live.ts` | FastAPI adapter (JWT refresh, device header, file downloads). |
 | `src/lib/api/mock/*` | In-browser mock backend (IndexedDB) with the same RBAC, rules, audit hash chain and seed data. Default mode, used for the Vercel demo. |
-| `src/lib/offline/outbox.ts` | Offline intake queue + replay; `public/sw.js` caches the kiosk shell and wakes the page on Background Sync. |
+| `src/lib/offline/outbox.ts` | Offline intake queue + replay, one queue per session scope (a kiosk link's queue replays with that link's session); `public/sw.js` caches pages and build assets and wakes the page on Background Sync. |
+| `src/lib/offline/precache.ts` | After a kiosk opens online, sends the service worker the page URL and every loaded `/_next/static` asset so the kiosk reloads with no network. |
 | `src/components/intake/*` | Kiosk / patient intake flow: consent → identity (household phone disambiguation) → visit type → voice / icons / text → duration & severity (+ maternal / chronic branches) → uploads → follow-ups → staff vitals → review → token + QR. |
 | `src/components/triage/*` | Urgency badge, flag list, value table with **source evidence** (image crop / transcript / device), sparkline trends, `NoteView` at doctor or nurse density. |
 | `src/app/reviewer/*` | Queue, case view (confirm / edit / override / escalate / referral / export), lookup by ID · QR · phone, escalations with acknowledgement, referrals. |
 | `src/app/admin/*` | Overview (counts only), facility setup wizard, kiosk devices, staff, audit log (verify chain, CSV), data retention. |
-| `src/app/patient/*`, `src/app/employer/*` | Patient self-service (no urgency), employer cohorts (no records). |
-| `src/app/k/[code]` | Public kiosk link: intake-only session per facility, token on completion, auto-reset for shared tablets. Kiosk tabs keep their own session (`lib/api/tokens.ts` scopes by path). |
+| `src/app/patient/*` | Patient self-service (no urgency). |
+| `src/app/employer/*` | Employer portal: fitness overview by department, worker roster (add / CSV import / remove), workplaces, organisation profile. Never any clinical record. |
+| `src/app/auth/page.tsx`, `components/auth/*` | Sign-in (OTP → PIN step, forgot PIN), registration with the national workplace search, organisation registration for employers, PIN creation; Change PIN modal in the dashboard header. |
+| `components/triage/worker-panel.tsx`, `patient-edit.tsx` | Occupational-health panel with *Record fitness* on a case; correcting a patient's registration details (case header and token board). |
+| `src/app/k/[code]` | Public kiosk link: intake-only session per facility, token on completion, auto-reset for shared tablets. Kiosk tabs keep their own session (`lib/api/tokens.ts` scopes by path). Works offline after one online visit (kiosk info, session and last user cached per scope). The intake wizard is loaded after the start screen. Live builds never download the mock backend (`lib/api/index.ts` loads it lazily). |
 | `src/app/s/[token]` | QR summary page for receiving clinicians (access code → patient, note, referral, documents). |
 | `src/app/admin/kiosk-links`, `components/triage/token-board.tsx` | Kiosk link management with QR posters; today's tokens for the front desk. |
 | `components/triage/share-qr.tsx` | Create/revoke QR summaries and print hand-off slips. |
@@ -66,8 +70,10 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 | Module | Purpose |
 |---|---|
-| `models.py` | SQLAlchemy models. `UTCDateTime` keeps every timestamp timezone-aware. `JSONType` = JSONB on Postgres. |
-| `security.py` | JWT (access 60 min, rotating single-use refresh 7 days, revocation on logout), PBKDF2 hashing for OTP and PIN (PIN salted with user + device id), role dependencies. |
+| `models.py` | SQLAlchemy models. `UTCDateTime` keeps every timestamp timezone-aware. `JSONType` = JSONB on Postgres. Includes `Organisation`, `DirectoryFacility`, `FitnessAssessment`. |
+| `migrations/` (Alembic) | `0001` baseline, `0002` organisations + national directory + fitness (converts old JSON cohorts into real rows), `0003` account PIN. `init_db()` runs `alembic upgrade head` under a Postgres advisory lock at start-up (stamping `0001` on databases created before Alembic); SQLite tests use `create_all`. |
+| `directory.py`, `scripts/fetch_directory.py` | National facility directory: classification (sub-centre, PHC, CHC, district / sub-district hospital, medical college, ESI, AYUSH, hospital, clinic), public/private ownership, batched upsert loader, trigram search. The fetch script pulls OpenStreetMap health facilities state by state via Overpass into `directory_data/facilities_in.jsonl.gz`; the API loads it in the background when the table is empty. |
+| `security.py` | JWT (access 60 min, rotating single-use refresh 7 days, revocation on logout; 5-minute `pin` step tokens between OTP and PIN), PBKDF2 hashing for OTP and PIN, weak-PIN rules, role dependencies. |
 | `audit.py` | Append-only hash chain. Each event is written in its own short transaction, serialised by a process lock and a Postgres advisory lock. ORM hook + DB trigger block UPDATE / DELETE. `GET /audit/verify` re-computes the chain. |
 | `triage/rules/*.yaml`, `triage/rules.py` | Deterministic rules engine (ATP, IMCI, maternal). |
 | `triage/pipeline.py` | Note-generation interface + deterministic stub — **replace internals here** with the ML pipeline. |
@@ -75,6 +81,8 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | `services.py` | Encounter creation, role-aware serialisation, patient ownership, lazy auto-escalation. |
 | `storage.py` | Pluggable object storage — local disk, Cloudinary (authenticated assets, signed downloads) or S3/R2 — with expiry and `purge_expired()`. |
 | `otp.py` | OTP delivery: mock (dev) or Twilio Verify; sample accounts keep a fixed code. |
+| `routers/organisations.py` | Organisation profile, workplaces, worker roster (CSV import), department fitness view for employers. |
+| `routers/directory.py` | Public workplace search and state list. |
 | `routers/kiosk.py` | Kiosk links (create/revoke), public kiosk session and returning-patient identify, token board. |
 | `routers/shares.py` | QR summary links: create/list/revoke, public meta, open with access code (lockout, expiry, audit). |
 | `exports.py` | PDF (fpdf2), print HTML, JSON, CSV, FHIR R4 document bundle. |
@@ -85,10 +93,11 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/otp/request`, `POST /auth/otp/verify`, `POST /auth/register`, `POST /auth/pin`, `POST /auth/pin/login`, `POST /auth/refresh`, `GET /auth/me`, `POST /auth/logout` |
+| Auth | `POST /auth/otp/request`, `POST /auth/otp/verify` (patients: tokens; staff/employers: `pin_required` or `pin_setup_required` + `pin_token`), `POST /auth/pin/verify`, `POST /auth/pin/setup`, `POST /auth/pin/forgot` (supervisor/employer), `POST /auth/pin/change`, `POST /auth/register`, `POST /auth/refresh`, `GET /auth/me`, `POST /auth/logout` |
+| Directory / organisations | `GET /directory/search?q=&state=`, `GET /directory/states`, `GET/PATCH /organisations/me`, `POST /organisations/me/facilities`, `GET/POST /organisations/me/workers`, `POST /organisations/me/workers/import`, `PATCH /organisations/me/workers/{code}`, `GET /employer/cohorts`, `POST /encounters/{id}/fitness` |
 | Devices | `GET/POST /devices`, `DELETE /devices/{id}` |
-| Facilities / users | `GET /facilities`, `GET/PATCH /facilities/{id}`, `GET /facilities/{id}/stats`, `GET /users` |
-| Patients / consent | `GET /patients?q=`, `POST /patients`, `GET /patients/{id}`, `GET /patients/by-code/{code}`, `GET /patients/{id}/encounters`, `POST /consents` |
+| Facilities / users | `GET /facilities`, `GET/PATCH /facilities/{id}`, `GET /facilities/{id}/stats`, `GET /users`, `PATCH /users/{id}` (role, active), `POST /users/{id}/reset-pin` |
+| Patients / consent | `GET /patients?q=`, `POST /patients` (optional `employee_code` at organisation workplaces), `GET /patients/{id}`, `PATCH /patients/{id}` (correction), `GET /patients/by-code/{code}`, `GET /patients/{id}/encounters`, `POST /consents` |
 | Encounters | `POST /encounters`, `GET /queue?facility_id=`, `GET/PATCH /encounters/{id}`, `POST /encounters/{id}/confirm`, `PATCH /encounters/{id}/note`, `POST /encounters/{id}/override`, `GET /encounters/{id}/export?format=pdf|print|json|csv|fhir` |
 | Escalation / referral | `POST /encounters/{id}/escalations`, `GET /escalations`, `POST /escalations/{id}/acknowledge`, `POST /encounters/{id}/referrals`, `GET /referrals` |
 | Files | `POST /files` (multipart, `kind`, optional `sample_key`), `GET /files/{id}`, `GET /files/{id}/content?sig=` |
@@ -101,12 +110,17 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 | | doctor | nurse | receptionist / supervisor | patient | employer |
 |---|---|---|---|---|---|
-| Queue, case notes, files | ✔ | ✔ | ✘ (counts only) | own visits, no urgency / note | ✘ |
+| Queue, case notes | ✔ | ✔ | ✘ (counts only) | own visits, no urgency / note | ✘ |
+| Patient documents and photos | ✔ at the treating facility | ✔ at the treating facility | ✘ | own files | ✘ |
+| Correct patient details | ✔ | ✔ | ✔ | ✘ | ✘ |
+| Record fitness | ✔ | ✘ | ✘ | ✘ | ✘ |
 | Confirm, override, referral, acknowledge | ✔ | ✘ | ✘ | ✘ | ✘ |
 | Edit note, escalate, export | ✔ | ✔ | ✘ | ✘ | ✘ |
-| Facility config, device revoke, staff, retention | ✘ | ✘ | ✔ | ✘ | ✘ |
+| Facility config, device revoke, retention | ✘ | ✘ | ✔ | ✘ | ✘ |
+| Staff role / deactivate / reset PIN | ✘ | ✘ | supervisor | ✘ | ✘ |
 | Audit log | ✔ | ✘ | ✔ | ✘ | ✘ |
-| Fitness cohorts | ✘ | ✘ | ✘ | ✘ | ✔ |
+| Fitness outcomes, roster, workplaces | ✘ | ✘ | ✘ | ✘ | ✔ (own organisation) |
+| Sign-in factors | OTP + PIN | OTP + PIN | OTP + PIN | OTP | OTP + PIN |
 
 ## 4. Spec item → implementation
 
@@ -123,19 +137,20 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | E2, 3E | Role-differentiated rendering | `NoteView density="doctor|nurse"`; nurse toggle on case view |
 | E3, 3E | Escalation UI + acknowledgement | Escalate modal, `app/reviewer/escalations`, auto-escalation timers |
 | D7, E4, E7 | Referral UI and export triggers | Referral modal (facility-aware destination), Export menu |
-| 3F, 3N | Employer view — fitness and cohort only | `app/employer/page.tsx` |
+| 3F, 3N | Employer view — fitness and cohort only | `app/employer/*` (overview, workers, workplaces, organisation) |
 | F3, 3J | Accessibility — TTS read-back, icon mode, large targets | `lib/speech.ts`, A11y menu (large text, icon mode, read aloud), 56–64 px kiosk targets |
-| 3N | Offline intake PWA | `lib/offline/outbox.ts`, `public/sw.js`, simulate-offline switch on the kiosk |
+| 3N | Offline intake PWA | `lib/offline/outbox.ts`, `lib/offline/precache.ts`, `public/sw.js`, simulate-offline switch on the kiosk; `/k/CODE` reloads offline |
 
 ### Backend (Saanvi)
 
 | Spec | Item | Where |
 |---|---|---|
 | H2 | CRUD for Patient, Encounter, Facility, User | `routers/patients.py`, `routers/encounters.py`, `routers/facilities.py` |
-| 3N | Phone + OTP, PIN, device binding, JWT | `routers/auth.py`, `security.py`, `routers/facilities.py` (devices) |
+| 3N | Phone OTP + account PIN (two-factor), device binding, JWT, OTP rate limits | `routers/auth.py`, `security.py`, `routers/facilities.py` (devices, staff) |
+| H2 | Organisations, national facility directory, fitness | `routers/organisations.py`, `routers/directory.py`, `directory.py`, `migrations/` |
 | G1 | Consent capture — self, proxy, privacy context | `POST /consents`; intake refuses without `consent_id` |
 | G4 | Append-only audit writes incl. VIEW | `audit.py`, DB trigger in `db.py`, VIEW on every clinical read |
-| A4, H4 | File storage — upload, retrieve, expiry | `routers/files.py`, `storage.py` |
+| A4, H4 | File storage — upload, retrieve, expiry; documents open only for the treating doctors / nurses, the patient, or a QR summary holder | `routers/files.py`, `storage.py` |
 | E7 | Export — PDF, print, JSON, CSV, FHIR | `exports.py`, `GET /encounters/{id}/export` |
 | F1 | Facility admin screens | `PATCH /facilities/{id}` + `frontend/src/app/admin/*` |
 | H8 | Logging and observability | `observability.py`, `/metrics`, `/health` |
@@ -147,14 +162,19 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 |---|---|
 | ASR / translation / OCR / summariser | Replace the body of `backend/app/triage/pipeline.py::build_note` — keep the returned shape (`TriageNote` in `frontend/src/lib/types.ts`). Values must carry `source` (bbox for OCR) and `needs_check` when engines disagree. |
 | Patient identity resolution | `services.own_patient` (patient-account linking) and `GET /patients?q=` candidate ranking. |
-| Retention purge | Call `storage.purge_expired(db)` on a schedule; it deletes bytes, keeps metadata and writes `PURGE` audit events. |
+| Retention purge | Runs hourly in the API (`main._housekeeping_loop`, one instance via advisory lock); `storage.purge_expired(db)` deletes bytes, keeps metadata and writes `PURGE` audit events. Old OTP challenges are deleted too. |
 
 ## 5. Verification done
 
-* Backend: 38 pytest tests (rules, auth incl. OTP lockout / PIN device binding / refresh rotation / logout revocation,
-  bound-device intake, idempotent replay, override rules, escalation acknowledgement, exports, RBAC for every role,
-  patient isolation on a shared household phone, audit VIEW logging, chain verification, append-only guard, signed file
-  URLs, concurrency) — passing on SQLite and on PostgreSQL 16.
-* Browser end-to-end (Playwright, Chrome) in mock mode, live mode against FastAPI + SQLite, and the Docker Compose
-  stack on Postgres: kiosk intake → critical in queue → OCR crops → override → referral → PDF export → audit verify →
-  patient and employer isolation; plus offline capture → queue → sync → reviewed.
+* Backend: 50 pytest tests — rules; auth (OTP lockout and rate limits, two-factor PIN: setup, verify, lockout, forgot,
+  change, supervisor reset; refresh rotation; logout revocation); bound-device intake; idempotent replay; overrides;
+  escalation acknowledgement; exports; RBAC for every role; patient isolation on a shared household phone; document
+  access (treating clinicians only); directory search; organisation onboarding; roster and CSV import; fitness →
+  employer view; staff management; patient correction; audit VIEW logging, chain verification, append-only guard;
+  signed file URLs; concurrency. Passing on SQLite and PostgreSQL.
+* Migrations: `0002`/`0003` rehearsed on a Neon branch copy of production before release; `alembic check` clean.
+* Browser end-to-end (Playwright, Chrome) in live mode: full staff journey with OTP + PIN; employer registers an
+  organisation → roster + CSV → doctor and supervisor join its workplace by search → PIN change / wrong PIN / supervisor
+  reset → worker checks in at a kiosk link with an employee ID → doctor records fitness and corrects details → employer
+  sees the outcome only; kiosk links on tablet and phone; QR summaries; and a true-offline test (network cut, `/k/CODE`
+  reloaded, intake queued, synced on reconnect with the kiosk's own session).

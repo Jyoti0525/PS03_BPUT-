@@ -74,8 +74,11 @@ export const liveApi: JeeviaApi = {
   requestOtp: (phone) => post("/auth/otp/request", { phone }),
   verifyOtp: (challenge_id, code) => post("/auth/otp/verify", { challenge_id, code }),
   register: (input) => post("/auth/register", input),
-  loginWithPin: (phone, pin, device_id) => post("/auth/pin/login", { phone, pin, device_id }),
-  setPin: (pin, device_id) => post("/auth/pin", { pin, device_id }),
+  verifyPin: (pin_token, pin) => post("/auth/pin/verify", { pin_token, pin }),
+  setupPin: (pin_token, pin) => post("/auth/pin/setup", { pin_token, pin }),
+  forgotPin: (pin_token) => post("/auth/pin/forgot", { pin_token }),
+  changePin: (current_pin, new_pin) => post("/auth/pin/change", { current_pin, new_pin }),
+  resetStaffPin: (id) => post(`/users/${id}/reset-pin`),
   me: () => json("/auth/me"),
   logout: async () => {
     try {
@@ -112,6 +115,24 @@ export const liveApi: JeeviaApi = {
   revokeShare: (id) => json(`/shares/${id}`, { method: "DELETE" }),
   shareMeta: (token) => json(`/share/${encodeURIComponent(token)}`),
   openShare: (token, access_code) => post(`/share/${encodeURIComponent(token)}/open`, { access_code }),
+
+  searchDirectory: (q, state) => json(`/directory/search?q=${encodeURIComponent(q)}${state ? `&state=${encodeURIComponent(state)}` : ""}`),
+  directoryStates: () => json("/directory/states"),
+
+  myOrganisation: () => json("/organisations/me"),
+  updateOrganisation: (p) => patch("/organisations/me", p),
+  addOrganisationFacility: (input) => post("/organisations/me/facilities", input),
+  listWorkers: () => json("/organisations/me/workers"),
+  addWorker: (input) => post("/organisations/me/workers", input),
+  importWorkers: (csv) => post("/organisations/me/workers/import", { csv }),
+  removeWorker: async (code) => {
+    await patch(`/organisations/me/workers/${encodeURIComponent(code)}`, { active: false });
+  },
+
+  recordFitness: (id, input) => post(`/encounters/${id}/fitness`, input),
+
+  updateUser: (id, p) => patch(`/users/${id}`, p),
+  correctPatient: (id, p) => patch(`/patients/${id}`, p),
 
   listUsers: () => json("/users"),
 

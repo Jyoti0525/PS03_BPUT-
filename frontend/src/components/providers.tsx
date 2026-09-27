@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api } from "@/lib/api";
-import { getTokens, setTokens } from "@/lib/api/tokens";
+import { getCachedUser, getTokens, setCachedUser, setTokens } from "@/lib/api/tokens";
 import type { Tokens, User } from "@/lib/types";
 import { translate, type DictKey } from "@/lib/i18n/dict";
 import { installOutboxAutoFlush } from "@/lib/offline/outbox";
@@ -92,9 +92,12 @@ export function Providers({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      setUser(await api.me());
-    } catch {
-      setUser(null);
+      const u = await api.me();
+      setCachedUser(u);
+      setUser(u);
+    } catch (e) {
+      // Offline (no HTTP status): keep the last known user so offline kiosks keep working.
+      setUser((e as { status?: number }).status ? null : getCachedUser());
     } finally {
       setLoading(false);
     }
@@ -118,6 +121,7 @@ export function Providers({ children }: { children: ReactNode }) {
       loading,
       signIn: (tokens, u) => {
         setTokens(tokens);
+        setCachedUser(u);
         setUser(u);
       },
       signOut: async () => {

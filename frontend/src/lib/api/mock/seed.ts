@@ -59,14 +59,7 @@ export const SEED_USERS: (User & { pin?: string })[] = [
   { id: "usr_pat1", phone: "9876543210", name: "Priya Sharma", role: "patient", facility_id: null, registration_no: null, language: "hi", has_pin: false, created_at: iso(40 * DAY) },
 ];
 
-export const DEMO_LOGINS = [
-  { role: "doctor", phone: "9000000001", name: "Dr. Deepa Sharma" },
-  { role: "nurse", phone: "9000000002", name: "Sunita Yadav (ANM)" },
-  { role: "receptionist", phone: "9000000003", name: "Rakesh Tiwari" },
-  { role: "supervisor", phone: "9000000004", name: "Meera Nair" },
-  { role: "patient", phone: "9876543210", name: "Priya Sharma" },
-  { role: "employer", phone: "9000000005", name: "Arjun Patnaik" },
-] as const;
+export { DEMO_LOGINS } from "@/lib/samples";
 
 export const SEED_PATIENTS: Patient[] = [
   { id: "pat_001", code: "JVA-P001", name: "Radha Kumari", age: 42, sex: "F", phone: "9876543210", language: "hi", category: "normal", village: "Manikpur", created_at: iso(200 * DAY) },

@@ -14,7 +14,7 @@ from sqlalchemy import func, select
 
 from .. import audit
 from ..config import get_settings
-from ..models import Encounter, Facility, KioskLink, Patient, User
+from ..models import Encounter, Facility, KioskLink, Organisation, Patient, User
 from ..schemas import ADMIN_ROLES, STAFF_ROLES, AuthResult, KioskIdentifyIn, KioskInfo, KioskLinkIn, KioskLinkOut, KioskSessionIn, PatientOut, TokenBoardItem
 from ..security import DB, CurrentUser, issue_tokens, require
 from ..services import local_day, now
@@ -84,7 +84,8 @@ def revoke_link(lid: str, user: Admin, db: DB):
 def kiosk_info(code: str, db: DB):
     k = _active(db, code)
     f = db.get(Facility, k.facility_id)
-    return KioskInfo(code=k.code, label=k.label, facility_id=f.id, facility_name=f.name, district=f.district, state=f.state, languages=f.languages)
+    org = db.get(Organisation, f.organisation_id) if f.organisation_id else None
+    return KioskInfo(code=k.code, label=k.label, facility_id=f.id, facility_name=f.name, organisation_name=org.name if org else None, district=f.district, state=f.state, languages=f.languages)
 
 
 @router.post("/kiosk/{code}/session", response_model=AuthResult)
@@ -119,7 +120,7 @@ def token_board(fid: str, user: CurrentUser, db: DB):
     rows = db.scalars(select(Encounter).where(Encounter.facility_id == fid, Encounter.token_date == day).order_by(Encounter.created_at.desc()))
     return [
         TokenBoardItem(
-            encounter_id=e.id, token=e.token, patient_name=e.patient.name, patient_code=e.patient.code, status=e.status, channel=e.channel,
+            encounter_id=e.id, token=e.token, patient_id=e.patient_id, patient_name=e.patient.name, patient_code=e.patient.code, status=e.status, channel=e.channel,
             created_at=e.created_at, wait_minutes=max(0, round((t - e.created_at).total_seconds() / 60)),
         )
         for e in rows

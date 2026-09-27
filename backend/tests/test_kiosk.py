@@ -73,7 +73,7 @@ def test_supervisor_can_create_facility_at_registration(client):
     ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
     r = client.post(f"{API}/auth/register", json={
-        "registration_token": v["registration_token"], "name": "New Supervisor", "role": "supervisor", "facility_id": None, "language": "or", "accepted_terms": True,
+        "registration_token": v["registration_token"], "name": "New Supervisor", "role": "supervisor", "facility_id": None, "language": "or", "accepted_terms": True, "pin": "7391",
         "new_facility": {"name": "CHC Balipatna", "type": "chc", "district": "Khordha", "state": "Odisha"},
     })
     assert r.status_code == 200, r.text
@@ -99,4 +99,4 @@ def test_twilio_provider_used_for_real_numbers(client, monkeypatch):
     calls.clear()
     demo = client.post(f"{API}/auth/otp/request", json={"phone": "9000000001"}).json()
     assert calls == []
-    assert client.post(f"{API}/auth/otp/verify", json={"challenge_id": demo["challenge_id"], "code": "123456"}).json()["status"] == "authenticated"
+    assert client.post(f"{API}/auth/otp/verify", json={"challenge_id": demo["challenge_id"], "code": "123456"}).json()["status"] == "pin_required"

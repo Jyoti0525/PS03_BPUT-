@@ -30,7 +30,8 @@ import type {
   IntakeChannel,
   KioskLink,
 } from "@/lib/types";
-import { ADMIN_ROLES, REVIEWER_ROLES, STAFF_ROLES } from "@/lib/types";
+import { ADMIN_ROLES, PIN_ROLES, REVIEWER_ROLES, STAFF_ROLES } from "@/lib/types";
+import { SAMPLE_PIN, pinProblem } from "@/lib/pin";
 import { evaluate } from "./rules";
 import { buildNote, sampleReportImage, type UploadedForNote } from "./note";
 import { DEMO_OTP, SEED_COHORTS, SEED_FACILITIES, SEED_HISTORY, SEED_PATIENTS, SEED_TODAY, SEED_USERS } from "./seed";
@@ -52,7 +53,7 @@ interface StoredKioskLink extends Omit<KioskLink, "url" | "intakes_today"> {
 
 interface DB {
   facilities: Facility[];
-  users: (User & { pins?: Record<string, string>; active?: boolean })[];
+  users: (User & { pinHash?: string | null; active?: boolean })[];
   kioskLinks: StoredKioskLink[];
   shares?: { id: string; token: string; code: string; encounter_id: string; purpose: "referral" | "handoff"; created_by: string; created_at: string; expires_at: string; revoked: boolean; views: number; failed: number }[];
   devices: Device[];
@@ -327,9 +328,9 @@ function issueTokens(user: User): Tokens {
 }
 
 function publicUser(u: DB["users"][number]): User {
-  const { pins, active: _a, ...rest } = u;
+  const { pinHash, active: _a, ...rest } = u;
   void _a;
-  return { ...rest, has_pin: !!pins && Object.keys(pins).length > 0 };
+  return { ...rest, has_pin: !!pinHash || (pinHash === undefined && DEMO_PHONES.includes(u.phone) && PIN_ROLES.includes(u.role)) };
 }
 
 async function current(d: DB): Promise<User> {
@@ -399,6 +400,18 @@ function sanitizeFile(f: StoredFile): FileObject {
 }
 
 const LAT = 180;
+const DEMO_PHONES = ["9000000001", "9000000002", "9000000003", "9000000004", "9000000005"];
+
+function pinStepUser(token: string) {
+  return token.startsWith("pinstep.") ? token.slice(8) : "";
+}
+
+async function pinMatches(u: { id: string; phone: string; pinHash?: string | null }, pin: string) {
+  if (u.pinHash) return u.pinHash === (await sha256(pin + u.id));
+  return u.pinHash === undefined && DEMO_PHONES.includes(u.phone) && pin === SAMPLE_PIN;
+}
+
+const MOCK_ORG = { id: "org_kalinganagar", name: "Kalinga Steel Works (sample)", kind: "industrial" as const, registration_no: null, state: "Odisha", district: "Jajpur", address: null, contact_phone: null, verified: false, created_at: new Date(0).toISOString() };
 
 async function withDb<T>(fn: (d: DB) => Promise<T>): Promise<T> {
   const d = await load();
@@ -432,6 +445,10 @@ export const mockApi: JeeviaApi = {
         const token = uid("reg");
         d.registrations[token] = { phone: c.phone, exp: Date.now() + 15 * 60000 };
         return { status: "new_user" as const, registration_token: token };
+      }
+      if (PIN_ROLES.includes(u.role)) {
+        const has = u.pinHash !== null && (u.pinHash !== undefined || DEMO_PHONES.includes(u.phone));
+        return { status: has ? ("pin_required" as const) : ("pin_setup_required" as const), pin_token: `pinstep.${u.id}`, name: u.name, can_reset_pin: ["supervisor", "employer"].includes(u.role) };
       }
       const tokens = issueTokens(publicUser(u));
       setTokens(tokens);
@@ -467,7 +484,11 @@ export const mockApi: JeeviaApi = {
         has_pin: false,
         created_at: new Date().toISOString(),
       };
-      d.users.push(user);
+      if (PIN_ROLES.includes(input.role)) {
+        const problem = pinProblem(input.pin ?? "");
+        if (problem) throw new ApiError(422, problem);
+      }
+      d.users.push({ ...user, pinHash: input.pin ? await sha256(input.pin + user.id) : undefined });
       delete d.registrations[input.registration_token];
       if (input.role === "patient" && !d.patients.some((p) => p.phone === r.phone && p.name === input.name)) {
         d.patients.push({ id: uid("pat"), code: `JVA-P${String(++d.seq).padStart(3, "0")}`, name: input.name, age: 30, sex: "O", phone: r.phone, language: input.language, category: "normal", created_at: user.created_at });
@@ -478,26 +499,57 @@ export const mockApi: JeeviaApi = {
       return { tokens, user };
     }),
 
-  loginWithPin: (phone, pin, deviceId) =>
+  verifyPin: (pinToken, pin) =>
     withDb(async (d) => {
-      const u = d.users.find((x) => x.phone === phone);
-      const stored = u?.pins?.[deviceId];
-      if (!u || !stored) throw new ApiError(400, "PIN login is not set up on this device — use OTP");
-      if (stored !== (await sha256(pin + deviceId))) throw new ApiError(400, "Incorrect PIN");
+      const u = d.users.find((x) => x.id === pinStepUser(pinToken));
+      if (!u) throw new ApiError(401, "Sign in again");
+      if (!(await pinMatches(u, pin))) throw new ApiError(400, "Incorrect PIN");
       const user = publicUser(u);
       const tokens = issueTokens(user);
       setTokens(tokens);
-      await audit(d, user, "LOGIN", "user", u.id, "Signed in with device-bound PIN");
+      await audit(d, user, "LOGIN", "user", u.id, "Signed in with phone OTP + PIN");
       return { tokens, user };
     }),
 
-  setPin: (pin, deviceId) =>
+  setupPin: (pinToken, pin) =>
+    withDb(async (d) => {
+      const u = d.users.find((x) => x.id === pinStepUser(pinToken));
+      if (!u) throw new ApiError(401, "Sign in again");
+      const problem = pinProblem(pin);
+      if (problem) throw new ApiError(422, problem);
+      u.pinHash = await sha256(pin + u.id);
+      const user = publicUser(u);
+      const tokens = issueTokens(user);
+      setTokens(tokens);
+      return { tokens, user };
+    }),
+
+  forgotPin: (pinToken) =>
+    withDb(async (d) => {
+      const u = d.users.find((x) => x.id === pinStepUser(pinToken));
+      if (!u) throw new ApiError(401, "Sign in again");
+      if (!["supervisor", "employer"].includes(u.role)) throw new ApiError(403, "Ask your facility supervisor to reset your PIN");
+      u.pinHash = null;
+      return { status: "pin_setup_required" as const, pin_token: pinToken, name: u.name, can_reset_pin: true };
+    }),
+
+  changePin: (currentPin, newPin) =>
     withDb(async (d) => {
       const me = await current(d);
-      if (!/^\d{4,6}$/.test(pin)) throw new ApiError(422, "PIN must be 4–6 digits");
       const u = d.users.find((x) => x.id === me.id)!;
-      u.pins = { ...(u.pins ?? {}), [deviceId]: await sha256(pin + deviceId) };
-      await audit(d, me, "DEVICE", "user", me.id, "PIN set and bound to this device");
+      if (!(await pinMatches(u, currentPin))) throw new ApiError(400, "Current PIN is incorrect");
+      const problem = pinProblem(newPin);
+      if (problem) throw new ApiError(422, problem);
+      u.pinHash = await sha256(newPin + u.id);
+    }),
+
+  resetStaffPin: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["supervisor"]);
+      const u = d.users.find((x) => x.id === id && x.facility_id === me.facility_id);
+      if (!u) throw new ApiError(404, "Staff member not found");
+      u.pinHash = null;
     }),
 
   me: () => withDb(async (d) => current(d)),
@@ -592,7 +644,7 @@ export const mockApi: JeeviaApi = {
       return d.encounters
         .filter((e) => e.facility_id === id && (e as Encounter & { token_date?: string }).token_date === day)
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .map((e) => ({ encounter_id: e.id, token: e.token ?? null, patient_name: e.patient.name, patient_code: e.patient.code, status: e.status, channel: e.channel ?? "staff_kiosk", created_at: e.created_at, wait_minutes: Math.max(0, Math.round((Date.now() - Date.parse(e.created_at)) / 60000)) }));
+        .map((e) => ({ encounter_id: e.id, token: e.token ?? null, patient_id: e.patient.id, patient_name: e.patient.name, patient_code: e.patient.code, status: e.status, channel: e.channel ?? "staff_kiosk", created_at: e.created_at, wait_minutes: Math.max(0, Math.round((Date.now() - Date.parse(e.created_at)) / 60000)) }));
     }),
 
   listKioskLinks: () =>
@@ -723,11 +775,86 @@ export const mockApi: JeeviaApi = {
       };
     }),
 
+  searchDirectory: (q, state) =>
+    withDb(async (d) => {
+      const s = q.trim().toLowerCase();
+      return d.facilities
+        .filter((f) => (!state || f.state === state) && (`${f.name} ${f.district}`.toLowerCase().includes(s) || f.pincode === s))
+        .map((f) => ({
+          key: `fac:${f.id}`, name: f.name, kind: f.type, kind_label: f.type.replace(/_/g, " "), type: f.type, ownership: f.organisation_id ? "private" : "public",
+          state: f.state, district: f.district, city: null, pincode: f.pincode ?? null, source: f.source ?? "sample", directory_ref: null, facility_id: f.id,
+          organisation_name: f.organisation_id ? "Kalinga Steel Works (sample)" : null, verified: false,
+        }));
+    }),
+
+  directoryStates: () => withDb(async (d) => [...new Set(d.facilities.map((f) => f.state))].sort().map((state) => ({ state, facilities: d.facilities.filter((f) => f.state === state).length }))),
+
+  myOrganisation: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["employer"]);
+      return { organisation: MOCK_ORG, facilities: clone(d.facilities.filter((f) => f.id === me.facility_id)) };
+    }),
+
+  updateOrganisation: async () => {
+    throw new ApiError(501, "Editing the organisation needs the live API");
+  },
+  addOrganisationFacility: async () => {
+    throw new ApiError(501, "Adding workplaces needs the live API");
+  },
+
+  listWorkers: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["employer"]);
+      return d.cohorts.flatMap((c) =>
+        c.workers.map((w) => ({ employee_code: w.worker_code, name: `Worker ${w.worker_code} (sample)`, department: w.department, patient_code: `JVA-${w.worker_code}`, fitness_status: w.fitness_status, restrictions: null, valid_until: null, last_assessed_at: w.last_screened_at, assessed_by: w.last_screened_at ? "Occupational Health Physician (sample)" : null })),
+      );
+    }),
+
+  addWorker: async () => {
+    throw new ApiError(501, "Managing the roster needs the live API");
+  },
+  importWorkers: async () => {
+    throw new ApiError(501, "Managing the roster needs the live API");
+  },
+  removeWorker: async () => {
+    throw new ApiError(501, "Managing the roster needs the live API");
+  },
+  recordFitness: async () => {
+    throw new ApiError(501, "Recording fitness needs the live API");
+  },
+
+  updateUser: (id, patch) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["supervisor"]);
+      const u = d.users.find((x) => x.id === id && x.facility_id === me.facility_id);
+      if (!u) throw new ApiError(404, "Staff member not found");
+      if (u.id === me.id) throw new ApiError(422, "You cannot change your own role or access");
+      if (patch.role) u.role = patch.role;
+      if (patch.is_active !== undefined) u.active = patch.is_active;
+      await audit(d, me, "UPDATE", "user", u.id, `Staff ${u.name} updated`);
+      return { ...publicUser(u), is_active: u.active !== false };
+    }),
+
+  correctPatient: (id, patch) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, STAFF_ROLES);
+      const p = d.patients.find((x) => x.id === id);
+      if (!p) throw new ApiError(404, "Patient not found");
+      Object.assign(p, Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined && v !== null)));
+      for (const e of d.encounters) if (e.patient.id === id) e.patient = clone(p);
+      await audit(d, me, "UPDATE", "patient", id, `Patient details corrected: ${Object.keys(patch).join(", ")}`, p.code);
+      return clone(p);
+    }),
+
   listUsers: () =>
     withDb(async (d) => {
       const me = await current(d);
       requireRole(me, ADMIN_ROLES);
-      return d.users.filter((u) => u.facility_id === me.facility_id).map(publicUser);
+      return d.users.filter((u) => u.facility_id === me.facility_id && u.role !== "kiosk").map((u) => ({ ...publicUser(u), is_active: u.active !== false }));
     }),
 
   searchPatients: (q) =>

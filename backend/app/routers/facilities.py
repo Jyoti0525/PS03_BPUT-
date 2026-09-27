@@ -8,7 +8,7 @@ from sqlalchemy import select
 
 from .. import audit
 from ..models import Device, Encounter, Escalation, Facility, Referral, User
-from ..schemas import ADMIN_ROLES, STAFF_ROLES, DeviceIn, DeviceOut, FacilityOut, FacilityPatch, FacilityStats, UserOut
+from ..schemas import ADMIN_ROLES, STAFF_ROLES, DeviceIn, DeviceOut, FacilityOut, FacilityPatch, FacilityStats, UserOut, UserPatch
 from ..security import DB, CurrentUser, require
 from ..services import auto_escalate, aware, now
 from .auth import user_out
@@ -100,6 +100,35 @@ def revoke_device(device_id: str, user: Admin, db: DB):
         raise HTTPException(404, "Device not found")
     d.revoked = True
     audit.record(db, user, "DEVICE", "device", device_id, f"Kiosk device '{d.label}' revoked")
+
+
+@router.patch("/users/{uid}", response_model=UserOut)
+def update_user(uid: str, body: UserPatch, user: Annotated[User, Depends(require("supervisor"))], db: DB):
+    """Supervisor: change a staff member's role or deactivate them (sessions end immediately)."""
+    u = db.get(User, uid)
+    if not u or u.facility_id != user.facility_id or u.role not in STAFF_ROLES:
+        raise HTTPException(404, "Staff member not found")
+    if u.id == user.id:
+        raise HTTPException(422, "You cannot change your own role or access")
+    changes = []
+    if body.role and body.role != u.role:
+        changes.append(f"role {u.role} → {body.role}")
+        u.role = body.role
+    if body.is_active is not None and body.is_active != u.is_active:
+        changes.append("reactivated" if body.is_active else "deactivated")
+        u.is_active = body.is_active
+    audit.record(db, user, "UPDATE", "user", u.id, f"Staff {u.name}: {', '.join(changes) or 'no changes'}")
+    return user_out(db, u)
+
+
+@router.post("/users/{uid}/reset-pin", status_code=204)
+def reset_staff_pin(uid: str, user: Annotated[User, Depends(require("supervisor"))], db: DB):
+    """Forgotten PIN: the staff member sets a new one at their next sign-in (after phone OTP)."""
+    u = db.get(User, uid)
+    if not u or u.facility_id != user.facility_id or u.role not in STAFF_ROLES or u.id == user.id:
+        raise HTTPException(404, "Staff member not found")
+    u.pin_hash, u.pin_failed_attempts, u.pin_locked_until = None, 0, None
+    audit.record(db, user, "UPDATE", "user", u.id, f"PIN reset for {u.name}; a new PIN is required at next sign-in")
 
 
 @router.get("/users", response_model=list[UserOut])

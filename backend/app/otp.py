@@ -19,13 +19,13 @@ log = logging.getLogger("jeevia.otp")
 VERIFY = "https://verify.twilio.com/v2/Services"
 
 
-def _is_demo(phone: str) -> bool:
+def is_demo(phone: str) -> bool:
     s = get_settings()
     return bool(s.demo_otp) and phone in {p.strip() for p in s.demo_phones.split(",") if p.strip()}
 
 
 def uses_local_code(phone: str) -> bool:
-    return get_settings().otp_provider != "twilio" or _is_demo(phone)
+    return get_settings().otp_provider != "twilio" or is_demo(phone)
 
 
 def _twilio_auth() -> tuple[str, str]:
@@ -37,7 +37,7 @@ def _twilio_auth() -> tuple[str, str]:
 
 def local_code(phone: str) -> str:
     s = get_settings()
-    if _is_demo(phone) or (s.otp_provider == "mock" and s.demo_otp):
+    if is_demo(phone) or (s.otp_provider == "mock" and s.demo_otp):
         return s.demo_otp  # type: ignore[return-value]
     return f"{secrets.randbelow(10**6):06d}"
 

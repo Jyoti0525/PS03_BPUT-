@@ -1,4 +1,5 @@
 import logging
+import threading
 import time
 from contextlib import asynccontextmanager
 
@@ -10,11 +11,40 @@ from sqlalchemy import text
 from .config import get_settings
 from .db import SessionLocal, engine, init_db
 from .observability import RequestContextMiddleware, metrics_endpoint, setup_logging
-from .routers import admin, auth, encounters, facilities, files, kiosk, patients, shares
+from .routers import admin, auth, directory as directory_router, encounters, facilities, files, kiosk, organisations, patients, shares
 
 settings = get_settings()
 setup_logging(settings.log_level)
 log = logging.getLogger("jeevia")
+
+
+def _housekeeping_loop(stop: threading.Event) -> None:
+    """Hourly: purge files past their retention window and old OTP challenges. One server at a time."""
+    from datetime import timedelta
+
+    from sqlalchemy import delete
+
+    from . import storage
+    from .models import OtpChallenge
+    from .services import now
+
+    while not stop.wait(3600):
+        try:
+            with SessionLocal() as db:
+                if engine.dialect.name == "postgresql" and not db.execute(text("SELECT pg_try_advisory_lock(7274424)")).scalar():
+                    continue
+                try:
+                    purged = storage.purge_expired(db)
+                    db.execute(delete(OtpChallenge).where(OtpChallenge.expires_at < now() - timedelta(days=2)))
+                    db.commit()
+                    if purged:
+                        log.info("retention purge", extra={"path": str(purged)})
+                finally:
+                    if engine.dialect.name == "postgresql":
+                        db.execute(text("SELECT pg_advisory_unlock(7274424)"))
+                        db.commit()
+        except Exception:
+            log.exception("housekeeping failed")
 
 
 @asynccontextmanager
@@ -25,8 +55,15 @@ async def lifespan(_: FastAPI):
 
         with SessionLocal() as db:
             seed(db)
+    from . import directory
+
+    if get_settings().directory_autoload:
+        directory.load_in_background_if_empty(SessionLocal)
+    stop = threading.Event()
+    threading.Thread(target=_housekeeping_loop, args=(stop,), name="housekeeping", daemon=True).start()
     log.info("Jeevia API ready", extra={"path": settings.database_url.split("@")[-1]})
     yield
+    stop.set()
 
 
 app = FastAPI(
@@ -48,7 +85,7 @@ app.add_middleware(
 )
 
 API = "/api/v1"
-for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router, shares.router):
+for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router, shares.router, directory_router.router, organisations.router):
     app.include_router(r, prefix=API)
 
 

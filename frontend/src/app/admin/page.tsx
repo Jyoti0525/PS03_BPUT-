@@ -8,7 +8,6 @@ import { useAsync } from "@/lib/hooks";
 import { useSession } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Button, Card, CardHeader, ErrorNote, Spinner, Stat } from "@/components/ui";
-import { resetMockData } from "@/lib/api/mock/server";
 import { TokenBoard } from "@/components/triage/token-board";
 import { API_MODE } from "@/lib/api";
 
@@ -82,7 +81,7 @@ export default function AdminHome() {
             <Card className="p-4">
               <p className="font-semibold text-ink">Demo data</p>
               <p className="mt-1 text-sm text-muted">Reset the synthetic database stored in this browser.</p>
-              <Button className="mt-3 w-full" variant="secondary" onClick={async () => { await resetMockData(); await refresh(); router.replace("/auth"); }}>Reset demo data</Button>
+              <Button className="mt-3 w-full" variant="secondary" onClick={async () => { const { resetMockData } = await import("@/lib/api/mock/server"); await resetMockData(); await refresh(); router.replace("/auth"); }}>Reset demo data</Button>
             </Card>
           )}
         </div>
