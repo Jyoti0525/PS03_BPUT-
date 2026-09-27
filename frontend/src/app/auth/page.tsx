@@ -16,6 +16,7 @@ import { SAMPLE_PIN } from "@/lib/pin";
 import { LANGUAGES } from "@/lib/i18n/languages";
 import { PIN_ROLES, type FacilityType, type NewOrganisationInput, type OrgKind, type OtpChallenge, type OtpVerifyResult, type Role, type User } from "@/lib/types";
 import { INDIAN_STATES } from "@/lib/india";
+import { localiseServerMessage } from "@/lib/i18n/phrases";
 
 /** The walkthrough accounts work in every environment (OTP 123456, PIN 4826); hide with NEXT_PUBLIC_HIDE_SAMPLES=1. */
 const SHOW_SAMPLES = process.env.NEXT_PUBLIC_HIDE_SAMPLES !== "1";
@@ -300,7 +301,7 @@ function AuthInner() {
       toast(c.dev_code ? `OTP sent. Demo code: ${c.dev_code}` : `OTP sent to +91 ${phone}`, "info");
       return true;
     } catch (e) {
-      setErr(errMsg(e));
+      setErr(localiseServerMessage(errMsg(e), tr));
       return false;
     } finally {
       setBusy(false);
@@ -319,7 +320,7 @@ function AuthInner() {
     try {
       return await api.verifyOtp(challenge.challenge_id, otp, purpose);
     } catch (e) {
-      setErr(errMsg(e));
+      setErr(localiseServerMessage(errMsg(e), tr));
       setTaken(purpose === "register" && e instanceof ApiError && e.status === 409);
       return null;
     } finally {
@@ -387,7 +388,7 @@ function AuthInner() {
       signIn(r.tokens, r.user);
       toast(tr("Registration complete"));
     } catch (e) {
-      setErr(errMsg(e));
+      setErr(localiseServerMessage(errMsg(e), tr));
     } finally {
       setBusy(false);
     }

@@ -25,3 +25,14 @@ export function fill(s: string, vars?: Record<string, string | number>) {
 export function makeTr(phrases: Phrases) {
   return (s: string | null | undefined, vars?: Record<string, string | number>) => (s == null ? "" : fill(phrases[s] ?? s, vars));
 }
+
+type Tr = (s: string | null | undefined, vars?: Record<string, string | number>) => string;
+
+/** Server messages are English; translate the known ones, including "… — try again in about N minutes". */
+export function localiseServerMessage(msg: string, tr: Tr): string {
+  const m = /^(.*) — try again in about (\d+) (minute|minutes|hour|hours)$/.exec(msg);
+  if (!m) return tr(msg);
+  const n = Number(m[2]);
+  const when = m[3].startsWith("hour") ? tr(n === 1 ? "try again in about 1 hour" : "try again in about {n} hours", { n }) : tr(n === 1 ? "try again in about 1 minute" : "try again in about {n} minutes", { n });
+  return `${tr(m[1])} — ${when}`;
+}

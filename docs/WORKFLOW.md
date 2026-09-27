@@ -142,7 +142,7 @@ The landing page shows live status (checked every 20 seconds) for the website, A
 - **PIN rules:** easy PINs (1234, 0000, 1111, 2580, birthdays-style repeats, straight sequences) are refused. Five wrong PINs lock the account for 15 minutes.
 - **Change PIN:** the key icon in the dashboard header (needs the current PIN).
 - **Forgot PIN:** supervisors and employers reset it themselves after the OTP (*Forgot PIN?*). Doctors, nurses and receptionists ask their supervisor (**Admin → Staff → Reset PIN**); they then create a new PIN after their next OTP.
-- **Rate limits:** 3 codes per phone per 10 minutes, 10 per day, 30 per network address per hour.
+- **Rate limits:** 3 codes per phone per 10 minutes, 10 per day, 30 per network address per hour; the message says how long to wait. Sample numbers are exempt (they never send an SMS).
 - **Sample walkthrough accounts** (code `123456`, staff PIN `4826`): doctor 9000000001, nurse 9000000002, receptionist 9000000003, supervisor 9000000004, employer 9000000005, patient 9876543210. They belong to the sample facility *PHC Manikpur* (kiosk link `/k/MANIKPUR`) and the sample organisation *Kalinga Steel Works*.
 - **New accounts start empty:** a number that already has an account cannot be used to register again (sign in instead), the sample numbers are reserved, and the sample facility cannot be joined — so a newly registered doctor, nurse or employer always gets their own fresh dashboard.
 

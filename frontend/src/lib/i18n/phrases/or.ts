@@ -865,5 +865,12 @@ const or: Record<string, string> = {
   "· opened": "· ଖୋଲାଗଲା",
   "— kiosk requires a staff role.": "— କିଓସ୍କ ପାଇଁ କର୍ମଚାରୀ ଭୂମିକା ଦରକାର।",
   "This device has no {lang} voice, so questions are not read aloud. Install the {lang} voice in the device’s text-to-speech settings.": "ଏହି ଡିଭାଇସରେ {lang} ସ୍ୱର ନାହିଁ, ତେଣୁ ପ୍ରଶ୍ନ ପଢ଼ି ଶୁଣାଯିବ ନାହିଁ। ଡିଭାଇସର ଟେକ୍ସଟ-ଟୁ-ସ୍ପିଚ୍ ସେଟିଂସରେ {lang} ସ୍ୱର ଇନଷ୍ଟଲ୍ କରନ୍ତୁ।",
+  "Too many codes requested for this number": "ଏହି ନମ୍ବର ପାଇଁ ବହୁତ ଅଧିକ କୋଡ୍ ମଗାଯାଇଛି",
+  "Too many codes requested for this number today": "ଆଜି ଏହି ନମ୍ବର ପାଇଁ ବହୁତ ଅଧିକ କୋଡ୍ ମଗାଯାଇଛି",
+  "Too many code requests from this network": "ଏହି ନେଟୱାର୍କରୁ ବହୁତ ଅଧିକ କୋଡ୍ ଅନୁରୋଧ",
+  "try again in about 1 minute": "ପ୍ରାୟ 1 ମିନିଟ୍ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+  "try again in about {n} minutes": "ପ୍ରାୟ {n} ମିନିଟ୍ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+  "try again in about 1 hour": "ପ୍ରାୟ 1 ଘଣ୍ଟା ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+  "try again in about {n} hours": "ପ୍ରାୟ {n} ଘଣ୍ଟା ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
 };
 export default or;

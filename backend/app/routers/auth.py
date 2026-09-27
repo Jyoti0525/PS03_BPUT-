@@ -27,20 +27,40 @@ def _client_ip(request: Request) -> str:
     return (request.client.host if request.client else "unknown")[:64]
 
 
+def _wait_text(seconds: int) -> str:
+    minutes = max(1, -(-seconds // 60))
+    if minutes < 90:
+        return f"about {minutes} minute{'s' if minutes != 1 else ''}"
+    hours = round(minutes / 60)
+    return f"about {hours} hour{'s' if hours != 1 else ''}"
+
+
+def _limit(db, query, t, window: timedelta, allowed: int, message: str) -> None:
+    """Refuse when `allowed` requests already fall inside the rolling window, saying exactly when to retry."""
+    times = sorted(aware(x) for x in db.scalars(query.where(OtpChallenge.created_at > t - window)))
+    if len(times) < allowed:
+        return
+    # A slot frees up when the oldest request that still counts leaves the window.
+    free_at = times[len(times) - allowed] + window if allowed > 0 else t + window
+    wait = max(1, int((free_at - t).total_seconds()))
+    raise HTTPException(429, f"{message} — try again in {_wait_text(wait)}", headers={"Retry-After": str(wait)})
+
+
 @router.post("/otp/request", response_model=OtpChallengeOut)
 def request_otp(body: OtpRequest, request: Request, db: DB):
     s = get_settings()
     t = now()
     ip = _client_ip(request)
-    # Rate limits protect people from SMS spam and the SMS account from abuse.
+    # Rate limits protect people from SMS spam and the SMS account from abuse. Sample numbers never send an SMS,
+    # so they are exempt from every limit and do not count towards a network's allowance either.
     if not otp.is_demo(body.phone):
-        recent = db.scalar(select(func.count(OtpChallenge.id)).where(OtpChallenge.phone == body.phone, OtpChallenge.created_at > t - timedelta(minutes=10))) or 0
-        daily = db.scalar(select(func.count(OtpChallenge.id)).where(OtpChallenge.phone == body.phone, OtpChallenge.created_at > t - timedelta(hours=24))) or 0
-        if recent >= s.otp_per_phone_10min or daily >= s.otp_per_phone_day:
-            raise HTTPException(429, "Too many codes requested for this number — try again later")
-    per_ip = db.scalar(select(func.count(OtpChallenge.id)).where(OtpChallenge.ip == ip, OtpChallenge.created_at > t - timedelta(hours=1))) or 0
-    if per_ip >= s.otp_per_ip_hour:
-        raise HTTPException(429, "Too many code requests from this network — try again later")
+        by_phone = select(OtpChallenge.created_at).where(OtpChallenge.phone == body.phone)
+        _limit(db, by_phone, t, timedelta(minutes=10), s.otp_per_phone_10min, "Too many codes requested for this number")
+        _limit(db, by_phone, t, timedelta(hours=24), s.otp_per_phone_day, "Too many codes requested for this number today")
+        by_ip = select(OtpChallenge.created_at).where(OtpChallenge.ip == ip)
+        if otp.demo_phones():
+            by_ip = by_ip.where(OtpChallenge.phone.not_in(otp.demo_phones()))
+        _limit(db, by_ip, t, timedelta(hours=1), s.otp_per_ip_hour, "Too many code requests from this network")
     local = otp.uses_local_code(body.phone)
     code = otp.local_code(body.phone) if local else ""
     if not local:

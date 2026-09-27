@@ -164,16 +164,27 @@ def test_patient_correction(client, doctor, supervisor):
 
 def test_otp_request_limits(client):
     phone = "7" + str(uuid.uuid4().int)[:9]
-    codes = [client.post(f"{API}/auth/otp/request", json={"phone": phone}).status_code for _ in range(4)]
-    assert codes == [200, 200, 200, 429]
+    rs = [client.post(f"{API}/auth/otp/request", json={"phone": phone}) for _ in range(4)]
+    assert [r.status_code for r in rs] == [200, 200, 200, 429]
+    assert "try again in about 10 minutes" in rs[3].json()["detail"] and 540 <= int(rs[3].headers["Retry-After"]) <= 600
     assert all(client.post(f"{API}/auth/otp/request", json={"phone": "9000000001"}).status_code == 200 for _ in range(4))  # sample accounts exempt
 
 
 def test_otp_per_network_limit(client, monkeypatch):
     from app.config import get_settings
 
+    # Sample numbers never send an SMS: they are exempt and do not use up the network's allowance.
+    for _ in range(5):
+        assert client.post(f"{API}/auth/otp/request", json={"phone": "9000000005"}).status_code == 200
+    monkeypatch.setattr(get_settings(), "otp_per_ip_hour", 2)
+    real = ["7" + str(uuid.uuid4().int)[:9] for _ in range(3)]
+    codes = [client.post(f"{API}/auth/otp/request", json={"phone": p}) for p in real]
+    blocked = [r for r in codes if r.status_code == 429]
+    assert blocked and "network" in blocked[0].json()["detail"] and "try again in about" in blocked[0].json()["detail"]
+    assert int(blocked[0].headers["Retry-After"]) > 0
+    assert client.post(f"{API}/auth/otp/request", json={"phone": "9000000001"}).status_code == 200  # still fine for samples
     monkeypatch.setattr(get_settings(), "otp_per_ip_hour", 0)
-    r = client.post(f"{API}/auth/otp/request", json={"phone": "9000000001"})
+    r = client.post(f"{API}/auth/otp/request", json={"phone": real[0]})
     assert r.status_code == 429 and "network" in r.json()["detail"]
 
 

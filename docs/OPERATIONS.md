@@ -89,9 +89,11 @@ Odia text to both files — anything missing simply shows in English. Placeholde
 | Setting (env) | Default | Meaning |
 |---|---|---|
 | `JEEVIA_OTP_PER_PHONE_10MIN` / `JEEVIA_OTP_PER_PHONE_DAY` | 3 / 10 | OTP requests per phone (sample phones exempt) |
-| `JEEVIA_OTP_PER_IP_HOUR` | 30 | OTP requests per client address |
+| `JEEVIA_OTP_PER_IP_HOUR` | 30 | OTP requests per client address (real numbers only — sample numbers never send SMS, so they neither count nor get blocked) |
 | `JEEVIA_PIN_MAX_ATTEMPTS` / `JEEVIA_PIN_LOCK_MINUTES` | 5 / 15 | Wrong PINs before a temporary lock |
 | `JEEVIA_DEMO_PIN` | 4826 | PIN of the sample staff/employer accounts |
+
+When a limit is hit the message says how long to wait ("try again in about 12 minutes") and the response carries a `Retry-After` header.
 
 A forgotten staff PIN is reset by the facility supervisor (Admin → Staff → Reset PIN); supervisors and employers reset their own after the phone OTP.
 

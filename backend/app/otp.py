@@ -19,9 +19,14 @@ log = logging.getLogger("jeevia.otp")
 VERIFY = "https://verify.twilio.com/v2/Services"
 
 
-def is_demo(phone: str) -> bool:
+def demo_phones() -> set[str]:
+    """Sample walkthrough numbers. They use a fixed code and never send an SMS."""
     s = get_settings()
-    return bool(s.demo_otp) and phone in {p.strip() for p in s.demo_phones.split(",") if p.strip()}
+    return {p.strip() for p in s.demo_phones.split(",") if p.strip()} if s.demo_otp else set()
+
+
+def is_demo(phone: str) -> bool:
+    return phone in demo_phones()
 
 
 def uses_local_code(phone: str) -> bool:

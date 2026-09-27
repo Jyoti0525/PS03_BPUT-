@@ -865,5 +865,12 @@ const hi: Record<string, string> = {
   "· opened": "· खोला गया",
   "— kiosk requires a staff role.": "— कियोस्क के लिए स्टाफ़ भूमिका चाहिए।",
   "This device has no {lang} voice, so questions are not read aloud. Install the {lang} voice in the device’s text-to-speech settings.": "इस डिवाइस में {lang} आवाज़ नहीं है, इसलिए प्रश्न पढ़कर नहीं सुनाए जाएँगे। डिवाइस की टेक्स्ट-टू-स्पीच सेटिंग में {lang} आवाज़ इंस्टॉल करें।",
+  "Too many codes requested for this number": "इस नंबर के लिए बहुत अधिक कोड माँगे गए",
+  "Too many codes requested for this number today": "आज इस नंबर के लिए बहुत अधिक कोड माँगे गए",
+  "Too many code requests from this network": "इस नेटवर्क से बहुत अधिक कोड अनुरोध",
+  "try again in about 1 minute": "लगभग 1 मिनट बाद फिर कोशिश करें",
+  "try again in about {n} minutes": "लगभग {n} मिनट बाद फिर कोशिश करें",
+  "try again in about 1 hour": "लगभग 1 घंटे बाद फिर कोशिश करें",
+  "try again in about {n} hours": "लगभग {n} घंटे बाद फिर कोशिश करें",
 };
 export default hi;
