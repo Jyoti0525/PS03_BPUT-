@@ -5,10 +5,11 @@ import { Users, KeyRound, RotateCcw, UserX, UserCheck } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { useAsync, timeAgo } from "@/lib/hooks";
 import { PageHeader } from "@/components/layout/app-shell";
-import { useSession } from "@/components/providers";
+import { useSession, usePrefs } from "@/components/providers";
 import { Badge, Button, Card, Empty, ErrorNote, Modal, Select, Spinner } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { langByCode } from "@/lib/i18n/languages";
+import { DutyList } from "@/components/staff/duty";
 import type { Role, User } from "@/lib/types";
 
 const STAFF_ROLES: { v: Role; label: string }[] = [
@@ -21,6 +22,7 @@ const STAFF_ROLES: { v: Role; label: string }[] = [
 type Pending = { user: User; kind: "reset" | "deactivate" | "reactivate" };
 
 export default function StaffPage() {
+  const { tr } = usePrefs();
   const { user: me } = useSession();
   const canManage = me?.role === "supervisor";
   const { data, error, loading, reload } = useAsync(() => api.listUsers(), []);
@@ -35,7 +37,7 @@ export default function StaffPage() {
       setPending(null);
       reload();
     } catch (e) {
-      toast(e instanceof ApiError ? e.message : "Action failed", "error");
+      toast(e instanceof ApiError ? e.message : tr("Action failed"), "error");
     } finally {
       setBusy(false);
     }
@@ -49,14 +51,19 @@ export default function StaffPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader title="Staff" subtitle={canManage ? "Accounts linked to this facility. Change roles, reset forgotten PINs or remove access. Every change is audited." : "Accounts linked to this facility. New staff register themselves with phone OTP and a PIN."} />
+      <PageHeader title={tr("Staff")} subtitle={canManage ? tr("Accounts linked to this facility. Change roles, reset forgotten PINs or remove access. Every change is audited.") : tr("Accounts linked to this facility. New staff register themselves with phone OTP and a PIN.")} />
+      {canManage && data && (
+        <div className="mb-4">
+          <DutyList staff={data} onChange={reload} compact />
+        </div>
+      )}
       {error ? (
         <ErrorNote error={error} onRetry={reload} />
       ) : loading && !data ? (
         <Spinner />
       ) : !data?.length ? (
         <Card>
-          <Empty icon={<Users className="size-6" />} title="No staff yet" />
+          <Empty icon={<Users className="size-6" />} title={tr("No staff yet")} />
         </Card>
       ) : (
         <Card>
@@ -69,42 +76,42 @@ export default function StaffPage() {
                   <span className="grid size-10 place-items-center rounded-full bg-teal-50 font-bold text-teal-700">{u.name.replace(/^Dr\.\s*/, "").charAt(0)}</span>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-ink">
-                      {u.name} {self && <span className="text-xs font-normal text-muted">(you)</span>}
+                      {u.name} {self && <span className="text-xs font-normal text-muted">{tr("(you)")}</span>}
                     </p>
                     <p className="text-xs text-muted">
-                      +91 {u.phone.slice(0, 5)}••••• · {langByCode(u.language).name} · joined {timeAgo(u.created_at)}
+                      +91 {u.phone.slice(0, 5)}••••• · {langByCode(u.language).name} {tr("· joined")} {timeAgo(u.created_at)}
                     </p>
                   </div>
                   {u.registration_no && <Badge>{u.registration_no}</Badge>}
                   {u.has_pin ? (
                     <Badge tone="teal">
-                      <KeyRound className="size-3" /> PIN set
+                      <KeyRound className="size-3" /> {tr("PIN set")}
                     </Badge>
                   ) : (
-                    <Badge tone="semi">PIN pending</Badge>
+                    <Badge tone="semi">{tr("PIN pending")}</Badge>
                   )}
-                  {inactive && <Badge tone="crit">Deactivated</Badge>}
+                  {inactive && <Badge tone="crit">{tr("Deactivated")}</Badge>}
                   {canManage && !self ? (
                     <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                       <Select aria-label={`Role for ${u.name}`} value={u.role} disabled={busy || inactive} onChange={(e) => run(() => api.updateUser(u.id, { role: e.target.value as Role }), `Role changed to ${e.target.value}`)} className="h-9 w-36 text-sm">
                         {STAFF_ROLES.map((r) => (
                           <option key={r.v} value={r.v}>
-                            {r.label}
+                            {tr(r.label)}
                           </option>
                         ))}
                       </Select>
                       {!inactive && (
                         <Button size="sm" variant="secondary" icon={<RotateCcw className="size-4" />} onClick={() => setPending({ user: u, kind: "reset" })}>
-                          Reset PIN
+                          {tr("Reset PIN")}
                         </Button>
                       )}
                       {inactive ? (
                         <Button size="sm" variant="secondary" icon={<UserCheck className="size-4" />} onClick={() => setPending({ user: u, kind: "reactivate" })}>
-                          Reactivate
+                          {tr("Reactivate")}
                         </Button>
                       ) : (
                         <Button size="sm" variant="ghost" icon={<UserX className="size-4" />} onClick={() => setPending({ user: u, kind: "deactivate" })}>
-                          Deactivate
+                          {tr("Deactivate")}
                         </Button>
                       )}
                     </div>
@@ -121,11 +128,11 @@ export default function StaffPage() {
         open={!!pending}
         onClose={() => setPending(null)}
         size="sm"
-        title={confirm?.title}
+        title={tr(confirm?.title)}
         footer={
           <>
             <Button variant="ghost" onClick={() => setPending(null)}>
-              Cancel
+              {tr("Cancel")}
             </Button>
             <Button variant={pending?.kind === "deactivate" ? "danger" : "primary"} loading={busy} onClick={confirm?.go}>
               {confirm?.cta}
@@ -133,7 +140,7 @@ export default function StaffPage() {
           </>
         }
       >
-        <p className="text-sm text-ink-2">{confirm?.body}</p>
+        <p className="text-sm text-ink-2">{tr(confirm?.body)}</p>
       </Modal>
     </div>
   );

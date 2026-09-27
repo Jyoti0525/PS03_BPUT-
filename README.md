@@ -74,10 +74,10 @@ Everything anyone views or changes is written to a tamper-evident audit log.
 
 | Role | Main screen | Does | Never sees |
 |---|---|---|---|
-| **Supervisor** | `/admin` | Joins a facility from the all-India directory (or adds a missing public one), sets specialists on duty, creates kiosk links and QR posters, manages staff (role, deactivate, reset PIN), audits activity, can restart the server | Symptoms, notes, documents |
-| **Receptionist** | `/admin` | Watches today's tokens, calls patients, corrects registration details, manages kiosk links and staff devices | Symptoms, notes, documents |
-| **Nurse / ANM** | `/reviewer` (nurse view), `/kiosk` | Assisted intake with vitals, "do now" checklist, follow-up questions, escalation | — (cannot override or refer) |
-| **Doctor / Medical Officer** | `/reviewer` | Reviews the queue, confirms/edits notes, overrides with a reason, acknowledges escalations, refers, exports, shares QR summaries | — |
+| **Supervisor** | `/admin` | Joins a facility from the all-India directory (or adds a missing public one), sets specialists on duty, creates kiosk links and QR posters, manages staff (role, deactivate, reset PIN, duty), devices, audit and retention, can restart the server | Symptoms, notes, documents |
+| **Receptionist** | `/desk` | Today's patients and waiting times, finds/registers patients, corrects registration details, marks doctors and nurses on/off duty, runs the check-in kiosk | Symptoms, urgency, notes, documents; supervisor tools |
+| **Nurse / ANM** | `/nurse`, `/kiosk` | Patients to attend, records vitals and bedside observations, nursing checklist, alerts the doctor, assisted intake | Referrals, exports, QR summaries, overrides, sign-off |
+| **Doctor / Medical Officer** | `/reviewer` | Reviews the queue with nurses' observations, confirms/edits notes, overrides with a reason, acknowledges escalations, refers, exports, shares QR summaries | — |
 | **Patient** | `/patient` | Adds a problem before visiting, sees own visits and reminders | Urgency, notes, family members' records |
 | **Employer / organisation** | `/employer` | Registers the organisation and its workplaces (company clinic, industrial unit, campus, health camp), keeps the worker roster, sees fitness outcomes | Any clinical record |
 | **Kiosk link** (no login) | `/k/<code>` | Registers a patient, captures consent and symptoms, uploads reports, issues a token | Everything else |
@@ -151,7 +151,7 @@ real capture time so waiting time is never understated.
 **Check-in**
 - Public kiosk links per facility with printable QR posters; open on any tab, tablet or phone; revocable instantly.
 - Staff kiosk on bound tablets with patient search (household-phone disambiguation) and vitals entry.
-- Voice-first intake with spoken read-back, icon mode, large text, 22 languages (full screens in English, Hindi, Odia).
+- Voice-first intake with spoken read-back, icon mode, large text, 22 languages. **Every screen** (website, sign-in, all dashboards, kiosks) switches between English, Hindi and Odia at any time; each user's language is saved to their account and applied at sign-in; kiosk speech listens and reads aloud in the patient's language.
 - Maternal and chronic-disease branches; follow-up questions generated from what is still missing.
 - Photo capture with in-browser compression; offline queue with automatic sync. Kiosk links keep working offline after one online visit (page, facility and session cached on the device).
 - At organisation workplaces the kiosk asks for the employee / student ID and links the visit to the roster.
@@ -184,7 +184,7 @@ real capture time so waiting time is never understated.
 ```
 Jeevia/
 ├── frontend/                 Next.js app (all user interfaces)
-│   ├── src/app/              Routes: /, /auth, /k/[code], /kiosk, /reviewer/*, /admin/*, /patient/*, /employer/*, /s/[token], /api/ops/restart
+│   ├── src/app/              Routes: /, /auth, /k/[code], /kiosk, /reviewer/*, /nurse/*, /desk/*, /admin/*, /patient/*, /employer/*, /s/[token], /api/ops/restart
 │   ├── src/components/       UI kit, site chrome, intake flow, triage note views, share QR, status panel
 │   ├── src/lib/              API contract + live/mock adapters, i18n, offline outbox, speech, status, exports
 │   └── public/sw.js          Service worker (offline kiosk)
@@ -259,7 +259,7 @@ Secrets live only in the Render and Vercel dashboards — never in the repositor
 ## 10. Testing
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 50 tests
+cd backend && .venv/bin/pytest -q                  # 54 tests
 cd frontend && npm run lint && npx tsc --noEmit && npm run build
 ```
 Backend tests cover the rules engine, OTP (including lockout, rate limits and the Twilio path), the two-factor PIN

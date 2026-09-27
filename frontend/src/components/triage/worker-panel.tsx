@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useState } from "react";
 import { Briefcase, ClipboardCheck, EyeOff } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
@@ -12,6 +13,7 @@ const CHOICES: FitnessStatus[] = ["fit", "fit_with_restrictions", "temporarily_u
 
 /** Shown on a case when the patient is on an employer's roster. Only the fitness outcome is shared with the employer. */
 export function WorkerPanel({ encounterId, worker, canRecord, onRecorded }: { encounterId: string; worker: WorkerInfo; canRecord: boolean; onRecorded: () => void }) {
+  const { tr } = usePrefs();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<FitnessStatus>(worker.latest?.status ?? "fit");
   const [restrictions, setRestrictions] = useState("");
@@ -22,7 +24,7 @@ export function WorkerPanel({ encounterId, worker, canRecord, onRecorded }: { en
 
   async function save() {
     setErr(null);
-    if (status === "fit_with_restrictions" && restrictions.trim().length < 3) return setErr("Describe the restrictions (e.g. no work at height)");
+    if (status === "fit_with_restrictions" && restrictions.trim().length < 3) return setErr(tr("Describe the restrictions (e.g. no work at height)"));
     setBusy(true);
     try {
       await api.recordFitness(encounterId, { status, restrictions: restrictions.trim() || null, valid_until: validUntil || null });
@@ -30,7 +32,7 @@ export function WorkerPanel({ encounterId, worker, canRecord, onRecorded }: { en
       setOpen(false);
       onRecorded();
     } catch (e) {
-      setErr(e instanceof ApiError ? e.message : "Could not record fitness");
+      setErr(e instanceof ApiError ? e.message : tr("Could not record fitness"));
     } finally {
       setBusy(false);
     }
@@ -39,57 +41,57 @@ export function WorkerPanel({ encounterId, worker, canRecord, onRecorded }: { en
   return (
     <Card className="mt-4">
       <CardHeader
-        title="Occupational health"
+        title={tr("Occupational health")}
         subtitle={`${worker.organisation_name}${worker.employee_code ? ` · ${worker.employee_code}` : ""}${worker.department ? ` · ${worker.department}` : ""}`}
         icon={<Briefcase className="size-4" />}
         action={
           canRecord && !open ? (
             <Button size="sm" icon={<ClipboardCheck className="size-4" />} onClick={() => setOpen(true)}>
-              Record fitness
+              {tr("Record fitness")}
             </Button>
           ) : undefined
         }
       />
       <div className="space-y-3 p-4 text-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-muted">Current status:</span>
-          <Badge tone={FITNESS[l?.status ?? "pending_review"].tone}>{FITNESS[l?.status ?? "pending_review"].label}</Badge>
+          <span className="text-muted">{tr("Current status:")}</span>
+          <Badge tone={FITNESS[l?.status ?? "pending_review"].tone}>{tr(FITNESS[l?.status ?? "pending_review"].label)}</Badge>
           {l && (
             <span className="text-xs text-muted">
-              by {l.assessed_by} · {new Date(l.assessed_at).toLocaleDateString("en-IN")}
+              {tr("by")} {l.assessed_by} · {new Date(l.assessed_at).toLocaleDateString("en-IN")}
               {l.valid_until && ` · valid until ${new Date(l.valid_until).toLocaleDateString("en-IN")}`}
             </span>
           )}
         </div>
-        {l?.restrictions && <p className="text-ink-2">Restrictions: {l.restrictions}</p>}
+        {l?.restrictions && <p className="text-ink-2">{tr("Restrictions:")} {l.restrictions}</p>}
         {open && (
           <div className="space-y-3 rounded-xl border border-line bg-canvas p-3">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {CHOICES.map((c) => (
                 <button key={c} onClick={() => setStatus(c)} aria-pressed={status === c} className={cx("rounded-xl border px-2 py-2 text-xs font-semibold", status === c ? "border-teal-600 bg-teal-50 text-teal-800" : "border-line bg-white text-muted")}>
-                  {FITNESS[c].label}
+                  {tr(FITNESS[c].label)}
                 </button>
               ))}
             </div>
             {status !== "pending_review" && (
               <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
                 <div>
-                  <Label htmlFor="fit-r" hint={status === "fit_with_restrictions" ? undefined : "(optional)"}>Work restrictions</Label>
-                  <Textarea id="fit-r" rows={2} value={restrictions} onChange={(e) => setRestrictions(e.target.value)} placeholder="e.g. No work at height for 2 weeks" />
+                  <Label htmlFor="fit-r" hint={status === "fit_with_restrictions" ? undefined : tr("(optional)")}>{tr("Work restrictions")}</Label>
+                  <Textarea id="fit-r" rows={2} value={restrictions} onChange={(e) => setRestrictions(e.target.value)} placeholder={tr("e.g. No work at height for 2 weeks")} />
                 </div>
                 <div>
-                  <Label htmlFor="fit-v" hint="(optional)">Valid until</Label>
+                  <Label htmlFor="fit-v" hint={tr("(optional)")}>{tr("Valid until")}</Label>
                   <Input id="fit-v" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
                 </div>
               </div>
             )}
             <p className="flex items-start gap-1.5 text-xs text-muted">
-              <EyeOff className="mt-0.5 size-3.5 shrink-0" /> The employer sees only this outcome, restrictions and validity — never symptoms, notes or documents.
+              <EyeOff className="mt-0.5 size-3.5 shrink-0" /> {tr("The employer sees only this outcome, restrictions and validity — never symptoms, notes or documents.")}
             </p>
             <FieldError>{err}</FieldError>
             <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button size="sm" onClick={save} loading={busy}>Save outcome</Button>
+              <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>{tr("Cancel")}</Button>
+              <Button size="sm" onClick={save} loading={busy}>{tr("Save outcome")}</Button>
             </div>
           </div>
         )}

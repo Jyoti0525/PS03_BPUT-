@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import Link from "next/link";
 import { useState } from "react";
 import { Send, Ambulance, Car, Footprints } from "lucide-react";
@@ -16,13 +17,14 @@ const TRANSPORT = {
 };
 
 export default function ReferralsPage() {
+  const { tr } = usePrefs();
   const { data, error, loading, reload } = useAsync(() => api.listReferrals(), []);
   const [view, setView] = useState<Referral | null>(null);
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Referrals" subtitle="Referral notes prepared from triage notes. Destinations follow the facility's specialist configuration." />
+      <PageHeader title={tr("Referrals")} subtitle={tr("Referral notes prepared from triage notes. Destinations follow the facility's specialist configuration.")} />
       {error ? <ErrorNote error={error} onRetry={reload} /> : loading && !data ? <Spinner /> : !data?.length ? (
-        <Card><Empty icon={<Send className="size-6" />} title="No referrals yet" body="Open a case and choose “Referral note” to prepare one." /></Card>
+        <Card><Empty icon={<Send className="size-6" />} title={tr("No referrals yet")} body={tr("Open a case and choose “Referral note” to prepare one.")} /></Card>
       ) : (
         <Card>
           <ul className="divide-y divide-line">
@@ -33,11 +35,11 @@ export default function ReferralsPage() {
                     <Link href={`/reviewer/case/${r.encounter_id}`} className="hover:underline">{r.patient_name}</Link> <span className="font-normal text-muted">→ {r.destination}</span>
                   </p>
                   <p className="text-sm text-muted">{r.specialty} · {r.reason}</p>
-                  <p className="text-xs text-subtle">by {r.created_by} · {timeAgo(r.created_at)}</p>
+                  <p className="text-xs text-subtle">{tr("by")} {r.created_by} · {timeAgo(r.created_at)}</p>
                 </div>
-                <Badge>{TRANSPORT[r.transport].icon} {TRANSPORT[r.transport].label}</Badge>
+                <Badge>{TRANSPORT[r.transport].icon} {tr(TRANSPORT[r.transport].label)}</Badge>
                 <Badge tone="teal">{r.status}</Badge>
-                <button className="text-sm font-semibold text-teal-700 hover:underline" onClick={() => setView(r)}>View note</button>
+                <button className="text-sm font-semibold text-teal-700 hover:underline" onClick={() => setView(r)}>{tr("View note")}</button>
               </li>
             ))}
           </ul>

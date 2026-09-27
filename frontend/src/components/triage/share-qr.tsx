@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, KeyRound, Printer, QrCode, ShieldOff, Clock } from "lucide-react";
@@ -39,6 +40,7 @@ ${svg.replace(/width="\d+"/, 'width="260"').replace(/height="\d+"/, 'height="260
 
 /** Create and manage the QR summary for one encounter. */
 export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Encounter; facilityName?: string; onClose: () => void; initial?: ShareLink | null }) {
+  const { tr } = usePrefs();
   const [hours, setHours] = useState(72);
   const [created, setCreated] = useState<ShareLink | null>(initial ?? null);
   const [busy, setBusy] = useState(false);
@@ -51,7 +53,7 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
       setCreated(await api.createShare(enc.id, hours, "referral"));
       reload();
     } catch (e) {
-      toast(e instanceof Error ? e.message : "Could not create link", "error");
+      toast(e instanceof Error ? e.message : tr("Could not create link"), "error");
     } finally {
       setBusy(false);
     }
@@ -62,8 +64,8 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
       open
       onClose={onClose}
       size="lg"
-      title="QR summary for referral"
-      subtitle="The receiving clinician scans the QR and enters the access code to see this patient's details, the reviewed note, the referral and the uploaded documents."
+      title={tr("QR summary for referral")}
+      subtitle={tr("The receiving clinician scans the QR and enters the access code to see this patient's details, the reviewed note, the referral and the uploaded documents.")}
     >
       {created ? (
         <div className="grid items-center gap-6 sm:grid-cols-[auto_1fr]">
@@ -72,64 +74,64 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
           </div>
           <div>
             <p className="flex items-center gap-1.5 text-sm text-muted">
-              <KeyRound className="size-4" /> Access code — shown only now
+              <KeyRound className="size-4" /> {tr("Access code — shown only now")}
             </p>
             <p className="font-mono text-4xl font-extrabold tracking-[0.3em] text-ink">{created.access_code}</p>
             <p className="mt-2 flex items-center gap-1.5 text-sm text-muted">
-              <Clock className="size-4" /> Valid until {new Date(created.expires_at).toLocaleString("en-IN")}
+              <Clock className="size-4" /> {tr("Valid until")} {new Date(created.expires_at).toLocaleString("en-IN")}
             </p>
             <p className="mt-2 font-mono text-xs break-all text-subtle">{created.url}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button icon={<Printer className="size-4" />} onClick={() => printShareSlip(enc, created, facilityName)}>
-                Print slip
+                {tr("Print slip")}
               </Button>
               <Button
                 variant="secondary"
                 icon={<Copy className="size-4" />}
                 onClick={() => {
                   navigator.clipboard?.writeText(`${created.url}\nAccess code: ${created.access_code}`);
-                  toast("Link and code copied");
+                  toast(tr("Link and code copied"));
                 }}
               >
-                Copy link + code
+                {tr("Copy link + code")}
               </Button>
               <Button variant="ghost" onClick={() => setCreated(null)}>
-                New link
+                {tr("New link")}
               </Button>
             </div>
-            <p className="mt-3 text-xs text-muted">Give the slip to the patient or send it with the referral. Share the code separately if you send the link by message.</p>
+            <p className="mt-3 text-xs text-muted">{tr("Give the slip to the patient or send it with the referral. Share the code separately if you send the link by message.")}</p>
           </div>
         </div>
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1">
-            <Label htmlFor="share-hours">Link valid for</Label>
+            <Label htmlFor="share-hours">{tr("Link valid for")}</Label>
             <Select id="share-hours" value={hours} onChange={(e) => setHours(Number(e.target.value))}>
               {VALIDITY.map((v) => (
                 <option key={v.h} value={v.h}>
-                  {v.label}
+                  {tr(v.label)}
                 </option>
               ))}
             </Select>
           </div>
           <Button variant="teal" size="lg" loading={busy} onClick={create} icon={<QrCode className="size-5" />}>
-            Create QR
+            {tr("Create QR")}
           </Button>
         </div>
       )}
 
       {!!links?.length && (
         <div className="mt-6 border-t border-line pt-4">
-          <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">Links for this visit</p>
+          <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">{tr("Links for this visit")}</p>
           <ul className="space-y-2">
             {links.map((l) => {
               const expired = Date.parse(l.expires_at) < now;
               return (
                 <li key={l.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-line px-3 py-2 text-sm">
                   <span className="flex-1 text-ink">
-                    by {l.created_by} · {timeAgo(l.created_at)} · opened {l.views}×
+                    {tr("by")} {l.created_by} · {timeAgo(l.created_at)} {tr("· opened")} {l.views}×
                   </span>
-                  {l.revoked ? <Badge tone="crit">Revoked</Badge> : expired ? <Badge>Expired</Badge> : <Badge tone="rout">Active until {new Date(l.expires_at).toLocaleDateString("en-IN")}</Badge>}
+                  {l.revoked ? <Badge tone="crit">{tr("Revoked")}</Badge> : expired ? <Badge>{tr("Expired")}</Badge> : <Badge tone="rout">{tr("Active until")} {new Date(l.expires_at).toLocaleDateString("en-IN")}</Badge>}
                   {!l.revoked && !expired && (
                     <Button
                       size="sm"
@@ -137,11 +139,11 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
                       icon={<ShieldOff className="size-4" />}
                       onClick={async () => {
                         await api.revokeShare(l.id);
-                        toast("Link revoked");
+                        toast(tr("Link revoked"));
                         reload();
                       }}
                     >
-                      Revoke
+                      {tr("Revoke")}
                     </Button>
                   )}
                 </li>

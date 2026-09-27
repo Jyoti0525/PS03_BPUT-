@@ -23,13 +23,14 @@ from ..schemas import (
     FitnessOut,
     IntakeIn,
     NotePatch,
+    ObservationIn,
     OverrideIn,
     QueueItem,
     ReferralIn,
     ReferralOut,
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
-from ..services import auto_escalate, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient
+from ..services import auto_escalate, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient, record_observations
 from .facilities import get_facility
 
 router = APIRouter(tags=["encounters"])
@@ -119,6 +120,8 @@ def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
                 needs_check_count=sum(1 for v in [*n.get("vitals", []), *n.get("labs", [])] if v.get("needs_check")),
                 language=e.patient.language,
                 escalation_due_at=e.escalation_due_at,
+                vitals_recorded=bool(n.get("vitals")),
+                observation_count=len(n.get("observations") or []),
             )
         )
     return sorted(items, key=lambda i: (RANK[i.urgency], -i.wait_minutes))
@@ -134,11 +137,27 @@ def get_encounter(eid: str, user: CurrentUser, db: DB):
 
 
 @router.patch("/encounters/{eid}", response_model=EncounterOut)
-def patch_encounter(eid: str, body: EncounterPatch, user: Reviewer, db: DB):
+def patch_encounter(eid: str, body: EncounterPatch, user: Doctor, db: DB):
     e = load_encounter(db, eid, user)
     if body.referral_needed is not None:
         e.referral_needed = body.referral_needed
         audit.record(db, user, "UPDATE", "encounter", eid, f"Referral needed: {'yes' if body.referral_needed else 'no'}", e.patient.code, e.facility_id)
+    return encounter_out(e, user)
+
+
+@router.post("/encounters/{eid}/observations", response_model=EncounterOut)
+def add_observations(eid: str, body: ObservationIn, user: Reviewer, db: DB):
+    """Nurse (or doctor) records vitals and bedside observations. Rules are re-run on the new vitals."""
+    e = load_encounter(db, eid, user)
+    vitals = {k: v for k, v in (body.vitals.model_dump() if body.vitals else {}).items() if v is not None}
+    note = (body.note or "").strip()
+    if not vitals and not note:
+        raise HTTPException(422, "Enter at least one vital sign or an observation")
+    before = e.urgency
+    record_observations(db, e, user, vitals, note)
+    parts = [f"{k}={v}" for k, v in vitals.items()] + ([f"note: {note[:120]}"] if note else [])
+    change = f"; urgency {before} → {e.urgency} (rules)" if e.urgency != before else ""
+    audit.record(db, user, "UPDATE", "encounter", e.id, f"Observations recorded by {user.role}: {', '.join(parts)}{change}", e.patient.code, e.facility_id)
     return encounter_out(e, user)
 
 
@@ -176,7 +195,7 @@ def override(eid: str, body: OverrideIn, user: Doctor, db: DB):
 
 
 @router.get("/encounters/{eid}/export")
-def export(eid: str, user: Reviewer, db: DB, format: ExportFormat = "pdf"):
+def export(eid: str, user: Doctor, db: DB, format: ExportFormat = "pdf"):
     e = load_encounter(db, eid, user)
     data = encounter_out(e, user).model_dump(mode="json")
     fac = get_facility(e.facility_id, db)
@@ -268,6 +287,6 @@ def create_referral(eid: str, body: ReferralIn, user: Doctor, db: DB):
 
 
 @router.get("/referrals", response_model=list[ReferralOut])
-def list_referrals(user: Reviewer, db: DB):
+def list_referrals(user: Doctor, db: DB):
     q = select(Referral).join(Encounter).where(Encounter.facility_id == user.facility_id).order_by(Referral.created_at.desc())
     return [ref_out(r) for r in db.scalars(q).unique()]

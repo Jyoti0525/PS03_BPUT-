@@ -58,7 +58,19 @@ export interface User {
   has_pin: boolean;
   is_active?: boolean;
   organisation_id?: string | null;
+  /** Doctors and nurses: on duty right now (front-desk time management). */
+  on_duty?: boolean;
+  duty_changed_at?: string | null;
   created_at: string;
+}
+
+/** Bedside observation recorded by a nurse or doctor (kept on the note). */
+export interface Observation {
+  by: string;
+  role: Role;
+  at: string;
+  vitals: VitalsInput;
+  note: string | null;
 }
 
 export interface Tokens {
@@ -424,6 +436,7 @@ export interface TriageNote {
   generated_by: string;
   generated_at: string;
   edited_by?: string | null;
+  observations?: Observation[];
   edited_at?: string | null;
 }
 
@@ -560,6 +573,8 @@ export interface QueueItem {
   needs_check_count: number;
   language: string;
   escalation_due_at: string | null;
+  vitals_recorded?: boolean;
+  observation_count?: number;
 }
 
 export interface Escalation {

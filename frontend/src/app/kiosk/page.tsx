@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, TabletSmartphone, Wifi, WifiOff, CloudUpload, ShieldCheck, LogIn } from "lucide-react";
 import { api, getDeviceId } from "@/lib/api";
-import { useSession } from "@/components/providers";
+import { useSession, usePrefs } from "@/components/providers";
 import { useAsync, useOnline } from "@/lib/hooks";
 import { A11yButton, LanguageButton, Logo } from "@/components/layout/chrome";
 import { Badge, Button, Card, Input, Label, Spinner, Toggle } from "@/components/ui";
@@ -14,8 +14,10 @@ import { IntakeFlow } from "@/components/intake/intake-flow";
 import { flushOutbox, isSimulatedOffline, setSimulatedOffline, subscribeOutbox, type OutboxItem } from "@/lib/offline/outbox";
 import { STAFF_ROLES } from "@/lib/types";
 import { precacheCurrentPage } from "@/lib/offline/precache";
+import { loadPhrases } from "@/lib/i18n/phrases";
 
 export default function KioskPage() {
+  const { tr } = usePrefs();
   const { user, loading, signOut } = useSession();
   const router = useRouter();
   const online = useOnline();
@@ -37,7 +39,7 @@ export default function KioskPage() {
 
   useEffect(() => subscribeOutbox(setOutbox), []);
   useEffect(() => {
-    precacheCurrentPage();
+    Promise.allSettled([loadPhrases("hi"), loadPhrases("or")]).then(() => precacheCurrentPage());
   }, []);
 
   useEffect(() => {
@@ -57,14 +59,14 @@ export default function KioskPage() {
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-coral-100 text-coral-700">
             <Lock className="size-7" />
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-ink">Kiosk locked</h1>
-          <p className="mt-2 text-muted">Patients do not sign in. A nurse, ANM or receptionist unlocks this tablet with their staff account; it then stays in intake mode.</p>
+          <h1 className="mt-4 text-2xl font-bold text-ink">{tr("Kiosk locked")}</h1>
+          <p className="mt-2 text-muted">{tr("Patients do not sign in. A nurse, ANM or receptionist unlocks this tablet with their staff account; it then stays in intake mode.")}</p>
           <Link href="/auth?next=/kiosk">
             <Button size="xl" className="mt-6 w-full" icon={<LogIn className="size-5" />}>
-              Staff unlock
+              {tr("Staff unlock")}
             </Button>
           </Link>
-          {user && <p className="mt-3 text-sm text-crit">Signed in as {user.role} — kiosk requires a staff role.</p>}
+          {user && <p className="mt-3 text-sm text-crit">{tr("Signed in as")} {user.role} {tr("— kiosk requires a staff role.")}</p>}
         </Card>
       </div>
     );
@@ -77,12 +79,12 @@ export default function KioskPage() {
           <div className="grid size-14 place-items-center rounded-2xl bg-teal-50 text-teal-700">
             <TabletSmartphone className="size-7" />
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-ink">Bind this device</h1>
+          <h1 className="mt-4 text-2xl font-bold text-ink">{tr("Bind this device")}</h1>
           <p className="mt-2 text-muted">
-            This tablet is not yet registered to <strong>{facility?.name ?? "your facility"}</strong>. Binding lets it submit intakes under the facility and is recorded in the audit log.
+            {tr("This tablet is not yet registered to")} <strong>{facility?.name ?? tr("your facility")}</strong>{tr(". Binding lets it submit intakes under the facility and is recorded in the audit log.")}
           </p>
           <div className="mt-5">
-            <Label htmlFor="dev-label">Device name</Label>
+            <Label htmlFor="dev-label">{tr("Device name")}</Label>
             <Input id="dev-label" value={label} onChange={(e) => setLabel(e.target.value)} />
             <p className="mt-1 font-mono text-xs text-subtle">{deviceId}</p>
           </div>
@@ -95,17 +97,17 @@ export default function KioskPage() {
               setBinding(true);
               try {
                 await api.bindDevice(label, deviceId);
-                toast("Device bound to facility");
+                toast(tr("Device bound to facility"));
                 reload();
               } catch (e) {
-                toast(e instanceof Error ? e.message : "Failed", "error");
+                toast(e instanceof Error ? e.message : tr("Failed"), "error");
               } finally {
                 setBinding(false);
               }
             }}
             icon={<ShieldCheck className="size-5" />}
           >
-            Bind device
+            {tr("Bind device")}
           </Button>
         </Card>
       </div>
@@ -119,10 +121,10 @@ export default function KioskPage() {
       <header className="no-print border-b border-line bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3">
           <Logo />
-          <span className="hidden text-sm text-muted md:inline">{facility?.name} · {bound?.label}</span>
+          <span className="hidden text-sm text-muted md:inline">{facility?.name} · {tr(bound?.label)}</span>
           <div className="ml-auto flex items-center gap-2">
-            {offline ? <Badge tone="semi"><WifiOff className="size-3" /> Offline</Badge> : <Badge tone="rout"><Wifi className="size-3" /> Online</Badge>}
-            {outbox.length > 0 && <Badge tone="info"><CloudUpload className="size-3" /> {outbox.length} queued</Badge>}
+            {offline ? <Badge tone="semi"><WifiOff className="size-3" /> {tr("Offline")}</Badge> : <Badge tone="rout"><Wifi className="size-3" /> {tr("Online")}</Badge>}
+            {outbox.length > 0 && <Badge tone="info"><CloudUpload className="size-3" /> {outbox.length} {tr("queued")}</Badge>}
             <LanguageButton />
             <A11yButton />
             <Button
@@ -134,7 +136,7 @@ export default function KioskPage() {
                 router.replace("/kiosk");
               }}
             >
-              Lock
+              {tr("Lock")}
             </Button>
           </div>
         </div>
@@ -145,10 +147,10 @@ export default function KioskPage() {
           <Toggle
             checked={simOffline}
             onChange={setSimOffline}
-            label="Simulate offline (rural camp)"
-            description="Intakes are queued in IndexedDB on this device and synced automatically when you switch back online."
+            label={tr("Simulate offline (rural camp)")}
+            description={tr("Intakes are queued in IndexedDB on this device and synced automatically when you switch back online.")}
           />
-          <p className="mt-2 text-xs text-muted">Staff on duty: {user?.name}</p>
+          <p className="mt-2 text-xs text-muted">{tr("Staff on duty:")} {user?.name}</p>
         </div>
       </main>
     </div>

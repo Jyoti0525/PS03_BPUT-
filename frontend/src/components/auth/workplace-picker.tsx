@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useEffect, useRef, useState } from "react";
 import { Building2, Check, Loader2, MapPin, Plus, Search, ShieldCheck, BadgeInfo } from "lucide-react";
 import { api } from "@/lib/api";
@@ -30,6 +31,7 @@ export function workplaceLabel(w: Workplace) {
 
 /** Search India's health facilities (national directory) and registered workplaces. */
 export function WorkplacePicker({ role, value, onChange }: { role: Role; value: Workplace; onChange: (w: Workplace) => void }) {
+  const { tr } = usePrefs();
   const [q, setQ] = useState("");
   const [state, setState] = useState("");
   const [hits, setHits] = useState<DirectoryHit[] | null>(null);
@@ -67,41 +69,41 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
     };
     return (
       <div className="space-y-3 rounded-xl border border-coral-200 bg-coral-50/40 p-3">
-        <p className="text-sm font-semibold text-ink">Add a public facility that is not listed</p>
+        <p className="text-sm font-semibold text-ink">{tr("Add a public facility that is not listed")}</p>
         <div>
-          <Label htmlFor="nf-name">Facility name</Label>
-          <Input id="nf-name" value={nf.name} onChange={(e) => update({ name: e.target.value })} placeholder="e.g. PHC Balipatna" />
+          <Label htmlFor="nf-name">{tr("Facility name")}</Label>
+          <Input id="nf-name" value={nf.name} onChange={(e) => update({ name: e.target.value })} placeholder={tr("e.g. PHC Balipatna")} />
         </div>
         <div>
-          <Label htmlFor="nf-type">Type</Label>
+          <Label htmlFor="nf-type">{tr("Type")}</Label>
           <Select id="nf-type" value={nf.type} onChange={(e) => update({ type: e.target.value as FacilityType })}>
             {PUBLIC_TYPES.map((t) => (
               <option key={t.v} value={t.v}>
-                {t.label}
+                {tr(t.label)}
               </option>
             ))}
           </Select>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label htmlFor="nf-state">State</Label>
+            <Label htmlFor="nf-state">{tr("State")}</Label>
             <Select id="nf-state" value={nf.state} onChange={(e) => update({ state: e.target.value })}>
-              <option value="">Select</option>
+              <option value="">{tr("Select")}</option>
               {INDIAN_STATES.map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </Select>
           </div>
           <div>
-            <Label htmlFor="nf-dist">District</Label>
+            <Label htmlFor="nf-dist">{tr("District")}</Label>
             <Input id="nf-dist" value={nf.district} onChange={(e) => update({ district: e.target.value })} />
           </div>
         </div>
         <div>
-          <Label htmlFor="nf-pin" hint="(optional)">PIN code</Label>
+          <Label htmlFor="nf-pin" hint={tr("(optional)")}>{tr("PIN code")}</Label>
           <Input id="nf-pin" inputMode="numeric" value={nf.pincode ?? ""} onChange={(e) => update({ pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} />
         </div>
-        <p className="text-xs text-muted">It will be marked “self-registered” until verified.</p>
+        <p className="text-xs text-muted">{tr("It will be marked “self-registered” until verified.")}</p>
         <Button
           variant="ghost"
           size="sm"
@@ -110,7 +112,7 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
             onChange(null);
           }}
         >
-          Back to search
+          {tr("Back to search")}
         </Button>
       </div>
     );
@@ -128,14 +130,14 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
               setQ(e.target.value);
               if (e.target.value.trim().length < 2) setHits(null);
             }}
-            placeholder="Facility name, district or PIN code"
+            placeholder={tr("Facility name, district or PIN code")}
             className="pl-9"
-            aria-label="Search your workplace"
+            aria-label={tr("Search your workplace")}
           />
           {busy && <Loader2 className="absolute top-3.5 right-3 size-4 animate-spin text-subtle" />}
         </div>
-        <Select value={state} onChange={(e) => setState(e.target.value)} aria-label="State">
-          <option value="">All states</option>
+        <Select value={state} onChange={(e) => setState(e.target.value)} aria-label={tr("State")}>
+          <option value="">{tr("All states")}</option>
           {INDIAN_STATES.map((s) => (
             <option key={s} value={s}>
               {s}
@@ -158,8 +160,8 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
       )}
 
       {hits && (
-        <ul className="max-h-72 space-y-1.5 overflow-y-auto pr-1" role="listbox" aria-label="Workplaces">
-          {hits.length === 0 && !busy && <li className="rounded-xl bg-canvas px-3 py-4 text-center text-sm text-muted">No match. Try the district or PIN code.</li>}
+        <ul className="max-h-72 space-y-1.5 overflow-y-auto pr-1" role="listbox" aria-label={tr("Workplaces")}>
+          {hits.length === 0 && !busy && <li className="rounded-xl bg-canvas px-3 py-4 text-center text-sm text-muted">{tr("No match. Try the district or PIN code.")}</li>}
           {hits.map((h) => (
             <li key={h.key}>
               <button
@@ -184,7 +186,7 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
                   </span>
                   {h.organisation_name && <span className="block text-xs text-coral-600">{h.organisation_name}</span>}
                 </span>
-                {h.facility_id ? <Badge tone="teal">On Jeevia</Badge> : h.verified ? <Badge><ShieldCheck className="size-3" /> Listed</Badge> : null}
+                {h.facility_id ? <Badge tone="teal">{tr("On Jeevia")}</Badge> : h.verified ? <Badge><ShieldCheck className="size-3" /> {tr("Listed")}</Badge> : null}
               </button>
             </li>
           ))}
@@ -194,8 +196,8 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
       <div className="flex items-start gap-2 rounded-xl bg-canvas p-3 text-xs text-muted">
         <BadgeInfo className="mt-0.5 size-4 shrink-0" />
         <span>
-          Government and private health facilities across India are listed (© OpenStreetMap contributors, ODbL). Company clinics, industrial units, campus health centres and health camps appear once their organisation registers on Jeevia.
-          {role === "supervisor" ? " Can’t find a public facility? Add it below." : " Can’t find your workplace? Ask your supervisor to add it."}
+          {tr("Government and private health facilities across India are listed (© OpenStreetMap contributors, ODbL). Company clinics, industrial units, campus health centres and health camps appear once their organisation registers on Jeevia.")}
+          {role === "supervisor" ? tr(" Can’t find a public facility? Add it below.") : tr(" Can’t find your workplace? Ask your supervisor to add it.")}
         </span>
       </div>
       {role === "supervisor" && (
@@ -208,7 +210,7 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
             onChange({ kind: "new", facility: nf });
           }}
         >
-          Add a missing public facility
+          {tr("Add a missing public facility")}
         </Button>
       )}
     </div>

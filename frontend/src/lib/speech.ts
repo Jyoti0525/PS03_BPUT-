@@ -9,20 +9,54 @@ export function canSpeak() {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
-export function speak(text: string, lang: string, onEnd?: () => void) {
+let voices: SpeechSynthesisVoice[] = [];
+
+function loadVoices() {
+  if (!canSpeak()) return;
+  voices = window.speechSynthesis.getVoices();
+}
+
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  loadVoices();
+  window.speechSynthesis.addEventListener?.("voiceschanged", loadVoices);
+}
+
+/** Best installed voice for a language (exact region first, then any voice of that language). */
+export function voiceFor(lang: string): SpeechSynthesisVoice | null {
+  if (!voices.length) loadVoices();
+  const tag = langByCode(lang).bcp47.toLowerCase();
+  const base = tag.split("-")[0];
+  return voices.find((v) => v.lang.toLowerCase().replace("_", "-") === tag) ?? voices.find((v) => v.lang.toLowerCase().split(/[-_]/)[0] === base) ?? null;
+}
+
+/** Whether this device can read text aloud in the language (English always falls back to the default voice). */
+export function hasVoice(lang: string): boolean {
+  return canSpeak() && (lang === "en" || !!voiceFor(lang));
+}
+
+/**
+ * Reads text aloud in the patient's language. If the device has no voice for that language we do not
+ * let an English voice mangle Odia or Hindi text — nothing is spoken and `false` is returned.
+ */
+export function speak(text: string, lang: string, onEnd?: () => void): boolean {
   if (!canSpeak()) {
     onEnd?.();
-    return;
+    return false;
+  }
+  const voice = voiceFor(lang);
+  if (!voice && lang !== "en") {
+    onEnd?.();
+    return false;
   }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = langByCode(lang).bcp47;
+  u.lang = voice?.lang ?? langByCode(lang).bcp47;
   u.rate = 0.9;
-  const voice = window.speechSynthesis.getVoices().find((v) => v.lang === u.lang) ?? window.speechSynthesis.getVoices().find((v) => v.lang.startsWith(u.lang.slice(0, 2)));
   if (voice) u.voice = voice;
   u.onend = () => onEnd?.();
   u.onerror = () => onEnd?.();
   window.speechSynthesis.speak(u);
+  return true;
 }
 
 export function stopSpeaking() {

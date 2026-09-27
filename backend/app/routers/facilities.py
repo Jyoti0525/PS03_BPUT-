@@ -8,13 +8,14 @@ from sqlalchemy import select
 
 from .. import audit
 from ..models import Device, Encounter, Escalation, Facility, Referral, User
-from ..schemas import ADMIN_ROLES, STAFF_ROLES, DeviceIn, DeviceOut, FacilityOut, FacilityPatch, FacilityStats, UserOut, UserPatch
+from ..schemas import ADMIN_ROLES, STAFF_ROLES, DeviceIn, DutyIn, DeviceOut, FacilityOut, FacilityPatch, FacilityStats, UserOut, UserPatch
 from ..security import DB, CurrentUser, require
 from ..services import auto_escalate, aware, now
 from .auth import user_out
 
 router = APIRouter(tags=["facilities"])
-Admin = Annotated[User, Depends(require(*ADMIN_ROLES))]
+Admin = Annotated[User, Depends(require(*ADMIN_ROLES))]  # front desk + supervisor
+Supervisor = Annotated[User, Depends(require("supervisor"))]
 Staff = Annotated[User, Depends(require(*STAFF_ROLES))]
 
 
@@ -33,7 +34,7 @@ def get_facility(fid: str, db: DB):
 
 
 @router.patch("/facilities/{fid}", response_model=FacilityOut)
-def update_facility(fid: str, body: FacilityPatch, user: Admin, db: DB):
+def update_facility(fid: str, body: FacilityPatch, user: Supervisor, db: DB):
     if user.facility_id != fid:
         raise HTTPException(403, "You can only configure your own facility")
     f = db.get(Facility, fid)
@@ -94,7 +95,7 @@ def bind_device(body: DeviceIn, user: Staff, db: DB):
 
 
 @router.delete("/devices/{device_id}", status_code=204)
-def revoke_device(device_id: str, user: Admin, db: DB):
+def revoke_device(device_id: str, user: Supervisor, db: DB):
     d = db.get(Device, device_id)
     if not d or d.facility_id != user.facility_id:
         raise HTTPException(404, "Device not found")
@@ -133,4 +134,20 @@ def reset_staff_pin(uid: str, user: Annotated[User, Depends(require("supervisor"
 
 @router.get("/users", response_model=list[UserOut])
 def list_users(user: Admin, db: DB):
-    return [user_out(db, u) for u in db.scalars(select(User).where(User.facility_id == user.facility_id).order_by(User.name))]
+    """Supervisor: every staff account. Front desk: the doctors and nurses (for duty and time management)."""
+    q = select(User).where(User.facility_id == user.facility_id, User.role.in_(STAFF_ROLES)).order_by(User.name)
+    if user.role != "supervisor":
+        q = q.where(User.role.in_(("doctor", "nurse")))
+    return [user_out(db, u) for u in list(db.scalars(q))]
+
+
+@router.patch("/users/{uid}/duty", response_model=UserOut)
+def set_duty(uid: str, body: DutyIn, user: Admin, db: DB):
+    """Front desk / supervisor: mark a doctor or nurse on or off duty."""
+    u = db.get(User, uid)
+    if not u or u.facility_id != user.facility_id or u.role not in ("doctor", "nurse"):
+        raise HTTPException(404, "Doctor or nurse not found")
+    if u.on_duty != body.on_duty:
+        u.on_duty, u.duty_changed_at = body.on_duty, now()
+        audit.record(db, user, "UPDATE", "user", u.id, f"{u.name} marked {'on' if body.on_duty else 'off'} duty")
+    return user_out(db, u)

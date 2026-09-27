@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import { getCachedUser, getTokens, setCachedUser, setTokens } from "@/lib/api/tokens";
 import type { Tokens, User } from "@/lib/types";
 import { translate, type DictKey } from "@/lib/i18n/dict";
+import { loadPhrases, makeTr, type Phrases } from "@/lib/i18n/phrases";
 import { installOutboxAutoFlush } from "@/lib/offline/outbox";
 import { ToastHost } from "@/components/ui/toast";
 
@@ -19,7 +20,11 @@ interface Prefs {
 
 interface PrefsCtx extends Prefs {
   set: (p: Partial<Prefs>) => void;
+  /** Change the language everywhere; a signed-in user's choice is also saved to their account. */
+  setLanguage: (lang: string) => void;
   t: (k: DictKey) => string;
+  /** Translate an English UI phrase into the current language (falls back to English). */
+  tr: (english: string | null | undefined, vars?: Record<string, string | number>) => string;
 }
 
 const PREFS_KEY = "jeevia.prefs";
@@ -50,10 +55,28 @@ export function useSession() {
   return c;
 }
 
+function persist(next: Prefs): Prefs {
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+  return next;
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   const [prefs, setPrefs] = useState<Prefs>(defaultPrefs);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [phrases, setPhrases] = useState<Phrases>({});
+
+  useEffect(() => {
+    let live = true;
+    loadPhrases(prefs.lang).then((p) => live && setPhrases(p), () => live && setPhrases({}));
+    return () => {
+      live = false;
+    };
+  }, [prefs.lang]);
 
   useEffect(() => {
     try {
@@ -74,15 +97,12 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [prefs]);
 
   const set = useCallback((p: Partial<Prefs>) => {
-    setPrefs((cur) => {
-      const next = { ...cur, ...p };
-      try {
-        localStorage.setItem(PREFS_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    setPrefs((cur) => persist({ ...cur, ...p }));
+  }, []);
+
+  /** Each signed-in person gets their own saved language on every screen (kiosk sessions keep the kiosk's). */
+  const applyUserLanguage = useCallback((u: User) => {
+    if (u.role !== "kiosk" && u.language) setPrefs((cur) => (cur.lang === u.language ? cur : persist({ ...cur, lang: u.language })));
   }, []);
 
   const refresh = useCallback(async () => {
@@ -95,13 +115,14 @@ export function Providers({ children }: { children: ReactNode }) {
       const u = await api.me();
       setCachedUser(u);
       setUser(u);
+      applyUserLanguage(u);
     } catch (e) {
       // Offline (no HTTP status): keep the last known user so offline kiosks keep working.
       setUser((e as { status?: number }).status ? null : getCachedUser());
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applyUserLanguage]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -123,6 +144,7 @@ export function Providers({ children }: { children: ReactNode }) {
         setTokens(tokens);
         setCachedUser(u);
         setUser(u);
+        applyUserLanguage(u);
       },
       signOut: async () => {
         await api.logout();
@@ -130,10 +152,28 @@ export function Providers({ children }: { children: ReactNode }) {
       },
       refresh,
     }),
-    [user, loading, refresh],
+    [user, loading, refresh, applyUserLanguage],
   );
 
-  const prefsValue = useMemo<PrefsCtx>(() => ({ ...prefs, set, t: (k) => translate(prefs.lang, k) }), [prefs, set]);
+  const setLanguage = useCallback(
+    (lang: string) => {
+      set({ lang });
+      // A patient choosing a language on a shared kiosk must not change the unlocking staff member's own preference.
+      const onKiosk = typeof window !== "undefined" && /^\/(kiosk|k\/)/.test(window.location.pathname);
+      if (user && user.role !== "kiosk" && !onKiosk && user.language !== lang) {
+        api.updateMe({ language: lang }).then(
+          (u) => {
+            setCachedUser(u);
+            setUser(u);
+          },
+          () => {},
+        );
+      }
+    },
+    [set, user],
+  );
+
+  const prefsValue = useMemo<PrefsCtx>(() => ({ ...prefs, set, setLanguage, t: (k) => translate(prefs.lang, k), tr: makeTr(phrases) }), [prefs, set, setLanguage, phrases]);
 
   return (
     <PrefsContext.Provider value={prefsValue}>

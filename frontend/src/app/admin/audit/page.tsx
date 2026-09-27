@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useState } from "react";
 import { Download, ShieldCheck, ShieldX, Search, Link2 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -22,6 +23,7 @@ const TONE: Partial<Record<AuditAction, "crit" | "semi" | "teal" | "coral" | "in
 };
 
 export default function AuditPage() {
+  const { tr } = usePrefs();
   const [action, setAction] = useState<AuditAction | "">("");
   const [q, setQ] = useState("");
   const [verify, setVerify] = useState<{ ok: boolean; checked: number; broken_at: number | null } | null>(null);
@@ -30,8 +32,8 @@ export default function AuditPage() {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        title="Audit log"
-        subtitle="Append-only and hash-chained. Records who viewed, changed, overrode or exported what — including every VIEW."
+        title={tr("Audit log")}
+        subtitle={tr("Append-only and hash-chained. Records who viewed, changed, overrode or exported what — including every VIEW.")}
         actions={
           <>
             <Button
@@ -43,7 +45,7 @@ export default function AuditPage() {
                 toast(r.ok ? `Chain intact — ${r.checked} entries verified` : `Chain broken at entry ${r.broken_at}`, r.ok ? "success" : "error");
               }}
             >
-              Verify chain
+              {tr("Verify chain")}
             </Button>
             <Button
               variant="secondary"
@@ -54,7 +56,7 @@ export default function AuditPage() {
                 reload();
               }}
             >
-              Export CSV
+              {tr("Export CSV")}
             </Button>
           </>
         }
@@ -69,10 +71,10 @@ export default function AuditPage() {
         <div className="flex flex-wrap gap-2 border-b border-line p-3">
           <div className="relative min-w-56 flex-1">
             <Search className="absolute top-3 left-3 size-4 text-subtle" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search actor, patient ID or detail" className="h-10 pl-9" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Search actor, patient ID or detail")} className="h-10 pl-9" />
           </div>
-          <Select value={action} onChange={(e) => setAction(e.target.value as AuditAction | "")} className="h-10 w-48" aria-label="Filter by action">
-            <option value="">All actions</option>
+          <Select value={action} onChange={(e) => setAction(e.target.value as AuditAction | "")} className="h-10 w-48" aria-label={tr("Filter by action")}>
+            <option value="">{tr("All actions")}</option>
             {ACTIONS.map((a) => <option key={a}>{a}</option>)}
           </Select>
         </div>
@@ -82,12 +84,12 @@ export default function AuditPage() {
               <thead>
                 <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">
                   <th className="px-4 py-2 font-semibold">#</th>
-                  <th className="px-4 py-2 font-semibold">Time</th>
-                  <th className="px-4 py-2 font-semibold">Actor</th>
-                  <th className="px-4 py-2 font-semibold">Action</th>
-                  <th className="px-4 py-2 font-semibold">Patient</th>
-                  <th className="px-4 py-2 font-semibold">Detail</th>
-                  <th className="px-4 py-2 font-semibold">Hash</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Time")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Actor")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Action")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Patient")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Detail")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Hash")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -110,7 +112,7 @@ export default function AuditPage() {
                 ))}
               </tbody>
             </table>
-            {data?.length === 0 && <p className="p-6 text-center text-sm text-muted">No matching entries.</p>}
+            {data?.length === 0 && <p className="p-6 text-center text-sm text-muted">{tr("No matching entries.")}</p>}
           </div>
         )}
       </Card>

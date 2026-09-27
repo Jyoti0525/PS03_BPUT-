@@ -52,7 +52,7 @@ Nothing secret is committed. Local development uses `backend/.env` (git-ignored)
 ## Database (Neon)
 
 - **Connection**: the API uses Neon's direct endpoint with `sslmode=require`; connections are health-checked and recycled every 4 minutes because Neon suspends idle compute (first query after a pause takes well under a second).
-- **Schema**: managed by **Alembic** (`backend/migrations/`). On start-up the API runs `alembic upgrade head` under a Postgres advisory lock (only one instance migrates), then re-applies the trigger that makes `audit_events` append-only. A database created before Alembic is stamped at `0001` first.
+- **Schema**: managed by **Alembic** (`backend/migrations/`). On start-up the API runs `alembic upgrade head` under a Postgres advisory lock (only one instance migrates), then re-applies the trigger that makes `audit_events` append-only. A database created before Alembic is stamped at `0001` first. Migrations so far: `0001` baseline, `0002` organisations/directory/fitness, `0003` account PIN, `0004` staff duty status.
   - New migration: change `app/models.py`, then `cd backend && JEEVIA_DATABASE_URL=<local pg> .venv/bin/alembic revision --autogenerate -m "…"`, review it, and check with `alembic check`.
   - Rehearse risky migrations on a Neon branch: `neonctl branches create --project-id empty-dream-42914552 --name mig-test`, run `alembic upgrade head` against the branch URL, inspect, then delete the branch.
 - **Backups**: Neon keeps point-in-time history (restore window per plan). For an extra copy:
@@ -65,6 +65,12 @@ Nothing secret is committed. Local development uses `backend/.env` (git-ignored)
 
 History: the database moved from Render PostgreSQL to Neon on 27 Sep 2026 (row counts and the audit chain verified
 identical after the move). The old Render database `jeevia-db` is no longer used and can be deleted.
+
+## Translations (Hindi, Odia)
+
+Screens use `tr("English text")`; translations live in `frontend/src/lib/i18n/phrases/hi.ts` and `or.ts`, keyed by the
+exact English text. To translate a new screen, wrap its text in `tr(...)` and add the same English key with the Hindi and
+Odia text to both files — anything missing simply shows in English. Placeholders such as `{name}` must be kept.
 
 ## Facility directory (all of India)
 

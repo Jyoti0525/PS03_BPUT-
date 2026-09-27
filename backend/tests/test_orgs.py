@@ -21,6 +21,13 @@ def auth(r):
     return {"Authorization": f"Bearer {r.json()['tokens']['access_token']}"}
 
 
+def new_facility_with_supervisor(client, name="CHC Test"):
+    """A real (non-sample) facility with its own supervisor — new accounts may not join sample facilities."""
+    r, _ = register(client, "supervisor", f"Sup {name}", new_facility={"name": f"{name} {uuid.uuid4().hex[:4]}", "type": "chc", "district": "Khordha", "state": "Odisha"})
+    assert r.status_code == 200, r.text
+    return r.json()["user"]["facility_id"], auth(r)
+
+
 @pytest.fixture(scope="module")
 def loaded_directory(client, tmp_path_factory):
     rows = [
@@ -133,8 +140,9 @@ def test_employer_registers_org_then_staff_join_and_fitness_flows(client, loaded
     assert "TK-1" not in {w["employee_code"] for w in client.get(f"{API}/organisations/me/workers", headers=emp).json()}
 
 
-def test_supervisor_manages_staff(client, supervisor):
-    r, _ = register(client, "nurse", "Temp Nurse", registration_no="UPNC-7777", facility_id="fac_phc_manikpur")
+def test_supervisor_manages_staff(client):
+    fid, supervisor = new_facility_with_supervisor(client)
+    r, _ = register(client, "nurse", "Temp Nurse", registration_no="UPNC-7777", facility_id=fid)
     nurse = auth(r)
     uid = r.json()["user"]["id"]
     assert client.patch(f"{API}/users/{uid}", json={"role": "doctor"}, headers=nurse).status_code == 403
@@ -174,8 +182,9 @@ def test_login_helper_still_works(client):
     assert DEVICE
 
 
-def test_pin_setup_forgot_and_supervisor_reset(client, supervisor):
-    r, phone = register(client, "doctor", "Dr Reset", registration_no="UPMC-2222", facility_id="fac_phc_manikpur")
+def test_pin_setup_forgot_and_supervisor_reset(client):
+    fid, supervisor = new_facility_with_supervisor(client)
+    r, phone = register(client, "doctor", "Dr Reset", registration_no="UPMC-2222", facility_id=fid)
     uid = r.json()["user"]["id"]
     assert client.post(f"{API}/users/{uid}/reset-pin", headers=auth(r)).status_code == 403  # doctors can't
     assert client.post(f"{API}/users/{uid}/reset-pin", headers=supervisor).status_code == 204
@@ -186,7 +195,7 @@ def test_pin_setup_forgot_and_supervisor_reset(client, supervisor):
     assert client.post(f"{API}/auth/pin/setup", json={"pin_token": v["pin_token"], "pin": "5820"}).status_code == 200
     assert client.post(f"{API}/auth/pin/setup", json={"pin_token": v["pin_token"], "pin": "5821"}).status_code == 409  # already set
     # a supervisor may reset their own PIN after OTP
-    rs, sphone = register(client, "supervisor", "Sup Forgot", facility_id="fac_phc_manikpur")
+    rs, sphone = register(client, "supervisor", "Sup Forgot", facility_id=fid)
     ch = client.post(f"{API}/auth/otp/request", json={"phone": sphone}).json()
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
     assert v["can_reset_pin"] is True
@@ -209,3 +218,70 @@ def test_documents_only_for_treating_clinicians(client, doctor, nurse, superviso
     assert client.get(f"{API}/files/{fid}", headers=auth(r)).status_code == 403  # another facility
     views = client.get(f"{API}/audit", params={"action": "VIEW", "q": "Document opened"}, headers=doctor).json()
     assert views, "document views are audited"
+
+
+def test_signup_cannot_reuse_numbers_or_join_sample_facilities(client):
+    # an existing number is never signed in from the sign-up form
+    ch = client.post(f"{API}/auth/otp/request", json={"phone": "9000000001"}).json()
+    r = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": "123456", "purpose": "register"})
+    assert r.status_code == 409 and "already registered" in r.json()["detail"]
+    # a new account cannot join the sample facility, and it is hidden from the workplace search
+    r, _ = register(client, "doctor", "Dr Sample", registration_no="ODMC-1212", facility_id="fac_phc_manikpur")
+    assert r.status_code == 403
+    assert all(h["facility_id"] != "fac_phc_manikpur" for h in client.get(f"{API}/directory/search", params={"q": "manikpur"}).json())
+    # a freshly registered doctor starts with an empty workspace at their own facility
+    fid, _ = new_facility_with_supervisor(client, "PHC Fresh")
+    d, _ = register(client, "doctor", "Dr Fresh", registration_no="ODMC-3434", facility_id=fid)
+    h = auth(d)
+    assert d.json()["user"]["name"] == "Dr. Dr Fresh" or d.json()["user"]["name"].endswith("Fresh")
+    assert client.get(f"{API}/queue", params={"facility_id": fid}, headers=h).json() == []
+    assert client.get(f"{API}/escalations", headers=h).json() == []
+
+
+def test_front_desk_vs_supervisor(client, supervisor):
+    rec = login(client, "9000000003")
+    # supervisor-only tools
+    assert client.get(f"{API}/kiosk-links", headers=rec).status_code == 403
+    assert client.post(f"{API}/kiosk-links", json={"label": "Desk"}, headers=rec).status_code == 403
+    assert client.patch(f"{API}/facilities/fac_phc_manikpur", json={"beds_total": 9}, headers=rec).status_code == 403
+    assert client.get(f"{API}/audit", headers=rec).status_code == 403
+    assert client.get(f"{API}/retention", headers=rec).status_code == 403
+    assert client.get(f"{API}/kiosk-links", headers=supervisor).status_code == 200
+    # front desk: doctors and nurses only, and their duty status
+    staff = client.get(f"{API}/users", headers=rec).json()
+    assert staff and {u["role"] for u in staff} <= {"doctor", "nurse"}
+    assert {"supervisor", "receptionist"} <= {u["role"] for u in client.get(f"{API}/users", headers=supervisor).json()}
+    doc = next(u for u in staff if u["role"] == "doctor")
+    off = client.patch(f"{API}/users/{doc['id']}/duty", json={"on_duty": False}, headers=rec).json()
+    assert off["on_duty"] is False and off["duty_changed_at"]
+    assert client.patch(f"{API}/users/{doc['id']}/duty", json={"on_duty": True}, headers=rec).json()["on_duty"] is True
+    me = client.get(f"{API}/auth/me", headers=supervisor).json()
+    assert client.patch(f"{API}/users/{me['id']}/duty", json={"on_duty": False}, headers=rec).status_code == 404  # doctors and nurses only
+    assert client.get(f"{API}/facilities/fac_phc_manikpur/tokens", headers=rec).status_code == 200
+
+
+def test_nurse_records_observations_but_cannot_refer(client, doctor, nurse):
+    q = client.get(f"{API}/queue?facility_id=fac_phc_manikpur", headers=nurse).json()
+    item = next(i for i in q if i["urgency"] != "red")
+    eid = item["encounter_id"]
+    r = client.post(f"{API}/encounters/{eid}/observations", json={"vitals": {"spo2": 86, "pulse": 118}, "note": "Looks breathless at rest"}, headers=nurse)
+    assert r.status_code == 200, r.text
+    enc = r.json()
+    assert enc["urgency"] == "red"  # rules re-run on the new vitals
+    assert enc["note"]["observations"][-1]["note"] == "Looks breathless at rest"
+    assert any(v["label"] == "SpO₂" and v["value"] == "86" for v in enc["note"]["vitals"])
+    assert client.post(f"{API}/encounters/{eid}/observations", json={}, headers=nurse).status_code == 422
+    # doctor-only clinical decisions
+    assert client.post(f"{API}/encounters/{eid}/referrals", json={"destination": "DH", "specialty": "Medicine", "reason": "needs review", "note_text": "x", "transport": "self"}, headers=nurse).status_code == 403
+    assert client.get(f"{API}/referrals", headers=nurse).status_code == 403
+    assert client.get(f"{API}/encounters/{eid}/export", headers=nurse).status_code == 403
+    assert client.post(f"{API}/encounters/{eid}/shares", json={"hours": 24}, headers=nurse).status_code == 403
+    assert client.patch(f"{API}/encounters/{eid}", json={"referral_needed": True}, headers=nurse).status_code == 403
+    assert client.get(f"{API}/referrals", headers=doctor).status_code == 200
+
+
+def test_user_language_preference(client):
+    h = login(client, "9000000002")
+    assert client.patch(f"{API}/auth/me", json={"language": "or"}, headers=h).json()["language"] == "or"
+    assert client.get(f"{API}/auth/me", headers=h).json()["language"] == "or"
+    client.patch(f"{API}/auth/me", json={"language": "hi"}, headers=h)

@@ -49,8 +49,12 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
 | `src/lib/offline/precache.ts` | After a kiosk opens online, sends the service worker the page URL and every loaded `/_next/static` asset so the kiosk reloads with no network. |
 | `src/components/intake/*` | Kiosk / patient intake flow: consent → identity (household phone disambiguation) → visit type → voice / icons / text → duration & severity (+ maternal / chronic branches) → uploads → follow-ups → staff vitals → review → token + QR. |
 | `src/components/triage/*` | Urgency badge, flag list, value table with **source evidence** (image crop / transcript / device), sparkline trends, `NoteView` at doctor or nurse density. |
-| `src/app/reviewer/*` | Queue, case view (confirm / edit / override / escalate / referral / export), lookup by ID · QR · phone, escalations with acknowledgement, referrals. |
-| `src/app/admin/*` | Overview (counts only), facility setup wizard, kiosk devices, staff, audit log (verify chain, CSV), data retention. |
+| `src/app/reviewer/*` | **Doctor only.** Queue, case view (confirm / edit / override / escalate / referral / export / QR, nurses' observations), lookup by ID · QR · phone, escalations with acknowledgement, referrals. |
+| `src/app/nurse/*` | **Nursing station.** Patients to attend (vitals needed first), patient view with vitals & observations form, nurse checklist, reports, alert doctor; lookup. |
+| `src/app/desk/*` | **Front desk (receptionist).** Today's patients and waiting times, token board with corrections, find & register patients, doctors & nurses on/off duty. |
+| `src/app/admin/*` | **Supervisor only.** Overview (counts only), staff & duty, facility setup wizard, kiosk links, devices, audit log (verify chain, CSV), data retention. |
+| `components/layout/app-shell.tsx` | Shared shell; each workspace has its own colour and label (doctor ink, nurse teal, front desk blue, supervisor coral). |
+| `components/triage/observations.tsx`, `components/staff/duty.tsx` | Vitals & observations form/list; on-duty list with switches. |
 | `src/app/patient/*` | Patient self-service (no urgency). |
 | `src/app/employer/*` | Employer portal: fitness overview by department, worker roster (add / CSV import / remove), workplaces, organisation profile. Never any clinical record. |
 | `src/app/auth/page.tsx`, `components/auth/*` | Sign-in (OTP → PIN step, forgot PIN), registration with the national workplace search, organisation registration for employers, PIN creation; Change PIN modal in the dashboard header. |
@@ -62,7 +66,8 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
 | `lib/status.ts`, `components/site/system-status.tsx` | Shared live status store (polls `/health`), status panel, header dot, wake and restart. |
 | `src/app/api/ops/restart/route.ts` | Server-only route: verifies a supervisor JWT and asks Render to restart the API. |
 | `lib/image.ts` | In-browser photo compression before upload. |
-| `src/lib/i18n/*` | 22 scheduled languages + English in the picker; full UI strings for English, Hindi, Odia. |
+| `src/lib/i18n/*` | 22 scheduled languages + English in the picker. Every screen is translated into Hindi and Odia: components call `tr("English text")` from `usePrefs()`, and `i18n/phrases/{hi,or}.ts` (loaded on demand, cached for offline kiosks) map the English text to the translation; missing phrases fall back to English. Kiosk step keys use `i18n/dict.ts`. The signed-in user's saved language is applied at sign-in; changing it from the header saves it (`PATCH /auth/me`). |
+| `src/lib/speech.ts` | Speech recognition and read-aloud in the chosen language; picks an installed voice for that language and reports when none exists. |
 
 Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
@@ -93,12 +98,12 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /auth/otp/request`, `POST /auth/otp/verify` (patients: tokens; staff/employers: `pin_required` or `pin_setup_required` + `pin_token`), `POST /auth/pin/verify`, `POST /auth/pin/setup`, `POST /auth/pin/forgot` (supervisor/employer), `POST /auth/pin/change`, `POST /auth/register`, `POST /auth/refresh`, `GET /auth/me`, `POST /auth/logout` |
+| Auth | `POST /auth/otp/request`, `POST /auth/otp/verify` (patients: tokens; staff/employers: `pin_required` or `pin_setup_required` + `pin_token`; `purpose: "register"` refuses numbers that already have an account), `PATCH /auth/me` (language), `POST /auth/pin/verify`, `POST /auth/pin/setup`, `POST /auth/pin/forgot` (supervisor/employer), `POST /auth/pin/change`, `POST /auth/register`, `POST /auth/refresh`, `GET /auth/me`, `POST /auth/logout` |
 | Directory / organisations | `GET /directory/search?q=&state=`, `GET /directory/states`, `GET/PATCH /organisations/me`, `POST /organisations/me/facilities`, `GET/POST /organisations/me/workers`, `POST /organisations/me/workers/import`, `PATCH /organisations/me/workers/{code}`, `GET /employer/cohorts`, `POST /encounters/{id}/fitness` |
 | Devices | `GET/POST /devices`, `DELETE /devices/{id}` |
-| Facilities / users | `GET /facilities`, `GET/PATCH /facilities/{id}`, `GET /facilities/{id}/stats`, `GET /users`, `PATCH /users/{id}` (role, active), `POST /users/{id}/reset-pin` |
+| Facilities / users | `GET /facilities`, `GET/PATCH /facilities/{id}` (PATCH: supervisor), `GET /facilities/{id}/stats`, `GET /users` (supervisor: all staff; receptionist: doctors & nurses), `PATCH /users/{id}` (role, active), `POST /users/{id}/reset-pin`, `PATCH /users/{id}/duty` (receptionist / supervisor) |
 | Patients / consent | `GET /patients?q=`, `POST /patients` (optional `employee_code` at organisation workplaces), `GET /patients/{id}`, `PATCH /patients/{id}` (correction), `GET /patients/by-code/{code}`, `GET /patients/{id}/encounters`, `POST /consents` |
-| Encounters | `POST /encounters`, `GET /queue?facility_id=`, `GET/PATCH /encounters/{id}`, `POST /encounters/{id}/confirm`, `PATCH /encounters/{id}/note`, `POST /encounters/{id}/override`, `GET /encounters/{id}/export?format=pdf|print|json|csv|fhir` |
+| Encounters | `POST /encounters`, `GET /queue?facility_id=`, `GET/PATCH /encounters/{id}`, `POST /encounters/{id}/confirm`, `PATCH /encounters/{id}/note`, `POST /encounters/{id}/observations` (nurse/doctor: vitals + note, rules re-run), `POST /encounters/{id}/override`, `GET /encounters/{id}/export?format=pdf|print|json|csv|fhir` |
 | Escalation / referral | `POST /encounters/{id}/escalations`, `GET /escalations`, `POST /escalations/{id}/acknowledge`, `POST /encounters/{id}/referrals`, `GET /referrals` |
 | Files | `POST /files` (multipart, `kind`, optional `sample_key`), `GET /files/{id}`, `GET /files/{id}/content?sig=` |
 | Governance | `GET /audit`, `GET /audit/verify`, `GET /audit/export`, `GET /retention`, `GET /me/record`, `GET /employer/cohorts` |
@@ -108,19 +113,21 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 ### Role matrix
 
-| | doctor | nurse | receptionist / supervisor | patient | employer |
-|---|---|---|---|---|---|
-| Queue, case notes | ✔ | ✔ | ✘ (counts only) | own visits, no urgency / note | ✘ |
-| Patient documents and photos | ✔ at the treating facility | ✔ at the treating facility | ✘ | own files | ✘ |
-| Correct patient details | ✔ | ✔ | ✔ | ✘ | ✘ |
-| Record fitness | ✔ | ✘ | ✘ | ✘ | ✘ |
-| Confirm, override, referral, acknowledge | ✔ | ✘ | ✘ | ✘ | ✘ |
-| Edit note, escalate, export | ✔ | ✔ | ✘ | ✘ | ✘ |
-| Facility config, device revoke, retention | ✘ | ✘ | ✔ | ✘ | ✘ |
-| Staff role / deactivate / reset PIN | ✘ | ✘ | supervisor | ✘ | ✘ |
-| Audit log | ✔ | ✘ | ✔ | ✘ | ✘ |
-| Fitness outcomes, roster, workplaces | ✘ | ✘ | ✘ | ✘ | ✔ (own organisation) |
-| Sign-in factors | OTP + PIN | OTP + PIN | OTP + PIN | OTP | OTP + PIN |
+| | doctor | nurse | receptionist | supervisor | patient | employer |
+|---|---|---|---|---|---|---|
+| Workspace | `/reviewer` | `/nurse` | `/desk` | `/admin` | `/patient` | `/employer` |
+| Queue, case notes | ✔ | ✔ | ✘ (names, tokens, waits only) | ✘ (counts only) | own visits, no urgency / note | ✘ |
+| Vitals & bedside observations | ✔ | ✔ | ✘ | ✘ | ✘ | ✘ |
+| Patient documents and photos | ✔ at the treating facility | ✔ at the treating facility | ✘ | ✘ | own files | ✘ |
+| Find / correct patient details | ✔ | ✔ | ✔ | ✔ | ✘ | ✘ |
+| Doctors & nurses on/off duty | ✘ | ✘ | ✔ | ✔ | ✘ | ✘ |
+| Edit note, escalate (alert doctor) | ✔ | ✔ | ✘ | ✘ | ✘ | ✘ |
+| Confirm, override, referral, export, QR summary, acknowledge, fitness | ✔ | ✘ | ✘ | ✘ | ✘ | ✘ |
+| Facility config, kiosk links, devices, retention | ✘ | ✘ | ✘ | ✔ | ✘ | ✘ |
+| Staff role / deactivate / reset PIN | ✘ | ✘ | ✘ | ✔ | ✘ | ✘ |
+| Audit log | ✔ | ✘ | ✘ | ✔ | ✘ | ✘ |
+| Fitness outcomes, roster, workplaces | ✘ | ✘ | ✘ | ✘ | ✘ | ✔ (own organisation) |
+| Sign-in factors | OTP + PIN | OTP + PIN | OTP + PIN | OTP + PIN | OTP | OTP + PIN |
 
 ## 4. Spec item → implementation
 
@@ -166,7 +173,7 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 ## 5. Verification done
 
-* Backend: 50 pytest tests — rules; auth (OTP lockout and rate limits, two-factor PIN: setup, verify, lockout, forgot,
+* Backend: 54 pytest tests (incl. front desk vs supervisor, nurse observations vs doctor-only actions, sign-up number reuse, language preference) — rules; auth (OTP lockout and rate limits, two-factor PIN: setup, verify, lockout, forgot,
   change, supervisor reset; refresh rotation; logout revocation); bound-device intake; idempotent replay; overrides;
   escalation acknowledgement; exports; RBAC for every role; patient isolation on a shared household phone; document
   access (treating clinicians only); directory search; organisation onboarding; roster and CSV import; fitness →

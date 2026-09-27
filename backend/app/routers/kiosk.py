@@ -22,6 +22,7 @@ from .auth import user_out
 
 router = APIRouter(tags=["kiosk"])
 Admin = Annotated[User, Depends(require(*ADMIN_ROLES))]
+Supervisor = Annotated[User, Depends(require("supervisor"))]
 Kiosk = Annotated[User, Depends(require("kiosk"))]
 ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O/1/I — easy to read aloud
 
@@ -55,20 +56,20 @@ def create_link(db, facility_id: str, label: str, created_by: User | None, code:
 
 # ── Admin ─────────────────────────────────────────────
 @router.get("/kiosk-links", response_model=list[KioskLinkOut])
-def list_links(user: Admin, db: DB):
+def list_links(user: Supervisor, db: DB):
     rows = db.scalars(select(KioskLink).where(KioskLink.facility_id == user.facility_id).order_by(KioskLink.created_at.desc()))
     return [_link_out(db, k) for k in rows]
 
 
 @router.post("/kiosk-links", response_model=KioskLinkOut)
-def new_link(body: KioskLinkIn, user: Admin, db: DB):
+def new_link(body: KioskLinkIn, user: Supervisor, db: DB):
     k = create_link(db, user.facility_id, body.label.strip(), user)
     audit.record(db, user, "DEVICE", "kiosk_link", k.id, f"Kiosk link '{k.label}' created ({k.code})")
     return _link_out(db, k)
 
 
 @router.delete("/kiosk-links/{lid}", status_code=204)
-def revoke_link(lid: str, user: Admin, db: DB):
+def revoke_link(lid: str, user: Supervisor, db: DB):
     k = db.get(KioskLink, lid)
     if not k or k.facility_id != user.facility_id:
         raise HTTPException(404, "Kiosk link not found")

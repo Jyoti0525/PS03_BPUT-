@@ -11,6 +11,7 @@ import { Badge, Button, Card } from "@/components/ui";
 import dynamic from "next/dynamic";
 import { subscribeOutbox, type OutboxItem } from "@/lib/offline/outbox";
 import { precacheCurrentPage } from "@/lib/offline/precache";
+import { loadPhrases } from "@/lib/i18n/phrases";
 import type { KioskInfo } from "@/lib/types";
 
 /** The intake wizard loads after the start screen; it is fetched (and cached for offline) as soon as the kiosk activates. */
@@ -52,7 +53,7 @@ function saveInfo(code: string, info: KioskInfo | null) {
 export default function PublicKiosk() {
   const { code } = useParams<{ code: string }>();
   const { user, loading, signIn } = useSession();
-  const { t } = usePrefs();
+  const { tr, t } = usePrefs();
   const online = useOnline();
   const [info, setInfo] = useState<KioskInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -90,9 +91,10 @@ export default function PublicKiosk() {
           const r = await api.kioskSession(code, getDeviceId());
           if (live) signIn(r.tokens, r.user);
         }
-        if (reachable) loadIntake().then(() => precacheCurrentPage(), () => precacheCurrentPage());
+        // Fetch the intake wizard and the Hindi/Odia screens now, so they are cached for offline use too.
+        if (reachable) Promise.allSettled([loadIntake(), loadPhrases("hi"), loadPhrases("or")]).then(() => precacheCurrentPage());
       } catch (e) {
-        if (live) setError(e instanceof Error ? e.message : "This kiosk link could not be opened.");
+        if (live) setError(e instanceof Error ? e.message : tr("This kiosk link could not be opened."));
       }
     })();
     return () => {
@@ -110,17 +112,17 @@ export default function PublicKiosk() {
           <Logo />
           {info && (
             <span className="hidden min-w-0 items-center gap-1.5 truncate text-sm text-muted md:flex">
-              <Building2 className="size-4 shrink-0" /> <span className="truncate font-semibold text-ink">{info.facility_name}</span> · {info.label}
+              <Building2 className="size-4 shrink-0" /> <span className="truncate font-semibold text-ink">{info.facility_name}</span> · {tr(info.label)}
             </span>
           )}
           <div className="ml-auto flex items-center gap-2">
             {online ? (
               <Badge tone="rout">
-                <Wifi className="size-3" /> <span className="hidden sm:inline">Online</span>
+                <Wifi className="size-3" /> <span className="hidden sm:inline">{tr("Online")}</span>
               </Badge>
             ) : (
               <Badge tone="semi">
-                <WifiOff className="size-3" /> Offline
+                <WifiOff className="size-3" /> {tr("Offline")}
               </Badge>
             )}
             {outbox.length > 0 && (
@@ -138,12 +140,12 @@ export default function PublicKiosk() {
       <main className="px-4 py-8">
         {error ? (
           <Card className="mx-auto max-w-md p-8 text-center">
-            <p className="text-xl font-bold text-ink">Link not active</p>
+            <p className="text-xl font-bold text-ink">{tr("Link not active")}</p>
             <p className="mt-2 text-muted">{error}</p>
           </Card>
         ) : !ready ? (
           <div className="flex items-center justify-center gap-2 py-24 text-muted">
-            <Loader2 className="size-5 animate-spin" /> Opening kiosk…
+            <Loader2 className="size-5 animate-spin" /> {tr("Opening kiosk…")}
           </div>
         ) : !started ? (
           <div className="fade-up mx-auto max-w-2xl text-center">
@@ -151,14 +153,14 @@ export default function PublicKiosk() {
               <Building2 className="size-3.5" /> {info.facility_name}
             </span>
             <h1 className="mt-6 text-4xl leading-tight font-extrabold tracking-tight text-ink sm:text-5xl">
-              Get your <span className="text-gradient">token</span>
+              {tr("Get your")} <span className="text-gradient">{tr("token")}</span>
             </h1>
             <p className="mx-auto mt-4 max-w-lg text-lg text-muted">{t("kiosk.welcome")}</p>
             <button
               onClick={() => setStarted(true)}
               className="bg-brand-gradient mx-auto mt-10 flex h-20 w-full max-w-sm items-center justify-center gap-3 rounded-full text-2xl font-bold text-white shadow-[0_18px_40px_-12px_rgb(242_145_145/0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
             >
-              <Ticket className="size-7" /> Start
+              <Ticket className="size-7" /> {tr("Start")}
             </button>
             <div className="mx-auto mt-12 grid max-w-xl gap-3 text-left sm:grid-cols-3">
               {[
@@ -168,7 +170,7 @@ export default function PublicKiosk() {
               ].map((x) => (
                 <div key={x.t} className="flex items-center gap-3 rounded-2xl border border-line bg-white/80 p-3 text-sm font-medium text-ink-2">
                   <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-700">{x.i}</span>
-                  {x.t}
+                  {tr(x.t)}
                 </div>
               ))}
             </div>
@@ -189,7 +191,7 @@ export default function PublicKiosk() {
         {ready && started && (
           <div className="no-print mx-auto mt-6 max-w-3xl text-center">
             <Button variant="ghost" size="sm" onClick={() => { setRound((n) => n + 1); setStarted(false); }}>
-              Cancel and start over
+              {tr("Cancel and start over")}
             </Button>
           </div>
         )}

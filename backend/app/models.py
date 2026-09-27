@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, event
+from sqlalchemy import Boolean, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, event, true as sa_true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base, JSONType, UTCDateTime
@@ -103,6 +103,9 @@ class User(Base):
     pin_set_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     pin_failed_attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     pin_locked_until: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    # Front-desk time management: whether a doctor / nurse is on duty right now.
+    on_duty: Mapped[bool] = mapped_column(Boolean, default=True, server_default=sa_true())
+    duty_changed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
 
 
 class OtpChallenge(Base):

@@ -38,6 +38,7 @@ import type {
   TriageNote,
   Urgency,
   User,
+  VitalsInput,
 } from "@/lib/types";
 
 export interface ExportResult {
@@ -55,7 +56,8 @@ export interface JeeviaApi {
 
   // Auth — phone + OTP, PIN, device binding, JWT
   requestOtp(phone: string): Promise<OtpChallenge>;
-  verifyOtp(challengeId: string, code: string): Promise<OtpVerifyResult>;
+  /** `purpose: "register"` refuses numbers that already have an account (never signs them in). */
+  verifyOtp(challengeId: string, code: string, purpose?: "signin" | "register"): Promise<OtpVerifyResult>;
   register(input: RegisterInput): Promise<{ tokens: Tokens; user: User }>;
   /** Second factor after OTP for staff and employers. */
   verifyPin(pinToken: string, pin: string): Promise<{ tokens: Tokens; user: User }>;
@@ -64,6 +66,7 @@ export interface JeeviaApi {
   changePin(currentPin: string, newPin: string): Promise<void>;
   resetStaffPin(userId: string): Promise<void>;
   me(): Promise<User>;
+  updateMe(patch: { language?: string }): Promise<User>;
   logout(): Promise<void>;
 
   // Devices (kiosk binding)
@@ -117,6 +120,8 @@ export interface JeeviaApi {
 
   // Users
   listUsers(): Promise<User[]>;
+  setDuty(userId: string, onDuty: boolean): Promise<User>;
+  addObservations(encounterId: string, input: { vitals?: VitalsInput | null; note?: string | null }): Promise<Encounter>;
 
   // Patients
   searchPatients(q: string): Promise<PatientCandidate[]>;

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useState } from "react";
 import { Building2, MapPin, Plus } from "lucide-react";
 import { PageHeader } from "@/components/layout/app-shell";
@@ -19,6 +20,7 @@ const TYPES: { v: FacilityType; label: string }[] = [
 const label = (t: FacilityType) => TYPES.find((x) => x.v === t)?.label ?? t.replace(/_/g, " ");
 
 export default function WorkplacesPage() {
+  const { tr } = usePrefs();
   const { data, error, loading, reload } = useAsync(() => api.myOrganisation(), []);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<NewFacilityInput>({ name: "", type: "company_clinic", district: "", state: "" });
@@ -33,7 +35,7 @@ export default function WorkplacesPage() {
 
   async function save() {
     setErr(null);
-    if (form.name.trim().length < 3 || form.district.trim().length < 2 || form.state.trim().length < 2) return setErr("Enter the name, district and state");
+    if (form.name.trim().length < 3 || form.district.trim().length < 2 || form.state.trim().length < 2) return setErr(tr("Enter the name, district and state"));
     setBusy(true);
     try {
       await api.addOrganisationFacility({ ...form, name: form.name.trim(), pincode: form.pincode || null });
@@ -41,7 +43,7 @@ export default function WorkplacesPage() {
       setOpen(false);
       reload();
     } catch (e) {
-      setErr(e instanceof ApiError ? e.message : "Could not add workplace");
+      setErr(e instanceof ApiError ? e.message : tr("Could not add workplace"));
     } finally {
       setBusy(false);
     }
@@ -52,11 +54,11 @@ export default function WorkplacesPage() {
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
-        title="Workplaces"
-        subtitle="Health centres run by your organisation. Each one appears in Jeevia’s workplace search so doctors and nurses can join it."
+        title={tr("Workplaces")}
+        subtitle={tr("Health centres run by your organisation. Each one appears in Jeevia’s workplace search so doctors and nurses can join it.")}
         actions={
           <Button icon={<Plus className="size-4" />} onClick={start}>
-            Add workplace
+            {tr("Add workplace")}
           </Button>
         }
       />
@@ -75,56 +77,56 @@ export default function WorkplacesPage() {
                   {f.pincode && ` · ${f.pincode}`}
                 </p>
               </div>
-              <Badge tone="teal">Listed</Badge>
+              <Badge tone="teal">{tr("Listed")}</Badge>
             </div>
           </Card>
         ))}
       </div>
-      <p className="mt-4 text-xs text-muted">Doctors, nurses and receptionists join a workplace by searching for it at sign-up. Their supervisor can then create kiosk links for walk-in intake.</p>
+      <p className="mt-4 text-xs text-muted">{tr("Doctors, nurses and receptionists join a workplace by searching for it at sign-up. Their supervisor can then create kiosk links for walk-in intake.")}</p>
 
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Add a workplace"
+        title={tr("Add a workplace")}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={save} loading={busy}>Add workplace</Button>
+            <Button variant="ghost" onClick={() => setOpen(false)}>{tr("Cancel")}</Button>
+            <Button onClick={save} loading={busy}>{tr("Add workplace")}</Button>
           </>
         }
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label htmlFor="wp-name">Name</Label>
-            <Input id="wp-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Plant 2 First-aid Centre" />
+            <Label htmlFor="wp-name">{tr("Name")}</Label>
+            <Input id="wp-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={tr("e.g. Plant 2 First-aid Centre")} />
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="wp-type">Type</Label>
+            <Label htmlFor="wp-type">{tr("Type")}</Label>
             <Select id="wp-type" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as FacilityType })}>
               {TYPES.map((t) => (
-                <option key={t.v} value={t.v}>{t.label}</option>
+                <option key={t.v} value={t.v}>{tr(t.label)}</option>
               ))}
             </Select>
           </div>
           <div>
-            <Label htmlFor="wp-dist">District</Label>
+            <Label htmlFor="wp-dist">{tr("District")}</Label>
             <Input id="wp-dist" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="wp-state">State</Label>
+            <Label htmlFor="wp-state">{tr("State")}</Label>
             <Select id="wp-state" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })}>
-              <option value="">Select</option>
+              <option value="">{tr("Select")}</option>
               {INDIAN_STATES.map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </Select>
           </div>
           <div>
-            <Label htmlFor="wp-pin" hint="(optional)">PIN code</Label>
+            <Label htmlFor="wp-pin" hint={tr("(optional)")}>{tr("PIN code")}</Label>
             <Input id="wp-pin" inputMode="numeric" value={form.pincode ?? ""} onChange={(e) => setForm({ ...form, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} />
           </div>
           <div>
-            <Label htmlFor="wp-addr" hint="(optional)">Address</Label>
+            <Label htmlFor="wp-addr" hint={tr("(optional)")}>{tr("Address")}</Label>
             <Input id="wp-addr" value={form.address ?? ""} onChange={(e) => setForm({ ...form, address: e.target.value })} />
           </div>
         </div>

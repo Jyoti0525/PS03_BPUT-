@@ -67,6 +67,7 @@ function PhoneField({ id, value, onChange }: { id: string; value: string; onChan
 
 /** Second factor: after the phone OTP, staff and employers enter (or create) their account PIN. */
 function PinStep({ gate, onGate, onDone, onCancel }: { gate: PinGate; onGate: (g: PinGate) => void; onDone: (r: { tokens: Parameters<ReturnType<typeof useSession>["signIn"]>[0]; user: User }) => void; onCancel: () => void }) {
+  const { tr } = usePrefs();
   const [pin, setPin] = useState("");
   const [confirm, setConfirm] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -79,7 +80,7 @@ function PinStep({ gate, onGate, onDone, onCancel }: { gate: PinGate; onGate: (g
     if (setup) {
       const p = newPinError(pin, confirm);
       if (p) return setErr(p);
-    } else if (!/^\d{4,6}$/.test(pin)) return setErr("Your PIN is 4–6 digits");
+    } else if (!/^\d{4,6}$/.test(pin)) return setErr(tr("Your PIN is 4–6 digits"));
     setBusy(true);
     try {
       onDone(setup ? await api.setupPin(gate.pin_token, pin) : await api.verifyPin(gate.pin_token, pin));
@@ -101,7 +102,7 @@ function PinStep({ gate, onGate, onDone, onCancel }: { gate: PinGate; onGate: (g
         setPin("");
         setConfirm("");
         onGate(r);
-        toast("Phone verified — choose a new PIN", "info");
+        toast(tr("Phone verified — choose a new PIN"), "info");
       }
     } catch (e) {
       setErr(errMsg(e));
@@ -115,103 +116,104 @@ function PinStep({ gate, onGate, onDone, onCancel }: { gate: PinGate; onGate: (g
       <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-teal-50 text-teal-700">
         <LockKeyhole className="size-6" />
       </div>
-      <p className="text-xs font-semibold tracking-wide text-teal-700 uppercase">Step 2 of 2 · Account PIN</p>
+      <p className="text-xs font-semibold tracking-wide text-teal-700 uppercase">{tr("Step 2 of 2 · Account PIN")}</p>
       <h2 className="mt-1 text-xl font-bold text-ink">{setup ? `Create your PIN, ${gate.name.split(" ")[0]}` : `Welcome back, ${gate.name.split(" ")[0]}`}</h2>
       <p className="mt-1 text-sm text-muted">
-        {setup ? "Your dashboard is protected by two factors: your phone OTP and a PIN only you know. You will need it every time you sign in." : "Phone verified. Enter your 4–6 digit account PIN to open your dashboard."}
+        {setup ? tr("Your dashboard is protected by two factors: your phone OTP and a PIN only you know. You will need it every time you sign in.") : tr("Phone verified. Enter your 4–6 digit account PIN to open your dashboard.")}
       </p>
       <div className="mt-5">
         {setup ? (
           <NewPinFields pin={pin} confirm={confirm} onPin={setPin} onConfirm={setConfirm} />
         ) : (
           <>
-            <Label htmlFor="pin">Account PIN</Label>
-            <PinInput id="pin" value={pin} onChange={setPin} autoFocus onEnter={submit} label="Account PIN" />
+            <Label htmlFor="pin">{tr("Account PIN")}</Label>
+            <PinInput id="pin" value={pin} onChange={setPin} autoFocus onEnter={submit} label={tr("Account PIN")} />
           </>
         )}
         <FieldError>{err}</FieldError>
       </div>
       <Button className="mt-5 w-full" size="lg" onClick={submit} loading={busy} icon={<KeyRound className="size-4" />}>
-        {setup ? "Save PIN & continue" : "Unlock dashboard"}
+        {setup ? tr("Save PIN & continue") : tr("Unlock dashboard")}
       </Button>
       <div className="mt-3 flex items-center justify-between text-sm">
         <button onClick={onCancel} className="inline-flex items-center gap-1 font-medium text-muted hover:text-ink">
-          <ArrowLeft className="size-4" /> Use another number
+          <ArrowLeft className="size-4" /> {tr("Use another number")}
         </button>
         {!setup && (
           <button onClick={forgot} className="font-semibold text-teal-700 hover:underline">
-            Forgot PIN?
+            {tr("Forgot PIN?")}
           </button>
         )}
       </div>
-      {askSupervisor && <p className="mt-3 rounded-xl bg-coral-50 p-3 text-sm text-ink-2">For your security, only your facility supervisor can reset a doctor, nurse or receptionist PIN. Ask them to open Admin → Staff → Reset PIN, then sign in again to create a new one.</p>}
+      {askSupervisor && <p className="mt-3 rounded-xl bg-coral-50 p-3 text-sm text-ink-2">{tr("For your security, only your facility supervisor can reset a doctor, nurse or receptionist PIN. Ask them to open Admin → Staff → Reset PIN, then sign in again to create a new one.")}</p>}
     </Card>
   );
 }
 
 function OrganisationForm({ value, onChange }: { value: NewOrganisationInput; onChange: (o: NewOrganisationInput) => void }) {
+  const { tr } = usePrefs();
   const set = (p: Partial<NewOrganisationInput>) => onChange({ ...value, ...p });
   const setFac = (p: Partial<NewOrganisationInput["facility"]>) => onChange({ ...value, facility: { ...value.facility, ...p } });
   return (
     <div className="space-y-3">
       <div>
-        <Label htmlFor="org-name">Organisation name</Label>
-        <Input id="org-name" value={value.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Kalinga Steel Works Ltd." />
+        <Label htmlFor="org-name">{tr("Organisation name")}</Label>
+        <Input id="org-name" value={value.name} onChange={(e) => set({ name: e.target.value })} placeholder={tr("e.g. Kalinga Steel Works Ltd.")} />
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="org-kind">Type</Label>
+          <Label htmlFor="org-kind">{tr("Type")}</Label>
           <Select id="org-kind" value={value.kind} onChange={(e) => set({ kind: e.target.value as OrgKind })}>
             {ORG_KINDS.map((k) => (
               <option key={k.v} value={k.v}>
-                {k.label}
+                {tr(k.label)}
               </option>
             ))}
           </Select>
         </div>
         <div>
-          <Label htmlFor="org-reg" hint="(optional)">CIN / registration no.</Label>
+          <Label htmlFor="org-reg" hint={tr("(optional)")}>{tr("CIN / registration no.")}</Label>
           <Input id="org-reg" value={value.registration_no ?? ""} onChange={(e) => set({ registration_no: e.target.value })} />
         </div>
         <div>
-          <Label htmlFor="org-state">State</Label>
+          <Label htmlFor="org-state">{tr("State")}</Label>
           <Select id="org-state" value={value.state} onChange={(e) => onChange({ ...value, state: e.target.value, facility: { ...value.facility, state: value.facility.state || e.target.value } })}>
-            <option value="">Select</option>
+            <option value="">{tr("Select")}</option>
             {INDIAN_STATES.map((s) => (
               <option key={s}>{s}</option>
             ))}
           </Select>
         </div>
         <div>
-          <Label htmlFor="org-dist">District</Label>
+          <Label htmlFor="org-dist">{tr("District")}</Label>
           <Input id="org-dist" value={value.district} onChange={(e) => onChange({ ...value, district: e.target.value, facility: { ...value.facility, district: e.target.value } })} />
         </div>
       </div>
       <div className="space-y-3 rounded-xl border border-coral-200 bg-coral-50/40 p-3">
         <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-          <Building2 className="size-4 text-coral-600" /> First workplace health centre
+          <Building2 className="size-4 text-coral-600" /> {tr("First workplace health centre")}
         </p>
         <div>
-          <Label htmlFor="of-name">Name</Label>
-          <Input id="of-name" value={value.facility.name} onChange={(e) => setFac({ name: e.target.value })} placeholder="e.g. KSW Occupational Health Centre" />
+          <Label htmlFor="of-name">{tr("Name")}</Label>
+          <Input id="of-name" value={value.facility.name} onChange={(e) => setFac({ name: e.target.value })} placeholder={tr("e.g. KSW Occupational Health Centre")} />
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <Label htmlFor="of-type">Type</Label>
+            <Label htmlFor="of-type">{tr("Type")}</Label>
             <Select id="of-type" value={value.facility.type} onChange={(e) => setFac({ type: e.target.value as FacilityType })}>
               {ORG_FAC_TYPES.map((k) => (
                 <option key={k.v} value={k.v}>
-                  {k.label}
+                  {tr(k.label)}
                 </option>
               ))}
             </Select>
           </div>
           <div>
-            <Label htmlFor="of-pin" hint="(optional)">PIN code</Label>
+            <Label htmlFor="of-pin" hint={tr("(optional)")}>{tr("PIN code")}</Label>
             <Input id="of-pin" inputMode="numeric" value={value.facility.pincode ?? ""} onChange={(e) => setFac({ pincode: e.target.value.replace(/\D/g, "").slice(0, 6) })} />
           </div>
         </div>
-        <p className="text-xs text-muted">Once registered, your doctors, nurses and workers can pick this workplace when they sign up. Add more sites later from the employer portal.</p>
+        <p className="text-xs text-muted">{tr("Once registered, your doctors, nurses and workers can pick this workplace when they sign up. Add more sites later from the employer portal.")}</p>
       </div>
     </div>
   );
@@ -220,7 +222,7 @@ function OrganisationForm({ value, onChange }: { value: NewOrganisationInput; on
 function AuthInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const { t, lang } = usePrefs();
+  const { t, tr, lang } = usePrefs();
   const { signIn, user } = useSession();
   const [mode, setMode] = useState<"signin" | "register">(params.get("mode") === "register" ? "register" : "signin");
   const next = params.get("next");
@@ -235,6 +237,7 @@ function AuthInner() {
   const [busy, setBusy] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [gate, setGate] = useState<PinGate | null>(null);
+  const [taken, setTaken] = useState(false);
 
   /* ── Registration state ── */
   const [stepKey, setStepKey] = useState<StepKey>("role");
@@ -285,7 +288,7 @@ function AuthInner() {
   async function sendOtp(): Promise<boolean> {
     setErr(null);
     if (!/^\d{10}$/.test(phone)) {
-      setErr("Enter a valid 10-digit mobile number");
+      setErr(tr("Enter a valid 10-digit mobile number"));
       return false;
     }
     setBusy(true);
@@ -305,18 +308,19 @@ function AuthInner() {
   }
 
   /** Verify the OTP; returns the result for the caller to route. */
-  async function verify(): Promise<OtpVerifyResult | null> {
+  async function verify(purpose: "signin" | "register" = "signin"): Promise<OtpVerifyResult | null> {
     if (!challenge) return null;
     setErr(null);
     if (otp.length !== 6) {
-      setErr("Enter all 6 digits");
+      setErr(tr("Enter all 6 digits"));
       return null;
     }
     setBusy(true);
     try {
-      return await api.verifyOtp(challenge.challenge_id, otp);
+      return await api.verifyOtp(challenge.challenge_id, otp, purpose);
     } catch (e) {
       setErr(errMsg(e));
+      setTaken(purpose === "register" && e instanceof ApiError && e.status === 409);
       return null;
     } finally {
       setBusy(false);
@@ -339,7 +343,7 @@ function AuthInner() {
       setRegToken(r.registration_token);
       setMode("register");
       setStepKey("role");
-      toast("Phone verified. This number is new — please register.", "info");
+      toast(tr("Phone verified. This number is new — please register."), "info");
       return;
     }
     routeExisting(r);
@@ -363,7 +367,7 @@ function AuthInner() {
   async function register() {
     if (!regToken || !role) return;
     setErr(null);
-    if (!terms) return setErr("Please accept the terms to continue");
+    if (!terms) return setErr(tr("Please accept the terms to continue"));
     setBusy(true);
     try {
       const r = await api.register({
@@ -381,7 +385,7 @@ function AuthInner() {
         device_id: getDeviceId(),
       });
       signIn(r.tokens, r.user);
-      toast("Registration complete");
+      toast(tr("Registration complete"));
     } catch (e) {
       setErr(errMsg(e));
     } finally {
@@ -434,8 +438,8 @@ function AuthInner() {
 
       {mode === "signin" ? (
         <div className="p-6">
-          <h2 className="text-xl font-bold text-ink">Welcome back</h2>
-          <p className="mt-1 text-sm text-muted">Sign in with your mobile number. Staff and employers then enter their account PIN.</p>
+          <h2 className="text-xl font-bold text-ink">{tr("Welcome back")}</h2>
+          <p className="mt-1 text-sm text-muted">{tr("Sign in with your mobile number. Staff and employers then enter their account PIN.")}</p>
 
           <div className="mt-5">
             <Label htmlFor="phone">{t("auth.phone")}</Label>
@@ -458,14 +462,14 @@ function AuthInner() {
                   `Resend in ${countdown}s`
                 ) : (
                   <button className="font-semibold text-teal-700" onClick={sendOtp}>
-                    Resend OTP
+                    {tr("Resend OTP")}
                   </button>
                 )}
-                {challenge.dev_code && <span className="ml-2 rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">demo code {challenge.dev_code}</span>}
+                {challenge.dev_code && <span className="ml-2 rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">{tr("demo code")} {challenge.dev_code}</span>}
               </p>
               <FieldError>{err}</FieldError>
               <Button className="mt-5 w-full" size="lg" onClick={verifySignIn} loading={busy}>
-                {t("auth.verify")} & continue
+                {t("auth.verify")} {tr("& continue")}
               </Button>
             </div>
           ) : (
@@ -480,7 +484,7 @@ function AuthInner() {
           {SHOW_SAMPLES && (
             <div className="mt-6 rounded-xl border border-dashed border-teal-300 bg-teal-50/60 p-3">
               <p className="text-xs font-semibold text-teal-800">
-                Sample accounts — OTP 123456 · staff PIN {SAMPLE_PIN}
+                {tr("Sample accounts — OTP 123456 · staff PIN")} {SAMPLE_PIN}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {DEMO_LOGINS.map((d) => (
@@ -501,7 +505,7 @@ function AuthInner() {
         </div>
       ) : (
         <div className="p-6">
-          <ol className="mb-5 flex items-center gap-1.5" aria-label="Registration progress">
+          <ol className="mb-5 flex items-center gap-1.5" aria-label={tr("Registration progress")}>
             {steps.map((s, i) => (
               <li key={s} className="flex flex-1 flex-col gap-1">
                 <span className={cx("h-1.5 rounded-full", i < stepIdx ? "bg-teal-600" : i === stepIdx ? "bg-coral-500" : "bg-line")} />
@@ -518,8 +522,8 @@ function AuthInner() {
                   <button key={c.role} onClick={() => setRole(c.role)} aria-pressed={role === c.role} className={cx("flex items-start gap-3 rounded-xl border p-3 text-left transition-colors", role === c.role ? "border-teal-600 bg-teal-50" : "border-line hover:bg-canvas")}>
                     <span className={cx("mt-0.5 [&>svg]:size-5", role === c.role ? "text-teal-700" : "text-muted")}>{c.icon}</span>
                     <span>
-                      <span className="block text-sm font-semibold text-ink">{c.label}</span>
-                      <span className="block text-xs text-muted">{c.body}</span>
+                      <span className="block text-sm font-semibold text-ink">{tr(c.label)}</span>
+                      <span className="block text-xs text-muted">{tr(c.body)}</span>
                     </span>
                   </button>
                 ))}
@@ -527,25 +531,25 @@ function AuthInner() {
               <Button className="mt-5 w-full" size="lg" disabled={!role} onClick={nextStep}>
                 {t("common.next")}
               </Button>
-              {regToken && <p className="mt-3 text-center text-xs text-teal-700">Phone +91 {phone} already verified.</p>}
+              {regToken && <p className="mt-3 text-center text-xs text-teal-700">{tr("Phone +91")} {phone} {tr("already verified.")}</p>}
             </div>
           )}
 
           {stepKey === "info" && role && (
             <div className="fade-up space-y-4">
-              <h2 className="text-xl font-bold text-ink">Personal info</h2>
+              <h2 className="text-xl font-bold text-ink">{tr("Personal info")}</h2>
               <div>
-                <Label htmlFor="name">{role === "employer" ? "Your full name (HR / admin contact)" : "Full name"}</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={role === "doctor" ? "Deepa Sharma" : "Your name"} />
+                <Label htmlFor="name">{role === "employer" ? tr("Your full name (HR / admin contact)") : tr("Full name")}</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={role === "doctor" ? tr("Deepa Sharma") : tr("Your name")} />
               </div>
               {CLINICAL.includes(role) && (
                 <div>
-                  <Label htmlFor="regno" hint="(State medical / nursing council)">Registration number</Label>
-                  <Input id="regno" value={regNo} onChange={(e) => setRegNo(e.target.value)} placeholder="e.g. UPMC-48921" />
+                  <Label htmlFor="regno" hint={tr("(State medical / nursing council)")}>{tr("Registration number")}</Label>
+                  <Input id="regno" value={regNo} onChange={(e) => setRegNo(e.target.value)} placeholder={tr("e.g. UPMC-48921")} />
                 </div>
               )}
               <div>
-                <Label htmlFor="plang">Preferred language</Label>
+                <Label htmlFor="plang">{tr("Preferred language")}</Label>
                 <Select id="plang" value={prefLang} onChange={(e) => setPrefLang(e.target.value)}>
                   {LANGUAGES.map((l) => (
                     <option key={l.code} value={l.code}>
@@ -562,8 +566,8 @@ function AuthInner() {
                   size="lg"
                   onClick={() => {
                     setErr(null);
-                    if (name.trim().length < 2) return setErr("Enter your full name");
-                    if (CLINICAL.includes(role) && regNo.trim().length < 4) return setErr("Registration number is required for clinical staff");
+                    if (name.trim().length < 2) return setErr(tr("Enter your full name"));
+                    if (CLINICAL.includes(role) && regNo.trim().length < 4) return setErr(tr("Registration number is required for clinical staff"));
                     nextStep();
                   }}
                 >
@@ -576,8 +580,8 @@ function AuthInner() {
           {stepKey === "workplace" && role && (
             <div className="fade-up space-y-4">
               <div>
-                <h2 className="text-xl font-bold text-ink">{role === "employer" ? "Register your organisation" : "Where do you work?"}</h2>
-                <p className="mt-1 text-sm text-muted">{role === "employer" ? "Company clinics, industrial units, campuses and health camps are listed on Jeevia only after their organisation registers." : "Search any health facility in India by name, district or PIN code."}</p>
+                <h2 className="text-xl font-bold text-ink">{role === "employer" ? tr("Register your organisation") : tr("Where do you work?")}</h2>
+                <p className="mt-1 text-sm text-muted">{role === "employer" ? tr("Company clinics, industrial units, campuses and health camps are listed on Jeevia only after their organisation registers.") : tr("Search any health facility in India by name, district or PIN code.")}</p>
               </div>
               {role === "employer" ? <OrganisationForm value={org} onChange={setOrg} /> : <WorkplacePicker role={role} value={workplace} onChange={setWorkplace} />}
               <FieldError>{err}</FieldError>
@@ -601,7 +605,7 @@ function AuthInner() {
           {stepKey === "phone" && (
             <div className="fade-up">
               <h2 className="text-xl font-bold text-ink">{t("auth.phone")}</h2>
-              <p className="mt-1 text-sm text-muted">We will send a one-time code to verify it.</p>
+              <p className="mt-1 text-sm text-muted">{tr("We will send a one-time code to verify it.")}</p>
               <div className="mt-4">
                 <PhoneField id="reg-phone" value={phone} onChange={setPhone} />
               </div>
@@ -617,17 +621,32 @@ function AuthInner() {
 
           {stepKey === "otp" && (
             <div className="fade-up">
-              <h2 className="text-xl font-bold text-ink">OTP verification</h2>
-              <p className="mt-1 text-sm text-muted">Sent to +91 {phone.slice(0, 5)}•••••</p>
+              <h2 className="text-xl font-bold text-ink">{tr("OTP verification")}</h2>
+              <p className="mt-1 text-sm text-muted">{tr("Sent to +91")} {phone.slice(0, 5)}•••••</p>
               <div className="mt-4">
                 <OtpBoxes value={otp} onChange={setOtp} autoFocus />
                 {challenge?.dev_code && (
                   <p className="mt-2 text-xs">
-                    <span className="rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">demo code {challenge.dev_code}</span>
+                    <span className="rounded bg-teal-50 px-1.5 py-0.5 font-mono text-teal-800">{tr("demo code")} {challenge.dev_code}</span>
                   </p>
                 )}
               </div>
               <FieldError>{err}</FieldError>
+              {taken && (
+                <Button
+                  variant="secondary"
+                  className="mt-3 w-full"
+                  onClick={() => {
+                    setTaken(false);
+                    setErr(null);
+                    setChallenge(null);
+                    setOtp("");
+                    setMode("signin");
+                  }}
+                >
+                  {tr("Sign in instead")}
+                </Button>
+              )}
               <div className="mt-5 flex gap-2">
                 {back}
                 <Button
@@ -635,16 +654,12 @@ function AuthInner() {
                   size="lg"
                   loading={busy}
                   onClick={async () => {
-                    const r = await verify();
-                    if (!r) return;
-                    if (r.status === "new_user") {
+                    const r = await verify("register");
+                    if (r?.status === "new_user") {
                       setRegToken(r.registration_token);
                       setErr(null);
                       setStepKey(steps[stepIdx + 1]);
-                      return;
                     }
-                    toast("This number is already registered — continue signing in.", "info");
-                    routeExisting(r);
                   }}
                 >
                   {t("auth.verify")}
@@ -658,8 +673,8 @@ function AuthInner() {
               <div className="mb-3 grid size-11 place-items-center rounded-2xl bg-teal-50 text-teal-700">
                 <LockKeyhole className="size-5" />
               </div>
-              <h2 className="text-xl font-bold text-ink">Create your account PIN</h2>
-              <p className="mt-1 mb-4 text-sm text-muted">Signing in to your dashboard will need both an OTP on this phone and this PIN. You can change it later from your dashboard.</p>
+              <h2 className="text-xl font-bold text-ink">{tr("Create your account PIN")}</h2>
+              <p className="mt-1 mb-4 text-sm text-muted">{tr("Signing in to your dashboard will need both an OTP on this phone and this PIN. You can change it later from your dashboard.")}</p>
               <NewPinFields pin={newPin} confirm={confirmPin} onPin={setNewPin} onConfirm={setConfirmPin} />
               <FieldError>{err}</FieldError>
               <div className="mt-5 flex gap-2">
@@ -681,13 +696,13 @@ function AuthInner() {
 
           {stepKey === "terms" && role && (
             <div className="fade-up">
-              <h2 className="text-xl font-bold text-ink">Terms & privacy</h2>
+              <h2 className="text-xl font-bold text-ink">{tr("Terms & privacy")}</h2>
               <div className="mt-3 max-h-52 space-y-2 overflow-y-auto rounded-xl border border-line bg-canvas p-3 text-sm text-muted">
-                <p><strong className="text-ink">Triage support, not diagnosis.</strong> Jeevia supports triage review. It does not diagnose, prescribe or replace a qualified professional.</p>
-                <p><strong className="text-ink">Role-based access.</strong> You only see what your role needs. Patient documents and photos open only for the doctors and nurses treating that patient. Employers see fitness status only.</p>
-                <p><strong className="text-ink">Two-factor sign-in.</strong> Staff and employer dashboards need a phone OTP and your account PIN. Never share your PIN.</p>
-                <p><strong className="text-ink">Audit.</strong> Every record you view, edit, override or export is written to an append-only audit log with your name.</p>
-                <p><strong className="text-ink">Retention.</strong> Raw voice recordings and photos are deleted automatically after the retention window.</p>
+                <p><strong className="text-ink">{tr("Triage support, not diagnosis.")}</strong> {tr("Jeevia supports triage review. It does not diagnose, prescribe or replace a qualified professional.")}</p>
+                <p><strong className="text-ink">{tr("Role-based access.")}</strong> {tr("You only see what your role needs. Patient documents and photos open only for the doctors and nurses treating that patient. Employers see fitness status only.")}</p>
+                <p><strong className="text-ink">{tr("Two-factor sign-in.")}</strong> {tr("Staff and employer dashboards need a phone OTP and your account PIN. Never share your PIN.")}</p>
+                <p><strong className="text-ink">{tr("Audit.")}</strong> {tr("Every record you view, edit, override or export is written to an append-only audit log with your name.")}</p>
+                <p><strong className="text-ink">{tr("Retention.")}</strong> {tr("Raw voice recordings and photos are deleted automatically after the retention window.")}</p>
               </div>
               <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3">
                 <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-0.5 size-5 accent-teal-700" />
@@ -698,7 +713,7 @@ function AuthInner() {
                 <p className="text-muted">
                   {roleLabel} · +91 {phone}
                   {role === "employer" ? ` · ${org.name}` : workplace ? ` · ${workplaceLabel(workplace)}` : ""}
-                  {PIN_ROLES.includes(role) && " · PIN set"}
+                  {PIN_ROLES.includes(role) && tr(" · PIN set")}
                 </p>
               </div>
               <FieldError>{err}</FieldError>
@@ -717,15 +732,16 @@ function AuthInner() {
 }
 
 export default function AuthPage() {
+  const { tr } = usePrefs();
   return (
     <div className="min-h-[calc(100vh-28px)] bg-[radial-gradient(60%_50%_at_100%_0%,var(--color-teal-100),transparent),radial-gradient(60%_50%_at_0%_100%,var(--color-coral-50),transparent)]">
       <SiteHeader />
       <div className="mx-auto grid max-w-6xl items-start gap-10 px-4 pt-8 pb-20 sm:px-6 lg:grid-cols-[1fr_460px]">
         <div className="hidden pt-8 lg:block">
           <h1 className="text-4xl leading-tight font-extrabold tracking-tight text-ink">
-            Secure, <span className="text-gradient">role-based</span> access
+            {tr("Secure,")} <span className="text-gradient">{tr("role-based")}</span> {tr("access")}
           </h1>
-          <p className="mt-3 max-w-md text-lg text-muted">Phone OTP plus a personal PIN for every staff and employer dashboard. Every session is logged.</p>
+          <p className="mt-3 max-w-md text-lg text-muted">{tr("Phone OTP plus a personal PIN for every staff and employer dashboard. Every session is logged.")}</p>
           <ul className="mt-8 space-y-3 text-sm text-ink-2">
             {[
               [<UserRound key="a" className="size-4" />, "Patients never see triage status — only their own visits and reminders."],

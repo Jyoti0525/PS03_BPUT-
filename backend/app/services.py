@@ -105,6 +105,32 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
     return enc
 
 
+def record_observations(db: Session, e: Encounter, user: User, vitals: dict, note: str) -> None:
+    """Bedside vitals / observations from a nurse or doctor. The note is rebuilt from the updated intake and the
+    deterministic rules run again, so new vitals (e.g. SpO2 88%) can raise urgency. A doctor's override is kept."""
+    intake = dict(e.intake or {})
+    if vitals:
+        intake["vitals"] = {**(intake.get("vitals") or {}), **vitals}
+    e.intake = intake
+    urgency, hits = evaluate(intake, e.patient.age)
+    history = [x for x in db.scalars(select(Encounter).where(Encounter.patient_id == e.patient_id).order_by(Encounter.created_at.desc())) if x.id != e.id]
+    files = [f for f in (db.get(FileObject, fid) for fid in intake.get("file_ids", [])) if f]
+    consent = db.get(Consent, intake["consent_id"]) if intake.get("consent_id") else None
+    old = dict(e.note or {})
+    new = build_note(intake=intake, patient=e.patient, hits=hits, files=files, history=history, proxy=bool(consent and consent.mode == "proxy"))
+    if old.get("edited_by"):  # keep what a clinician wrote by hand
+        new.update({k: old[k] for k in ("summary", "missing_info", "edited_by", "edited_at") if k in old})
+    obs = list(old.get("observations") or [])
+    obs.append({"by": user.name, "role": user.role, "at": now().isoformat(), "vitals": vitals, "note": note or None})
+    new["observations"] = obs
+    e.note = new
+    e.rules_urgency = urgency
+    if e.urgency_source == "rules" and urgency != e.urgency:
+        e.urgency = urgency
+        esc = escalate_after(urgency)
+        e.escalation_due_at = aware(e.created_at) + timedelta(minutes=esc) if esc else None
+
+
 def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
     out = EncounterOut(
         id=e.id,

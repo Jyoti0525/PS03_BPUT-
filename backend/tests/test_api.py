@@ -27,7 +27,7 @@ def test_register_requires_a_strong_pin_and_login_needs_otp_plus_pin(client):
     phone = "7" + uuid.uuid4().int.__str__()[:9]
     ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
-    reg = {"registration_token": v["registration_token"], "name": "New Nurse", "role": "nurse", "facility_id": "fac_phc_manikpur", "language": "hi", "accepted_terms": True, "registration_no": "UPNC-1111"}
+    reg = {"registration_token": v["registration_token"], "name": "New Nurse", "role": "nurse", "facility_id": "fac_kalinganagar", "language": "hi", "accepted_terms": True, "registration_no": "UPNC-1111"}
     assert client.post(f"{API}/auth/register", json=reg).status_code == 422  # PIN required
     assert "easy to guess" in client.post(f"{API}/auth/register", json={**reg, "pin": "1234"}).json()["detail"]
     assert client.post(f"{API}/auth/register", json={**reg, "pin": "4567"}).status_code == 422  # sequence
@@ -55,7 +55,7 @@ def test_pin_lockout(client):
     phone = "7" + uuid.uuid4().int.__str__()[:9]
     ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
-    client.post(f"{API}/auth/register", json={"registration_token": v["registration_token"], "name": "Lock Test", "role": "receptionist", "facility_id": "fac_phc_manikpur", "language": "en", "accepted_terms": True, "pin": GOOD_PIN})
+    client.post(f"{API}/auth/register", json={"registration_token": v["registration_token"], "name": "Lock Test", "role": "receptionist", "facility_id": "fac_kalinganagar", "language": "en", "accepted_terms": True, "pin": GOOD_PIN})
     ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
     codes = [client.post(f"{API}/auth/pin/verify", json={"pin_token": v["pin_token"], "pin": "9999"}).status_code for _ in range(5)]

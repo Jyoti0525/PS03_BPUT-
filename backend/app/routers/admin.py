@@ -16,8 +16,7 @@ from ..services import encounter_out, now, own_patient
 from .files import file_out
 
 router = APIRouter(tags=["governance"])
-Auditor = Annotated[User, Depends(require(*ADMIN_ROLES, "doctor"))]
-Admin = Annotated[User, Depends(require(*ADMIN_ROLES))]
+Auditor = Annotated[User, Depends(require("supervisor", "doctor"))]
 
 
 @router.get("/audit", response_model=list[AuditOut])
@@ -49,7 +48,7 @@ def export_audit(user: Auditor, db: DB):
 
 
 @router.get("/retention", response_model=RetentionOut)
-def retention(user: Admin, db: DB):
+def retention(user: Annotated[User, Depends(require("supervisor"))], db: DB):
     t = now()
     files = list(db.scalars(select(FileObject).order_by(FileObject.expires_at)))
     return RetentionOut(

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import Link from "next/link";
 import { useState } from "react";
 import { Link2, Tablet, UserRound, Ticket, Pencil } from "lucide-react";
@@ -27,22 +28,23 @@ const CHANNEL: Record<IntakeChannel, { label: string; icon: React.ReactNode }> =
 
 /** Today's tokens for the front desk. Names and status only — never symptoms or urgency. */
 export function TokenBoard({ facilityId, linkToCase }: { facilityId: string; linkToCase?: boolean }) {
+  const { tr } = usePrefs();
   const { data, reload } = useAsync(() => api.facilityTokens(facilityId), [facilityId], { pollMs: 10_000 });
   const [editing, setEditing] = useState<Patient | null>(null);
   const edit = async (pid: string) => {
     try {
       setEditing(await api.getPatient(pid));
     } catch (e) {
-      toast(e instanceof Error ? e.message : "Could not open patient", "error");
+      toast(e instanceof Error ? e.message : tr("Could not open patient"), "error");
     }
   };
   return (
     <Card>
-      <CardHeader title="Today's tokens" subtitle="Updates every 10 seconds · includes kiosk-link check-ins" icon={<Ticket className="size-4" />} action={<Badge tone="coral">{data?.length ?? 0} today</Badge>} />
+      <CardHeader title={tr("Today's tokens")} subtitle={tr("Updates every 10 seconds · includes kiosk-link check-ins")} icon={<Ticket className="size-4" />} action={<Badge tone="coral">{data?.length ?? 0} {tr("today")}</Badge>} />
       {!data ? (
-        <p className="px-4 py-6 text-sm text-muted">Loading…</p>
+        <p className="px-4 py-6 text-sm text-muted">{tr("Loading…")}</p>
       ) : data.length === 0 ? (
-        <Empty icon={<Ticket className="size-6" />} title="No tokens yet today" body="Tokens appear here the moment someone checks in." />
+        <Empty icon={<Ticket className="size-6" />} title={tr("No tokens yet today")} body={tr("Tokens appear here the moment someone checks in.")} />
       ) : (
         <ul className="max-h-[420px] divide-y divide-line overflow-y-auto">
           {data.map((t) => {
@@ -52,17 +54,17 @@ export function TokenBoard({ facilityId, linkToCase }: { facilityId: string; lin
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ink">{t.patient_name}</p>
                   <p className="flex items-center gap-1 text-xs text-muted">
-                    {CHANNEL[t.channel].icon} {CHANNEL[t.channel].label} · <span className="font-mono">{t.patient_code}</span>
+                    {CHANNEL[t.channel].icon} {tr(CHANNEL[t.channel].label)} · <span className="font-mono">{t.patient_code}</span>
                   </p>
                 </div>
                 <span className="text-xs text-subtle tabular-nums">{fmtWait(t.wait_minutes)}</span>
-                <Badge tone={STATUS[t.status].tone}>{STATUS[t.status].label}</Badge>
+                <Badge tone={STATUS[t.status].tone}>{tr(STATUS[t.status].label)}</Badge>
               </div>
             );
             return (
               <li key={t.encounter_id} className="flex items-center">
                 <div className="min-w-0 flex-1">{linkToCase ? <Link href={`/reviewer/case/${t.encounter_id}`} className="block hover:bg-canvas">{row}</Link> : row}</div>
-                <button onClick={() => edit(t.patient_id)} className="mr-2 rounded-lg p-2 text-subtle hover:bg-canvas hover:text-ink" aria-label={`Edit details for ${t.patient_name}`} title="Correct patient details">
+                <button onClick={() => edit(t.patient_id)} className="mr-2 rounded-lg p-2 text-subtle hover:bg-canvas hover:text-ink" aria-label={`Edit details for ${t.patient_name}`} title={tr("Correct patient details")}>
                   <Pencil className="size-4" />
                 </button>
               </li>

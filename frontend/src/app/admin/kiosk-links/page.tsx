@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, ExternalLink, Link2, Plus, Printer, ShieldOff, QrCode } from "lucide-react";
@@ -11,22 +12,23 @@ import { toast } from "@/components/ui/toast";
 import type { KioskLink } from "@/lib/types";
 
 export default function KioskLinksPage() {
+  const { tr } = usePrefs();
   const { data, error, loading, reload } = useAsync(() => api.listKioskLinks(), [], { pollMs: 30_000 });
   const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
   const [qr, setQr] = useState<KioskLink | null>(null);
 
   const create = async () => {
-    if (label.trim().length < 2) return toast("Give the link a name, e.g. 'OPD waiting area'", "error");
+    if (label.trim().length < 2) return toast(tr("Give the link a name, e.g. 'OPD waiting area'"), "error");
     setBusy(true);
     try {
       const k = await api.createKioskLink(label);
       setLabel("");
       reload();
       setQr(k);
-      toast("Kiosk link created");
+      toast(tr("Kiosk link created"));
     } catch (e) {
-      toast(e instanceof Error ? e.message : "Failed", "error");
+      toast(e instanceof Error ? e.message : tr("Failed"), "error");
     } finally {
       setBusy(false);
     }
@@ -34,25 +36,25 @@ export default function KioskLinksPage() {
 
   const copy = (url: string) => {
     navigator.clipboard?.writeText(url);
-    toast("Link copied");
+    toast(tr("Link copied"));
   };
 
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
-        title="Kiosk links"
-        subtitle="Share a link or print its QR. Anyone who opens it — a waiting-room tablet or a patient's own phone — can register and get a token for this facility. No staff login needed."
+        title={tr("Kiosk links")}
+        subtitle={tr("Share a link or print its QR. Anyone who opens it — a waiting-room tablet or a patient's own phone — can register and get a token for this facility. No staff login needed.")}
       />
 
       <Card className="p-4">
-        <Label htmlFor="kl-label">New link</Label>
+        <Label htmlFor="kl-label">{tr("New link")}</Label>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Input id="kl-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Where will it be used? e.g. OPD waiting area, Camp tablet 2" onKeyDown={(e) => e.key === "Enter" && create()} />
+          <Input id="kl-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder={tr("Where will it be used? e.g. OPD waiting area, Camp tablet 2")} onKeyDown={(e) => e.key === "Enter" && create()} />
           <Button onClick={create} loading={busy} variant="teal" icon={<Plus className="size-4" />}>
-            Create link
+            {tr("Create link")}
           </Button>
         </div>
-        <p className="mt-2 text-xs text-muted">A kiosk link can only register patients, record consent, upload reports and submit intakes. It can never read the queue or any notes. Revoke it any time.</p>
+        <p className="mt-2 text-xs text-muted">{tr("A kiosk link can only register patients, record consent, upload reports and submit intakes. It can never read the queue or any notes. Revoke it any time.")}</p>
       </Card>
 
       <div className="mt-5">
@@ -62,7 +64,7 @@ export default function KioskLinksPage() {
           <Spinner />
         ) : !data?.length ? (
           <Card>
-            <Empty icon={<Link2 className="size-6" />} title="No kiosk links yet" body="Create one above for each place patients will check in." />
+            <Empty icon={<Link2 className="size-6" />} title={tr("No kiosk links yet")} body={tr("Create one above for each place patients will check in.")} />
           </Card>
         ) : (
           <div className="grid gap-3">
@@ -74,28 +76,28 @@ export default function KioskLinksPage() {
                   </button>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-ink">{k.label}</p>
+                      <p className="font-semibold text-ink">{tr(k.label)}</p>
                       <span className="rounded-md bg-canvas px-2 py-0.5 font-mono text-sm font-bold tracking-widest text-ink-2">{k.code}</span>
-                      {k.revoked ? <Badge tone="crit">Revoked</Badge> : <Badge tone="rout">Active</Badge>}
+                      {k.revoked ? <Badge tone="crit">{tr("Revoked")}</Badge> : <Badge tone="rout">{tr("Active")}</Badge>}
                     </div>
                     <p className="mt-0.5 truncate font-mono text-xs text-muted">{k.url}</p>
                     <p className="mt-1 text-xs text-subtle">
-                      {k.intakes_today} intake{k.intakes_today === 1 ? "" : "s"} today · {k.sessions} session{k.sessions === 1 ? "" : "s"} opened
-                      {k.last_used_at && ` · last used ${timeAgo(k.last_used_at)}`} · created by {k.created_by}
+                      {k.intakes_today} {tr("intake")}{k.intakes_today === 1 ? "" : "s"} {tr("today ·")} {k.sessions} {tr("session")}{k.sessions === 1 ? "" : "s"} {tr("opened")}
+                      {k.last_used_at && ` · last used ${timeAgo(k.last_used_at)}`} {tr("· created by")} {k.created_by}
                     </p>
                   </div>
                   {!k.revoked && (
                     <div className="flex flex-wrap gap-2">
                       <Button size="sm" variant="secondary" icon={<Copy className="size-4" />} onClick={() => copy(k.url)}>
-                        Copy
+                        {tr("Copy")}
                       </Button>
                       <a href={k.url} target="_blank" rel="noreferrer">
                         <Button size="sm" variant="secondary" icon={<ExternalLink className="size-4" />}>
-                          Open
+                          {tr("Open")}
                         </Button>
                       </a>
                       <Button size="sm" variant="secondary" icon={<QrCode className="size-4" />} onClick={() => setQr(k)}>
-                        QR
+                        {tr("QR")}
                       </Button>
                       <Button
                         size="sm"
@@ -104,11 +106,11 @@ export default function KioskLinksPage() {
                         onClick={async () => {
                           if (!confirm(`Revoke "${k.label}"? Tablets using it will stop working immediately.`)) return;
                           await api.revokeKioskLink(k.id);
-                          toast("Link revoked");
+                          toast(tr("Link revoked"));
                           reload();
                         }}
                       >
-                        Revoke
+                        {tr("Revoke")}
                       </Button>
                     </div>
                   )}
@@ -123,11 +125,11 @@ export default function KioskLinksPage() {
         open={!!qr}
         onClose={() => setQr(null)}
         title={qr?.label ?? ""}
-        subtitle="Print and put this up where patients wait, or open the link on a tablet."
+        subtitle={tr("Print and put this up where patients wait, or open the link on a tablet.")}
         footer={
           <>
             <Button variant="secondary" icon={<Copy className="size-4" />} onClick={() => qr && copy(qr.url)}>
-              Copy link
+              {tr("Copy link")}
             </Button>
             <Button
               icon={<Printer className="size-4" />}
@@ -141,7 +143,7 @@ export default function KioskLinksPage() {
                 w.document.close();
               }}
             >
-              Print poster
+              {tr("Print poster")}
             </Button>
           </>
         }

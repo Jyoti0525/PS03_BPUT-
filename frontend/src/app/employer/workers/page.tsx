@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useMemo, useState } from "react";
 import { FileUp, Search, UserMinus, UserPlus, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/app-shell";
@@ -16,6 +17,7 @@ const SAMPLE_CSV = "employee_code,name,age,sex,department,phone\nEMP-001,Ravi Ku
 const msg = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong");
 
 export default function WorkersPage() {
+  const { tr } = usePrefs();
   const { data, error, loading, reload } = useAsync(() => api.listWorkers(), []);
   const [q, setQ] = useState("");
   const [adding, setAdding] = useState(false);
@@ -34,8 +36,8 @@ export default function WorkersPage() {
 
   async function add() {
     setErr(null);
-    if (form.employee_code.trim().length < 2 || form.name.trim().length < 2) return setErr("Employee code and name are required");
-    if (form.phone && !/^\d{10}$/.test(form.phone)) return setErr("Phone must be 10 digits");
+    if (form.employee_code.trim().length < 2 || form.name.trim().length < 2) return setErr(tr("Employee code and name are required"));
+    if (form.phone && !/^\d{10}$/.test(form.phone)) return setErr(tr("Phone must be 10 digits"));
     setBusy(true);
     try {
       await api.addWorker({ ...form, employee_code: form.employee_code.trim(), name: form.name.trim(), department: form.department || null, phone: form.phone || null });
@@ -52,7 +54,7 @@ export default function WorkersPage() {
 
   async function doImport() {
     setErr(null);
-    if (!csv.trim()) return setErr("Paste CSV rows or choose a file");
+    if (!csv.trim()) return setErr(tr("Paste CSV rows or choose a file"));
     setBusy(true);
     try {
       const r = await api.importWorkers(csv);
@@ -83,15 +85,15 @@ export default function WorkersPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
-        title="Worker roster"
-        subtitle="Workers on this roster are linked when they visit your health centre (by employee code). You see fitness outcomes only."
+        title={tr("Worker roster")}
+        subtitle={tr("Workers on this roster are linked when they visit your health centre (by employee code). You see fitness outcomes only.")}
         actions={
           <div className="flex gap-2">
             <Button variant="secondary" icon={<FileUp className="size-4" />} onClick={() => { setErr(null); setResult(null); setImporting(true); }}>
-              Import CSV
+              {tr("Import CSV")}
             </Button>
             <Button icon={<UserPlus className="size-4" />} onClick={() => { setErr(null); setAdding(true); }}>
-              Add worker
+              {tr("Add worker")}
             </Button>
           </div>
         }
@@ -102,25 +104,25 @@ export default function WorkersPage() {
         <Spinner />
       ) : !data?.length ? (
         <Card>
-          <Empty icon={<Users className="size-6" />} title="No workers yet" body="Add workers one by one or import your HR sheet as CSV." />
+          <Empty icon={<Users className="size-6" />} title={tr("No workers yet")} body={tr("Add workers one by one or import your HR sheet as CSV.")} />
         </Card>
       ) : (
         <Card>
           <div className="border-b border-line p-3">
             <div className="relative max-w-sm">
               <Search className="absolute top-3.5 left-3 size-4 text-subtle" />
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search code, name, department" className="pl-9" aria-label="Search workers" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Search code, name, department")} className="pl-9" aria-label={tr("Search workers")} />
             </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[680px] text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-xs tracking-wide text-muted uppercase">
-                  <th className="px-4 py-2 font-semibold">Code</th>
-                  <th className="px-4 py-2 font-semibold">Name</th>
-                  <th className="px-4 py-2 font-semibold">Department</th>
-                  <th className="px-4 py-2 font-semibold">Fitness</th>
-                  <th className="px-4 py-2 font-semibold">Valid until</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Code")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Name")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Department")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Fitness")}</th>
+                  <th className="px-4 py-2 font-semibold">{tr("Valid until")}</th>
                   <th className="px-4 py-2" />
                 </tr>
               </thead>
@@ -131,13 +133,13 @@ export default function WorkersPage() {
                     <td className="px-4 py-2.5 text-ink">{w.name}</td>
                     <td className="px-4 py-2.5 text-muted">{w.department ?? "—"}</td>
                     <td className="px-4 py-2.5">
-                      <Badge tone={FITNESS[w.fitness_status].tone}>{FITNESS[w.fitness_status].label}</Badge>
+                      <Badge tone={FITNESS[w.fitness_status].tone}>{tr(FITNESS[w.fitness_status].label)}</Badge>
                       {w.restrictions && <p className="mt-0.5 text-xs text-muted">{w.restrictions}</p>}
                     </td>
                     <td className="px-4 py-2.5 text-muted">{w.valid_until ? new Date(w.valid_until).toLocaleDateString("en-IN") : "—"}</td>
                     <td className="px-4 py-2.5 text-right">
                       <Button size="sm" variant="ghost" icon={<UserMinus className="size-4" />} onClick={() => setRemoving(w)} aria-label={`Remove ${w.employee_code}`}>
-                        Remove
+                        {tr("Remove")}
                       </Button>
                     </td>
                   </tr>
@@ -151,41 +153,41 @@ export default function WorkersPage() {
       <Modal
         open={adding}
         onClose={() => setAdding(false)}
-        title="Add worker"
+        title={tr("Add worker")}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setAdding(false)}>Cancel</Button>
-            <Button onClick={add} loading={busy}>Add to roster</Button>
+            <Button variant="ghost" onClick={() => setAdding(false)}>{tr("Cancel")}</Button>
+            <Button onClick={add} loading={busy}>{tr("Add to roster")}</Button>
           </>
         }
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <Label htmlFor="w-code">Employee code</Label>
-            <Input id="w-code" value={form.employee_code} onChange={(e) => setForm({ ...form, employee_code: e.target.value.toUpperCase() })} placeholder="EMP-1041" />
+            <Label htmlFor="w-code">{tr("Employee code")}</Label>
+            <Input id="w-code" value={form.employee_code} onChange={(e) => setForm({ ...form, employee_code: e.target.value.toUpperCase() })} placeholder={tr("EMP-1041")} />
           </div>
           <div>
-            <Label htmlFor="w-name">Full name</Label>
+            <Label htmlFor="w-name">{tr("Full name")}</Label>
             <Input id="w-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="w-age">Age</Label>
+            <Label htmlFor="w-age">{tr("Age")}</Label>
             <Input id="w-age" type="number" min={14} max={100} value={form.age} onChange={(e) => setForm({ ...form, age: Number(e.target.value) })} />
           </div>
           <div>
-            <Label htmlFor="w-sex">Sex</Label>
+            <Label htmlFor="w-sex">{tr("Sex")}</Label>
             <Select id="w-sex" value={form.sex} onChange={(e) => setForm({ ...form, sex: e.target.value as WorkerInput["sex"] })}>
-              <option value="M">Male</option>
-              <option value="F">Female</option>
-              <option value="O">Other</option>
+              <option value="M">{tr("Male")}</option>
+              <option value="F">{tr("Female")}</option>
+              <option value="O">{tr("Other")}</option>
             </Select>
           </div>
           <div>
-            <Label htmlFor="w-dept" hint="(optional)">Department</Label>
+            <Label htmlFor="w-dept" hint={tr("(optional)")}>{tr("Department")}</Label>
             <Input id="w-dept" value={form.department ?? ""} onChange={(e) => setForm({ ...form, department: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="w-phone" hint="(optional)">Mobile</Label>
+            <Label htmlFor="w-phone" hint={tr("(optional)")}>{tr("Mobile")}</Label>
             <Input id="w-phone" inputMode="numeric" value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} />
           </div>
         </div>
@@ -196,12 +198,12 @@ export default function WorkersPage() {
         open={importing}
         onClose={() => setImporting(false)}
         size="lg"
-        title="Import workers from CSV"
-        subtitle="Columns: employee_code, name, age, sex, department, phone. Existing codes are updated."
+        title={tr("Import workers from CSV")}
+        subtitle={tr("Columns: employee_code, name, age, sex, department, phone. Existing codes are updated.")}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setImporting(false)}>Close</Button>
-            <Button onClick={doImport} loading={busy}>Import</Button>
+            <Button variant="ghost" onClick={() => setImporting(false)}>{tr("Close")}</Button>
+            <Button onClick={doImport} loading={busy}>{tr("Import")}</Button>
           </>
         }
       >
@@ -209,22 +211,22 @@ export default function WorkersPage() {
           <input
             type="file"
             accept=".csv,text/csv"
-            aria-label="CSV file"
+            aria-label={tr("CSV file")}
             className="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-teal-50 file:px-3 file:py-2 file:font-medium file:text-teal-800"
             onChange={async (e) => {
               const f = e.target.files?.[0];
               if (f) setCsv(await f.text());
             }}
           />
-          <Textarea rows={8} value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={SAMPLE_CSV} className="font-mono text-xs" aria-label="CSV rows" />
+          <Textarea rows={8} value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={SAMPLE_CSV} className="font-mono text-xs" aria-label={tr("CSV rows")} />
           <button className="text-xs font-semibold text-teal-700" onClick={() => setCsv(SAMPLE_CSV)}>
-            Insert example rows
+            {tr("Insert example rows")}
           </button>
           <FieldError>{err}</FieldError>
           {result && (
             <div className="rounded-xl bg-canvas p-3 text-sm">
               <p className="font-semibold text-ink">
-                {result.created} added · {result.updated} updated
+                {result.created} {tr("added ·")} {result.updated} {tr("updated")}
               </p>
               {result.errors.length > 0 && (
                 <ul className="mt-2 list-disc pl-5 text-xs text-crit">
@@ -245,12 +247,12 @@ export default function WorkersPage() {
         title={`Remove ${removing?.employee_code}?`}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setRemoving(null)}>Cancel</Button>
-            <Button variant="danger" loading={busy} onClick={() => removing && remove(removing)}>Remove</Button>
+            <Button variant="ghost" onClick={() => setRemoving(null)}>{tr("Cancel")}</Button>
+            <Button variant="danger" loading={busy} onClick={() => removing && remove(removing)}>{tr("Remove")}</Button>
           </>
         }
       >
-        <p className="text-sm text-ink-2">The worker is unlinked from your organisation. Their own health record stays with them and the health centre; you stop seeing their fitness status.</p>
+        <p className="text-sm text-ink-2">{tr("The worker is unlinked from your organisation. Their own health record stays with them and the health centre; you stop seeing their fitness status.")}</p>
       </Modal>
     </div>
   );

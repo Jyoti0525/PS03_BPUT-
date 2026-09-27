@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useEffect, useState } from "react";
 import { FileImage, Mic, Cpu, PenLine, Maximize2 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -38,6 +39,7 @@ function useNatural(url?: string | null) {
 
 /** Shows exactly the region of the source image a value was extracted from. */
 export function Crop({ url, bbox, className }: { url: string; bbox: [number, number, number, number]; className?: string }) {
+  const { tr } = usePrefs();
   const dim = useNatural(url);
   if (!dim) return <div className={cx("h-10 animate-pulse rounded-md bg-canvas", className)} />;
   const [x, y, w, h] = bbox;
@@ -51,7 +53,7 @@ export function Crop({ url, bbox, className }: { url: string; bbox: [number, num
         backgroundPosition: `${w >= 1 ? 0 : (x / (1 - w)) * 100}% ${h >= 1 ? 0 : (y / (1 - h)) * 100}%`,
       }}
       role="img"
-      aria-label="Cropped region of the source report"
+      aria-label={tr("Cropped region of the source report")}
     />
   );
 }
@@ -63,6 +65,7 @@ export function SourceIcon({ kind }: { kind: SourceRef["kind"] }) {
 
 /** Inline evidence beside a value: crop for OCR, excerpt for transcripts, device for sensors. */
 export function SourceEvidence({ v, compact }: { v: ExtractedValue; compact?: boolean }) {
+  const { tr } = usePrefs();
   const s = v.source;
   const file = useFile(s.kind === "image_crop" ? s.file_id : null);
   const [open, setOpen] = useState(false);
@@ -70,11 +73,11 @@ export function SourceEvidence({ v, compact }: { v: ExtractedValue; compact?: bo
   if (s.kind === "image_crop") {
     return (
       <>
-        <button onClick={() => setOpen(true)} className="group relative block w-full text-left" title="Open full report with this region highlighted">
+        <button onClick={() => setOpen(true)} className="group relative block w-full text-left" title={tr("Open full report with this region highlighted")}>
           {file?.url && s.bbox ? (
             <Crop url={file.url} bbox={s.bbox} className={compact ? "max-h-9" : ""} />
           ) : (
-            <span className="block rounded-md border border-dashed border-line px-2 py-1.5 font-mono text-[11px] text-muted">{file?.purged_at ? "Source image purged (retention)" : s.crop_text ?? "Image"}</span>
+            <span className="block rounded-md border border-dashed border-line px-2 py-1.5 font-mono text-[11px] text-muted">{file?.purged_at ? tr("Source image purged (retention)") : s.crop_text ?? tr("Image")}</span>
           )}
           <Maximize2 className="absolute top-1 right-1 size-3.5 text-muted opacity-0 group-hover:opacity-100" />
         </button>
@@ -91,9 +94,9 @@ export function SourceEvidence({ v, compact }: { v: ExtractedValue; compact?: bo
               )}
             </div>
           ) : (
-            <p className="text-sm text-muted">The source image is no longer available (retention policy) or could not be loaded.</p>
+            <p className="text-sm text-muted">{tr("The source image is no longer available (retention policy) or could not be loaded.")}</p>
           )}
-          <p className="mt-3 text-xs text-muted">Highlighted box = pixels the value was read from. Values that disagree between engines are marked “needs checking”.</p>
+          <p className="mt-3 text-xs text-muted">{tr("Highlighted box = pixels the value was read from. Values that disagree between engines are marked “needs checking”.")}</p>
         </Modal>
       </>
     );

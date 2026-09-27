@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { RefreshCw, Search, Baby, HeartPulse, Timer, AlertTriangle, WifiOff, Inbox } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, useNow, fmtWait } from "@/lib/hooks";
-import { useSession } from "@/components/providers";
+import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Input, Segmented, Spinner, Stat, cx } from "@/components/ui";
 import { UrgencyBadge, urgencyBar } from "@/components/triage/note";
@@ -13,9 +13,10 @@ import type { QueueItem, Urgency } from "@/lib/types";
 import { langByCode } from "@/lib/i18n/languages";
 
 function Countdown({ due, now }: { due: string | null; now: number }) {
+  const { tr } = usePrefs();
   if (!due) return null;
   const ms = Date.parse(due) - now;
-  if (ms <= 0) return <Badge tone="crit"><AlertTriangle className="size-3" /> Escalated</Badge>;
+  if (ms <= 0) return <Badge tone="crit"><AlertTriangle className="size-3" /> {tr("Escalated")}</Badge>;
   const m = Math.floor(ms / 60000);
   const s = Math.floor((ms % 60000) / 1000);
   return (
@@ -26,6 +27,7 @@ function Countdown({ due, now }: { due: string | null; now: number }) {
 }
 
 export default function QueuePage() {
+  const { tr } = usePrefs();
   const { user } = useSession();
   const fid = user!.facility_id!;
   const { data, error, loading, reload } = useAsync(() => api.queue(fid), [fid], { pollMs: 15_000 });
@@ -44,20 +46,20 @@ export default function QueuePage() {
   return (
     <>
       <PageHeader
-        title="Triage queue"
-        subtitle="Ordered by rules-engine urgency, then waiting time. Critical cases auto-escalate after 15 minutes."
+        title={tr("Triage queue")}
+        subtitle={tr("Ordered by rules-engine urgency, then waiting time. Critical cases auto-escalate after 15 minutes.")}
         actions={
           <Button variant="secondary" onClick={() => reload()} icon={<RefreshCw className="size-4" />}>
-            Refresh
+            {tr("Refresh")}
           </Button>
         }
       />
 
       <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Critical" value={count("red")} tone="crit" hint="Immediate" />
-        <Stat label="Semi-urgent" value={count("yellow")} tone="semi" hint="Within 30–60 min" />
-        <Stat label="Routine" value={count("green")} tone="rout" hint="Standard OPD order" />
-        <Stat label="Avg. wait" value={fmtWait(avgWait)} hint={`${data?.length ?? 0} waiting`} />
+        <Stat label={tr("Critical")} value={count("red")} tone="crit" hint={tr("Immediate")} />
+        <Stat label={tr("Semi-urgent")} value={count("yellow")} tone="semi" hint={tr("Within 30–60 min")} />
+        <Stat label={tr("Routine")} value={count("green")} tone="rout" hint={tr("Standard OPD order")} />
+        <Stat label={tr("Avg. wait")} value={fmtWait(avgWait)} hint={`${data?.length ?? 0} waiting`} />
       </div>
 
       <Card>
@@ -74,7 +76,7 @@ export default function QueuePage() {
           />
           <div className="relative ml-auto w-full sm:w-64">
             <Search className="absolute top-3 left-3 size-4 text-subtle" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Name, ID or complaint" className="h-10 pl-9" aria-label="Filter queue" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Name, ID or complaint")} className="h-10 pl-9" aria-label={tr("Filter queue")} />
           </div>
         </div>
 
@@ -83,9 +85,9 @@ export default function QueuePage() {
             <ErrorNote error={error} onRetry={reload} />
           </div>
         ) : loading && !data ? (
-          <Spinner label="Loading queue…" />
+          <Spinner label={tr("Loading queue…")} />
         ) : items.length === 0 ? (
-          <Empty icon={<Inbox className="size-6" />} title="No patients waiting" body="New intakes from the kiosk appear here automatically." />
+          <Empty icon={<Inbox className="size-6" />} title={tr("No patients waiting")} body={tr("New intakes from the kiosk appear here automatically.")} />
         ) : (
           <ul className="divide-y divide-line">
             {items.map((i: QueueItem, idx) => (
@@ -94,7 +96,7 @@ export default function QueuePage() {
                   <span className={cx("w-1.5 shrink-0 rounded-full", urgencyBar(i.urgency))} />
                   <span className="hidden w-14 shrink-0 pt-0.5 sm:block">
                     <span className="block rounded-md bg-coral-50 py-0.5 text-center font-mono text-xs font-bold text-coral-700">{i.token ?? idx + 1}</span>
-                    {i.channel === "kiosk_link" && <span className="mt-1 block text-center text-[10px] text-subtle">kiosk link</span>}
+                    {i.channel === "kiosk_link" && <span className="mt-1 block text-center text-[10px] text-subtle">{tr("kiosk link")}</span>}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -104,21 +106,21 @@ export default function QueuePage() {
                         {i.sex}
                       </span>
                       <span className="font-mono text-xs text-subtle">{i.patient_code}</span>
-                      {i.category === "maternal" && <Badge tone="coral"><Baby className="size-3" /> Maternal</Badge>}
-                      {i.category === "chronic" && <Badge tone="teal"><HeartPulse className="size-3" /> Chronic</Badge>}
-                      {i.status === "in_review" && <Badge tone="info">In review</Badge>}
+                      {i.category === "maternal" && <Badge tone="coral"><Baby className="size-3" /> {tr("Maternal")}</Badge>}
+                      {i.category === "chronic" && <Badge tone="teal"><HeartPulse className="size-3" /> {tr("Chronic")}</Badge>}
+                      {i.status === "in_review" && <Badge tone="info">{tr("In review")}</Badge>}
                     </div>
                     <p className="mt-0.5 truncate text-sm text-ink-2">{i.chief_complaint}</p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      {i.flag_count > 0 && <Badge tone={i.urgency === "red" ? "crit" : "semi"}>{i.flag_count} flag{i.flag_count > 1 && "s"}</Badge>}
-                      {i.needs_check_count > 0 && <Badge tone="semi">{i.needs_check_count} needs checking</Badge>}
+                      {i.flag_count > 0 && <Badge tone={i.urgency === "red" ? "crit" : "semi"}>{i.flag_count} {tr("flag")}{i.flag_count > 1 && "s"}</Badge>}
+                      {i.needs_check_count > 0 && <Badge tone="semi">{i.needs_check_count} {tr("needs checking")}</Badge>}
                       <Badge>{langByCode(i.language).name}</Badge>
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end justify-between gap-1.5">
                     <UrgencyBadge u={i.urgency} size="sm" />
                     <span className="text-sm font-semibold text-ink tabular-nums">{fmtWait(Math.max(i.wait_minutes, Math.round((now - Date.parse(i.created_at)) / 60000)))}</span>
-                    {i.status !== "escalated" ? <Countdown due={i.escalation_due_at} now={now} /> : <Badge tone="crit">Escalated</Badge>}
+                    {i.status !== "escalated" ? <Countdown due={i.escalation_due_at} now={now} /> : <Badge tone="crit">{tr("Escalated")}</Badge>}
                   </div>
                 </Link>
               </li>
@@ -127,7 +129,7 @@ export default function QueuePage() {
         )}
       </Card>
       <p className="mt-3 flex items-center gap-1.5 text-xs text-subtle">
-        <WifiOff className="size-3.5" /> Intakes captured offline keep their original capture time, so waiting time is never understated.
+        <WifiOff className="size-3.5" /> {tr("Intakes captured offline keep their original capture time, so waiting time is never understated.")}
       </p>
     </>
   );

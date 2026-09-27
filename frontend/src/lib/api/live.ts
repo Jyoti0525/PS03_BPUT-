@@ -72,7 +72,7 @@ export const liveApi: JeeviaApi = {
   mode: "live",
 
   requestOtp: (phone) => post("/auth/otp/request", { phone }),
-  verifyOtp: (challenge_id, code) => post("/auth/otp/verify", { challenge_id, code }),
+  verifyOtp: (challenge_id, code, purpose = "signin") => post("/auth/otp/verify", { challenge_id, code, purpose }),
   register: (input) => post("/auth/register", input),
   verifyPin: (pin_token, pin) => post("/auth/pin/verify", { pin_token, pin }),
   setupPin: (pin_token, pin) => post("/auth/pin/setup", { pin_token, pin }),
@@ -80,6 +80,7 @@ export const liveApi: JeeviaApi = {
   changePin: (current_pin, new_pin) => post("/auth/pin/change", { current_pin, new_pin }),
   resetStaffPin: (id) => post(`/users/${id}/reset-pin`),
   me: () => json("/auth/me"),
+  updateMe: (p) => patch("/auth/me", p),
   logout: async () => {
     try {
       await post("/auth/logout");
@@ -135,6 +136,8 @@ export const liveApi: JeeviaApi = {
   correctPatient: (id, p) => patch(`/patients/${id}`, p),
 
   listUsers: () => json("/users"),
+  setDuty: (id, on_duty) => patch(`/users/${id}/duty`, { on_duty }),
+  addObservations: (eid, input) => post(`/encounters/${eid}/observations`, input),
 
   searchPatients: (q) => json(`/patients?q=${encodeURIComponent(q)}`),
   getPatient: (id) => json(`/patients/${id}`),

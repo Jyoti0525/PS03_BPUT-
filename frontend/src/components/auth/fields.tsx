@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { cx } from "@/components/ui";
@@ -52,6 +53,7 @@ export function OtpBoxes({ value, onChange, autoFocus }: { value: string; onChan
 
 /** Masked 4–6 digit PIN entry. */
 export function PinInput({ id, value, onChange, autoFocus, label = "PIN", onEnter }: { id: string; value: string; onChange: (v: string) => void; autoFocus?: boolean; label?: string; onEnter?: () => void }) {
+  const { tr } = usePrefs();
   const [show, setShow] = useState(false);
   return (
     <div className="relative">
@@ -69,7 +71,7 @@ export function PinInput({ id, value, onChange, autoFocus, label = "PIN", onEnte
         placeholder="••••"
         className="h-14 w-full rounded-xl border border-line bg-white px-4 pr-12 text-center font-mono text-2xl tracking-[0.5em] text-ink focus:border-teal-600 focus:ring-4 focus:ring-teal-100 focus:outline-none"
       />
-      <button type="button" onClick={() => setShow((s) => !s)} className="absolute top-3.5 right-3 text-subtle hover:text-ink" aria-label={show ? "Hide PIN" : "Show PIN"}>
+      <button type="button" onClick={() => setShow((s) => !s)} className="absolute top-3.5 right-3 text-subtle hover:text-ink" aria-label={show ? tr("Hide PIN") : tr("Show PIN")}>
         {show ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
       </button>
     </div>
@@ -78,23 +80,24 @@ export function PinInput({ id, value, onChange, autoFocus, label = "PIN", onEnte
 
 /** New PIN + confirmation with live strength feedback. Returns the PIN when valid, else null. */
 export function NewPinFields({ pin, confirm, onPin, onConfirm }: { pin: string; confirm: string; onPin: (v: string) => void; onConfirm: (v: string) => void }) {
+  const { tr } = usePrefs();
   const problem = pin.length >= 4 ? pinProblem(pin) : null;
   const mismatch = confirm.length >= pin.length && confirm.length > 0 && confirm !== pin;
   return (
     <div className="space-y-3">
       <div>
         <label htmlFor="new-pin" className="mb-1.5 block text-sm font-medium text-ink-2">
-          Choose a 4–6 digit PIN
+          {tr("Choose a 4–6 digit PIN")}
         </label>
-        <PinInput id="new-pin" value={pin} onChange={onPin} autoFocus label="New PIN" />
-        <p className={cx("mt-1.5 text-xs", problem ? "font-medium text-crit" : "text-muted")}>{problem ?? "Avoid birthdays, repeated digits and sequences like 1234."}</p>
+        <PinInput id="new-pin" value={pin} onChange={onPin} autoFocus label={tr("New PIN")} />
+        <p className={cx("mt-1.5 text-xs", problem ? "font-medium text-crit" : "text-muted")}>{problem ?? tr("Avoid birthdays, repeated digits and sequences like 1234.")}</p>
       </div>
       <div>
         <label htmlFor="confirm-pin" className="mb-1.5 block text-sm font-medium text-ink-2">
-          Enter it again
+          {tr("Enter it again")}
         </label>
-        <PinInput id="confirm-pin" value={confirm} onChange={onConfirm} label="Confirm PIN" />
-        {mismatch && <p className="mt-1.5 text-xs font-medium text-crit">PINs don’t match</p>}
+        <PinInput id="confirm-pin" value={confirm} onChange={onConfirm} label={tr("Confirm PIN")} />
+        {mismatch && <p className="mt-1.5 text-xs font-medium text-crit">{tr("PINs don’t match")}</p>}
       </div>
     </div>
   );

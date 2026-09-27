@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { useAsync, useNow, timeAgo } from "@/lib/hooks";
-import { useSession } from "@/components/providers";
+import { useSession, usePrefs } from "@/components/providers";
 import { Badge, Button, Card, CardHeader, ErrorNote, FieldError, Label, Modal, Segmented, Select, Spinner, Textarea, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
@@ -18,6 +18,7 @@ import type { Encounter, ExportFormat, Facility, ShareLink, Urgency } from "@/li
 import { ShareQrModal } from "@/components/triage/share-qr";
 import { PatientEditModal } from "@/components/triage/patient-edit";
 import { WorkerPanel } from "@/components/triage/worker-panel";
+import { ObservationList } from "@/components/triage/observations";
 import { URGENCY_LABEL, downloadBlob, referralText } from "@/lib/export";
 import { langByCode } from "@/lib/i18n/languages";
 
@@ -30,6 +31,7 @@ const OVERRIDE_CATEGORIES = [
 ];
 
 function FileThumb({ id }: { id: string }) {
+  const { tr } = usePrefs();
   const f = useFile(id);
   if (!f) return <div className="h-20 w-28 animate-pulse rounded-lg bg-canvas" />;
   return (
@@ -38,26 +40,28 @@ function FileThumb({ id }: { id: string }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={f.url} alt={f.filename} className="h-20 w-28 rounded-lg border border-line object-cover object-top" />
       ) : (
-        <div className="grid h-20 w-28 place-items-center rounded-lg border border-line bg-canvas text-xs text-muted">{f.purged_at ? "Purged" : f.kind}</div>
+        <div className="grid h-20 w-28 place-items-center rounded-lg border border-line bg-canvas text-xs text-muted">{f.purged_at ? tr("Purged") : f.kind}</div>
       )}
       <p className="mt-1 truncate text-[11px] text-muted">{f.filename}</p>
-      <p className="text-[10px] text-subtle">expires {new Date(f.expires_at).toLocaleDateString("en-IN")}</p>
+      <p className="text-[10px] text-subtle">{tr("expires")} {new Date(f.expires_at).toLocaleDateString("en-IN")}</p>
     </a>
   );
 }
 
 function ReviewClock({ start }: { start: number }) {
+  const { tr } = usePrefs();
   const now = useNow(1000);
   const s = Math.floor((now - start) / 1000);
   const over = s > 240;
   return (
-    <span className={cx("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums", over ? "bg-semi-bg text-semi" : "bg-canvas text-muted")} title="Target: review within 4 minutes">
+    <span className={cx("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums", over ? "bg-semi-bg text-semi" : "bg-canvas text-muted")} title={tr("Target: review within 4 minutes")}>
       <Timer className="size-3.5" /> {Math.floor(s / 60)}:{String(s % 60).padStart(2, "0")} / 4:00
     </span>
   );
 }
 
 export default function CasePage() {
+  const { tr } = usePrefs();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useSession();
@@ -80,7 +84,7 @@ export default function CasePage() {
       toast(msg);
       return true;
     } catch (e) {
-      toast(e instanceof ApiError ? e.message : "Action failed", "error");
+      toast(e instanceof ApiError ? e.message : tr("Action failed"), "error");
       return false;
     } finally {
       setBusy(false);
@@ -88,7 +92,7 @@ export default function CasePage() {
   };
 
   if (error) return <ErrorNote error={error} onRetry={reload} />;
-  if (loading || !enc) return <Spinner label="Opening case…" />;
+  if (loading || !enc) return <Spinner label={tr("Opening case…")} />;
   const p = enc.patient;
   const n = enc.note;
   const done = ["confirmed", "referred", "closed"].includes(enc.status);
@@ -104,7 +108,7 @@ export default function CasePage() {
       } else downloadBlob(r.filename, r.blob);
       toast(`Exported ${f.toUpperCase()} — logged to audit`);
     } catch (e) {
-      toast(e instanceof Error ? e.message : "Export failed", "error");
+      toast(e instanceof Error ? e.message : tr("Export failed"), "error");
     }
   };
 
@@ -112,7 +116,7 @@ export default function CasePage() {
     <div className="mx-auto max-w-6xl">
       <div className="mb-3 flex items-center justify-between gap-2">
         <Link href="/reviewer" className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-ink">
-          <ArrowLeft className="size-4" /> Queue
+          <ArrowLeft className="size-4" /> {tr("Queue")}
         </Link>
         <ReviewClock start={start} />
       </div>
@@ -129,30 +133,30 @@ export default function CasePage() {
                   {enc.token && <span className="rounded-lg bg-coral-50 px-2 py-0.5 font-mono text-sm font-bold text-coral-700">{enc.token}</span>}
                   <h1 className="text-xl font-bold text-ink sm:text-2xl">{p.name}</h1>
                   <UrgencyBadge u={enc.urgency} size="lg" />
-                  {enc.urgency_source === "override" && <Badge tone="coral">Overridden</Badge>}
-                  <button onClick={() => setModal("patient")} className="inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-xs font-medium text-muted hover:bg-canvas hover:text-ink" title="Correct name, age, phone…">
-                    <Pencil className="size-3.5" /> Edit details
+                  {enc.urgency_source === "override" && <Badge tone="coral">{tr("Overridden")}</Badge>}
+                  <button onClick={() => setModal("patient")} className="inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-xs font-medium text-muted hover:bg-canvas hover:text-ink" title={tr("Correct name, age, phone…")}>
+                    <Pencil className="size-3.5" /> {tr("Edit details")}
                   </button>
                 </div>
                 <p className="mt-0.5 text-sm text-muted">
-                  {p.age} y · {p.sex === "F" ? "Female" : p.sex === "M" ? "Male" : "Other"} · <span className="font-mono">{p.code}</span> · {langByCode(p.language).name} · intake {timeAgo(enc.created_at, now)}
+                  {p.age} y · {p.sex === "F" ? tr("Female") : p.sex === "M" ? tr("Male") : tr("Other")} · <span className="font-mono">{p.code}</span> · {langByCode(p.language).name} {tr("· intake")} {timeAgo(enc.created_at, now)}
                 </p>
                 <p className="mt-2 text-[15px] font-medium text-ink">{enc.chief_complaint}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {enc.category === "maternal" && <Badge tone="coral"><Baby className="size-3" /> Maternal · {enc.intake?.maternal?.gestation_weeks ?? "?"} weeks</Badge>}
-                  {enc.category === "chronic" && <Badge tone="teal"><HeartPulse className="size-3" /> Chronic · {enc.intake?.chronic?.condition}</Badge>}
+                  {enc.category === "maternal" && <Badge tone="coral"><Baby className="size-3" /> {tr("Maternal ·")} {enc.intake?.maternal?.gestation_weeks ?? "?"} {tr("weeks")}</Badge>}
+                  {enc.category === "chronic" && <Badge tone="teal"><HeartPulse className="size-3" /> {tr("Chronic ·")} {enc.intake?.chronic?.condition}</Badge>}
                   {enc.consent && (
                     <Badge tone={enc.consent.mode === "proxy" ? "info" : "neutral"}>
                       {enc.consent.mode === "proxy" ? <Users className="size-3" /> : <UserRoundCheck className="size-3" />}
-                      {enc.consent.mode === "proxy" ? `Proxy: ${enc.consent.proxy_name} (${enc.consent.proxy_relation})` : "Self consent"}
+                      {enc.consent.mode === "proxy" ? `Proxy: ${enc.consent.proxy_name} (${enc.consent.proxy_relation})` : tr("Self consent")}
                     </Badge>
                   )}
-                  {enc.intake?.captured_offline && <Badge>Captured offline</Badge>}
-                  <Badge tone="neutral">Status: {enc.status.replace("_", " ")}</Badge>
+                  {enc.intake?.captured_offline && <Badge>{tr("Captured offline")}</Badge>}
+                  <Badge tone="neutral">{tr("Status:")} {enc.status.replace("_", " ")}</Badge>
                   {dueMs != null && !done && enc.status !== "escalated" && (
                     <Badge tone={dueMs < 300000 ? "crit" : "neutral"}>
                       <Timer className="size-3" />
-                      {dueMs > 0 ? `Auto-escalates in ${Math.floor(dueMs / 60000)}:${String(Math.floor((dueMs % 60000) / 1000)).padStart(2, "0")}` : "Escalation due"}
+                      {dueMs > 0 ? `Auto-escalates in ${Math.floor(dueMs / 60000)}:${String(Math.floor((dueMs % 60000) / 1000)).padStart(2, "0")}` : tr("Escalation due")}
                     </Badge>
                   )}
                 </div>
@@ -160,7 +164,7 @@ export default function CasePage() {
 
               {/* Referral yes / no + triage status (from system design) */}
               <div className="w-full rounded-xl border border-line bg-canvas p-3 sm:w-auto sm:min-w-56">
-                <p className="text-xs font-semibold tracking-wide text-muted uppercase">Referral needed?</p>
+                <p className="text-xs font-semibold tracking-wide text-muted uppercase">{tr("Referral needed?")}</p>
                 <div className="mt-2 flex gap-1.5">
                   {[true, false].map((v) => (
                     <button
@@ -169,7 +173,7 @@ export default function CasePage() {
                       onClick={() => act(() => api.setReferralNeeded(enc.id, v), `Referral marked ${v ? "needed" : "not needed"}`)}
                       className={cx("flex-1 rounded-lg border px-3 py-1.5 text-sm font-semibold", enc.referral_needed === v ? (v ? "border-coral-500 bg-coral-500 text-white" : "border-ink bg-ink text-white") : "border-line bg-white text-muted")}
                     >
-                      {v ? "Yes" : "No"}
+                      {v ? tr("Yes") : tr("No")}
                     </button>
                   ))}
                 </div>
@@ -190,31 +194,31 @@ export default function CasePage() {
         <div className="no-print flex flex-wrap items-center gap-2 border-t border-line bg-canvas/60 px-4 py-3">
           {isDoctor && (
             <Button variant="teal" disabled={done} loading={busy} onClick={() => act(() => api.confirmEncounter(enc.id), "Note confirmed and signed")} icon={<CheckCircle2 className="size-4" />}>
-              {done ? `Reviewed by ${enc.reviewed_by}` : "Confirm note"}
+              {done ? `Reviewed by ${enc.reviewed_by}` : tr("Confirm note")}
             </Button>
           )}
           <Button variant="secondary" onClick={() => setModal("edit")} icon={<Pencil className="size-4" />}>
-            Edit
+            {tr("Edit")}
           </Button>
           {isDoctor && (
             <Button variant="secondary" onClick={() => setModal("override")} icon={<ShieldAlert className="size-4" />}>
-              Override urgency
+              {tr("Override urgency")}
             </Button>
           )}
           <Button variant="secondary" onClick={() => setModal("escalate")} icon={<Siren className="size-4" />}>
-            Escalate
+            {tr("Escalate")}
           </Button>
           {isDoctor && (
             <Button variant="secondary" onClick={() => setModal("referral")} icon={<Send className="size-4" />}>
-              Referral note
+              {tr("Referral note")}
             </Button>
           )}
           <Button variant="secondary" onClick={() => { setFreshShare(null); setModal("share"); }} icon={<QrCode className="size-4" />}>
-            Share QR
+            {tr("Share QR")}
           </Button>
           <div className="relative">
             <Button variant="secondary" onClick={() => setExportOpen((o) => !o)} icon={<Download className="size-4" />}>
-              Export <ChevronDown className="size-3.5" />
+              {tr("Export")} <ChevronDown className="size-3.5" />
             </Button>
             {exportOpen && (
               <div className="absolute top-11 left-0 z-20 w-44 rounded-xl border border-line bg-white p-1 shadow-[var(--shadow-pop)]">
@@ -239,8 +243,8 @@ export default function CasePage() {
               value={density}
               onChange={setDensity}
               options={[
-                { value: "doctor", label: <span className="inline-flex items-center gap-1"><Stethoscope className="size-3.5" /> Doctor view</span> },
-                { value: "nurse", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> Nurse view</span> },
+                { value: "doctor", label: <span className="inline-flex items-center gap-1"><Stethoscope className="size-3.5" /> {tr("Doctor view")}</span> },
+                { value: "nurse", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Nurse view")}</span> },
               ]}
             />
           </div>
@@ -250,34 +254,40 @@ export default function CasePage() {
       {/* Scenario panels */}
       {enc.category === "maternal" && enc.intake?.maternal && (
         <Card className="mt-4">
-          <CardHeader title="Maternal details" icon={<Baby className="size-4" />} />
+          <CardHeader title={tr("Maternal details")} icon={<Baby className="size-4" />} />
           <dl className="grid grid-cols-2 gap-4 p-4 text-sm sm:grid-cols-4">
-            <div><dt className="text-muted">Gestation</dt><dd className="font-semibold">{enc.intake.maternal.gestation_weeks ?? "—"} weeks</dd></div>
-            <div><dt className="text-muted">ANC visits</dt><dd className="font-semibold">{enc.intake.maternal.anc_visits ?? "—"}</dd></div>
-            <div><dt className="text-muted">Next check-up</dt><dd className="font-semibold">{enc.intake.maternal.next_checkup ?? "Not scheduled"}</dd></div>
-            <div><dt className="text-muted">Reminder channel</dt><dd className="font-semibold uppercase">{enc.intake.maternal.reminder_channel ?? "—"}</dd></div>
+            <div><dt className="text-muted">{tr("Gestation")}</dt><dd className="font-semibold">{enc.intake.maternal.gestation_weeks ?? "—"} {tr("weeks")}</dd></div>
+            <div><dt className="text-muted">{tr("ANC visits")}</dt><dd className="font-semibold">{enc.intake.maternal.anc_visits ?? "—"}</dd></div>
+            <div><dt className="text-muted">{tr("Next check-up")}</dt><dd className="font-semibold">{enc.intake.maternal.next_checkup ?? tr("Not scheduled")}</dd></div>
+            <div><dt className="text-muted">{tr("Reminder channel")}</dt><dd className="font-semibold uppercase">{enc.intake.maternal.reminder_channel ?? "—"}</dd></div>
           </dl>
         </Card>
       )}
       {enc.category === "chronic" && enc.intake?.chronic && (
         <Card className="mt-4">
-          <CardHeader title="Chronic follow-up" subtitle="Compare with the last check-up before deciding" icon={<HeartPulse className="size-4" />} />
+          <CardHeader title={tr("Chronic follow-up")} subtitle={tr("Compare with the last check-up before deciding")} icon={<HeartPulse className="size-4" />} />
           <dl className="grid grid-cols-2 gap-4 p-4 text-sm sm:grid-cols-4">
-            <div><dt className="text-muted">Condition</dt><dd className="font-semibold">{enc.intake.chronic.condition}</dd></div>
-            <div><dt className="text-muted">Last check-up</dt><dd className="font-semibold">{enc.intake.chronic.last_checkup ?? "—"}</dd></div>
-            <div><dt className="text-muted">Patient feels</dt><dd className={cx("font-semibold capitalize", enc.intake.chronic.feeling_vs_last === "worse" && "text-crit")}>{enc.intake.chronic.feeling_vs_last} than last time</dd></div>
-            <div className="col-span-2 sm:col-span-1"><dt className="text-muted">Medicines</dt><dd className="font-semibold">{enc.intake.chronic.current_medicines ?? "—"}</dd></div>
+            <div><dt className="text-muted">{tr("Condition")}</dt><dd className="font-semibold">{enc.intake.chronic.condition}</dd></div>
+            <div><dt className="text-muted">{tr("Last check-up")}</dt><dd className="font-semibold">{enc.intake.chronic.last_checkup ?? "—"}</dd></div>
+            <div><dt className="text-muted">{tr("Patient feels")}</dt><dd className={cx("font-semibold capitalize", enc.intake.chronic.feeling_vs_last === "worse" && "text-crit")}>{enc.intake.chronic.feeling_vs_last} {tr("than last time")}</dd></div>
+            <div className="col-span-2 sm:col-span-1"><dt className="text-muted">{tr("Medicines")}</dt><dd className="font-semibold">{enc.intake.chronic.current_medicines ?? "—"}</dd></div>
           </dl>
         </Card>
       )}
 
+      {!!enc.note?.observations?.length && (
+        <div className="mt-4">
+          <ObservationList items={enc.note.observations} />
+        </div>
+      )}
+
       {enc.worker && <WorkerPanel encounterId={enc.id} worker={enc.worker} canRecord={isDoctor} onRecorded={reload} />}
 
-      <div className="mt-4">{n ? <NoteView enc={enc} density={density} /> : <p className="text-sm text-muted">No note generated.</p>}</div>
+      <div className="mt-4">{n ? <NoteView enc={enc} density={density} /> : <p className="text-sm text-muted">{tr("No note generated.")}</p>}</div>
 
       {!!enc.intake?.file_ids.length && (
         <Card className="mt-4">
-          <CardHeader title="Uploaded files" subtitle="Raw files expire automatically under the retention policy" icon={<Paperclip className="size-4" />} />
+          <CardHeader title={tr("Uploaded files")} subtitle={tr("Raw files expire automatically under the retention policy")} icon={<Paperclip className="size-4" />} />
           <div className="flex flex-wrap gap-3 p-4">
             {enc.intake.file_ids.map((f) => (
               <FileThumb key={f} id={f} />
@@ -315,6 +325,7 @@ export default function CasePage() {
 }
 
 function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encounter; onClose: () => void; onDone: (e: Encounter) => void }) {
+  const { tr } = usePrefs();
   const [to, setTo] = useState<Urgency | "">("");
   const [category, setCategory] = useState(OVERRIDE_CATEGORIES[0]);
   const [reason, setReason] = useState("");
@@ -323,14 +334,14 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
   const options = (["red", "yellow", "green"] as Urgency[]).filter((u) => u !== enc.urgency);
   const submit = async () => {
     setErr(null);
-    if (!to) return setErr("Choose the new urgency");
-    if (reason.trim().length < 15) return setErr("Write a reason of at least 15 characters");
+    if (!to) return setErr(tr("Choose the new urgency"));
+    if (reason.trim().length < 15) return setErr(tr("Write a reason of at least 15 characters"));
     setBusy(true);
     try {
       onDone(await api.overrideUrgency(enc.id, to, category, reason));
-      toast("Override recorded in audit log");
+      toast(tr("Override recorded in audit log"));
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Failed");
+      setErr(e instanceof Error ? e.message : tr("Failed"));
     } finally {
       setBusy(false);
     }
@@ -339,33 +350,33 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
     <Modal
       open={open}
       onClose={onClose}
-      title="Override rules-engine urgency"
-      subtitle="The original rules output is kept. Your reason is permanently written to the audit log."
+      title={tr("Override rules-engine urgency")}
+      subtitle={tr("The original rules output is kept. Your reason is permanently written to the audit log.")}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button variant="danger" onClick={submit} loading={busy}>Record override</Button>
+          <Button variant="secondary" onClick={onClose}>{tr("Cancel")}</Button>
+          <Button variant="danger" onClick={submit} loading={busy}>{tr("Record override")}</Button>
         </>
       }
     >
-      <p className="text-sm text-muted">Current: <UrgencyBadge u={enc.urgency} size="sm" /> from rules {enc.note?.rules_fired.map((r) => r.rule_id).join(", ")}</p>
+      <p className="text-sm text-muted">{tr("Current:")} <UrgencyBadge u={enc.urgency} size="sm" /> {tr("from rules")} {enc.note?.rules_fired.map((r) => r.rule_id).join(", ")}</p>
       <div className="mt-4 grid grid-cols-2 gap-2">
         {options.map((u) => (
           <button key={u} onClick={() => setTo(u)} className={cx("rounded-xl border p-3 text-left", to === u ? "border-ink bg-canvas" : "border-line")}>
             <UrgencyBadge u={u} />
-            <p className="mt-1 text-xs text-muted">{u === "red" ? "Immediate" : u === "yellow" ? "Within 30–60 min" : "Standard OPD order"}</p>
+            <p className="mt-1 text-xs text-muted">{u === "red" ? tr("Immediate") : u === "yellow" ? tr("Within 30–60 min") : tr("Standard OPD order")}</p>
           </button>
         ))}
       </div>
       <div className="mt-4">
-        <Label htmlFor="ov-cat">Category</Label>
+        <Label htmlFor="ov-cat">{tr("Category")}</Label>
         <Select id="ov-cat" value={category} onChange={(e) => setCategory(e.target.value)}>
           {OVERRIDE_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
         </Select>
       </div>
       <div className="mt-4">
-        <Label htmlFor="ov-reason" hint={`${reason.trim().length}/15 min`}>Written reason (required)</Label>
-        <Textarea id="ov-reason" rows={4} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Repeat BP 132/84 after rest; chest wall tenderness reproduces pain; ECG normal." />
+        <Label htmlFor="ov-reason" hint={`${reason.trim().length}/15 min`}>{tr("Written reason (required)")}</Label>
+        <Textarea id="ov-reason" rows={4} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr("e.g. Repeat BP 132/84 after rest; chest wall tenderness reproduces pain; ECG normal.")} />
       </div>
       <FieldError>{err}</FieldError>
     </Modal>
@@ -373,6 +384,7 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
 }
 
 function EscalateModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encounter; onClose: () => void; onDone: () => void }) {
+  const { tr } = usePrefs();
   const [to, setTo] = useState<"senior_mo" | "specialist" | "doctor">("senior_mo");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -381,43 +393,43 @@ function EscalateModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
     <Modal
       open={open}
       onClose={onClose}
-      title="Escalate this case"
-      subtitle="The receiving clinician must acknowledge. Unacknowledged escalations stay on their dashboard."
+      title={tr("Escalate this case")}
+      subtitle={tr("The receiving clinician must acknowledge. Unacknowledged escalations stay on their dashboard.")}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button variant="secondary" onClick={onClose}>{tr("Cancel")}</Button>
           <Button
             variant="danger"
             loading={busy}
             onClick={async () => {
               setErr(null);
-              if (reason.trim().length < 5) return setErr("Add a short reason");
+              if (reason.trim().length < 5) return setErr(tr("Add a short reason"));
               setBusy(true);
               try {
                 await api.escalate(enc.id, to, reason);
-                toast("Escalated — awaiting acknowledgement");
+                toast(tr("Escalated — awaiting acknowledgement"));
                 onDone();
               } catch (e) {
-                setErr(e instanceof Error ? e.message : "Failed");
+                setErr(e instanceof Error ? e.message : tr("Failed"));
               } finally {
                 setBusy(false);
               }
             }}
           >
-            Escalate
+            {tr("Escalate")}
           </Button>
         </>
       }
     >
-      <Label htmlFor="esc-to">Escalate to</Label>
+      <Label htmlFor="esc-to">{tr("Escalate to")}</Label>
       <Select id="esc-to" value={to} onChange={(e) => setTo(e.target.value as typeof to)}>
-        <option value="senior_mo">Senior Medical Officer</option>
-        <option value="specialist">Specialist on call</option>
-        <option value="doctor">Doctor on duty</option>
+        <option value="senior_mo">{tr("Senior Medical Officer")}</option>
+        <option value="specialist">{tr("Specialist on call")}</option>
+        <option value="doctor">{tr("Doctor on duty")}</option>
       </Select>
       <div className="mt-4">
-        <Label htmlFor="esc-reason">Reason</Label>
-        <Textarea id="esc-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. SpO₂ dropping on repeat, needs senior review now" />
+        <Label htmlFor="esc-reason">{tr("Reason")}</Label>
+        <Textarea id="esc-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr("e.g. SpO₂ dropping on repeat, needs senior review now")} />
       </div>
       <FieldError>{err}</FieldError>
     </Modal>
@@ -425,6 +437,7 @@ function EscalateModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
 }
 
 function EditModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encounter; onClose: () => void; onDone: (e: Encounter) => void }) {
+  const { tr } = usePrefs();
   const [summary, setSummary] = useState(enc.note?.summary ?? "");
   const [missing, setMissing] = useState((enc.note?.missing_info ?? []).join("\n"));
   const [busy, setBusy] = useState(false);
@@ -433,34 +446,34 @@ function EditModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encount
       open={open}
       onClose={onClose}
       size="lg"
-      title="Edit triage note"
-      subtitle="Edits are attributed to you and logged. Urgency cannot be changed here — use Override."
+      title={tr("Edit triage note")}
+      subtitle={tr("Edits are attributed to you and logged. Urgency cannot be changed here — use Override.")}
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button variant="secondary" onClick={onClose}>{tr("Cancel")}</Button>
           <Button
             loading={busy}
             onClick={async () => {
               setBusy(true);
               try {
                 onDone(await api.editNote(enc.id, { summary, missing_info: missing.split("\n").map((s) => s.trim()).filter(Boolean) }));
-                toast("Note updated");
+                toast(tr("Note updated"));
               } catch (e) {
-                toast(e instanceof Error ? e.message : "Failed", "error");
+                toast(e instanceof Error ? e.message : tr("Failed"), "error");
               } finally {
                 setBusy(false);
               }
             }}
           >
-            Save changes
+            {tr("Save changes")}
           </Button>
         </>
       }
     >
-      <Label htmlFor="ed-sum">Summary</Label>
+      <Label htmlFor="ed-sum">{tr("Summary")}</Label>
       <Textarea id="ed-sum" rows={6} value={summary} onChange={(e) => setSummary(e.target.value)} />
       <div className="mt-4">
-        <Label htmlFor="ed-miss" hint="(one per line)">Missing information</Label>
+        <Label htmlFor="ed-miss" hint={tr("(one per line)")}>{tr("Missing information")}</Label>
         <Textarea id="ed-miss" rows={4} value={missing} onChange={(e) => setMissing(e.target.value)} />
       </div>
     </Modal>
@@ -468,6 +481,7 @@ function EditModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encount
 }
 
 function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean; enc: Encounter; facility: Facility | null; onClose: () => void; onDone: (share: ShareLink | null) => void }) {
+  const { tr } = usePrefs();
   const spec = facility?.specialists.find((s) => s.key === enc.specialist_required);
   const defaultDest = spec?.available ? `${facility?.name} — ${spec.label} (in-house)` : facility?.referral_destination ?? "";
   const [destination, setDestination] = useState(defaultDest);
@@ -488,11 +502,11 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
       open={open}
       onClose={onClose}
       size="xl"
-      title="Referral note"
-      subtitle="Prepared from the triage note and this facility's specialist configuration. Review before sending."
+      title={tr("Referral note")}
+      subtitle={tr("Prepared from the triage note and this facility's specialist configuration. Review before sending.")}
       footer={
         <>
-          <Button variant="secondary" icon={<Copy className="size-4" />} onClick={() => { navigator.clipboard?.writeText(text); toast("Copied"); }}>Copy</Button>
+          <Button variant="secondary" icon={<Copy className="size-4" />} onClick={() => { navigator.clipboard?.writeText(text); toast(tr("Copied")); }}>{tr("Copy")}</Button>
           <Button
             variant="secondary"
             icon={<Printer className="size-4" />}
@@ -505,7 +519,7 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
               }
             }}
           >
-            Print
+            {tr("Print")}
           </Button>
           <Button
             variant="teal"
@@ -519,16 +533,16 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
                   ? `${text}\n\nPatient summary and documents (scan QR or open): ${share.url}\nAccess code: ${share.access_code} · valid until ${new Date(share.expires_at).toLocaleString("en-IN")}`
                   : text;
                 await api.createReferral(enc.id, { destination, specialty, reason: reason || enc.chief_complaint, transport, note_text: note });
-                toast(share ? "Referral sent — print the QR slip for the patient" : "Referral sent and logged");
+                toast(share ? tr("Referral sent — print the QR slip for the patient") : tr("Referral sent and logged"));
                 onDone(share);
               } catch (e) {
-                toast(e instanceof Error ? e.message : "Failed", "error");
+                toast(e instanceof Error ? e.message : tr("Failed"), "error");
               } finally {
                 setBusy(false);
               }
             }}
           >
-            Send referral
+            {tr("Send referral")}
           </Button>
         </>
       }
@@ -536,46 +550,46 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         <div className="space-y-3">
           <div>
-            <Label htmlFor="rf-dest">Destination</Label>
+            <Label htmlFor="rf-dest">{tr("Destination")}</Label>
             <Select id="rf-dest" value={destination} onChange={(e) => setDestination(e.target.value)}>
               {spec?.available && <option>{`${facility?.name} — ${spec.label} (in-house)`}</option>}
               {facility && <option>{facility.referral_destination}</option>}
-              <option>Tele-consultation (eSanjeevani hub)</option>
+              <option>{tr("Tele-consultation (eSanjeevani hub)")}</option>
             </Select>
-            {spec && !spec.available && <p className="mt-1 text-xs text-muted">{spec.label} is not on site today{spec.schedule ? ` (${spec.schedule})` : ""}.</p>}
+            {spec && !spec.available && <p className="mt-1 text-xs text-muted">{tr(spec.label)} {tr("is not on site today")}{spec.schedule ? ` (${spec.schedule})` : ""}.</p>}
           </div>
           <div>
-            <Label htmlFor="rf-spec">Specialty</Label>
+            <Label htmlFor="rf-spec">{tr("Specialty")}</Label>
             <Select id="rf-spec" value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
               {[...new Set([specialty, ...(facility?.specialists.map((s) => s.label) ?? []), "Emergency Medicine"])].map((s) => <option key={s}>{s}</option>)}
             </Select>
           </div>
           <div>
-            <Label htmlFor="rf-reason">Reason</Label>
+            <Label htmlFor="rf-reason">{tr("Reason")}</Label>
             <Textarea id="rf-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={enc.chief_complaint} />
           </div>
           <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-teal-200 bg-teal-50/60 p-3 text-sm">
             <input type="checkbox" checked={withQr} onChange={(e) => setWithQr(e.target.checked)} className="mt-0.5 size-4 accent-teal-700" />
             <span>
-              <span className="font-semibold text-ink">Attach QR summary</span>
-              <span className="block text-xs text-muted">Receiving team scans it for details and uploaded documents (valid 7 days, needs access code).</span>
+              <span className="font-semibold text-ink">{tr("Attach QR summary")}</span>
+              <span className="block text-xs text-muted">{tr("Receiving team scans it for details and uploaded documents (valid 7 days, needs access code).")}</span>
             </span>
           </label>
           <div>
-            <Label htmlFor="rf-tr">Transport</Label>
+            <Label htmlFor="rf-tr">{tr("Transport")}</Label>
             <Select id="rf-tr" value={transport} onChange={(e) => setTransport(e.target.value as typeof transport)}>
-              <option value="ambulance_108">108 ambulance</option>
-              <option value="facility_vehicle">Facility vehicle</option>
-              <option value="self">Self / family</option>
+              <option value="ambulance_108">{tr("108 ambulance")}</option>
+              <option value="facility_vehicle">{tr("Facility vehicle")}</option>
+              <option value="self">{tr("Self / family")}</option>
             </Select>
           </div>
         </div>
         <div>
-          <Label htmlFor="rf-text">Note text (editable)</Label>
+          <Label htmlFor="rf-text">{tr("Note text (editable)")}</Label>
           <Textarea id="rf-text" rows={20} value={text} onChange={(e) => setText(e.target.value)} className="font-mono text-[13px]" />
         </div>
       </div>
-      <p className="mt-2 text-xs text-muted">Triage category: {enc.urgency && URGENCY_LABEL[enc.urgency]}. Export as PDF/FHIR from the case Export menu.</p>
+      <p className="mt-2 text-xs text-muted">{tr("Triage category:")} {enc.urgency && URGENCY_LABEL[enc.urgency]}{tr(". Export as PDF/FHIR from the case Export menu.")}</p>
     </Modal>
   );
 }

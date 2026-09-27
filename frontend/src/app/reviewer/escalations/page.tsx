@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Siren, CheckCircle2, Bot, UserRound } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, timeAgo } from "@/lib/hooks";
-import { useSession } from "@/components/providers";
+import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Label, Modal, Segmented, Spinner, Textarea } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
@@ -15,6 +15,7 @@ import type { Escalation } from "@/lib/types";
 const TO = { senior_mo: "Senior MO", specialist: "Specialist", doctor: "Doctor on duty" };
 
 export default function EscalationsPage() {
+  const { tr } = usePrefs();
   const { user } = useSession();
   const [tab, setTab] = useState<"open" | "acknowledged">("open");
   const { data, error, loading, reload } = useAsync(() => api.listEscalations(), [], { pollMs: 15_000 });
@@ -25,7 +26,7 @@ export default function EscalationsPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Escalations" subtitle="Raised by staff or automatically when a critical case waits too long. Each must be acknowledged by a doctor." />
+      <PageHeader title={tr("Escalations")} subtitle={tr("Raised by staff or automatically when a critical case waits too long. Each must be acknowledged by a doctor.")} />
       <Segmented
         className="mb-4"
         value={tab}
@@ -36,7 +37,7 @@ export default function EscalationsPage() {
         ]}
       />
       {error ? <ErrorNote error={error} onRetry={reload} /> : loading && !data ? <Spinner /> : list.length === 0 ? (
-        <Card><Empty icon={<Siren className="size-6" />} title={tab === "open" ? "Nothing waiting for acknowledgement" : "No acknowledged escalations yet"} /></Card>
+        <Card><Empty icon={<Siren className="size-6" />} title={tab === "open" ? tr("Nothing waiting for acknowledgement") : tr("No acknowledged escalations yet")} /></Card>
       ) : (
         <div className="space-y-3">
           {list.map((e) => (
@@ -49,21 +50,21 @@ export default function EscalationsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Link href={`/reviewer/case/${e.encounter_id}`} className="font-semibold text-ink hover:underline">{e.patient_name}</Link>
                     <UrgencyBadge u={e.urgency} size="sm" />
-                    <Badge tone={e.auto ? "semi" : "neutral"}>{e.auto ? <><Bot className="size-3" /> Auto (timer)</> : <><UserRound className="size-3" /> {e.raised_by}</>}</Badge>
+                    <Badge tone={e.auto ? "semi" : "neutral"}>{e.auto ? <><Bot className="size-3" /> {tr("Auto (timer)")}</> : <><UserRound className="size-3" /> {e.raised_by}</>}</Badge>
                     <Badge>→ {TO[e.to_role]}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-ink-2">{e.reason}</p>
-                  <p className="mt-1 text-xs text-muted">Raised {timeAgo(e.raised_at)}</p>
+                  <p className="mt-1 text-xs text-muted">{tr("Raised")} {timeAgo(e.raised_at)}</p>
                   {e.status === "acknowledged" && (
                     <p className="mt-2 rounded-lg bg-rout-bg px-3 py-2 text-sm text-rout">
-                      Acknowledged by {e.acknowledged_by} {e.acknowledged_at && timeAgo(e.acknowledged_at)}{e.ack_note ? ` — “${e.ack_note}”` : ""}
+                      {tr("Acknowledged by")} {e.acknowledged_by} {e.acknowledged_at && timeAgo(e.acknowledged_at)}{e.ack_note ? ` — “${e.ack_note}”` : ""}
                     </p>
                   )}
                 </div>
                 {e.status === "open" && (
                   <div className="flex gap-2">
-                    <Link href={`/reviewer/case/${e.encounter_id}`}><Button variant="secondary">Open case</Button></Link>
-                    {user?.role === "doctor" && <Button variant="danger" onClick={() => { setAck(e); setNote(""); }}>Acknowledge</Button>}
+                    <Link href={`/reviewer/case/${e.encounter_id}`}><Button variant="secondary">{tr("Open case")}</Button></Link>
+                    {user?.role === "doctor" && <Button variant="danger" onClick={() => { setAck(e); setNote(""); }}>{tr("Acknowledge")}</Button>}
                   </div>
                 )}
               </div>
@@ -74,11 +75,11 @@ export default function EscalationsPage() {
       <Modal
         open={!!ack}
         onClose={() => setAck(null)}
-        title="Acknowledge escalation"
-        subtitle="Confirms you have taken responsibility for this patient. Logged with your name and time."
+        title={tr("Acknowledge escalation")}
+        subtitle={tr("Confirms you have taken responsibility for this patient. Logged with your name and time.")}
         footer={
           <>
-            <Button variant="secondary" onClick={() => setAck(null)}>Cancel</Button>
+            <Button variant="secondary" onClick={() => setAck(null)}>{tr("Cancel")}</Button>
             <Button
               variant="teal"
               loading={busy}
@@ -87,23 +88,23 @@ export default function EscalationsPage() {
                 setBusy(true);
                 try {
                   await api.acknowledgeEscalation(ack.id, note);
-                  toast("Escalation acknowledged");
+                  toast(tr("Escalation acknowledged"));
                   setAck(null);
                   reload();
                 } catch (err) {
-                  toast(err instanceof Error ? err.message : "Failed", "error");
+                  toast(err instanceof Error ? err.message : tr("Failed"), "error");
                 } finally {
                   setBusy(false);
                 }
               }}
             >
-              Acknowledge
+              {tr("Acknowledge")}
             </Button>
           </>
         }
       >
-        <Label htmlFor="ack-note">Note (optional)</Label>
-        <Textarea id="ack-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Seeing patient now in bay 2" />
+        <Label htmlFor="ack-note">{tr("Note (optional)")}</Label>
+        <Textarea id="ack-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={tr("e.g. Seeing patient now in bay 2")} />
       </Modal>
     </div>
   );

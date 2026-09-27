@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from .. import audit
 from ..config import get_settings
 from ..models import Facility, Organisation, OtpChallenge, Patient, RevokedToken, User
-from ..schemas import ORG_FACILITY_TYPES, AuthResult, OtpChallengeOut, OtpRequest, OtpVerify, OtpVerifyOut, PinChangeIn, PinForgotIn, PinStepIn, RefreshIn, RegisterIn, UserOut
+from ..schemas import ORG_FACILITY_TYPES, AuthResult, OtpChallengeOut, OtpRequest, OtpVerify, OtpVerifyOut, PinChangeIn, PinForgotIn, PinStepIn, MePatch, RefreshIn, RegisterIn, UserOut
 from .. import directory, otp
 from ..security import PIN_ROLES, DB, CurrentUser, bearer, decode, hash_pin, hash_secret, issue_tokens, pin_problem, pin_step_token, registration_token, verify_secret
 from ..services import aware, next_patient_code, now
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 def user_out(db, u: User) -> UserOut:
     has_pin = u.pin_hash is not None
-    return UserOut.model_validate({**{c: getattr(u, c) for c in ("id", "phone", "name", "role", "facility_id", "registration_no", "language", "is_active", "organisation_id")}, "has_pin": has_pin, "created_at": aware(u.created_at)})
+    return UserOut.model_validate({**{c: getattr(u, c) for c in ("id", "phone", "name", "role", "facility_id", "registration_no", "language", "is_active", "organisation_id", "on_duty")}, "has_pin": has_pin, "duty_changed_at": aware(u.duty_changed_at) if u.duty_changed_at else None, "created_at": aware(u.created_at)})
 
 
 def _client_ip(request: Request) -> str:
@@ -69,7 +69,11 @@ def verify_otp(body: OtpVerify, db: DB):
     db.commit()
     user = db.scalar(select(User).where(User.phone == ch.phone))
     if not user:
+        if otp.is_demo(ch.phone):
+            raise HTTPException(403, "Sample numbers are reserved for the walkthrough — register with your own mobile number")
         return OtpVerifyOut(status="new_user", registration_token=registration_token(ch.phone))
+    if body.purpose == "register":
+        raise HTTPException(409, "This mobile number is already registered. Each number can hold only one account — sign in instead, or register with your own number.")
     if not user.is_active:
         raise HTTPException(403, "This account has been deactivated — contact your supervisor")
     if user.role in PIN_ROLES:
@@ -159,7 +163,9 @@ def register(body: RegisterIn, db: DB):
     if not body.accepted_terms:
         raise HTTPException(422, "Terms must be accepted")
     if db.scalar(select(User).where(User.phone == phone)):
-        raise HTTPException(409, "This phone is already registered")
+        raise HTTPException(409, "This mobile number is already registered — sign in instead")
+    if otp.is_demo(phone):
+        raise HTTPException(403, "Sample numbers are reserved for the walkthrough")
     org_id = None
     if body.role == "employer":
         # An employer registers their organisation and its first workplace; only then does that
@@ -198,8 +204,12 @@ def register(body: RegisterIn, db: DB):
             db.add(fac)
             db.flush()
             body.facility_id = fac.id
-        elif not db.get(Facility, body.facility_id):
-            raise HTTPException(422, "Unknown facility")
+        else:
+            fac = db.get(Facility, body.facility_id)
+            if not fac:
+                raise HTTPException(422, "Unknown facility")
+            if fac.source == "sample":
+                raise HTTPException(403, "This is a sample facility for the walkthrough — choose your real workplace")
     if body.role in PIN_ROLES:
         if not body.pin:
             raise HTTPException(422, "Choose a PIN to protect your account")
@@ -234,6 +244,15 @@ def refresh(body: RefreshIn, db: DB):
 
 @router.get("/me", response_model=UserOut)
 def me(user: CurrentUser, db: DB):
+    return user_out(db, user)
+
+
+@router.patch("/me", response_model=UserOut)
+def update_me(body: MePatch, user: CurrentUser, db: DB):
+    """Own preferences. The language is applied to every screen whenever this user signs in."""
+    if body.language and body.language != user.language:
+        user.language = body.language
+        audit.record(db, user, "UPDATE", "user", user.id, f"Preferred language set to {body.language}")
     return user_out(db, user)
 
 

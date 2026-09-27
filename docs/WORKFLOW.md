@@ -27,10 +27,10 @@ One idea runs through everything: **the system organises and prioritises; a qual
 
 | Role | Signs in at | Main screen | What they do | What they can never see |
 |---|---|---|---|---|
-| **Supervisor** | `/auth` | `/admin` | Picks the facility from the national directory (or adds a missing public one), sets facility type and specialists on duty, creates kiosk links / QR posters, watches today's tokens, manages staff (role, deactivate, **reset PIN**), reviews the audit log and data retention | Symptoms, triage notes, reports, patient documents |
-| **Receptionist** | `/auth` | `/admin` | Watches the token board, calls patients by token, corrects registration mistakes, manages kiosk links and staff devices | Symptoms, triage notes, reports, patient documents |
-| **Nurse / ANM** | `/auth` | `/reviewer` (nurse view) and `/kiosk` | Runs assisted intake on the staff kiosk (and adds vitals), works the "Do now" checklist, asks follow-up questions, escalates | Cannot override urgency, confirm notes or send referrals |
-| **Doctor / MO** | `/auth` | `/reviewer` | Works the queue top-down, reviews the note with its sources, confirms or edits, overrides urgency with a written reason, acknowledges escalations, sends referrals, exports | — |
+| **Supervisor** | `/auth` | `/admin` *(Facility supervisor)* | Picks the facility from the national directory (or adds a missing public one), sets facility type and specialists on duty, creates kiosk links / QR posters, manages staff (role, deactivate, **reset PIN**, on/off duty), staff devices, audit log and data retention | Symptoms, triage notes, reports, patient documents |
+| **Receptionist** | `/auth` | `/desk` *(Front desk)* | Today's patients and waiting times, finds and registers patients, corrects registration mistakes, marks doctors and nurses on/off duty, runs the check-in kiosk | Symptoms, urgency, notes, documents; facility setup, kiosk links, devices, audit, staff accounts |
+| **Nurse / ANM** | `/auth` | `/nurse` *(Nursing station)* and `/kiosk` | Patients to attend, **records vitals and bedside observations**, works the "Do now" checklist and questions, alerts the doctor, runs assisted intake | Referrals, QR summaries, exports, overrides, sign-off, fitness |
+| **Doctor / MO** | `/auth` | `/reviewer` *(Medical officer)* | Works the queue top-down, reviews the note with its sources and the nurses' observations, confirms or edits, overrides urgency with a written reason, acknowledges escalations, sends referrals, exports, shares QR summaries | — |
 | **Patient** | `/auth` | `/patient` | Adds a new problem before arriving, sees own visits, tokens and check-up reminders | Urgency, triage notes, other family members' records |
 | **Employer / organisation** | `/auth` | `/employer` | Registers the organisation and its workplaces (company clinic, industrial unit, campus, health camp), keeps the worker roster, sees each worker's fitness outcome (fit / restricted / unfit / pending) | Symptoms, notes, documents — any clinical record |
 | **Kiosk link** (no login) | opens `/k/CODE` | intake only | Registers a patient, records consent, takes symptoms and reports, issues a token | Everything else — it cannot read any data |
@@ -84,11 +84,17 @@ If the network is down, the intake is saved on the device and sent automatically
 4. **Routing** — if the needed specialist is not on duty, the case is pre-marked "Referral needed".
 5. **Audit** — the intake, consent and any source disagreement are written to the audit log.
 
-### 4.4 Front desk (receptionist / supervisor)
-`/admin` → **Today's tokens** updates every 10 seconds: token, name, patient ID, how they checked in, waiting time and status (*Waiting → With doctor → Seen / Referred / Escalated*). Staff call patients by token. The pencil on each row corrects a registration mistake (name, age, sex, phone, language, village); the audit log records which fields changed. The front desk never sees symptoms, urgency or documents.
+### 4.4 Front desk (receptionist)
+`/desk` → **Today's patients**: waiting now, with doctor, seen today, average and longest wait, doctors on duty. **Today's tokens** updates every 10 seconds: token, name, patient ID, how they checked in, waiting time and status (*Waiting → With doctor → Seen / Referred / Escalated*). Staff call patients by token. The pencil on each row corrects a registration mistake (name, age, sex, phone, language, village); the audit log records which fields changed.
+- **Find & register** (`/desk/patients`): search by phone, patient ID or name; edit details; register new patients through the check-in kiosk.
+- **Doctors & nurses** (`/desk/staff`): switch each doctor or nurse on/off duty as they arrive or leave (time management). A warning shows when no doctor is on duty.
+- The front desk never sees symptoms, urgency or documents, and has no facility setup, kiosk-link, device, audit or staff-account tools — those are the supervisor's (`/admin`), and the API refuses them to receptionists.
 
-### 4.5 Nurse
-`/reviewer` shows the same queue. Opening a case gives the **nurse view**: *Do now* (flags), vitals to re-measure, questions to ask, missing information. A nurse can edit the note and **escalate** ("SpO₂ dropping — needs senior review now").
+### 4.5 Nurse (`/nurse`)
+- **Patients to attend** lists everyone waiting, with *Vitals needed* first, urgency colour and waiting time.
+- Opening a patient (`/nurse/patient/…`) shows **Record vitals & observations** (BP, pulse, SpO₂, temperature, respiratory rate, glucose and a free-text nursing observation), the nurse checklist (*Do now*, questions to ask, still missing), the visit's reports and photos, and **Alert doctor**.
+- Saved observations go on the patient's record with the nurse's name. The fixed rules run again on the new vitals, so a low SpO₂ raises urgency automatically; the doctor sees every observation on the case.
+- Nurses have no referral, QR summary, export, override, sign-off or fitness tools — the API enforces this too.
 
 ### 4.6 Doctor
 1. **Queue** (`/reviewer`) — ordered by urgency, then waiting time; each row shows the token, flags, "needs checking" counts and an auto-escalation timer.
@@ -138,12 +144,21 @@ The landing page shows live status (checked every 20 seconds) for the website, A
 - **Forgot PIN:** supervisors and employers reset it themselves after the OTP (*Forgot PIN?*). Doctors, nurses and receptionists ask their supervisor (**Admin → Staff → Reset PIN**); they then create a new PIN after their next OTP.
 - **Rate limits:** 3 codes per phone per 10 minutes, 10 per day, 30 per network address per hour.
 - **Sample walkthrough accounts** (code `123456`, staff PIN `4826`): doctor 9000000001, nurse 9000000002, receptionist 9000000003, supervisor 9000000004, employer 9000000005, patient 9876543210. They belong to the sample facility *PHC Manikpur* (kiosk link `/k/MANIKPUR`) and the sample organisation *Kalinga Steel Works*.
+- **New accounts start empty:** a number that already has an account cannot be used to register again (sign in instead), the sample numbers are reserved, and the sample facility cannot be joined — so a newly registered doctor, nurse or employer always gets their own fresh dashboard.
 
-## 7. Kiosk links offline
+## 7. Language
+
+- The language picker (globe) in every header switches **every screen** — website, sign-in, all dashboards and both kiosks — between English, हिन्दी and ଓଡ଼ିଆ at any time.
+- Each person's choice is saved to their account: when they sign in on any device, their dashboard opens in their language. (The sample nurse, receptionist and patient prefer Hindi.)
+- On a kiosk the patient picks their own language; it applies to every question and answer, the microphone listens in that language, and questions are read aloud in it. Changing language on a shared kiosk never changes the unlocking staff member's own preference.
+- Read-aloud needs a voice for that language on the device (Android: Settings → Text-to-speech → install Odia/Hindi). If it is missing the kiosk says so instead of reading Odia text with an English voice.
+- Clinical notes stay in the working language (English) for the reviewing clinician; the patient's original words are kept beside them.
+
+## 8. Kiosk links offline
 
 Open a kiosk link once with internet and it keeps working without it: the page, the facility details and the kiosk session stay on the device. Intakes made offline get an `OFF-xxxx` slip, wait in that link's own queue on the device, and are sent automatically — with that kiosk's session — as soon as the connection returns.
 
-## 8. Where things run
+## 9. Where things run
 
 | Part | Where |
 |---|---|

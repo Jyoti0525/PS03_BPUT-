@@ -10,7 +10,7 @@ import { api, ApiError } from "@/lib/api";
 import { usePrefs } from "@/components/providers";
 import { Button, Card, FieldError, Input, Label, Select, Textarea, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
-import { canRecognise, speak, startCapture, stopSpeaking, type Recorder } from "@/lib/speech";
+import { canRecognise, hasVoice, speak, startCapture, stopSpeaking, type Recorder } from "@/lib/speech";
 import { enqueue } from "@/lib/offline/outbox";
 import { compressImage } from "@/lib/image";
 import { SAMPLE_FACILITY_ID, SAMPLE_REPORTS, sampleReportImage } from "@/lib/sample-reports";
@@ -78,7 +78,18 @@ export function IntakeFlow({
   /** Set when the facility is an organisation's workplace (company clinic, campus…): asks for the employee / student ID. */
   organisationName?: string | null;
 }) {
-  const { t, lang, readAloud } = usePrefs();
+  const { tr, t, lang, readAloud } = usePrefs();
+  const [voiceOk, setVoiceOk] = useState(true);
+  useEffect(() => {
+    // Voices load asynchronously; check now and again once the list arrives.
+    const check = () => setVoiceOk(hasVoice(lang));
+    const id = setTimeout(check, 600);
+    window.speechSynthesis?.addEventListener?.("voiceschanged", check);
+    return () => {
+      clearTimeout(id);
+      window.speechSynthesis?.removeEventListener?.("voiceschanged", check);
+    };
+  }, [lang]);
   const steps: Step[] = useMemo(
     () =>
       mode === "kiosk"
@@ -216,7 +227,7 @@ export function IntakeFlow({
   /* ── identity ── */
   const findPatient = async () => {
     setErr(null);
-    if (!/^\d{10}$/.test(lookupPhone) && !/^jva-/i.test(lookupPhone)) return setErr("Enter a 10-digit phone or a patient ID");
+    if (!/^\d{10}$/.test(lookupPhone) && !/^jva-/i.test(lookupPhone)) return setErr(tr("Enter a 10-digit phone or a patient ID"));
     setBusy(true);
     try {
       const c = /^jva-/i.test(lookupPhone) ? [{ patient: await api.getPatientByCode(lookupPhone), last_visit_at: null, match_reason: "Patient ID" }] : await api.searchPatients(lookupPhone);
@@ -226,7 +237,7 @@ export function IntakeFlow({
         setNewP((p) => ({ ...p, phone: /^\d{10}$/.test(lookupPhone) ? lookupPhone : "" }));
       }
     } catch (e) {
-      setErr(e instanceof ApiError && e.status === 404 ? "No patient with that ID" : e instanceof Error ? e.message : "Search failed");
+      setErr(e instanceof ApiError && e.status === 404 ? tr("No patient with that ID") : e instanceof Error ? e.message : tr("Search failed"));
     } finally {
       setBusy(false);
     }
@@ -242,7 +253,7 @@ export function IntakeFlow({
         recRef.current = await startCapture(lang, setPartial);
         setRecording(true);
       } catch {
-        setErr("Microphone not available — type or tap instead");
+        setErr(tr("Microphone not available — type or tap instead"));
       }
       return;
     }
@@ -255,7 +266,7 @@ export function IntakeFlow({
       // No live ASR in this browser: server-side IndicConformer would transcribe the audio.
       original = DEMO_SPEECH[lang] ?? DEMO_SPEECH.en;
       text = DEMO_TRANSLATION;
-      toast(canRecognise() ? "Could not hear clearly — using demo transcript" : "Live transcription unavailable — demo transcript used", "info");
+      toast(canRecognise() ? tr("Could not hear clearly — using demo transcript") : tr("Live transcription unavailable — demo transcript used"), "info");
     } else if (lang !== "en") {
       text = original; // translated server-side (IndicTrans2); raw text kept for audit
     }
@@ -285,7 +296,7 @@ export function IntakeFlow({
   /* ── uploads ── */
   const onPick = async (list: FileList | null, kind: "report" | "image") => {
     if (!list?.length) return;
-    if (offline) return setErr("Uploads need a connection — ask staff to add reports after syncing");
+    if (offline) return setErr(tr("Uploads need a connection — ask staff to add reports after syncing"));
     setBusy(true);
     try {
       for (const f of Array.from(list)) {
@@ -293,25 +304,25 @@ export function IntakeFlow({
         const up = await api.uploadFile(await compressImage(f), kind);
         setFiles((cur) => [...cur, up]);
       }
-      toast("Uploaded");
+      toast(tr("Uploaded"));
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Upload failed");
+      setErr(e instanceof Error ? e.message : tr("Upload failed"));
     } finally {
       setBusy(false);
     }
   };
 
   const addSample = async (key: string) => {
-    if (offline) return setErr("Uploads need a connection");
+    if (offline) return setErr(tr("Uploads need a connection"));
     setBusy(true);
     try {
       const img = sampleReportImage(key, patient?.name ?? (newP.name || "Patient"));
       const blob = await (await fetch(img.dataUrl)).blob();
       const up = await api.uploadFile(new File([blob], `${key}_sample_report.svg`, { type: "image/svg+xml" }), "report", null, key);
       setFiles((cur) => [...cur, up]);
-      toast("Sample report attached");
+      toast(tr("Sample report attached"));
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Upload failed");
+      setErr(e instanceof Error ? e.message : tr("Upload failed"));
     } finally {
       setBusy(false);
     }
@@ -380,7 +391,7 @@ export function IntakeFlow({
       setResult(r);
       onFinished?.(r);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Could not submit");
+      setErr(e instanceof Error ? e.message : tr("Could not submit"));
     } finally {
       setBusy(false);
     }
@@ -421,6 +432,12 @@ export function IntakeFlow({
 
   return (
     <div className="mx-auto max-w-3xl">
+      {!voiceOk && (
+        <p className="mb-4 flex items-start gap-2 rounded-xl border border-semi/30 bg-semi-bg px-4 py-2.5 text-sm text-ink-2">
+          <Volume2 className="mt-0.5 size-4 shrink-0 text-semi" />
+          {tr("This device has no {lang} voice, so questions are not read aloud. Install the {lang} voice in the device’s text-to-speech settings.", { lang: langByCode(lang).name })}
+        </p>
+      )}
       {/* progress */}
       <div className="mb-5 flex items-center gap-1.5" aria-label={`Step ${idx + 1} of ${steps.length}`}>
         {steps.map((s, i) => (
@@ -430,7 +447,7 @@ export function IntakeFlow({
 
       <Card className="fade-up p-5 sm:p-7" key={step}>
         <div className="mb-5 flex items-start justify-between gap-3">
-          <h2 className="text-2xl font-bold text-ink sm:text-3xl">{step === "vitals" ? "For staff: vitals" : t(STEP_TITLE[step])}</h2>
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">{step === "vitals" ? tr("For staff: vitals") : t(STEP_TITLE[step])}</h2>
           {step !== "vitals" && listen(step === "consent" ? t("kiosk.consent.body") : t(STEP_TITLE[step]))}
         </div>
 
@@ -444,13 +461,13 @@ export function IntakeFlow({
             {consentMode === "proxy" && (
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="px-name">Helper&apos;s name</Label>
+                  <Label htmlFor="px-name">{tr("Helper's name")}</Label>
                   <Input id="px-name" value={proxyName} onChange={(e) => setProxyName(e.target.value)} className="h-12 text-lg" />
                 </div>
                 <div>
-                  <Label htmlFor="px-rel">Relationship</Label>
+                  <Label htmlFor="px-rel">{tr("Relationship")}</Label>
                   <Select id="px-rel" value={proxyRel} onChange={(e) => setProxyRel(e.target.value)} className="h-12 text-lg">
-                    <option value="">Choose</option>
+                    <option value="">{tr("Choose")}</option>
                     {["Mother", "Father", "Husband", "Wife", "Son", "Daughter", "Mother-in-law", "Other family", "ASHA worker", "Caregiver"].map((r) => (
                       <option key={r}>{r}</option>
                     ))}
@@ -473,7 +490,7 @@ export function IntakeFlow({
                   </button>
                 ))}
               </div>
-              {privacy === "shared_space" && <p className="mt-2 text-sm text-semi">Sensitive questions will be asked by a health worker in private.</p>}
+              {privacy === "shared_space" && <p className="mt-2 text-sm text-semi">{tr("Sensitive questions will be asked by a health worker in private.")}</p>}
             </div>
             <label className="flex cursor-pointer items-center gap-4 rounded-2xl border-2 border-line p-4 has-checked:border-teal-600 has-checked:bg-teal-50">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="size-7 accent-teal-700" />
@@ -491,7 +508,7 @@ export function IntakeFlow({
                   <p className="text-lg font-semibold text-ink">{patient.name}</p>
                   <p className="text-sm text-muted">{patient.age} y · {patient.sex} · {patient.code}</p>
                 </div>
-                <Button variant="ghost" onClick={() => setPatient(null)}>Change</Button>
+                <Button variant="ghost" onClick={() => setPatient(null)}>{tr("Change")}</Button>
               </div>
             ) : isNew ? (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -519,25 +536,25 @@ export function IntakeFlow({
                 </div>
                 {organisationName && (
                   <div className="sm:col-span-2">
-                    <Label htmlFor="np-emp" hint="(optional)">{organisationName} employee / student ID</Label>
-                    <Input id="np-emp" value={newP.employee_code} onChange={(e) => setNewP({ ...newP, employee_code: e.target.value.toUpperCase().slice(0, 40) })} className="h-13 text-lg" placeholder="e.g. KSW-1041" />
+                    <Label htmlFor="np-emp" hint={tr("(optional)")}>{organisationName} {tr("employee / student ID")}</Label>
+                    <Input id="np-emp" value={newP.employee_code} onChange={(e) => setNewP({ ...newP, employee_code: e.target.value.toUpperCase().slice(0, 40) })} className="h-13 text-lg" placeholder={tr("e.g. KSW-1041")} />
                   </div>
                 )}
                 <Button variant="ghost" className="sm:col-span-2" onClick={() => { setIsNew(false); setCandidates(null); }} icon={<Search className="size-4" />} disabled={offline}>
-                  {mode === "link" ? "I have visited before" : "Search existing patients instead"}
+                  {mode === "link" ? tr("I have visited before") : tr("Search existing patients instead")}
                 </Button>
               </div>
             ) : mode === "link" ? (
               <div className="space-y-5">
                 <Button variant="teal" size="xl" className="w-full" onClick={() => setIsNew(true)} icon={<UserPlus className="size-6" />}>
-                  First visit — register
+                  {tr("First visit — register")}
                 </Button>
                 <div className="rounded-2xl border-2 border-line p-4">
-                  <p className="font-semibold text-ink">Been here before?</p>
-                  <p className="text-sm text-muted">Enter the ID printed on your old token and your phone number.</p>
+                  <p className="font-semibold text-ink">{tr("Been here before?")}</p>
+                  <p className="text-sm text-muted">{tr("Enter the ID printed on your old token and your phone number.")}</p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                    <Input value={returning.code} onChange={(e) => setReturning({ ...returning, code: e.target.value.toUpperCase().trim() })} placeholder="JVA-P012" aria-label="Patient ID" className="h-12 text-lg" disabled={offline} />
-                    <Input value={returning.phone} inputMode="numeric" onChange={(e) => setReturning({ ...returning, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} placeholder="Phone" aria-label="Phone" className="h-12 text-lg" disabled={offline} />
+                    <Input value={returning.code} onChange={(e) => setReturning({ ...returning, code: e.target.value.toUpperCase().trim() })} placeholder={tr("JVA-P012")} aria-label={tr("Patient ID")} className="h-12 text-lg" disabled={offline} />
+                    <Input value={returning.phone} inputMode="numeric" onChange={(e) => setReturning({ ...returning, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} placeholder={tr("Phone")} aria-label={tr("Phone")} className="h-12 text-lg" disabled={offline} />
                     <Button
                       size="lg"
                       className="h-12"
@@ -545,36 +562,36 @@ export function IntakeFlow({
                       disabled={offline}
                       onClick={async () => {
                         setErr(null);
-                        if (!/^JVA-/i.test(returning.code) || !/^\d{10}$/.test(returning.phone)) return setErr("Enter your Jeevia ID (JVA-…) and 10-digit phone");
+                        if (!/^JVA-/i.test(returning.code) || !/^\d{10}$/.test(returning.phone)) return setErr(tr("Enter your Jeevia ID (JVA-…) and 10-digit phone"));
                         setBusy(true);
                         try {
                           setPatient(await api.kioskIdentify(returning.code, returning.phone));
                         } catch (e) {
-                          setErr(e instanceof Error ? e.message : "Not found");
+                          setErr(e instanceof Error ? e.message : tr("Not found"));
                         } finally {
                           setBusy(false);
                         }
                       }}
                     >
-                      Continue
+                      {tr("Continue")}
                     </Button>
                   </div>
-                  {offline && <p className="mt-2 text-sm text-semi">Offline — register as new; records are matched when synced.</p>}
+                  {offline && <p className="mt-2 text-sm text-semi">{tr("Offline — register as new; records are matched when synced.")}</p>}
                 </div>
               </div>
             ) : (
               <>
-                <p className="text-muted">Returning? Search by phone (may be shared by family) or patient ID from an old token.</p>
+                <p className="text-muted">{tr("Returning? Search by phone (may be shared by family) or patient ID from an old token.")}</p>
                 <div className="flex gap-2">
-                  <Input value={lookupPhone} onChange={(e) => setLookupPhone(e.target.value.trim())} placeholder="Phone or JVA-…" className="h-13 text-lg" disabled={offline} />
+                  <Input value={lookupPhone} onChange={(e) => setLookupPhone(e.target.value.trim())} placeholder={tr("Phone or JVA-…")} className="h-13 text-lg" disabled={offline} />
                   <Button size="lg" className="h-13" onClick={findPatient} loading={busy} disabled={offline} icon={<Search className="size-5" />}>
-                    Find
+                    {tr("Find")}
                   </Button>
                 </div>
-                {offline && <p className="text-sm text-semi">Offline — search is unavailable. Register as new; records are matched when synced.</p>}
+                {offline && <p className="text-sm text-semi">{tr("Offline — search is unavailable. Register as new; records are matched when synced.")}</p>}
                 {candidates && candidates.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-sm font-semibold text-ink-2">{candidates.length > 1 ? "Several people use this phone — who is the patient?" : "Is this the patient?"}</p>
+                    <p className="text-sm font-semibold text-ink-2">{candidates.length > 1 ? tr("Several people use this phone — who is the patient?") : tr("Is this the patient?")}</p>
                     {candidates.map((c) => (
                       <button key={c.patient.id} type="button" onClick={() => setPatient(c.patient)} className="flex w-full items-center gap-3 rounded-2xl border-2 border-line p-3 text-left hover:border-teal-300">
                         <span className="grid size-11 place-items-center rounded-xl bg-coral-100 font-bold text-coral-700">{c.patient.name.charAt(0)}</span>
@@ -587,7 +604,7 @@ export function IntakeFlow({
                   </div>
                 )}
                 <Button variant="secondary" size="xl" className="w-full" onClick={() => setIsNew(true)} icon={<UserPlus className="size-6" />}>
-                  New patient
+                  {tr("New patient")}
                 </Button>
               </>
             )}
@@ -596,9 +613,9 @@ export function IntakeFlow({
 
         {step === "visit" && (
           <div className="grid gap-3">
-            <BigChoice selected={category === "normal"} onClick={() => setCategory("normal")} icon={<Stethoscope />} title={t("kiosk.visit.normal")} body="Fever, pain, injury, cough or any new problem" />
-            <BigChoice selected={category === "maternal"} onClick={() => setCategory("maternal")} icon={<Baby />} title={t("kiosk.visit.maternal")} body="Antenatal visit or a problem during pregnancy" />
-            <BigChoice selected={category === "chronic"} onClick={() => setCategory("chronic")} icon={<HeartPulse />} title={t("kiosk.visit.chronic")} body="Diabetes, BP, asthma/COPD, TB or other long-term illness" />
+            <BigChoice selected={category === "normal"} onClick={() => setCategory("normal")} icon={<Stethoscope />} title={t("kiosk.visit.normal")} body={tr("Fever, pain, injury, cough or any new problem")} />
+            <BigChoice selected={category === "maternal"} onClick={() => setCategory("maternal")} icon={<Baby />} title={t("kiosk.visit.maternal")} body={tr("Antenatal visit or a problem during pregnancy")} />
+            <BigChoice selected={category === "chronic"} onClick={() => setCategory("chronic")} icon={<HeartPulse />} title={t("kiosk.visit.chronic")} body={tr("Diabetes, BP, asthma/COPD, TB or other long-term illness")} />
           </div>
         )}
 
@@ -615,7 +632,7 @@ export function IntakeFlow({
                 {recording ? <Square className="size-10" /> : <Mic className="size-12" />}
               </button>
               <p className="text-lg font-semibold text-ink">{recording ? t("kiosk.symptoms.stop") : t("kiosk.symptoms.speak")}</p>
-              <p className="text-sm text-muted">{langByCode(lang).native} · {canRecognise() ? "live transcription" : "recorded for server transcription"}</p>
+              <p className="text-sm text-muted">{langByCode(lang).native} · {canRecognise() ? tr("live transcription") : tr("recorded for server transcription")}</p>
               {recording && partial && <p className="max-w-lg text-center text-lg text-ink-2 italic">“{partial}”</p>}
             </div>
 
@@ -623,7 +640,7 @@ export function IntakeFlow({
               <div className="rounded-2xl border-2 border-coral-300 bg-coral-50 p-4">
                 <p className="text-sm font-semibold text-coral-700">{t("kiosk.symptoms.readback")}</p>
                 <p className="mt-1 text-xl font-medium text-ink">“{pending.original}”</p>
-                {pending.text !== pending.original && <p className="mt-1 text-sm text-muted">→ {pending.text}</p>}
+                {pending.text !== pending.original && <p className="mt-1 text-sm text-muted">→ {tr(pending.text)}</p>}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button size="lg" variant="teal" onClick={() => confirmVoice(true)} icon={<Check className="size-5" />}>{t("kiosk.symptoms.correct")}</Button>
                   <Button size="lg" variant="secondary" onClick={() => confirmVoice(false)} icon={<RotateCcw className="size-5" />}>{t("kiosk.symptoms.again")}</Button>
@@ -638,7 +655,7 @@ export function IntakeFlow({
                   <li key={i} className="flex items-start gap-3 rounded-xl border border-line bg-white p-3">
                     <Mic className="mt-1 size-4 shrink-0 text-teal-700" />
                     <span className="flex-1 text-ink">{e.original_text}</span>
-                    <button type="button" onClick={() => setEntries(entries.filter((_, j) => j !== i))} className="text-subtle hover:text-crit" aria-label="Remove">
+                    <button type="button" onClick={() => setEntries(entries.filter((_, j) => j !== i))} className="text-subtle hover:text-crit" aria-label={tr("Remove")}>
                       <Trash2 className="size-4" />
                     </button>
                   </li>
@@ -701,26 +718,26 @@ export function IntakeFlow({
 
             {category === "maternal" && (
               <div className="rounded-2xl border border-coral-200 bg-coral-50/50 p-4">
-                <p className="mb-3 flex items-center gap-2 font-semibold text-coral-700"><Baby className="size-5" /> Pregnancy details</p>
+                <p className="mb-3 flex items-center gap-2 font-semibold text-coral-700"><Baby className="size-5" /> {tr("Pregnancy details")}</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <Label htmlFor="m-weeks">Weeks of pregnancy</Label>
+                    <Label htmlFor="m-weeks">{tr("Weeks of pregnancy")}</Label>
                     <Input id="m-weeks" inputMode="numeric" value={maternal.gestation_weeks} onChange={(e) => setMaternal({ ...maternal, gestation_weeks: e.target.value.replace(/\D/g, "").slice(0, 2) })} className="h-12 text-lg" />
                   </div>
                   <div>
-                    <Label htmlFor="m-anc">Check-ups done so far</Label>
+                    <Label htmlFor="m-anc">{tr("Check-ups done so far")}</Label>
                     <Input id="m-anc" inputMode="numeric" value={maternal.anc_visits} onChange={(e) => setMaternal({ ...maternal, anc_visits: e.target.value.replace(/\D/g, "").slice(0, 2) })} className="h-12 text-lg" />
                   </div>
                   <div>
-                    <Label htmlFor="m-next">Next check-up date</Label>
+                    <Label htmlFor="m-next">{tr("Next check-up date")}</Label>
                     <Input id="m-next" type="date" value={maternal.next_checkup} onChange={(e) => setMaternal({ ...maternal, next_checkup: e.target.value })} className="h-12" />
                   </div>
                   <div>
-                    <Label htmlFor="m-rem">Remind me by</Label>
+                    <Label htmlFor="m-rem">{tr("Remind me by")}</Label>
                     <Select id="m-rem" value={maternal.reminder_channel} onChange={(e) => setMaternal({ ...maternal, reminder_channel: e.target.value as "sms" | "voice" | "none" })} className="h-12">
-                      <option value="sms">SMS</option>
-                      <option value="voice">Voice call in my language</option>
-                      <option value="none">No reminder</option>
+                      <option value="sms">{tr("SMS")}</option>
+                      <option value="voice">{tr("Voice call in my language")}</option>
+                      <option value="none">{tr("No reminder")}</option>
                     </Select>
                   </div>
                 </div>
@@ -729,28 +746,28 @@ export function IntakeFlow({
 
             {category === "chronic" && (
               <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-4">
-                <p className="mb-3 flex items-center gap-2 font-semibold text-teal-800"><HeartPulse className="size-5" /> Long-term illness</p>
+                <p className="mb-3 flex items-center gap-2 font-semibold text-teal-800"><HeartPulse className="size-5" /> {tr("Long-term illness")}</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <Label htmlFor="c-cond">Illness</Label>
+                    <Label htmlFor="c-cond">{tr("Illness")}</Label>
                     <Select id="c-cond" value={chronic.condition} onChange={(e) => setChronic({ ...chronic, condition: e.target.value })} className="h-12">
-                      <option value="">Choose</option>
+                      <option value="">{tr("Choose")}</option>
                       {["Type 2 diabetes", "High blood pressure", "COPD / asthma", "Tuberculosis (on treatment)", "Heart disease", "Kidney disease", "Epilepsy", "Other"].map((c) => <option key={c}>{c}</option>)}
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="c-last">Last check-up</Label>
+                    <Label htmlFor="c-last">{tr("Last check-up")}</Label>
                     <Select id="c-last" value={chronic.last_checkup} onChange={(e) => setChronic({ ...chronic, last_checkup: e.target.value })} className="h-12">
-                      <option value="">Don&apos;t remember</option>
+                      <option value="">{tr("Don't remember")}</option>
                       {["Less than 1 month ago", "1–3 months ago", "3–6 months ago", "More than 6 months ago"].map((c) => <option key={c}>{c}</option>)}
                     </Select>
                   </div>
                   <div className="sm:col-span-2">
-                    <Label htmlFor="c-meds">Medicines you take</Label>
-                    <Input id="c-meds" value={chronic.current_medicines} onChange={(e) => setChronic({ ...chronic, current_medicines: e.target.value })} className="h-12" placeholder="Names, or 'white tablet twice a day'" />
+                    <Label htmlFor="c-meds">{tr("Medicines you take")}</Label>
+                    <Input id="c-meds" value={chronic.current_medicines} onChange={(e) => setChronic({ ...chronic, current_medicines: e.target.value })} className="h-12" placeholder={tr("Names, or 'white tablet twice a day'")} />
                   </div>
                   <div className="sm:col-span-2">
-                    <Label>Compared with last time you feel</Label>
+                    <Label>{tr("Compared with last time you feel")}</Label>
                     <div className="grid grid-cols-4 gap-2">
                       {(["better", "same", "worse", "unsure"] as const).map((f) => (
                         <button key={f} type="button" onClick={() => setChronic({ ...chronic, feeling_vs_last: f })} aria-pressed={chronic.feeling_vs_last === f} className={cx("h-12 rounded-xl border-2 font-semibold capitalize", chronic.feeling_vs_last === f ? "border-teal-600 bg-white text-teal-800" : "border-line text-ink-2")}>
@@ -773,26 +790,26 @@ export function IntakeFlow({
                 <Camera className="size-9 text-teal-700" />
                 <span>
                   <span className="block text-lg font-semibold text-ink">{t("kiosk.upload.camera")}</span>
-                  <span className="block text-sm text-muted">Lab report, prescription</span>
+                  <span className="block text-sm text-muted">{tr("Lab report, prescription")}</span>
                 </span>
                 <input type="file" accept="image/*,application/pdf" capture="environment" className="sr-only" onChange={(e) => onPick(e.target.files, "report")} />
               </label>
               <label className={cx("flex min-h-24 cursor-pointer items-center gap-4 rounded-2xl border-2 border-dashed border-coral-300 bg-coral-50/50 p-4", offline && "pointer-events-none opacity-50")}>
                 <Activity className="size-9 text-coral-600" />
                 <span>
-                  <span className="block text-lg font-semibold text-ink">Photo of the problem</span>
-                  <span className="block text-sm text-muted">Rash, wound, swelling</span>
+                  <span className="block text-lg font-semibold text-ink">{tr("Photo of the problem")}</span>
+                  <span className="block text-sm text-muted">{tr("Rash, wound, swelling")}</span>
                 </span>
                 <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => onPick(e.target.files, "image")} />
               </label>
             </div>
             {(API_MODE === "mock" || facilityId === SAMPLE_FACILITY_ID) && (
             <div>
-              <p className="mb-2 text-sm font-semibold text-ink-2">{t("kiosk.upload.sample")} <span className="font-normal text-muted">(synthetic, for the demo — OCR values are traced to the image)</span></p>
+              <p className="mb-2 text-sm font-semibold text-ink-2">{t("kiosk.upload.sample")} <span className="font-normal text-muted">{tr("(synthetic, for the demo — OCR values are traced to the image)")}</span></p>
               <div className="flex flex-wrap gap-2">
                 {SAMPLE_REPORTS.map((s) => (
                   <Button key={s.key} variant="secondary" size="sm" onClick={() => addSample(s.key)} disabled={busy || offline} icon={<FileText className="size-4" />}>
-                    {s.title}
+                    {tr(s.title)}
                   </Button>
                 ))}
               </div>
@@ -813,18 +830,18 @@ export function IntakeFlow({
                 ))}
               </div>
             )}
-            <p className="text-xs text-muted">Photos and reports are deleted automatically after 3–7 days. Voice recordings after 24 hours.</p>
+            <p className="text-xs text-muted">{tr("Photos and reports are deleted automatically after 3–7 days. Voice recordings after 24 hours.")}</p>
           </div>
         )}
 
         {step === "followup" && (
           <div className="space-y-5">
-            {questions.length === 0 && <p className="text-lg text-muted">No more questions. Thank you!</p>}
+            {questions.length === 0 && <p className="text-lg text-muted">{tr("No more questions. Thank you!")}</p>}
             {questions.map((q) => (
               <div key={q.qid}>
                 <div className="mb-2 flex items-start justify-between gap-2">
-                  <p className="text-lg font-semibold text-ink">{q.question}</p>
-                  {listen(q.question)}
+                  <p className="text-lg font-semibold text-ink">{tr(q.question)}</p>
+                  {listen(tr(q.question))}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {q.options.map((o) => (
@@ -835,7 +852,7 @@ export function IntakeFlow({
                       aria-pressed={answers[q.qid]?.answer === o}
                       className={cx("min-h-12 rounded-xl border-2 px-4 text-base font-medium", answers[q.qid]?.answer === o ? "border-teal-600 bg-teal-50 text-teal-800" : "border-line text-ink-2")}
                     >
-                      {o}
+                      {tr(o)}
                     </button>
                   ))}
                 </div>
@@ -846,7 +863,7 @@ export function IntakeFlow({
 
         {step === "vitals" && (
           <div>
-            <p className="mb-4 text-sm text-muted">Optional. Entered by the nurse / ANM. Readings feed the deterministic rules engine.</p>
+            <p className="mb-4 text-sm text-muted">{tr("Optional. Entered by the nurse / ANM. Readings feed the deterministic rules engine.")}</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(
                 [

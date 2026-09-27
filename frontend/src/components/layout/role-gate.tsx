@@ -2,14 +2,14 @@
 
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSession } from "@/components/providers";
+import { useSession, usePrefs } from "@/components/providers";
 import type { Role } from "@/lib/types";
 import { Spinner } from "@/components/ui";
 
 export const HOME_FOR_ROLE: Record<Role, string> = {
   doctor: "/reviewer",
-  nurse: "/reviewer",
-  receptionist: "/admin",
+  nurse: "/nurse",
+  receptionist: "/desk",
   supervisor: "/admin",
   patient: "/patient",
   employer: "/employer",
@@ -18,6 +18,7 @@ export const HOME_FOR_ROLE: Record<Role, string> = {
 
 /** Client-side role-based access. The API enforces the same rules server-side. */
 export function RoleGate({ roles, children }: { roles: Role[]; children: ReactNode }) {
+  const { tr } = usePrefs();
   const { user, loading } = useSession();
   const router = useRouter();
   const path = usePathname();
@@ -28,6 +29,6 @@ export function RoleGate({ roles, children }: { roles: Role[]; children: ReactNo
     else if (!roles.includes(user.role)) router.replace(HOME_FOR_ROLE[user.role]);
   }, [user, loading, roles, router, path]);
 
-  if (loading || !user || !roles.includes(user.role)) return <Spinner label="Checking access…" />;
+  if (loading || !user || !roles.includes(user.role)) return <Spinner label={tr("Checking access…")} />;
   return <>{children}</>;
 }

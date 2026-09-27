@@ -9,8 +9,9 @@ import { FULLY_TRANSLATED } from "@/lib/i18n/dict";
 import { Modal, Toggle, cx } from "@/components/ui";
 
 export function Logo({ className, light }: { className?: string; light?: boolean }) {
+  const { tr } = usePrefs();
   return (
-    <Link href="/" className={cx("group flex items-center gap-2.5 font-extrabold tracking-tight", className)} aria-label="Jeevia home">
+    <Link href="/" className={cx("group flex items-center gap-2.5 font-extrabold tracking-tight", className)} aria-label={tr("Jeevia home")}>
       <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-coral-300 to-coral-200 text-white shadow-[0_6px_16px_-4px_rgb(242_145_145/0.7)] transition-transform group-hover:scale-105">
         <span className="grid size-5 place-items-center rounded-full border-2 border-white">
           <Plus className="size-3" strokeWidth={3.5} aria-hidden />
@@ -36,7 +37,7 @@ export function DisclaimerBar() {
 
 /** Language dropdown: the fully translated interfaces first, then every scheduled language for voice/text input. */
 export function LanguageButton({ compact, className, align = "right" }: { compact?: boolean; className?: string; align?: "left" | "right" }) {
-  const { lang, set } = usePrefs();
+  const { tr, lang, setLanguage } = usePrefs();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -61,7 +62,7 @@ export function LanguageButton({ compact, className, align = "right" }: { compac
   }, [q]);
 
   const pick = (code: string) => {
-    set({ lang: code });
+    setLanguage(code);
     setOpen(false);
     setQ("");
   };
@@ -119,16 +120,16 @@ export function LanguageButton({ compact, className, align = "right" }: { compac
                 autoFocus
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search language"
+                placeholder={tr("Search language")}
                 className="h-9 w-full rounded-lg bg-canvas pr-3 pl-8 text-sm text-ink placeholder:text-subtle focus:outline-none"
-                aria-label="Search language"
+                aria-label={tr("Search language")}
               />
             </div>
           </div>
           <div className="max-h-[min(24rem,60vh)] overflow-y-auto p-1.5" role="listbox">
             {full.length > 0 && (
               <>
-                <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-semibold tracking-wider text-coral-500 uppercase">Full interface</p>
+                <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-semibold tracking-wider text-coral-500 uppercase">{tr("Full interface")}</p>
                 <ul>
                   {full.map((l) => renderItem(l.code))}
                 </ul>
@@ -136,14 +137,14 @@ export function LanguageButton({ compact, className, align = "right" }: { compac
             )}
             {voice.length > 0 && (
               <>
-                <p className="mt-1 border-t border-line px-2.5 pt-2.5 pb-1 text-[11px] font-semibold tracking-wider text-teal-700 uppercase">Voice &amp; text input</p>
-                <p className="px-2.5 pb-1.5 text-[11px] text-muted">Patients speak in these languages; screens show English.</p>
+                <p className="mt-1 border-t border-line px-2.5 pt-2.5 pb-1 text-[11px] font-semibold tracking-wider text-teal-700 uppercase">{tr("Voice & text input")}</p>
+                <p className="px-2.5 pb-1.5 text-[11px] text-muted">{tr("Patients speak in these languages; screens show English.")}</p>
                 <ul>
                   {voice.map((l) => renderItem(l.code))}
                 </ul>
               </>
             )}
-            {!full.length && !voice.length && <p className="px-3 py-6 text-center text-sm text-muted">No language matches “{q}”</p>}
+            {!full.length && !voice.length && <p className="px-3 py-6 text-center text-sm text-muted">{tr("No language matches “")}{q}”</p>}
           </div>
         </div>
       )}
@@ -152,31 +153,32 @@ export function LanguageButton({ compact, className, align = "right" }: { compac
 }
 
 export function A11yButton({ className }: { className?: string }) {
+  const { tr } = usePrefs();
   const p = usePrefs();
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button onClick={() => setOpen(true)} className={cx("inline-flex size-10 items-center justify-center rounded-full border border-line bg-white/80 text-ink-2 hover:border-coral-200 hover:bg-white", className)} aria-label="Accessibility settings">
+      <button onClick={() => setOpen(true)} className={cx("inline-flex size-10 items-center justify-center rounded-full border border-line bg-white/80 text-ink-2 hover:border-coral-200 hover:bg-white", className)} aria-label={tr("Accessibility settings")}>
         <Accessibility className="size-4.5" />
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Accessibility" subtitle="Settings are remembered on this device." size="sm">
+      <Modal open={open} onClose={() => setOpen(false)} title={tr("Accessibility")} subtitle={tr("Settings are remembered on this device.")} size="sm">
         <div className="space-y-5">
           <div className="flex items-start gap-3">
             <Type className="mt-0.5 size-5 text-muted" />
             <div className="flex-1">
-              <Toggle checked={p.largeText} onChange={(v) => p.set({ largeText: v })} label="Large text" description="Increases all text and touch targets." />
+              <Toggle checked={p.largeText} onChange={(v) => p.set({ largeText: v })} label={tr("Large text")} description={tr("Increases all text and touch targets.")} />
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Shapes className="mt-0.5 size-5 text-muted" />
             <div className="flex-1">
-              <Toggle checked={p.iconMode} onChange={(v) => p.set({ iconMode: v })} label="Icon mode" description="Big pictures, fewer words — for low-literacy users." />
+              <Toggle checked={p.iconMode} onChange={(v) => p.set({ iconMode: v })} label={tr("Icon mode")} description={tr("Big pictures, fewer words — for low-literacy users.")} />
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Volume2 className="mt-0.5 size-5 text-muted" />
             <div className="flex-1">
-              <Toggle checked={p.readAloud} onChange={(v) => p.set({ readAloud: v })} label="Read questions aloud" description="Kiosk speaks each question in the chosen language." />
+              <Toggle checked={p.readAloud} onChange={(v) => p.set({ readAloud: v })} label={tr("Read questions aloud")} description={tr("Kiosk speaks each question in the chosen language.")} />
             </div>
           </div>
         </div>

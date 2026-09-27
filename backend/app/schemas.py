@@ -19,7 +19,8 @@ ORG_FACILITY_TYPES = {"company_clinic", "industrial_unit", "campus", "health_cam
 OrgKind = Literal["company", "industrial", "campus", "ngo", "government_programme"]
 FitnessStatus = Literal["fit", "fit_with_restrictions", "temporarily_unfit", "pending_review"]
 REVIEWER_ROLES = {"doctor", "nurse"}
-ADMIN_ROLES = {"receptionist", "supervisor"}
+ADMIN_ROLES = {"receptionist", "supervisor"}  # front desk + supervisor (tokens, patients, duty)
+SUPERVISOR_ROLES = {"supervisor"}  # facility setup, kiosk links, devices, staff, audit, retention
 
 
 class ORM(BaseModel):
@@ -38,7 +39,22 @@ class UserOut(ORM):
     has_pin: bool = False
     is_active: bool = True
     organisation_id: str | None = None
+    on_duty: bool = True
+    duty_changed_at: datetime | None = None
     created_at: datetime
+
+
+class MePatch(BaseModel):
+    language: str | None = Field(default=None, min_length=2, max_length=8)
+
+
+class DutyIn(BaseModel):
+    on_duty: bool
+
+
+class ObservationIn(BaseModel):
+    vitals: "Vitals | None" = None
+    note: str | None = Field(default=None, max_length=1000)
 
 
 class Tokens(BaseModel):
@@ -61,6 +77,8 @@ class OtpChallengeOut(BaseModel):
 class OtpVerify(BaseModel):
     challenge_id: str
     code: str = Field(pattern=r"^\d{6}$")
+    # "register": the number must be new — an existing account is never signed in from the sign-up form.
+    purpose: Literal["signin", "register"] = "signin"
 
 
 class AuthResult(BaseModel):
@@ -373,6 +391,8 @@ class QueueItem(BaseModel):
     needs_check_count: int
     language: str
     escalation_due_at: datetime | None
+    vitals_recorded: bool = False
+    observation_count: int = 0
 
 
 class NotePatch(BaseModel):
@@ -718,3 +738,4 @@ class CohortOut(ORM):
 
 
 EncounterOut.model_rebuild()
+ObservationIn.model_rebuild()

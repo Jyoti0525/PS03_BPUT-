@@ -22,7 +22,7 @@ from ..security import DB, file_token, hash_secret, require, verify_secret
 from ..services import load_encounter, now
 
 router = APIRouter(tags=["shares"])
-Reviewer = Annotated[User, Depends(require(*REVIEWER_ROLES))]
+Reviewer = Annotated[User, Depends(require("doctor"))]  # QR summaries are shared by the treating doctor
 MAX_FAILED = 8
 
 

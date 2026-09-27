@@ -434,13 +434,14 @@ export const mockApi: JeeviaApi = {
       return { challenge_id: id, expires_in: 300, dev_code: DEMO_OTP };
     }),
 
-  verifyOtp: (challengeId, code) =>
+  verifyOtp: (challengeId, code, purpose = "signin") =>
     withDb(async (d) => {
       const c = d.otps[challengeId];
       if (!c || c.exp < Date.now()) throw new ApiError(400, "OTP expired — request a new one");
       if (c.code !== code) throw new ApiError(400, "Incorrect OTP");
       delete d.otps[challengeId];
       const u = d.users.find((x) => x.phone === c.phone);
+      if (u && purpose === "register") throw new ApiError(409, "This mobile number is already registered. Each number can hold only one account — sign in instead, or register with your own number.");
       if (!u) {
         const token = uid("reg");
         d.registrations[token] = { phone: c.phone, exp: Date.now() + 15 * 60000 };
@@ -553,6 +554,13 @@ export const mockApi: JeeviaApi = {
     }),
 
   me: () => withDb(async (d) => current(d)),
+  updateMe: (patch) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      const u = d.users.find((x) => x.id === me.id)!;
+      if (patch.language) u.language = patch.language;
+      return publicUser(u);
+    }),
 
   logout: async () => {
     setTokens(null);
@@ -854,7 +862,34 @@ export const mockApi: JeeviaApi = {
     withDb(async (d) => {
       const me = await current(d);
       requireRole(me, ADMIN_ROLES);
-      return d.users.filter((u) => u.facility_id === me.facility_id && u.role !== "kiosk").map((u) => ({ ...publicUser(u), is_active: u.active !== false }));
+      return d.users
+        .filter((u) => u.facility_id === me.facility_id && u.role !== "kiosk" && (me.role === "supervisor" || u.role === "doctor" || u.role === "nurse"))
+        .map((u) => ({ ...publicUser(u), is_active: u.active !== false }));
+    }),
+
+  setDuty: (id, onDuty) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ADMIN_ROLES);
+      const u = d.users.find((x) => x.id === id && x.facility_id === me.facility_id && (x.role === "doctor" || x.role === "nurse"));
+      if (!u) throw new ApiError(404, "Doctor or nurse not found");
+      u.on_duty = onDuty;
+      u.duty_changed_at = new Date().toISOString();
+      await audit(d, me, "UPDATE", "user", u.id, `${u.name} marked ${onDuty ? "on" : "off"} duty`);
+      return publicUser(u);
+    }),
+
+  addObservations: (eid, input) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor", "nurse"]);
+      const e = d.encounters.find((x) => x.id === eid);
+      if (!e || !e.note) throw new ApiError(404, "Encounter not found");
+      const vitals = Object.fromEntries(Object.entries(input.vitals ?? {}).filter(([, v]) => v != null));
+      if (!Object.keys(vitals).length && !input.note?.trim()) throw new ApiError(422, "Enter at least one vital sign or an observation");
+      e.note.observations = [...(e.note.observations ?? []), { by: me.name, role: me.role, at: new Date().toISOString(), vitals, note: input.note?.trim() || null }];
+      await audit(d, me, "UPDATE", "encounter", e.id, `Observations recorded by ${me.role}`);
+      return e as unknown as Encounter;
     }),
 
   searchPatients: (q) =>

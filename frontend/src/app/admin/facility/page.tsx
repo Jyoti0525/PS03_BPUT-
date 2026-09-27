@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Save, Building2, ClipboardCheck, Stethoscope, Route, Plus, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
-import { useSession } from "@/components/providers";
+import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, CardHeader, ErrorNote, Input, Label, Spinner, Toggle, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
@@ -43,6 +43,7 @@ export default function FacilitySetup() {
 }
 
 function FacilityForm({ data, onSaved }: { data: Facility; onSaved: () => void }) {
+  const { tr } = usePrefs();
   const [f, setF] = useState<Facility>(data);
   const [saving, setSaving] = useState(false);
   const [newSpec, setNewSpec] = useState("");
@@ -53,9 +54,9 @@ function FacilityForm({ data, onSaved }: { data: Facility; onSaved: () => void }
     try {
       await api.updateFacility(f.id, f);
       onSaved();
-      toast("Facility configuration saved — referral routing updated");
+      toast(tr("Facility configuration saved — referral routing updated"));
     } catch (e) {
-      toast(e instanceof Error ? e.message : "Save failed", "error");
+      toast(e instanceof Error ? e.message : tr("Save failed"), "error");
     } finally {
       setSaving(false);
     }
@@ -64,52 +65,52 @@ function FacilityForm({ data, onSaved }: { data: Facility; onSaved: () => void }
   return (
     <div className="mx-auto max-w-5xl pb-20">
       <PageHeader
-        title="Facility setup"
-        subtitle="What kind of facility is this, and who is available today? Referral notes use this configuration."
-        actions={<Button onClick={save} loading={saving} disabled={!dirty} variant="teal" icon={<Save className="size-4" />}>Save changes</Button>}
+        title={tr("Facility setup")}
+        subtitle={tr("What kind of facility is this, and who is available today? Referral notes use this configuration.")}
+        actions={<Button onClick={save} loading={saving} disabled={!dirty} variant="teal" icon={<Save className="size-4" />}>{tr("Save changes")}</Button>}
       />
 
       <Card>
-        <CardHeader title="1 · What type of facility is it?" icon={<Building2 className="size-4" />} />
+        <CardHeader title={tr("1 · What type of facility is it?")} icon={<Building2 className="size-4" />} />
         <div className="grid gap-2 p-4 sm:grid-cols-2 lg:grid-cols-3">
           {TYPES.map((t) => (
             <button key={t.v} onClick={() => setF({ ...f, type: t.v, offline_mode: t.v === "health_camp" ? true : f.offline_mode })} aria-pressed={f.type === t.v} className={cx("rounded-xl border-2 p-3 text-left", f.type === t.v ? "border-teal-600 bg-teal-50" : "border-line hover:bg-canvas")}>
-              <p className="font-semibold text-ink">{t.label}</p>
-              <p className="mt-0.5 text-xs text-muted">{t.hint}</p>
+              <p className="font-semibold text-ink">{tr(t.label)}</p>
+              <p className="mt-0.5 text-xs text-muted">{tr(t.hint)}</p>
             </button>
           ))}
         </div>
         <div className="grid gap-4 border-t border-line p-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2">
-            <Label htmlFor="f-name">Facility name</Label>
+            <Label htmlFor="f-name">{tr("Facility name")}</Label>
             <Input id="f-name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="f-dist">District</Label>
+            <Label htmlFor="f-dist">{tr("District")}</Label>
             <Input id="f-dist" value={f.district} onChange={(e) => setF({ ...f, district: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="f-state">State</Label>
+            <Label htmlFor="f-state">{tr("State")}</Label>
             <Input id="f-state" value={f.state} onChange={(e) => setF({ ...f, state: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="f-beds">Beds</Label>
+            <Label htmlFor="f-beds">{tr("Beds")}</Label>
             <Input id="f-beds" inputMode="numeric" value={f.beds_total} onChange={(e) => setF({ ...f, beds_total: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
           </div>
           <div>
-            <Label htmlFor="f-occ">Occupied</Label>
+            <Label htmlFor="f-occ">{tr("Occupied")}</Label>
             <Input id="f-occ" inputMode="numeric" value={f.beds_occupied} onChange={(e) => setF({ ...f, beds_occupied: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
           </div>
           <div className="flex items-end sm:col-span-2">
             <div className="w-full rounded-xl border border-line p-3">
-              <Toggle checked={f.offline_mode} onChange={(v) => setF({ ...f, offline_mode: v })} label="Offline-first kiosks" description="Queue intakes locally when the network drops" />
+              <Toggle checked={f.offline_mode} onChange={(v) => setF({ ...f, offline_mode: v })} label={tr("Offline-first kiosks")} description={tr("Queue intakes locally when the network drops")} />
             </div>
           </div>
         </div>
       </Card>
 
       <Card className="mt-4">
-        <CardHeader title="2 · What is available here?" subtitle="Used to decide what the reviewer can do on site vs. refer" icon={<ClipboardCheck className="size-4" />} />
+        <CardHeader title={tr("2 · What is available here?")} subtitle={tr("Used to decide what the reviewer can do on site vs. refer")} icon={<ClipboardCheck className="size-4" />} />
         <div className="grid gap-x-8 gap-y-4 p-4 sm:grid-cols-2">
           {QUESTIONS.map((q) => (
             <Toggle key={q.key} checked={!!f.capabilities[q.key]} onChange={(v) => setF({ ...f, capabilities: { ...f.capabilities, [q.key]: v } })} label={q.q} />
@@ -118,43 +119,43 @@ function FacilityForm({ data, onSaved }: { data: Facility; onSaved: () => void }
       </Card>
 
       <Card className="mt-4">
-        <CardHeader title="3 · Specialists on duty" subtitle="Toggle as staff arrive or leave — takes effect immediately for new referrals" icon={<Stethoscope className="size-4" />} />
+        <CardHeader title={tr("3 · Specialists on duty")} subtitle={tr("Toggle as staff arrive or leave — takes effect immediately for new referrals")} icon={<Stethoscope className="size-4" />} />
         <ul className="divide-y divide-line">
           {f.specialists.map((s, i) => (
             <li key={s.key} className="flex flex-wrap items-center gap-3 px-4 py-3">
               <span className={cx("size-2.5 rounded-full", s.available ? "bg-rout" : "bg-line")} />
-              <span className="min-w-40 flex-1 font-medium text-ink">{s.label}</span>
-              <Input value={s.schedule ?? ""} onChange={(e) => { const sp = [...f.specialists]; sp[i] = { ...s, schedule: e.target.value || null }; setF({ ...f, specialists: sp }); }} placeholder="Schedule e.g. Visiting Thu" className="h-9 w-48 text-sm" aria-label={`${s.label} schedule`} />
-              <Toggle checked={s.available} onChange={(v) => { const sp = [...f.specialists]; sp[i] = { ...s, available: v }; setF({ ...f, specialists: sp }); }} label={<span className="w-20 text-xs text-muted">{s.available ? "On site" : "Not on site"}</span>} />
+              <span className="min-w-40 flex-1 font-medium text-ink">{tr(s.label)}</span>
+              <Input value={s.schedule ?? ""} onChange={(e) => { const sp = [...f.specialists]; sp[i] = { ...s, schedule: e.target.value || null }; setF({ ...f, specialists: sp }); }} placeholder={tr("Schedule e.g. Visiting Thu")} className="h-9 w-48 text-sm" aria-label={`${s.label} schedule`} />
+              <Toggle checked={s.available} onChange={(v) => { const sp = [...f.specialists]; sp[i] = { ...s, available: v }; setF({ ...f, specialists: sp }); }} label={<span className="w-20 text-xs text-muted">{s.available ? tr("On site") : tr("Not on site")}</span>} />
               <button onClick={() => setF({ ...f, specialists: f.specialists.filter((_, j) => j !== i) })} className="text-subtle hover:text-crit" aria-label={`Remove ${s.label}`}><Trash2 className="size-4" /></button>
             </li>
           ))}
         </ul>
         <div className="flex gap-2 border-t border-line p-3">
-          <Input value={newSpec} onChange={(e) => setNewSpec(e.target.value)} placeholder="Add specialty (e.g. Dermatology)" className="h-10" />
-          <Button variant="secondary" icon={<Plus className="size-4" />} onClick={() => { if (!newSpec.trim()) return; setF({ ...f, specialists: [...f.specialists, { key: newSpec.trim().toLowerCase().replace(/\W+/g, "_"), label: newSpec.trim(), available: true, schedule: null }] }); setNewSpec(""); }}>Add</Button>
+          <Input value={newSpec} onChange={(e) => setNewSpec(e.target.value)} placeholder={tr("Add specialty (e.g. Dermatology)")} className="h-10" />
+          <Button variant="secondary" icon={<Plus className="size-4" />} onClick={() => { if (!newSpec.trim()) return; setF({ ...f, specialists: [...f.specialists, { key: newSpec.trim().toLowerCase().replace(/\W+/g, "_"), label: newSpec.trim(), available: true, schedule: null }] }); setNewSpec(""); }}>{tr("Add")}</Button>
         </div>
       </Card>
 
       <Card className="mt-4">
-        <CardHeader title="4 · Referral & languages" icon={<Route className="size-4" />} />
+        <CardHeader title={tr("4 · Referral & languages")} icon={<Route className="size-4" />} />
         <div className="space-y-4 p-4">
           <div>
-            <Label htmlFor="f-ref">Default referral destination</Label>
+            <Label htmlFor="f-ref">{tr("Default referral destination")}</Label>
             <Input id="f-ref" value={f.referral_destination} onChange={(e) => setF({ ...f, referral_destination: e.target.value })} />
           </div>
           <div>
-            <Label>Routing preview</Label>
+            <Label>{tr("Routing preview")}</Label>
             <div className="flex flex-wrap gap-2">
               {f.specialists.map((s) => (
                 <Badge key={s.key} tone={s.available ? "rout" : "semi"}>
-                  {s.label} → {s.available ? "treat on site" : f.referral_destination.split("(")[0].trim()}
+                  {tr(s.label)} → {s.available ? tr("treat on site") : f.referral_destination.split("(")[0].trim()}
                 </Badge>
               ))}
             </div>
           </div>
           <div>
-            <Label>Kiosk languages offered</Label>
+            <Label>{tr("Kiosk languages offered")}</Label>
             <div className="flex flex-wrap gap-1.5">
               {LANGUAGES.map((l) => {
                 const on = f.languages.includes(l.code);
@@ -172,9 +173,9 @@ function FacilityForm({ data, onSaved }: { data: Facility; onSaved: () => void }
       {dirty && (
         <div className="fixed inset-x-0 bottom-4 z-30 flex justify-center px-4">
           <div className="flex items-center gap-3 rounded-2xl border border-line bg-ink px-4 py-2.5 text-white shadow-[var(--shadow-pop)]">
-            <span className="text-sm">Unsaved changes</span>
-            <Button size="sm" variant="secondary" onClick={() => setF(data)}>Discard</Button>
-            <Button size="sm" variant="teal" loading={saving} onClick={save}>Save</Button>
+            <span className="text-sm">{tr("Unsaved changes")}</span>
+            <Button size="sm" variant="secondary" onClick={() => setF(data)}>{tr("Discard")}</Button>
+            <Button size="sm" variant="teal" loading={saving} onClick={save}>{tr("Save")}</Button>
           </div>
         </div>
       )}
