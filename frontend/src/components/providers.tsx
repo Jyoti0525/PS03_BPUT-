@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { getCachedUser, getTokens, setCachedUser, setTokens } from "@/lib/api/tokens";
 import type { Tokens, User } from "@/lib/types";
 import { translate, type DictKey } from "@/lib/i18n/dict";
-import { loadPhrases, makeTr, type Phrases } from "@/lib/i18n/phrases";
+import { loadPhrases, makeTr, setCurrentLang, type Phrases } from "@/lib/i18n/phrases";
 import { installOutboxAutoFlush } from "@/lib/offline/outbox";
 import { ToastHost } from "@/components/ui/toast";
 
@@ -173,7 +173,10 @@ export function Providers({ children }: { children: ReactNode }) {
     [set, user],
   );
 
-  const prefsValue = useMemo<PrefsCtx>(() => ({ ...prefs, set, setLanguage, t: (k) => translate(prefs.lang, k), tr: makeTr(phrases) }), [prefs, set, setLanguage, phrases]);
+  const prefsValue = useMemo<PrefsCtx>(() => {
+    setCurrentLang(prefs.lang);
+    return { ...prefs, set, setLanguage, t: (k) => translate(prefs.lang, k), tr: makeTr(phrases) };
+  }, [prefs, set, setLanguage, phrases]);
 
   return (
     <PrefsContext.Provider value={prefsValue}>

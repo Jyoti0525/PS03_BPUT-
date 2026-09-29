@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { fmtDateTime } from "@/lib/hooks";
 import { Activity, ClipboardPen, NotebookPen } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { Badge, Button, Card, CardHeader, FieldError, Input, Label, Textarea } from "@/components/ui";
@@ -98,7 +99,7 @@ export function ObservationList({ items }: { items: Observation[] | undefined })
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-ink">{o.by}</span>
               <Badge tone={o.role === "nurse" ? "teal" : "info"}>{tr(o.role === "nurse" ? "Nurse" : "Doctor")}</Badge>
-              <span className="text-xs text-subtle">{new Date(o.at).toLocaleString()}</span>
+              <span className="text-xs text-subtle">{fmtDateTime(o.at)}</span>
             </div>
             {Object.keys(o.vitals ?? {}).length > 0 && (
               <p className="mt-1 flex flex-wrap gap-1.5">

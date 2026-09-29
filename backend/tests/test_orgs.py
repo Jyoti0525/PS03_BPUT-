@@ -1,4 +1,5 @@
 import gzip
+import re
 import json
 import uuid
 
@@ -296,3 +297,67 @@ def test_user_language_preference(client):
     assert client.patch(f"{API}/auth/me", json={"language": "or"}, headers=h).json()["language"] == "or"
     assert client.get(f"{API}/auth/me", headers=h).json()["language"] == "or"
     client.patch(f"{API}/auth/me", json={"language": "hi"}, headers=h)
+
+
+def test_email_codes_optional(client, monkeypatch):
+    from app import mailer
+    from app.config import get_settings
+
+    s = get_settings()
+    assert client.get(f"{API}/auth/options").json() == {"sms": True, "email": False}
+    assert client.post(f"{API}/auth/otp/request", json={"email": "a@b.co"}).status_code == 503  # off by default
+    assert client.post(f"{API}/auth/otp/request", json={"email": "a@b.co", "phone": "9123456789"}).status_code == 422
+    monkeypatch.setattr(s, "email_provider", "brevo")
+    monkeypatch.setattr(s, "brevo_api_key", "test-key")
+    monkeypatch.setattr(s, "email_from", "sender@example.org")
+    sent = []
+
+    class R:
+        status_code = 201
+
+    monkeypatch.setattr(mailer.httpx, "post", lambda url, json, headers, timeout: sent.append((url, json, headers)) or R())
+    email = f"new.{uuid.uuid4().hex[:6]}@Example.org"
+    ch = client.post(f"{API}/auth/otp/request", json={"email": email, "purpose": "register"}).json()
+    assert ch.get("dev_code") is None and sent[0][0].endswith("/v3/smtp/email") and sent[0][2]["api-key"] == "test-key"
+    code = re.search(r"\b(\d{6})\b", sent[0][1]["textContent"]).group(1)
+    assert sent[0][1]["to"] == [{"email": email.lower()}] and sent[0][1]["sender"]["email"] == "sender@example.org"
+    v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": code, "purpose": "register"}).json()
+    assert v["status"] == "new_user"
+    phone = "8" + str(uuid.uuid4().int)[:9]
+    reg = {"registration_token": v["registration_token"], "name": "Email Nurse", "role": "nurse", "facility_id": "fac_kalinganagar", "registration_no": "ODNC-4242", "language": "or", "accepted_terms": True, "pin": "5820"}
+    assert client.post(f"{API}/auth/register", json=reg).status_code == 422  # mobile number still required
+    r = client.post(f"{API}/auth/register", json={**reg, "phone": phone})
+    assert r.status_code == 200, r.text
+    u = r.json()["user"]
+    assert u["email"] == email.lower() and u["phone"] == phone and u["phone_verified"] is False
+    # sign in by email → PIN step as usual
+    sent.clear()
+    ch = client.post(f"{API}/auth/otp/request", json={"email": email}).json()
+    code = re.search(r"\b(\d{6})\b", sent[0][1]["textContent"]).group(1)
+    assert client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": "000000"}).status_code == 400
+    v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": code}).json()
+    assert v["status"] == "pin_required"
+    # an existing email cannot register again
+    sent.clear()
+    ch = client.post(f"{API}/auth/otp/request", json={"email": email, "purpose": "register"}).json()
+    code = re.search(r"\b(\d{6})\b", sent[0][1]["textContent"]).group(1)
+    assert client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": code, "purpose": "register"}).status_code == 409
+    # a signed-in user adds an email to their account
+    h = login(client, "9000000005")
+    sent.clear()
+    other = f"hr.{uuid.uuid4().hex[:6]}@example.org"
+    ch = client.post(f"{API}/auth/email/start", json={"email": other}, headers=h).json()
+    code = re.search(r"\b(\d{6})\b", sent[0][1]["textContent"]).group(1)
+    assert client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": code}).status_code == 400  # not a sign-in code
+    sent.clear()
+    ch = client.post(f"{API}/auth/email/start", json={"email": other}, headers=h).json()
+    code = re.search(r"\b(\d{6})\b", sent[0][1]["textContent"]).group(1)
+    assert client.post(f"{API}/auth/email/confirm", json={"challenge_id": ch["challenge_id"], "code": code}, headers=h).json()["email"] == other
+    assert client.post(f"{API}/auth/email/start", json={"email": email.lower()}, headers=h).status_code == 409  # someone else's
+    assert client.delete(f"{API}/auth/email", headers=h).json()["email"] is None
+    # a provider failure is reported, not swallowed
+    class Bad:
+        status_code = 401
+
+    monkeypatch.setattr(mailer.httpx, "post", lambda url, json, headers, timeout: Bad())
+    assert client.post(f"{API}/auth/otp/request", json={"email": f"x{uuid.uuid4().hex[:5]}@example.org"}).status_code == 502

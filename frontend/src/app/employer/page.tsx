@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Briefcase, ShieldCheck, EyeOff, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/app-shell";
 import { api } from "@/lib/api";
-import { useAsync } from "@/lib/hooks";
+import { useAsync, fmtDate } from "@/lib/hooks";
 import { Badge, Button, Card, CardHeader, Empty, ErrorNote, Spinner, Stat } from "@/components/ui";
 import { FITNESS } from "@/components/employer/status";
 import type { FitnessStatus } from "@/lib/types";
@@ -46,7 +46,7 @@ export default function EmployerOverview() {
       )}
       {data.map((c) => (
         <Card key={c.id} className="mt-5">
-          <CardHeader title={c.name} subtitle={`${c.employer_name} · ${c.workers.length} worker${c.workers.length === 1 ? "" : "s"}`} icon={<Briefcase className="size-4" />} />
+          <CardHeader title={c.name} subtitle={tr(c.workers.length === 1 ? "{org} · 1 worker" : "{org} · {n} workers", { org: c.employer_name, n: c.workers.length })} icon={<Briefcase className="size-4" />} />
           <div className="overflow-x-auto">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
@@ -65,7 +65,7 @@ export default function EmployerOverview() {
                     <td className="px-4 py-2.5">
                       <Badge tone={FITNESS[w.fitness_status].tone}>{tr(FITNESS[w.fitness_status].label)}</Badge>
                     </td>
-                    <td className="px-4 py-2.5 text-muted">{w.last_screened_at ? new Date(w.last_screened_at).toLocaleDateString("en-IN") : "—"}</td>
+                    <td className="px-4 py-2.5 text-muted">{w.last_screened_at ? fmtDate(w.last_screened_at) : "—"}</td>
                   </tr>
                 ))}
               </tbody>

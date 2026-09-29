@@ -118,7 +118,7 @@ export default function KioskPage() {
 
   return (
     <div className="min-h-[calc(100vh-28px)] bg-[linear-gradient(180deg,var(--color-teal-50),var(--color-canvas)_40%)]">
-      <header className="no-print border-b border-line bg-white/80 backdrop-blur">
+      <header className="no-print relative z-40 border-b border-line bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3">
           <Logo />
           <span className="hidden text-sm text-muted md:inline">{facility?.name} · {tr(bound?.label)}</span>

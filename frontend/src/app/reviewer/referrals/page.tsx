@@ -34,7 +34,7 @@ export default function ReferralsPage() {
                   <p className="font-semibold text-ink">
                     <Link href={`/reviewer/case/${r.encounter_id}`} className="hover:underline">{r.patient_name}</Link> <span className="font-normal text-muted">→ {r.destination}</span>
                   </p>
-                  <p className="text-sm text-muted">{r.specialty} · {r.reason}</p>
+                  <p className="text-sm text-muted">{tr(r.specialty)} · {tr(r.reason)}</p>
                   <p className="text-xs text-subtle">{tr("by")} {r.created_by} · {timeAgo(r.created_at)}</p>
                 </div>
                 <Badge>{TRANSPORT[r.transport].icon} {tr(TRANSPORT[r.transport].label)}</Badge>
@@ -45,8 +45,8 @@ export default function ReferralsPage() {
           </ul>
         </Card>
       )}
-      <Modal open={!!view} onClose={() => setView(null)} title={`Referral — ${view?.patient_name}`} size="lg">
-        <pre className="font-mono text-[13px] whitespace-pre-wrap text-ink">{view?.note_text}</pre>
+      <Modal open={!!view} onClose={() => setView(null)} title={tr("Referral — {name}", { name: view?.patient_name ?? "" })} size="lg">
+        <pre className="font-mono text-[13px] whitespace-pre-wrap text-ink">{tr(view?.note_text)}</pre>
       </Modal>
     </div>
   );

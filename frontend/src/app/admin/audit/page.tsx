@@ -4,7 +4,7 @@ import { usePrefs } from "@/components/providers";
 import { useState } from "react";
 import { Download, ShieldCheck, ShieldX, Search, Link2 } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAsync } from "@/lib/hooks";
+import { useAsync, fmtDateTime } from "@/lib/hooks";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, ErrorNote, Input, Select, Spinner } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
@@ -75,7 +75,7 @@ export default function AuditPage() {
           </div>
           <Select value={action} onChange={(e) => setAction(e.target.value as AuditAction | "")} className="h-10 w-48" aria-label={tr("Filter by action")}>
             <option value="">{tr("All actions")}</option>
-            {ACTIONS.map((a) => <option key={a}>{a}</option>)}
+            {ACTIONS.map((a) => <option key={a} value={a}>{tr(a)}</option>)}
           </Select>
         </div>
         {error ? <div className="p-4"><ErrorNote error={error} /></div> : loading && !data ? <Spinner /> : (
@@ -96,14 +96,14 @@ export default function AuditPage() {
                 {data?.map((a) => (
                   <tr key={a.id} className="align-top hover:bg-canvas/60">
                     <td className="px-4 py-2.5 text-subtle tabular-nums">{a.id}</td>
-                    <td className="px-4 py-2.5 whitespace-nowrap text-muted tabular-nums">{new Date(a.ts).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "medium" })}</td>
+                    <td className="px-4 py-2.5 whitespace-nowrap text-muted tabular-nums">{fmtDateTime(a.ts, { dateStyle: "short", timeStyle: "medium" })}</td>
                     <td className="px-4 py-2.5">
-                      <p className="font-medium text-ink">{a.actor_name}</p>
-                      <p className="text-xs text-subtle">{a.actor_role}</p>
+                      <p className="font-medium text-ink">{tr(a.actor_name)}</p>
+                      <p className="text-xs text-subtle">{tr(a.actor_role)}</p>
                     </td>
-                    <td className="px-4 py-2.5"><Badge tone={TONE[a.action] ?? "neutral"}>{a.action}</Badge></td>
+                    <td className="px-4 py-2.5"><Badge tone={TONE[a.action] ?? "neutral"}>{tr(a.action)}</Badge></td>
                     <td className="px-4 py-2.5 font-mono text-xs text-muted">{a.patient_code ?? "—"}</td>
-                    <td className="max-w-md px-4 py-2.5 text-ink-2">{a.detail}</td>
+                    <td className="max-w-md px-4 py-2.5 text-ink-2">{tr(a.detail)}</td>
                     <td className="px-4 py-2.5 font-mono text-[11px] text-subtle" title={`prev ${a.prev_hash}\nthis ${a.hash}`}>
                       <Link2 className="mr-1 inline size-3" />
                       {a.hash.slice(0, 10)}…

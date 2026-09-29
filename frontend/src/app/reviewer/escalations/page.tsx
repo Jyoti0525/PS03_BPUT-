@@ -53,7 +53,7 @@ export default function EscalationsPage() {
                     <Badge tone={e.auto ? "semi" : "neutral"}>{e.auto ? <><Bot className="size-3" /> {tr("Auto (timer)")}</> : <><UserRound className="size-3" /> {e.raised_by}</>}</Badge>
                     <Badge>→ {TO[e.to_role]}</Badge>
                   </div>
-                  <p className="mt-1 text-sm text-ink-2">{e.reason}</p>
+                  <p className="mt-1 text-sm text-ink-2">{tr(e.reason)}</p>
                   <p className="mt-1 text-xs text-muted">{tr("Raised")} {timeAgo(e.raised_at)}</p>
                   {e.status === "acknowledged" && (
                     <p className="mt-2 rounded-lg bg-rout-bg px-3 py-2 text-sm text-rout">

@@ -111,7 +111,7 @@ export function SourceEvidence({ v, compact }: { v: ExtractedValue; compact?: bo
   }
   return (
     <span className="inline-flex items-center gap-1 text-[11px] text-muted">
-      <SourceIcon kind={s.kind} /> {s.engine}
+      <SourceIcon kind={s.kind} /> {tr(s.engine)}
     </span>
   );
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { EyeOff, ArrowRight, RefreshCw } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAsync } from "@/lib/hooks";
+import { useAsync, fmtDateTime } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Button, Card, CardHeader, ErrorNote, Spinner, Stat } from "@/components/ui";
@@ -29,7 +29,7 @@ export default function AdminHome() {
       />
       {error ? <ErrorNote error={error} /> : !stats ? <Spinner /> : (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Stat label={tr("Intakes today")} value={stats.today_total} hint={`${stats.offline_synced_today} synced from offline`} />
+          <Stat label={tr("Intakes today")} value={stats.today_total} hint={tr("{n} synced from offline", { n: stats.offline_synced_today })} />
           <Stat label={tr("Critical")} value={stats.by_urgency.red} tone="crit" />
           <Stat label={tr("Semi-urgent")} value={stats.by_urgency.yellow} tone="semi" />
           <Stat label={tr("Routine")} value={stats.by_urgency.green} tone="rout" />
@@ -48,10 +48,10 @@ export default function AdminHome() {
           <ul className="divide-y divide-line">
             {audit?.slice(0, 8).map((a) => (
               <li key={a.id} className="flex items-start gap-3 px-4 py-2.5 text-sm">
-                <span className="w-24 shrink-0 rounded-md bg-canvas px-1.5 py-0.5 text-center font-mono text-[11px] text-muted">{a.action}</span>
+                <span className="w-24 shrink-0 rounded-md bg-canvas px-1.5 py-0.5 text-center font-mono text-[11px] text-muted">{tr(a.action)}</span>
                 <span className="min-w-0 flex-1">
-                  <span className="text-ink">{a.detail}</span>
-                  <span className="block text-xs text-subtle">{a.actor_name} · {new Date(a.ts).toLocaleString("en-IN")}</span>
+                  <span className="text-ink">{tr(a.detail)}</span>
+                  <span className="block text-xs text-subtle">{tr(a.actor_name)} · {fmtDateTime(a.ts)}</span>
                 </span>
               </li>
             ))}

@@ -71,7 +71,11 @@ async function download(path: string, fallbackName: string): Promise<ExportResul
 export const liveApi: JeeviaApi = {
   mode: "live",
 
-  requestOtp: (phone) => post("/auth/otp/request", { phone }),
+  requestOtp: (target, purpose = "signin") => post("/auth/otp/request", { ...(typeof target === "string" ? { phone: target } : target), purpose }),
+  authOptions: () => json("/auth/options"),
+  emailStart: (email) => post("/auth/email/start", { email }),
+  emailConfirm: (challenge_id, code) => post("/auth/email/confirm", { challenge_id, code }),
+  emailRemove: () => json("/auth/email", { method: "DELETE" }),
   verifyOtp: (challenge_id, code, purpose = "signin") => post("/auth/otp/verify", { challenge_id, code, purpose }),
   register: (input) => post("/auth/register", input),
   verifyPin: (pin_token, pin) => post("/auth/pin/verify", { pin_token, pin }),

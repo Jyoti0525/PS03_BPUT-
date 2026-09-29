@@ -174,7 +174,7 @@ real capture time so waiting time is never understated.
 - Token board (with patient correction), kiosk links, staff management (role, deactivate, reset PIN), staff devices, audit log with chain verification and CSV export, data-retention view.
 
 **Platform**
-- Phone OTP sign-in; staff and employers add a personal PIN (two factors), change it from the dashboard; rotating refresh tokens, sign-out revocation, OTP rate limits.
+- Phone OTP sign-in, or an email code via Brevo (optional); staff and employers add a personal PIN (two factors), change it from the dashboard; rotating refresh tokens, sign-out revocation, OTP rate limits.
 - Alembic migrations run automatically at start-up; hourly retention purge inside the API.
 - Live system status on the website (API, database, SMS, storage) with **Wake server** and supervisor-only **Restart server**.
 - JSON logs with request ids and no request bodies; Prometheus-format `/metrics`.
@@ -259,7 +259,7 @@ Secrets live only in the Render and Vercel dashboards — never in the repositor
 ## 10. Testing
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 54 tests
+cd backend && .venv/bin/pytest -q                  # 55 tests
 cd frontend && npm run lint && npx tsc --noEmit && npm run build
 ```
 Backend tests cover the rules engine, OTP (including lockout, rate limits and the Twilio path), the two-factor PIN

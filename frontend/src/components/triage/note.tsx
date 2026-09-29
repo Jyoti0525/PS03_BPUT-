@@ -1,6 +1,7 @@
 "use client";
 
 import { usePrefs } from "@/components/providers";
+import { fmtDateTime } from "@/lib/hooks";
 import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split } from "lucide-react";
 import type { Encounter, ExtractedValue, Flag, TrendRow, Urgency } from "@/lib/types";
 import { Badge, Card, CardHeader, cx } from "@/components/ui";
@@ -9,13 +10,14 @@ import { URGENCY_LABEL } from "@/lib/export";
 import { langByCode } from "@/lib/i18n/languages";
 
 export function UrgencyBadge({ u, size = "md" }: { u: Urgency | null; size?: "sm" | "md" | "lg" }) {
+  const { tr } = usePrefs();
   if (!u) return null;
   const cls = { red: "bg-crit text-white", yellow: "bg-amber-400 text-ink", green: "bg-rout text-white" }[u];
   const sz = { sm: "px-1.5 py-0.5 text-[10px]", md: "px-2 py-0.5 text-xs", lg: "px-3 py-1 text-sm" }[size];
   return (
     <span className={cx("inline-flex items-center gap-1 rounded-md font-bold tracking-wide uppercase", cls, sz)}>
       <span className="size-1.5 rounded-full bg-current opacity-70" aria-hidden />
-      {URGENCY_LABEL[u]}
+      {tr(URGENCY_LABEL[u])}
     </span>
   );
 }
@@ -43,7 +45,7 @@ export function FlagList({ flags, limit }: { flags: Flag[]; limit?: number }) {
           <FlagIcon s={f.severity} />
           <span className="min-w-0 flex-1">
             <span className="font-medium text-ink">{tr(f.label)}</span>
-            <span className="block text-xs text-muted">{f.reason}</span>
+            <span className="block text-xs text-muted">{tr(f.reason)}</span>
           </span>
           <code className="hidden shrink-0 text-[10px] text-subtle sm:block">{f.code}</code>
         </li>
@@ -147,7 +149,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
               <li key={i} className="flex gap-2">
                 <span className="font-semibold text-teal-700">{i + 1}.</span>
                 <span>
-                  {q.question} <span className="text-xs text-subtle">({tr(q.tag)})</span>
+                  {tr(q.question)} <span className="text-xs text-subtle">({tr(q.tag)})</span>
                 </span>
               </li>
             ))}
@@ -160,7 +162,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
             {n.missing_info.map((m) => (
               <li key={m} className="flex gap-2">
                 <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-coral-500" />
-                {m}
+                {tr(m)}
               </li>
             ))}
             {!n.missing_info.length && <li className="text-muted">{tr("Nothing missing.")}</li>}
@@ -175,14 +177,14 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
       <Card>
         <CardHeader
           title={tr("Summary")}
-          subtitle={`Organised from patient-provided information · ${n.generated_by}${n.edited_by ? ` · edited by ${n.edited_by}` : ""}`}
+          subtitle={`${tr("Organised from patient-provided information")} · ${n.generated_by}${n.edited_by ? ` · ${tr("edited by {name}", { name: n.edited_by })}` : ""}`}
           icon={<Scale className="size-4" />}
         />
-        <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{n.summary}</p>
+        <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{tr(n.summary)}</p>
         {n.transcript && (
           <details className="border-t border-line px-4 py-2.5 text-sm">
             <summary className="flex cursor-pointer items-center gap-1.5 font-medium text-muted">
-              <Languages className="size-4" /> {tr("Original words (")}{langByCode(n.transcript.language).name})
+              <Languages className="size-4" /> {tr("Original words (")}{tr(langByCode(n.transcript.language).name)})
             </summary>
             <p className="mt-2 rounded-lg bg-canvas p-2.5 text-ink">{n.transcript.original}</p>
             <p className="mt-1.5 text-xs text-muted">{tr("Translated:")} {n.transcript.translated}</p>
@@ -204,7 +206,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
               <li key={r.rule_id} className="flex items-center gap-3 px-4 py-2.5">
                 <span className={cx("h-6 w-1 rounded-full", urgencyBar(r.urgency))} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-ink">{r.description}</p>
+                  <p className="text-sm text-ink">{tr(r.description)}</p>
                   <p className="font-mono text-[11px] text-subtle">
                     {r.rule_id} · {r.protocol}
                   </p>
@@ -216,11 +218,11 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
           {enc.override && (
             <div className="border-t border-line bg-coral-50 px-4 py-2.5 text-sm">
               <p className="font-semibold text-coral-700">
-                {tr("Clinician override:")} {URGENCY_LABEL[enc.override.from_urgency]} → {URGENCY_LABEL[enc.override.to_urgency]}
+                {tr("Clinician override:")} {tr(URGENCY_LABEL[enc.override.from_urgency])} → {tr(URGENCY_LABEL[enc.override.to_urgency])}
               </p>
-              <p className="text-ink-2">“{enc.override.reason}”</p>
+              <p className="text-ink-2">“{tr(enc.override.reason)}”</p>
               <p className="text-xs text-muted">
-                {enc.override.by} · {new Date(enc.override.at).toLocaleString("en-IN")} · {enc.override.category}
+                {enc.override.by} · {fmtDateTime(enc.override.at)} · {tr(enc.override.category)}
               </p>
             </div>
           )}
@@ -233,15 +235,15 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
           <ul className="divide-y divide-line">
             {n.disagreements.map((d, i) => (
               <li key={i} className="px-4 py-3 text-sm">
-                <p className="font-semibold text-ink">{d.field}</p>
+                <p className="font-semibold text-ink">{tr(d.field)}</p>
                 <div className="mt-1 flex flex-wrap gap-2">
                   {d.values.map((v) => (
                     <span key={v.engine} className="rounded-lg border border-line bg-canvas px-2 py-1">
-                      <span className="text-xs text-muted">{v.engine}:</span> <span className="font-semibold tabular-nums">{v.value}</span>
+                      <span className="text-xs text-muted">{tr(v.engine)}:</span> <span className="font-semibold tabular-nums">{v.value}</span>
                     </span>
                   ))}
                 </div>
-                <p className="mt-1.5 text-xs font-medium text-semi">{d.action}</p>
+                <p className="mt-1.5 text-xs font-medium text-semi">{tr(d.action)}</p>
               </li>
             ))}
           </ul>
@@ -278,8 +280,8 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
             {n.timeline.map((t, i) => (
               <li key={i} className="relative">
                 <span className="absolute top-1.5 -left-[11px] size-2 rounded-full bg-teal-600 ring-2 ring-white" />
-                <p className="text-xs text-subtle">{t.when}</p>
-                <p className="text-ink">{t.event}</p>
+                <p className="text-xs text-subtle">{tr(t.when)}</p>
+                <p className="text-ink">{tr(t.event)}</p>
               </li>
             ))}
           </ol>
@@ -289,7 +291,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
           <ul className="space-y-1.5 p-4 text-sm">
             {n.missing_info.map((m) => (
               <li key={m} className="flex gap-2">
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-coral-500" /> {m}
+                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-coral-500" /> {tr(m)}
               </li>
             ))}
             {!n.missing_info.length && <li className="text-muted">{tr("Nothing flagged as missing.")}</li>}
@@ -301,9 +303,9 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
             {n.followup_questions.map((q, i) => (
               <li key={i}>
                 <span className="text-xs font-semibold text-teal-700">
-                  {tr(q.tag)} {tr("· for")} {q.for_role.replace("_", " ")}
+                  {tr(q.tag)} {tr("· for")} {tr(q.for_role.replace("_", " "))}
                 </span>
-                <p className="text-ink">{q.question}</p>
+                <p className="text-ink">{tr(q.question)}</p>
               </li>
             ))}
           </ul>

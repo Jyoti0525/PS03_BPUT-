@@ -79,7 +79,7 @@ export default function StaffPage() {
                       {u.name} {self && <span className="text-xs font-normal text-muted">{tr("(you)")}</span>}
                     </p>
                     <p className="text-xs text-muted">
-                      +91 {u.phone.slice(0, 5)}••••• · {langByCode(u.language).name} {tr("· joined")} {timeAgo(u.created_at)}
+                      +91 {u.phone.slice(0, 5)}••••• · {tr(langByCode(u.language).name)} {tr("· joined")} {timeAgo(u.created_at)}
                     </p>
                   </div>
                   {u.registration_no && <Badge>{u.registration_no}</Badge>}
@@ -116,7 +116,7 @@ export default function StaffPage() {
                       )}
                     </div>
                   ) : (
-                    <Badge tone="info">{u.role}</Badge>
+                    <Badge tone="info">{tr(u.role)}</Badge>
                   )}
                 </li>
               );

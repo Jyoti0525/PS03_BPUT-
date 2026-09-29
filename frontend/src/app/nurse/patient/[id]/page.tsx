@@ -78,9 +78,9 @@ export default function NursePatient() {
                 <UrgencyBadge u={enc.urgency} size="lg" />
               </div>
               <p className="mt-0.5 text-sm text-muted">
-                {p.age} · {tr(p.sex === "F" ? "Female" : p.sex === "M" ? "Male" : "Other")} · <span className="font-mono">{p.code}</span> · {langByCode(p.language).name} · {tr("arrived {t}", { t: timeAgo(enc.created_at) })}
+                {p.age} · {tr(p.sex === "F" ? "Female" : p.sex === "M" ? "Male" : "Other")} · <span className="font-mono">{p.code}</span> · {tr(langByCode(p.language).name)} · {tr("arrived {t}", { t: timeAgo(enc.created_at) })}
               </p>
-              <p className="mt-2 text-[15px] font-medium text-ink">{enc.chief_complaint}</p>
+              <p className="mt-2 text-[15px] font-medium text-ink">{tr(enc.chief_complaint)}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {enc.category === "maternal" && (
                   <Badge tone="coral">
@@ -89,7 +89,7 @@ export default function NursePatient() {
                 )}
                 {enc.category === "chronic" && (
                   <Badge tone="teal">
-                    <HeartPulse className="size-3" /> {tr("Chronic")} · {enc.intake?.chronic?.condition}
+                    <HeartPulse className="size-3" /> {tr("Chronic")} · {tr(enc.intake?.chronic?.condition)}
                   </Badge>
                 )}
                 {enc.consent && (

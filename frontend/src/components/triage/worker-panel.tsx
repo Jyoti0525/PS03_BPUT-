@@ -1,6 +1,7 @@
 "use client";
 
 import { usePrefs } from "@/components/providers";
+import { fmtDate } from "@/lib/hooks";
 import { useState } from "react";
 import { Briefcase, ClipboardCheck, EyeOff } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
@@ -58,8 +59,8 @@ export function WorkerPanel({ encounterId, worker, canRecord, onRecorded }: { en
           <Badge tone={FITNESS[l?.status ?? "pending_review"].tone}>{tr(FITNESS[l?.status ?? "pending_review"].label)}</Badge>
           {l && (
             <span className="text-xs text-muted">
-              {tr("by")} {l.assessed_by} · {new Date(l.assessed_at).toLocaleDateString("en-IN")}
-              {l.valid_until && ` · valid until ${new Date(l.valid_until).toLocaleDateString("en-IN")}`}
+              {tr("by")} {l.assessed_by} · {fmtDate(l.assessed_at)}
+              {l.valid_until && ` · ${tr("valid until {d}", { d: fmtDate(l.valid_until) })}`}
             </span>
           )}
         </div>

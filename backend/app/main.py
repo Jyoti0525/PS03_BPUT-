@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
+from . import mailer
 from .config import get_settings
 from .db import SessionLocal, engine, init_db
 from .observability import RequestContextMiddleware, metrics_endpoint, setup_logging
@@ -125,6 +126,7 @@ def health():
         "db": {"engine": engine.dialect.name, "ok": db_ok, "latency_ms": db_ms},
         "storage": storage.health(),
         "otp": {"provider": s.otp_provider, "configured": otp_ready},
+        "email": {"provider": s.email_provider, "configured": mailer.enabled()},
     }
     return JSONResponse(body, status_code=200 if db_ok else 503, headers={"Cache-Control": "no-store"})
 

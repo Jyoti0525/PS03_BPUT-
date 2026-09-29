@@ -61,6 +61,10 @@ export interface User {
   /** Doctors and nurses: on duty right now (front-desk time management). */
   on_duty?: boolean;
   duty_changed_at?: string | null;
+  /** Verified email (optional second way to receive sign-in codes). */
+  email?: string | null;
+  /** False when the account was verified by email and the mobile number never received a code. */
+  phone_verified?: boolean;
   created_at: string;
 }
 
@@ -98,6 +102,8 @@ export const PIN_ROLES: Role[] = ["doctor", "nurse", "receptionist", "supervisor
 
 export interface RegisterInput {
   registration_token: string;
+  /** Required when the registration was verified by email. */
+  phone?: string | null;
   name: string;
   role: Exclude<Role, "kiosk">;
   facility_id: string | null;

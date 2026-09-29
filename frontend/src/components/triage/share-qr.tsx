@@ -5,7 +5,7 @@ import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy, KeyRound, Printer, QrCode, ShieldOff, Clock } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAsync, useNow, timeAgo } from "@/lib/hooks";
+import { useAsync, useNow, timeAgo, fmtDate, fmtDateTime } from "@/lib/hooks";
 import { Badge, Button, Label, Modal, Select } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import type { Encounter, ShareLink } from "@/lib/types";
@@ -78,7 +78,7 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
             </p>
             <p className="font-mono text-4xl font-extrabold tracking-[0.3em] text-ink">{created.access_code}</p>
             <p className="mt-2 flex items-center gap-1.5 text-sm text-muted">
-              <Clock className="size-4" /> {tr("Valid until")} {new Date(created.expires_at).toLocaleString("en-IN")}
+              <Clock className="size-4" /> {tr("Valid until")} {fmtDateTime(created.expires_at)}
             </p>
             <p className="mt-2 font-mono text-xs break-all text-subtle">{created.url}</p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -131,7 +131,7 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
                   <span className="flex-1 text-ink">
                     {tr("by")} {l.created_by} · {timeAgo(l.created_at)} {tr("· opened")} {l.views}×
                   </span>
-                  {l.revoked ? <Badge tone="crit">{tr("Revoked")}</Badge> : expired ? <Badge>{tr("Expired")}</Badge> : <Badge tone="rout">{tr("Active until")} {new Date(l.expires_at).toLocaleDateString("en-IN")}</Badge>}
+                  {l.revoked ? <Badge tone="crit">{tr("Revoked")}</Badge> : expired ? <Badge>{tr("Expired")}</Badge> : <Badge tone="rout">{tr("Active until")} {fmtDate(l.expires_at)}</Badge>}
                   {!l.revoked && !expired && (
                     <Button
                       size="sm"

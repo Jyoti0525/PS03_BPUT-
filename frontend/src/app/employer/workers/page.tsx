@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { FileUp, Search, UserMinus, UserPlus, Users } from "lucide-react";
 import { PageHeader } from "@/components/layout/app-shell";
 import { api, ApiError } from "@/lib/api";
-import { useAsync } from "@/lib/hooks";
+import { useAsync, fmtDate } from "@/lib/hooks";
 import { Badge, Button, Card, Empty, ErrorNote, FieldError, Input, Label, Modal, Select, Spinner, Textarea } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { FITNESS } from "@/components/employer/status";
@@ -136,7 +136,7 @@ export default function WorkersPage() {
                       <Badge tone={FITNESS[w.fitness_status].tone}>{tr(FITNESS[w.fitness_status].label)}</Badge>
                       {w.restrictions && <p className="mt-0.5 text-xs text-muted">{w.restrictions}</p>}
                     </td>
-                    <td className="px-4 py-2.5 text-muted">{w.valid_until ? new Date(w.valid_until).toLocaleDateString("en-IN") : "—"}</td>
+                    <td className="px-4 py-2.5 text-muted">{w.valid_until ? fmtDate(w.valid_until) : "—"}</td>
                     <td className="px-4 py-2.5 text-right">
                       <Button size="sm" variant="ghost" icon={<UserMinus className="size-4" />} onClick={() => setRemoving(w)} aria-label={`Remove ${w.employee_code}`}>
                         {tr("Remove")}
@@ -244,7 +244,7 @@ export default function WorkersPage() {
         open={!!removing}
         onClose={() => setRemoving(null)}
         size="sm"
-        title={`Remove ${removing?.employee_code}?`}
+        title={tr("Remove {code}?", { code: removing?.employee_code ?? "" })}
         footer={
           <>
             <Button variant="ghost" onClick={() => setRemoving(null)}>{tr("Cancel")}</Button>

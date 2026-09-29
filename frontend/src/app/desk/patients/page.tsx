@@ -77,7 +77,7 @@ export default function DeskPatients() {
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-ink">{p.name}</p>
                     <p className="text-xs text-muted">
-                      <span className="font-mono">{p.code}</span> · {p.age} · {p.sex} · {langByCode(p.language).name}
+                      <span className="font-mono">{p.code}</span> · {p.age} · {p.sex} · {tr(langByCode(p.language).name)}
                       {p.phone && ` · +91 ${p.phone.slice(0, 5)}•••••`}
                       {last_visit_at && ` · ${tr("last visit")} ${timeAgo(last_visit_at)}`}
                     </p>

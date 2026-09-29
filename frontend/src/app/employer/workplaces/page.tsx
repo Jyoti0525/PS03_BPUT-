@@ -71,7 +71,7 @@ export default function WorkplacesPage() {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-ink">{f.name}</p>
-                <p className="text-xs text-muted">{label(f.type)}</p>
+                <p className="text-xs text-muted">{tr(label(f.type))}</p>
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted">
                   <MapPin className="size-3" /> {f.district}, {f.state}
                   {f.pincode && ` · ${f.pincode}`}

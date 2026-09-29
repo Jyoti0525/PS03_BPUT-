@@ -47,7 +47,7 @@ function OrganisationForm({ o, onSaved }: { o: Organisation; onSaved: () => void
       <Card>
         <CardHeader
           title={o.name}
-          subtitle={`${KIND[o.kind] ?? o.kind} · ${o.district}, ${o.state}`}
+          subtitle={`${tr(KIND[o.kind] ?? o.kind)} · ${o.district}, ${o.state}`}
           icon={<Landmark className="size-4" />}
           action={o.verified ? <Badge tone="teal"><BadgeCheck className="size-3" /> {tr("Verified")}</Badge> : <Badge tone="semi">{tr("Self-registered")}</Badge>}
         />

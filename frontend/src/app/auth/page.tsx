@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Stethoscope, HeartPulse, ClipboardList, UserRound, Briefcase, KeyRound, CheckCircle2, ShieldCheck, ArrowLeft, Syringe, LockKeyhole, Building2 } from "lucide-react";
+import { Mail, Smartphone, Stethoscope, HeartPulse, ClipboardList, UserRound, Briefcase, KeyRound, CheckCircle2, ShieldCheck, ArrowLeft, Syringe, LockKeyhole, Building2 } from "lucide-react";
 import { api, ApiError, getDeviceId } from "@/lib/api";
 import { usePrefs, useSession } from "@/components/providers";
 import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
@@ -17,6 +17,7 @@ import { LANGUAGES } from "@/lib/i18n/languages";
 import { PIN_ROLES, type FacilityType, type NewOrganisationInput, type OrgKind, type OtpChallenge, type OtpVerifyResult, type Role, type User } from "@/lib/types";
 import { INDIAN_STATES } from "@/lib/india";
 import { localiseServerMessage } from "@/lib/i18n/phrases";
+import { useAsync } from "@/lib/hooks";
 
 /** The walkthrough accounts work in every environment (OTP 123456, PIN 4826); hide with NEXT_PUBLIC_HIDE_SAMPLES=1. */
 const SHOW_SAMPLES = process.env.NEXT_PUBLIC_HIDE_SAMPLES !== "1";
@@ -56,6 +57,30 @@ const ORG_FAC_TYPES: { v: FacilityType; label: string }[] = [
 const EMPTY_ORG: NewOrganisationInput = { name: "", kind: "company", registration_no: "", state: "", district: "", facility: { name: "", type: "company_clinic", district: "", state: "" } };
 
 const errMsg = (e: unknown) => (e instanceof ApiError ? e.message : e instanceof Error ? e.message : "Something went wrong");
+
+const EMAIL_OK = /^[^@\s]{1,64}@[^@\s]+\.[A-Za-z]{2,}$/;
+
+/** SMS or email code — shown only when the server has email codes switched on. */
+function ChannelPicker({ value, onChange }: { value: "sms" | "email"; onChange: (v: "sms" | "email") => void }) {
+  const { tr } = usePrefs();
+  return (
+    <div className="mt-4 grid grid-cols-2 gap-2" role="radiogroup" aria-label={tr("Receive the code by")}>
+      {(["sms", "email"] as const).map((c) => (
+        <button
+          key={c}
+          type="button"
+          role="radio"
+          aria-checked={value === c}
+          onClick={() => onChange(c)}
+          className={cx("flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium", value === c ? "border-teal-600 bg-teal-50 text-teal-800" : "border-line text-muted hover:bg-canvas")}
+        >
+          {c === "sms" ? <Smartphone className="size-4" /> : <Mail className="size-4" />}
+          {c === "sms" ? tr("Mobile (SMS)") : tr("Email")}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function PhoneField({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
   return (
@@ -232,6 +257,12 @@ function AuthInner() {
 
   /* ── Shared phone/OTP state ── */
   const [phone, setPhone] = useState("");
+  // Code channel: SMS to the mobile, or email (only when the server offers it).
+  const [channel, setChannel] = useState<"sms" | "email">("sms");
+  const [email, setEmail] = useState("");
+  const { data: options } = useAsync(() => api.authOptions(), []);
+  const emailOn = !!options?.email;
+  const byEmail = emailOn && channel === "email";
   const [challenge, setChallenge] = useState<OtpChallenge | null>(null);
   const [otp, setOtp] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -288,17 +319,27 @@ function AuthInner() {
 
   async function sendOtp(): Promise<boolean> {
     setErr(null);
-    if (!/^\d{10}$/.test(phone)) {
+    const registering = mode === "register";
+    if (byEmail) {
+      if (!EMAIL_OK.test(email.trim())) {
+        setErr(tr("Enter a valid email address"));
+        return false;
+      }
+      if (registering && !/^\d{10}$/.test(phone)) {
+        setErr(tr("Enter a valid 10-digit mobile number"));
+        return false;
+      }
+    } else if (!/^\d{10}$/.test(phone)) {
       setErr(tr("Enter a valid 10-digit mobile number"));
       return false;
     }
     setBusy(true);
     try {
-      const c = await api.requestOtp(phone);
+      const c = await api.requestOtp(byEmail ? { email: email.trim().toLowerCase() } : phone, registering ? "register" : "signin");
       setChallenge(c);
       setOtp("");
       setCountdown(30);
-      toast(c.dev_code ? `OTP sent. Demo code: ${c.dev_code}` : `OTP sent to +91 ${phone}`, "info");
+      toast(c.dev_code ? tr("OTP sent. Demo code: {c}", { c: c.dev_code }) : byEmail ? tr("Code sent to {e}", { e: email.trim() }) : tr("OTP sent to +91 {p}", { p: phone }), "info");
       return true;
     } catch (e) {
       setErr(localiseServerMessage(errMsg(e), tr));
@@ -373,6 +414,7 @@ function AuthInner() {
     try {
       const r = await api.register({
         registration_token: regToken,
+        phone: byEmail ? phone : null,
         name: role === "doctor" && !/^dr\.?\s/i.test(name) ? `Dr. ${name.trim()}` : name.trim(),
         role,
         facility_id: workplace?.kind === "existing" && role !== "employer" ? workplace.facility_id : null,
@@ -442,16 +484,26 @@ function AuthInner() {
           <h2 className="text-xl font-bold text-ink">{tr("Welcome back")}</h2>
           <p className="mt-1 text-sm text-muted">{tr("Sign in with your mobile number. Staff and employers then enter their account PIN.")}</p>
 
+          {emailOn && <ChannelPicker value={channel} onChange={(c) => { setChannel(c); setChallenge(null); setErr(null); }} />}
           <div className="mt-5">
-            <Label htmlFor="phone">{t("auth.phone")}</Label>
-            <PhoneField
-              id="phone"
-              value={phone}
-              onChange={(v) => {
-                setPhone(v);
-                setChallenge(null);
-              }}
-            />
+            {byEmail ? (
+              <>
+                <Label htmlFor="email">{tr("Email address")}</Label>
+                <Input id="email" type="email" inputMode="email" autoComplete="email" placeholder="name@example.com" value={email} onChange={(e) => { setEmail(e.target.value); setChallenge(null); }} />
+              </>
+            ) : (
+              <>
+                <Label htmlFor="phone">{t("auth.phone")}</Label>
+                <PhoneField
+                  id="phone"
+                  value={phone}
+                  onChange={(v) => {
+                    setPhone(v);
+                    setChallenge(null);
+                  }}
+                />
+              </>
+            )}
           </div>
 
           {challenge ? (
@@ -460,7 +512,7 @@ function AuthInner() {
               <OtpBoxes value={otp} onChange={setOtp} autoFocus />
               <p className="mt-2 text-xs text-muted">
                 {countdown > 0 ? (
-                  `Resend in ${countdown}s`
+                  tr("Resend in {s}s", { s: countdown })
                 ) : (
                   <button className="font-semibold text-teal-700" onClick={sendOtp}>
                     {tr("Resend OTP")}
@@ -497,7 +549,7 @@ function AuthInner() {
                     }}
                     className="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100"
                   >
-                    {d.role}
+                    {tr(ROLE_CARDS.find((c) => c.role === d.role)?.label ?? d.role)}
                   </button>
                 ))}
               </div>
@@ -510,7 +562,7 @@ function AuthInner() {
             {steps.map((s, i) => (
               <li key={s} className="flex flex-1 flex-col gap-1">
                 <span className={cx("h-1.5 rounded-full", i < stepIdx ? "bg-teal-600" : i === stepIdx ? "bg-coral-500" : "bg-line")} />
-                <span className={cx("hidden text-[11px] sm:block", i === stepIdx ? "font-semibold text-ink" : "text-subtle")}>{STEP_LABEL[s]}</span>
+                <span className={cx("hidden text-[11px] sm:block", i === stepIdx ? "font-semibold text-ink" : "text-subtle")}>{tr(STEP_LABEL[s])}</span>
               </li>
             ))}
           </ol>
@@ -605,9 +657,17 @@ function AuthInner() {
 
           {stepKey === "phone" && (
             <div className="fade-up">
-              <h2 className="text-xl font-bold text-ink">{t("auth.phone")}</h2>
-              <p className="mt-1 text-sm text-muted">{tr("We will send a one-time code to verify it.")}</p>
+              <h2 className="text-xl font-bold text-ink">{byEmail ? tr("Verify your email") : t("auth.phone")}</h2>
+              <p className="mt-1 text-sm text-muted">{byEmail ? tr("We will email you a one-time code. Your mobile number is still saved on your record.") : tr("We will send a one-time code to verify it.")}</p>
+              {emailOn && <ChannelPicker value={channel} onChange={(c) => { setChannel(c); setChallenge(null); setErr(null); }} />}
+              {byEmail && (
+                <div className="mt-4">
+                  <Label htmlFor="reg-email">{tr("Email address")}</Label>
+                  <Input id="reg-email" type="email" inputMode="email" autoComplete="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+              )}
               <div className="mt-4">
+                {byEmail && <Label htmlFor="reg-phone">{t("auth.phone")}</Label>}
                 <PhoneField id="reg-phone" value={phone} onChange={setPhone} />
               </div>
               <FieldError>{err}</FieldError>
@@ -623,7 +683,7 @@ function AuthInner() {
           {stepKey === "otp" && (
             <div className="fade-up">
               <h2 className="text-xl font-bold text-ink">{tr("OTP verification")}</h2>
-              <p className="mt-1 text-sm text-muted">{tr("Sent to +91")} {phone.slice(0, 5)}•••••</p>
+              <p className="mt-1 text-sm text-muted">{byEmail ? tr("Code sent to {e}", { e: email.trim() }) : `${tr("Sent to +91")} ${phone.slice(0, 5)}•••••`}</p>
               <div className="mt-4">
                 <OtpBoxes value={otp} onChange={setOtp} autoFocus />
                 {challenge?.dev_code && (
@@ -752,7 +812,7 @@ export default function AuthPage() {
             ].map(([i, s], k) => (
               <li key={k} className="flex items-start gap-3">
                 <span className="mt-0.5 grid size-8 place-items-center rounded-xl bg-white text-coral-500 shadow-sm">{i}</span>
-                <span className="pt-1.5">{s}</span>
+                <span className="pt-1.5">{typeof s === "string" ? tr(s) : s}</span>
               </li>
             ))}
           </ul>

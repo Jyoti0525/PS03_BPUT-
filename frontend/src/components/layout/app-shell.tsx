@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { LogOut, Building2, KeyRound } from "lucide-react";
+import { LogOut, Building2, KeyRound, Mail } from "lucide-react";
 import { usePrefs, useSession } from "@/components/providers";
 import { A11yButton, LanguageButton, Logo } from "./chrome";
 import { cx } from "@/components/ui";
@@ -11,6 +11,7 @@ import { useAsync } from "@/lib/hooks";
 import { api } from "@/lib/api";
 import { PIN_ROLES } from "@/lib/types";
 import { ChangePinModal } from "@/components/auth/change-pin";
+import { EmailModal } from "@/components/auth/email-settings";
 
 export interface NavItem {
   href: string;
@@ -47,6 +48,8 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
   const a = ACCENT[accent];
   const { data: facility } = useAsync(() => (user?.facility_id ? api.getFacility(user.facility_id) : Promise.resolve(null)), [user?.facility_id]);
   const [pinOpen, setPinOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const { data: authOpts } = useAsync(() => api.authOptions(), []);
   const active = (n: NavItem) => (n.exact ? path === n.href : path === n.href || path.startsWith(n.href + "/"));
 
   return (
@@ -93,7 +96,7 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
             <div className="hidden min-w-0 flex-1 lg:block">
               {facility && (
                 <p className="truncate text-sm text-muted">
-                  <span className="font-semibold text-ink">{facility.name}</span> · {facility.type.replace(/_/g, " ").toUpperCase()}
+                  <span className="font-semibold text-ink">{facility.name}</span> · {tr(facility.type.replace(/_/g, " ")).toUpperCase()}
                 </p>
               )}
             </div>
@@ -109,6 +112,16 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
                     <p className="text-[11px] text-muted">{tr(ROLE_LABEL[user.role] ?? user.role)}</p>
                   </div>
                 </div>
+              )}
+              {user && authOpts?.email && (
+                <button
+                  onClick={() => setEmailOpen(true)}
+                  className="inline-flex size-9 items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink"
+                  aria-label={tr("Email for sign-in codes")}
+                  title={tr("Email for sign-in codes")}
+                >
+                  <Mail className="size-4.5" />
+                </button>
               )}
               {user && PIN_ROLES.includes(user.role) && (
                 <button
@@ -152,6 +165,7 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
         </header>
         <main className="min-w-0 flex-1 p-4 lg:p-6">{children}</main>
         <ChangePinModal open={pinOpen} onClose={() => setPinOpen(false)} />
+        <EmailModal open={emailOpen} onClose={() => setEmailOpen(false)} />
       </div>
     </div>
   );

@@ -94,7 +94,7 @@ export default function NurseHome() {
                       </Badge>
                     )}
                   </div>
-                  <p className="mt-0.5 truncate text-sm text-ink-2">{i.chief_complaint}</p>
+                  <p className="mt-0.5 truncate text-sm text-ink-2">{tr(i.chief_complaint)}</p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     {i.vitals_recorded ? <Badge tone="rout">{tr("Vitals recorded")}</Badge> : <Badge tone="semi">{tr("Vitals needed")}</Badge>}
                     {!!i.observation_count && <Badge tone="teal">{tr("{n} observations", { n: i.observation_count })}</Badge>}

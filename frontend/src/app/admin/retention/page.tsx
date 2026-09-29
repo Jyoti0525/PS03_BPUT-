@@ -3,7 +3,7 @@
 import { usePrefs } from "@/components/providers";
 import { Mic, FileImage, FileText, Clock, CheckCircle2, Hourglass } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAsync, useNow } from "@/lib/hooks";
+import { useAsync, useNow, fmtDateTime } from "@/lib/hooks";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Card, CardHeader, ErrorNote, Spinner, Stat } from "@/components/ui";
 
@@ -22,7 +22,7 @@ export default function RetentionPage() {
         <Stat label={tr("Raw audio kept for")} value={`${data.policy_hours.audio}h`} hint={tr("deleted after transcript confirmation")} />
         <Stat label={tr("Photos kept for")} value={`${data.policy_hours.image / 24}d`} />
         <Stat label={tr("Reports kept for")} value={`${data.policy_hours.report / 24}d`} />
-        <Stat label={tr("Purged (7 days)")} value={data.purged_last_7d} tone="teal" hint={`${data.pending_purge} awaiting purge job`} />
+        <Stat label={tr("Purged (7 days)")} value={data.purged_last_7d} tone="teal" hint={tr("{n} awaiting purge job", { n: data.pending_purge })} />
       </div>
       <Card className="mt-5">
         <CardHeader title={tr("Stored files")} subtitle={tr("Admins see metadata only — never the file contents")} icon={<Clock className="size-4" />} />
@@ -34,9 +34,9 @@ export default function RetentionPage() {
                 <span className="text-muted">{KIND_ICON[f.kind]}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium text-ink">{f.filename}</span>
-                  <span className="text-xs text-subtle">{Math.round(f.size / 1024)} {tr("KB · uploaded")} {new Date(f.uploaded_at).toLocaleString("en-IN")}</span>
+                  <span className="text-xs text-subtle">{Math.round(f.size / 1024)} {tr("KB · uploaded")} {fmtDateTime(f.uploaded_at)}</span>
                 </span>
-                <span className="text-xs text-muted tabular-nums">{tr("expires")} {new Date(f.expires_at).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}</span>
+                <span className="text-xs text-muted tabular-nums">{tr("expires")} {fmtDateTime(f.expires_at, { dateStyle: "short", timeStyle: "short" })}</span>
                 {f.purged_at ? (
                   <Badge tone="rout"><CheckCircle2 className="size-3" /> {tr("Purged")}</Badge>
                 ) : expired ? (

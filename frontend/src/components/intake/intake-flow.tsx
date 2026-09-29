@@ -439,7 +439,7 @@ export function IntakeFlow({
         </p>
       )}
       {/* progress */}
-      <div className="mb-5 flex items-center gap-1.5" aria-label={`Step ${idx + 1} of ${steps.length}`}>
+      <div className="mb-5 flex items-center gap-1.5" aria-label={tr("Step {n} of {m}", { n: idx + 1, m: steps.length })}>
         {steps.map((s, i) => (
           <span key={s} className={cx("h-2 flex-1 rounded-full transition-colors", i < idx ? "bg-teal-600" : i === idx ? "bg-coral-500" : "bg-line")} />
         ))}
@@ -893,7 +893,7 @@ export function IntakeFlow({
             <Row k="Problem" v={chief || "—"} />
             {selected.length > 0 && <Row k="Also" v={selected.join(", ")} />}
             <Row k="Since" v={duration ?? answers.dur?.answer ?? "—"} />
-            <Row k="Files" v={`${files.filter((f) => f.kind !== "audio").length} report / photo`} />
+            <Row k="Files" v={tr("{n} report / photo", { n: files.filter((f) => f.kind !== "audio").length })} />
             {Object.values(answers).length > 0 && <Row k="Answers" v={Object.values(answers).map((a) => a.answer).join(" · ")} />}
             {offline && (
               <p className="flex items-center gap-2 rounded-xl bg-semi-bg px-3 py-2 text-sm font-medium text-semi">
@@ -927,10 +927,11 @@ export function IntakeFlow({
 }
 
 function Row({ k, v }: { k: string; v: string }) {
+  const { tr } = usePrefs();
   return (
     <div className="flex gap-4 border-b border-line pb-2 last:border-0">
-      <span className="w-24 shrink-0 text-muted">{k}</span>
-      <span className="font-medium text-ink capitalize-first">{v}</span>
+      <span className="w-24 shrink-0 text-muted">{tr(k)}</span>
+      <span className="font-medium text-ink capitalize-first">{tr(v)}</span>
     </div>
   );
 }

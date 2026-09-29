@@ -136,6 +136,7 @@ The landing page shows live status (checked every 20 seconds) for the website, A
 ## 6. Signing in (two-factor for staff and employers)
 
 - **Patients:** phone → one-time code by SMS. That is all.
+- **Email instead of SMS (optional):** when the server has email codes on, the sign-in and registration screens offer *Mobile (SMS)* or *Email*. Registering by email still records the mobile number. Anyone signed in can add or change a verified email from the envelope icon in the header.
 - **Doctors, nurses, receptionists, supervisors and employers:** two factors every time —
   1. phone → one-time code (proves the phone), then
   2. their **account PIN** (4–6 digits, chosen at registration; proves the person).

@@ -64,8 +64,10 @@ def issue_tokens(user: User, device_id: str | None = None) -> dict:
     }
 
 
-def registration_token(phone: str) -> str:
-    return _encode({"typ": "register", "phone": phone}, timedelta(minutes=get_settings().registration_ttl_min))
+def registration_token(phone: str | None = None, email: str | None = None) -> str:
+    """Proof that a new user verified their phone (SMS) or their email; carried into registration."""
+    claims = {"typ": "register", **({"phone": phone} if phone else {}), **({"email": email} if email else {})}
+    return _encode(claims, timedelta(minutes=get_settings().registration_ttl_min))
 
 
 PIN_ROLES = {"doctor", "nurse", "receptionist", "supervisor", "employer"}

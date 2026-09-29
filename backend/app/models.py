@@ -103,6 +103,11 @@ class User(Base):
     pin_set_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     pin_failed_attempts: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     pin_locked_until: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    # Optional verified email: a second way to receive sign-in codes.
+    email: Mapped[str | None] = mapped_column(String(254), nullable=True, unique=True, index=True)
+    email_verified_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    # False when the account was verified by email and the phone number was typed but never received a code.
+    phone_verified: Mapped[bool] = mapped_column(Boolean, default=True, server_default=sa_true())
     # Front-desk time management: whether a doctor / nurse is on duty right now.
     on_duty: Mapped[bool] = mapped_column(Boolean, default=True, server_default=sa_true())
     duty_changed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
@@ -111,7 +116,10 @@ class User(Base):
 class OtpChallenge(Base):
     __tablename__ = "otp_challenges"
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("otp"))
-    phone: Mapped[str] = mapped_column(String(15), index=True)
+    phone: Mapped[str | None] = mapped_column(String(15), nullable=True, index=True)
+    email: Mapped[str | None] = mapped_column(String(254), nullable=True, index=True)
+    # Signed-in user adding an email to their account (purpose "add").
+    user_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     code_hash: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True, default=utcnow, index=True)
     ip: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)

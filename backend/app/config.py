@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     twilio_api_key_secret: str | None = None
     twilio_verify_service_sid: str | None = None
     sms_country_code: str = "+91"
+    # Optional email codes: "none" (off), "mock" (local dev), "brevo" (Brevo transactional email API).
+    email_provider: str = "none"
+    brevo_api_key: str | None = None
+    email_from: str | None = None
+    email_from_name: str = "Jeevia"
     otp_ttl_sec: int = 300
     otp_max_attempts: int = 5
     otp_per_phone_10min: int = 3

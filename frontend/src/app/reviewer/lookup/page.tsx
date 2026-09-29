@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, CardHeader, Empty, ErrorNote, Input, Spinner } from "@/components/ui";
 import type { Encounter, Patient, PatientCandidate } from "@/lib/types";
 import { UrgencyBadge } from "@/components/triage/note";
-import { timeAgo } from "@/lib/hooks";
+import { timeAgo, fmtDate } from "@/lib/hooks";
 import { langByCode } from "@/lib/i18n/languages";
 import { useSession, usePrefs } from "@/components/providers";
 
@@ -139,7 +139,7 @@ export default function LookupPage() {
 
       {candidates && candidates.length > 1 && !patient && (
         <Card className="mt-4">
-          <CardHeader title={`${candidates.length} people match`} subtitle={tr("Phones are often shared within a household — confirm identity before opening a record.")} icon={<Phone className="size-4" />} />
+          <CardHeader title={tr("{n} people match", { n: candidates.length })} subtitle={tr("Phones are often shared within a household — confirm identity before opening a record.")} icon={<Phone className="size-4" />} />
           <ul className="divide-y divide-line">
             {candidates.map((c) => (
               <li key={c.patient.id}>
@@ -164,7 +164,7 @@ export default function LookupPage() {
             <span className="grid size-14 place-items-center rounded-2xl bg-coral-100 text-xl font-bold text-coral-700">{patient.name.charAt(0)}</span>
             <div className="flex-1">
               <p className="text-lg font-bold text-ink">{patient.name}</p>
-              <p className="text-sm text-muted">{patient.age} y · {patient.sex} · <span className="font-mono">{patient.code}</span> · {langByCode(patient.language).name} · {patient.category}</p>
+              <p className="text-sm text-muted">{patient.age} y · {patient.sex} · <span className="font-mono">{patient.code}</span> · {tr(langByCode(patient.language).name)} · {tr(patient.category)}</p>
             </div>
           </div>
           <div className="border-t border-line">
@@ -174,8 +174,8 @@ export default function LookupPage() {
                 {history.map((e) => (
                   <li key={e.id}>
                     <Link href={`${caseBase}/${e.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-canvas">
-                      <span className="w-28 shrink-0 text-xs text-muted">{new Date(e.created_at).toLocaleDateString("en-IN")}</span>
-                      <span className="min-w-0 flex-1 truncate text-sm text-ink">{e.chief_complaint}</span>
+                      <span className="w-28 shrink-0 text-xs text-muted">{fmtDate(e.created_at)}</span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink">{tr(e.chief_complaint)}</span>
                       <UrgencyBadge u={e.urgency} size="sm" />
                       <Badge>{e.status}</Badge>
                       <ArrowRight className="size-4 text-subtle" />

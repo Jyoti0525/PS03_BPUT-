@@ -1,5 +1,7 @@
 "use client";
 
+import { dateLocale, gtr } from "@/lib/i18n/phrases";
+
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 /** Minimal data hook: runs `fn` on mount / when deps change, exposes reload. */
@@ -64,15 +66,43 @@ export function useOnline() {
 
 export function timeAgo(iso: string, now = Date.now()) {
   const m = Math.round((now - Date.parse(iso)) / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m} min ago`;
+  if (m < 1) return gtr("just now");
+  if (m < 60) return gtr("{m} min ago", { m });
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ${m % 60}m ago`;
+  if (h < 24) return gtr("{h}h {m}m ago", { h, m: m % 60 });
   const d = Math.floor(h / 24);
-  return `${d} day${d > 1 ? "s" : ""} ago`;
+  return d > 1 ? gtr("{d} days ago", { d }) : gtr("1 day ago");
 }
 
 export function fmtWait(min: number) {
-  if (min < 60) return `${min}m`;
-  return `${Math.floor(min / 60)}h ${min % 60}m`;
+  if (min < 60) return gtr("{m}m", { m: min });
+  return gtr("{h}h {m}m", { h: Math.floor(min / 60), m: min % 60 });
+}
+
+/** Date / date-time in the current interface language. */
+/* Some browsers ship no Odia calendar data; Intl then silently falls back to English names. */
+const OR_MONTHS = ["ଜାନୁଆରୀ", "ଫେବୃଆରୀ", "ମାର୍ଚ୍ଚ", "ଅପ୍ରେଲ", "ମଇ", "ଜୁନ", "ଜୁଲାଇ", "ଅଗଷ୍ଟ", "ସେପ୍ଟେମ୍ବର", "ଅକ୍ଟୋବର", "ନଭେମ୍ବର", "ଡିସେମ୍ବର"];
+const OR_DAYS = ["ରବିବାର", "ସୋମବାର", "ମଙ୍ଗଳବାର", "ବୁଧବାର", "ଗୁରୁବାର", "ଶୁକ୍ରବାର", "ଶନିବାର"];
+let intlHasOdia: boolean | null = null;
+
+function odiaFallback(): boolean {
+  if (dateLocale() !== "or-IN") return false;
+  if (intlHasOdia === null) intlHasOdia = new Intl.DateTimeFormat("or-IN", { month: "long" }).format(new Date(2026, 0, 5)) !== "January";
+  return !intlHasOdia;
+}
+
+function odiaDate(x: Date, opts?: Intl.DateTimeFormatOptions) {
+  if (opts?.month === "long") return `${opts.weekday ? `${OR_DAYS[x.getDay()]}, ` : ""}${x.getDate()} ${OR_MONTHS[x.getMonth()]}${opts.year ? ` ${x.getFullYear()}` : ""}`;
+  return `${String(x.getDate()).padStart(2, "0")}/${String(x.getMonth() + 1).padStart(2, "0")}/${x.getFullYear()}`;
+}
+
+export function fmtDate(d: string | number | Date, opts?: Intl.DateTimeFormatOptions) {
+  const x = new Date(d);
+  return odiaFallback() ? odiaDate(x, opts) : x.toLocaleDateString(dateLocale(), opts);
+}
+
+export function fmtDateTime(d: string | number | Date, opts?: Intl.DateTimeFormatOptions) {
+  const x = new Date(d);
+  if (!odiaFallback()) return x.toLocaleString(dateLocale(), opts);
+  return `${odiaDate(x)}, ${String(x.getHours()).padStart(2, "0")}:${String(x.getMinutes()).padStart(2, "0")}`;
 }

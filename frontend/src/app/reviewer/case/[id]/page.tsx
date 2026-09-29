@@ -8,7 +8,7 @@ import {
   UserRoundCheck, Users, Timer, Paperclip, Copy, Ambulance, ChevronDown, Eye, QrCode,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
-import { useAsync, useNow, timeAgo } from "@/lib/hooks";
+import { useAsync, useNow, timeAgo, fmtDate } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
 import { Badge, Button, Card, CardHeader, ErrorNote, FieldError, Label, Modal, Segmented, Select, Spinner, Textarea, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
@@ -43,7 +43,7 @@ function FileThumb({ id }: { id: string }) {
         <div className="grid h-20 w-28 place-items-center rounded-lg border border-line bg-canvas text-xs text-muted">{f.purged_at ? tr("Purged") : f.kind}</div>
       )}
       <p className="mt-1 truncate text-[11px] text-muted">{f.filename}</p>
-      <p className="text-[10px] text-subtle">{tr("expires")} {new Date(f.expires_at).toLocaleDateString("en-IN")}</p>
+      <p className="text-[10px] text-subtle">{tr("expires")} {fmtDate(f.expires_at)}</p>
     </a>
   );
 }
@@ -139,24 +139,24 @@ export default function CasePage() {
                   </button>
                 </div>
                 <p className="mt-0.5 text-sm text-muted">
-                  {p.age} y · {p.sex === "F" ? tr("Female") : p.sex === "M" ? tr("Male") : tr("Other")} · <span className="font-mono">{p.code}</span> · {langByCode(p.language).name} {tr("· intake")} {timeAgo(enc.created_at, now)}
+                  {p.age} y · {p.sex === "F" ? tr("Female") : p.sex === "M" ? tr("Male") : tr("Other")} · <span className="font-mono">{p.code}</span> · {tr(langByCode(p.language).name)} {tr("· intake")} {timeAgo(enc.created_at, now)}
                 </p>
-                <p className="mt-2 text-[15px] font-medium text-ink">{enc.chief_complaint}</p>
+                <p className="mt-2 text-[15px] font-medium text-ink">{tr(enc.chief_complaint)}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {enc.category === "maternal" && <Badge tone="coral"><Baby className="size-3" /> {tr("Maternal ·")} {enc.intake?.maternal?.gestation_weeks ?? "?"} {tr("weeks")}</Badge>}
-                  {enc.category === "chronic" && <Badge tone="teal"><HeartPulse className="size-3" /> {tr("Chronic ·")} {enc.intake?.chronic?.condition}</Badge>}
+                  {enc.category === "chronic" && <Badge tone="teal"><HeartPulse className="size-3" /> {tr("Chronic ·")} {tr(enc.intake?.chronic?.condition)}</Badge>}
                   {enc.consent && (
                     <Badge tone={enc.consent.mode === "proxy" ? "info" : "neutral"}>
                       {enc.consent.mode === "proxy" ? <Users className="size-3" /> : <UserRoundCheck className="size-3" />}
-                      {enc.consent.mode === "proxy" ? `Proxy: ${enc.consent.proxy_name} (${enc.consent.proxy_relation})` : tr("Self consent")}
+                      {enc.consent.mode === "proxy" ? tr("Proxy: {n} ({r})", { n: enc.consent.proxy_name ?? "", r: tr(enc.consent.proxy_relation ?? "") }) : tr("Self consent")}
                     </Badge>
                   )}
                   {enc.intake?.captured_offline && <Badge>{tr("Captured offline")}</Badge>}
-                  <Badge tone="neutral">{tr("Status:")} {enc.status.replace("_", " ")}</Badge>
+                  <Badge tone="neutral">{tr("Status:")} {tr(enc.status.replace("_", " "))}</Badge>
                   {dueMs != null && !done && enc.status !== "escalated" && (
                     <Badge tone={dueMs < 300000 ? "crit" : "neutral"}>
                       <Timer className="size-3" />
-                      {dueMs > 0 ? `Auto-escalates in ${Math.floor(dueMs / 60000)}:${String(Math.floor((dueMs % 60000) / 1000)).padStart(2, "0")}` : tr("Escalation due")}
+                      {dueMs > 0 ? tr("Auto-escalates in {t}", { t: `${Math.floor(dueMs / 60000)}:${String(Math.floor((dueMs % 60000) / 1000)).padStart(2, "0")}` }) : tr("Escalation due")}
                     </Badge>
                   )}
                 </div>
@@ -181,7 +181,7 @@ export default function CasePage() {
                   <p className="mt-2 text-xs text-muted">
                     {(() => {
                       const s = facility.specialists.find((x) => x.key === enc.specialist_required);
-                      return s ? (s.available ? `${s.label}: on site` : `${s.label}: not on site → ${facility.referral_destination}`) : `No ${enc.specialist_required} service here → ${facility.referral_destination}`;
+                      return s ? (s.available ? tr("{s}: on site", { s: tr(s.label) }) : tr("{s}: not on site → {d}", { s: tr(s.label), d: facility.referral_destination })) : tr("No {s} service here → {d}", { s: enc.specialist_required ?? "", d: facility.referral_destination });
                     })()}
                   </p>
                 )}
@@ -267,7 +267,7 @@ export default function CasePage() {
         <Card className="mt-4">
           <CardHeader title={tr("Chronic follow-up")} subtitle={tr("Compare with the last check-up before deciding")} icon={<HeartPulse className="size-4" />} />
           <dl className="grid grid-cols-2 gap-4 p-4 text-sm sm:grid-cols-4">
-            <div><dt className="text-muted">{tr("Condition")}</dt><dd className="font-semibold">{enc.intake.chronic.condition}</dd></div>
+            <div><dt className="text-muted">{tr("Condition")}</dt><dd className="font-semibold">{tr(enc.intake.chronic.condition)}</dd></div>
             <div><dt className="text-muted">{tr("Last check-up")}</dt><dd className="font-semibold">{enc.intake.chronic.last_checkup ?? "—"}</dd></div>
             <div><dt className="text-muted">{tr("Patient feels")}</dt><dd className={cx("font-semibold capitalize", enc.intake.chronic.feeling_vs_last === "worse" && "text-crit")}>{enc.intake.chronic.feeling_vs_last} {tr("than last time")}</dd></div>
             <div className="col-span-2 sm:col-span-1"><dt className="text-muted">{tr("Medicines")}</dt><dd className="font-semibold">{enc.intake.chronic.current_medicines ?? "—"}</dd></div>
@@ -375,7 +375,7 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
         </Select>
       </div>
       <div className="mt-4">
-        <Label htmlFor="ov-reason" hint={`${reason.trim().length}/15 min`}>{tr("Written reason (required)")}</Label>
+        <Label htmlFor="ov-reason" hint={tr("{n}/15 characters minimum", { n: reason.trim().length })}>{tr("Written reason (required)")}</Label>
         <Textarea id="ov-reason" rows={4} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr("e.g. Repeat BP 132/84 after rest; chest wall tenderness reproduces pain; ECG normal.")} />
       </div>
       <FieldError>{err}</FieldError>
@@ -552,7 +552,7 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
           <div>
             <Label htmlFor="rf-dest">{tr("Destination")}</Label>
             <Select id="rf-dest" value={destination} onChange={(e) => setDestination(e.target.value)}>
-              {spec?.available && <option>{`${facility?.name} — ${spec.label} (in-house)`}</option>}
+              {spec?.available && <option value={`${facility?.name} — ${spec.label} (in-house)`}>{`${facility?.name} — ${tr(spec.label)} (${tr("in-house")})`}</option>}
               {facility && <option>{facility.referral_destination}</option>}
               <option>{tr("Tele-consultation (eSanjeevani hub)")}</option>
             </Select>
@@ -566,7 +566,7 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
           </div>
           <div>
             <Label htmlFor="rf-reason">{tr("Reason")}</Label>
-            <Textarea id="rf-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={enc.chief_complaint} />
+            <Textarea id="rf-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr(enc.chief_complaint)} />
           </div>
           <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-teal-200 bg-teal-50/60 p-3 text-sm">
             <input type="checkbox" checked={withQr} onChange={(e) => setWithQr(e.target.checked)} className="mt-0.5 size-4 accent-teal-700" />

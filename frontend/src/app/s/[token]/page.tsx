@@ -1,6 +1,7 @@
 "use client";
 
 import { usePrefs } from "@/components/providers";
+import { fmtDateTime } from "@/lib/hooks";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { KeyRound, Printer, FileText, Building2, Clock, Send, AlertOctagon, AlertTriangle, Info, Lock, ExternalLink } from "lucide-react";
@@ -97,7 +98,7 @@ export default function SharedSummaryPage() {
               {tr("Open summary")}
             </Button>
             <p className="mt-4 flex items-center gap-1.5 text-xs text-subtle">
-              <Clock className="size-3.5" /> {tr("Link valid until")} {new Date(meta.expires_at).toLocaleString("en-IN")}{tr(". Every opening is logged.")}
+              <Clock className="size-3.5" /> {tr("Link valid until")} {fmtDateTime(meta.expires_at)}{tr(". Every opening is logged.")}
             </p>
           </Card>
         ) : (
@@ -116,12 +117,12 @@ export default function SharedSummaryPage() {
                     {data.patient.age} y · {data.patient.sex} · <span className="font-mono">{data.patient.code}</span> {tr("· language")} {data.patient.language}
                     {data.patient.phone && ` · +91 ${data.patient.phone}`}
                   </p>
-                  <p className="mt-2 font-medium text-ink">{e?.chief_complaint}</p>
+                  <p className="mt-2 font-medium text-ink">{tr(e?.chief_complaint)}</p>
                   <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                     <span className="flex items-center gap-1">
                       <Building2 className="size-3.5" /> {data.facility.name}, {data.facility.district}
                     </span>
-                    <span>{tr("Seen")} {e && new Date(e.created_at).toLocaleString("en-IN")}</span>
+                    <span>{tr("Seen")} {e && fmtDateTime(e.created_at)}</span>
                     {e?.reviewed_by && <span>{tr("Reviewed by")} {e.reviewed_by}</span>}
                     {e?.consent?.mode === "proxy" && <span>{tr("History from")} {e.consent.proxy_name} ({e.consent.proxy_relation})</span>}
                   </p>
@@ -131,8 +132,8 @@ export default function SharedSummaryPage() {
 
             {data.referral && (
               <Card>
-                <CardHeader title={`Referred to ${data.referral.destination}`} subtitle={`${data.referral.specialty} · ${data.referral.transport.replace(/_/g, " ")} · by ${data.referral.created_by}`} icon={<Send className="size-4" />} />
-                <p className="px-4 py-3 text-sm text-ink">{data.referral.reason}</p>
+                <CardHeader title={tr("Referred to {d}", { d: data.referral.destination })} subtitle={`${data.referral.specialty} · ${data.referral.transport.replace(/_/g, " ")} · by ${data.referral.created_by}`} icon={<Send className="size-4" />} />
+                <p className="px-4 py-3 text-sm text-ink">{tr(data.referral.reason)}</p>
               </Card>
             )}
 
@@ -140,7 +141,7 @@ export default function SharedSummaryPage() {
               <>
                 <Card>
                   <CardHeader title={tr("Summary")} subtitle={tr("Organised from patient-provided information — not a diagnosis")} />
-                  <p className="px-4 py-3 leading-relaxed text-ink">{n.summary}</p>
+                  <p className="px-4 py-3 leading-relaxed text-ink">{tr(n.summary)}</p>
                 </Card>
                 {n.flags.length > 0 && (
                   <Card>
@@ -225,7 +226,7 @@ export default function SharedSummaryPage() {
             </Card>
 
             <p className="text-center text-xs text-muted">
-              {tr("Shared by")} {data.shared_by} {tr("· link valid until")} {new Date(data.expires_at).toLocaleString("en-IN")} · {data.disclaimer}
+              {tr("Shared by")} {data.shared_by} {tr("· link valid until")} {fmtDateTime(data.expires_at)} · {data.disclaimer}
             </p>
           </div>
         )}

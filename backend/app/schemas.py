@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import model_validator, BaseModel, ConfigDict, Field, field_validator
 
 Role = Literal["doctor", "nurse", "receptionist", "supervisor", "patient", "employer", "kiosk"]
 Urgency = Literal["red", "yellow", "green"]
@@ -41,6 +41,8 @@ class UserOut(ORM):
     organisation_id: str | None = None
     on_duty: bool = True
     duty_changed_at: datetime | None = None
+    email: str | None = None
+    phone_verified: bool = True
     created_at: datetime
 
 
@@ -64,8 +66,37 @@ class Tokens(BaseModel):
     expires_in: int
 
 
+EMAIL_RE = r"^[^@\s]{1,64}@[^@\s]+\.[A-Za-z]{2,}$"
+
+
 class OtpRequest(BaseModel):
-    phone: str = Field(pattern=r"^\d{10}$")
+    """Exactly one of phone (SMS code) or email (email code)."""
+
+    phone: str | None = Field(default=None, pattern=r"^\d{10}$")
+    email: str | None = Field(default=None, max_length=254, pattern=EMAIL_RE)
+    purpose: Literal["signin", "register"] = "signin"
+
+    @model_validator(mode="after")
+    def one_channel(self):
+        if bool(self.phone) == bool(self.email):
+            raise ValueError("Give either a mobile number or an email address")
+        if self.email:
+            self.email = self.email.strip().lower()
+        return self
+
+
+class EmailStartIn(BaseModel):
+    email: str = Field(max_length=254, pattern=EMAIL_RE)
+
+
+class EmailConfirmIn(BaseModel):
+    challenge_id: str
+    code: str = Field(pattern=r"^\d{6}$")
+
+
+class AuthOptions(BaseModel):
+    sms: bool
+    email: bool
 
 
 class OtpChallengeOut(BaseModel):
@@ -119,6 +150,8 @@ class NewOrganisation(BaseModel):
 
 class RegisterIn(BaseModel):
     registration_token: str
+    # Required when the registration token came from an email code (the mobile number is still recorded).
+    phone: str | None = Field(default=None, pattern=r"^\d{10}$")
     name: str = Field(min_length=2, max_length=200)
     role: Literal["doctor", "nurse", "receptionist", "supervisor", "patient", "employer"]
     facility_id: str | None = None

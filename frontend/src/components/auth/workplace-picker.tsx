@@ -152,7 +152,7 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
           <div className="min-w-0 text-sm">
             <p className="font-semibold text-ink">{value.hit.name}</p>
             <p className="text-xs text-muted">
-              {value.hit.kind_label} · {[value.hit.district, value.hit.state].filter(Boolean).join(", ")}
+              {tr(value.hit.kind_label)} · {[value.hit.district, value.hit.state].filter(Boolean).join(", ")}
               {value.hit.organisation_name && ` · ${value.hit.organisation_name}`}
             </p>
           </div>
@@ -177,7 +177,7 @@ export function WorkplacePicker({ role, value, onChange }: { role: Role; value: 
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold text-ink">{h.name}</span>
                   <span className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
-                    <span>{h.kind_label}</span>
+                    <span>{tr(h.kind_label)}</span>
                     <span className="inline-flex items-center gap-0.5">
                       <MapPin className="size-3" />
                       {[h.city, h.district, h.state].filter(Boolean).join(", ")}

@@ -55,7 +55,12 @@ export interface JeeviaApi {
   mode: "mock" | "live";
 
   // Auth — phone + OTP, PIN, device binding, JWT
-  requestOtp(phone: string): Promise<OtpChallenge>;
+  /** A phone number (SMS code) or `{ email }` (email code, when the server offers it). */
+  requestOtp(target: string | { phone?: string; email?: string }, purpose?: "signin" | "register"): Promise<OtpChallenge>;
+  authOptions(): Promise<{ sms: boolean; email: boolean }>;
+  emailStart(email: string): Promise<OtpChallenge>;
+  emailConfirm(challengeId: string, code: string): Promise<User>;
+  emailRemove(): Promise<User>;
   /** `purpose: "register"` refuses numbers that already have an account (never signs them in). */
   verifyOtp(challengeId: string, code: string, purpose?: "signin" | "register"): Promise<OtpVerifyResult>;
   register(input: RegisterInput): Promise<{ tokens: Tokens; user: User }>;

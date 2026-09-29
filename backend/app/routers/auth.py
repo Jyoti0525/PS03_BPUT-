@@ -1,16 +1,17 @@
+import secrets
 import uuid
 from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 
 from .. import audit
 from ..config import get_settings
 from ..models import Facility, Organisation, OtpChallenge, Patient, RevokedToken, User
-from ..schemas import ORG_FACILITY_TYPES, AuthResult, OtpChallengeOut, OtpRequest, OtpVerify, OtpVerifyOut, PinChangeIn, PinForgotIn, PinStepIn, MePatch, RefreshIn, RegisterIn, UserOut
-from .. import directory, otp
+from ..schemas import ORG_FACILITY_TYPES, AuthResult, OtpChallengeOut, OtpRequest, OtpVerify, OtpVerifyOut, PinChangeIn, PinForgotIn, PinStepIn, AuthOptions, EmailConfirmIn, EmailStartIn, MePatch, RefreshIn, RegisterIn, UserOut
+from .. import directory, mailer, otp
 from ..security import PIN_ROLES, DB, CurrentUser, bearer, decode, hash_pin, hash_secret, issue_tokens, pin_problem, pin_step_token, registration_token, verify_secret
 from ..services import aware, next_patient_code, now
 from .organisations import create_org_facility
@@ -20,7 +21,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 def user_out(db, u: User) -> UserOut:
     has_pin = u.pin_hash is not None
-    return UserOut.model_validate({**{c: getattr(u, c) for c in ("id", "phone", "name", "role", "facility_id", "registration_no", "language", "is_active", "organisation_id", "on_duty")}, "has_pin": has_pin, "duty_changed_at": aware(u.duty_changed_at) if u.duty_changed_at else None, "created_at": aware(u.created_at)})
+    return UserOut.model_validate({**{c: getattr(u, c) for c in ("id", "phone", "name", "role", "facility_id", "registration_no", "language", "is_active", "organisation_id", "on_duty", "email", "phone_verified")}, "has_pin": has_pin, "duty_changed_at": aware(u.duty_changed_at) if u.duty_changed_at else None, "created_at": aware(u.created_at)})
 
 
 def _client_ip(request: Request) -> str:
@@ -46,8 +47,16 @@ def _limit(db, query, t, window: timedelta, allowed: int, message: str) -> None:
     raise HTTPException(429, f"{message} — try again in {_wait_text(wait)}", headers={"Retry-After": str(wait)})
 
 
+@router.get("/options", response_model=AuthOptions)
+def options():
+    """Which code channels this server offers (the sign-in page shows the email option only when enabled)."""
+    return AuthOptions(sms=True, email=mailer.enabled())
+
+
 @router.post("/otp/request", response_model=OtpChallengeOut)
 def request_otp(body: OtpRequest, request: Request, db: DB):
+    if body.email:
+        return _request_email_code(db, request, body.email, body.purpose)
     s = get_settings()
     t = now()
     ip = _client_ip(request)
@@ -57,10 +66,7 @@ def request_otp(body: OtpRequest, request: Request, db: DB):
         by_phone = select(OtpChallenge.created_at).where(OtpChallenge.phone == body.phone)
         _limit(db, by_phone, t, timedelta(minutes=10), s.otp_per_phone_10min, "Too many codes requested for this number")
         _limit(db, by_phone, t, timedelta(hours=24), s.otp_per_phone_day, "Too many codes requested for this number today")
-        by_ip = select(OtpChallenge.created_at).where(OtpChallenge.ip == ip)
-        if otp.demo_phones():
-            by_ip = by_ip.where(OtpChallenge.phone.not_in(otp.demo_phones()))
-        _limit(db, by_ip, t, timedelta(hours=1), s.otp_per_ip_hour, "Too many code requests from this network")
+        _limit(db, _network_query(ip), t, timedelta(hours=1), s.otp_per_ip_hour, "Too many code requests from this network")
     local = otp.uses_local_code(body.phone)
     code = otp.local_code(body.phone) if local else ""
     if not local:
@@ -72,28 +78,67 @@ def request_otp(body: OtpRequest, request: Request, db: DB):
     return OtpChallengeOut(challenge_id=ch.id, expires_in=s.otp_ttl_sec, dev_code=code if s.otp_provider == "mock" else None)
 
 
-@router.post("/otp/verify", response_model=OtpVerifyOut, response_model_exclude_none=True)
-def verify_otp(body: OtpVerify, db: DB):
+def _network_query(ip: str):
+    q = select(OtpChallenge.created_at).where(OtpChallenge.ip == ip)
+    demo = otp.demo_phones()
+    return q.where(or_(OtpChallenge.phone.is_(None), OtpChallenge.phone.not_in(demo))) if demo else q
+
+
+def _request_email_code(db, request: Request, email: str, purpose: str, user_id: str | None = None) -> OtpChallengeOut:
+    """Email codes follow the same limits as SMS: per address, per day and per network."""
     s = get_settings()
-    ch = db.get(OtpChallenge, body.challenge_id)
+    if not mailer.enabled():
+        raise HTTPException(503, "Email codes are not enabled on this server")
+    t = now()
+    ip = _client_ip(request)
+    by_email = select(OtpChallenge.created_at).where(OtpChallenge.email == email)
+    _limit(db, by_email, t, timedelta(minutes=10), s.otp_per_phone_10min, "Too many codes requested for this email")
+    _limit(db, by_email, t, timedelta(hours=24), s.otp_per_phone_day, "Too many codes requested for this email today")
+    _limit(db, _network_query(ip), t, timedelta(hours=1), s.otp_per_ip_hour, "Too many code requests from this network")
+    code = f"{secrets.randbelow(10**6):06d}"
+    mailer.send_code(email, code, purpose)
+    ch = OtpChallenge(email=email, user_id=user_id, code_hash=hash_secret(code, email), expires_at=t + timedelta(seconds=s.otp_ttl_sec), created_at=t, ip=ip)
+    db.add(ch)
+    db.commit()
+    return OtpChallengeOut(challenge_id=ch.id, expires_in=s.otp_ttl_sec, dev_code=code if s.email_provider == "mock" else None)
+
+
+def _check_challenge(db, challenge_id: str, code: str) -> OtpChallenge:
+    s = get_settings()
+    ch = db.get(OtpChallenge, challenge_id)
     if not ch or ch.consumed or aware(ch.expires_at) < now():
         raise HTTPException(400, "OTP expired — request a new one")
     if ch.attempts >= s.otp_max_attempts:
         raise HTTPException(429, "Too many attempts — request a new OTP")
-    ok = otp.check(ch.phone, body.code) if ch.code_hash == "twilio" else verify_secret(body.code, ch.phone, ch.code_hash)
+    if ch.email:
+        ok = verify_secret(code, ch.email, ch.code_hash)
+    else:
+        ok = otp.check(ch.phone, code) if ch.code_hash == "twilio" else verify_secret(code, ch.phone, ch.code_hash)
     if not ok:
         ch.attempts += 1
         db.commit()
         raise HTTPException(400, "Incorrect OTP")
     ch.consumed = True
     db.commit()
-    user = db.scalar(select(User).where(User.phone == ch.phone))
+    return ch
+
+
+@router.post("/otp/verify", response_model=OtpVerifyOut, response_model_exclude_none=True)
+def verify_otp(body: OtpVerify, db: DB):
+    ch = _check_challenge(db, body.challenge_id, body.code)
+    if ch.user_id:
+        raise HTTPException(400, "This code confirms an email address — use it on the email screen")
+    if ch.email:
+        user = db.scalar(select(User).where(User.email == ch.email, User.email_verified_at.is_not(None)))
+    else:
+        user = db.scalar(select(User).where(User.phone == ch.phone))
     if not user:
-        if otp.is_demo(ch.phone):
+        if ch.phone and otp.is_demo(ch.phone):
             raise HTTPException(403, "Sample numbers are reserved for the walkthrough — register with your own mobile number")
-        return OtpVerifyOut(status="new_user", registration_token=registration_token(ch.phone))
+        return OtpVerifyOut(status="new_user", registration_token=registration_token(phone=ch.phone, email=ch.email))
     if body.purpose == "register":
-        raise HTTPException(409, "This mobile number is already registered. Each number can hold only one account — sign in instead, or register with your own number.")
+        what = "email address" if ch.email else "mobile number"
+        raise HTTPException(409, f"This {what} is already registered. Each {what} can hold only one account — sign in instead, or register with your own {what}.")
     if not user.is_active:
         raise HTTPException(403, "This account has been deactivated — contact your supervisor")
     if user.role in PIN_ROLES:
@@ -179,11 +224,17 @@ def pin_change(body: PinChangeIn, user: CurrentUser, db: DB):
 
 @router.post("/register", response_model=AuthResult)
 def register(body: RegisterIn, db: DB):
-    phone = decode(body.registration_token, "register")["phone"]
+    claims = decode(body.registration_token, "register")
+    email = claims.get("email")
+    phone = claims.get("phone") or body.phone
+    if not phone:
+        raise HTTPException(422, "Enter your 10-digit mobile number")
     if not body.accepted_terms:
         raise HTTPException(422, "Terms must be accepted")
     if db.scalar(select(User).where(User.phone == phone)):
         raise HTTPException(409, "This mobile number is already registered — sign in instead")
+    if email and db.scalar(select(User).where(User.email == email)):
+        raise HTTPException(409, "This email address is already registered — sign in instead")
     if otp.is_demo(phone):
         raise HTTPException(403, "Sample numbers are reserved for the walkthrough")
     org_id = None
@@ -239,6 +290,8 @@ def register(body: RegisterIn, db: DB):
     if body.role in ("doctor", "nurse") and not (body.registration_no and len(body.registration_no.strip()) >= 4):
         raise HTTPException(422, "Registration number is required for clinical staff")
     user = User(phone=phone, name=body.name.strip(), role=body.role, facility_id=body.facility_id if body.role != "patient" else None, registration_no=body.registration_no, language=body.language, organisation_id=org_id)
+    if email:  # verified by an email code; the mobile number was typed, not verified
+        user.email, user.email_verified_at, user.phone_verified = email, now(), False
     db.add(user)
     db.flush()
     if body.role in PIN_ROLES:
@@ -264,6 +317,36 @@ def refresh(body: RefreshIn, db: DB):
 
 @router.get("/me", response_model=UserOut)
 def me(user: CurrentUser, db: DB):
+    return user_out(db, user)
+
+
+@router.post("/email/start", response_model=OtpChallengeOut)
+def email_start(body: EmailStartIn, request: Request, user: CurrentUser, db: DB):
+    """Add or change the account's email: a code is sent to the new address."""
+    email = body.email.strip().lower()
+    other = db.scalar(select(User).where(User.email == email))
+    if other and other.id != user.id:
+        raise HTTPException(409, "This email address is already used by another account")
+    return _request_email_code(db, request, email, "add", user_id=user.id)
+
+
+@router.post("/email/confirm", response_model=UserOut)
+def email_confirm(body: EmailConfirmIn, user: CurrentUser, db: DB):
+    ch = _check_challenge(db, body.challenge_id, body.code)
+    if ch.user_id != user.id or not ch.email:
+        raise HTTPException(400, "This code was not issued for your account")
+    if db.scalar(select(User).where(User.email == ch.email, User.id != user.id)):
+        raise HTTPException(409, "This email address is already used by another account")
+    user.email, user.email_verified_at = ch.email, now()
+    audit.record(db, user, "UPDATE", "user", user.id, "Email address verified and added to the account")
+    return user_out(db, user)
+
+
+@router.delete("/email", response_model=UserOut)
+def email_remove(user: CurrentUser, db: DB):
+    if user.email:
+        user.email, user.email_verified_at = None, None
+        audit.record(db, user, "UPDATE", "user", user.id, "Email address removed from the account")
     return user_out(db, user)
 
 

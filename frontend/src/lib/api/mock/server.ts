@@ -426,8 +426,21 @@ async function withDb<T>(fn: (d: DB) => Promise<T>): Promise<T> {
 export const mockApi: JeeviaApi = {
   mode: "mock",
 
-  requestOtp: (phone) =>
+  authOptions: async () => ({ sms: true, email: false }),
+  emailStart: async () => {
+    throw new ApiError(503, "Email codes are not enabled on this server");
+  },
+  emailConfirm: async () => {
+    throw new ApiError(503, "Email codes are not enabled on this server");
+  },
+  emailRemove: async () => {
+    throw new ApiError(503, "Email codes are not enabled on this server");
+  },
+
+  requestOtp: (target) =>
     withDb(async (d) => {
+      if (typeof target !== "string") throw new ApiError(503, "Email codes are not enabled on this server");
+      const phone = target;
       if (!/^\d{10}$/.test(phone)) throw new ApiError(422, "Enter a valid 10-digit mobile number");
       const id = uid("otp");
       d.otps[id] = { phone, code: DEMO_OTP, exp: Date.now() + 5 * 60000 };

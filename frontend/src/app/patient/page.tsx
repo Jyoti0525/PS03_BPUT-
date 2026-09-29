@@ -4,7 +4,7 @@ import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { PlusCircle, CalendarClock, MessageSquareText, PhoneCall, CheckCircle2, Hourglass, Send, FileText, Info } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAsync, timeAgo } from "@/lib/hooks";
+import { useAsync, timeAgo, fmtDate } from "@/lib/hooks";
 import { usePrefs } from "@/components/providers";
 import { Badge, Button, Card, CardHeader, Empty, ErrorNote, Spinner } from "@/components/ui";
 import type { Encounter } from "@/lib/types";
@@ -55,8 +55,8 @@ export default function PatientHome() {
               <li key={r.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="grid size-10 place-items-center rounded-xl bg-coral-50 text-coral-700">{r.channel === "sms" ? <MessageSquareText className="size-5" /> : <PhoneCall className="size-5" />}</span>
                 <div className="flex-1">
-                  <p className="font-medium text-ink">{r.message}</p>
-                  <p className="text-sm text-muted">{new Date(r.due_at).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })} · {r.channel.toUpperCase()}</p>
+                  <p className="font-medium text-ink">{tr(r.message)}</p>
+                  <p className="text-sm text-muted">{fmtDate(r.due_at, { weekday: "long", day: "numeric", month: "long" })} · {r.channel.toUpperCase()}</p>
                 </div>
               </li>
             ))}
@@ -73,11 +73,11 @@ export default function PatientHome() {
             {encounters.map((e) => (
               <li key={e.id} className="px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="flex-1 font-medium text-ink">{e.chief_complaint}</p>
+                  <p className="flex-1 font-medium text-ink">{tr(e.chief_complaint)}</p>
                   <StatusBadge e={e} />
                 </div>
                 <p className="mt-0.5 text-sm text-muted">
-                  {new Date(e.created_at).toLocaleDateString("en-IN")} · {timeAgo(e.created_at)}
+                  {fmtDate(e.created_at)} · {timeAgo(e.created_at)}
                   {e.reviewed_by && ` · seen by ${e.reviewed_by}`}
                   {!!e.intake?.file_ids.length && ` · ${e.intake.file_ids.length} file(s) shared`}
                 </p>

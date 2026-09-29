@@ -83,7 +83,7 @@ export default function KioskLinksPage() {
                     <p className="mt-0.5 truncate font-mono text-xs text-muted">{k.url}</p>
                     <p className="mt-1 text-xs text-subtle">
                       {k.intakes_today} {tr("intake")}{k.intakes_today === 1 ? "" : "s"} {tr("today ·")} {k.sessions} {tr("session")}{k.sessions === 1 ? "" : "s"} {tr("opened")}
-                      {k.last_used_at && ` · last used ${timeAgo(k.last_used_at)}`} {tr("· created by")} {k.created_by}
+                      {k.last_used_at && ` · ${tr("last used {t}", { t: timeAgo(k.last_used_at) })}`} {tr("· created by")} {k.created_by}
                     </p>
                   </div>
                   {!k.revoked && (

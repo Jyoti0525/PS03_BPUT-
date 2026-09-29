@@ -2,9 +2,16 @@
 
 import clsx from "clsx";
 import { Loader2, X } from "lucide-react";
+import { usePrefs } from "@/components/providers";
 import { forwardRef, useEffect, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 
 export const cx = clsx;
+
+/** Shared components translate the plain-string text they are given, so every screen follows the chosen language. */
+function useT() {
+  const { tr } = usePrefs();
+  return (n: ReactNode): ReactNode => (typeof n === "string" ? tr(n) : n);
+}
 
 /* ── Button ─────────────────────────────────────────────── */
 
@@ -66,13 +73,14 @@ export function Card({ className, children, ...rest }: React.HTMLAttributes<HTML
 }
 
 export function CardHeader({ title, subtitle, action, icon }: { title: ReactNode; subtitle?: ReactNode; action?: ReactNode; icon?: ReactNode }) {
+  const T = useT();
   return (
     <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
       <div className="flex min-w-0 items-start gap-2.5">
         {icon && <span className="mt-0.5 text-muted">{icon}</span>}
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-ink">{title}</h3>
-          {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
+          <h3 className="text-sm font-semibold text-ink">{T(title)}</h3>
+          {subtitle && <p className="text-xs text-muted">{T(subtitle)}</p>}
         </div>
       </div>
       {action}
@@ -94,16 +102,18 @@ const tones: Record<Tone, string> = {
 };
 
 export function Badge({ tone = "neutral", className, children }: { tone?: Tone; className?: string; children: ReactNode }) {
-  return <span className={cx("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap", tones[tone], className)}>{children}</span>;
+  const T = useT();
+  return <span className={cx("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap", tones[tone], className)}>{T(children)}</span>;
 }
 
 /* ── Form fields ───────────────────────────────────────── */
 
 export function Label({ children, htmlFor, hint }: { children: ReactNode; htmlFor?: string; hint?: ReactNode }) {
+  const T = useT();
   return (
     <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-ink-2">
-      {children}
-      {hint && <span className="ml-1 font-normal text-subtle">{hint}</span>}
+      {T(children)}
+      {hint && <span className="ml-1 font-normal text-subtle">{T(hint)}</span>}
     </label>
   );
 }
@@ -136,11 +146,12 @@ export function FieldError({ children }: { children?: ReactNode }) {
 }
 
 export function Toggle({ checked, onChange, label, description, disabled }: { checked: boolean; onChange: (v: boolean) => void; label: ReactNode; description?: ReactNode; disabled?: boolean }) {
+  const T = useT();
   return (
     <label className={cx("flex cursor-pointer items-center justify-between gap-4", disabled && "cursor-not-allowed opacity-60")}>
       <span className="min-w-0">
-        <span className="block text-sm font-medium text-ink">{label}</span>
-        {description && <span className="block text-xs text-muted">{description}</span>}
+        <span className="block text-sm font-medium text-ink">{T(label)}</span>
+        {description && <span className="block text-xs text-muted">{T(description)}</span>}
       </span>
       <button
         type="button"
@@ -175,6 +186,7 @@ export function Modal({
   footer?: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
 }) {
+  const T = useT();
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -195,8 +207,8 @@ export function Modal({
       <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" className={cx("fade-up flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-surface shadow-[var(--shadow-pop)] outline-none sm:rounded-2xl", w)}>
         <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-ink">{title}</h2>
-            {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
+            <h2 className="text-lg font-semibold text-ink">{T(title)}</h2>
+            {subtitle && <p className="mt-0.5 text-sm text-muted">{T(subtitle)}</p>}
           </div>
           <button onClick={onClose} className="rounded-lg p-1.5 text-muted hover:bg-canvas hover:text-ink" aria-label="Close">
             <X className="size-5" />
@@ -212,32 +224,35 @@ export function Modal({
 /* ── Misc ───────────────────────────────────────────────── */
 
 export function Spinner({ label = "Loading…" }: { label?: string }) {
+  const T = useT();
   return (
     <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted" role="status">
-      <Loader2 className="size-4 animate-spin" /> {label}
+      <Loader2 className="size-4 animate-spin" /> {T(label)}
     </div>
   );
 }
 
 export function Empty({ icon, title, body, action }: { icon?: ReactNode; title: string; body?: ReactNode; action?: ReactNode }) {
+  const T = useT();
   return (
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
       {icon && <div className="mb-3 rounded-2xl bg-canvas p-3 text-subtle">{icon}</div>}
-      <p className="font-semibold text-ink">{title}</p>
-      {body && <p className="mt-1 max-w-sm text-sm text-muted">{body}</p>}
+      <p className="font-semibold text-ink">{T(title)}</p>
+      {body && <p className="mt-1 max-w-sm text-sm text-muted">{T(body)}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }
 
 export function ErrorNote({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
+  const T = useT();
   const msg = error instanceof Error ? error.message : String(error);
   return (
     <div role="alert" className="flex items-center justify-between gap-3 rounded-xl border border-crit-line bg-crit-bg px-4 py-3 text-sm text-crit">
-      <span>{msg}</span>
+      <span>{T(msg)}</span>
       {onRetry && (
         <Button size="sm" variant="secondary" onClick={onRetry}>
-          Retry
+          {T("Retry")}
         </Button>
       )}
     </div>
@@ -245,6 +260,7 @@ export function ErrorNote({ error, onRetry }: { error: unknown; onRetry?: () => 
 }
 
 export function Segmented<T extends string>({ value, onChange, options, className }: { value: T; onChange: (v: T) => void; options: { value: T; label: ReactNode; count?: number }[]; className?: string }) {
+  const T = useT();
   return (
     <div role="tablist" className={cx("inline-flex flex-wrap gap-1 rounded-xl bg-canvas p-1", className)}>
       {options.map((o) => (
@@ -255,7 +271,7 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
           onClick={() => onChange(o.value)}
           className={cx("rounded-lg px-3 py-1.5 text-sm font-medium transition-colors", value === o.value ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink")}
         >
-          {o.label}
+          {T(o.label)}
           {o.count != null && <span className="ml-1.5 text-xs text-subtle">{o.count}</span>}
         </button>
       ))}
@@ -264,12 +280,13 @@ export function Segmented<T extends string>({ value, onChange, options, classNam
 }
 
 export function Stat({ label, value, hint, tone }: { label: string; value: ReactNode; hint?: ReactNode; tone?: "crit" | "semi" | "rout" | "teal" }) {
+  const T = useT();
   const color = tone ? { crit: "text-crit", semi: "text-semi", rout: "text-rout", teal: "text-teal-700" }[tone] : "text-ink";
   return (
     <Card className="px-4 py-3">
-      <p className="text-xs font-medium tracking-wide text-muted uppercase">{label}</p>
+      <p className="text-xs font-medium tracking-wide text-muted uppercase">{T(label)}</p>
       <p className={cx("mt-1 text-2xl font-bold tabular-nums", color)}>{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-subtle">{hint}</p>}
+      {hint && <p className="mt-0.5 text-xs text-subtle">{T(hint)}</p>}
     </Card>
   );
 }

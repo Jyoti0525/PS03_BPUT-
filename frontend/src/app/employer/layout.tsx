@@ -3,12 +3,14 @@
 import { Briefcase, Building2, Landmark, Users } from "lucide-react";
 import { RoleGate } from "@/components/layout/role-gate";
 import { AppShell } from "@/components/layout/app-shell";
+import { usePrefs } from "@/components/providers";
 
 export default function EmployerLayout({ children }: { children: React.ReactNode }) {
+  const { tr } = usePrefs();
   return (
     <RoleGate roles={["employer"]}>
       <AppShell
-        section="Employer"
+        section={tr("Employer")}
         nav={[
           { href: "/employer", label: "Fitness overview", icon: <Briefcase />, exact: true },
           { href: "/employer/workers", label: "Workers", icon: <Users /> },

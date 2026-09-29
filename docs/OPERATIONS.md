@@ -44,6 +44,7 @@ Before pushing: `cd backend && .venv/bin/pytest -q` and `cd frontend && npm run 
 | `JEEVIA_DATABASE_URL` | Render env | Neon console → Roles → reset password, then update Render |
 | `JEEVIA_JWT_SECRET` | Render env **and** Vercel env (same value) | Set a new random value in both, redeploy both. All users sign in again. |
 | Twilio `ACCOUNT_SID`, `API_KEY_SID`, `API_KEY_SECRET`, `VERIFY_SERVICE_SID` | Render env | Twilio console → API keys → create new, update Render, delete the old key |
+| `JEEVIA_BREVO_API_KEY` (+ `JEEVIA_EMAIL_PROVIDER=brevo`, `JEEVIA_EMAIL_FROM`) | Render env | Brevo → SMTP & API → API keys → generate, update Render, delete the old key |
 | Cloudinary `CLOUD_NAME`, `API_KEY`, `API_SECRET` | Render env | Cloudinary console → API keys → generate, update Render, revoke the old key |
 | `RENDER_API_KEY`, `RENDER_SERVICE_ID` | Vercel env (server-only) | Render → Account settings → API keys |
 
@@ -52,7 +53,7 @@ Nothing secret is committed. Local development uses `backend/.env` (git-ignored)
 ## Database (Neon)
 
 - **Connection**: the API uses Neon's direct endpoint with `sslmode=require`; connections are health-checked and recycled every 4 minutes because Neon suspends idle compute (first query after a pause takes well under a second).
-- **Schema**: managed by **Alembic** (`backend/migrations/`). On start-up the API runs `alembic upgrade head` under a Postgres advisory lock (only one instance migrates), then re-applies the trigger that makes `audit_events` append-only. A database created before Alembic is stamped at `0001` first. Migrations so far: `0001` baseline, `0002` organisations/directory/fitness, `0003` account PIN, `0004` staff duty status.
+- **Schema**: managed by **Alembic** (`backend/migrations/`). On start-up the API runs `alembic upgrade head` under a Postgres advisory lock (only one instance migrates), then re-applies the trigger that makes `audit_events` append-only. A database created before Alembic is stamped at `0001` first. Migrations so far: `0001` baseline, `0002` organisations/directory/fitness, `0003` account PIN, `0004` staff duty status, `0005` email verification.
   - New migration: change `app/models.py`, then `cd backend && JEEVIA_DATABASE_URL=<local pg> .venv/bin/alembic revision --autogenerate -m "…"`, review it, and check with `alembic check`.
   - Rehearse risky migrations on a Neon branch: `neonctl branches create --project-id empty-dream-42914552 --name mig-test`, run `alembic upgrade head` against the branch URL, inspect, then delete the branch.
 - **Backups**: Neon keeps point-in-time history (restore window per plan). For an extra copy:
@@ -66,11 +67,25 @@ Nothing secret is committed. Local development uses `backend/.env` (git-ignored)
 History: the database moved from Render PostgreSQL to Neon on 27 Sep 2026 (row counts and the audit chain verified
 identical after the move). The old Render database `jeevia-db` is no longer used and can be deleted.
 
+## Email codes (Brevo, optional)
+
+Email is an optional second channel for one-time codes: sign in by email, register by email (useful while the Twilio
+account is on a trial), and add/verify an email from the dashboard (envelope icon). It is on when
+`JEEVIA_EMAIL_PROVIDER=brevo`, `JEEVIA_BREVO_API_KEY` and `JEEVIA_EMAIL_FROM` are set; `GET /api/v1/auth/options` and
+`/health` report it. The sender (`JEEVIA_EMAIL_FROM`) must be a verified sender in Brevo (Senders & IP). Free plan:
+300 emails a day. Email codes use the same limits as SMS (3 per address per 10 min, 10 a day, 30 per network per hour).
+Delivery can be checked in Brevo → Transactional → Logs. Sending from a gmail.com address through Brevo can land in
+spam for some inboxes; a verified domain sender (e.g. `no-reply@your-domain`) fixes that.
+
 ## Translations (Hindi, Odia)
 
 Screens use `tr("English text")`; translations live in `frontend/src/lib/i18n/phrases/hi.ts` and `or.ts`, keyed by the
 exact English text. To translate a new screen, wrap its text in `tr(...)` and add the same English key with the Hindi and
 Odia text to both files — anything missing simply shows in English. Placeholders such as `{name}` must be kept.
+Keys with placeholders also work as templates for text built by the server (rule explanations, note sentences, audit
+entries): `"{p} rule {id} matched on intake data"` translates every rule line. Shared components (cards, stats,
+badges, tabs, modals, labels) translate the plain text they are given automatically. Names, places, IDs and a
+patient's own words are data and are shown as entered.
 
 ## Facility directory (all of India)
 

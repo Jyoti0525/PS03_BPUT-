@@ -37,7 +37,7 @@ export default function DevicesPage() {
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-ink">{tr(d.label)} {d.id === me && <Badge tone="teal">{tr("this device")}</Badge>}</p>
                   <p className="font-mono text-xs text-subtle">{d.id}</p>
-                  <p className="text-xs text-muted">{tr("Bound by")} {d.bound_by} {timeAgo(d.bound_at)}{d.last_seen_at && ` · last seen ${timeAgo(d.last_seen_at)}`}</p>
+                  <p className="text-xs text-muted">{tr("Bound by")} {d.bound_by} {timeAgo(d.bound_at)}{d.last_seen_at && ` · ${tr("last seen {t}", { t: timeAgo(d.last_seen_at) })}`}</p>
                 </div>
                 {d.revoked ? <Badge tone="crit">{tr("Revoked")}</Badge> : (
                   <Button size="sm" variant="secondary" icon={<ShieldOff className="size-4" />} onClick={async () => {

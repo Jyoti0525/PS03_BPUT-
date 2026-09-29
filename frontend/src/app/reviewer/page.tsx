@@ -59,7 +59,7 @@ export default function QueuePage() {
         <Stat label={tr("Critical")} value={count("red")} tone="crit" hint={tr("Immediate")} />
         <Stat label={tr("Semi-urgent")} value={count("yellow")} tone="semi" hint={tr("Within 30–60 min")} />
         <Stat label={tr("Routine")} value={count("green")} tone="rout" hint={tr("Standard OPD order")} />
-        <Stat label={tr("Avg. wait")} value={fmtWait(avgWait)} hint={`${data?.length ?? 0} waiting`} />
+        <Stat label={tr("Avg. wait")} value={fmtWait(avgWait)} hint={tr("{n} waiting", { n: data?.length ?? 0 })} />
       </div>
 
       <Card>
@@ -110,11 +110,11 @@ export default function QueuePage() {
                       {i.category === "chronic" && <Badge tone="teal"><HeartPulse className="size-3" /> {tr("Chronic")}</Badge>}
                       {i.status === "in_review" && <Badge tone="info">{tr("In review")}</Badge>}
                     </div>
-                    <p className="mt-0.5 truncate text-sm text-ink-2">{i.chief_complaint}</p>
+                    <p className="mt-0.5 truncate text-sm text-ink-2">{tr(i.chief_complaint)}</p>
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                       {i.flag_count > 0 && <Badge tone={i.urgency === "red" ? "crit" : "semi"}>{i.flag_count} {tr("flag")}{i.flag_count > 1 && "s"}</Badge>}
                       {i.needs_check_count > 0 && <Badge tone="semi">{i.needs_check_count} {tr("needs checking")}</Badge>}
-                      <Badge>{langByCode(i.language).name}</Badge>
+                      <Badge>{tr(langByCode(i.language).name)}</Badge>
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end justify-between gap-1.5">
