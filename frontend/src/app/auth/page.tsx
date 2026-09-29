@@ -335,7 +335,7 @@ function AuthInner() {
     }
     setBusy(true);
     try {
-      const c = await api.requestOtp(byEmail ? { email: email.trim().toLowerCase() } : phone, registering ? "register" : "signin");
+      const c = await api.requestOtp(byEmail ? { email: email.trim().toLowerCase(), language: lang } : phone, registering ? "register" : "signin");
       setChallenge(c);
       setOtp("");
       setCountdown(30);

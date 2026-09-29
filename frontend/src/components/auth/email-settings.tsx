@@ -12,7 +12,7 @@ import { localiseServerMessage } from "@/lib/i18n/phrases";
 /** Add, change or remove the verified email that can receive sign-in codes. */
 export function EmailModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user, refresh } = useSession();
-  const { tr } = usePrefs();
+  const { tr, lang } = usePrefs();
   const [email, setEmail] = useState("");
   const [challenge, setChallenge] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -33,7 +33,7 @@ export function EmailModal({ open, onClose }: { open: boolean; onClose: () => vo
     if (!/^[^@\s]{1,64}@[^@\s]+\.[A-Za-z]{2,}$/.test(email.trim())) return setErr(tr("Enter a valid email address"));
     setBusy(true);
     try {
-      setChallenge((await api.emailStart(email.trim().toLowerCase())).challenge_id);
+      setChallenge((await api.emailStart(email.trim().toLowerCase(), lang)).challenge_id);
       toast(tr("Code sent to {e}", { e: email.trim() }), "info");
     } catch (e) {
       fail(e);

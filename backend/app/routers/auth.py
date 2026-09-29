@@ -56,7 +56,7 @@ def options():
 @router.post("/otp/request", response_model=OtpChallengeOut)
 def request_otp(body: OtpRequest, request: Request, db: DB):
     if body.email:
-        return _request_email_code(db, request, body.email, body.purpose)
+        return _request_email_code(db, request, body.email, body.purpose, lang=body.language)
     s = get_settings()
     t = now()
     ip = _client_ip(request)
@@ -84,7 +84,7 @@ def _network_query(ip: str):
     return q.where(or_(OtpChallenge.phone.is_(None), OtpChallenge.phone.not_in(demo))) if demo else q
 
 
-def _request_email_code(db, request: Request, email: str, purpose: str, user_id: str | None = None) -> OtpChallengeOut:
+def _request_email_code(db, request: Request, email: str, purpose: str, user_id: str | None = None, lang: str | None = None) -> OtpChallengeOut:
     """Email codes follow the same limits as SMS: per address, per day and per network."""
     s = get_settings()
     if not mailer.enabled():
@@ -96,7 +96,9 @@ def _request_email_code(db, request: Request, email: str, purpose: str, user_id:
     _limit(db, by_email, t, timedelta(hours=24), s.otp_per_phone_day, "Too many codes requested for this email today")
     _limit(db, _network_query(ip), t, timedelta(hours=1), s.otp_per_ip_hour, "Too many code requests from this network")
     code = f"{secrets.randbelow(10**6):06d}"
-    mailer.send_code(email, code, purpose)
+    # Greet the person by name, in their own language, when the address belongs to an account.
+    owner = db.get(User, user_id) if user_id else db.scalar(select(User).where(User.email == email, User.email_verified_at.is_not(None)))
+    mailer.send_code(email, code, purpose, name=owner.name if owner else None, lang=(owner.language if owner else None) or lang or "en")
     ch = OtpChallenge(email=email, user_id=user_id, code_hash=hash_secret(code, email), expires_at=t + timedelta(seconds=s.otp_ttl_sec), created_at=t, ip=ip)
     db.add(ch)
     db.commit()
@@ -327,7 +329,7 @@ def email_start(body: EmailStartIn, request: Request, user: CurrentUser, db: DB)
     other = db.scalar(select(User).where(User.email == email))
     if other and other.id != user.id:
         raise HTTPException(409, "This email address is already used by another account")
-    return _request_email_code(db, request, email, "add", user_id=user.id)
+    return _request_email_code(db, request, email, "add", user_id=user.id, lang=body.language or user.language)
 
 
 @router.post("/email/confirm", response_model=UserOut)

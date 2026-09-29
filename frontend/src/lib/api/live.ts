@@ -73,7 +73,7 @@ export const liveApi: JeeviaApi = {
 
   requestOtp: (target, purpose = "signin") => post("/auth/otp/request", { ...(typeof target === "string" ? { phone: target } : target), purpose }),
   authOptions: () => json("/auth/options"),
-  emailStart: (email) => post("/auth/email/start", { email }),
+  emailStart: (email, language) => post("/auth/email/start", { email, language }),
   emailConfirm: (challenge_id, code) => post("/auth/email/confirm", { challenge_id, code }),
   emailRemove: () => json("/auth/email", { method: "DELETE" }),
   verifyOtp: (challenge_id, code, purpose = "signin") => post("/auth/otp/verify", { challenge_id, code, purpose }),

@@ -75,6 +75,7 @@ class OtpRequest(BaseModel):
     phone: str | None = Field(default=None, pattern=r"^\d{10}$")
     email: str | None = Field(default=None, max_length=254, pattern=EMAIL_RE)
     purpose: Literal["signin", "register"] = "signin"
+    language: str | None = Field(default=None, max_length=8)  # language of the email when the address is new
 
     @model_validator(mode="after")
     def one_channel(self):
@@ -87,6 +88,7 @@ class OtpRequest(BaseModel):
 
 class EmailStartIn(BaseModel):
     email: str = Field(max_length=254, pattern=EMAIL_RE)
+    language: str | None = Field(default=None, max_length=8)
 
 
 class EmailConfirmIn(BaseModel):

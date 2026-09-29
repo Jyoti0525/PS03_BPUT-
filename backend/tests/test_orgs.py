@@ -321,6 +321,7 @@ def test_email_codes_optional(client, monkeypatch):
     assert ch.get("dev_code") is None and sent[0][0].endswith("/v3/smtp/email") and sent[0][2]["api-key"] == "test-key"
     code = re.search(r"\b(\d{6})\b", sent[0][1]["textContent"]).group(1)
     assert sent[0][1]["to"] == [{"email": email.lower()}] and sent[0][1]["sender"]["email"] == "sender@example.org"
+    assert code in sent[0][1]["subject"] and "Verify your email for Jeevia" in sent[0][1]["subject"] and "Hello," in sent[0][1]["textContent"]
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": code, "purpose": "register"}).json()
     assert v["status"] == "new_user"
     phone = "8" + str(uuid.uuid4().int)[:9]
@@ -333,6 +334,7 @@ def test_email_codes_optional(client, monkeypatch):
     # sign in by email → PIN step as usual
     sent.clear()
     ch = client.post(f"{API}/auth/otp/request", json={"email": email}).json()
+    assert sent[0][1]["subject"].startswith("ଆପଣଙ୍କ Jeevia ସାଇନ୍-ଇନ୍ କୋଡ୍") and "Email Nurse" in sent[0][1]["textContent"]  # her name, in her language (Odia)
     code = re.search(r"\b(\d{6})\b", sent[0][1]["textContent"]).group(1)
     assert client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": "000000"}).status_code == 400
     v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": code}).json()
