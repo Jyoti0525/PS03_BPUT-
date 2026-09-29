@@ -435,7 +435,7 @@ export function IntakeFlow({
       {!voiceOk && (
         <p className="mb-4 flex items-start gap-2 rounded-xl border border-semi/30 bg-semi-bg px-4 py-2.5 text-sm text-ink-2">
           <Volume2 className="mt-0.5 size-4 shrink-0 text-semi" />
-          {tr("This device has no {lang} voice, so questions are not read aloud. Install the {lang} voice in the device’s text-to-speech settings.", { lang: langByCode(lang).name })}
+          {tr("This device has no {lang} voice, so questions are not read aloud. Install the {lang} voice in the device’s text-to-speech settings.", { lang: langByCode(lang).native })}
         </p>
       )}
       {/* progress */}
