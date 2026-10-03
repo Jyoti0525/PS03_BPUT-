@@ -57,6 +57,10 @@ class DutyIn(BaseModel):
 class ObservationIn(BaseModel):
     vitals: "Vitals | None" = None
     note: str | None = Field(default=None, max_length=1000)
+    # Danger-sign check: the signs found present (finding ids). `exam_done` records that the check
+    # was performed, so unchecked signs count as absent rather than unknown.
+    signs: list[str] | None = None
+    exam_done: bool = False
 
 
 class Tokens(BaseModel):
@@ -329,6 +333,7 @@ class SymptomEntry(BaseModel):
     language: str
     source: Literal["voice", "text", "icon"]
     confirmed_by_readback: bool = False
+    engine: str | None = Field(default=None, max_length=80)  # speech/translation engine that produced `text`
 
 
 class IntakeAnswer(BaseModel):
@@ -345,6 +350,7 @@ class Vitals(BaseModel):
     spo2: float | None = Field(default=None, ge=50, le=100)
     resp_rate: float | None = Field(default=None, ge=4, le=80)
     glucose: float | None = Field(default=None, ge=10, le=1000)
+    avpu: Literal["A", "V", "P", "U"] | None = None  # Alert / responds to Voice / to Pain / Unresponsive
 
 
 class Maternal(BaseModel):
@@ -368,6 +374,7 @@ class IntakeIn(BaseModel):
     category: Category
     language: str
     chief_complaint: str = Field(min_length=1, max_length=500)
+    age_months: int | None = Field(default=None, ge=0, le=59)  # under-5s: exact months for infant rules
     symptoms: list[SymptomEntry] = []
     selected_symptoms: list[str] = []
     duration: str | None = None
@@ -717,6 +724,9 @@ class FileOut(BaseModel):
     expires_at: datetime
     purged_at: datetime | None
     url: str | None = None
+    # Capture feedback only (engine, image quality, how many values were read) — never the values
+    # or their interpretation, which stay reviewer-facing.
+    read_quality: dict | None = None
 
 
 class AuditOut(ORM):

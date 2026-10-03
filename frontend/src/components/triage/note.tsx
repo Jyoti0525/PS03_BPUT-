@@ -2,7 +2,7 @@
 
 import { usePrefs } from "@/components/providers";
 import { fmtDateTime } from "@/lib/hooks";
-import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split } from "lucide-react";
+import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock } from "lucide-react";
 import type { Encounter, ExtractedValue, Flag, TrendRow, Urgency } from "@/lib/types";
 import { Badge, Card, CardHeader, cx } from "@/components/ui";
 import { SourceEvidence } from "./source";
@@ -76,6 +76,9 @@ export function ValueTable({ values, compact }: { values: ExtractedValue[]; comp
           <div className={cx("flex flex-col items-start gap-1", compact ? "items-end" : "sm:items-start")}>
             {v.needs_check && <Badge tone="semi">{tr("Needs checking")}</Badge>}
             {v.reference && !compact && <span className="text-[11px] text-subtle">{tr("ref")} {v.reference}</span>}
+            {!compact && v.checks?.map((c) => (
+              <span key={c} className="text-[11px] text-semi">{tr(c)}</span>
+            ))}
           </div>
           {!compact && (
             <div className="col-span-2 min-w-0 sm:col-span-1">
@@ -200,21 +203,66 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
           </div>
         </Card>
         <Card>
-          <CardHeader title={tr("Rules engine trace")} subtitle={tr("Urgency comes only from these deterministic rules")} icon={<ListChecks className="size-4" />} />
+          <CardHeader
+            title={tr("Rules engine trace")}
+            subtitle={`${tr("Urgency comes only from these deterministic rules")}${n.triage ? ` · ${n.triage.protocols.map((p) => p.key).join(" + ")} · rulepack ${n.triage.rulepack_version}` : ""}`}
+            icon={<ListChecks className="size-4" />}
+          />
+          {n.triage?.provisional && (
+            <div className="border-b border-semi-line bg-semi-bg px-4 py-2.5 text-sm">
+              <p className="font-semibold text-semi">{tr("Provisional — unknown is never treated as normal")}</p>
+              <p className="text-ink-2">{tr("Measure or check before this case can be routine:")}</p>
+              <ul className="mt-1 flex flex-wrap gap-1.5">
+                {[...new Set([...n.triage.missing_for_green, ...n.triage.unresolved.flatMap((u) => u.needs.map((x) => (x.startsWith("danger-sign") ? "clinician danger-sign check" : x)))])].map((x) => (
+                  <li key={x} className="rounded-md border border-semi-line bg-surface px-2 py-0.5 text-xs text-ink">{tr(x)}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ul className="divide-y divide-line">
             {n.rules_fired.map((r) => (
-              <li key={r.rule_id} className="flex items-center gap-3 px-4 py-2.5">
-                <span className={cx("h-6 w-1 rounded-full", urgencyBar(r.urgency))} />
+              <li key={r.rule_id} className="flex items-start gap-3 px-4 py-2.5">
+                <span className={cx("mt-0.5 h-6 w-1 shrink-0 rounded-full", urgencyBar(r.urgency))} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-ink">{tr(r.description)}</p>
+                  <p className="text-sm text-ink">
+                    {tr(r.description)}
+                    {r.non_downgradable && r.urgency === "red" && (
+                      <span title={tr("Non-downgradable: only a doctor can lower it, with a written reason that is audited")} className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-crit-bg px-1.5 text-[10px] font-semibold uppercase text-crit">
+                        <Lock className="size-3" /> {tr("locked")}
+                      </span>
+                    )}
+                  </p>
+                  {(r.evidence?.length ?? 0) > 0 && (
+                    <ul className="mt-0.5 space-y-0.5">
+                      {r.evidence!.map((ev, i) => (
+                        <li key={i} className="text-xs text-ink-2">→ {ev}</li>
+                      ))}
+                    </ul>
+                  )}
                   <p className="font-mono text-[11px] text-subtle">
-                    {r.rule_id} · {r.protocol}
+                    {r.rule_id} · {r.source ?? r.protocol}
                   </p>
                 </div>
                 <UrgencyBadge u={r.urgency} size="sm" />
               </li>
             ))}
           </ul>
+          {(n.triage?.unresolved.filter((u) => u.urgency === "red").length ?? 0) > 0 && (
+            <details className="border-t border-line px-4 py-2.5 text-sm">
+              <summary className="cursor-pointer font-medium text-muted">
+                {tr("RED rules not yet ruled out")} ({n.triage!.unresolved.filter((u) => u.urgency === "red").length})
+              </summary>
+              <ul className="mt-1.5 space-y-1">
+                {n.triage!.unresolved
+                  .filter((u) => u.urgency === "red")
+                  .map((u) => (
+                    <li key={u.rule_id} className="text-xs text-ink-2">
+                      <span className="font-mono text-subtle">{u.rule_id}</span> {tr(u.description)} — {tr("needs")}: {u.needs.join(", ")}
+                    </li>
+                  ))}
+              </ul>
+            </details>
+          )}
           {enc.override && (
             <div className="border-t border-line bg-coral-50 px-4 py-2.5 text-sm">
               <p className="font-semibold text-coral-700">

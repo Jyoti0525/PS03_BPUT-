@@ -1,34 +1,81 @@
-# Integrated Management of Childhood Illness — children under 5.
+# WHO Integrated Management of Childhood Illness — Chart Booklet, March 2014. Children under 5.
+# IMCI "pink" (urgent referral) classifications map to RED; "yellow" (specific treatment) to YELLOW.
+# Runs alongside the IITT paediatric tool; the higher urgency wins.
 protocol: IMCI
+name: WHO IMCI (under 5)
+source: imci
+applies: { age_max_exclusive: 5 }
 rules:
-  - id: IMCI-DANGER-01
-    description: "General danger sign: convulsions, lethargy, unable to drink, vomits everything"
+  - id: IMCI-DANGER-SIGN
+    description: "General danger sign — unable to drink or breastfeed, vomits everything, convulsions, lethargic or unconscious"
+    urgency: red
+    when:
+      any:
+        - finding: unable_to_drink
+        - finding: vomits_everything
+        - finding: seizure
+        - finding: lethargy
+        - finding: unresponsive
+        - avpu_in: [V, P, U]
+  - id: IMCI-STRIDOR
+    description: Stridor in a calm child (severe pneumonia or very severe disease)
+    urgency: red
+    when: { finding: stridor }
+  - id: IMCI-SPO2
+    description: SpO₂ below 90% (severe pneumonia)
+    urgency: red
+    when: { vital: [spo2, lt, 90] }
+  - id: IMCI-SEVERE-DEHYDRATION
+    description: Diarrhoea with two of — lethargic/unconscious, sunken eyes, not able to drink or drinking poorly, skin pinch very slow
     urgency: red
     when:
       all:
-        - age_lt: 5
-        - text_any: ["convulsion", "fits", "lethargic", "unable to drink", "not feeding", "vomits everything"]
-  - id: IMCI-RESP-01
-    description: Fast breathing or chest indrawing
+        - finding: diarrhoea
+        - at_least:
+            n: 2
+            of:
+              - any: [ { finding: lethargy }, { finding: unresponsive } ]
+              - finding: sunken_eyes
+              - any: [ { finding: unable_to_drink }, { finding: drinks_poorly } ]
+              - finding: skin_pinch_slow
+  - id: IMCI-FEBRILE-STIFF-NECK
+    description: Fever with stiff neck (very severe febrile disease)
+    urgency: red
+    when: { all: [ { any: [ { finding: fever }, { vital: [temp_c, gte, 37.5] } ] }, { finding: stiff_neck } ] }
+  - id: IMCI-FAST-BREATHING-YOUNG
+    description: Fast breathing — 60 or more per minute under 2 months
+    urgency: yellow
+    when: { all: [ { age_days: [lt, 61] }, { vital: [resp_rate, gte, 60] } ] }
+  - id: IMCI-FAST-BREATHING-INFANT
+    description: Fast breathing — 50 or more per minute at 2–12 months
+    urgency: yellow
+    when: { all: [ { age_days: [gte, 61] }, { age_years: [lt, 1] }, { vital: [resp_rate, gte, 50] } ] }
+  - id: IMCI-FAST-BREATHING-CHILD
+    description: Fast breathing — 40 or more per minute at 12 months to 5 years
+    urgency: yellow
+    when: { all: [ { age_years: [gte, 1] }, { vital: [resp_rate, gte, 40] } ] }
+  - id: IMCI-CHEST-INDRAWING
+    description: Chest indrawing (pneumonia)
+    urgency: yellow
+    when: { finding: chest_indrawing }
+  - id: IMCI-SOME-DEHYDRATION
+    description: Diarrhoea with two of — restless/irritable, sunken eyes, drinks eagerly/thirsty, skin pinch slow
     urgency: yellow
     when:
       all:
-        - age_lt: 5
-        - any:
-            - vital_gte: { field: resp_rate, value: 40 }
-            - text_any: ["chest indrawing", "fast breathing"]
-  - id: IMCI-FEVER-01
-    description: Fever in a child under 5
+        - finding: diarrhoea
+        - at_least:
+            n: 2
+            of:
+              - finding: irritable
+              - finding: sunken_eyes
+              - finding: dehydration
+              - finding: skin_pinch_slow
+  - id: IMCI-PERSISTENT-DIARRHOEA
+    description: Diarrhoea for 14 days or more
     urgency: yellow
-    when:
-      all:
-        - age_lt: 5
-        - text_any: ["fever", "बुखार", "ଜ୍ୱର"]
-  - id: IMCI-DIARR-01
-    description: Diarrhoea with signs of dehydration
+    when: { all: [ { finding: diarrhoea }, { onset_hours: [gte, 336] } ] }
+  - id: IMCI-DYSENTERY
+    description: Blood in stool (dysentery)
     urgency: yellow
-    when:
-      all:
-        - age_lt: 5
-        - text_any: ["diarrhoea", "diarrhea", "loose motion"]
-        - text_any: ["sunken", "dry mouth", "no urine"]
+    when: { finding: blood_in_stool }

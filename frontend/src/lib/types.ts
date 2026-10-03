@@ -75,6 +75,8 @@ export interface Observation {
   at: string;
   vitals: VitalsInput;
   note: string | null;
+  signs?: string[];
+  exam_done?: boolean;
 }
 
 export interface Tokens {
@@ -301,6 +303,7 @@ export interface SymptomEntry {
   language: string;
   source: InputSource;
   confirmed_by_readback: boolean;
+  engine?: string | null; // speech/translation engine that produced `text`
 }
 
 export interface IntakeAnswer {
@@ -332,7 +335,10 @@ export interface VitalsInput {
   spo2?: number | null;
   resp_rate?: number | null;
   glucose?: number | null;
+  avpu?: "A" | "V" | "P" | "U" | null;
 }
+
+export type NumericVital = Exclude<keyof VitalsInput, "avpu">;
 
 export interface IntakePayload {
   patient_id: string;
@@ -384,6 +390,9 @@ export interface ExtractedValue {
   reference?: string | null;
   status: ValueStatus;
   needs_check: boolean;
+  /** Why the value needs checking (misread risk, no printed range…). */
+  checks?: string[];
+  loinc?: string | null;
   source: SourceRef;
 }
 
@@ -399,9 +408,13 @@ export interface Flag {
 
 export interface RuleHit {
   rule_id: string;
-  protocol: "ATP" | "IMCI" | "MATERNAL" | "FACILITY";
+  protocol: "ATP" | "IITT" | "IMCI" | "MATERNAL" | "LAB" | "LOCAL" | "SAFETY" | "FACILITY";
   description: string;
   urgency: Urgency;
+  source?: string;
+  evidence?: string[];
+  non_downgradable?: boolean;
+  review_by?: "health_worker" | "nurse" | "doctor";
 }
 
 export interface Disagreement {
@@ -427,10 +440,20 @@ export interface FollowUpQuestion {
   for_role: "nurse" | "doctor" | "health_worker";
 }
 
+export interface TriageResult {
+  provisional: boolean;
+  protocols: { key: string; name: string }[];
+  unresolved: { rule_id: string; urgency: Urgency; description: string; needs: string[] }[];
+  missing_for_green: string[];
+  findings: Record<string, { label: string; value: boolean | null; evidence: string[] }>;
+  rulepack_version: string;
+}
+
 export interface TriageNote {
   summary: string;
   flags: Flag[];
   rules_fired: RuleHit[];
+  triage?: TriageResult;
   vitals: ExtractedValue[];
   labs: ExtractedValue[];
   timeline: TimelineEvent[];
@@ -658,6 +681,8 @@ export interface FileObject {
   purged_at: string | null;
   /** Object URL / data URL for previews (mock) or signed path (live). */
   url?: string | null;
+  /** Capture feedback from the server's document reader: image quality and how many values it found. */
+  read_quality?: { engine: string; ok: boolean; issues: string[]; values_found: number } | null;
 }
 
 export interface RetentionStatus {

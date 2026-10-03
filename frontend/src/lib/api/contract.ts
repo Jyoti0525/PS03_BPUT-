@@ -126,7 +126,7 @@ export interface JeeviaApi {
   // Users
   listUsers(): Promise<User[]>;
   setDuty(userId: string, onDuty: boolean): Promise<User>;
-  addObservations(encounterId: string, input: { vitals?: VitalsInput | null; note?: string | null }): Promise<Encounter>;
+  addObservations(encounterId: string, input: { vitals?: VitalsInput | null; note?: string | null; signs?: string[]; exam_done?: boolean }): Promise<Encounter>;
 
   // Patients
   searchPatients(q: string): Promise<PatientCandidate[]>;

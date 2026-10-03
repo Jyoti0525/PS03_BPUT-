@@ -1,107 +1,155 @@
-# AIIMS Triage Protocol (adult) — deterministic urgency rules.
-# Urgency is ONLY ever assigned by these rules; the language model never sets or lowers it.
-# Condition keys: all / any (nested), text_any, age_gte, age_lt, category,
-#                 vital_lt / vital_gte / vital_between {field, value|min|max}, severity_gte, duration_long
+# AIIMS Triage Protocol — Red criteria (Supplementary Table 1 of the 2022 validation study).
+# Applies to patients aged 14 and above. Any single criterion means RED. ATP defines Yellow and
+# Green by exclusion only, so Yellow criteria come from the WHO IITT (iitt_adult.yaml).
+# Condition grammar: all / any / not / at_least {n, of}; finding: <id>; vital: [field, op, value];
+# avpu_in; age_years / age_days / severity / onset_hours / gestation_weeks: [op, value]; sex; lab.
 protocol: ATP
+name: AIIMS Triage Protocol (adult, 14+)
+source: atp
+applies: { age_min: 14 }
 rules:
-  - id: ATP-CARD-01
-    description: Chest pain with radiation or sweating
+  # --- Altered physiology: airway
+  - id: ATP-A-STRIDOR
+    description: Stridor / noisy breathing
     urgency: red
-    when:
-      all:
-        - age_gte: 12
-        - text_any: ["chest pain", "chest heaviness", "सीने"]
-        - text_any: ["arm", "jaw", "sweat", "radiat"]
-  - id: ATP-CARD-02
-    description: Chest pain reported
-    urgency: yellow
-    when:
-      all:
-        - age_gte: 12
-        - text_any: ["chest pain", "chest heaviness", "सीने"]
-  - id: ATP-RESP-01
-    description: SpO₂ below 90% on room air
+    when: { finding: stridor }
+  - id: ATP-A-ANGIOEDEMA
+    description: Angioedema involving the face
     urgency: red
-    when: { vital_lt: { field: spo2, value: 90 } }
-  - id: ATP-RESP-02
-    description: SpO₂ 90–93% on room air
-    urgency: yellow
-    when: { vital_between: { field: spo2, min: 90, max: 93 } }
-  - id: ATP-RESP-03
-    description: Respiratory rate ≥ 30/min
+    when: { finding: angioedema_face }
+  - id: ATP-A-SEIZURE
+    description: Active seizures (fits reported — treated as active until a clinician confirms otherwise)
     urgency: red
-    when:
-      all:
-        - age_gte: 12
-        - vital_gte: { field: resp_rate, value: 30 }
-  - id: ATP-RESP-04
-    description: Breathlessness reported
-    urgency: yellow
-    when: { text_any: ["breathless", "short of breath", "difficulty breathing", "सांस"] }
-  - id: ATP-VITAL-01
-    description: Systolic ≥ 180 or diastolic ≥ 120 mmHg
+    when: { finding: seizure }
+  # --- Breathing
+  - id: ATP-B-SPEECH
+    description: Talking in incomplete sentences
+    urgency: red
+    when: { finding: incomplete_sentences }
+  - id: ATP-B-WHEEZE
+    description: Audible wheeze
+    urgency: red
+    when: { finding: wheeze }
+  - id: ATP-B-RR
+    description: Respiratory rate > 22 or < 10 per minute
+    urgency: red
+    when: { any: [ { vital: [resp_rate, gt, 22] }, { vital: [resp_rate, lt, 10] } ] }
+  - id: ATP-B-SPO2
+    description: SpO₂ below 90%
+    urgency: red
+    when: { vital: [spo2, lt, 90] }
+  # --- Circulation
+  - id: ATP-C-PULSE
+    description: Pulse < 50, or > 120 without fever
     urgency: red
     when:
       any:
-        - vital_gte: { field: bp_systolic, value: 180 }
-        - vital_gte: { field: bp_diastolic, value: 120 }
-  - id: ATP-VITAL-02
-    description: Systolic ≥ 160 or diastolic ≥ 100 mmHg
-    urgency: yellow
+        - vital: [pulse, lt, 50]
+        - all:
+            - vital: [pulse, gt, 120]
+            - not: { any: [ { finding: fever }, { vital: [temp_c, gte, 38] } ] }
+  - id: ATP-C-BP-HIGH
+    description: Systolic BP > 220 or diastolic BP > 110 mmHg
+    urgency: red
+    when: { any: [ { vital: [bp_systolic, gt, 220] }, { vital: [bp_diastolic, gt, 110] } ] }
+  - id: ATP-C-BP-LOW
+    description: Systolic BP < 90 or diastolic BP < 60 mmHg
+    urgency: red
+    when: { any: [ { vital: [bp_systolic, lt, 90] }, { vital: [bp_diastolic, lt, 60] } ] }
+  - id: ATP-C-SHOCK-INDEX
+    description: Shock index (pulse ÷ systolic BP) above 1
+    urgency: red
+    when: { vital: [shock_index, gt, 1] }
+  - id: ATP-C-BLEEDING
+    description: Active bleeding — nose, gums, vomiting blood or other
+    urgency: red
+    when: { any: [ { finding: bleeding }, { finding: haemoptysis }, { finding: blood_in_stool }, { finding: vaginal_bleeding } ] }
+  # --- Disability
+  - id: ATP-D-SENSORIUM
+    description: Altered sensorium — responds only to voice or pain, or unresponsive
+    urgency: red
+    when: { any: [ { avpu_in: [V, P, U] }, { finding: unresponsive } ] }
+  # --- Time-sensitive conditions
+  - id: ATP-T-CHEST-PAIN
+    description: Acute chest pain (onset within 24 h)
+    urgency: red
+    when: { all: [ { finding: chest_pain }, { onset_hours: [lte, 24] } ] }
+  - id: ATP-T-LIMB-WEAKNESS
+    description: Limb weakness (onset within 24 h)
+    urgency: red
+    when: { all: [ { finding: limb_weakness }, { onset_hours: [lte, 24] } ] }
+  - id: ATP-T-STROKE
+    description: Suspected stroke presenting within 24 h
+    urgency: red
+    when: { all: [ { finding: one_sided_weakness }, { onset_hours: [lte, 24] } ] }
+  - id: ATP-T-MECHANISM
+    description: Drowning, hanging, electrocution or trauma with a dangerous mechanism
+    urgency: red
     when:
       any:
-        - vital_gte: { field: bp_systolic, value: 160 }
-        - vital_gte: { field: bp_diastolic, value: 100 }
-  - id: ATP-VITAL-03
-    description: Systolic below 90 mmHg
+        - finding: drowning_hanging_electrocution
+        - finding: fall_from_height
+        - finding: road_traffic_high_risk
+        - finding: penetrating_injury
+        - finding: crush_injury
+  - id: ATP-T-BREATHLESS
+    description: Acute-onset shortness of breath (within 12 h)
     urgency: red
-    when: { vital_lt: { field: bp_systolic, value: 90 } }
-  - id: ATP-VITAL-04
-    description: Pulse above 130 or below 40 bpm
+    when: { all: [ { finding: breathless }, { onset_hours: [lte, 12] } ] }
+  - id: ATP-T-LIMB-ISCHAEMIA
+    description: Acute limb ischaemia — limb pulseless, or painful and pale/cold
+    urgency: red
+    when: { finding: threatened_limb }
+  - id: ATP-T-ALLERGY
+    description: Allergic reaction
+    urgency: red
+    when: { finding: allergic_reaction }
+  - id: ATP-T-SCROTAL
+    description: Acute scrotal or inguinal pain in a male
+    urgency: red
+    when: { all: [ { finding: scrotal_pain }, { sex: M } ] }
+  - id: ATP-T-SEVERE-PAIN
+    description: Severe pain anywhere in the body (self-rated 7/10 or more)
+    urgency: red
+    when: { all: [ { finding: pain }, { severity: [gte, 7] } ] }
+  - id: ATP-T-ABDO-SUDDEN
+    description: Sudden-onset abdominal pain
+    urgency: red
+    when: { finding: abdominal_pain_sudden }
+  - id: ATP-T-HEADACHE-SUDDEN
+    description: Sudden headache
+    urgency: red
+    when: { finding: headache_sudden }
+  - id: ATP-T-URINE
+    description: Acute urinary retention
+    urgency: red
+    when: { finding: urinary_retention }
+  - id: ATP-T-SYNCOPE
+    description: History of syncope (fainting)
+    urgency: red
+    when: { finding: syncope }
+  - id: ATP-T-NEEDLE
+    description: Needle-prick injury
+    urgency: red
+    when: { finding: needle_stick }
+  - id: ATP-T-FEVER
+    description: Fever with temperature above 39 °C (102.2 °F)
+    urgency: red
+    when: { vital: [temp_c, gt, 39] }
+  - id: ATP-T-OUTSIDE-EVAL
+    description: Outside evaluation suggesting a time-sensitive emergency (ACS, dissection, stroke, sepsis, leukaemia, recent chemotherapy, potassium > 5.5)
     urgency: red
     when:
       any:
-        - vital_gte: { field: pulse, value: 130.01 }
-        - vital_lt: { field: pulse, value: 40 }
-  - id: ATP-NEURO-01
-    description: Seizure, unconsciousness or one-sided weakness
+        - finding: known_time_sensitive_dx
+        - finding: chemo_recent
+        - lab: [potassium, gt, 5.5]
+  # --- Other conditions with increased urgency
+  - id: ATP-O-ABDO-VAGINAL-BLEED
+    description: Abdominal pain with vaginal bleeding
     urgency: red
-    when: { text_any: ["seizure", "fits", "unconscious", "fainted", "slurred", "one side", "stroke", "convulsion"] }
-  - id: ATP-BLEED-01
-    description: Heavy bleeding or vomiting blood
+    when: { all: [ { finding: abdominal_pain }, { finding: vaginal_bleeding } ] }
+  - id: ATP-O-AGITATED
+    description: Agitated or violent patient
     urgency: red
-    when: { text_any: ["heavy bleeding", "vomiting blood", "blood in vomit", "coughing blood"] }
-  - id: ATP-ENDO-01
-    description: Blood glucose below 70 mg/dL
-    urgency: red
-    when: { vital_lt: { field: glucose, value: 70 } }
-  - id: ATP-ENDO-02
-    description: Blood glucose above 300 mg/dL
-    urgency: yellow
-    when: { vital_gte: { field: glucose, value: 300.01 } }
-  - id: ATP-FEVER-01
-    description: Temperature ≥ 103°F
-    urgency: yellow
-    when: { vital_gte: { field: temp_f, value: 103 } }
-  - id: ATP-FEVER-02
-    description: Fever for 3 days or more
-    urgency: yellow
-    when:
-      all:
-        - text_any: ["fever", "बुखार", "ଜ୍ୱର"]
-        - duration_long: true
-  - id: ATP-TRAUMA-01
-    description: Injury, burn or fall
-    urgency: yellow
-    when: { text_any: ["injury", "burn", "fall", "fracture", "cut ", "accident"] }
-  - id: ATP-ABD-01
-    description: Severe abdominal pain
-    urgency: yellow
-    when:
-      all:
-        - text_any: ["abdominal pain", "stomach pain", "pet dard"]
-        - severity_gte: 7
-  - id: ATP-PAIN-01
-    description: Self-reported pain score 8 or above
-    urgency: yellow
-    when: { severity_gte: 8 }
+    when: { finding: agitated }

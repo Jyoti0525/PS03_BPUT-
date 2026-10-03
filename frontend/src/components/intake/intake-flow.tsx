@@ -17,7 +17,7 @@ import { SAMPLE_FACILITY_ID, SAMPLE_REPORTS, sampleReportImage } from "@/lib/sam
 import { API_MODE } from "@/lib/api";
 import { langByCode } from "@/lib/i18n/languages";
 import type { DictKey } from "@/lib/i18n/dict";
-import type { ConsentMode, FileObject, IntakeAnswer, Patient, PatientCandidate, PatientCategory, PrivacyContext, SymptomEntry, VitalsInput } from "@/lib/types";
+import type { ConsentMode, FileObject, IntakeAnswer, Patient, PatientCandidate, PatientCategory, PrivacyContext, SymptomEntry, NumericVital, VitalsInput } from "@/lib/types";
 import { DURATIONS, SEVERITIES, SYMPTOMS, contextQuestions } from "./catalog";
 
 type Step = "consent" | "identity" | "visit" | "symptoms" | "details" | "uploads" | "followup" | "vitals" | "review";
@@ -141,7 +141,7 @@ export function IntakeFlow({
   // uploads / follow-up / vitals
   const [files, setFiles] = useState<FileObject[]>([]);
   const [answers, setAnswers] = useState<Record<string, IntakeAnswer>>({});
-  const [vitals, setVitals] = useState<Record<keyof VitalsInput, string>>({ bp_systolic: "", bp_diastolic: "", pulse: "", temp_f: "", spo2: "", resp_rate: "", glucose: "" });
+  const [vitals, setVitals] = useState<Record<NumericVital, string>>({ bp_systolic: "", bp_diastolic: "", pulse: "", temp_f: "", spo2: "", resp_rate: "", glucose: "" });
 
   const age = patient?.age ?? (Number(newP.age) || 30);
   const chief = useMemo(() => {
@@ -826,6 +826,14 @@ export function IntakeFlow({
                       <div className="grid h-24 w-28 place-items-center rounded-xl border border-line bg-canvas"><FileText className="size-8 text-muted" /></div>
                     )}
                     <p className="mt-1 truncate text-xs text-muted">{f.filename}</p>
+                    {f.read_quality && !f.read_quality.ok && (
+                      <p role="alert" className="mt-0.5 text-xs font-medium text-crit">
+                        {f.read_quality.issues.map((i) => tr(i)).join(" · ")}
+                      </p>
+                    )}
+                    {f.read_quality?.ok && f.kind === "report" && (
+                      <p className="mt-0.5 text-xs text-rout">{tr("Readable")} ✓</p>
+                    )}
                   </div>
                 ))}
               </div>

@@ -83,7 +83,7 @@ def test_staff_intake_requires_bound_device(client, nurse):
     r = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE})
     assert r.status_code == 200, r.text
     enc = r.json()
-    assert enc["urgency"] == "red"  # ATP-CARD-01 from the rules engine
+    assert enc["urgency"] == "red"  # LOCAL-ACS-FEATURES from the rules engine
     # idempotent replay (offline outbox)
     again = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()
     assert again["id"] == enc["id"]

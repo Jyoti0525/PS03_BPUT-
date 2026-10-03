@@ -83,7 +83,7 @@ export function buildNote(args: {
 
   const vitalSource = (label: string) =>
     voice && voice.text.toLowerCase().includes(label)
-      ? { kind: "transcript" as const, engine: "IndicConformer ASR", transcript_excerpt: voice.text, original_excerpt: voice.original_text }
+      ? { kind: "transcript" as const, engine: voice.engine ?? "Browser speech recognition", transcript_excerpt: voice.text, original_excerpt: voice.original_text }
       : { kind: "manual" as const, engine: "Nurse entry at kiosk" };
 
   if (v.bp_systolic && v.bp_diastolic)
@@ -120,7 +120,7 @@ export function buildNote(args: {
         needs_check: false,
         source: {
           kind: "image_crop",
-          engine: sample.handwritten ? "PaddleOCR + parrotlet layout (handwriting)" : "PaddleOCR + parrotlet layout",
+          engine: "Synthetic sample report — values pre-extracted for the demo (not OCR)",
           file_id: f.id,
           bbox: f.boxes?.[i] ?? null,
           crop_text: `${row.test}  ${row.value} ${row.unit}`,

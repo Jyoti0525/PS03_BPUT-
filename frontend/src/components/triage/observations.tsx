@@ -4,12 +4,12 @@ import { useState } from "react";
 import { fmtDateTime } from "@/lib/hooks";
 import { Activity, ClipboardPen, NotebookPen } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
-import { Badge, Button, Card, CardHeader, FieldError, Input, Label, Textarea } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, cx, FieldError, Input, Label, Textarea } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { usePrefs } from "@/components/providers";
-import type { Encounter, Observation, VitalsInput } from "@/lib/types";
+import type { Encounter, NumericVital, Observation, VitalsInput } from "@/lib/types";
 
-type Field = { key: keyof VitalsInput; label: string; unit: string; min: number; max: number; step?: number };
+type Field = { key: NumericVital; label: string; unit: string; min: number; max: number; step?: number };
 
 const FIELDS: Field[] = [
   { key: "bp_systolic", label: "BP systolic", unit: "mmHg", min: 50, max: 260 },
@@ -21,14 +21,51 @@ const FIELDS: Field[] = [
   { key: "glucose", label: "Glucose (POC)", unit: "mg/dL", min: 20, max: 600 },
 ];
 
-const VITAL_LABEL: Record<string, string> = Object.fromEntries(FIELDS.map((f) => [f.key, f.label]));
+const VITAL_LABEL: Record<string, string> = { ...Object.fromEntries(FIELDS.map((f) => [f.key, f.label])), avpu: "AVPU" };
+
+const AVPU: { v: "A" | "V" | "P" | "U"; label: string }[] = [
+  { v: "A", label: "Alert" },
+  { v: "V", label: "Responds to voice" },
+  { v: "P", label: "Responds to pain" },
+  { v: "U", label: "Unresponsive" },
+];
+
+/** Danger signs from the WHO IITT charts and the AIIMS Triage Protocol that need a trained eye.
+ *  Ids match backend findings; until this check is saved they count as unknown, never as absent. */
+const SIGNS: { id: string; label: string; child?: boolean }[] = [
+  { id: "stridor", label: "Stridor / noisy breathing" },
+  { id: "respiratory_distress", label: "Respiratory distress (accessory muscles, flaring, grunting)" },
+  { id: "cyanosis", label: "Central cyanosis (blue lips or tongue)" },
+  { id: "incomplete_sentences", label: "Cannot speak full sentences" },
+  { id: "wheeze", label: "Audible wheeze" },
+  { id: "chest_indrawing", label: "Lower chest indrawing", child: true },
+  { id: "angioedema_face", label: "Swelling of face, lips or tongue" },
+  { id: "swelling_mouth_neck", label: "Swelling or mass of mouth, throat or neck" },
+  { id: "cap_refill_gt3", label: "Capillary refill > 3 s" },
+  { id: "weak_fast_pulse", label: "Weak and fast pulse" },
+  { id: "cold_extremities", label: "Cold hands and feet" },
+  { id: "severe_pallor", label: "Severe pallor" },
+  { id: "altered_mental_status", label: "Confused or disoriented" },
+  { id: "lethargy", label: "Lethargic or abnormally sleepy" },
+  { id: "irritable", label: "Restless or continuously irritable", child: true },
+  { id: "stiff_neck", label: "Stiff neck" },
+  { id: "sunken_eyes", label: "Sunken eyes", child: true },
+  { id: "skin_pinch_slow", label: "Skin pinch goes back very slowly", child: true },
+  { id: "malnutrition", label: "Visible severe wasting or swelling of both feet", child: true },
+];
+const SIGN_LABEL: Record<string, string> = Object.fromEntries(SIGNS.map((s) => [s.id, s.label]));
 
 /** Record vitals and bedside observations. Rules run again on the server, so urgency can rise. */
 export function ObservationForm({ enc, onSaved, compact }: { enc: Encounter; onSaved: (e: Encounter) => void; compact?: boolean }) {
   const { tr } = usePrefs();
   const [v, setV] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
+  const [avpu, setAvpu] = useState<VitalsInput["avpu"]>(null);
+  const [signs, setSigns] = useState<string[]>([]);
+  const [examDone, setExamDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const child = enc.patient.age < 12;
+  const priorExam = !!(enc.intake as { exam?: { done?: boolean } } | null)?.exam?.done;
   const [busy, setBusy] = useState(false);
 
   async function save() {
@@ -42,13 +79,17 @@ export function ObservationForm({ enc, onSaved, compact }: { enc: Encounter; onS
       vitals[f.key] = n;
     }
     if (!!vitals.bp_systolic !== !!vitals.bp_diastolic) return setErr(tr("Enter both BP values"));
-    if (!Object.keys(vitals).length && !note.trim()) return setErr(tr("Enter at least one vital sign or an observation"));
+    if (avpu) vitals.avpu = avpu;
+    if (!Object.keys(vitals).length && !note.trim() && !signs.length && !examDone) return setErr(tr("Enter at least one vital sign, danger sign or observation"));
     setBusy(true);
     try {
       const before = enc.urgency;
-      const e = await api.addObservations(enc.id, { vitals, note: note.trim() || null });
+      const e = await api.addObservations(enc.id, { vitals, note: note.trim() || null, signs, exam_done: examDone });
       setV({});
       setNote("");
+      setAvpu(null);
+      setSigns([]);
+      setExamDone(false);
       toast(e.urgency !== before ? tr("Saved — the rules raised the urgency; the doctor has been alerted in the queue") : tr("Observations saved to the patient record"), e.urgency !== before ? "info" : "success");
       onSaved(e);
     } catch (e) {
@@ -72,6 +113,38 @@ export function ObservationForm({ enc, onSaved, compact }: { enc: Encounter; onS
             </div>
           ))}
         </div>
+        <fieldset>
+          <legend className="mb-1.5 text-sm font-medium text-ink">{tr("Level of consciousness (AVPU)")}</legend>
+          <div className="flex flex-wrap gap-2">
+            {AVPU.map((a) => (
+              <button
+                key={a.v}
+                type="button"
+                aria-pressed={avpu === a.v}
+                onClick={() => setAvpu(avpu === a.v ? null : a.v)}
+                className={cx("min-h-10 rounded-lg border-2 px-3 text-sm", avpu === a.v ? (a.v === "A" ? "border-teal-600 bg-teal-50 text-teal-800" : "border-crit bg-crit-bg text-crit") : "border-line text-ink-2")}
+              >
+                <strong>{a.v}</strong> · {tr(a.label)}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="rounded-xl border border-line p-3">
+          <legend className="px-1 text-sm font-medium text-ink">{tr("Danger-sign check")}</legend>
+          <p className="mb-2 text-xs text-muted">{tr("Tick every sign present. Until the check is saved, these count as unknown — the case cannot be routine.")}</p>
+          <div className={compact ? "grid gap-1.5" : "grid gap-1.5 sm:grid-cols-2"}>
+            {SIGNS.filter((s) => child || !s.child).map((s) => (
+              <label key={s.id} className="flex items-start gap-2 text-sm text-ink-2">
+                <input type="checkbox" className="mt-0.5 size-4 accent-current" checked={signs.includes(s.id)} onChange={(e) => setSigns(e.target.checked ? [...signs, s.id] : signs.filter((x) => x !== s.id))} />
+                {tr(s.label)}
+              </label>
+            ))}
+          </div>
+          <label className="mt-3 flex items-center gap-2 border-t border-line pt-2.5 text-sm font-medium text-ink">
+            <input type="checkbox" className="size-4" checked={examDone} onChange={(e) => setExamDone(e.target.checked)} />
+            {priorExam ? tr("Danger-sign check repeated (already recorded once)") : tr("I have checked for all the signs above")}
+          </label>
+        </fieldset>
         <div>
           <Label htmlFor="ob-note" hint={tr("(optional)")}>
             {tr("Nursing observation")}
@@ -110,6 +183,16 @@ export function ObservationList({ items }: { items: Observation[] | undefined })
                 ))}
               </p>
             )}
+            {(o.signs?.length ?? 0) > 0 && (
+              <p className="mt-1 flex flex-wrap gap-1.5">
+                {o.signs!.map((s) => (
+                  <span key={s} className="rounded-md bg-crit-bg px-2 py-0.5 text-xs font-medium text-crit">
+                    {tr(SIGN_LABEL[s] ?? s)}
+                  </span>
+                ))}
+              </p>
+            )}
+            {o.exam_done && <p className="mt-1 text-xs text-muted">{tr("Danger-sign check completed")}</p>}
             {o.note && <p className="mt-1 text-ink-2">{o.note}</p>}
           </li>
         ))}

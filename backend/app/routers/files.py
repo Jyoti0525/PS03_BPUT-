@@ -3,6 +3,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from .. import audit, storage
 from ..config import get_settings
@@ -10,6 +11,7 @@ from ..models import Encounter, FileObject, User
 from ..schemas import ADMIN_ROLES, FileKind, FileOut
 from ..security import DB, CurrentUser, decode, file_token
 from ..services import now, own_patient
+from ..triage.extraction import extract_document
 from ..triage.reports import SAMPLE_REPORTS, render
 
 router = APIRouter(tags=["files"])
@@ -19,7 +21,9 @@ def file_out(f: FileObject, request: Request | None = None, user: User | None = 
     url = None
     if request and user and not f.purged_at:
         url = str(request.url_for("file_content", fid=f.id)) + f"?sig={file_token(f.id, user.id)}"
-    return FileOut(id=f.id, filename=f.filename, content_type=f.content_type, size=f.size, kind=f.kind, encounter_id=f.encounter_id, uploaded_at=f.uploaded_at, expires_at=f.expires_at, purged_at=f.purged_at, url=url)
+    ex = f.extraction
+    rq = {"engine": ex["engine"], "ok": ex["quality"].get("ok", True), "issues": ex["quality"].get("issues", []), "values_found": len(ex["rows"])} if ex else None
+    return FileOut(id=f.id, filename=f.filename, content_type=f.content_type, size=f.size, kind=f.kind, encounter_id=f.encounter_id, uploaded_at=f.uploaded_at, expires_at=f.expires_at, purged_at=f.purged_at, url=url, read_quality=rq)
 
 
 @router.post("/files", response_model=FileOut)
@@ -54,7 +58,11 @@ async def upload(
     except Exception:
         db.rollback()
         raise HTTPException(502, "File storage is unavailable — please try again")
-    audit.record(db, user, "UPLOAD", "file", f.id, f"{kind} uploaded ({f.filename}, {max(1, len(data) // 1024)} KB); expires {f.expires_at:%Y-%m-%d %H:%M} UTC")
+    if kind == "report":
+        # Read the document now (offline OCR / text layer) so the reviewer sees values with their source crops.
+        f.extraction = await run_in_threadpool(extract_document, data, ctype)
+    audit.record(db, user, "UPLOAD", "file", f.id, f"{kind} uploaded ({f.filename}, {max(1, len(data) // 1024)} KB); expires {f.expires_at:%Y-%m-%d %H:%M} UTC"
+                 + (f"; read by {f.extraction['engine']}, {len(f.extraction['rows'])} lab value(s)" if f.extraction else ""))
     return file_out(f, request, user)
 
 

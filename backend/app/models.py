@@ -308,6 +308,7 @@ class FileObject(Base):
     purged_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     sample_key: Mapped[str | None] = mapped_column(String(32), nullable=True)
     boxes: Mapped[list | None] = mapped_column(JSONType, nullable=True)
+    extraction: Mapped[dict | None] = mapped_column(JSONType, nullable=True)  # OCR/text-layer lab rows, see triage.extraction
 
 
 class AuditEvent(Base):

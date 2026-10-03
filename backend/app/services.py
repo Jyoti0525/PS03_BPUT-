@@ -13,7 +13,8 @@ from .config import get_settings
 from .models import Consent, Encounter, Escalation, Facility, FileObject, Patient, User
 from .schemas import ADMIN_ROLES, ConsentOut, EncounterOut, FitnessOut, PatientOut, WorkerInfo
 from .triage.pipeline import build_note, infer_specialist
-from .triage.rules import evaluate
+from .triage.extraction import lab_values
+from .triage.rules import evaluate_full
 
 
 def aware(d: datetime | None) -> datetime | None:
@@ -69,10 +70,13 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
         db.scalars(select(Encounter).where(Encounter.patient_id == patient.id).order_by(Encounter.created_at.desc()))
     )
     files = [f for f in (db.get(FileObject, fid) for fid in intake.get("file_ids", [])) if f]
-    urgency, hits = evaluate(intake, patient.age)
+    if labs := lab_values([f.extraction for f in files if f.extraction]):
+        intake = {**intake, "lab_values": labs}  # read from uploaded reports; rules may only raise urgency
+    triage = evaluate_full(intake, patient.age, patient.sex)
+    urgency = triage["urgency"]
     consent = db.get(Consent, intake["consent_id"]) if intake.get("consent_id") else None
-    note = build_note(intake=intake, patient=patient, hits=hits, files=files, history=history, proxy=bool(consent and consent.mode == "proxy"))
-    specialist = infer_specialist(intake, patient.age)
+    note = build_note(intake=intake, patient=patient, triage=triage, files=files, history=history, proxy=bool(consent and consent.mode == "proxy"))
+    specialist = infer_specialist(intake, patient.age, triage)
     facility = db.get(Facility, intake["facility_id"])
     on_site = any(s["key"] == specialist and s["available"] for s in (facility.specialists if facility else []))
     esc = escalate_after(urgency)
@@ -105,23 +109,36 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
     return enc
 
 
-def record_observations(db: Session, e: Encounter, user: User, vitals: dict, note: str) -> None:
+def record_observations(db: Session, e: Encounter, user: User, vitals: dict, note: str, signs: list[str] | None = None, exam_done: bool = False) -> None:
     """Bedside vitals / observations from a nurse or doctor. The note is rebuilt from the updated intake and the
-    deterministic rules run again, so new vitals (e.g. SpO2 88%) can raise urgency. A doctor's override is kept."""
+    deterministic rules run again, so new vitals (e.g. SpO2 88%) or a danger sign can raise urgency, and a completed
+    danger-sign check can release a provisional case. A doctor's override is kept."""
     intake = dict(e.intake or {})
     if vitals:
         intake["vitals"] = {**(intake.get("vitals") or {}), **vitals}
-    e.intake = intake
-    urgency, hits = evaluate(intake, e.patient.age)
-    history = [x for x in db.scalars(select(Encounter).where(Encounter.patient_id == e.patient_id).order_by(Encounter.created_at.desc())) if x.id != e.id]
+    if signs is not None or exam_done:
+        prev = intake.get("exam") or {}
+        intake["exam"] = {
+            "done": bool(exam_done or prev.get("done")),
+            "signs": sorted(set(prev.get("signs") or []) | set(signs or [])),
+            "by": f"{user.name} ({user.role})",
+            "at": now().isoformat(),
+        }
     files = [f for f in (db.get(FileObject, fid) for fid in intake.get("file_ids", [])) if f]
+    if labs := lab_values([f.extraction for f in files if f.extraction]):
+        intake["lab_values"] = labs
+    e.intake = intake
+    triage = evaluate_full(intake, e.patient.age, e.patient.sex)
+    urgency = triage["urgency"]
+    history = [x for x in db.scalars(select(Encounter).where(Encounter.patient_id == e.patient_id).order_by(Encounter.created_at.desc())) if x.id != e.id]
     consent = db.get(Consent, intake["consent_id"]) if intake.get("consent_id") else None
     old = dict(e.note or {})
-    new = build_note(intake=intake, patient=e.patient, hits=hits, files=files, history=history, proxy=bool(consent and consent.mode == "proxy"))
+    new = build_note(intake=intake, patient=e.patient, triage=triage, files=files, history=history, proxy=bool(consent and consent.mode == "proxy"))
     if old.get("edited_by"):  # keep what a clinician wrote by hand
         new.update({k: old[k] for k in ("summary", "missing_info", "edited_by", "edited_at") if k in old})
     obs = list(old.get("observations") or [])
-    obs.append({"by": user.name, "role": user.role, "at": now().isoformat(), "vitals": vitals, "note": note or None})
+    obs.append({"by": user.name, "role": user.role, "at": now().isoformat(), "vitals": vitals, "note": note or None,
+                "signs": signs or [], "exam_done": exam_done})
     new["observations"] = obs
     e.note = new
     e.rules_urgency = urgency

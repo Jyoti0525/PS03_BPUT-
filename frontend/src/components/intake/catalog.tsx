@@ -54,6 +54,15 @@ export function contextQuestions(draft: Pick<IntakePayload, "chief_complaint" | 
   const text = [draft.chief_complaint, ...draft.selected_symptoms, ...draft.symptoms.map((s) => s.text)].join(" ").toLowerCase();
   const qs: ContextQuestion[] = [];
   const has = (...w: string[]) => w.some((x) => text.includes(x));
+  // Danger questions first: each answer resolves an AIIMS / WHO IITT Red criterion that would otherwise stay unknown.
+  if (age < 5 || has("fits", "convuls", "dizz", "faint", "injury", "head", "confus", "fever"))
+    qs.push({ qid: "conscious", question: "Is the patient fully awake and talking or responding normally?", options: ["Yes — awake and normal", "Drowsy or confused", "Not responding"] });
+  if (has("injury", "burn", "fall", "accident"))
+    qs.push({ qid: "mechanism", question: "How did the injury happen?", options: ["Fall from a height (tree, roof, ladder)", "Road accident", "Stabbed or hit with a weapon", "Crushed under something", "Burn", "Bite by a dog or animal", "Snake bite", "Minor — slipped or small cut"] });
+  if (age >= 12 && has("dizz", "headache", "weak", "numb", "speech", "tired"))
+    qs.push({ qid: "one_side", question: "Any weakness, numbness or drooping on one side of the face or body?", options: ["Yes — on one side", "No"] });
+  if (has("headache")) qs.push({ qid: "sudden_head", question: "Did the headache start suddenly, within seconds or minutes?", options: ["Sudden — within minutes", "Gradually"] });
+  if (has("stomach")) qs.push({ qid: "sudden_abd", question: "Did the stomach pain start suddenly?", options: ["Sudden — within minutes", "Gradually"] });
   if (has("chest")) {
     qs.push({ qid: "chest_radiation", question: "Does the pain spread to the arm, jaw or back?", options: ["Yes — spreads to arm / jaw", "No", "Not sure"] });
     qs.push({ qid: "chest_sweat", question: "Is there sweating or feeling faint with the pain?", options: ["Yes — sweating", "No"] });
@@ -69,7 +78,7 @@ export function contextQuestions(draft: Pick<IntakePayload, "chief_complaint" | 
   if (has("diarr", "loose")) qs.push({ qid: "dehyd", question: "Dry mouth, sunken eyes or passing very little urine?", options: ["No", "Yes — sunken eyes / dry mouth"] });
   if (has("injury", "burn")) qs.push({ qid: "inj_loc", question: "Did the person faint or hit their head?", options: ["No", "Yes — fainted / head injury"] });
   if (has("stomach")) qs.push({ qid: "abd_where", question: "Where is the pain?", options: ["Upper", "Lower right", "Lower left", "All over"] });
-  if (!draft.duration) qs.push({ qid: "dur", question: "Since when do you have this problem?", options: ["Today", "1–2 days", "3–7 days", "More than a week"] });
+  if (!draft.duration || draft.duration === "today") qs.unshift({ qid: "dur", question: "Since when do you have this problem?", options: ["In the last few hours", "Today", "1–2 days", "3–7 days", "More than a week"] });
   if (draft.category === "chronic") qs.push({ qid: "chr_meds", question: "Are you taking your medicines every day?", options: ["Yes, every day", "Sometimes miss", "Stopped taking"] });
-  return qs.slice(0, 5);
+  return qs.slice(0, 7);
 }

@@ -1,0 +1,24 @@
+# Rules on values read from uploaded reports (OCR or PDF text layer, see triage/extraction.py).
+# A value the extractor judged impossible is never passed in; the reviewer still checks every crop.
+protocol: LAB
+name: Uploaded report values
+source: who_hb
+applies: {}
+rules:
+  - id: LAB-SEVERE-ANAEMIA-PREG-CHILD
+    description: Severe anaemia on report — Hb below 7.0 g/dL (pregnancy or child under 5)
+    urgency: yellow
+    when: { all: [ { lab: [haemoglobin, lt, 7.0] }, { any: [ { finding: pregnant }, { age_years: [lt, 5] } ] } ] }
+  - id: LAB-SEVERE-ANAEMIA
+    description: Severe anaemia on report — Hb below 8.0 g/dL
+    urgency: yellow
+    when: { all: [ { lab: [haemoglobin, lt, 8.0] }, { age_years: [gte, 5] }, { not: { finding: pregnant } } ] }
+  - id: LAB-PE-PROTEINURIA
+    description: Pregnant with BP ≥ 140/90 and urine protein 1+ or more on report (pre-eclampsia)
+    urgency: red
+    source: isshp
+    when:
+      all:
+        - finding: pregnant
+        - lab: [urine_albumin, gte, 1]
+        - any: [ { vital: [bp_systolic, gte, 140] }, { vital: [bp_diastolic, gte, 90] } ]

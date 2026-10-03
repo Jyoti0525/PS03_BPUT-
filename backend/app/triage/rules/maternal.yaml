@@ -1,36 +1,74 @@
-# Maternal red flags (applies when the visit category is maternal).
+# Pregnancy — applies whenever the patient is pregnant (pregnancy visit, or pregnancy reported),
+# at any age. Runs alongside the age-routed protocols; the higher urgency wins.
 protocol: MATERNAL
+name: Pregnancy danger signs (WHO PCPNC, ISSHP, IITT)
+source: who_pcpnc
+applies: { pregnant: true }
 rules:
-  - id: MAT-01
-    description: Pregnant, BP ≥ 140/90 with headache or blurred vision
+  - id: MAT-BP-SEVERE
+    description: Severe hypertension in pregnancy — SBP ≥ 160 or DBP ≥ 110 mmHg
     urgency: red
+    source: isshp
+    when: { any: [ { vital: [bp_systolic, gte, 160] }, { vital: [bp_diastolic, gte, 110] } ] }
+  - id: MAT-PE-FEATURES
+    description: BP ≥ 140/90 with headache, visual disturbance or upper abdominal pain (possible pre-eclampsia)
+    urgency: red
+    source: isshp
     when:
       all:
-        - category: maternal
-        - any:
-            - vital_gte: { field: bp_systolic, value: 140 }
-            - vital_gte: { field: bp_diastolic, value: 90 }
-        - text_any: ["headache", "blurred", "vision"]
-  - id: MAT-02
-    description: Pregnant with vaginal bleeding
+        - any: [ { vital: [bp_systolic, gte, 140] }, { vital: [bp_diastolic, gte, 90] } ]
+        - any: [ { finding: headache }, { finding: visual_disturbance }, { finding: upper_abdominal_pain } ]
+  - id: MAT-VAGINAL-BLEEDING
+    description: Vaginal bleeding in pregnancy
     urgency: red
-    when:
-      all:
-        - category: maternal
-        - text_any: ["bleeding", "spotting"]
-  - id: MAT-03
-    description: Pregnant with reduced fetal movement
+    when: { finding: vaginal_bleeding }
+  - id: MAT-CONVULSIONS
+    description: Convulsions or altered consciousness in pregnancy
     urgency: red
-    when:
-      all:
-        - category: maternal
-        - text_any: ["reduced movement", "baby not moving", "less movement", "fetal movement reduced"]
-  - id: MAT-04
-    description: Pregnant with BP ≥ 140/90
+    when: { any: [ { finding: seizure }, { finding: unresponsive }, { finding: altered_mental_status } ] }
+  - id: MAT-HEADACHE-VISION
+    description: Severe headache with blurred vision
+    urgency: red
+    when: { all: [ { finding: headache }, { finding: visual_disturbance } ] }
+  - id: MAT-FEVER-WEAK
+    description: Fever and too weak to get out of bed
+    urgency: red
+    when: { all: [ { any: [ { finding: fever }, { vital: [temp_c, gte, 38] } ] }, { finding: weakness_general } ] }
+  - id: MAT-SEVERE-ABDO-PAIN
+    description: Severe abdominal pain in pregnancy
+    urgency: red
+    when: { all: [ { finding: abdominal_pain }, { severity: [gte, 7] } ] }
+  - id: MAT-BREATHING
+    description: Fast or difficult breathing in pregnancy
+    urgency: red
+    when: { any: [ { finding: breathless }, { vital: [resp_rate, gt, 30] } ] }
+  - id: MAT-LABOUR
+    description: Active labour
+    urgency: red
+    source: iitt_adult
+    when: { finding: labour_pains }
+  - id: MAT-TRAUMA
+    description: Any trauma in pregnancy
+    urgency: red
+    source: iitt_card
+    when: { finding: injury }
+  - id: MAT-HYPERTENSION
+    description: Hypertension in pregnancy — BP ≥ 140/90 mmHg (needs review within 24 h)
     urgency: yellow
-    when:
-      all:
-        - category: maternal
-        - any:
-            - vital_gte: { field: bp_systolic, value: 140 }
-            - vital_gte: { field: bp_diastolic, value: 90 }
+    source: isshp
+    when: { any: [ { vital: [bp_systolic, gte, 140] }, { vital: [bp_diastolic, gte, 90] } ] }
+  - id: MAT-REDUCED-MOVEMENT
+    description: Baby moving less than usual (same-day assessment)
+    urgency: yellow
+    source: rcog_rfm
+    when: { finding: reduced_fetal_movement }
+  - id: MAT-FLUID-LEAK
+    description: Fluid leaking from the vagina (possible rupture of membranes)
+    urgency: yellow
+    source: local
+    when: { finding: fluid_leaking }
+  - id: MAT-SWELLING
+    description: New swelling of face or hands
+    urgency: yellow
+    source: local
+    when: { finding: swelling_face_hands }

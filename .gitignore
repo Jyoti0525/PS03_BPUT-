@@ -31,3 +31,6 @@ out/
 
 # raw per-state downloads (the merged snapshot is committed)
 backend/directory_data/parts/
+
+# local browser-test logs
+.playwright-mcp/

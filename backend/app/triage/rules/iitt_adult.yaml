@@ -1,0 +1,217 @@
+# WHO/ICRC/MSF Interagency Integrated Triage Tool — Age ≥12.
+# Step 1 Red criteria → RED. Step 2 Yellow criteria → YELLOW. Step 3 high-risk vital signs →
+# "up-triage or immediate review by supervising clinician": YELLOW with doctor review.
+# Covers the trauma presentations ATP excludes, and ages 12–13 that ATP does not cover.
+protocol: IITT
+name: WHO Interagency Integrated Triage Tool (age 12+)
+source: iitt_adult
+applies: { age_min: 12 }
+rules:
+  # ---------------- Step 1: RED
+  - id: IITT-A-UNRESPONSIVE
+    description: Unresponsive
+    urgency: red
+    when: { any: [ { finding: unresponsive }, { avpu_in: [U] } ] }
+  - id: IITT-A-STRIDOR
+    description: Stridor
+    urgency: red
+    when: { finding: stridor }
+  - id: IITT-A-RESP-DISTRESS
+    description: Respiratory distress or central cyanosis
+    urgency: red
+    when: { any: [ { finding: respiratory_distress }, { finding: cyanosis } ] }
+  - id: IITT-A-CAP-REFILL
+    description: Capillary refill > 3 seconds
+    urgency: red
+    when: { finding: cap_refill_gt3 }
+  - id: IITT-A-WEAK-FAST-PULSE
+    description: Weak and fast pulse
+    urgency: red
+    when: { finding: weak_fast_pulse }
+  - id: IITT-A-HEAVY-BLEEDING
+    description: Heavy bleeding
+    urgency: red
+    when: { finding: bleeding_heavy }
+  - id: IITT-A-HR
+    description: Heart rate < 50 or > 150
+    urgency: red
+    when: { any: [ { vital: [pulse, lt, 50] }, { vital: [pulse, gt, 150] } ] }
+  - id: IITT-A-CONVULSIONS
+    description: Active convulsions
+    urgency: red
+    when: { finding: seizure }
+  - id: IITT-A-MENINGISM
+    description: Any two of — fever or hypothermia, headache, altered mental status, stiff neck
+    urgency: red
+    when:
+      at_least:
+        n: 2
+        of:
+          - any: [ { finding: fever }, { vital: [temp_c, gte, 38] }, { vital: [temp_c, lt, 36] } ]
+          - finding: headache
+          - finding: altered_mental_status
+          - finding: stiff_neck
+  - id: IITT-A-HYPOGLYCAEMIA
+    description: Hypoglycaemia (blood glucose below 70 mg/dL)
+    urgency: red
+    source: ada
+    when: { vital_if_measured: [glucose, lt, 70] }
+  - id: IITT-A-HIGH-RISK-TRAUMA
+    description: High-risk trauma — fall from height, road crash mechanism, penetrating, crush, or injury in pregnancy
+    urgency: red
+    source: iitt_card
+    when:
+      any:
+        - finding: fall_from_height
+        - finding: road_traffic_high_risk
+        - finding: penetrating_injury
+        - finding: crush_injury
+        - all: [ { finding: injury }, { finding: pregnant } ]
+  - id: IITT-A-MAJOR-BURN-AGE
+    description: Any burn at age over 70
+    urgency: red
+    source: iitt_card
+    when: { all: [ { finding: burn }, { age_years: [gt, 70] } ] }
+  - id: IITT-A-POISONING
+    description: Poisoning / ingestion or dangerous chemical exposure
+    urgency: red
+    source: iitt_card
+    when: { finding: poisoning }
+  - id: IITT-A-THREATENED-LIMB
+    description: Threatened limb
+    urgency: red
+    source: iitt_card
+    when: { finding: threatened_limb }
+  - id: IITT-A-SNAKE-BITE
+    description: Snake bite
+    urgency: red
+    when: { finding: snake_bite }
+  - id: IITT-A-PAIN-OVER-50
+    description: Acute chest or abdominal pain, age over 50
+    urgency: red
+    when: { all: [ { any: [ { finding: chest_pain }, { finding: abdominal_pain } ] }, { age_years: [gt, 50] } ] }
+  - id: IITT-A-VIOLENT
+    description: Violent or aggressive
+    urgency: red
+    when: { finding: agitated }
+  - id: IITT-A-PREGNANT-RED
+    description: Pregnant with heavy bleeding, severe abdominal pain, seizures or altered mental status, severe headache, visual changes, SBP ≥160 or DBP ≥110, active labour or trauma
+    urgency: red
+    when:
+      all:
+        - finding: pregnant
+        - any:
+            - finding: bleeding_heavy
+            - all: [ { finding: abdominal_pain }, { severity: [gte, 7] } ]
+            - finding: seizure
+            - finding: altered_mental_status
+            - finding: headache_sudden
+            - all: [ { finding: headache }, { severity: [gte, 7] } ]
+            - finding: visual_disturbance
+            - vital: [bp_systolic, gte, 160]
+            - vital: [bp_diastolic, gte, 110]
+            - finding: labour_pains
+            - finding: injury
+  # ---------------- Step 2: YELLOW
+  - id: IITT-A-Y-NECK-SWELLING
+    description: Swelling or mass of mouth, throat or neck
+    urgency: yellow
+    when: { finding: swelling_mouth_neck }
+  - id: IITT-A-Y-WHEEZE
+    description: Wheezing
+    urgency: yellow
+    when: { finding: wheeze }
+  - id: IITT-A-Y-VOMIT-DIARRHOEA
+    description: Vomits everything or ongoing diarrhoea
+    urgency: yellow
+    when: { any: [ { finding: vomits_everything }, { finding: diarrhoea } ] }
+  - id: IITT-A-Y-UNABLE-TO-DRINK
+    description: Unable to feed or drink
+    urgency: yellow
+    when: { finding: unable_to_drink }
+  - id: IITT-A-Y-PALLOR
+    description: Severe pallor
+    urgency: yellow
+    when: { finding: severe_pallor }
+  - id: IITT-A-Y-BLEEDING
+    description: Ongoing bleeding
+    urgency: yellow
+    when: { finding: bleeding }
+  - id: IITT-A-Y-FAINTING
+    description: Recent fainting
+    urgency: yellow
+    when: { finding: syncope }
+  - id: IITT-A-Y-MENTAL-STATUS
+    description: Altered mental status or agitation
+    urgency: yellow
+    when: { any: [ { finding: altered_mental_status }, { finding: agitated } ] }
+  - id: IITT-A-Y-WEAKNESS
+    description: Acute general weakness
+    urgency: yellow
+    when: { finding: weakness_general }
+  - id: IITT-A-Y-FOCAL-NEURO
+    description: Acute focal neurological complaint
+    urgency: yellow
+    when: { any: [ { finding: one_sided_weakness }, { finding: limb_weakness } ] }
+  - id: IITT-A-Y-VISION
+    description: Acute visual disturbance
+    urgency: yellow
+    when: { finding: visual_disturbance }
+  - id: IITT-A-Y-SEVERE-PAIN
+    description: Severe pain
+    urgency: yellow
+    when: { all: [ { finding: pain }, { severity: [gte, 7] } ] }
+  - id: IITT-A-Y-RASH
+    description: New rash worsening over hours or peeling
+    urgency: yellow
+    when: { finding: rash_spreading }
+  - id: IITT-A-Y-LIMB
+    description: Visible limb deformity, open fracture or suspected dislocation
+    urgency: yellow
+    when: { finding: limb_deformity }
+  - id: IITT-A-Y-TRAUMA
+    description: Other trauma or burns
+    urgency: yellow
+    when: { any: [ { finding: injury }, { finding: burn } ] }
+  - id: IITT-A-Y-ASSAULT
+    description: Sexual assault
+    urgency: yellow
+    when: { finding: sexual_assault }
+  - id: IITT-A-Y-TESTICULAR
+    description: Acute testicular / scrotal pain or priapism
+    urgency: yellow
+    when: { finding: scrotal_pain }
+  - id: IITT-A-Y-URINE
+    description: Unable to pass urine
+    urgency: yellow
+    when: { finding: urinary_retention }
+  - id: IITT-A-Y-PROPHYLAXIS
+    description: Exposure requiring time-sensitive prophylaxis (animal bite, needlestick)
+    urgency: yellow
+    when: { any: [ { finding: animal_bite }, { finding: needle_stick } ] }
+  # ---------------- Step 3: high-risk vital signs
+  - id: IITT-A-V-HR
+    description: High-risk vital sign — heart rate < 60 or > 130
+    urgency: yellow
+    review_by: doctor
+    when: { any: [ { vital: [pulse, lt, 60] }, { vital: [pulse, gt, 130] } ] }
+  - id: IITT-A-V-RR
+    description: High-risk vital sign — respiratory rate < 10 or > 30
+    urgency: yellow
+    review_by: doctor
+    when: { any: [ { vital: [resp_rate, lt, 10] }, { vital: [resp_rate, gt, 30] } ] }
+  - id: IITT-A-V-TEMP
+    description: High-risk vital sign — temperature < 36 °C or > 39 °C
+    urgency: yellow
+    review_by: doctor
+    when: { any: [ { vital: [temp_c, lt, 36] }, { vital: [temp_c, gt, 39] } ] }
+  - id: IITT-A-V-SPO2
+    description: High-risk vital sign — SpO₂ below 92%
+    urgency: yellow
+    review_by: doctor
+    when: { vital: [spo2, lt, 92] }
+  - id: IITT-A-V-AVPU
+    description: High-risk vital sign — AVPU other than Alert
+    urgency: yellow
+    review_by: doctor
+    when: { avpu_in: [V, P, U] }

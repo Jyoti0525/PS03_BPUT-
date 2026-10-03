@@ -1,29 +1,35 @@
-"""Note-generation pipeline — interface + deterministic stub.
+"""Triage-note builder.
 
-The production pipeline (IndicConformer/Bhashini ASR → IndicTrans2 → PaddleOCR + parrotlet layout
-→ bounded BioMistral summary) is owned by the ML track and plugs in behind `build_note`. This stub
-produces the same TriageNote shape from structured intake so the API and every reviewer screen
-work end to end. It never assigns urgency (that is rules.evaluate) and never states a diagnosis.
+Assembles the reviewer-facing TriageNote from the intake, the rules-engine result, uploaded
+reports and visit history. Every value carries its source and the engine that produced it, named
+truthfully. It never assigns urgency (that is rules.evaluate_full) and never states a diagnosis.
 """
 
 import re
 import uuid
 from datetime import datetime, timezone
 
-from .reports import SAMPLE_REPORTS
+from .extraction import document_checks
 
+# Follow-up questions keyed by findings (negation-aware), so "no chest pain" never asks about chest pain.
 FOLLOWUPS = [
-    (r"chest", {"tag": "Onset", "question": "Did the chest discomfort start at rest or during effort?", "for_role": "doctor"}),
-    (r"chest", {"tag": "ECG", "question": "Has a 12-lead ECG been recorded since arrival?", "for_role": "nurse"}),
-    (r"fever|बुखार", {"tag": "Fever pattern", "question": "Is the fever continuous or does it come with chills at a fixed time?", "for_role": "health_worker"}),
-    (r"fever|बुखार", {"tag": "Rash / bleeding", "question": "Any rash, gum bleeding or black stools since the fever began?", "for_role": "nurse"}),
-    (r"breath|सांस", {"tag": "Speech", "question": "Can the patient speak full sentences without pausing for breath?", "for_role": "nurse"}),
-    (r"headache|vision|blurred", {"tag": "Visual change", "question": "Any flashing lights, spots or blurred vision right now?", "for_role": "nurse"}),
-    (r"cough", {"tag": "Duration", "question": "Has the cough lasted more than 2 weeks? Any blood in sputum?", "for_role": "health_worker"}),
-    (r"abdominal|stomach|pet", {"tag": "Location", "question": "Where exactly is the pain — upper, lower, right or left side?", "for_role": "doctor"}),
-    (r"burn|injury|fall", {"tag": "Mechanism", "question": "How and when did the injury happen? Any loss of consciousness?", "for_role": "nurse"}),
-    (r"diarr|loose", {"tag": "Hydration", "question": "How many times has the child passed urine in the last 6 hours?", "for_role": "health_worker"}),
+    ("chest_pain", {"tag": "Onset", "question": "Did the chest discomfort start at rest or during effort?", "for_role": "doctor"}),
+    ("chest_pain", {"tag": "ECG", "question": "Has a 12-lead ECG been recorded since arrival?", "for_role": "nurse"}),
+    ("fever", {"tag": "Fever pattern", "question": "Is the fever continuous or does it come with chills at a fixed time?", "for_role": "health_worker"}),
+    ("fever", {"tag": "Rash / bleeding", "question": "Any rash, gum bleeding or black stools since the fever began?", "for_role": "nurse"}),
+    ("breathless", {"tag": "Speech", "question": "Can the patient speak full sentences without pausing for breath?", "for_role": "nurse"}),
+    ("headache", {"tag": "Visual change", "question": "Any flashing lights, spots or blurred vision right now?", "for_role": "nurse"}),
+    ("cough", {"tag": "Duration", "question": "Has the cough lasted more than 2 weeks? Any blood in sputum?", "for_role": "health_worker"}),
+    ("abdominal_pain", {"tag": "Location", "question": "Where exactly is the pain — upper, lower, right or left side?", "for_role": "doctor"}),
+    ("injury", {"tag": "Mechanism", "question": "How and when did the injury happen? Any loss of consciousness?", "for_role": "nurse"}),
+    ("diarrhoea", {"tag": "Hydration", "question": "How many times has the patient passed urine in the last 6 hours?", "for_role": "health_worker"}),
+    ("weakness_general", {"tag": "Weakness", "question": "Is the weakness all over, or in one arm, leg or side of the face?", "for_role": "nurse"}),
+    ("snake_bite", {"tag": "Envenomation", "question": "Time of bite? Any bleeding gums, drooping eyelids or difficulty swallowing?", "for_role": "doctor"}),
 ]
+
+
+def _present(triage: dict, fid: str) -> bool:
+    return (triage.get("findings") or {}).get(fid, {}).get("value") is True
 
 
 def _vid() -> str:
@@ -31,16 +37,18 @@ def _vid() -> str:
 
 
 def _status(kind: str, n: float) -> str:
+    """Display colour for an adult vital: 'abnormal' at an ATP Red threshold, 'borderline' at an IITT
+    high-risk limit or common clinical cut-off. Urgency itself always comes from the rules engine."""
     if kind == "sys":
-        return "abnormal" if n >= 160 or n < 90 else "borderline" if n >= 140 else "normal"
+        return "abnormal" if n > 220 or n < 90 else "borderline" if n >= 140 else "normal"
     if kind == "spo2":
-        return "abnormal" if n < 90 else "borderline" if n <= 94 else "normal"
+        return "abnormal" if n < 90 else "borderline" if n < 94 else "normal"
     if kind == "pulse":
-        return "abnormal" if n > 120 or n < 50 else "borderline" if n > 100 else "normal"
+        return "abnormal" if n > 120 or n < 50 else "borderline" if n > 100 or n < 60 else "normal"
     if kind == "temp":
-        return "abnormal" if n >= 103 else "borderline" if n >= 100 else "normal"
+        return "abnormal" if n > 102.2 else "borderline" if n >= 100.4 or n < 96.8 else "normal"
     if kind == "rr":
-        return "abnormal" if n >= 30 else "borderline" if n > 20 else "normal"
+        return "abnormal" if n > 22 or n < 10 else "borderline" if n > 20 else "normal"
     if kind == "glucose":
         return "abnormal" if n > 300 or n < 70 else "borderline" if n > 140 else "normal"
     return "normal"
@@ -50,14 +58,15 @@ def _fmt(n: float) -> str:
     return str(int(n)) if float(n).is_integer() else str(n)
 
 
-def build_note(*, intake: dict, patient, hits: list[dict], files: list, history: list, proxy: bool) -> dict:
+def build_note(*, intake: dict, patient, triage: dict, files: list, history: list, proxy: bool) -> dict:
+    hits = triage["hits"]
     v = {k: x for k, x in (intake.get("vitals") or {}).items() if x is not None}
     flags, vitals, labs, disagreements, missing = [], [], [], [], []
     voice = next((s for s in intake.get("symptoms", []) if s.get("source") == "voice"), None)
 
     def vsrc(label: str) -> dict:
         if voice and label in voice["text"].lower():
-            return {"kind": "transcript", "engine": "IndicConformer ASR", "transcript_excerpt": voice["text"], "original_excerpt": voice["original_text"]}
+            return {"kind": "transcript", "engine": voice.get("engine") or "Browser speech recognition", "transcript_excerpt": voice["text"], "original_excerpt": voice["original_text"]}
         return {"kind": "manual", "engine": "Nurse entry at kiosk"}
 
     if v.get("bp_systolic") and v.get("bp_diastolic"):
@@ -70,50 +79,65 @@ def build_note(*, intake: dict, patient, hits: list[dict], files: list, history:
         vitals.append({"id": _vid(), "label": "Temperature", "value": _fmt(v["temp_f"]), "unit": "°F", "status": _status("temp", v["temp_f"]), "needs_check": False, "source": {"kind": "sensor", "engine": "IR thermometer"}})
     if v.get("resp_rate"):
         vitals.append({"id": _vid(), "label": "Resp. rate", "value": _fmt(v["resp_rate"]), "unit": "/min", "status": _status("rr", v["resp_rate"]), "needs_check": False, "source": {"kind": "manual", "engine": "Nurse count"}})
+    if intake_avpu := (intake.get("vitals") or {}).get("avpu"):
+        label = {"A": "Alert", "V": "Responds to voice", "P": "Responds to pain", "U": "Unresponsive"}.get(intake_avpu, intake_avpu)
+        vitals.append({"id": _vid(), "label": "AVPU", "value": label, "unit": None, "status": "normal" if intake_avpu == "A" else "abnormal", "needs_check": False, "source": {"kind": "manual", "engine": "Clinician assessment"}})
     if v.get("glucose"):
         vitals.append({"id": _vid(), "label": "Glucose (POC)", "value": _fmt(v["glucose"]), "unit": "mg/dL", "status": _status("glucose", v["glucose"]), "needs_check": False, "source": {"kind": "sensor", "engine": "Glucometer"}})
 
+    pregnant = (triage.get("findings") or {}).get("pregnant", {}).get("value") is True
     for f in files:
         if f.kind != "report":
             continue
-        sample = SAMPLE_REPORTS.get(f.sample_key or "")
-        if not sample:
-            missing.append(f'Uploaded report "{f.filename}" is awaiting OCR — review the image directly')
+        ex = f.extraction
+        if not ex:
+            missing.append(f'Uploaded report "{f.filename}" was not read — review the image directly')
             continue
-        for i, row in enumerate(sample["rows"]):
+        doc_warns = list(ex.get("warnings", [])) + document_checks(ex.get("meta") or {}, patient.name)
+        for w in dict.fromkeys(doc_warns):
+            flags.append({"code": "DOC-CHECK", "label": f'"{f.filename}": {w}', "severity": "warning", "reason": f"Document check on {ex['engine']}"})
+        for row in ex.get("rows", []):
             ev = {
                 "id": _vid(),
                 "label": row["test"],
                 "value": row["value"],
                 "unit": row["unit"] or None,
-                "reference": row["ref"],
+                "reference": row.get("reference"),
                 "status": row["status"],
-                "needs_check": False,
+                "needs_check": row["needs_check"],
+                "checks": row.get("checks", []),
+                "loinc": row.get("loinc"),
                 "source": {
                     "kind": "image_crop",
-                    "engine": "PaddleOCR + parrotlet layout (handwriting)" if sample.get("handwritten") else "PaddleOCR + parrotlet layout",
+                    "engine": ex["engine"],
                     "file_id": f.id,
-                    "bbox": f.boxes[i] if f.boxes and i < len(f.boxes) else None,
-                    "crop_text": f"{row['test']}  {row['value']} {row['unit']}",
+                    "bbox": row.get("bbox"),
+                    "crop_text": row.get("crop_text"),
+                    "confidence": row.get("ocr_confidence"),
                 },
             }
-            if row.get("field") == "bp" and v.get("bp_systolic") and v.get("bp_diastolic"):
+            if row["test_key"] == "haemoglobin" and pregnant and row.get("value_num") and row["value_num"] < 11:
+                ev["status"] = "abnormal"
+            if row["test_key"] == "bp" and v.get("bp_systolic") and v.get("bp_diastolic"):
                 kiosk = f"{_fmt(v['bp_systolic'])}/{_fmt(v['bp_diastolic'])}"
-                if kiosk != row["value"]:
+                s_, d_ = row["values"]["systolic"], row["values"]["diastolic"]
+                if abs(s_ - v["bp_systolic"]) > 10 or abs(d_ - v["bp_diastolic"]) > 10:
                     ev["needs_check"] = True
                     for x in vitals:
                         if x["label"] == "Blood pressure":
                             x["needs_check"] = True
-                    disagreements.append({"field": "Blood pressure", "values": [{"engine": "Kiosk reading", "value": f"{kiosk} mmHg"}, {"engine": "OCR from card", "value": f"{row['value']} mmHg"}], "action": "Needs checking — re-measure during examination"})
-            if row.get("field") == "glucose" and v.get("glucose") and abs(v["glucose"] - float(row["value"])) > 40:
+                    disagreements.append({"field": "Blood pressure", "values": [{"engine": "Measured today", "value": f"{kiosk} mmHg"}, {"engine": f"Read from {f.filename}", "value": f"{row['value']} mmHg"}], "action": "Needs checking — re-measure during examination"})
+            if row["test_key"].startswith("glucose") and v.get("glucose") and row.get("value_num") and abs(v["glucose"] - row["value_num"]) > 40:
                 ev["needs_check"] = True
-                disagreements.append({"field": "Blood glucose", "values": [{"engine": "Glucometer today", "value": f"{_fmt(v['glucose'])} mg/dL"}, {"engine": "OCR from slip", "value": f"{row['value']} mg/dL"}], "action": "Needs checking — confirm date of the lab slip"})
+                disagreements.append({"field": "Blood glucose", "values": [{"engine": "Glucometer today", "value": f"{_fmt(v['glucose'])} mg/dL"}, {"engine": f"Read from {f.filename}", "value": f"{row['value']} mg/dL"}], "action": "Needs checking — confirm the date of the lab slip"})
             labs.append(ev)
 
     for h in hits:
         if h["urgency"] == "green":
             continue
-        flags.append({"code": h["rule_id"], "label": h["description"], "severity": "critical" if h["urgency"] == "red" else "warning", "reason": f"{h['protocol']} rule {h['rule_id']} matched on intake data"})
+        why = "; ".join(h.get("evidence") or []) or "matched on intake data"
+        flags.append({"code": h["rule_id"], "label": h["description"], "severity": "critical" if h["urgency"] == "red" else "warning",
+                      "reason": f"{why} — {h.get('source', h['protocol'])}", "non_downgradable": h.get("non_downgradable", False)})
     for d in disagreements:
         flags.append({"code": "DISAGREE", "label": f"{d['field']}: sources disagree", "severity": "warning", "reason": d["action"]})
     if voice and not voice.get("confirmed_by_readback"):
@@ -124,11 +148,13 @@ def build_note(*, intake: dict, patient, hits: list[dict], files: list, history:
         flags.append({"code": "OFFLINE", "label": "Captured offline, synced later", "severity": "info", "reason": "Wait time is counted from the original capture time"})
 
     cat = intake.get("category")
-    if not v.get("bp_systolic"):
-        missing.append("Blood pressure not recorded")
-    if not v.get("pulse") and not v.get("spo2"):
-        missing.append("Pulse / SpO₂ not recorded")
-    if not intake.get("duration"):
+    for m in triage.get("missing_for_green", []):
+        missing.append(f"{m[0].upper()}{m[1:]} not recorded — needed before the case can be routine")
+    asks = sorted({n for u in triage.get("unresolved", []) if u["urgency"] == "red" for n in u["needs"] if not n.startswith("danger-sign")})
+    for n in asks:
+        if not any(n.lower() in x.lower() for x in missing):
+            missing.append(f"Ask / measure: {n} (a RED rule depends on it)")
+    if not intake.get("duration") and not any(a.get("qid") == "dur" for a in intake.get("answers", [])):
         missing.append("Duration of complaint not stated")
     if cat == "maternal" and not (intake.get("maternal") or {}).get("gestation_weeks"):
         missing.append("Gestational age not recorded")
@@ -137,10 +163,9 @@ def build_note(*, intake: dict, patient, hits: list[dict], files: list, history:
     if cat == "chronic" and not any(f.kind == "report" for f in files):
         missing.append("No recent lab report for chronic follow-up")
 
-    text = " ".join([intake.get("chief_complaint", ""), *[s["text"] for s in intake.get("symptoms", [])], *intake.get("selected_symptoms", [])]).lower()
     followup = []
-    for pat, q in FOLLOWUPS:
-        if re.search(pat, text) and len(followup) < 5:
+    for fid, q in FOLLOWUPS:
+        if _present(triage, fid) and len(followup) < 5:
             followup.append(q)
     if not followup:
         followup.append({"tag": "Context", "question": "Anything else that changed recently — food, work, travel or medicines?", "for_role": "health_worker"})
@@ -191,6 +216,14 @@ def build_note(*, intake: dict, patient, hits: list[dict], files: list, history:
         "summary": " ".join(parts),
         "flags": flags,
         "rules_fired": hits,
+        "triage": {
+            "provisional": triage["provisional"],
+            "protocols": triage["protocols"],
+            "unresolved": [{"rule_id": u["rule_id"], "urgency": u["urgency"], "description": u["description"], "needs": u["needs"]} for u in triage["unresolved"]],
+            "missing_for_green": triage["missing_for_green"],
+            "findings": triage["findings"],
+            "rulepack_version": triage["rulepack_version"],
+        },
         "vitals": vitals,
         "labs": labs,
         "timeline": timeline,
@@ -199,18 +232,23 @@ def build_note(*, intake: dict, patient, hits: list[dict], files: list, history:
         "trend": trend,
         "disagreements": disagreements,
         "transcript": {"original": voice["original_text"], "translated": voice["text"], "language": voice["language"]} if voice else None,
-        "generated_by": "stub-pipeline (rules v1 + template summariser)",
+        "generated_by": f"rules engine (rulepack {triage['rulepack_version']}) + template summariser",
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
-def infer_specialist(intake: dict, age: int) -> str:
-    t = " ".join([intake.get("chief_complaint", ""), *[s["text"] for s in intake.get("symptoms", [])]]).lower()
+def infer_specialist(intake: dict, age: int, triage: dict | None = None) -> str:
+    """Suggested specialist for the referral prompt — from negation-aware findings, never raw keywords."""
     if age < 12:
         return "paeds"
-    if intake.get("category") == "maternal":
+    if intake.get("category") == "maternal" or (triage and _present(triage, "pregnant")):
         return "obgyn"
-    for pat, key in [(r"chest", "cardio"), (r"breath|copd|asthma", "pulmo"), (r"diabet|sugar|thirst", "endo"), (r"burn", "burns"), (r"fracture|fall", "ortho")]:
-        if re.search(pat, t):
+    t = triage or {}
+    for fids, key in [(("chest_pain",), "cardio"), (("breathless", "wheeze", "haemoptysis"), "pulmo"), (("burn",), "burns"),
+                      (("limb_deformity", "fall_from_height"), "ortho")]:
+        if any(_present(t, f) for f in fids):
             return key
+    text = intake.get("chief_complaint", "").lower()
+    if re.search(r"diabet|sugar", text) or (intake.get("chronic") or {}).get("condition", "").lower().startswith("diab"):
+        return "endo"
     return "genmed"

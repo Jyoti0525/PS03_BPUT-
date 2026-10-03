@@ -1,0 +1,221 @@
+# WHO/ICRC/MSF Interagency Integrated Triage Tool — Age <12.
+# Closes the 5–11 year gap between IMCI (under 5) and the adult tools. Respiratory and heart rate
+# limits follow the tool's age bands (<1, 1–4, 5–12 years). The chart prints "High 50" etc.;
+# we read the high limits as "at or above" (the conservative reading).
+protocol: IITT
+name: WHO Interagency Integrated Triage Tool (under 12)
+source: iitt_paed
+applies: { age_max_exclusive: 12 }
+rules:
+  # ---------------- Step 1: RED
+  - id: IITT-P-UNRESPONSIVE
+    description: Unresponsive
+    urgency: red
+    when: { any: [ { finding: unresponsive }, { avpu_in: [U] } ] }
+  - id: IITT-P-STRIDOR
+    description: Stridor
+    urgency: red
+    when: { finding: stridor }
+  - id: IITT-P-RESP-DISTRESS
+    description: Respiratory distress or central cyanosis
+    urgency: red
+    when: { any: [ { finding: respiratory_distress }, { finding: cyanosis }, { finding: chest_indrawing } ] }
+  - id: IITT-P-CAP-REFILL
+    description: Capillary refill > 3 seconds
+    urgency: red
+    when: { finding: cap_refill_gt3 }
+  - id: IITT-P-WEAK-FAST-PULSE
+    description: Weak and fast pulse
+    urgency: red
+    when: { finding: weak_fast_pulse }
+  - id: IITT-P-HEAVY-BLEEDING
+    description: Heavy bleeding
+    urgency: red
+    when: { finding: bleeding_heavy }
+  - id: IITT-P-COLD-EXTREMITIES
+    description: Cold extremities
+    urgency: red
+    when: { finding: cold_extremities }
+  - id: IITT-P-SEVERE-DEHYDRATION
+    description: Any two of — lethargy, sunken eyes, very slow skin pinch, drinks poorly
+    urgency: red
+    when:
+      at_least:
+        n: 2
+        of:
+          - finding: lethargy
+          - finding: sunken_eyes
+          - finding: skin_pinch_slow
+          - any: [ { finding: drinks_poorly }, { finding: unable_to_drink } ]
+  - id: IITT-P-CONVULSIONS
+    description: Active convulsions
+    urgency: red
+    when: { finding: seizure }
+  - id: IITT-P-AMS-MENINGISM
+    description: Altered mental status (confused, restless, irritable or lethargic) with stiff neck, hypothermia or fever
+    urgency: red
+    when:
+      all:
+        - any: [ { finding: altered_mental_status }, { finding: irritable }, { finding: lethargy } ]
+        - any: [ { finding: stiff_neck }, { finding: fever }, { vital: [temp_c, gte, 38] }, { vital: [temp_c, lt, 36] } ]
+  - id: IITT-P-HYPOGLYCAEMIA
+    description: Hypoglycaemia (blood glucose below 54 mg/dL / 3 mmol/L)
+    urgency: red
+    source: who_pocketbook
+    when: { vital_if_measured: [glucose, lt, 54] }
+  - id: IITT-P-NEWBORN
+    description: Any infant under 8 days old
+    urgency: red
+    when: { age_days: [lt, 8] }
+  - id: IITT-P-YOUNG-INFANT-TEMP
+    description: Age under 2 months with temperature < 36 °C or > 39 °C
+    urgency: red
+    when: { all: [ { age_days: [lt, 61] }, { any: [ { vital: [temp_c, lt, 36] }, { vital: [temp_c, gt, 39] } ] } ] }
+  - id: IITT-P-HIGH-RISK-TRAUMA
+    description: High-risk trauma — fall from height, road crash mechanism, penetrating or crush injury
+    urgency: red
+    source: iitt_card
+    when:
+      any:
+        - finding: fall_from_height
+        - finding: road_traffic_high_risk
+        - finding: penetrating_injury
+        - finding: crush_injury
+  - id: IITT-P-BURN-UNDER-2
+    description: Any burn at age under 2
+    urgency: red
+    source: iitt_card
+    when: { all: [ { finding: burn }, { age_years: [lt, 2] } ] }
+  - id: IITT-P-THREATENED-LIMB
+    description: Threatened limb
+    urgency: red
+    source: iitt_card
+    when: { finding: threatened_limb }
+  - id: IITT-P-TESTICULAR
+    description: Acute testicular / scrotal pain or priapism
+    urgency: red
+    when: { finding: scrotal_pain }
+  - id: IITT-P-SNAKE-BITE
+    description: Snake bite
+    urgency: red
+    when: { finding: snake_bite }
+  - id: IITT-P-POISONING
+    description: Poisoning / ingestion or dangerous chemical exposure
+    urgency: red
+    source: iitt_card
+    when: { finding: poisoning }
+  # ---------------- Step 2: YELLOW
+  - id: IITT-P-Y-NECK-SWELLING
+    description: Swelling or mass of mouth, throat or neck
+    urgency: yellow
+    when: { finding: swelling_mouth_neck }
+  - id: IITT-P-Y-WHEEZE
+    description: Wheezing
+    urgency: yellow
+    when: { finding: wheeze }
+  - id: IITT-P-Y-UNABLE-TO-DRINK
+    description: Unable to feed or drink
+    urgency: yellow
+    when: { finding: unable_to_drink }
+  - id: IITT-P-Y-VOMITS-EVERYTHING
+    description: Vomits everything
+    urgency: yellow
+    when: { finding: vomits_everything }
+  - id: IITT-P-Y-DIARRHOEA
+    description: Ongoing diarrhoea
+    urgency: yellow
+    when: { finding: diarrhoea }
+  - id: IITT-P-Y-DEHYDRATION
+    description: Dehydration
+    urgency: yellow
+    when: { finding: dehydration }
+  - id: IITT-P-Y-PALLOR
+    description: Severe pallor
+    urgency: yellow
+    when: { finding: severe_pallor }
+  - id: IITT-P-Y-IRRITABLE
+    description: Restless, continuously irritable or lethargic
+    urgency: yellow
+    when: { any: [ { finding: irritable }, { finding: lethargy } ] }
+  - id: IITT-P-Y-SEVERE-PAIN
+    description: Severe pain
+    urgency: yellow
+    when: { all: [ { finding: pain }, { severity: [gte, 7] } ] }
+  - id: IITT-P-Y-YOUNG-INFANT
+    description: Any infant 8 days to 6 months old
+    urgency: yellow
+    when: { all: [ { age_days: [gte, 8] }, { age_days: [lt, 183] } ] }
+  - id: IITT-P-Y-MALNUTRITION
+    description: Malnutrition with visible severe wasting or oedema of both feet
+    urgency: yellow
+    when: { finding: malnutrition }
+  - id: IITT-P-Y-TRAUMA
+    description: Trauma or burn
+    urgency: yellow
+    when: { any: [ { finding: injury }, { finding: burn } ] }
+  - id: IITT-P-Y-ASSAULT
+    description: Sexual assault
+    urgency: yellow
+    when: { finding: sexual_assault }
+  - id: IITT-P-Y-RASH
+    description: New rash worsening over hours or peeling
+    urgency: yellow
+    when: { finding: rash_spreading }
+  - id: IITT-P-Y-PROPHYLAXIS
+    description: Exposure requiring time-sensitive prophylaxis (animal bite)
+    urgency: yellow
+    when: { any: [ { finding: animal_bite }, { finding: needle_stick } ] }
+  - id: IITT-P-Y-PREGNANCY
+    description: Pregnancy
+    urgency: yellow
+    when: { finding: pregnant }
+  - id: IITT-P-Y-HEADACHE
+    description: Headache
+    urgency: yellow
+    when: { finding: headache }
+  # ---------------- Step 3: high-risk vital signs
+  - id: IITT-P-V-TEMP
+    description: High-risk vital sign — temperature < 36 °C or > 39 °C
+    urgency: yellow
+    review_by: doctor
+    when: { any: [ { vital: [temp_c, lt, 36] }, { vital: [temp_c, gt, 39] } ] }
+  - id: IITT-P-V-SPO2
+    description: High-risk vital sign — SpO₂ below 92%
+    urgency: yellow
+    review_by: doctor
+    when: { vital: [spo2, lt, 92] }
+  - id: IITT-P-V-AVPU
+    description: High-risk vital sign — AVPU other than Alert
+    urgency: yellow
+    review_by: doctor
+    when: { avpu_in: [V, P, U] }
+  - id: IITT-P-V-RR-INFANT
+    description: High-risk respiratory rate for age under 1 — ≥ 50 or < 25
+    urgency: yellow
+    review_by: doctor
+    when: { all: [ { age_years: [lt, 1] }, { any: [ { vital: [resp_rate, gte, 50] }, { vital: [resp_rate, lt, 25] } ] } ] }
+  - id: IITT-P-V-RR-1-4
+    description: High-risk respiratory rate for age 1–4 — ≥ 40 or < 20
+    urgency: yellow
+    review_by: doctor
+    when: { all: [ { age_years: [gte, 1] }, { age_years: [lt, 5] }, { any: [ { vital: [resp_rate, gte, 40] }, { vital: [resp_rate, lt, 20] } ] } ] }
+  - id: IITT-P-V-RR-5-12
+    description: High-risk respiratory rate for age 5–12 — ≥ 30 or < 10
+    urgency: yellow
+    review_by: doctor
+    when: { all: [ { age_years: [gte, 5] }, { any: [ { vital: [resp_rate, gte, 30] }, { vital: [resp_rate, lt, 10] } ] } ] }
+  - id: IITT-P-V-HR-INFANT
+    description: High-risk heart rate for age under 1 — ≥ 180 or < 90
+    urgency: yellow
+    review_by: doctor
+    when: { all: [ { age_years: [lt, 1] }, { any: [ { vital: [pulse, gte, 180] }, { vital: [pulse, lt, 90] } ] } ] }
+  - id: IITT-P-V-HR-1-4
+    description: High-risk heart rate for age 1–4 — ≥ 160 or < 80
+    urgency: yellow
+    review_by: doctor
+    when: { all: [ { age_years: [gte, 1] }, { age_years: [lt, 5] }, { any: [ { vital: [pulse, gte, 160] }, { vital: [pulse, lt, 80] } ] } ] }
+  - id: IITT-P-V-HR-5-12
+    description: High-risk heart rate for age 5–12 — ≥ 140 or < 70
+    urgency: yellow
+    review_by: doctor
+    when: { all: [ { age_years: [gte, 5] }, { any: [ { vital: [pulse, gte, 140] }, { vital: [pulse, lt, 70] } ] } ] }

@@ -1,0 +1,19 @@
+# Facility-configurable rules. These are NOT from a published triage protocol; the reviewer screen
+# labels them "Local facility rule" so they are never mistaken for guideline criteria.
+protocol: LOCAL
+name: Local facility rules
+source: local
+applies: {}
+rules:
+  - id: LOCAL-GLUCOSE-HIGH
+    description: Point-of-care blood glucose above 300 mg/dL
+    urgency: yellow
+    when: { vital_if_measured: [glucose, gt, 300] }
+  - id: LOCAL-HAEMOPTYSIS
+    description: Coughing blood (screen for TB and other causes)
+    urgency: yellow
+    when: { finding: haemoptysis }
+  - id: LOCAL-ACS-FEATURES
+    description: Chest pain spreading to arm, jaw or back, or with sweating (features of acute coronary syndrome) — whatever the onset
+    urgency: red
+    when: { all: [ { finding: chest_pain }, { any: [ { finding: chest_pain_radiating }, { finding: sweating } ] } ] }

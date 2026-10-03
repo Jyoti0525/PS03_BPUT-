@@ -1,0 +1,80 @@
+# Published sources cited by the rule files. Every rule names one of these keys, and the
+# reviewer screen shows the short form next to each fired rule.
+sources:
+  atp:
+    short: AIIMS Triage Protocol (ATP) — Red criteria
+    full: >-
+      Sahu AK, Bhoi S, Galwankar S, Aggarwal P, Murmu L, Nayer J, et al. All India Institute of Medical
+      Sciences Triage Protocol (ATP): ATP of a busy emergency department. J Emerg Trauma Shock.
+      2020;13:107-9. Validation: Singh SK, Sahu AK, Kumar A, et al. Prospective validation of a novel
+      triage system developed in a middle income country — AIIMS Triage Protocol. J Emerg Trauma Shock.
+      2022;15(3):124-127. doi:10.4103/jets.jets_146_21 (Supplementary Table 1, Red criteria).
+    scope: Adults aged 14 and above, non-trauma. Any single Red criterion means RED.
+  iitt_adult:
+    short: WHO/ICRC/MSF Interagency Integrated Triage Tool, age ≥12
+    full: >-
+      World Health Organization, International Committee of the Red Cross, Médecins Sans Frontières.
+      Interagency Integrated Triage Tool: Age ≥12 (routine triage). https://www.who.int/tools/triage
+    scope: Older children and adults, including trauma. Steps — Red criteria, Yellow criteria, high-risk vital signs.
+  iitt_paed:
+    short: WHO/ICRC/MSF Interagency Integrated Triage Tool, age <12
+    full: >-
+      World Health Organization, International Committee of the Red Cross, Médecins Sans Frontières.
+      Interagency Integrated Triage Tool: Age <12 (routine triage). https://www.who.int/tools/triage
+    scope: Children under 12, with age-banded respiratory and heart rate limits (<1, 1–4, 5–12 years).
+  iitt_card:
+    short: IITT reference card — high-risk trauma, burns, threatened limb
+    full: >-
+      WHO/ICRC/MSF. Interagency Integrated Triage: Reference card (General Trauma, Road Traffic, Major
+      Burns, Threatened Limb, Signs of Respiratory Distress, Ingestion/exposure). https://www.who.int/tools/triage
+    scope: Defines the "high-risk trauma", "threatened limb" and "poisoning/ingestion" Red criteria of both IITT tools.
+  imci:
+    short: WHO IMCI Chart Booklet (2014)
+    full: World Health Organization. Integrated Management of Childhood Illness — Chart Booklet. Geneva; March 2014.
+    scope: Children 2 months to 5 years (young infants under 2 months use the young-infant chart).
+  isshp:
+    short: ISSHP 2021 hypertension-in-pregnancy recommendations
+    full: >-
+      Magee LA, Brown MA, Hall DR, et al. The 2021 International Society for the Study of Hypertension in
+      Pregnancy classification, diagnosis & management recommendations for international practice.
+      Pregnancy Hypertens. 2022;27:148-169.
+    scope: Hypertension ≥140/90; severe hypertension ≥160/110; pre-eclampsia features.
+  who_pcpnc:
+    short: WHO Pregnancy, Childbirth, Postpartum and Newborn Care (PCPNC), danger signs
+    full: >-
+      World Health Organization. Pregnancy, Childbirth, Postpartum and Newborn Care: a guide for essential
+      practice. 3rd ed. Geneva; 2015.
+    scope: Pregnancy danger signs — vaginal bleeding, convulsions, severe headache with blurred vision, fever and too weak to get out of bed, severe abdominal pain, fast or difficult breathing.
+  rcog_rfm:
+    short: RCOG Green-top Guideline 57 — reduced fetal movements
+    full: Royal College of Obstetricians and Gynaecologists. Reduced Fetal Movements. Green-top Guideline No. 57; 2011.
+    scope: Reduced fetal movements after 24 weeks warrant same-day assessment.
+  ada:
+    short: ADA Standards of Care — hypoglycaemia level 1 (<70 mg/dL)
+    full: American Diabetes Association. Standards of Care in Diabetes — Glycemic Goals and Hypoglycemia (level 1 <70 mg/dL; level 2 <54 mg/dL).
+    scope: Numeric threshold for the IITT "hypoglycaemia" Red criterion in adults, which the IITT leaves unquantified.
+  who_pocketbook:
+    short: WHO Pocket Book of Hospital Care for Children (2013) — hypoglycaemia
+    full: >-
+      World Health Organization. Pocket Book of Hospital Care for Children. 2nd ed. 2013 (hypoglycaemia
+      <2.5 mmol/L, or <3 mmol/L in severe acute malnutrition).
+    scope: Numeric threshold for the IITT paediatric "hypoglycaemia" Red criterion; the higher 3 mmol/L (54 mg/dL) cut-off is used to stay conservative.
+  who_hb:
+    short: WHO haemoglobin thresholds for anaemia severity (2011)
+    full: >-
+      World Health Organization. Haemoglobin concentrations for the diagnosis of anaemia and assessment
+      of severity. Vitamin and Mineral Nutrition Information System. Geneva; 2011 (WHO/NMH/NHD/MNM/11.1).
+    scope: Severe anaemia — Hb below 7.0 g/dL in pregnancy and children 6–59 months; below 8.0 g/dL in children 5 years and over, non-pregnant women and men.
+  local:
+    short: Local facility rule (not from a published protocol)
+    full: >-
+      Facility-configurable rule added by the deploying institution. Not taken from a published triage
+      protocol; shown to reviewers as local so it is never mistaken for a guideline.
+    scope: Editable per facility profile.
+  safety:
+    short: Jeevia safety policy — unknown is never normal
+    full: >-
+      Engine policy: a case cannot be routine (GREEN) while core vital signs, AVPU or the danger-sign
+      check are missing, or while any rule is undecided because of missing data. Such cases are held at
+      provisional YELLOW listing what to measure.
+    scope: All patients.

@@ -30,6 +30,7 @@ from ..schemas import (
     ReferralOut,
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
+from ..triage.findings import FINDINGS
 from ..services import auto_escalate, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient, record_observations
 from .facilities import get_facility
 
@@ -151,11 +152,14 @@ def add_observations(eid: str, body: ObservationIn, user: Reviewer, db: DB):
     e = load_encounter(db, eid, user)
     vitals = {k: v for k, v in (body.vitals.model_dump() if body.vitals else {}).items() if v is not None}
     note = (body.note or "").strip()
-    if not vitals and not note:
-        raise HTTPException(422, "Enter at least one vital sign or an observation")
+    signs = [s for s in (body.signs or []) if s in FINDINGS]
+    if body.signs and len(signs) != len(body.signs):
+        raise HTTPException(422, "Unknown danger sign")
+    if not vitals and not note and not signs and not body.exam_done:
+        raise HTTPException(422, "Enter at least one vital sign, danger sign or observation")
     before = e.urgency
-    record_observations(db, e, user, vitals, note)
-    parts = [f"{k}={v}" for k, v in vitals.items()] + ([f"note: {note[:120]}"] if note else [])
+    record_observations(db, e, user, vitals, note, signs, body.exam_done)
+    parts = [f"{k}={v}" for k, v in vitals.items()] + ([f"signs: {', '.join(signs)}"] if signs else []) + (["danger-sign check done"] if body.exam_done else []) + ([f"note: {note[:120]}"] if note else [])
     change = f"; urgency {before} → {e.urgency} (rules)" if e.urgency != before else ""
     audit.record(db, user, "UPDATE", "encounter", e.id, f"Observations recorded by {user.role}: {', '.join(parts)}{change}", e.patient.code, e.facility_id)
     return encounter_out(e, user)
@@ -185,12 +189,17 @@ def override(eid: str, body: OverrideIn, user: Doctor, db: DB):
     """Human-in-the-loop override. The rules-engine output stays in `rules_urgency`; a written reason is mandatory."""
     e = load_encounter(db, eid, user)
     frm = e.urgency
-    e.override = {"from_urgency": frm, "to_urgency": body.to_urgency, "category": body.category, "reason": body.reason, "by": user.name, "at": now().isoformat()}
+    # Rules marked non-downgradable can still be overruled by a doctor (humans decide), but never
+    # silently: the audit entry names every such rule that the new urgency goes below.
+    rank = {"green": 0, "yellow": 1, "red": 2}
+    overruled = [h["rule_id"] for h in ((e.note or {}).get("rules_fired") or [])
+                 if h.get("non_downgradable") and rank.get(h["urgency"], 0) > rank[body.to_urgency]]
+    e.override = {"from_urgency": frm, "to_urgency": body.to_urgency, "category": body.category, "reason": body.reason, "by": user.name, "at": now().isoformat(), "overruled_non_downgradable": overruled}
     e.urgency = body.to_urgency
     e.urgency_source = "override"
     esc = escalate_after(body.to_urgency)
     e.escalation_due_at = e.created_at + timedelta(minutes=esc) if esc else None
-    audit.record(db, user, "OVERRIDE", "encounter", eid, f'Urgency {frm} → {body.to_urgency} ({body.category}). Reason: "{body.reason}". Rules-engine output ({e.rules_urgency}) retained.', e.patient.code, e.facility_id)
+    audit.record(db, user, "OVERRIDE", "encounter", eid, f'Urgency {frm} → {body.to_urgency} ({body.category}). Reason: "{body.reason}". Rules-engine output ({e.rules_urgency}) retained.{(" Overrules non-downgradable rule(s): " + ", ".join(overruled)) if overruled else ""}', e.patient.code, e.facility_id)
     return encounter_out(e, user)
 
 
