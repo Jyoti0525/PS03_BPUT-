@@ -244,3 +244,35 @@ def _auto_escalate(db: Session) -> None:
         changed = True
     if changed:
         db.commit()
+
+
+def summarise_later(encounter_id: str) -> None:
+    """Ask the local language model for a readable summary in the background (B5), so intake is never slowed.
+    The template note is already saved; this replaces its summary only if the model's text passes every check. A note
+    rebuilt meanwhile (new vitals) or edited by a clinician is left alone."""
+    if not get_settings().llm_url:
+        return
+
+    def run():
+        from . import llm
+        from .db import SessionLocal
+
+        with SessionLocal() as db:
+            e = db.get(Encounter, encounter_id)
+            if not e or not e.note or e.note.get("edited_by"):
+                return
+            stamp = e.note.get("generated_at")
+            note = llm.apply(e.note, e.intake or {}, e.patient)
+            db.refresh(e)
+            if not e.note or e.note.get("generated_at") != stamp or e.note.get("edited_by"):
+                return
+            e.note = note
+            r = note.get("llm") or {}
+            if r.get("status") == "FAIL_FELL_BACK":
+                why = "; ".join(r["guard"] + r["faithfulness"])
+                audit.record(db, None, "GUARD_BLOCK", "encounter", e.id, f'AI summary rejected ({why}). Rejected text: "{r["rejected_text"][:600]}"', e.patient.code, e.facility_id)
+            elif r.get("status") == "PASS":
+                audit.record(db, None, "UPDATE", "encounter", e.id, f"Summary written by {r['model']} in {r['ms']} ms; faithfulness and output guard passed", e.patient.code, e.facility_id)
+            db.commit()
+
+    threading.Thread(target=run, name=f"summary-{encounter_id}", daemon=True).start()

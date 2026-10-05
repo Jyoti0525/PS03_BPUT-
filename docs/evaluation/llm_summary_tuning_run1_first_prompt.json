@@ -1,0 +1,370 @@
+{
+ "summary": {
+  "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+  "cases": 30,
+  "passed": 19,
+  "fell_back": 11,
+  "pass_rate": 0.633,
+  "median_ms": 2194,
+  "max_ms": 2907,
+  "guard_blocks": 0,
+  "faithfulness_failures": 11
+ },
+ "rows": [
+  {
+   "case": 1,
+   "chief": "Fever for 4 days with headache",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2875,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 34-year-old female visited for a normal visit with a chief complaint of fever for 4 days and headache. She reported the fever started 4 days ago and rated its severity as 6 out of 10. The case matches any two of the following: fever or hypothermia, headache, altered mental status, or stiff neck. Pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, clinician danger-sign check, diastolic BP, and shock index have not been recorded and are required before the case can be routine.",
+   "faithfulness": [
+    "states altered mental status, which the record does not",
+    "states stiff neck, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 2,
+   "chief": "Chest pain spreading to the left arm since morning, sweating",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2400,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 52-year-old male visited for chest pain spreading to the left arm since this morning, accompanied by sweating. His blood pressure was 150/95 mmHg and pulse was 104 bpm. The system flagged acute chest or abdominal pain in patients over 50 and chest pain spreading to arm, jaw, or back with sweating as features of acute coronary syndrome. Respiratory rate, SpO₂, temperature, level of consciousness, clinician danger-sign check, pain severity, and time of onset were not recorded and are required before the case can be routine.",
+   "faithfulness": [
+    "states abdominal pain, which the record does not",
+    "states known time sensitive dx, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 3,
+   "chief": "Fever for 3 days, no chest pain, no cough",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2262,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 45-year-old male visited for a normal visit with a chief complaint of fever for 3 days, no chest pain, and no cough. His measured temperature is 101.2 °F. The case is currently not routine due to missing vital signs and assessments: pulse, respiratory rate, SpO₂, systolic BP, AVPU level of consciousness, clinician danger-sign check, diastolic BP, and shock index (pulse ÷ systolic BP). These measurements are required before the case can be considered routine."
+  },
+  {
+   "case": 4,
+   "chief": "Headache and blurred vision",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1972,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 28-year-old female pregnant at 32 weeks presents with headache and blurred vision. Her blood pressure is 158/102 mmHg. The case matches rules for severe headache with blurred vision, hypertension in pregnancy, and acute visual disturbance. The patient denies chest pain, and the duration of symptoms is not stated. Vital signs including pulse, respiratory rate, SpO₂, temperature, and level of consciousness are not recorded.",
+   "faithfulness": [
+    "denies pain, which the record states"
+   ],
+   "guard": []
+  },
+  {
+   "case": 5,
+   "chief": "Routine antenatal check, feels well",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2194,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 24-year-old female visited for a routine antenatal check and reports feeling well. She is currently pregnant at 20 weeks. The visit has not yet been classified as routine because key vital signs and assessments are missing: pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, clinician danger-sign check, diastolic BP, pain/symptom severity, and shock index (pulse ÷ systolic BP). The duration of the complaint is not stated.",
+   "faithfulness": [
+    "states pain, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 6,
+   "chief": "Diabetes follow-up, more tired than usual",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2225,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 61-year-old male attended for diabetes follow-up, reporting feeling more tired than usual. He denies any new onset of symptoms and has no recent lab reports. His measured glucose level is 268 mg/dL. He is currently on metformin. Pulse, respiratory rate, SpO₂, systolic BP, diastolic BP, temperature, AVPU level of consciousness, and clinician danger-sign check were not recorded and are required before the case can be routine. Duration of the complaint is not stated."
+  },
+  {
+   "case": 7,
+   "chief": "BP check, no complaints",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2305,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 58-year-old female visited for a routine BP check with no complaints. Her blood pressure reading was 146/92 mmHg. She has a known condition of hypertension and reports feeling the same as during her last visit. She is currently on amlodipine. Pulse, respiratory rate, SpO₂, temperature, AVPU level of consciousness, and clinician danger-sign check were not recorded and are required before the case can be considered routine. Duration of complaint and recent lab reports for chronic follow-up are not available."
+  },
+  {
+   "case": 8,
+   "chief": "Loose stools 6 times since yesterday and vomiting twice",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1773,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 6-year-old male visited for a normal visit with chief complaint of loose stools 6 times since yesterday and vomiting twice. The symptoms started 1 day ago. The case is matched to ongoing diarrhoea and requires recording of pulse, respiratory rate, SpO₂, temperature, AVPU level of consciousness, and clinician danger-sign check before it can be routine. None of these vital signs or assessments have been recorded yet."
+  },
+  {
+   "case": 9,
+   "chief": "Fever and fast breathing since last night",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1704,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 3-year-old female visited for fever and fast breathing since last night. Her temperature is 102.4 °F and her respiratory rate is 52 /min. The case has triggered high-risk rules for temperature and respiratory rate based on age. Pulse, SpO₂, level of consciousness, and clinician danger-sign check have not been recorded and are required before the case can be considered routine."
+  },
+  {
+   "case": 10,
+   "chief": "Fell from a roof, pain and swelling in the right wrist",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2287,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 40-year-old male visited for a normal visit with a chief complaint of falling from a roof, causing pain and swelling in the right wrist, which started today. The case is flagged under trauma with a dangerous mechanism, high-risk trauma due to fall from height, and other trauma or burns. Pulse, respiratory rate, SpO₂, systolic BP, temperature, level of consciousness, clinician danger-sign check, diastolic BP, pain severity, and shock index have not been recorded and are required before the case can be considered routine.",
+   "faithfulness": [
+    "states burn, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 11,
+   "chief": "Snake bite on the left foot two hours ago",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1660,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 35-year-old male visited for a snake bite on the left foot two hours ago. The case is matched to the rule for snake bite. Pulse, respiratory rate, SpO₂, systolic BP, temperature, level of consciousness, clinician danger-sign check, diastolic BP, and shock index have not been recorded and are required before the case can be routine."
+  },
+  {
+   "case": 12,
+   "chief": "Sudden weakness of the right arm and slurred speech since one hour",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2467,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 67-year-old female visited the facility with a chief complaint of sudden weakness in the right arm and slurred speech that started one hour ago. The case is flagged for acute general weakness and acute focal neurological complaint. Key measurements such as pulse, respiratory rate, SpO₂, systolic BP, diastolic BP, temperature, AVPU level of consciousness, and clinician danger-sign check have not been recorded. The time of onset, pulse, and shock index (pulse ÷ systolic BP) are also not yet recorded and are required before the case can be considered routine."
+  },
+  {
+   "case": 13,
+   "chief": "Cough for 3 weeks with blood in sputum and weight loss",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2512,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 30-year-old male visited for a normal visit with a chief complaint of cough for 3 weeks and blood in sputum along with weight loss. The cough started 3 weeks ago. The system flagged active bleeding due to blood in nose, gums, vomiting, or other sources and coughing blood, prompting screening for TB and other causes. Pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, clinician danger-sign check, diastolic BP, and shock index have not been recorded and are required before the case can be considered routine.",
+   "faithfulness": [
+    "states bleeding, which the record does not",
+    "states vomiting, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 14,
+   "chief": "Burning while passing urine for 2 days",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2399,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 22-year-old female visited for a normal visit with a chief complaint of burning while passing urine for 2 days. She rates the severity as 4 out of 10. The case is currently matched to \"Other trauma or burns\" and requires additional measurements including pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, clinician danger-sign check, diastolic BP, and shock index (pulse ÷ systolic BP) before it can be considered routine. These vital signs and assessments have not yet been recorded."
+  },
+  {
+   "case": 15,
+   "chief": "Breathless when walking, worse over the last week, works in a stone-crushing unit",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2907,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 48-year-old male visited for a normal visit with a chief complaint of breathlessness when walking, which has worsened over the last week. He works in a stone-crushing unit. The system has flagged possible drowning, hanging, electrocution, or trauma with a dangerous mechanism, as well as high-risk trauma including fall from height, road crash, penetrating, crush, or injury during pregnancy, and other trauma or burns. Key vital signs including pulse, respiratory rate, SpO₂, systolic BP, temperature, and level of consciousness are not recorded and are required before the case can be considered routine. Diastolic BP and shock index are also not recorded and are needed for further assessment.",
+   "faithfulness": [
+    "states burn, which the record does not",
+    "states fall from height, which the record does not",
+    "states penetrating injury, which the record does not",
+    "states drowning hanging electrocution, which the record does not",
+    "states pregnant, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 16,
+   "chief": "Stomach pain on the right lower side since yesterday, vomited once",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2510,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 19-year-old female visited for a normal visit with a chief complaint of right lower side stomach pain that started one day ago and has vomited once. She rates the pain as 7 out of 10. The case is flagged as matching the rule for severe pain anywhere in the body due to self-rated severity of 7/10 or more. Pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, clinician danger-sign check, diastolic BP, and shock index have not been recorded and are required before the case can be routine."
+  },
+  {
+   "case": 17,
+   "chief": "Confused since morning, not eating",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2553,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 72-year-old male visited for a normal visit with chief complaint of confusion since morning and not eating. His oxygen saturation was measured at 89%, and his temperature was 100.8 °F. The system flagged that SpO₂ is below 90%, and that the patient has altered mental status or agitation, fever or hypothermia, headache, or stiff neck. Pulse, respiratory rate, systolic BP, AVPU level, clinician danger-sign check, diastolic BP, and shock index were not recorded and are required before the case can be routine.",
+   "faithfulness": [
+    "states headache, which the record does not",
+    "states stiff neck, which the record does not",
+    "states agitated, which the record does not",
+    "states fever, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 18,
+   "chief": "Itchy rash on both hands for a week, no fever",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2164,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 26-year-old female visited for a normal visit with a chief complaint of an itchy rash on both hands for a week, and denies fever. The onset of symptoms was 7 days ago. Several vital signs and assessments, including pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, and clinician danger-sign check, have not been recorded. Diastolic BP and shock index (pulse ÷ systolic BP) have also not been measured or recorded."
+  },
+  {
+   "case": 19,
+   "chief": "Asthma, using inhaler more often at night",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2339,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 55-year-old male with known asthma reports using his salbutamol inhaler more frequently at night and feels worse compared to his last visit. The visit is for chronic follow-up. Pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, and clinician danger-sign check have not been recorded. Diastolic BP and shock index (pulse ÷ systolic BP) have not been measured or recorded. Duration of the complaint is not stated and no recent lab report is available for this chronic follow-up."
+  },
+  {
+   "case": 20,
+   "chief": "Fever with chills every evening for 5 days, body ache",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2174,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 33-year-old male visited for a normal visit with a chief complaint of fever with chills every evening for 5 days and body ache. His measured temperature is 102 °F. Pulse, respiratory rate, SpO₂, systolic BP, diastolic BP, AVPU level of consciousness, clinician danger-sign check, and pain/symptom severity have not been recorded. Shock index (pulse ÷ systolic BP) has not been measured or recorded."
+  },
+  {
+   "case": 21,
+   "chief": "Bleeding gums and black stools after fever",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2070,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 44-year-old female visited for a normal visit with chief complaint of bleeding gums and black stools after fever. The symptoms started 3-7 days ago. The case is matched under active bleeding — nose, gums, vomiting blood or other — and ongoing bleeding. Pulse, respiratory rate, SpO₂, systolic BP, temperature, level of consciousness, clinician danger-sign check, diastolic BP, and shock index have not been recorded and are required before the case can be routine.",
+   "faithfulness": [
+    "states haematemesis, which the record does not",
+    "states vomiting, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 22,
+   "chief": "Ear pain and discharge for 3 days",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1334,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 10-year-old male visited for ear pain and discharge that started 3 days ago. The visit type is normal. Pulse, respiratory rate, SpO₂, temperature, level of consciousness, and clinician danger-sign check have not been recorded and are required before the case can be considered routine."
+  },
+  {
+   "case": 23,
+   "chief": "Dizziness and tiredness, periods heavy",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1811,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 39-year-old female visited for dizziness and tiredness, with heavy periods. The onset of symptoms is unknown. The duration of the complaint is not stated. Pulse, respiratory rate, SpO₂, systolic BP, diastolic BP, temperature, AVPU level of consciousness, and clinician danger-sign check have not been recorded. Shock index and diastolic BP have not been measured or recorded."
+  },
+  {
+   "case": 24,
+   "chief": "Headache, no vomiting, no weakness",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1825,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 50-year-old male visited for a normal visit with chief complaint of headache, no vomiting, and no weakness. Blood pressure was measured at 182/110 mmHg. Pulse, respiratory rate, SpO₂, temperature, level of consciousness, and clinician danger-sign check were not recorded. Pain or symptom severity and shock index were not measured or recorded. Duration of the complaint is not stated."
+  },
+  {
+   "case": 25,
+   "chief": "Cut on the left palm from a machine at work, bleeding stopped",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2134,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 29-year-old male visited for a cut on the left palm sustained at work today. The bleeding has stopped, and the patient denies any other symptoms. The case is flagged under active bleeding, ongoing bleeding, and other trauma or burns. Vital signs including pulse, respiratory rate, SpO₂, systolic BP, temperature, and level of consciousness are not recorded and are required before the case can be marked as routine. Diastolic BP and shock index are also not recorded and are needed for further assessment.",
+   "faithfulness": [
+    "states burn, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 26,
+   "chief": "Sugar check, feet tingling",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1943,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 63-year-old female visited for a sugar check and reports feet tingling. She has a known history of diabetes and feels unsure about her condition compared to her last visit. Current medicines are not recorded. Vital signs including pulse, respiratory rate, SpO₂, systolic BP, diastolic BP, temperature, and level of consciousness are not recorded. Duration of the complaint is not stated and no recent lab report is available for chronic follow-up."
+  },
+  {
+   "case": 27,
+   "chief": "Less baby movement since yesterday",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1993,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 31-year-old female pregnant woman at 36 weeks gestation reports less baby movement since yesterday. The onset of the complaint is stated to be one day ago. Pulse, respiratory rate, SpO₂, systolic BP, temperature, AVPU level of consciousness, clinician danger-sign check, diastolic BP, and pain/symptom severity have not been recorded. Shock index (pulse ÷ systolic BP) has not been measured.",
+   "faithfulness": [
+    "states pain, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 28,
+   "chief": "Fever and rash for 2 days, no cough",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1359,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "An 8-year-old female visited for fever and rash that started 2 days ago. Her measured temperature is 101 °F. Pulse, respiratory rate, SpO₂, AVPU level of consciousness, and clinician danger-sign check have not been recorded and are required before the case can be routine."
+  },
+  {
+   "case": 29,
+   "chief": "Vomiting blood once this morning",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2015,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 46-year-old male visited for a normal visit with a chief complaint of vomiting blood once this morning. The onset was today, as stated by the patient. The case is matched under active bleeding due to vomiting blood or other sources and ongoing bleeding. Pulse, respiratory rate, SpO₂, systolic BP, temperature, level of consciousness, clinician danger-sign check, diastolic BP, and shock index have not been recorded and are required before the case can be considered routine."
+  },
+  {
+   "case": 30,
+   "chief": "Back pain after lifting a sack, no leg weakness",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 2337,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 37-year-old male visited for back pain after lifting a sack, with no leg weakness. The pain started 1-2 days ago and is rated 5 out of 10 in severity. The case is currently provisional and cannot be marked as routine until vital signs and consciousness level are recorded, including pulse, respiratory rate, SpO₂, systolic BP, diastolic BP, temperature, AVPU level of consciousness, and clinician danger-sign check. Shock index and diastolic BP are also required before the case can be considered routine."
+  }
+ ]
+}

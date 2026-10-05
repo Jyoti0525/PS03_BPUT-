@@ -64,6 +64,10 @@ class Settings(BaseSettings):
     # "indic-conformer-600m-multilingual" = the original fp32 download.
     asr_model: str = "indic-conformer-600m-int8"
     asr_decoding: str = "ctc"  # "ctc" (2x faster) or "rnnt" (slightly more accurate) — see docs/EVALUATION.md
+    # Note summary model (B5): llama.cpp llama-server, OpenAI-compatible. Unset = template summary only.
+    llm_url: str | None = None
+    llm_model_name: str = "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)"
+    llm_timeout_s: float = 30
     preload_language_models: bool = False  # load at start-up instead of on the first request
 
     escalate_red_min: int = 15

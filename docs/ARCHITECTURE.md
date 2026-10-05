@@ -1,6 +1,7 @@
 # Jeevia — architecture and implementation map
 
 Written for the team (frontend, backend, ML/data) and reviewers who want to see where each requirement lives.
+For each feature with the tools, models and data it uses, see [FEATURES.md](FEATURES.md).
 
 ## 1. System overview
 
@@ -14,9 +15,9 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
                                      FastAPI  /api/v1   (backend/app)
       auth · devices · facilities · patients · consents · encounters · escalations · referrals · files · audit
                      │                     │                          │
-         Rules engine (YAML)      Note pipeline (stub →        Local object storage
-         ATP · IMCI · maternal    ML track: ASR, IndicTrans2,   (expiry timestamps,
-         → urgency, rules trace   PaddleOCR + parrotlet, LLM)   signed URLs)
+         Rules engine (YAML)      Note pipeline: OCR, ASR,      Object storage
+         ATP · IITT · IMCI ·      IndicTrans2, privacy scrub,   (expiry timestamps,
+         maternal → urgency       checked LLM summary           signed URLs)
                      │                     │
                      └──────────► PostgreSQL on Neon: relational identity, facilities, users, audit_events
                                   (append-only trigger + hash chain); JSONB for intake and triage notes
@@ -28,7 +29,7 @@ Written for the team (frontend, backend, ML/data) and reviewers who want to see 
 1. A nurse signs in (phone OTP + account PIN — two factors) and opens `/kiosk`. The tablet must be **bound** to her facility
    (`POST /devices`); staff intake submissions without a bound `X-Device-Id` are rejected.
 2. Consent is captured first (`POST /consents`: self or proxy + relationship, privacy context, scopes).
-3. Voice: Web Speech API gives a live transcript; the kiosk **reads it back aloud** (TTS) and the patient confirms.
+3. Voice: the recording goes to `POST /speech/transcribe` (offline IndicConformer + IndicTrans2; the browser's Web Speech API only as a labelled fallback); the kiosk **reads it back aloud** (TTS) and the patient confirms.
    Raw audio is uploaded as `kind=audio` (24 h retention). Unconfirmed transcripts are flagged `ASR-UNCONFIRMED`.
 4. Bounded follow-up questions (`components/intake/catalog.tsx → contextQuestions`) fill gaps; answers feed the rules.
 5. `POST /encounters` → `rules.evaluate()` sets urgency and returns every fired rule → `pipeline.build_note()` builds
@@ -81,7 +82,10 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | `security.py` | JWT (access 60 min, rotating single-use refresh 7 days, revocation on logout; 5-minute `pin` step tokens between OTP and PIN), PBKDF2 hashing for OTP and PIN, weak-PIN rules, role dependencies. |
 | `audit.py` | Append-only hash chain. Each event is written in its own short transaction, serialised by a process lock and a Postgres advisory lock. ORM hook + DB trigger block UPDATE / DELETE. `GET /audit/verify` re-computes the chain. |
 | `triage/rules/*.yaml`, `triage/rules.py` | Deterministic rules engine (ATP, IMCI, maternal). |
-| `triage/pipeline.py` | Note-generation interface + deterministic stub — **replace internals here** with the ML pipeline. |
+| `triage/pipeline.py` | Builds the note: values with sources, flags, timeline, missing info, trends, documents, medicines. |
+| `triage/findings.py`, `triage/timeline.py` | Intake → present / absent / unknown findings (English, Hindi, Odia); onset with a certainty label. |
+| `triage/extraction.py`, `triage/images.py` | OCR and lab parsing; document type, medicine names, face and ID redaction. |
+| `language.py`, `privacy.py`, `llm.py`, `output_guard.py` | Speech and translation; identifier removal and cohort counts; checked summary model; non-diagnostic guard. |
 | `triage/reports.py` | Synthetic lab slips rendered to SVG with per-row bounding boxes (drives the traceability crops). |
 | `services.py` | Encounter creation, role-aware serialisation, patient ownership, lazy auto-escalation. |
 | `storage.py` | Pluggable object storage — local disk, Cloudinary (authenticated assets, signed downloads) or S3/R2 — with expiry and `purge_expired()`. |
@@ -167,13 +171,13 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 | Item | Hook |
 |---|---|
-| ASR / translation / OCR / summariser | Replace the body of `backend/app/triage/pipeline.py::build_note` — keep the returned shape (`TriageNote` in `frontend/src/lib/types.ts`). Values must carry `source` (bbox for OCR) and `needs_check` when engines disagree. |
+| ASR / translation / OCR / summariser | Built (see [FEATURES.md](FEATURES.md)). New engines must keep the note shape (`TriageNote` in `frontend/src/lib/types.ts`); values carry `source` (bbox for OCR) and `needs_check` when engines disagree. |
 | Patient identity resolution | `services.own_patient` (patient-account linking) and `GET /patients?q=` candidate ranking. |
 | Retention purge | Runs hourly in the API (`main._housekeeping_loop`, one instance via advisory lock); `storage.purge_expired(db)` deletes bytes, keeps metadata and writes `PURGE` audit events. Old OTP challenges are deleted too. |
 
 ## 5. Verification done
 
-* Backend: 54 pytest tests (incl. front desk vs supervisor, nurse observations vs doctor-only actions, sign-up number reuse, language preference) — rules; auth (OTP lockout and rate limits, two-factor PIN: setup, verify, lockout, forgot,
+* Backend: 332 pytest tests as of 5 Oct (see FEATURES.md §7); the list below is the original platform set: 54 tests (incl. front desk vs supervisor, nurse observations vs doctor-only actions, sign-up number reuse, language preference) — rules; auth (OTP lockout and rate limits, two-factor PIN: setup, verify, lockout, forgot,
   change, supervisor reset; refresh rotation; logout revocation); bound-device intake; idempotent replay; overrides;
   escalation acknowledgement; exports; RBAC for every role; patient isolation on a shared household phone; document
   access (treating clinicians only); directory search; organisation onboarding; roster and CSV import; fitness →

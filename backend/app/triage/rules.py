@@ -137,6 +137,17 @@ def onset_hours(intake: dict) -> tuple[float, float] | None:
             lo, hi, unit = float(m.group(1)), float(m.group(2) or m.group(1)), m.group(3)
             per = {"hour": 1, "hr": 1, "h": 1, "day": 24, "week": 168, "month": 720}[unit]
             return (max(0, (lo - 0.5) * per), (hi + 0.5) * per) if per > 1 else (lo, hi)
+    # Nothing tapped: use an onset the patient stated in their own words ("ଦୁଇ ଦିନ ହେଲା", "since this morning"), with a
+    # wide window. A vague one ("since Diwali") is never used, so its rules stay unresolved and staff are asked.
+    from .timeline import onset
+
+    o = onset(intake)
+    if o["certainty"] == "STATED" and o["days"] is not None:
+        h = o["days"] * 24
+        if h < 1e-9:
+            return (0, 24)  # "today", "this morning"
+        margin = h * 0.25 if h < 24 else max(12, h * 0.25)
+        return (max(0, h - margin), h + margin)
     return None
 
 

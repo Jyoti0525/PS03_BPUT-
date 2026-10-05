@@ -1,0 +1,56 @@
+# Synthetic intakes for evaluating the note-summary model (B5). Written by the team, 5 Oct 2026; no patient data.
+# English text as it reaches the note (after translation). Used by backend/scripts/eval_llm.py.
+cases:
+  - {age: 34, sex: F, category: normal, chief: "Fever for 4 days with headache", duration: "3-7 days", severity: 6}
+  - {age: 52, sex: M, category: normal, chief: "Chest pain spreading to the left arm since morning, sweating", vitals: {bp_systolic: 150, bp_diastolic: 95, pulse: 104}}
+  - {age: 45, sex: M, category: normal, chief: "Fever for 3 days, no chest pain, no cough", vitals: {temp_f: 101.2}}
+  - {age: 28, sex: F, category: maternal, chief: "Headache and blurred vision", maternal: {gestation_weeks: 32}, vitals: {bp_systolic: 158, bp_diastolic: 102}}
+  - {age: 24, sex: F, category: maternal, chief: "Routine antenatal check, feels well", maternal: {gestation_weeks: 20}}
+  - {age: 61, sex: M, category: chronic, chief: "Diabetes follow-up, more tired than usual", chronic: {condition: diabetes, current_medicines: metformin, feeling_vs_last: worse}, vitals: {glucose: 268}}
+  - {age: 58, sex: F, category: chronic, chief: "BP check, no complaints", chronic: {condition: hypertension, current_medicines: amlodipine, feeling_vs_last: same}, vitals: {bp_systolic: 146, bp_diastolic: 92}}
+  - {age: 6, sex: M, category: normal, chief: "Loose stools 6 times since yesterday and vomiting twice", duration: "1-2 days"}
+  - {age: 3, sex: F, category: normal, chief: "Fever and fast breathing since last night", vitals: {temp_f: 102.4, resp_rate: 52}}
+  - {age: 40, sex: M, category: normal, chief: "Fell from a roof, pain and swelling in the right wrist", duration: "Today"}
+  - {age: 35, sex: M, category: normal, chief: "Snake bite on the left foot two hours ago", duration: "Today"}
+  - {age: 67, sex: F, category: normal, chief: "Sudden weakness of the right arm and slurred speech since one hour"}
+  - {age: 30, sex: M, category: normal, chief: "Cough for 3 weeks with blood in sputum and weight loss", duration: "1-4 weeks"}
+  - {age: 22, sex: F, category: normal, chief: "Burning while passing urine for 2 days", duration: "1-2 days", severity: 4}
+  - {age: 48, sex: M, category: normal, chief: "Breathless when walking, worse over the last week, works in a stone-crushing unit", duration: "3-7 days"}
+  - {age: 19, sex: F, category: normal, chief: "Stomach pain on the right lower side since yesterday, vomited once", severity: 7}
+  - {age: 72, sex: M, category: normal, chief: "Confused since morning, not eating", vitals: {spo2: 89, temp_f: 100.8}}
+  - {age: 26, sex: F, category: normal, chief: "Itchy rash on both hands for a week, no fever", duration: "3-7 days"}
+  - {age: 55, sex: M, category: chronic, chief: "Asthma, using inhaler more often at night", chronic: {condition: asthma, current_medicines: salbutamol inhaler, feeling_vs_last: worse}}
+  - {age: 33, sex: M, category: normal, chief: "Fever with chills every evening for 5 days, body ache", duration: "3-7 days", vitals: {temp_f: 102}}
+  - {age: 44, sex: F, category: normal, chief: "Bleeding gums and black stools after fever", duration: "3-7 days"}
+  - {age: 10, sex: M, category: normal, chief: "Ear pain and discharge for 3 days", duration: "3-7 days"}
+  - {age: 39, sex: F, category: normal, chief: "Dizziness and tiredness, periods heavy"}
+  - {age: 50, sex: M, category: normal, chief: "Headache, no vomiting, no weakness", vitals: {bp_systolic: 182, bp_diastolic: 110}}
+  - {age: 29, sex: M, category: normal, chief: "Cut on the left palm from a machine at work, bleeding stopped", duration: "Today"}
+  - {age: 63, sex: F, category: chronic, chief: "Sugar check, feet tingling", chronic: {condition: diabetes, current_medicines: not recorded, feeling_vs_last: unsure}}
+  - {age: 31, sex: F, category: maternal, chief: "Less baby movement since yesterday", maternal: {gestation_weeks: 36}}
+  - {age: 8, sex: F, category: normal, chief: "Fever and rash for 2 days, no cough", duration: "1-2 days", vitals: {temp_f: 101}}
+  - {age: 46, sex: M, category: normal, chief: "Vomiting blood once this morning", duration: "Today"}
+  - {age: 37, sex: M, category: normal, chief: "Back pain after lifting a sack, no leg weakness", duration: "1-2 days", severity: 5}
+
+# Held out: written on 5 Oct after the prompt was revised on `cases`, before any model output on them was seen.
+held_out:
+  - {age: 27, sex: F, category: normal, chief: "Vomiting since last night, cannot keep water down", duration: "1-2 days", severity: 6}
+  - {age: 64, sex: M, category: chronic, chief: "BP follow-up, ankles swollen this week", chronic: {condition: hypertension, current_medicines: telmisartan, feeling_vs_last: worse}, vitals: {bp_systolic: 162, bp_diastolic: 98}}
+  - {age: 5, sex: M, category: normal, chief: "Cough and fever for 4 days, eating less", vitals: {temp_f: 101.6, resp_rate: 38}}
+  - {age: 41, sex: F, category: normal, chief: "Pain in the upper belly after meals for 2 weeks", duration: "1-4 weeks", severity: 4}
+  - {age: 23, sex: M, category: normal, chief: "Dog bite on the right calf this morning", duration: "Today"}
+  - {age: 70, sex: F, category: normal, chief: "Fell in the bathroom, hip pain, cannot stand", duration: "Today", vitals: {pulse: 96}}
+  - {age: 36, sex: F, category: maternal, chief: "Swelling of feet and face", maternal: {gestation_weeks: 34}, vitals: {bp_systolic: 148, bp_diastolic: 96}}
+  - {age: 52, sex: M, category: chronic, chief: "Diabetes check, wound on the left foot not healing", chronic: {condition: diabetes, current_medicines: glimepiride, feeling_vs_last: worse}, vitals: {glucose: 312}}
+  - {age: 18, sex: F, category: normal, chief: "Headache and fever for 2 days, no rash", duration: "1-2 days", vitals: {temp_f: 100.9}}
+  - {age: 44, sex: M, category: normal, chief: "Chest tightness while climbing stairs, settles with rest", duration: "1-4 weeks"}
+  - {age: 2, sex: F, category: normal, chief: "Loose stools and not passing urine since morning", vitals: {temp_f: 99.5}}
+  - {age: 33, sex: M, category: normal, chief: "Burn on the right forearm from hot oil at work", duration: "Today", severity: 7}
+  - {age: 57, sex: F, category: normal, chief: "Blurred vision in one eye since yesterday"}
+  - {age: 29, sex: F, category: normal, chief: "Fever with joint pains for 3 days", duration: "3-7 days", vitals: {temp_f: 102.2}}
+  - {age: 66, sex: M, category: chronic, chief: "COPD, more breathless, cough with yellow sputum", chronic: {condition: COPD, current_medicines: tiotropium inhaler, feeling_vs_last: worse}, vitals: {spo2: 91}}
+  - {age: 12, sex: M, category: normal, chief: "Fell from a bicycle, scraped knee, no head injury", duration: "Today"}
+  - {age: 38, sex: F, category: normal, chief: "Tired for a month, no weight loss, no fever", duration: "more than a month"}
+  - {age: 25, sex: F, category: maternal, chief: "Bleeding from the vagina with lower belly pain", maternal: {gestation_weeks: 10}}
+  - {age: 49, sex: M, category: normal, chief: "Eyes red and itchy for 3 days, no pain", duration: "3-7 days"}
+  - {age: 60, sex: M, category: normal, chief: "Passing very little urine, swelling of legs", vitals: {bp_systolic: 170, bp_diastolic: 100}}

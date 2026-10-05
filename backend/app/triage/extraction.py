@@ -456,18 +456,27 @@ def extract_document(data: bytes, content_type: str, *, patient_name: str | None
     warnings = list(res.quality.get("issues", []))
     if res.error:
         warnings.append(res.error)
-    if res.lines:
-        warnings += document_checks(meta, patient_name)
-    if res.lines and not rows:
-        warnings.append("No recognised lab values — the reviewer should read the document directly")
     W, H = res.page_size
+    text = [{"text": x.text, "conf": round(x.conf, 3), "bbox": [x.box[0] / W, x.box[1] / H, x.box[2] / W, x.box[3] / H], "page": x.page} for x in res.lines[:400]]
+    from .images import doc_type, medicines
+
+    kind = doc_type(text, len(rows)) if res.lines else {"type": "non_document", "label": "Not read", "why": res.error or "no text found"}
+    if res.lines and kind["type"] != "medicine_strip":  # a strip has mfg/expiry dates and no patient name
+        warnings += document_checks(meta, patient_name)
+    if res.lines and not rows and kind["type"] not in ("medicine_strip", "prescription"):
+        warnings.append("No recognised lab values — the reviewer should read the document directly")
+    meds = medicines(text) if kind["type"] in ("prescription", "medicine_strip") else []
+    if kind["type"] in ("prescription", "medicine_strip") and rows:
+        rows = []  # numbers on a strip or prescription are strengths, not lab values
     return {
         "engine": res.engine,
+        "doc_type": kind,
+        "medicines": meds,
         "quality": res.quality,
         "rows": rows,
         "meta": meta,
         "warnings": warnings,
-        "text": [{"text": x.text, "conf": round(x.conf, 3), "bbox": [x.box[0] / W, x.box[1] / H, x.box[2] / W, x.box[3] / H], "page": x.page} for x in res.lines[:400]],
+        "text": text,
         "at": datetime.now(timezone.utc).isoformat(),
     }
 

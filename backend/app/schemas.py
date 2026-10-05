@@ -20,11 +20,20 @@ OrgKind = Literal["company", "industrial", "campus", "ngo", "government_programm
 FitnessStatus = Literal["fit", "fit_with_restrictions", "temporarily_unfit", "pending_review"]
 REVIEWER_ROLES = {"doctor", "nurse"}
 ADMIN_ROLES = {"receptionist", "supervisor"}  # front desk + supervisor (tokens, patients, duty)
-SUPERVISOR_ROLES = {"supervisor"}  # facility setup, kiosk links, devices, staff, audit, retention
+SUPERVISOR_ROLES = {"supervisor"}
+NO_AI_SCOPE = "no_ai"  # consent scope: the patient chose to continue without AI (G1)  # facility setup, kiosk links, devices, staff, audit, retention
 
 
 class ORM(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+
+
+def _no_id_numbers(v: str | None) -> str | None:
+    """Staff free text: phone, Aadhaar, ABHA and e-mail are replaced before storage (G3). Names stay — staff
+    legitimately refer to the patient, whose identity is on the registration record."""
+    from .privacy import scrub
+
+    return scrub(v, numbers_only=True)[0]
 
 
 # ── Auth ────────────────────────────────────────────────
@@ -54,6 +63,12 @@ class DutyIn(BaseModel):
     on_duty: bool
 
 
+class MedicationReview(BaseModel):
+    """Nurse/doctor decision on medicine names read from a strip or prescription (B10)."""
+    confirm: list[str] = []  # generic names exactly as listed in medications_pending
+    reject: list[str] = []
+
+
 class ObservationIn(BaseModel):
     vitals: "Vitals | None" = None
     note: str | None = Field(default=None, max_length=1000)
@@ -61,6 +76,8 @@ class ObservationIn(BaseModel):
     # was performed, so unchecked signs count as absent rather than unknown.
     signs: list[str] | None = None
     exam_done: bool = False
+
+    _scrub = field_validator("note")(_no_id_numbers)
 
 
 class Tokens(BaseModel):
@@ -457,16 +474,20 @@ class OverrideIn(BaseModel):
     def _strip(cls, v: str) -> str:
         if len(v.strip()) < 15:
             raise ValueError("A written reason of at least 15 characters is required")
-        return v.strip()
+        return _no_id_numbers(v.strip())
 
 
 class EscalationIn(BaseModel):
     to_role: Literal["senior_mo", "specialist", "doctor"]
     reason: str = Field(min_length=5, max_length=1000)
 
+    _scrub = field_validator("reason")(_no_id_numbers)
+
 
 class AckIn(BaseModel):
     note: str = ""
+
+    _scrub = field_validator("note")(_no_id_numbers)
 
 
 class EscalationOut(BaseModel):

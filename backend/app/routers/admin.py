@@ -8,7 +8,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import or_, select
 
-from .. import audit, storage
+from .. import audit, privacy, storage
 from ..models import AuditEvent, Encounter, FileObject, Reminder, User
 from ..schemas import ADMIN_ROLES, AuditOut, AuditVerify, MyRecord, PatientOut, ReminderOut, RetentionOut
 from ..security import DB, require
@@ -45,6 +45,21 @@ def export_audit(user: Auditor, db: DB):
     for a in db.scalars(select(AuditEvent).where(or_(AuditEvent.facility_id == user.facility_id, AuditEvent.facility_id.is_(None))).order_by(AuditEvent.id)):
         w.writerow([a.id, a.ts.isoformat(), a.actor_name, a.actor_role, a.action, f"{a.resource_type}:{a.resource_id or ''}", a.patient_code or "", a.detail, a.prev_hash, a.hash])
     return Response(buf.getvalue(), media_type="text/csv", headers={"Content-Disposition": 'attachment; filename="jeevia-audit-log.csv"'})
+
+
+@router.get("/cohort")
+def deidentified_cohort(user: Auditor, db: DB, days: int = 28):
+    """De-identified view of this facility's recent cases (G3): counts only, small cells suppressed."""
+    days = max(7, min(days, 180))
+    since = now() - timedelta(days=days)
+    rows = []
+    for e in db.scalars(select(Encounter).where(Encounter.facility_id == user.facility_id, Encounter.created_at >= since)):
+        found = ((e.note or {}).get("triage") or {}).get("findings") or {}
+        y, w, _ = e.created_at.isocalendar()
+        rows.append({"week": f"{y}-W{w:02d}", "age": e.patient.age, "sex": e.patient.sex if e.patient.sex in ("F", "M") else "O",
+                     "category": e.category, "urgency": e.urgency, "findings": [f for f, v in found.items() if (v or {}).get("value") is True]})
+    audit.record(db, user, "VIEW", "cohort", None, f"De-identified cohort viewed ({days} days, {len(rows)} cases)", None, user.facility_id)
+    return privacy.cohort(rows, days)
 
 
 @router.get("/retention", response_model=RetentionOut)

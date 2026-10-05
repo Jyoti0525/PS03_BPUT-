@@ -141,6 +141,7 @@ export const liveApi: JeeviaApi = {
 
   listUsers: () => json("/users"),
   setDuty: (id, on_duty) => patch(`/users/${id}/duty`, { on_duty }),
+  reviewMedications: (eid, confirm, reject) => post(`/encounters/${eid}/medications`, { confirm, reject }),
   addObservations: (eid, input) => post(`/encounters/${eid}/observations`, input),
 
   searchPatients: (q) => json(`/patients?q=${encodeURIComponent(q)}`),
@@ -168,8 +169,9 @@ export const liveApi: JeeviaApi = {
   createReferral: (encounterId, input) => post(`/encounters/${encounterId}/referrals`, input),
   listReferrals: () => json("/referrals"),
 
-  uploadFile: (file, kind, encounterId, sampleKey) => {
+  uploadFile: (file, kind, encounterId, sampleKey, read = true) => {
     const fd = new FormData();
+    if (!read) fd.append("read", "false");
     fd.append("file", file);
     fd.append("kind", kind);
     if (encounterId) fd.append("encounter_id", encounterId);
@@ -195,6 +197,7 @@ export const liveApi: JeeviaApi = {
   exportAuditCsv: () => download("/audit/export", "audit-log.csv"),
 
   retentionStatus: () => json("/retention"),
+  deidentifiedCohort: (days = 28) => json(`/cohort?days=${days}`),
 
   myRecord: () => json("/me/record"),
 

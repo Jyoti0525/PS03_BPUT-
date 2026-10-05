@@ -892,6 +892,15 @@ export const mockApi: JeeviaApi = {
       return publicUser(u);
     }),
 
+  reviewMedications: (eid) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor", "nurse"]);
+      const enc = d.encounters.find((e) => e.id === eid);
+      if (!enc) throw new ApiError(404, "Encounter not found");
+      return clone(enc); // the in-browser demo never reads medicine strips (no OCR), so there is nothing to confirm
+    }),
+
   addObservations: (eid, input) =>
     withDb(async (d) => {
       const me = await current(d);
@@ -1273,6 +1282,50 @@ export const mockApi: JeeviaApi = {
       const encounters = d.encounters.filter((e) => e.patient.id === patient.id).sort((a, b) => b.created_at.localeCompare(a.created_at)).map((e) => forRole(e, me));
       await audit(d, me, "VIEW", "patient", patient.id, "Patient viewed own record", patient.code);
       return { patient: clone(patient), encounters, reminders: clone(d.reminders.filter((r) => r.patient_id === patient.id)) };
+    }),
+
+  deidentifiedCohort: (days = 28) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["supervisor", "doctor"]);
+      const since = Date.now() - days * 86400000;
+      const rows = d.encounters.filter((e) => e.facility_id === me.facility_id && Date.parse(e.created_at) >= since);
+      await audit(d, me, "VIEW", "cohort", null, `De-identified cohort viewed (${days} days, ${rows.length} cases)`);
+      const K = 5;
+      let suppressed = 0;
+      const table = (vals: string[], keys: string[]) =>
+        keys.map((key) => {
+          const n = vals.filter((v) => v === key).length;
+          const hide = n > 0 && n < K;
+          if (hide) suppressed++;
+          return { key, count: hide ? null : n };
+        });
+      const bands: [number, number, string][] = [[0, 4, "0–4"], [5, 13, "5–13"], [14, 17, "14–17"], [18, 39, "18–39"], [40, 59, "40–59"], [60, 200, "60+"]];
+      const band = (a: number) => bands.find(([lo, hi]) => lo <= a && a <= hi)![2];
+      const week = (iso: string) => {
+        const t = new Date(iso);
+        const d0 = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate()));
+        d0.setUTCDate(d0.getUTCDate() + 4 - (d0.getUTCDay() || 7)); // ISO week: the Thursday decides the year
+        const w = Math.ceil(((d0.getTime() - Date.UTC(d0.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+        return `${d0.getUTCFullYear()}-W${String(w).padStart(2, "0")}`;
+      };
+      const weeks = rows.map((e) => week(e.created_at));
+      const urg = rows.map((e) => e.urgency ?? "green");
+      const ages = rows.map((e) => band(e.patient.age));
+      return {
+        days,
+        k_min: K,
+        total: rows.length >= K || rows.length === 0 ? rows.length : null,
+        by_week: table(weeks, [...new Set(weeks)].sort()),
+        by_age_band: table(ages, bands.map((b) => b[2])),
+        by_sex: table(rows.map((e) => (e.patient.sex === "F" || e.patient.sex === "M" ? e.patient.sex : "O")), ["F", "M", "O"]),
+        by_category: table(rows.map((e) => e.category), ["normal", "maternal", "chronic"]),
+        by_urgency: table(urg, ["red", "yellow", "green"]),
+        urgency_by_age_band: (["red", "yellow", "green"] as const).map((u) => ({ urgency: u, cells: table(rows.filter((e) => (e.urgency ?? "green") === u).map((e) => band(e.patient.age)), bands.map((b) => b[2])) })),
+        findings: [],
+        suppressed_cells: suppressed,
+        removed_fields: ["name", "patient ID", "phone", "village", "exact age", "exact date and time", "free text", "token"],
+      };
     }),
 
   listCohorts: () =>

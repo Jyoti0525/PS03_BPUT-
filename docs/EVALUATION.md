@@ -77,3 +77,74 @@ linear layers changed "ମୋ ପେଟ ବହୁତ ଯନ୍ତ୍ରଣା �
 **nausea**" — a different symptom — and did not lower memory when applied at load time (2.24 GB vs 1.30 GB for
 Indic → English). Translation stays fp32. To save memory, only Indic → English is loaded at start-up;
 English → Indic loads when first used.
+
+## Non-diagnostic output guard
+
+Every sentence the summary model writes is checked against a pattern list before it can reach a note
+(`backend/app/output_guard.yaml`, `output_guard.py`). The list has three categories: condition names, diagnostic
+phrasing, and medicine/dose/treatment advice. Each is covered in English, Hindi (Devanagari and romanised) and Odia.
+A phrase is allowed only if the same words are already in the data the model was given. So "Known diabetes" can be
+repeated from a chronic check-in, but "likely dengue" cannot be added.
+
+| Set (5 Oct) | Size | Result |
+|---|---|---|
+| Red-team outputs that must be blocked | 101 | **101 blocked (100 %)** |
+| Faithful note sentences that must pass | 40 | **40 passed (0 false blocks)** |
+
+- The red-team set includes evasion attempts:
+  - misspellings ("maleria", "dengu", "tyfoid");
+  - upper case, full-width letters, zero-width characters and extra spaces;
+  - abbreviations ("Dx", "TB", "Koch's", "BD", "SOS").
+- It also covers advice that names no drug ("needs antibiotics", "recommend surgery") and claims the source never made.
+- Reproduce: `pytest backend/tests/test_output_guard.py` (data: `backend/tests/data/redteam_outputs.yaml`).
+
+**Limits**
+- We wrote both sets and the pattern list, so 100 % shows the listed patterns are covered. It does not show that every
+  possible phrasing is caught.
+- The real test is the model's own output on new cases (next section). Every block is logged with the phrase that
+  triggered it, so the list can grow.
+
+## Note summary model (B5)
+
+The rules engine sets urgency and the template note holds every fact. A small local model only rewrites the facts
+as a readable paragraph. Its text is used only if it passes two checks; otherwise the reviewer sees the template:
+- **Faithfulness:** every number (digits or words), unit and medicine must be in the facts, and every symptom it
+  states or denies must agree with the rules engine's findings.
+- **The output guard** (above).
+
+- **Engine:** Qwen3-4B-Instruct-2507 (Alibaba Qwen, Apache-2.0), Q4_K_M GGUF quantised by Unsloth (SHA-256
+  `3605803b…c67e597`, checked against Hugging Face). Served by llama.cpp b11424 (CUDA 12.4) on the demo laptop's
+  RTX 3050 (4 GB), all layers on the GPU (3.1 GB VRAM). Offline.
+- **Data:** synthetic intakes we wrote (`backend/tests/data/llm_eval_cases.yaml`), run through the real rules engine
+  and note builder. No patient data.
+
+| Set (5 Oct) | Cases | Model text used | Fell back to template | Median time |
+|---|---|---|---|---|
+| Tuning, first prompt | 30 | 19 (63 %) | 11 | 2.2 s |
+| Tuning, final prompt | 30 | **30 (100 %)** | 0 | 0.87 s |
+| **Held out**, final prompt | 20 | **18 (90 %)** | 2 | 0.82 s |
+
+**What changed between the first and final prompt (found by reading the rejected texts)**
+- The first prompt gave the model the fired rules and the missing list. Rule text names several conditions at once
+  ("altered mental status or agitation, fever or hypothermia, headache, or stiff neck"), and the model restated it
+  as if the patient had them all. The faithfulness check rejected these correctly. The final fact sheet holds the
+  patient's account and the measured values only; rules and missing items have their own sections on the note.
+- The model invented "the patient denies chest pain" once, probably copying an example in our own prompt. The check
+  rejected it, and the example was removed.
+- **A rules-engine bug was found this way:** "works in a stone-crushing unit" fired the *crush injury* trauma rules.
+  The lexicon now needs injury wording ("crushed", "crush injury", "trapped under"); regression tests were added.
+
+**Held-out set.** The 20 cases were written after the prompt was revised and before any output on them was seen.
+- **First run:** 19 of 20 passed. Reading them showed a problem the checks cannot see: the model called general
+  visits "a normal check-up", which understates an acute complaint (a 2-year-old not passing urine). The fact sheet
+  now says "General visit for a new problem".
+- **After that fix:** 18 of 20. Both fallbacks were the check being strict: "severity 7/10" became "pain 7/10", and
+  a dog bite was called "the injury".
+- Per-case texts: `docs/evaluation/llm_summary_*.json`.
+
+**Limits**
+- Fifty short synthetic cases, all in English (translation happens before the model).
+- The checks catch wrong facts, not framing. Framing was checked by us reading the outputs, not by a clinician.
+- Re-running the held-out set after a fix makes it less "held out". We report the first run as well.
+- Reproduce: start `backend/scripts/start_llm.sh`, then
+  `JEEVIA_LLM_URL=http://127.0.0.1:8031 python backend/scripts/eval_llm.py held_out`.

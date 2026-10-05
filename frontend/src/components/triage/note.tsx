@@ -183,7 +183,31 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
           subtitle={`${tr("Organised from patient-provided information")} · ${n.generated_by}${n.edited_by ? ` · ${tr("edited by {name}", { name: n.edited_by })}` : ""}`}
           icon={<Scale className="size-4" />}
         />
-        <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{tr(n.summary)}</p>
+        <div className="flex flex-wrap items-center gap-2 px-4 pt-3 text-xs">
+          {n.renderer === "LLM" && !n.edited_by ? (
+            <Badge tone="teal">{tr("Written by {model} · checked against the record", { model: n.llm?.model.split(" (")[0] ?? "AI" })}</Badge>
+          ) : (
+            <Badge>{tr("Template summary")}</Badge>
+          )}
+          {n.llm?.status === "FAIL_FELL_BACK" && <Badge tone="semi">{tr("AI summary rejected by the checks")}</Badge>}
+          {n.llm?.status === "UNAVAILABLE" && <Badge>{tr("AI summary unavailable")}</Badge>}
+        </div>
+        <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
+        {n.renderer === "LLM" && n.summary_template && (
+          <details className="border-t border-line px-4 py-2.5 text-sm">
+            <summary className="cursor-pointer font-medium text-muted">{tr("Template summary (facts as recorded)")}</summary>
+            <p className="mt-2 text-ink-2">{tr(n.summary_template)}</p>
+          </details>
+        )}
+        {n.llm?.status === "FAIL_FELL_BACK" && n.llm.rejected_text && (
+          <details className="border-t border-line px-4 py-2.5 text-sm">
+            <summary className="cursor-pointer font-medium text-muted">{tr("Rejected AI text and why")}</summary>
+            <p className="mt-2 rounded-lg bg-canvas p-2.5 text-ink-2 line-through decoration-crit/60">{n.llm.rejected_text}</p>
+            <ul className="mt-1.5 list-disc pl-5 text-xs text-crit">
+              {[...(n.llm.guard ?? []), ...(n.llm.faithfulness ?? [])].map((r) => <li key={r}>{r}</li>)}
+            </ul>
+          </details>
+        )}
         {n.transcript && (
           <details className="border-t border-line px-4 py-2.5 text-sm">
             <summary className="flex cursor-pointer items-center gap-1.5 font-medium text-muted">
@@ -328,8 +352,14 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
             {n.timeline.map((t, i) => (
               <li key={i} className="relative">
                 <span className="absolute top-1.5 -left-[11px] size-2 rounded-full bg-teal-600 ring-2 ring-white" />
-                <p className="text-xs text-subtle">{tr(t.when)}</p>
+                <p className="flex flex-wrap items-center gap-1.5 text-xs text-subtle">
+                  {tr(t.when)}
+                  {t.certainty && t.certainty !== "RECORDED" && (
+                    <Badge tone={t.certainty === "STATED" ? "teal" : t.certainty === "INFERRED" ? "info" : "semi"}>{tr(t.certainty)}</Badge>
+                  )}
+                </p>
                 <p className="text-ink">{tr(t.event)}</p>
+                {t.raw && <p className="text-xs text-muted">“{t.raw}”</p>}
               </li>
             ))}
           </ol>

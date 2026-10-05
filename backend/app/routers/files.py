@@ -12,6 +12,7 @@ from ..schemas import ADMIN_ROLES, FileKind, FileOut
 from ..security import DB, CurrentUser, decode, file_token
 from ..services import now, own_patient
 from ..triage.extraction import extract_document
+from ..triage.images import redact
 from ..triage.reports import SAMPLE_REPORTS, render
 
 router = APIRouter(tags=["files"])
@@ -22,7 +23,7 @@ def file_out(f: FileObject, request: Request | None = None, user: User | None = 
     if request and user and not f.purged_at:
         url = str(request.url_for("file_content", fid=f.id)) + f"?sig={file_token(f.id, user.id)}"
     ex = f.extraction
-    rq = {"engine": ex["engine"], "ok": ex["quality"].get("ok", True), "issues": ex["quality"].get("issues", []), "values_found": len(ex["rows"])} if ex else None
+    rq = {"engine": ex["engine"], "ok": ex["quality"].get("ok", True), "issues": ex["quality"].get("issues", []), "values_found": len(ex["rows"])} if ex and f.kind == "report" else None
     return FileOut(id=f.id, filename=f.filename, content_type=f.content_type, size=f.size, kind=f.kind, encounter_id=f.encounter_id, uploaded_at=f.uploaded_at, expires_at=f.expires_at, purged_at=f.purged_at, url=url, read_quality=rq)
 
 
@@ -35,6 +36,7 @@ async def upload(
     kind: Annotated[FileKind, Form()],
     encounter_id: Annotated[str | None, Form()] = None,
     sample_key: Annotated[str | None, Form()] = None,
+    read: Annotated[bool, Form()] = True,  # False: the patient chose to continue without AI — no OCR runs
 ):
     if user.role in ADMIN_ROLES or user.role == "employer":
         raise HTTPException(403, "This role cannot upload clinical files")
@@ -50,7 +52,24 @@ async def upload(
         if sample_key not in SAMPLE_REPORTS:
             raise HTTPException(422, "Unknown sample report")
         boxes = render(sample_key, "")[1]
-    f = FileObject(filename=(file.filename or "upload")[:255], content_type=ctype, size=len(data), kind=kind, encounter_id=encounter_id, uploaded_by=user.id, expires_at=storage.expiry_for(kind), sample_key=sample_key, boxes=boxes)
+    extraction = None
+    if kind == "report" and read:
+        # Read the document now (offline OCR / text layer) so the reviewer sees values with their source crops.
+        extraction = await run_in_threadpool(extract_document, data, ctype)
+    elif kind == "image" and read and ctype.startswith("image/"):
+        # A photo of the problem is never interpreted; it is only scanned for ID numbers to black out.
+        ex = await run_in_threadpool(extract_document, data, ctype)
+        extraction = {"engine": "none", "quality": {"ok": True, "issues": []}, "rows": [], "meta": {}, "warnings": [], "text": [],
+                      "doc_type": {"type": "non_document", "label": "Photo — not interpreted", "why": "photo of the problem"}, "medicines": [], "_lines": ex["text"]}
+    # Privacy before storage (G3): faces blurred, ID-number lines blacked out, photo metadata dropped.
+    lines = (extraction or {}).pop("_lines", None) or (extraction or {}).get("text")
+    data, redaction = await run_in_threadpool(redact, data, ctype, lines)
+    if kind == "image" and extraction is None:
+        extraction = {"engine": "none", "quality": {"ok": True, "issues": []}, "rows": [], "meta": {}, "warnings": [], "text": [],
+                      "doc_type": {"type": "non_document", "label": "Photo — not interpreted", "why": "photo of the problem"}, "medicines": []}
+    if extraction is not None:
+        extraction["redaction"] = redaction
+    f = FileObject(filename=(file.filename or "upload")[:255], content_type=ctype, size=len(data), kind=kind, encounter_id=encounter_id, uploaded_by=user.id, expires_at=storage.expiry_for(kind), sample_key=sample_key, boxes=boxes, extraction=extraction)
     db.add(f)
     db.flush()
     try:
@@ -58,11 +77,10 @@ async def upload(
     except Exception:
         db.rollback()
         raise HTTPException(502, "File storage is unavailable — please try again")
-    if kind == "report":
-        # Read the document now (offline OCR / text layer) so the reviewer sees values with their source crops.
-        f.extraction = await run_in_threadpool(extract_document, data, ctype)
     audit.record(db, user, "UPLOAD", "file", f.id, f"{kind} uploaded ({f.filename}, {max(1, len(data) // 1024)} KB); expires {f.expires_at:%Y-%m-%d %H:%M} UTC"
-                 + (f"; read by {f.extraction['engine']}, {len(f.extraction['rows'])} lab value(s)" if f.extraction else ""))
+                 + (f"; read by {f.extraction['engine']}, {len(f.extraction['rows'])} lab value(s)" if f.extraction else "")
+                 + ("; not read (patient continued without AI)" if kind == "report" and not read else "")
+                 + (f"; redacted before storage: {redaction['faces']} face(s), {redaction['id_numbers']} ID-number line(s)" if redaction.get("faces") or redaction.get("id_numbers") else ""))
     return file_out(f, request, user)
 
 

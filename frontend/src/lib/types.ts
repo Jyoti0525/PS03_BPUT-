@@ -443,6 +443,10 @@ export interface TrendRow {
 export interface TimelineEvent {
   when: string;
   event: string;
+  /** How sure the time is (B4). RECORDED = a dated record in this system. */
+  certainty?: "RECORDED" | "STATED" | "INFERRED" | "VAGUE" | "UNKNOWN";
+  /** The patient's own words (or the tapped answer) the time came from. */
+  raw?: string | null;
 }
 
 export interface FollowUpQuestion {
@@ -474,6 +478,15 @@ export interface TriageNote {
   disagreements: Disagreement[];
   transcript?: { original: string; translated: string; language: string } | null;
   generated_by: string;
+  /** Who wrote `summary`: the fixed template, or the local language model after passing the faithfulness check and output guard. */
+  renderer?: "TEMPLATE" | "LLM";
+  /** Uploads: what kind of document each is (B10) and what was hidden before storage (G3). */
+  documents?: { file_id: string; filename: string; kind: string; read: boolean; doc_type: { type: string; label: string; why: string } | null; redaction: { faces: number; id_numbers: number; engine?: string; skipped?: string } | null }[];
+  /** Medicine names read from a strip or prescription — not part of the record until confirmed. */
+  medications_pending?: { name: string; strength: string | null; seen: string; confidence: number; file_id: string; filename: string }[];
+  medications?: { name: string; strength: string | null; source: string; by: string; at: string }[];
+  summary_template?: string;
+  llm?: { status: "PASS" | "FAIL_FELL_BACK" | "UNAVAILABLE"; model: string; ms?: number; reason?: string; rejected_text?: string; faithfulness?: string[]; guard?: string[] };
   generated_at: string;
   edited_by?: string | null;
   observations?: Observation[];
@@ -663,7 +676,9 @@ export type AuditAction =
   | "DEVICE"
   | "CONFIG"
   | "DISAGREEMENT"
-  | "PURGE";
+  | "PURGE"
+  | "REDACT"
+  | "GUARD_BLOCK";
 
 export interface AuditEvent {
   id: number;
@@ -721,6 +736,28 @@ export interface CohortWorker {
   department: string;
   fitness_status: FitnessStatus;
   last_screened_at: string | null;
+}
+
+/** One count in the de-identified view: `null` means 1–4 cases, suppressed so a small group cannot be singled out. */
+export interface CohortCell {
+  key: string;
+  count: number | null;
+}
+
+/** Facility cases as counts only (G3): no name, ID, phone, village, exact age, time or free text. */
+export interface DeidentifiedCohort {
+  days: number;
+  k_min: number;
+  total: number | null;
+  by_week: CohortCell[];
+  by_age_band: CohortCell[];
+  by_sex: CohortCell[];
+  by_category: CohortCell[];
+  by_urgency: CohortCell[];
+  urgency_by_age_band: { urgency: Urgency; cells: CohortCell[] }[];
+  findings: (CohortCell & { label: string })[];
+  suppressed_cells: number;
+  removed_fields: string[];
 }
 
 export interface Cohort {

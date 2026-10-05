@@ -11,12 +11,14 @@ import { toast } from "@/components/ui/toast";
 import { downloadBlob } from "@/lib/export";
 import type { AuditAction } from "@/lib/types";
 
-const ACTIONS: AuditAction[] = ["VIEW", "CREATE", "UPDATE", "CONFIRM", "OVERRIDE", "ESCALATE", "ACKNOWLEDGE", "REFERRAL", "EXPORT", "LOGIN", "CONSENT", "UPLOAD", "DEVICE", "CONFIG", "DISAGREEMENT", "PURGE"];
+const ACTIONS: AuditAction[] = ["VIEW", "CREATE", "UPDATE", "CONFIRM", "OVERRIDE", "ESCALATE", "ACKNOWLEDGE", "REFERRAL", "EXPORT", "LOGIN", "CONSENT", "UPLOAD", "DEVICE", "CONFIG", "DISAGREEMENT", "PURGE", "REDACT", "GUARD_BLOCK"];
 const TONE: Partial<Record<AuditAction, "crit" | "semi" | "teal" | "coral" | "info" | "neutral">> = {
   OVERRIDE: "coral",
   ESCALATE: "crit",
   DISAGREEMENT: "semi",
   PURGE: "neutral",
+  REDACT: "teal",
+  GUARD_BLOCK: "crit",
   VIEW: "info",
   EXPORT: "teal",
   REFERRAL: "teal",

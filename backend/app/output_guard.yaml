@@ -1,0 +1,112 @@
+# Non-diagnostic output guard (C4). Every sentence a language model writes for a note passes through this list.
+# A match blocks the sentence unless the same words already appear in the data the model was given (what the patient
+# said, the record, the rules engine) — the model may repeat, never add. Matching is case-insensitive on NFKC text.
+# Entries are regular expressions; \b is applied around Latin entries automatically, Indic entries match as written.
+version: 1
+
+# Removed before matching: disclaimers that mention a diagnosis only to deny it.
+safe_phrases:
+  - (it|this|this summary|this note|this tool) (is|does) not (a diagnosis|diagnose)
+  - not a diagnosis
+  - non-diagnostic
+
+categories:
+  condition:
+    label: Names a disease or condition
+    terms:
+      # infections and fevers
+      - dengue|dengu|dengi
+      - malaria|maleria|malarial
+      - typhoid|tyfoid|enteric fever
+      - chikungunya|chikungunia
+      - tuberculosis|\btb\b|koch'?s
+      - pneumonia|pneumonitis|numonia
+      - bronchitis|bronchiolitis
+      - influenza|\bflu\b|h1n1|swine flu
+      - covid(-?19)?|coronavirus|sars-cov-2
+      - sepsis|septic|septicaemia|septicemia
+      - meningitis|encephalitis|cerebral malaria
+      - cholera|dysentery|gastroenteritis|gastritis
+      - hepatitis|jaundice|cirrhosis
+      - urinary tract infection|\buti\b|pyelonephritis
+      - (viral|bacterial|fungal) (infection|fever)
+      - leptospirosis|scrub typhus|kala[- ]azar|filariasis|japanese encephalitis
+      - leprosy|scabies|cellulitis|abscess
+      - hiv|aids|syphilis|gonorrh?oea|\bsti\b
+      # heart, lungs, brain
+      - heart attack|myocardial infarction|\bmi\b|\bstemi\b|\bnstemi\b|acute coronary syndrome|\bacs\b
+      - angina|heart failure|cardiac arrest|arrhythmia|atrial fibrillation|cardiomyopathy
+      - stroke|cerebrovascular accident|\bcva\b|\btia\b|paralysis|hemiplegia
+      - asthma|\bcopd\b|emphysema|pulmonary embolism|pneumothorax
+      - silicosis|pneumoconiosis|asbestosis|byssinosis|occupational lung disease
+      - epilepsy|migraine|dementia|parkinson
+      # metabolic, kidney, blood
+      - diabetes|diabetic|\bdka\b|ketoacidosis|hypoglycaemia|hypoglycemia
+      - hypertension|hypertensive|hypotension
+      - anaemia|anemia|anaemic|anemic|thalassaemia|thalassemia|sickle cell
+      - kidney failure|renal failure|kidney disease|\bckd\b|kidney stone|renal colic
+      - hypothyroidism|hyperthyroidism|thyroid disease
+      - dehydration|dehydrated
+      # pregnancy
+      - pre-?eclampsia|eclampsia|ectopic pregnancy|miscarriage|abortion|placenta pr(a)?evia|abruption|gestational diabetes
+      # surgical, injury, other
+      - appendicitis|cholecystitis|pancreatitis|peritonitis|intestinal obstruction|hernia
+      - fracture|dislocation|concussion|haemorrhage|hemorrhage|internal bleeding
+      - cancer|tumou?r|malignan(t|cy)|carcinoma|leuk(a)?emia|lymphoma
+      - anaphylaxis|allergic reaction
+      - depression|anxiety disorder|schizophrenia|psychosis|bipolar
+      - poisoning|envenomation
+      # Hindi (Devanagari)
+      - डेंगू|मलेरिया|टाइफाइड|मियादी बुखार|चिकनगुनिया|टीबी|तपेदिक|क्षय रोग|निमोनिया|हैजा|पीलिया|दमा
+      - मधुमेह|शुगर की बीमारी|उच्च रक्तचाप|हाई बीपी की बीमारी|दिल का दौरा|हृदयाघात|हार्ट अटैक|लकवा|मिर्गी|कैंसर|खून की कमी
+      # Hindi (romanised)
+      - malariya|taifaid|tibi|piliya|madhumeh|sugar ki bimari|dil ka daura|lakwa|khoon ki kami
+      # Odia
+      - ଡେଙ୍ଗୁ|ମ୍ୟାଲେରିଆ|ମ୍ୟାଲେରିଆ|ଟାଇଫଏଡ୍|ଟାଇଫଏଡ|ଯକ୍ଷ୍ମା|ଟିବି|ନିମୋନିଆ|ହଇଜା|ଜଣ୍ଡିସ|ଆଜ୍ମା|ଶ୍ୱାସରୋଗ
+      - ମଧୁମେହ|ସୁଗାର ରୋଗ|ଉଚ୍ଚ ରକ୍ତଚାପ|ହୃଦଘାତ|ହାର୍ଟ ଆଟାକ|ପକ୍ଷାଘାତ|ମୃଗୀ|କର୍କଟ|କ୍ୟାନସର|ରକ୍ତହୀନତା
+
+  diagnostic_phrasing:
+    label: States or suggests a diagnosis
+    terms:
+      - diagnos(is|ed|e|ing|tic)
+      - suggestive of|consistent with|indicative of|compatible with|characteristic of|typical of
+      - (most )?likely (has|have|to be|due to|caused by|represents|a case of)
+      - probabl(e|y) (case|has|is|infection|diagnosis)
+      - (possible|suspected|presumed|query|\?) (case of|infection|diagnosis)
+      - rule out|r/o|differential|impression\s*:|working diagnosis|provisional diagnosis
+      - you have|you are suffering|suffering from|the patient has (a|an) [a-z]+ (infection|disease|disorder)
+      - (this|these symptoms|it) (is|are|could be|may be|might be|points to|indicates?) (a |an )?(case|sign|symptom)s? of
+      - points (to|towards)|clinical picture of|picture suggests
+      - caused by (a |an )?(virus|bacteria|infection|parasite)
+      - (confirms?|confirmed|confirming) (the )?(diagnosis|disease|infection)
+      # Hindi
+      - निदान|आपको .{1,25} है|होने की संभावना|लगता है कि (आपको|मरीज़ को)|यह .{1,20} के लक्षण हैं|बीमारी है
+      - aapko .{1,25} hai|lagta hai ki|ho sakta hai ki .{1,25} (bimari|rog)
+      # Odia
+      - ରୋଗ ନିର୍ଣ୍ଣୟ|ସମ୍ଭବତଃ|ଆପଣଙ୍କୁ .{1,25} ହୋଇଛି|ଏହା .{1,20} ର ଲକ୍ଷଣ|ରୋଗ ହୋଇଛି|ହୋଇଥାଇପାରେ
+
+  drug_advice:
+    label: Gives medicine, dose or treatment advice
+    terms:
+      - prescrib(e|ed|ing)|prescription\s*:|\brx\b
+      - (should|must|please|to) (take|start|begin|continue|stop|give|administer|use)
+      - administer|commence|initiate (treatment|therapy)
+      - \d+(\.\d+)?\s?(mg|mcg|µg|ml|g|iu|units?)\b(?! ?/ ?dl)
+      - \b(od|bd|bid|tds|tid|qid|hs|sos|prn|stat)\b(?! ?/)
+      - (once|twice|thrice|three times|four times) (a|per) day|every \d+ hours|before meals|after meals|at bedtime
+      - tablet|\btab\.|capsule|syrup|injection|\binj\.|ointment|drip|\biv fluids?\b|nebuli[sz]ation|inhaler
+      - antibiotics?|antivirals?|antimalarials?|antipyretics?|antifungals?|painkillers?|analgesics?|steroids?|anti-?inflammator(y|ies)
+      - paracetamol|acetaminophen|crocin|dolo|calpol|ibuprofen|brufen|diclofenac|aspirin|ecosprin|nimesulide
+      - amoxicillin|augmentin|azithromycin|ciprofloxacin|ofloxacin|norfloxacin|metronidazole|doxycycline|ceftriaxone|cefixime|cotrimoxazole
+      - artesunate|artemether|chloroquine|primaquine|isoniazid|rifampicin|ethambutol|pyrazinamide
+      - insulin|metformin|glimepiride|gliclazide|sitagliptin|amlodipine|telmisartan|losartan|enalapril|atenolol|atorvastatin|clopidogrel
+      - salbutamol|asthalin|budesonide|prednisolone|dexamethasone|hydrocortisone|adrenaline|epinephrine
+      - ondansetron|domperidone|pantoprazole|omeprazole|ranitidine|cetirizine|levocetirizine|montelukast|loperamide
+      - \bors\b|oral rehydration|zinc tablets?|iron (tablets?|folic)|folic acid|vitamin [a-z0-9]+ (tablets?|supplements?)|antivenom|anti-snake venom|\basv\b
+      - (treat|treated|treatment|therapy|manage|managed) (with|by|using)
+      - (needs?|requires?|recommend(ed)?|advised?) (antibiotics?|medicines?|medication|drugs?|treatment|surgery|admission|an? (injection|operation))
+      # Hindi
+      - दवा (लें|लो|लीजिए|खाएं|खाइए|दें)|दवाई (लें|लो|खाएं)|गोली (लें|लो|खाएं)|इंजेक्शन (लगवाएं|दें)|मिलीग्राम|दिन में (दो|तीन) बार|एंटीबायोटिक
+      - dawa (lo|le|lein|khao|khayein)|dawai (lo|le|khao)|goli (lo|khao)|din mein (do|teen) baar
+      # Odia
+      - ଔଷଧ (ଖାଆନ୍ତୁ|ନିଅନ୍ତୁ|ଦିଅନ୍ତୁ)|ଟାବଲେଟ୍|ଟାବଲେଟ|ଇଞ୍ଜେକସନ|ଇଞ୍ଜେକ୍ସନ|ମିଲିଗ୍ରାମ|ଦିନକୁ (ଦୁଇ|ତିନି) ଥର|ଆଣ୍ଟିବାୟୋଟିକ

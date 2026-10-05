@@ -136,3 +136,60 @@ def test_rules_read_the_original_words_when_translation_is_wrong(client, nurse):
     enc = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()
     flag = next(f for f in enc["note"]["flags"] if f["code"] == "MT-CHECK")
     assert language.MT_ENGINE in flag["reason"] and "or" in flag["reason"]
+
+
+def test_overlapping_translations_do_not_hang(monkeypatch):
+    """IndicProcessor hands placeholder maps from preprocess to postprocess through one shared queue and clears it
+    afterwards; two overlapping translations used to leave one waiting forever (seen live, 5 Oct)."""
+    import queue
+    import threading
+    import time
+
+    import torch
+
+    class Processor:  # same queue behaviour as IndicTransToolkit.processor.IndicProcessor
+        def __init__(self):
+            self.q = queue.Queue()
+
+        def preprocess_batch(self, texts, src_lang, tgt_lang):
+            for _ in texts:
+                self.q.put({})
+            time.sleep(0.05)
+            return list(texts)
+
+        def postprocess_batch(self, sents, lang):
+            maps = [self.q.get(timeout=2) for _ in sents]  # the real one has no timeout: it hangs
+            self.q.queue.clear()
+            return [s for s, _ in zip(sents, maps)]
+
+    class Tok:
+        def __call__(self, batch, **kw):
+            class Enc(dict):
+                def to(self, device):
+                    return self
+            return Enc(input_ids=torch.zeros((len(batch), 1)))
+
+        def batch_decode(self, out, **kw):
+            return ["x"] * len(out)
+
+    class Model:
+        def generate(self, **kw):
+            time.sleep(0.05)
+            return kw["input_ids"]
+
+    monkeypatch.setattr(language, "_indictrans", lambda d: (Tok(), Model(), Processor.shared, "cpu"))
+    Processor.shared = Processor()
+    errors = []
+
+    def run():
+        try:
+            language.translate(["ଜ୍ୱର"], "or", "en")
+        except Exception as e:  # noqa: BLE001 — collected and asserted below
+            errors.append(e)
+
+    threads = [threading.Thread(target=run) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(10)
+    assert not errors and not any(t.is_alive() for t in threads)

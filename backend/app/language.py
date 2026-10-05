@@ -155,6 +155,10 @@ def transcribe(data: bytes, lang: str) -> dict:
 
 _mt: dict[str, tuple] = {}
 _mt_lock = threading.Lock()
+# One translation at a time per direction: IndicProcessor passes placeholder maps from preprocess to postprocess
+# through a shared queue and clears it afterwards, so two overlapping calls (two kiosks, or start-up warm-up during
+# the first intake) would leave one waiting on an empty queue forever.
+_mt_run = {"indic-en": threading.Lock(), "en-indic": threading.Lock()}
 
 
 def _indictrans(direction: str):
@@ -187,16 +191,18 @@ def translate(texts: list[str], src: str, tgt: str) -> dict:
         return {"texts": list(texts), "engine": None}
     if src not in IT2_TAGS or tgt not in IT2_TAGS or "en" not in (src, tgt):
         raise LanguageUnavailable(f"No offline translation for {src} → {tgt}")
-    tok, model, ip, device = _indictrans("indic-en" if tgt == "en" else "en-indic")
+    direction = "indic-en" if tgt == "en" else "en-indic"
+    tok, model, ip, device = _indictrans(direction)
     import torch
 
-    batch = ip.preprocess_batch(texts, src_lang=IT2_TAGS[src], tgt_lang=IT2_TAGS[tgt])
-    enc = tok(batch, truncation=True, padding="longest", return_tensors="pt", return_attention_mask=True).to(device)
-    with torch.inference_mode():
-        # use_cache=False: the model repo's decoder expects the legacy tuple KV-cache that transformers 4.4x+ replaced.
-        out = model.generate(**enc, use_cache=False, min_length=0, max_length=256, num_beams=5, num_return_sequences=1)
-    decoded = tok.batch_decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True)
-    return {"texts": ip.postprocess_batch(decoded, lang=IT2_TAGS[tgt]), "engine": MT_ENGINE}
+    with _mt_run[direction]:
+        batch = ip.preprocess_batch(texts, src_lang=IT2_TAGS[src], tgt_lang=IT2_TAGS[tgt])
+        enc = tok(batch, truncation=True, padding="longest", return_tensors="pt", return_attention_mask=True).to(device)
+        with torch.inference_mode():
+            # use_cache=False: the model repo's decoder expects the legacy tuple KV-cache that transformers 4.4x+ replaced.
+            out = model.generate(**enc, use_cache=False, min_length=0, max_length=256, num_beams=5, num_return_sequences=1)
+        decoded = tok.batch_decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True)
+        return {"texts": ip.postprocess_batch(decoded, lang=IT2_TAGS[tgt]), "engine": MT_ENGINE}
 
 
 def translate_symptoms(intake: dict) -> dict:

@@ -300,3 +300,19 @@ def test_report_values_feed_rules():
     preg = complete({"bp_systolic": 144, "bp_diastolic": 92}, category="maternal", chief_complaint="ANC visit", lab_values={"urine_albumin": 2})
     assert "LAB-PE-PROTEINURIA" in ids(evaluate_full(preg, 25, "F"))
     assert "LAB-SEVERE-ANAEMIA" in ids(evaluate_full(complete(chief_complaint="tired", lab_values={"haemoglobin": 7.4}), 30, "F"))
+
+
+@pytest.mark.parametrize(
+    "text, crush",
+    [
+        ("Breathless when walking, works in a stone-crushing unit", False),  # occupation (seen 5 Oct in the LLM evaluation)
+        ("Operates the stone crusher, cough for a month", False),
+        ("Hand got crushed in the machine", True),
+        ("Crush injury to the left foot", True),
+        ("Trapped under a fallen wall for an hour", True),
+    ],
+)
+def test_crush_injury_needs_injury_wording(text, crush):
+    from app.triage.findings import scan_text
+
+    assert (scan_text(text, "t").get("crush_injury") is not None and scan_text(text, "t")["crush_injury"].value) is crush

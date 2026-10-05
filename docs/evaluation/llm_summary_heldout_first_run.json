@@ -1,0 +1,220 @@
+{
+ "summary": {
+  "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+  "set": "held_out",
+  "cases": 20,
+  "passed": 19,
+  "fell_back": 1,
+  "pass_rate": 0.95,
+  "median_ms": 865,
+  "max_ms": 1136,
+  "guard_blocks": 0,
+  "faithfulness_failures": 1
+ },
+ "rows": [
+  {
+   "case": 1,
+   "chief": "Vomiting since last night, cannot keep water down",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1136,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 27-year-old female visited for a normal check-up. She reports vomiting since last night and cannot keep water down. She rates the severity of her symptoms as 6 out of 10."
+  },
+  {
+   "case": 2,
+   "chief": "BP follow-up, ankles swollen this week",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 971,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 64-year-old male visited for BP follow-up and reported that his ankles are swollen this week. He said he feels worse compared with last visit. Blood pressure was measured at 162/98 mmHg."
+  },
+  {
+   "case": 3,
+   "chief": "Cough and fever for 4 days, eating less",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 968,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 5-year-old male visited for a normal check-up. He reports cough and fever for 4 days, and eating less. His temperature was 101.6 °F and respiratory rate was 38 /min."
+  },
+  {
+   "case": 4,
+   "chief": "Pain in the upper belly after meals for 2 weeks",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 967,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 41-year-old female visited for a normal check-up reporting pain in the upper belly after meals for 2 weeks. She stated the pain started 2 weeks ago and rates its severity as 4 out of 10."
+  },
+  {
+   "case": 5,
+   "chief": "Dog bite on the right calf this morning",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 776,
+   "guard_version": 1,
+   "status": "FAIL_FELL_BACK",
+   "rejected_text": "A 23-year-old male visited for a dog bite on the right calf this morning. He reported that the injury occurred this morning. No values were measured or read from a report.",
+   "faithfulness": [
+    "states injury, which the record does not"
+   ],
+   "guard": []
+  },
+  {
+   "case": 6,
+   "chief": "Fell in the bathroom, hip pain, cannot stand",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 798,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 70-year-old female visited for a normal check-up. She reported, \"Fell in the bathroom, hip pain, cannot stand.\" Her pulse was measured at 96 bpm."
+  },
+  {
+   "case": 7,
+   "chief": "Swelling of feet and face",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 879,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 36-year-old female pregnant at 34 weeks visits for swelling of feet and face. She reports swelling of feet and face. Blood pressure measured is 148/96 mmHg."
+  },
+  {
+   "case": 8,
+   "chief": "Diabetes check, wound on the left foot not healing",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1071,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 52-year-old male visited for a diabetes check and reported that a wound on his left foot is not healing. He said he feels worse compared with last visit. His blood glucose level measured by point-of-care device was 312 mg/dL."
+  },
+  {
+   "case": 9,
+   "chief": "Headache and fever for 2 days, no rash",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1032,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "An 18-year-old female visited for a normal visit with a chief complaint of headache and fever for 2 days, no rash. She reported that the symptoms started 2 days ago. Her measured temperature was 100.9 °F."
+  },
+  {
+   "case": 10,
+   "chief": "Chest tightness while climbing stairs, settles with rest",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 803,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 44-year-old male visited for a normal check-up. He reports chest tightness while climbing stairs, which settles with rest. The chest tightness started 1-4 weeks ago."
+  },
+  {
+   "case": 11,
+   "chief": "Loose stools and not passing urine since morning",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 773,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 2-year-old female visited for a normal check-up. She reported loose stools and not passing urine since this morning. Her temperature was measured at 99.5 °F."
+  },
+  {
+   "case": 12,
+   "chief": "Burn on the right forearm from hot oil at work",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 815,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 33-year-old male visited for a burn on the right forearm from hot oil at work. He reported the burn started today and rated its severity as 7 out of 10."
+  },
+  {
+   "case": 13,
+   "chief": "Blurred vision in one eye since yesterday",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 687,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 57-year-old female visited for a normal check-up. She reports blurred vision in one eye since yesterday. No values were measured or read from a report."
+  },
+  {
+   "case": 14,
+   "chief": "Fever with joint pains for 3 days",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1036,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 29-year-old female visited for a normal visit with a chief complaint of fever with joint pains for 3 days. She reported that the fever and joint pains started 3 days ago. Her measured temperature was 102.2 °F."
+  },
+  {
+   "case": 15,
+   "chief": "COPD, more breathless, cough with yellow sputum",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1080,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 66-year-old male with a known condition of COPD visits for a chronic follow-up, reporting that he feels worse compared with last visit, with increased breathlessness, cough, and yellow sputum. His oxygen saturation measured as 91%."
+  },
+  {
+   "case": 16,
+   "chief": "Fell from a bicycle, scraped knee, no head injury",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 785,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 12-year-old male visited for a normal check-up. He reported: \"Fell from a bicycle, scraped knee, no head injury.\" The onset of the incident was today."
+  },
+  {
+   "case": 17,
+   "chief": "Tired for a month, no weight loss, no fever",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 800,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 38-year-old female visited for a normal check-up. She reports being tired for a month, with no weight loss and no fever. The onset of symptoms started 4 weeks ago."
+  },
+  {
+   "case": 18,
+   "chief": "Bleeding from the vagina with lower belly pain",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 845,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 25-year-old female visited for a maternal care visit reporting \"bleeding from the vagina with lower belly pain.\" She is pregnant and reports a history of 10 weeks of gestation."
+  },
+  {
+   "case": 19,
+   "chief": "Eyes red and itchy for 3 days, no pain",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 865,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 49-year-old male visited for a normal check-up. He reported that his eyes are red and itchy for 3 days, with no pain. The onset of symptoms was 3 days ago."
+  },
+  {
+   "case": 20,
+   "chief": "Passing very little urine, swelling of legs",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 838,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 60-year-old male visited for a normal check-up and reported passing very little urine and swelling of legs. His blood pressure was measured as 170/100 mmHg."
+  }
+ ]
+}

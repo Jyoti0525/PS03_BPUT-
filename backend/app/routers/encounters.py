@@ -8,10 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from .. import audit, exports, language
+from .. import audit, exports, language, privacy
 from ..config import get_settings
-from ..models import Device, Encounter, Escalation, Facility, FitnessAssessment, Patient, Referral, Reminder, User
+from ..models import Consent, Device, Encounter, FileObject, Escalation, Facility, FitnessAssessment, Patient, Referral, Reminder, User
 from ..schemas import (
+    NO_AI_SCOPE,
     REVIEWER_ROLES,
     AckIn,
     EncounterOut,
@@ -22,6 +23,7 @@ from ..schemas import (
     FitnessIn,
     FitnessOut,
     IntakeIn,
+    MedicationReview,
     NotePatch,
     ObservationIn,
     OverrideIn,
@@ -31,7 +33,7 @@ from ..schemas import (
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
 from ..triage.findings import FINDINGS
-from ..services import auto_escalate, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient, record_observations
+from ..services import auto_escalate, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient, record_observations, summarise_later
 from .facilities import get_facility
 
 router = APIRouter(tags=["encounters"])
@@ -66,8 +68,30 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
             dev.last_seen_at = now()
     if not body.consent_id:
         raise HTTPException(422, "Consent must be captured before intake")
-    # Free text in the patient's language gets an English rendering for the reviewer (offline IndicTrans2).
-    intake = language.translate_symptoms(body.model_dump(mode="json"))
+    # Identifiers are scrubbed from free text before anything is stored or sent to a model (G3); the placeholders
+    # survive translation. Then free text in the patient's language gets an English rendering (offline IndicTrans2),
+    # which is scrubbed again for names that only appear in Latin script.
+    consent = db.get(Consent, body.consent_id)
+    if not consent or consent.patient_id != p.id:
+        raise HTTPException(422, "Consent does not belong to this patient")
+    # "Continue without AI" (G1): no speech, translation or report-reading model touches this intake.
+    ai = NO_AI_SCOPE not in (consent.scopes or [])
+    if not ai and any(s.source == "voice" for s in body.symptoms):
+        raise HTTPException(422, "Voice entries need speech recognition, which the patient declined — type or tap instead")
+    names = [p.name] + ([consent.proxy_name] if consent.proxy_name else [])
+    intake, removed = privacy.anonymise_intake(body.model_dump(mode="json"), names)
+    intake["ai_assist"] = ai
+    if ai:
+        intake, removed_en = privacy.anonymise_intake(language.translate_symptoms(intake), names)
+    else:
+        removed_en = {}
+        for f in (db.get(FileObject, fid) for fid in body.file_ids):
+            if f and f.extraction and f.uploaded_by == user.id:
+                f.extraction = None  # read before the patient chose no AI: discarded, staff view the image itself
+    for k, n in removed_en.items():
+        removed[k] = removed.get(k, 0) + n
+    if removed:
+        intake["redactions"] = removed
     captured = body.captured_at if body.captured_at and body.captured_at < now() else None
     try:
         channel = {"kiosk": "kiosk_link", "patient": "patient_app"}.get(user.role, "staff_kiosk")
@@ -86,10 +110,14 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
         except ValueError:
             pass
     audit.record(db, user, "CREATE", "encounter", enc.id, f"Intake submitted{' (offline, synced)' if body.captured_offline else ''}; rules engine: {enc.urgency}", p.code, enc.facility_id)
+    if removed:
+        audit.record(db, user, "REDACT", "encounter", enc.id, f"Removed from free text before storage: {privacy.describe(removed)}", p.code, enc.facility_id)
     if enc.note and enc.note["disagreements"]:
         detail = "; ".join(f"{d['field']}: " + " vs ".join(v["value"] for v in d["values"]) for d in enc.note["disagreements"])
         audit.record(db, None, "DISAGREEMENT", "encounter", enc.id, detail, p.code, enc.facility_id)
     db.commit()
+    if enc.intake.get("ai_assist", True):
+        summarise_later(enc.id)
     return encounter_out(enc, user)
 
 
@@ -147,6 +175,32 @@ def patch_encounter(eid: str, body: EncounterPatch, user: Doctor, db: DB):
     return encounter_out(e, user)
 
 
+@router.post("/encounters/{eid}/medications", response_model=EncounterOut)
+def review_medications(eid: str, body: MedicationReview, user: Reviewer, db: DB):
+    """Medicines read from a photo enter the record only here, one by one, by a nurse or doctor."""
+    e = load_encounter(db, eid, user)
+    note, intake = dict(e.note or {}), dict(e.intake or {})
+    pending = {m["name"]: m for m in note.get("medications_pending") or []}
+    unknown = [n for n in body.confirm + body.reject if n not in pending]
+    if unknown:
+        raise HTTPException(422, f"Not awaiting confirmation: {', '.join(unknown)}")
+    stamp = {"by": f"{user.name} ({user.role})", "at": now().isoformat()}
+    added = [{"name": n, "strength": pending[n].get("strength"), "source": f"read from {pending[n]['filename']}", **stamp} for n in body.confirm]
+    intake["medications_confirmed"] = list(intake.get("medications_confirmed") or []) + added
+    intake["medications_rejected"] = list(intake.get("medications_rejected") or []) + body.reject
+    left = [m for n, m in pending.items() if n not in body.confirm and n not in body.reject]
+    note["medications"] = intake["medications_confirmed"]
+    note["medications_pending"] = left
+    flags = [f for f in note.get("flags") or [] if f.get("code") != "MEDS-UNCONFIRMED"]
+    if left:
+        flags.append({"code": "MEDS-UNCONFIRMED", "label": f"{len(left)} medicine name(s) read from a strip or prescription — awaiting confirmation", "severity": "warning",
+                      "reason": "Read by OCR and matched to the PMBJP generic list; not part of the record until a nurse or doctor confirms each one"})
+    note["flags"] = flags
+    e.intake, e.note = intake, note
+    audit.record(db, user, "UPDATE", "encounter", e.id, f"Medicines read from photo — confirmed: {', '.join(body.confirm) or 'none'}; rejected: {', '.join(body.reject) or 'none'}", e.patient.code, e.facility_id)
+    return encounter_out(e, user)
+
+
 @router.post("/encounters/{eid}/observations", response_model=EncounterOut)
 def add_observations(eid: str, body: ObservationIn, user: Reviewer, db: DB):
     """Nurse (or doctor) records vitals and bedside observations. Rules are re-run on the new vitals."""
@@ -163,6 +217,8 @@ def add_observations(eid: str, body: ObservationIn, user: Reviewer, db: DB):
     parts = [f"{k}={v}" for k, v in vitals.items()] + ([f"signs: {', '.join(signs)}"] if signs else []) + (["danger-sign check done"] if body.exam_done else []) + ([f"note: {note[:120]}"] if note else [])
     change = f"; urgency {before} → {e.urgency} (rules)" if e.urgency != before else ""
     audit.record(db, user, "UPDATE", "encounter", e.id, f"Observations recorded by {user.role}: {', '.join(parts)}{change}", e.patient.code, e.facility_id)
+    if (e.intake or {}).get("ai_assist", True):
+        summarise_later(e.id)  # the note was rebuilt from the new vitals, so its summary is rewritten too
     return encounter_out(e, user)
 
 

@@ -1,0 +1,1090 @@
+# Generic medicine names from the PMBJP list of 2110 generic medicines (to 31.12.2025),
+# Press Information Bureau, Government of India, Release ID 2224371. Reproduced under the PIB copyright policy
+# (free reproduction with source acknowledged). Built by backend/scripts/build_medicine_list.py.
+abacavir
+abiraterone acetate
+absolute alcohol
+acamprosate calcium
+acarbose
+acebrophylline
+aceclofenac
+acenocoumarol
+acetaminophen
+acetazolamide
+acetylcysteine
+acetylsalicylic acid
+aciclovir
+acitretin
+acotiamide
+activated charcoal
+activated dimethicone
+acyclovir
+adapalene
+adenosine
+adrenaline
+agomelatine
+albendazole
+alendronate sodium
+alfacalcidol soft gelatin
+alfuzosin
+allantoin
+allopurinol
+allylestrenol
+aloe vera
+alogliptin
+alpha ketoanalouge
+alpha lipoic acid
+alpha lipolic acid
+alpha-amylase
+alprazolam
+aluminium hydroxide
+amantadine
+ambrisentan
+ambroxol
+amikacin
+amiloride
+amino acid
+amiodarone
+amisulpride
+amitriptyline
+amlodipine
+amlodipine besilate
+ammonium chloride
+amorolfine
+amorolfine nail lacquer
+amorphous hydrogel wound
+amoxapine
+amoxycillin
+amoxycillin trihydrate
+ampicillin
+anastrozole
+and complex
+anise oil
+anti-d immunoglobulin
+antioxidant
+antiseptic liquid
+apixaban
+applicator
+apremilast
+aripiprazole
+armodafinil
+arteether
+artemether
+artesunate
+ascorbic acid
+ashwagandha
+aspirin
+astaxanthin
+atazanavir
+atenolol
+atomizer mono carton
+atomoxetine
+atorvastatin
+atracurium besylate
+atropine sulphate
+avibactam
+azathioprine
+azelaic acid
+azelastine
+azelnidipine
+azilsartan
+azilsartan medoxomil
+azithromycin
+bacillus clausii spores
+bacitracin
+bacitracin zinc
+baclofen
+baricitinib
+beclometasone dipropionate
+beclomethasone
+beclomethasone dipropionate
+beclomethasone dipropionate inhalation
+bempedoic acid
+benazepril
+benedipine
+benfotiamine
+benidipine
+benzalkonium chloride
+benzocaine
+benzoic acid
+benzoyl peroxide
+benzyl nicotinate
+bepotastine besilate
+beta carotene
+betahistine
+betamethasone
+betamethasone dipropionate
+betamethasone sodium phosphate
+betamethasone valerate
+betaxolol
+bethanechol chloride
+bezyl alcohol
+bicalutamide
+bifonazole
+bilastine
+bilberry extract
+bimatoprost
+bimatoprost ophthalmic
+biotin
+biphasic insulin lispro
+biphasic isophane insulin
+bisacodyl
+bisoprolol
+bisoprolol fumarate
+bleomycin
+bortezomib
+bosentan
+boswellia serrata extract
+brimonidine
+brimonidine tartrate
+brinzolamide
+brinzolamide ophthalmic
+brivaracetam
+bromelain
+bromfenac
+bromfenac sodium
+bromhexine
+bromocriptine mesylate
+budesonide
+budesonide inhalation
+budesonide nebuliser
+bupivacaine
+bupropion
+buspirone
+cabergoline
+cabozantinib
+caffeine
+caffeine citrate
+calamine
+calcipotriol
+calcitriol
+calcium
+calcium acetate
+calcium aspartate
+calcium carbonate
+calcium citrate
+calcium citrate malate
+calcium dobesilate
+calcium dobesilate monohydrate
+calcium gluconate
+calcium orotate
+calcium pant
+calcium pantothenate
+calcium phosphate
+calcium polystyrene sulphonate
+canagliflozin
+capecitabine
+caraway oil
+carbamazepine
+carbetocin
+carbidopa
+carbimazole
+carbonyl iron
+carboplatin
+carboprost
+carboxymethlycellulose
+carboxymethylcellulose sodium
+carica papaya leaf
+cariprazine
+carminatives
+carnitine tartrate
+carvedilol
+carvedilol phosphate
+cefaclor
+cefadroxil
+cefazolin sodium
+cefdinir
+cefepime
+cefixime
+cefoperazone
+cefotaxime sodium
+cefpodoxime
+cefpodoxime proxetil
+cefprozil
+ceftazidime
+ceftriaxone
+cefuroxime
+cefuroxime axetil
+centbucridine
+cephalexin
+cephalexin dry
+cereal based foods
+cerebroprotein hydrolysate
+cetirizine
+cetrimide
+cetrizine
+chloramphenicol
+chlorbutol
+chlordiazepoxide
+chlorhexidine
+chlorhexidine gluconate
+chlorocresol
+chloroquine phosphate
+chloroxylenol
+chlorpheniramine
+chlorpheniramine maleate
+chlorpromazine
+chlorthalidon
+chlorthalidone
+chlorzoxazone
+cholecalciferol
+cholecalciferol soft gelatin
+chondroitin
+chondroitin sulfate
+chromium picolinate
+chyawanprash special
+chymotrypsin
+ciclesonide
+ciclopirox olamine
+ciclopirox olamine nail
+cilastatin
+cilnidipine
+cilostazol
+cinitapride
+cinnarizine
+ciprofloxacin
+cisplatin
+citalopram
+citicoline
+citric acid
+clarithromycin
+clavulanic acid
+clidinium bromide
+clindamycin
+clindamycin phosphate
+clioquinol
+clobazam
+clobetasol propionate
+clomiphene citrate
+clomipramine
+clonazepam
+clonazepam mouth dissolving
+clonidine
+clopidogrel
+clotrimazole
+clotrimazole mouth paint
+cloxacillin
+clozapine
+co-enzyme
+co-trimoxazole
+coal tar
+coenzyme
+colchicine
+colistimethate sodium
+colistin sulphate
+collagen peptide
+colloidal silver
+complex
+conjugated estrogens
+copper
+cranberry extract
+crizotinib
+cyanocobalamin
+cyanocobalamine
+cyclobenzaprine
+cyclophosphamide
+cyclosporin
+cyclosporin capulses
+cyclosporine
+cyproheptadine
+cyproterone
+d-mannose
+dabigatran etexilate mesilate
+dacarbazine
+daclatasvir
+dapagliflozin
+dapoxetine
+darifenacin
+dasatinib
+daunorubicin
+deferasirox
+deferiprone
+deflazacort
+dehydroepiandrosterone
+denosumab
+dental
+desloratadine
+desmopressin
+desogestrel
+desvenlafaxine
+devil claw extract
+dexamethasone
+dexchlorpheniramine maleate
+dexlansoprazole
+dextromethorphan
+dextromethorphan hydrobromide
+dextrose
+dextrose monohydrate
+di-cloxacillin
+di-hydralazine
+diabetes care protein
+diacerein
+diastase
+diazepam
+diclofenac
+diclofenac diethylamine
+diclofenac dithylamine
+diclofenac potassium
+diclofenac sodium
+dicyclomine
+diethylcarbamazine
+diethylcarbamazine citrate
+digoxin
+dil oil
+dill oil
+diltiazem
+diluent
+diluent mono pack
+dimenhydrinate
+dimethicone
+dinoprostone
+diphenhydramine
+diphenoxylate
+disodium hydrogen citrate
+disulfiram
+dithranol
+divalproex
+divalproex sodium
+dobutamine
+docetaxel
+docosahexaenoic acid
+dolutegravir
+domperidone
+donepezil
+dopamine
+dorzolamide
+dosulepin
+dosulepine
+doxepin
+doxofylline
+doxorubicin
+doxycycline
+doxylamine
+doxylamine succinate
+dried aluminium hydroxide
+drotaverine
+duloxetin
+duloxetine
+dutasteride
+dydrogesterone
+ebastine
+eberconazole
+efavirenz
+efonidipine ethanolate
+eicosapentaenoic acid
+eltrombopag
+empagliflozin
+emtricitabine
+enalapril
+enalapril maleate
+enoxaparin
+entacapone
+entecavir
+enzalutamide
+enzyme mixed fruit
+epalrestat
+eplerenone
+erlotinib
+erythromycin estolate
+erythromycin stearate
+erythropoietin
+escitalopram
+escitalopram oxalate
+escitalopram oxelate
+esomeprazole
+esomeprazole gastro-resistance
+esomeprazole magnessium
+essential amino acid
+estradiol
+etamsylate
+ethinylestradiol
+etizolam
+etodolac
+etophyllin
+etophylline
+etoposide
+etoricoxib
+evening primrose oil
+everolimus
+evogliptin
+evogliptin tartarate
+ezetimibe
+face wash
+facewash
+famotidine
+faropenem
+febuxostat
+fennel oil
+fenofibrate
+feracrylum
+feracrylum mouth wash
+feracrylum sterile antiseptic
+ferric carboxymaltose
+ferrous
+ferrous ascorbate
+ferrous asparto glycinate
+fexofenadine
+filgrastim
+finasteride
+flavoxate
+flecanide
+fluconazole
+flunarizine
+flunarizine dihydrochloride
+fluocinolone acetonide
+fluocinonide
+fluoromethalone
+fluoxetine
+flupentixol
+flupentixole
+flupirtine maleate
+flurbiprofen
+fluromethalone
+fluticasone
+fluticasone furoate
+fluticasone propionate
+fluvoxamine maleate
+foaming facewash
+folic acid
+folic acid base
+folic acid-
+formoterol
+formoterol fumarate
+formoterol fumarate dihydrate
+framycetin skin
+frusemide
+fungal diastase
+fungal diastase enyme
+furazolidone
+fusidic acid
+gabapentin
+gama benzene hexachloride
+gatifloxacin
+gefitinib
+gemcitabine
+gentamicin
+gentamicin sulphate
+ginseng
+glargine
+glibenclamide
+gliclazide
+glimepiride
+glimipride
+glipizide
+glucosamine
+glucosamine sulphate
+glycerin
+glycerine mouth paint
+glyceryl trinitrate
+glycolic acid
+glycopyrrolate
+glycopyrronium
+goat milk
+griseofulvin
+guaifenesin
+guaiphenesin
+haematinic iron
+halobetasol
+halobetasol propionate
+hand sanitizer
+heparin sodium
+homatropine hydrobromide
+human
+human chorionic gonadotrophin
+human normal immunoglobulin
+human papillomavirus quadrivalent
+hydralazine
+hydrochlorothiazide
+hydrocortisone
+hydrocortisone acetate
+hydrocortisone sodium succinate
+hydroquinone
+hydroxychloroquine
+hydroxyprogesterone
+hydroxypropylmethylcellulose
+hydroxyurea
+hydroxyzine
+hyoscine butylbromide
+ibandronic acid
+ibrutinib
+ibuprofen
+ifosfamide
+iguratimod
+ilaprazole
+imatinib mesylate
+imeglimin
+imipenem
+imipramine
+indacaterol
+indapamide
+indomethacin
+inhalent softgel
+inosine pranobex
+inositol
+insulin
+insulin aspart
+insulin glargine
+intimate hygiene wash
+iodine
+ipratropium
+ipratropium bromide
+ipratropium bromide respirator
+iron
+iron sucrose
+isopropyl alcohol
+isosorbide
+isosorbide dinitrate
+isosorbide mononitrate
+isosorbidemononitrate
+isotretinoin
+isoxsuprine
+ispaghula
+itopride
+itraconazole
+ivabradine
+ivermectin
+jan pudina soft
+janushadhi madhurak
+ketoconazole
+ketoprofen
+ketorolac
+ketorolac tromethamine
+ketorolac tromethamine ophthalmic
+l-arginine
+l-carnitine
+l-carnitine-l-tartrate
+l-lysine
+l-methyl folate
+l-methylfoate calcium
+l-methylfolate
+l-methylfolate calcium
+l-ornithine l-aspartate
+labetalol
+lacosamide
+lactic acid
+lactic acid bacillus
+lactitol
+lactulose
+lamivudine
+lamotrigine
+lansoprazole
+lapatinib
+latanoprost
+lecithin
+leflunomide
+lenalidomide
+lenvatinib
+letrozole
+leucovorin calcium
+leuprolide acetate
+levetiracetam
+levocarnitine
+levocetirizine
+levocetirizine dihydrochloride
+levocetrizine
+levocloperastine
+levodopa
+levodropropizine
+levofloxacin
+levonorgestrel
+levosalbutamol
+levosalbutamol sulphate
+levosulpiride
+licorice extract
+lidocaine
+light liquid paraffin
+lignocaine
+linagliptin
+linceed oil
+lincomycin
+linezolid
+linseed oil
+liposomal amphotericin
+liquid
+liquid paraffin
+lisinopril
+lithium carbonate
+lobeglitazone sulfate
+loperamide
+lopinavir
+loratadine
+lorazepam
+lornoxicam
+losartan
+losartan potassium
+luliconazole
+lumefantrine
+lurasidone
+lutein
+lycopene
+macitentan
+madhu
+magaldrate
+magnesium
+magnesium citrate
+magnesium hydroxide
+magnesium oxide
+magnesium sulphate
+manganese sulphate
+mannitol
+maraviroc
+measuring
+measuring mono-carton
+mebendazole
+mebeverine
+mecobalamin
+medroxyprogesterone acetate
+mefenamic acid
+mefloquine
+megaldrate
+megestrol acetate
+melatonin
+melitracen
+meloxicam
+memantine
+menthol
+menthol base
+menthol cinnamon
+meropenem
+mesalamine
+mesalazine
+metadoxine
+metaxalone
+metformin
+metformin hydrchloride
+methimazole
+methionine
+methotrexate
+methyl ergometrine
+methyl salicylate
+methylcobalamin
+methylfolate
+methylphenidate
+methylprednisolone
+methylprednisolone sodium succinate
+methylsalicylate
+methylsulfonylmethane
+metoclopramide
+metolazone
+metoprolol
+metoprolol succinate
+metoprolol tartrate
+metronidazole
+miconazole
+miconazole nitrate
+micronized purified flavanoid
+midazolam
+midodrine
+mifepristone
+milk magnesia
+minerals
+minocycline
+minoxidil
+mirabegron
+mirtazapine
+misoprostol
+modafinil
+moisturising
+molnupiravir
+mometasone
+mometasone aqueous
+mometasone furoate
+mono carton
+monocarton
+montelukast
+montelukast sodium
+mosapride
+mosapride citrate
+mouth ulcer
+moxifloxacin
+moxonidine
+multi minerals
+multiminerals
+multivitamin
+multivitamin chocolate flavour
+multivitamins
+mupirocin
+mycophenolate mofetil
+mycophenolate sodium
+myo-inositol
+n-acetylcysteine
+nadifloxacin
+naftifine
+nalidixic acid
+naltrexone
+nandrolone decanoate
+naproxen
+natamycin ophthalmic
+natural micronised progesterone
+nebivolol
+neomycin
+neomycin sulfate
+neomycin sulphate
+neostigmine methylsulphate
+nepafenac
+niacinamide
+niacinamide-
+nicorandil
+nicotinamide
+nicotine
+nicoumalone
+nifedipine
+nimesulid
+nimesulide
+nimodipine
+nintedanib soft gelatin
+nitazoxanide
+nitrazepam
+nitrofurantoin
+nitroglycerin
+norethisterone
+norethisterone acetate
+norfloxacin
+nortriptyline
+nortryptyline
+noscapine
+obeticholic acid
+octreotide
+octreotide long acting
+ofloxacin
+olanzapine
+olaparib
+olmesartan
+olmesartan medoxomil
+olopatadine
+olopatadine ophthalmic
+omega
+omega-
+omeprazole
+ondansetron
+ophthalmic
+opipramol
+opipramol dihydrochloride
+opthalmic
+orlistat
+ornidazole
+ornithin aspartate
+ornithine l-aspartate
+oseltamivir
+oseltamivir phosphate
+oxaceprol
+oxaliplatin
+oxcarbazepine
+oxetacaine
+oxybutynin chloride
+oxymetazoline
+ozenoxacin
+pack vitamin
+paclitaxel
+pancreatin
+panitumumab
+pantoprazole
+pantoprazole gastro-resistance
+pantoprazole sodium
+papain
+papaya leaf extract
+para aminobenzoic acid
+paracetamol
+paradichlorobenzene
+paroxetin
+paroxetine
+pazopanib
+pemetrexed
+penicillin
+pentazocine
+pepsin
+pepsin enzyme
+perampanel
+perindopril
+perindopril erbumine
+permethrin
+pheniramine maleate
+phenobarbitone
+phenobarbitone sodium
+phenylephrine
+phenytoin
+phytomenadione
+pilocarpine
+pine oil soft
+pioglitazone
+piperacillin
+piracetam
+pirfenidone
+piroxicam
+polmacoxib
+polyethylene glycol
+polymyxin
+polymyxin sulfate
+polymyxin sulfates
+polymyxin sulphate
+polyvitamin nfi
+pomalidomide
+potassium chloride
+potassium citrate
+potassium clavulanate
+potassium iodide
+potassium magnesium citrate
+potassium nitrate
+potassium nitrate toothpaste
+povidone iodine
+povidone- iodine
+povidone-iodine
+pramipexole
+pramipexole dihydrochloride
+prasugrel
+prazosin
+prednisolone
+prednisolone acetate
+prednisolone sodium phosphate
+pregabalin
+prilocaine
+primaquine phosphate
+pro-biotic
+proanthocyanidin
+probiotic microbes
+prochlorperazine
+procyclidine
+progesterone
+promethazine
+propofol
+propranolol
+propylene glycol
+protamine sulphate
+protein
+prucalopride
+pyrantel pamoate
+pyrazinamide
+pyridostigmine bromide
+pyridoxal-
+pyridoxine
+pyridoxine-
+pyrimethamine
+quetiapine
+quetiapine fumarate
+quinine sulphate
+rabeprazole
+rabeprazole sodium
+rabies vaccine
+racecadotril
+ramipril
+ranitidine
+ranolazine
+rasagiline
+rebamipide
+recombinant
+recombinant human tissue
+rehydration salt
+rehydration salts
+rehydration salts orange
+remogliflozin etabonate
+renal care protein
+repaglinide
+ribavirin
+riboflavin
+rifaximin
+ringer lactate
+risperidone
+ritonavir
+rituximab
+rivaroxaban
+rivastigmine
+rizatriptan benzoate
+romiplostim
+ropinirole
+rosehip extract
+rosuvastatin
+roxithromycin
+rupatadine
+rutoside trihydrate
+s-adenosyl l-methionine
+s-adenosyl methionine
+s-amlodipine
+s-metoprolol
+saccharomyces boulardii
+sacubitril
+safinamide
+salbutamol
+salbutamol inhalation
+salicylic acid
+saline
+salmeterol
+saroglitazar
+saxagliptin
+screw dropper
+selegiline
+selenium
+selenium dioxide
+selenium sulfide
+selenium sulphide
+selexipag
+serratiopeptidase
+sertaconazole
+sertaconazole nitrate
+sertraline
+sesame oil
+sevelamer
+sevelamer carbonate
+shilajit
+sildenafil
+silodosin
+silver nitrate
+silver sulphadiazine
+silymarin
+simethicone
+simvastatin
+sirolimus
+sitagliptin
+sitagliptin phosphate
+sodium bicarbonate
+sodium chloride
+sodium citrate
+sodium fluoride
+sodium hyaluronate
+sodium monofluoro phosphate
+sodium picosulphate
+sodium tauroglycocholate
+sodium valproate
+sofosbuvir
+solifenacin succinate
+soluble insulin
+solvent
+somatotropin
+sorafenib
+sorbitol
+spironolactone
+streptokinase
+strontium chloride hexahydrate
+sucralfate
+sulbactam
+sulbactam sodium
+sulfadoxine
+sulfasalazine
+sulphacetamide
+sumatriptan
+sunitinib
+surgical spirit
+tacrolimus
+tadalafil
+tamoxifen citrate
+tamsulosin
+tannic acid glycerin
+tapentadol
+taurine
+tazobactam
+tazobactum
+teicoplanin
+telmisartan
+temozolomide
+teneligliptin
+tenofovir alafenamide
+tenofovir disoproxil fumarate
+terazosin
+terbinafine
+terbutaline
+terbutaline sulphate
+terlipressin
+terpineol
+testosterone enanthate
+tetanus vaccine
+tetrabenazine
+thalidomide
+theophylline
+thiamine
+thiocholchicoside
+thiocolchicoside
+throat
+thymol
+thyroxine sodium
+tianeptine
+ticagrelor
+tigecycline
+timolol
+timolol maleate
+tinidazole
+tinospora cordifolia
+tiotropium
+tiotropium bromide
+tiotropium bromide inhalation
+tiotropium inhalation
+tizanidine
+tobramycin
+tofacitinib
+tofisopam
+tolperisone
+tolterodine tartrate
+tolvaptan
+toothpaste
+topiramate
+topiroxostat
+torasemide
+torsemide
+tramadol
+tranexamic acid
+transfer canula mono
+tranylcypromine
+trastuzumab
+travoprost
+travoprost ophthalmic
+trazodone
+tretinoin
+triamcinolone
+triamcinolone acetonide
+triamcinolone acetonide mouth
+tricholine citrate
+triclofos
+trientine
+trifluoperazine
+trihexiphenidyl
+trihexyphenidyl
+trimetazidine
+triphala
+tropicamide
+troxerutin
+trypsin
+trypsin chymotrypsin
+tulobuterol
+turpentine oil
+ubidecarenone
+ulipristal acetate
+ursodeoxycholic acid
+valacyclovir
+valethamate
+valganciclovir
+valproic acid
+valsartan
+vancomycin
+vasopressin
+vecuronium bromide
+velpatasvir
+venlafaxine
+verapamil
+vildaglipitin
+vildagliptin
+vincristine
+vitamin
+vitamin acetate
+vitamin b-complex
+vitamin b-complex fort
+vitamin complex
+vitamin softgel
+vitamin-c
+vitamine complex use
+vitamins
+voglibose
+voriconazole
+vortioxetine
+warfarin
+water amp polypack
+water reconstitution
+wfi mono carton
+xylometazoline
+zeaxanthin
+zinc
+zinc chloride
+zinc oxide
+zinc pyrithione
+zinc sulphate
+ziprasidone
+zoledronic acid
+zolpidem
+zonisamide

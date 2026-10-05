@@ -13,6 +13,7 @@ import { useSession, usePrefs } from "@/components/providers";
 import { Badge, Button, Card, CardHeader, ErrorNote, FieldError, Label, Modal, Segmented, Select, Spinner, Textarea, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
+import { DocumentLabels, MedicationsPanel } from "@/components/triage/medications";
 import { useFile } from "@/components/triage/source";
 import type { Encounter, ExportFormat, Facility, ShareLink, Urgency } from "@/lib/types";
 import { ShareQrModal } from "@/components/triage/share-qr";
@@ -283,6 +284,8 @@ export default function CasePage() {
 
       {enc.worker && <WorkerPanel encounterId={enc.id} worker={enc.worker} canRecord={isDoctor} onRecorded={reload} />}
 
+      <MedicationsPanel enc={enc} canReview onDone={setData} />
+
       <div className="mt-4">{n ? <NoteView enc={enc} density={density} /> : <p className="text-sm text-muted">{tr("No note generated.")}</p>}</div>
 
       {!!enc.intake?.file_ids.length && (
@@ -293,6 +296,7 @@ export default function CasePage() {
               <FileThumb key={f} id={f} />
             ))}
           </div>
+          <DocumentLabels enc={enc} />
         </Card>
       )}
 

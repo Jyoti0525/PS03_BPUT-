@@ -188,7 +188,8 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "fall_from_height": {"en": [r"fell (from|off) (a |the )?(tree|roof|terrace|height|building|ladder|scaffold\w*|stairs)", r"fall from (a |the )?(height|tree|roof|terrace|building|ladder)"], "hi": ["पेड़ से गिर", "छत से गिर", "ऊंचाई से गिर"], "or": ["ଗଛରୁ ପଡ଼ି", "ଛାତରୁ ପଡ଼ି", "ଉଚ୍ଚରୁ ପଡ଼ି"]},
     "road_traffic_high_risk": {"en": [r"(hit|knocked down|run over) by (a |the )?(car|bus|truck|vehicle|lorry|bike)", r"(high[- ]speed|head[- ]on) (crash|collision|accident)", r"thrown (from|off) (the )?(vehicle|bike|motorcycle)", r"trapped in (the )?(car|vehicle)", r"without (a )?(seat ?belt|helmet)"], "hi": ["गाड़ी ने टक्कर", "ट्रक ने टक्कर"], "or": ["ଗାଡ଼ି ଧକ୍କା", "ଟ୍ରକ୍ ଧକ୍କା"]},
     "penetrating_injury": {"en": [r"stab\w*", r"gunshot", r"shot", r"knife (wound|injury)", r"penetrat\w*", r"impaled"], "hi": ["चाकू", "गोली लगी"], "or": ["ଛୁରୀ", "ଗୁଳି"]},
-    "crush_injury": {"en": [r"crush\w*", r"(trapped|stuck) under"], "hi": ["दब गया", "कुचल"], "or": ["ଚାପି ହୋଇଗଲା"]},
+    # Injury wording only: "works in a stone-crushing unit" or "crusher" is an occupation, not an injury.
+    "crush_injury": {"en": [r"crush(ed)? (injury|injuries)", r"crushed", r"got crushed", r"(trapped|stuck|pinned) under"], "hi": ["दब गया", "कुचल"], "or": ["ଚାପି ହୋଇଗଲା"]},
     "limb_deformity": {"en": [r"fractur\w*", r"broken (bone|arm|leg|hand)", r"dislocat\w*", r"(arm|leg) (is )?(bent|deformed)"], "hi": ["हड्डी टूट", "फ्रैक्चर"], "or": ["ହାଡ଼ ଭାଙ୍ଗି"]},
     "threatened_limb": {"en": [r"(arm|leg|hand|foot|limb) (is |has gone |turned )?(cold and pale|pale and cold|pulseless|blue and cold)", r"no pulse in (the )?(arm|leg|foot|hand)"], "hi": [], "or": []},
     "drowning_hanging_electrocution": {"en": [r"drown\w*", r"hanging", r"hanged", r"electr\w* (shock|cution)", r"electrocut\w*", r"current (laga|lagi|lag gaya)", r"lightning"], "hi": ["डूब", "फांसी", "करंट लग", "बिजली गिर"], "or": ["ବୁଡ଼ି", "ଫାଶୀ", "କରେଣ୍ଟ", "ବିଜୁଳି"]},

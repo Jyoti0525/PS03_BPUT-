@@ -2,6 +2,7 @@ import type {
   AuditAction,
   AuditEvent,
   Cohort,
+  DeidentifiedCohort,
   Consent,
   ConsentInput,
   Device,
@@ -127,6 +128,8 @@ export interface JeeviaApi {
   // Users
   listUsers(): Promise<User[]>;
   setDuty(userId: string, onDuty: boolean): Promise<User>;
+  /** Confirm or reject medicine names read from a photo (B10). */
+  reviewMedications(encounterId: string, confirm: string[], reject: string[]): Promise<Encounter>;
   addObservations(encounterId: string, input: { vitals?: VitalsInput | null; note?: string | null; signs?: string[]; exam_done?: boolean }): Promise<Encounter>;
 
   // Patients
@@ -163,7 +166,8 @@ export interface JeeviaApi {
 
   // Files
   /** `sampleKey` marks one of the bundled synthetic reports so OCR crops can be generated. */
-  uploadFile(file: File, kind: FileObject["kind"], encounterId?: string | null, sampleKey?: string | null): Promise<FileObject>;
+  /** `read: false` — the patient chose to continue without AI, so the server does not OCR the report. */
+  uploadFile(file: File, kind: FileObject["kind"], encounterId?: string | null, sampleKey?: string | null, read?: boolean): Promise<FileObject>;
   getFile(id: string): Promise<FileObject>;
 
   // Speech — offline models on the facility server; the audio itself is not stored by this call
@@ -176,6 +180,8 @@ export interface JeeviaApi {
 
   // Privacy / retention (purge job itself is owned by the ML/data track)
   retentionStatus(): Promise<RetentionStatus>;
+  /** Counts only, small cells suppressed (anonymisation, G3). Supervisor and doctor. */
+  deidentifiedCohort(days?: number): Promise<DeidentifiedCohort>;
 
   // Patient self-service (triage status is stripped server-side for this role)
   myRecord(): Promise<{ patient: Patient; encounters: Encounter[]; reminders: Reminder[] }>;

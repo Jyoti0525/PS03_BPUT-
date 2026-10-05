@@ -14,6 +14,8 @@ triage note, so a qualified clinician can review each patient in under four minu
 | **API (interactive docs)** | https://jeevia-api.onrender.com/docs |
 | **Sample kiosk link** | https://jeevia-triage.vercel.app/k/MANIKPUR |
 | **Live system status** | https://jeevia-triage.vercel.app/#status |
+| **Every feature, what it uses, where it lives** | [docs/FEATURES.md](docs/FEATURES.md) |
+| **Measured results** | [docs/EVALUATION.md](docs/EVALUATION.md) |
 | **Role-by-role guide** | [docs/WORKFLOW.md](docs/WORKFLOW.md) |
 | **Architecture and code map** | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | **Operations runbook** | [docs/OPERATIONS.md](docs/OPERATIONS.md) |
@@ -143,7 +145,10 @@ real capture time so waiting time is never understated.
 | Document storage | **Cloudinary** (private, `jeevia/<facility>/<yyyy-mm>/<kind>/`) | Report scans, prescription photos, voice recordings. Uploaded as authenticated assets; served only through the API with signed downloads. |
 | Rules | YAML rule files | AIIMS Triage Protocol, IMCI and maternal red flags; deterministic urgency. |
 | Exports | fpdf2 and built-in writers | Triage note as PDF, print, JSON, CSV and FHIR R4. |
-| Speech | Browser Web Speech API + speechSynthesis | Live transcription and read-back in the kiosk (server-side Indic ASR is a planned hand-off). |
+| Speech to text | **IndicConformer-600M** (AI4Bharat, MIT), 8-bit ONNX on ONNX Runtime, offline | Voice intake in the 22 scheduled languages. Read-back uses the browser's speechSynthesis. |
+| Translation | **IndicTrans2** distilled 200M (AI4Bharat, MIT), offline | Indian language ↔ English; the original words stay beside the translation. |
+| Report reading | **RapidOCR** (PaddleOCR models on ONNX Runtime), pypdfium2, OpenCV | Lab reports, prescriptions and medicine strips; photo quality check; face and ID-number redaction (YuNet). |
+| Note summary | **Qwen3-4B-Instruct-2507** (Apache-2.0), 4-bit GGUF on llama.cpp, laptop GPU | A short summary paragraph, used only if it passes the faithfulness check and the non-diagnostic output guard. |
 | CI and uptime | **GitHub Actions** | `ci.yml` runs backend tests and frontend lint, type-check and build on every push; `keepalive.yml` pings the API every 10 minutes so the free Render instance stays awake. |
 
 ## 6. Features
@@ -190,10 +195,11 @@ Jeevia/
 │   └── public/sw.js          Service worker (offline kiosk)
 ├── backend/                  FastAPI service
 │   ├── app/routers/          auth, facilities, patients, encounters, kiosk, shares, files, admin
-│   ├── app/triage/           rules engine + YAML rules, note pipeline, synthetic report renderer
-│   ├── app/*.py              models, schemas, services, security, audit, storage, otp, exports, observability, seed
-│   └── tests/                38 pytest tests
-├── docs/                     WORKFLOW.md · ARCHITECTURE.md · OPERATIONS.md
+│   ├── app/triage/           rules engine + YAML rules, findings, OCR, image labels, timeline, note pipeline
+│   ├── app/*.py              models, schemas, services, security, audit, storage, otp, exports, observability, seed,
+│   │                         language (speech + translation), privacy, llm, output_guard
+│   └── tests/                332 pytest tests
+├── docs/                     FEATURES.md · EVALUATION.md · TODO.md · WORKFLOW.md · ARCHITECTURE.md · OPERATIONS.md
 ├── prototype/                Original static HTML prototype (design reference)
 ├── docker-compose.yml        Postgres + API + web for local full-stack runs
 ├── render.yaml               Render service definition
@@ -225,6 +231,9 @@ NEXT_PUBLIC_API_MODE=live NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
 ```
 Locally the OTP provider is `mock` (the code is shown on screen) and files go to `backend/data/uploads`.
 
+**Full AI stack on the demo laptop** (speech, translation, OCR and the summary model): start the summary model,
+then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEATURES.md#6-running-the-full-demo-on-the-laptop).
+
 ## 9. Configuration
 
 ### API (`backend`, prefix `JEEVIA_`)
@@ -244,6 +253,9 @@ Locally the OTP provider is `mock` (the code is shown on screen) and files go to
 | `REQUIRE_BOUND_DEVICE` | Staff kiosk must be a bound device | `true` |
 | `CORS_ORIGINS`, `WEB_BASE_URL` | Web app origin; used in kiosk and share links | `https://jeevia-triage.vercel.app` |
 | `SEED_DEMO` | Seed sample data into an empty database | `true` |
+| `LLM_URL` | llama.cpp server for the note summary (e.g. `http://127.0.0.1:8031`); unset = template summary only | unset |
+| `PRELOAD_LANGUAGE_MODELS` | Load speech and translation at start-up instead of on first use | unset (laptop: `true`) |
+| `ASR_MODEL`, `ASR_DECODING` | Speech model folder under `models/` and `ctc` or `rnnt` decoding | defaults |
 
 ### Web app (`frontend`)
 
@@ -259,7 +271,7 @@ Secrets live only in the Render and Vercel dashboards — never in the repositor
 ## 10. Testing
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 55 tests
+cd backend && .venv/bin/pytest -q                  # 332 tests
 cd frontend && npm run lint && npx tsc --noEmit && npm run build
 ```
 Backend tests cover the rules engine, OTP (including lockout, rate limits and the Twilio path), the two-factor PIN
@@ -307,7 +319,7 @@ register their organisation first so its clinics appear.
 
 - **Twilio trial:** SMS codes reach only numbers verified in the Twilio console until the account is upgraded.
 - **Render free instance:** may sleep when idle; the keep-alive workflow and the **Wake server** button cover this. A paid instance removes it.
-- **Note pipeline:** summaries use a deterministic template; server-side Indic ASR (IndicConformer / Bhashini), translation (IndicTrans2), OCR (PaddleOCR) and a bounded summariser plug in behind `backend/app/triage/pipeline.py` without changing the note format.
+- **AI engines on the hosted link:** the hosted API installs only `requirements.txt`, so speech, translation, OCR and the summary model run on the facility machine (the demo laptop) and show as unavailable on the public link. Bhashini as an online engine is pending.
 - **Facility directory coverage:** OpenStreetMap is thorough for hospitals and PHCs but uneven for village sub-centres; supervisors can add missing public facilities. The official NHM/HFR registry can be loaded into the same table when access is available.
 
 | Area | Owner |

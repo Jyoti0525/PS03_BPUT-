@@ -10,6 +10,7 @@ import uuid
 from datetime import datetime, timezone
 
 from .extraction import document_checks
+from .timeline import onset
 
 # Follow-up questions keyed by findings (negation-aware), so "no chest pain" never asks about chest pain.
 FOLLOWUPS = [
@@ -86,6 +87,16 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         vitals.append({"id": _vid(), "label": "Glucose (POC)", "value": _fmt(v["glucose"]), "unit": "mg/dL", "status": _status("glucose", v["glucose"]), "needs_check": False, "source": {"kind": "sensor", "engine": "Glucometer"}})
 
     pregnant = (triage.get("findings") or {}).get("pregnant", {}).get("value") is True
+    # What each upload is (B10) and what was hidden before storage (G3). Photos of the problem are never interpreted.
+    documents, meds_pending = [], []
+    confirmed = {m["name"] for m in intake.get("medications_confirmed") or []} | set(intake.get("medications_rejected") or [])
+    for f in files:
+        ex = f.extraction or {}
+        documents.append({"file_id": f.id, "filename": f.filename, "kind": f.kind, "doc_type": ex.get("doc_type"), "redaction": ex.get("redaction"),
+                          "read": bool(ex) and ex.get("engine") not in (None, "none")})
+        for m in ex.get("medicines") or []:
+            if m["name"] not in confirmed and all(x["name"] != m["name"] for x in meds_pending):
+                meds_pending.append({**m, "file_id": f.id, "filename": f.filename})
     for f in files:
         if f.kind != "report":
             continue
@@ -93,7 +104,8 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         if not ex:
             missing.append(f'Uploaded report "{f.filename}" was not read — review the image directly')
             continue
-        doc_warns = list(ex.get("warnings", [])) + document_checks(ex.get("meta") or {}, patient.name)
+        strip = (ex.get("doc_type") or {}).get("type") == "medicine_strip"  # no report date or patient name on a strip
+        doc_warns = list(ex.get("warnings", [])) + ([] if strip else document_checks(ex.get("meta") or {}, patient.name))
         for w in dict.fromkeys(doc_warns):
             flags.append({"code": "DOC-CHECK", "label": f'"{f.filename}": {w}', "severity": "warning", "reason": f"Document check on {ex['engine']}"})
         for row in ex.get("rows", []):
@@ -147,6 +159,17 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         langs = ", ".join(sorted({x.get("language", "") for x in machine}))
         flags.append({"code": "MT-CHECK", "label": "Machine-translated history — check against the patient's own words", "severity": "info",
                       "reason": f"English rendered by {machine[0].get('engine') or 'machine translation'} from {langs}; rules also read the original-language text"})
+    if meds_pending:
+        flags.append({"code": "MEDS-UNCONFIRMED", "label": f"{len(meds_pending)} medicine name(s) read from a strip or prescription — awaiting confirmation", "severity": "warning",
+                      "reason": "Read by OCR and matched to the PMBJP generic list; not part of the record until a nurse or doctor confirms each one"})
+    if intake.get("ai_assist") is False:
+        flags.append({"code": "NO-AI", "label": "Patient chose to continue without AI", "severity": "info",
+                      "reason": "No speech recognition, translation or report reading ran; the note is the fixed template and urgency comes from the rules alone"})
+    if intake.get("redactions"):
+        from ..privacy import describe
+
+        flags.append({"code": "PII-REDACTED", "label": "Identifiers removed from the patient's free text", "severity": "info",
+                      "reason": f"{describe(intake['redactions'])} replaced with placeholders before storage; identity is on the registration record"})
     if proxy:
         flags.append({"code": "PROXY", "label": "History given by a proxy", "severity": "info", "reason": "Consent and history captured from a family member or caregiver"})
     if intake.get("captured_offline"):
@@ -159,8 +182,11 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     for n in asks:
         if not any(n.lower() in x.lower() for x in missing):
             missing.append(f"Ask / measure: {n} (a RED rule depends on it)")
-    if not intake.get("duration") and not any(a.get("qid") == "dur" for a in intake.get("answers", [])):
+    began = onset(intake)
+    if began["certainty"] == "UNKNOWN":
         missing.append("Duration of complaint not stated")
+    elif began["check"]:
+        missing.append(began["check"])
     if cat == "maternal" and not (intake.get("maternal") or {}).get("gestation_weeks"):
         missing.append("Gestational age not recorded")
     if cat == "chronic" and not (intake.get("chronic") or {}).get("current_medicines"):
@@ -176,14 +202,14 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         followup.append({"tag": "Context", "question": "Anything else that changed recently — food, work, travel or medicines?", "for_role": "health_worker"})
 
     timeline = []
+    # Each entry says how sure it is (B4): RECORDED (a dated record here), STATED, INFERRED, VAGUE or UNKNOWN.
     for e in [e for e in history if e.intake][:3]:
-        timeline.append({"when": e.created_at.strftime("%d/%m/%Y"), "event": f"Previous visit: {e.chief_complaint}"})
+        timeline.append({"when": e.created_at.strftime("%d/%m/%Y"), "event": f"Previous visit: {e.chief_complaint}", "certainty": "RECORDED", "raw": None})
     if (intake.get("chronic") or {}).get("last_checkup"):
-        timeline.append({"when": intake["chronic"]["last_checkup"], "event": f"Last {intake['chronic']['condition']} check-up"})
-    if intake.get("duration"):
-        timeline.append({"when": f"{intake['duration']} ago", "event": f"Onset: {intake['chief_complaint']}"})
+        timeline.append({"when": intake["chronic"]["last_checkup"], "event": f"Last {intake['chronic']['condition']} check-up", "certainty": "STATED", "raw": "as told by the patient"})
+    timeline.append({"when": began["when"], "event": f"Onset: {intake['chief_complaint']}", "certainty": began["certainty"], "raw": began["raw"]})
     src = intake["symptoms"][0]["source"] if intake.get("symptoms") else "text"
-    timeline.append({"when": "Today", "event": f"Intake at kiosk ({intake.get('language', 'en').upper()}, {src})"})
+    timeline.append({"when": "Today", "event": f"Intake at kiosk ({intake.get('language', 'en').upper()}, {src})", "certainty": "RECORDED", "raw": None})
 
     trend = []
     ordered = list(reversed(history))
@@ -203,6 +229,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     parts = [
         f"{patient.age}-year-old {sex}, {'general' if cat == 'normal' else cat} visit.",
         f"Chief complaint: {intake['chief_complaint']}{' for ' + intake['duration'] if intake.get('duration') else ''}.",
+        *([f"Onset vague: \"{began['raw']}\"."] if began["certainty"] == "VAGUE" else []),
     ]
     if intake.get("selected_symptoms"):
         parts.append(f"Also reports: {', '.join(intake['selected_symptoms'])}.")
@@ -236,8 +263,13 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         "followup_questions": followup,
         "trend": trend,
         "disagreements": disagreements,
+        "documents": documents,
+        "medications_pending": meds_pending,
+        "medications": list(intake.get("medications_confirmed") or []),
         "transcript": {"original": voice["original_text"], "translated": voice["text"], "language": voice["language"]} if voice else None,
         "generated_by": f"rules engine (rulepack {triage['rulepack_version']}) + template summariser",
+        "renderer": "TEMPLATE",
+        "ai_assist": intake.get("ai_assist", True),
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 

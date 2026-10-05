@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Mic, Square, Volume2, Check, RotateCcw, Camera, FileText, UserRound, Users, Lock, Eye, HandHeart, Stethoscope, Baby, HeartPulse, ArrowLeft, ArrowRight,
-  Search, UserPlus, WifiOff, Trash2, Keyboard, CheckCircle2, Activity,
+  Search, UserPlus, WifiOff, Trash2, Keyboard, CheckCircle2, Activity, Sparkles,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { usePrefs } from "@/components/providers";
@@ -109,6 +109,8 @@ export function IntakeFlow({
   const [privacy, setPrivacy] = useState<PrivacyContext>(mode === "kiosk" ? "assisted" : "private");
   const [returning, setReturning] = useState({ code: "", phone: "" });
   const [agreed, setAgreed] = useState(false);
+  // "Continue without AI" (G1): no speech recognition, translation or report reading for this visit.
+  const [aiAssist, setAiAssist] = useState(true);
 
   // identity
   const [lookupPhone, setLookupPhone] = useState("");
@@ -317,7 +319,7 @@ export function IntakeFlow({
     try {
       for (const f of Array.from(list)) {
         if (f.size > 20 * 1024 * 1024) throw new Error("File too large (max 20 MB before compression)");
-        const up = await api.uploadFile(await compressImage(f), kind);
+        const up = await api.uploadFile(await compressImage(f), kind, null, null, aiAssist);
         setFiles((cur) => [...cur, up]);
       }
       toast(tr("Uploaded"));
@@ -334,7 +336,7 @@ export function IntakeFlow({
     try {
       const img = sampleReportImage(key, patient?.name ?? (newP.name || "Patient"));
       const blob = await (await fetch(img.dataUrl)).blob();
-      const up = await api.uploadFile(new File([blob], `${key}_sample_report.svg`, { type: "image/svg+xml" }), "report", null, key);
+      const up = await api.uploadFile(new File([blob], `${key}_sample_report.svg`, { type: "image/svg+xml" }), "report", null, key, aiAssist);
       setFiles((cur) => [...cur, up]);
       toast(tr("Sample report attached"));
     } catch (e) {
@@ -386,7 +388,7 @@ export function IntakeFlow({
       proxy_relation: consentMode === "proxy" ? proxyRel : null,
       privacy_context: privacy,
       language: lang,
-      scopes: ["triage", "share_with_treating_team", "store_reports_until_expiry"],
+      scopes: ["triage", "share_with_treating_team", "store_reports_until_expiry", aiAssist ? "ai_assist" : "no_ai"],
     };
     const newPatient = isNew
       ? { name: newP.name.trim(), age: Number(newP.age), sex: newP.sex as "F" | "M" | "O", phone: newP.phone || null, language: lang, category: category!, village: null, employee_code: (organisationName && newP.employee_code.trim()) || null }
@@ -507,6 +509,13 @@ export function IntakeFlow({
                 ))}
               </div>
               {privacy === "shared_space" && <p className="mt-2 text-sm text-semi">{tr("Sensitive questions will be asked by a health worker in private.")}</p>}
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-semibold text-ink-2">{tr("Computer helpers")}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <BigChoice selected={aiAssist} onClick={() => setAiAssist(true)} icon={<Sparkles />} title={tr("Use AI helpers")} body={tr("Speech to text, translation and reading reports, all on this facility's computer")} />
+                <BigChoice selected={!aiAssist} onClick={() => setAiAssist(false)} icon={<Keyboard />} title={tr("Continue without AI")} body={tr("Type or tap only. Staff read your reports themselves. Your care is the same.")} />
+              </div>
             </div>
             <label className="flex cursor-pointer items-center gap-4 rounded-2xl border-2 border-line p-4 has-checked:border-teal-600 has-checked:bg-teal-50">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="size-7 accent-teal-700" />
@@ -637,7 +646,12 @@ export function IntakeFlow({
 
         {step === "symptoms" && (
           <div className="space-y-6">
-            <div className="flex flex-col items-center gap-3 rounded-2xl bg-canvas p-5">
+            {!aiAssist && (
+              <p className="flex items-center gap-2 rounded-2xl bg-canvas p-4 text-base text-ink-2">
+                <Keyboard className="size-5 shrink-0" /> {tr("AI helpers are off for this visit. Please tap the pictures or type.")}
+              </p>
+            )}
+            <div className={cx("flex flex-col items-center gap-3 rounded-2xl bg-canvas p-5", !aiAssist && "hidden")}>
               <button
                 type="button"
                 onClick={toggleMic}
@@ -915,6 +929,7 @@ export function IntakeFlow({
           <div className="space-y-3 text-base">
             <Row k="Patient" v={patient ? `${patient.name} · ${patient.age} y · ${patient.code}` : `${newP.name} · ${newP.age} y (new)`} />
             <Row k="Consent" v={consentMode === "proxy" ? `Given by ${proxyName} (${proxyRel})` : "Given by patient"} />
+            <Row k="Computer helpers" v={aiAssist ? "Use AI helpers" : "Continue without AI"} />
             <Row k="Visit" v={category ?? "—"} />
             <Row k="Problem" v={chief || "—"} />
             {selected.length > 0 && <Row k="Also" v={selected.join(", ")} />}

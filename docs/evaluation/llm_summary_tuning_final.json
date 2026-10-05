@@ -1,0 +1,316 @@
+{
+ "summary": {
+  "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+  "set": "cases",
+  "cases": 30,
+  "passed": 30,
+  "fell_back": 0,
+  "pass_rate": 1.0,
+  "median_ms": 869,
+  "max_ms": 1349,
+  "guard_blocks": 0,
+  "faithfulness_failures": 0
+ },
+ "rows": [
+  {
+   "case": 1,
+   "chief": "Fever for 4 days with headache",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1319,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 34-year-old female visited for a new problem reporting fever for 4 days with headache. She stated the fever started 4 days ago and rated its severity as 6 out of 10."
+  },
+  {
+   "case": 2,
+   "chief": "Chest pain spreading to the left arm since morning, sweating",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1069,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 52-year-old male visited for a new problem. He reported chest pain spreading to the left arm since morning along with sweating. His blood pressure was measured at 150/95 mmHg and his pulse was 104 bpm."
+  },
+  {
+   "case": 3,
+   "chief": "Fever for 3 days, no chest pain, no cough",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 841,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 45-year-old male visited for a new problem. He reports fever for 3 days, no chest pain, and no cough. His measured temperature is 101.2 °F."
+  },
+  {
+   "case": 4,
+   "chief": "Headache and blurred vision",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 887,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 28-year-old female visited for a pregnancy visit at 32 weeks gestation. She reported headache and blurred vision. Her blood pressure was measured as 158/102 mmHg."
+  },
+  {
+   "case": 5,
+   "chief": "Routine antenatal check, feels well",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 696,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 24-year-old female attended for a routine antenatal check and reported feeling well. She is pregnant and has a history of being 20 weeks pregnant."
+  },
+  {
+   "case": 6,
+   "chief": "Diabetes follow-up, more tired than usual",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1010,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 61-year-old male attended for a follow-up visit related to his diabetes. He reported feeling more tired than usual compared to his last visit. His blood glucose level measured by point-of-care device was 268 mg/dL."
+  },
+  {
+   "case": 7,
+   "chief": "BP check, no complaints",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1123,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 58-year-old female visited for a follow-up of her long-term hypertension. She reported, \"BP check, no complaints,\" and noted that she feels the same as compared with last visit. Her measured blood pressure was 146/92 mmHg."
+  },
+  {
+   "case": 8,
+   "chief": "Loose stools 6 times since yesterday and vomiting twice",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 697,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 6-year-old male visited for a new problem. He reports loose stools 6 times since yesterday and vomiting twice. The onset of symptoms was 1 day ago."
+  },
+  {
+   "case": 9,
+   "chief": "Fever and fast breathing since last night",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 869,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 3-year-old female visited for a new problem. She reports fever and fast breathing since last night. Her temperature was 102.4 °F and her respiratory rate is 52 /min."
+  },
+  {
+   "case": 10,
+   "chief": "Fell from a roof, pain and swelling in the right wrist",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 760,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 40-year-old male visited for a new problem. He reported: \"Fell from a roof, pain and swelling in the right wrist.\" The onset of symptoms was today."
+  },
+  {
+   "case": 11,
+   "chief": "Snake bite on the left foot two hours ago",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 713,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 35-year-old male visited for a new problem. He reported, \"Snake bite on the left foot two hours ago.\" The onset was two hours ago, today."
+  },
+  {
+   "case": 12,
+   "chief": "Sudden weakness of the right arm and slurred speech since one hour",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 792,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 67-year-old female visited for a new problem. She reported: \"Sudden weakness of the right arm and slurred speech since one hour.\" The onset was one hour ago."
+  },
+  {
+   "case": 13,
+   "chief": "Cough for 3 weeks with blood in sputum and weight loss",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 795,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 30-year-old male visited for a new problem. He reports a cough for 3 weeks with blood in sputum and weight loss. The cough started 3 weeks ago."
+  },
+  {
+   "case": 14,
+   "chief": "Burning while passing urine for 2 days",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 871,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 22-year-old female visited for a new problem reporting burning while passing urine for 2 days. She stated the symptom started 2 days ago and rated its severity as 4 out of 10."
+  },
+  {
+   "case": 15,
+   "chief": "Breathless when walking, worse over the last week, works in a stone-crushing unit",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 946,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 48-year-old male visited for a new problem. He reports breathlessness when walking, which has worsened over the last week, and states he works in a stone-crushing unit. The symptom started 7 days ago."
+  },
+  {
+   "case": 16,
+   "chief": "Stomach pain on the right lower side since yesterday, vomited once",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 875,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 19-year-old female visited for a new problem. She reports stomach pain on the right lower side since yesterday and vomited once. She rates the pain severity as 7 out of 10."
+  },
+  {
+   "case": 17,
+   "chief": "Confused since morning, not eating",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 891,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 72-year-old male visited for a new problem. He reported being confused since this morning and not eating. His oxygen saturation was 89 % and temperature was 100.8 °F."
+  },
+  {
+   "case": 18,
+   "chief": "Itchy rash on both hands for a week, no fever",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 801,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 26-year-old female visited for a new problem. She reports, \"Itchy rash on both hands for a week, no fever.\" The rash has been present for 7 days."
+  },
+  {
+   "case": 19,
+   "chief": "Asthma, using inhaler more often at night",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1105,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 55-year-old male visiting for a follow-up on his long-term asthma condition reports that he is using his salbutamol inhaler more often at night. He feels worse compared with his last visit. He is currently using a salbutamol inhaler."
+  },
+  {
+   "case": 20,
+   "chief": "Fever with chills every evening for 5 days, body ache",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 820,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 33-year-old male visited for a new problem. He reports fever with chills every evening for 5 days along with body ache. His measured temperature is 102 °F."
+  },
+  {
+   "case": 21,
+   "chief": "Bleeding gums and black stools after fever",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 922,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 44-year-old female visited for a new problem. She reported bleeding gums and black stools after fever, which started 3-7 days ago. The patient noted the onset of symptoms was 3-7 days ago."
+  },
+  {
+   "case": 22,
+   "chief": "Ear pain and discharge for 3 days",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 686,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 10-year-old male visited for a new problem. He reports ear pain and discharge for 3 days. The onset of symptoms was 3 days ago."
+  },
+  {
+   "case": 23,
+   "chief": "Dizziness and tiredness, periods heavy",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1349,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 39-year-old female visited for a new problem reporting dizziness and tiredness, and periods heavy. The onset of symptoms is unknown. No values were measured or read from a report."
+  },
+  {
+   "case": 24,
+   "chief": "Headache, no vomiting, no weakness",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 816,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 50-year-old male visited for a new problem. He reported headache, no vomiting, and no weakness. Blood pressure was measured at 182/110 mmHg."
+  },
+  {
+   "case": 25,
+   "chief": "Cut on the left palm from a machine at work, bleeding stopped",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 739,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 29-year-old male visited for a new problem. He reported, \"Cut on the left palm from a machine at work, bleeding stopped.\" The cut occurred today."
+  },
+  {
+   "case": 26,
+   "chief": "Sugar check, feet tingling",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 826,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 63-year-old female visited for a follow-up related to a long-term condition. She reported that she has a sugar check and feels her feet are tingling. No current medicines were reported."
+  },
+  {
+   "case": 27,
+   "chief": "Less baby movement since yesterday",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 880,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 31-year-old female visited for a pregnancy check-up at 36 weeks of gestation. She reported that she has less baby movement since yesterday. The pregnancy duration is 36 weeks by history."
+  },
+  {
+   "case": 28,
+   "chief": "Fever and rash for 2 days, no cough",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 771,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "An 8-year-old female visited for a new problem. She reports fever and rash for 2 days, with no cough. Her temperature was measured at 101 °F."
+  },
+  {
+   "case": 29,
+   "chief": "Vomiting blood once this morning",
+   "urgency": "red",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 642,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 46-year-old male visited for a new problem. He reported vomiting blood once this morning. The onset was today, as stated by the patient."
+  },
+  {
+   "case": 30,
+   "chief": "Back pain after lifting a sack, no leg weakness",
+   "urgency": "yellow",
+   "model": "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)",
+   "ms": 1051,
+   "guard_version": 1,
+   "status": "PASS",
+   "text": "A 37-year-old male visited for a new problem. He reports back pain after lifting a sack, with no leg weakness, and says the pain started 1-2 days ago. He rates the pain severity as 5 out of 10."
+  }
+ ]
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Building2, TabletSmartphone, Users, ScrollText, Trash2, Tablet, Link2 } from "lucide-react";
+import { LayoutDashboard, Building2, TabletSmartphone, Users, ScrollText, Trash2, Tablet, Link2, ChartColumn } from "lucide-react";
 import { RoleGate } from "@/components/layout/role-gate";
 import { AppShell } from "@/components/layout/app-shell";
 import { usePrefs } from "@/components/providers";
@@ -20,6 +20,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         { href: "/admin/devices", label: tr("Staff devices"), icon: <TabletSmartphone /> },
         { href: "/admin/audit", label: tr("Audit log"), icon: <ScrollText /> },
         { href: "/admin/retention", label: tr("Data retention"), icon: <Trash2 /> },
+        { href: "/admin/cohort", label: tr("De-identified cohort"), icon: <ChartColumn /> },
         { href: "/kiosk", label: tr("Staff kiosk"), icon: <Tablet /> },
       ]}
     >
