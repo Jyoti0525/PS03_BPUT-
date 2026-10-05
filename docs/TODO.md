@@ -32,13 +32,13 @@ State last checked: **5 Oct 2026, evening** (last commit `ca889e7`).
 
 No speech recogniser is 100 % accurate. The goal is that **no recognition error reaches the note unnoticed**, and that every accuracy figure we show is measured.
 
-- [x] **Live-voice kiosk test, Odia:** done 5 Oct by Jyoti, 3 sentences on the laptop microphone. Transcript, English line, engine name and MT-CHECK flag all appeared. Found: translation dropped fever (ଜର), turned ଝାଡ଼ା into "sweating", 56 into "sixty-six"; the word list missed spoken spellings; the timeline put "2 days" against the wrong complaint. All fixed the same evening (not yet committed), see the next items.
+- [x] **Live-voice kiosk test, Odia:** done 5 Oct by Jyoti, 3 sentences on the laptop microphone. Transcript, English line, engine name and MT-CHECK flag all appeared. Found: translation dropped fever (ଜର), turned ଝାଡ଼ା into "sweating", 56 into "sixty-six"; the word list missed spoken spellings; the timeline put "2 days" against the wrong complaint. All fixed the same evening (0dc032a), see the next items.
 - [x] **Same live test in Hindi** (5 Oct, 2 sentences): transcripts word-perfect, translations right.
 - [ ] **Same live test in English.**
-- [x] Symptom word list matches spoken Hindi/Odia spellings (nukta, long/short vowels, ଶ/ଷ/ସ, silent ୱ) and allows up to two words in between ("ଛାତି ବି ଦରଦ") (5 Oct, not yet committed).
-- [x] Translation cross-check: symptoms in the patient's words vs in the English; a difference makes MT-CHECK a warning naming the sentence, and translation-only evidence is labelled (5 Oct, not yet committed).
-- [x] Translator gets standard words and digits (ଜର → ଜ୍ୱର, ଝାଡ଼ା → ଅତିସାର, ଛପନ ବର୍ଷ → 56 ବର୍ଷ); the record keeps the patient's words; rewrites listed on the note (5 Oct, not yet committed).
-- [x] Near-equal translation candidates compared for numbers and symptoms, all languages, no word list ("number unclear: 66 or 56") (5 Oct, not yet committed).
+- [x] Symptom word list matches spoken Hindi/Odia spellings (nukta, long/short vowels, ଶ/ଷ/ସ, silent ୱ) and allows up to two words in between ("ଛାତି ବି ଦରଦ") (5 Oct, 0dc032a).
+- [x] Translation cross-check: symptoms in the patient's words vs in the English; a difference makes MT-CHECK a warning naming the sentence, and translation-only evidence is labelled (5 Oct, 0dc032a).
+- [x] Translator gets standard words and digits (ଜର → ଜ୍ୱର, ଝାଡ଼ା → ଅତିସାର, ଛପନ ବର୍ଷ → 56 ବର୍ଷ); the record keeps the patient's words; rewrites listed on the note (5 Oct, 0dc032a).
+- [x] Near-equal translation candidates compared for numbers and symptoms, all languages, no word list ("number unclear: 66 or 56") (5 Oct, 0dc032a).
 - [ ] A native Odia speaker checks the Odia number list (1–100) and spoken-spelling list in `backend/app/mt_checks.py` and `findings.py`.
 - [ ] Measure the 8-bit model with RNNT decoding. Figures to beat: 19.7 % WER for fp32 RNNT, 21.6 % for int8 CTC. Make RNNT the default if it is accurate enough and fast enough.
 - [ ] **Measure every Indian language in FLEURS** (25 clips each, same script): as, bn, gu, hi, kn, ml, mr, ne, or ✅, pa, sd, ta, te, ur. Add per-language WER and CER to `docs/EVALUATION.md`.
@@ -99,7 +99,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
   - [x] Medicine names matched to the **PMBJP list of 2,110 generic medicines** (PIB, Govt of India, free to reproduce with acknowledgement; 1,087 names, `scripts/build_medicine_list.py`). Strength is read too. Each name awaits confirmation; nurse/doctor Confirm or "Not this", audited. Checked live in the browser.
   - [x] Faces pixelated (YuNet, MIT, vendored; checked on a public-domain portrait) and phone/Aadhaar/ABHA lines blacked out **before storage**. Photos are always re-encoded, which drops EXIF/GPS.
   - [x] A photo of the problem gets zero interpretation. 11 tests (`tests/test_images.py`).
-  - [x] Live test with a phone photo of a real medicine strip (5 Oct, Jyoti): labelled correctly, all three medicines found. Fixed the same evening (not yet committed): a torn fragment matched a different medicine (pheniramine); strengths in a column on the same row are now read.
+  - [x] Live test with a phone photo of a real medicine strip (5 Oct, Jyoti): labelled correctly, all three medicines found. Fixed the same evening (0dc032a): a torn fragment matched a different medicine (pheniramine); strengths in a column on the same row are now read.
   - [ ] Live test with a real printed prescription (blank out the patient's name first). Handwritten prescriptions will mostly fail OCR; say so.
 
 ### C. Triage intelligence
