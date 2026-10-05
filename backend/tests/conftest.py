@@ -11,6 +11,7 @@ os.environ["JEEVIA_STORAGE_DIR"] = f"{_tmp}/uploads"
 os.environ["JEEVIA_LOG_LEVEL"] = "WARNING"
 os.environ["JEEVIA_DIRECTORY_AUTOLOAD"] = "false"  # tests load their own small directory fixture
 os.environ["JEEVIA_OTP_PER_IP_HOUR"] = "100000"  # the whole test session shares one client address
+os.environ["JEEVIA_MODELS_DIR"] = f"{_tmp}/no-models"  # API tests run without AI models; test_language.py loads the real ones
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient  # noqa: E402

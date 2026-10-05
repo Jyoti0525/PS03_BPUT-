@@ -306,6 +306,17 @@ export interface SymptomEntry {
   engine?: string | null; // speech/translation engine that produced `text`
 }
 
+/** Server speech recognition result (offline IndicConformer, then IndicTrans2 into English). */
+export interface Transcription {
+  text: string; // in the speaker's language
+  language: string;
+  engine: string;
+  seconds_audio: number;
+  seconds_taken: number;
+  translation: { text: string; language: "en"; engine: string } | null;
+  translation_error?: string;
+}
+
 export interface IntakeAnswer {
   qid: string;
   question: string;

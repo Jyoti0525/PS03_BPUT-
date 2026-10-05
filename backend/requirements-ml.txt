@@ -1,0 +1,20 @@
+# Offline AI engines for the facility machine (not needed on the hosted demo API).
+# CPU PyTorch is enough: the speech model runs on ONNX Runtime and the 200M translation models are fast on CPU.
+#   pip install -r requirements.txt -r requirements-ml.txt --extra-index-url https://download.pytorch.org/whl/cpu
+-r requirements.txt
+
+# Document reading (app/triage/extraction.py)
+rapidocr-onnxruntime>=1.4
+pypdfium2>=4.30
+opencv-python-headless>=4.9
+
+# Speech recognition + translation (app/language.py)
+torch>=2.4
+onnxruntime>=1.20
+onnx  # scripts/quantize_asr.py
+psutil  # scripts/eval_asr.py memory figures
+transformers>=4.44,<5  # IndicTransToolkit and the AI4Bharat model code target 4.x
+sentencepiece>=0.2
+av>=12
+IndicTransToolkit>=1.0
+huggingface_hub>=0.24

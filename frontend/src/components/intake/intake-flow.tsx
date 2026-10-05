@@ -22,13 +22,8 @@ import { DURATIONS, SEVERITIES, SYMPTOMS, contextQuestions } from "./catalog";
 
 type Step = "consent" | "identity" | "visit" | "symptoms" | "details" | "uploads" | "followup" | "vitals" | "review";
 
-const DEMO_SPEECH: Record<string, string> = {
-  en: "I have had fever for four days with body ache and headache",
-  hi: "मुझे चार दिन से बुखार है, बदन दर्द और सिरदर्द भी है",
-  or: "ମୋର ଚାରି ଦିନ ହେଲା ଜ୍ୱର, ଦେହ ବିନ୍ଧା ଓ ମୁଣ୍ଡ ବିନ୍ଧା",
-};
-/** Working-language rendering of the demo phrases (translation normally happens server-side via IndicTrans2). */
-const DEMO_TRANSLATION = "I have had fever for four days with body ache and headache";
+/** Engine label for transcripts produced by the browser's own speech recognition (fallback only). */
+const BROWSER_ASR = "Browser speech recognition";
 
 export interface IntakeResult {
   token: string;
@@ -129,7 +124,8 @@ export function IntakeFlow({
   const [typed, setTyped] = useState("");
   const [recording, setRecording] = useState(false);
   const [partial, setPartial] = useState("");
-  const [pending, setPending] = useState<{ original: string; text: string; audio: Blob | null } | null>(null);
+  const [pending, setPending] = useState<{ original: string; text: string; engine: string; audio: Blob | null } | null>(null);
+  const [transcribing, setTranscribing] = useState(false);
   const recRef = useRef<Recorder | null>(null);
 
   // details
@@ -260,18 +256,38 @@ export function IntakeFlow({
     setRecording(false);
     const r = await recRef.current?.stop();
     recRef.current = null;
-    let original = r?.transcript?.trim() ?? "";
-    let text = original;
-    if (!original) {
-      // No live ASR in this browser: server-side IndicConformer would transcribe the audio.
-      original = DEMO_SPEECH[lang] ?? DEMO_SPEECH.en;
-      text = DEMO_TRANSLATION;
-      toast(canRecognise() ? tr("Could not hear clearly — using demo transcript") : tr("Live transcription unavailable — demo transcript used"), "info");
-    } else if (lang !== "en") {
-      text = original; // translated server-side (IndicTrans2); raw text kept for audit
+    const heard = r?.transcript?.trim() ?? "";
+    const audio = r?.audio ?? null;
+    let next: typeof pending = null;
+    if (audio && !offline) {
+      // Server first: offline IndicConformer transcript + IndicTrans2 English, both engines named.
+      setTranscribing(true);
+      try {
+        const res = await api.transcribe(audio, lang);
+        next = {
+          original: res.text,
+          text: res.translation?.text ?? res.text,
+          engine: res.translation ? `${res.engine} + ${res.translation.engine}` : res.engine,
+          audio,
+        };
+      } catch (e) {
+        if (e instanceof ApiError && e.status === 422) {
+          setErr(e.message); // the recording itself was unusable (silent / too short) — ask again
+          return;
+        }
+        /* server speech unavailable — fall back to what the browser heard, if anything */
+      } finally {
+        setTranscribing(false);
+      }
     }
-    setPending({ original, text, audio: r?.audio ?? null });
-    speak(`${t("kiosk.symptoms.readback")} ${original}`, lang);
+    // Browser fallback: English is kept as heard; other languages are translated when the intake is submitted.
+    if (!next && heard) next = { original: heard, text: heard, engine: BROWSER_ASR, audio };
+    if (!next) {
+      setErr(tr("Could not understand the recording — please speak again, or type or tap your symptoms"));
+      return;
+    }
+    setPending(next);
+    speak(`${t("kiosk.symptoms.readback")} ${next.original}`, lang);
   };
 
   const confirmVoice = async (ok: boolean) => {
@@ -281,7 +297,7 @@ export function IntakeFlow({
       setPending(null);
       return;
     }
-    setEntries((e) => [...e, { text: pending.text, original_text: pending.original, language: lang, source: "voice", confirmed_by_readback: true }]);
+    setEntries((e) => [...e, { text: pending.text, original_text: pending.original, language: lang, source: "voice", confirmed_by_readback: true, engine: pending.engine }]);
     if (pending.audio && !offline) {
       try {
         const f = await api.uploadFile(new File([pending.audio], `voice_${Date.now()}.webm`, { type: pending.audio.type }), "audio");
@@ -625,22 +641,24 @@ export function IntakeFlow({
               <button
                 type="button"
                 onClick={toggleMic}
-                disabled={!!pending}
+                disabled={!!pending || transcribing}
                 className={cx("grid size-28 place-items-center rounded-full text-white shadow-lg transition-transform active:scale-95 disabled:opacity-50", recording ? "recording-pulse bg-crit" : "bg-teal-700 hover:bg-teal-800")}
                 aria-label={recording ? t("kiosk.symptoms.stop") : t("kiosk.symptoms.speak")}
               >
                 {recording ? <Square className="size-10" /> : <Mic className="size-12" />}
               </button>
               <p className="text-lg font-semibold text-ink">{recording ? t("kiosk.symptoms.stop") : t("kiosk.symptoms.speak")}</p>
-              <p className="text-sm text-muted">{langByCode(lang).native} · {canRecognise() ? tr("live transcription") : tr("recorded for server transcription")}</p>
+              <p className="text-sm text-muted">{langByCode(lang).native} · {!offline ? tr("transcribed on the facility server") : canRecognise() ? tr("on-device transcription") : tr("voice needs the server — please type or tap")}</p>
               {recording && partial && <p className="max-w-lg text-center text-lg text-ink-2 italic">“{partial}”</p>}
+              {transcribing && <p className="text-base text-ink-2" role="status">{tr("Understanding what you said…")}</p>}
             </div>
 
             {pending && (
               <div className="rounded-2xl border-2 border-coral-300 bg-coral-50 p-4">
                 <p className="text-sm font-semibold text-coral-700">{t("kiosk.symptoms.readback")}</p>
                 <p className="mt-1 text-xl font-medium text-ink">“{pending.original}”</p>
-                {pending.text !== pending.original && <p className="mt-1 text-sm text-muted">→ {tr(pending.text)}</p>}
+                {pending.text !== pending.original && <p className="mt-1 text-sm text-muted" lang="en">→ {pending.text}</p>}
+                <p className="mt-1 text-xs text-subtle">{pending.engine}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button size="lg" variant="teal" onClick={() => confirmVoice(true)} icon={<Check className="size-5" />}>{t("kiosk.symptoms.correct")}</Button>
                   <Button size="lg" variant="secondary" onClick={() => confirmVoice(false)} icon={<RotateCcw className="size-5" />}>{t("kiosk.symptoms.again")}</Button>

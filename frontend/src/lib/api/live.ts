@@ -178,6 +178,13 @@ export const liveApi: JeeviaApi = {
   },
   getFile: (id) => json(`/files/${id}`),
 
+  transcribe: (audio, language) => {
+    const fd = new FormData();
+    fd.append("audio", new File([audio], "speech.webm", { type: audio.type || "audio/webm" }));
+    fd.append("language", language);
+    return json("/speech/transcribe", { method: "POST", body: fd });
+  },
+
   listAudit: (f) => {
     const qs = new URLSearchParams();
     if (f?.action) qs.set("action", f.action);

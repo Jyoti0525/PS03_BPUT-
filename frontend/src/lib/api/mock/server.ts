@@ -1212,6 +1212,11 @@ export const mockApi: JeeviaApi = {
       return sanitizeFile(f);
     }),
 
+  // The browser-only demo has no speech models; the kiosk falls back to on-device recognition or typing.
+  transcribe: async () => {
+    throw new ApiError(503, "Server speech recognition runs only with the live API");
+  },
+
   listAudit: (filter) =>
     withDb(async (d) => {
       const me = await current(d);

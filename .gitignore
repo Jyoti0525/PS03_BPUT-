@@ -34,3 +34,6 @@ backend/directory_data/parts/
 
 # local browser-test logs
 .playwright-mcp/
+
+# downloaded AI model weights (large, fetched by script)
+models/

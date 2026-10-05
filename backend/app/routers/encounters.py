@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from .. import audit, exports
+from .. import audit, exports, language
 from ..config import get_settings
 from ..models import Device, Encounter, Escalation, Facility, FitnessAssessment, Patient, Referral, Reminder, User
 from ..schemas import (
@@ -66,7 +66,8 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
             dev.last_seen_at = now()
     if not body.consent_id:
         raise HTTPException(422, "Consent must be captured before intake")
-    intake = body.model_dump(mode="json")
+    # Free text in the patient's language gets an English rendering for the reviewer (offline IndicTrans2).
+    intake = language.translate_symptoms(body.model_dump(mode="json"))
     captured = body.captured_at if body.captured_at and body.captured_at < now() else None
     try:
         channel = {"kiosk": "kiosk_link", "patient": "patient_app"}.get(user.role, "staff_kiosk")

@@ -333,7 +333,7 @@ class SymptomEntry(BaseModel):
     language: str
     source: Literal["voice", "text", "icon"]
     confirmed_by_readback: bool = False
-    engine: str | None = Field(default=None, max_length=80)  # speech/translation engine that produced `text`
+    engine: str | None = Field(default=None, max_length=160)  # speech/translation engine that produced `text`
 
 
 class IntakeAnswer(BaseModel):

@@ -12,7 +12,7 @@ from . import mailer
 from .config import get_settings
 from .db import SessionLocal, engine, init_db
 from .observability import RequestContextMiddleware, metrics_endpoint, setup_logging
-from .routers import admin, auth, directory as directory_router, encounters, facilities, files, kiosk, organisations, patients, shares
+from .routers import admin, auth, directory as directory_router, encounters, facilities, files, kiosk, language as language_router, organisations, patients, shares
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -60,6 +60,10 @@ async def lifespan(_: FastAPI):
 
     if get_settings().directory_autoload:
         directory.load_in_background_if_empty(SessionLocal)
+    if settings.preload_language_models:
+        from . import language
+
+        language.preload()
     stop = threading.Event()
     threading.Thread(target=_housekeeping_loop, args=(stop,), name="housekeeping", daemon=True).start()
     log.info("Jeevia API ready", extra={"path": settings.database_url.split("@")[-1]})
@@ -86,7 +90,7 @@ app.add_middleware(
 )
 
 API = "/api/v1"
-for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router, shares.router, directory_router.router, organisations.router):
+for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router, shares.router, directory_router.router, organisations.router, language_router.router):
     app.include_router(r, prefix=API)
 
 

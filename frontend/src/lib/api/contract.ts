@@ -35,6 +35,7 @@ import type {
   Reminder,
   RetentionStatus,
   Tokens,
+  Transcription,
   TriageNote,
   Urgency,
   User,
@@ -164,6 +165,9 @@ export interface JeeviaApi {
   /** `sampleKey` marks one of the bundled synthetic reports so OCR crops can be generated. */
   uploadFile(file: File, kind: FileObject["kind"], encounterId?: string | null, sampleKey?: string | null): Promise<FileObject>;
   getFile(id: string): Promise<FileObject>;
+
+  // Speech — offline models on the facility server; the audio itself is not stored by this call
+  transcribe(audio: Blob, language: string): Promise<Transcription>;
 
   // Audit
   listAudit(filter?: { action?: AuditAction | ""; q?: string }): Promise<AuditEvent[]>;

@@ -142,6 +142,11 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         flags.append({"code": "DISAGREE", "label": f"{d['field']}: sources disagree", "severity": "warning", "reason": d["action"]})
     if voice and not voice.get("confirmed_by_readback"):
         flags.append({"code": "ASR-UNCONFIRMED", "label": "Voice transcript not confirmed by read-back", "severity": "warning", "reason": "Patient skipped the spoken confirmation step"})
+    machine = [x for x in intake.get("symptoms", []) if x.get("original_text") and x.get("text") != x.get("original_text")]
+    if machine:
+        langs = ", ".join(sorted({x.get("language", "") for x in machine}))
+        flags.append({"code": "MT-CHECK", "label": "Machine-translated history — check against the patient's own words", "severity": "info",
+                      "reason": f"English rendered by {machine[0].get('engine') or 'machine translation'} from {langs}; rules also read the original-language text"})
     if proxy:
         flags.append({"code": "PROXY", "label": "History given by a proxy", "severity": "info", "reason": "Consent and history captured from a family member or caregiver"})
     if intake.get("captured_offline"):

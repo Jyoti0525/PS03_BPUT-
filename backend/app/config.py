@@ -58,6 +58,14 @@ class Settings(BaseSettings):
     retention_hours_report: int = 720  # 30 days, so reports travel with referrals
     directory_autoload: bool = True  # load directory_data/ snapshot into an empty facility_directory at start-up
 
+    # Offline speech / translation models (see app/language.py). Relative paths are from backend/.
+    models_dir: str = "../models"
+    # 8-bit copy made by scripts/quantize_asr.py: same accuracy, ~half the RAM (docs/EVALUATION.md).
+    # "indic-conformer-600m-multilingual" = the original fp32 download.
+    asr_model: str = "indic-conformer-600m-int8"
+    asr_decoding: str = "ctc"  # "ctc" (2x faster) or "rnnt" (slightly more accurate) — see docs/EVALUATION.md
+    preload_language_models: bool = False  # load at start-up instead of on the first request
+
     escalate_red_min: int = 15
     escalate_yellow_min: int = 60
 
