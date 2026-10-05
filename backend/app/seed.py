@@ -47,6 +47,8 @@ USERS = [
     ("usr_sup1", "9000000004", "Meera Nair", "supervisor", "fac_phc_manikpur", None, "en"),
     ("usr_emp1", "9000000005", "Arjun Patnaik (HR — Safety)", "employer", "fac_kalinganagar", None, "en"),
     ("usr_pat1", "9876543210", "Priya Sharma", "patient", None, None, "hi"),
+    ("usr_hw1", "9000000006", "Kamla Devi (ASHA)", "health_worker", "fac_phc_manikpur", None, "hi"),
+    ("usr_mo1", "9000000007", "Dr. Anil Verma (Medical Officer i/c)", "medical_officer", "fac_phc_manikpur", "UPMC-51207", "en"),
 ]
 
 PATIENTS = [
@@ -146,7 +148,9 @@ def seed(db) -> None:
             detail = "; ".join(f"{d['field']}: " + " vs ".join(v["value"] for v in d["values"]) for d in enc.note["disagreements"])
             audit.record(db, None, "DISAGREEMENT", "encounter", enc.id, detail, p.code, enc.facility_id, ts=created)
 
-    db.add(Reminder(patient_id="pat_003", kind="anc_checkup", due_at=NOW + 14 * DAY, channel="sms", status="scheduled", message="ANC check-up at PHC Manikpur (30 weeks). Bring your MCP card."))
+    # Priya's number is the household phone she shares with Radha, so the reminder says nothing about pregnancy (D4).
+    db.add(Reminder(patient_id="pat_003", kind="anc_checkup", due_at=NOW + 14 * DAY, channel="sms", status="scheduled", facility_id="fac_phc_manikpur",
+                    assigned_to="usr_hw1", phone_belongs_to="household", message=f"Namaste. This is PHC Manikpur. Please ask Priya to visit PHC Manikpur on {(NOW + 14 * DAY).strftime('%d %b')}."))
 
     from .routers.kiosk import create_link
 

@@ -1,0 +1,33 @@
+# Six chief complaints that a prospective AIIMS New Delhi study (2025) found to be high risk for death or
+# ICU admission within 72 hours. They are a floor, not a decision: any of the six makes an adult case at
+# least YELLOW, and the ATP / IITT Red criteria still decide RED. Without this pack an adult with shortness
+# of breath or chest pain and normal vital signs could be GREEN.
+protocol: AIIMS-HRC
+name: AIIMS high-risk chief complaints (2025)
+source: aiims_hrc
+applies: { age_min: 16 }
+rules:
+  - id: HRC-BREATHLESS
+    description: Shortness of breath — high-risk chief complaint (odds ratio 43.7 for death or ICU in 72 h)
+    urgency: yellow
+    when: { finding: breathless }
+  - id: HRC-ALTERED-MENTAL
+    description: Altered mental status — high-risk chief complaint (odds ratio 6.2)
+    urgency: yellow
+    when: { finding: altered_mental_status }
+  - id: HRC-HAEMATEMESIS
+    description: Vomiting blood — high-risk chief complaint (odds ratio 3.88)
+    urgency: yellow
+    when: { finding: haematemesis }
+  - id: HRC-FALL-HEIGHT
+    description: Fall from height — high-risk chief complaint (odds ratio 3.88)
+    urgency: yellow
+    when: { finding: fall_from_height }
+  - id: HRC-ONE-SIDED-WEAKNESS
+    description: Weakness of one side of the body — high-risk chief complaint (odds ratio 3.16)
+    urgency: yellow
+    when: { finding: one_sided_weakness }
+  - id: HRC-CHEST-PAIN
+    description: Chest pain — high-risk chief complaint (odds ratio 1.78)
+    urgency: yellow
+    when: { finding: chest_pain }

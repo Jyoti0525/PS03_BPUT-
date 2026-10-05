@@ -81,6 +81,9 @@ FINDINGS: dict[str, tuple[str, str]] = {
     "rash": ("Skin rash", SYMPTOM),
     "rash_spreading": ("Rash worsening over hours or peeling", SYMPTOM),
     "malnutrition": ("Visible severe wasting or swelling of both feet", SIGN),
+    "weight_loss": ("Weight loss", SYMPTOM),
+    "night_sweats": ("Night sweats", SYMPTOM),
+    "fatigue": ("Tiredness / fatigue", SYMPTOM),
     "pain": ("Pain", SYMPTOM),
     # trauma and exposures
     "injury": ("Injury", SYMPTOM),
@@ -181,6 +184,10 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "rash": {"en": [r"rash\w*", r"spots on (the )?skin", r"hives"], "hi": ["दाने", "चकत्ते"], "or": ["ଚର୍ମରେ ଦାଗ", "ଫୋଟକା"]},
     "rash_spreading": {"en": [r"rash[\w ]{0,20}(spread\w*|worsen\w*|peel\w*)", r"skin (is )?peeling"], "hi": ["दाने फैल", "त्वचा उतर"], "or": []},
     "malnutrition": {"en": [r"severe(ly)? (wasting|wasted|malnourish\w*)", r"swelling of both feet", r"skin and bones"], "hi": ["बहुत दुबला", "कुपोषण"], "or": ["ପୁଷ୍ଟିହୀନ"]},
+    "weight_loss": {"en": [r"(weight|wt\.?) (loss|lost|(is )?(going )?down|(is )?reduc\w*|(has )?dropped)", r"los(t|ing|e) (some |a lot of |much )?weight", r"(getting|became|become|grown) (thin|thinner)", r"wa?zan (kam|ghat)"],
+                    "hi": ["वजन कम", "वज़न कम", "वजन घट", "वज़न घट", "दुबला हो", "दुबली हो"], "or": ["ଓଜନ … କମ", "ଓଜନ … ହ୍ରାସ", "ପତଳା ହୋଇ"]},
+    "night_sweats": {"en": [r"night sweats?", r"sweat\w* (at|in the|during the) night", r"raat (ko|me|mein) paseena"], "hi": ["रात … पसीना", "रात … पसीने"], "or": ["ରାତି … ଝାଳ"]},
+    "fatigue": {"en": [r"tired\w*", r"fatigue\w*", r"exhaust\w*", r"no energy", r"thak(an|aan|awat|a hua|i hui)"], "hi": ["थकान", "थकावट", "थका हुआ", "थकी हुई", "थक जा"], "or": ["କ୍ଳାନ୍ତ", "କ୍ଲାନ୍ତ", "ଥକା ଲାଗୁ", "ଥକି ଯାଉ"]},
     "pain": {"en": [r"pain\w*", r"ache", r"dard", r"hurts?"], "hi": ["दर्द"], "or": ["ଯନ୍ତ୍ରଣା", "ବିନ୍ଧା", "ବିନ୍ଧୁ", "ଦରଜ", "ଦରଦ", "ଦର୍ଦ"]},
     "injury": {"en": [r"injur\w*", r"wound\w*", r"\bcut\b", r"hurt (my|his|her)", r"accident", r"fell (down|off)", r"chot"], "hi": ["चोट", "घाव", "दुर्घटना"], "or": ["ଆଘାତ", "କ୍ଷତ", "ଦୁର୍ଘଟଣା"]},
     "burn": {"en": [r"burn\w*", r"scald\w*", r"jal (gaya|gayi|gaye)"], "hi": ["जल गया", "जल गई", "जलना"], "or": ["ପୋଡ଼ି", "ଜଳିଗଲା"]},
@@ -225,7 +232,7 @@ TILES: dict[str, list[str]] = {
     "dizziness": [],
     "swelling": [],
     "skin rash": ["rash"],
-    "tiredness": [],
+    "tiredness": ["fatigue"],
     "fits / convulsion": ["seizure"],
 }
 

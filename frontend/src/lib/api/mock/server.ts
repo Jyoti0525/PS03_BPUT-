@@ -29,8 +29,10 @@ import type {
   Cohort,
   IntakeChannel,
   KioskLink,
+  Alert,
+  Capacity,
 } from "@/lib/types";
-import { ADMIN_ROLES, PIN_ROLES, REVIEWER_ROLES, STAFF_ROLES } from "@/lib/types";
+import { ADMIN_ROLES, DOCTOR_ROLES, PIN_ROLES, REVIEWER_ROLES, SIGN_OFF, STAFF_ROLES } from "@/lib/types";
 import { SAMPLE_PIN, pinProblem } from "@/lib/pin";
 import { evaluate } from "./rules";
 import { buildNote, sampleReportImage, type UploadedForNote } from "./note";
@@ -357,12 +359,45 @@ function requireRole(u: User, roles: Role[]) {
   if (!roles.includes(u.role)) throw new ApiError(403, `This action is not available to the ${u.role} role`);
 }
 
+const RANK: Record<Urgency, number> = { green: 0, yellow: 1, red: 2 };
+const ROLE_SEES: Partial<Record<Role, string[]>> = { health_worker: ["health_worker"], nurse: ["health_worker", "nurse"] };
+
+function canConfirm(role: Role, u: Urgency | null): boolean {
+  const limit = SIGN_OFF[role];
+  return !!limit && !!u && RANK[u] <= RANK[limit];
+}
+
 function forRole(e: Encounter, u: User): Encounter {
   if (u.role === "patient" || u.role === "kiosk") {
     // Health outputs stay reviewer-facing: strip urgency, note and override.
     return { ...clone(e), urgency: null, note: null, override: null, escalation_due_at: null, specialist_required: null, referral_needed: null };
   }
-  return clone(e);
+  const out = clone(e);
+  out.can_confirm = canConfirm(u.role, out.urgency);
+  out.sign_off = out.urgency === "green" ? "health_worker" : out.urgency === "yellow" ? "nurse" : "doctor";
+  if (out.note) {
+    const sees = ROLE_SEES[u.role];
+    out.note.followup_questions = out.note.followup_questions.filter((q) => !sees || sees.includes(q.for_role));
+    out.note.detail_level = u.role === "health_worker" ? "summary" : "full";
+    if (u.role === "health_worker") {
+      out.note = { ...out.note, rules_fired: [], labs: [], timeline: [], trend: [], disagreements: [], documents: [], medications_pending: [] };
+    }
+  }
+  return out;
+}
+
+function mockCapacity(d: DB, me: User): Capacity {
+  const reds = d.encounters.filter((e) => e.facility_id === me.facility_id && e.urgency === "red" && ["queued", "in_review", "escalated"].includes(e.status));
+  const docs = d.users.filter((u) => u.facility_id === me.facility_id && DOCTOR_ROLES.includes(u.role) && (u as { on_duty?: boolean }).on_duty !== false).length;
+  const now = Date.now();
+  const rows = reds.map((e) => ({ token: e.token ?? null, wait_minutes: Math.max(0, Math.round((now - Date.parse(e.created_at)) / 60000)), status: e.status }));
+  const over = reds.length > docs;
+  const iso = new Date().toISOString();
+  const alert: Alert | null = over
+    ? { id: "alr_capacity", facility_id: me.facility_id ?? "", kind: "capacity", key: "red", to_role: "medical_officer", assigned_to: null,
+        title: `${reds.length} RED cases waiting, ${docs} doctors or medical officers on duty`, detail: { open_red: reds.length, doctors_on_duty: docs }, status: "open", raised_at: iso, updated_at: iso }
+    : null;
+  return { open_red: reds.length, doctors_on_duty: docs, over, reds: rows, alert };
 }
 
 async function autoEscalate(d: DB) {
@@ -400,7 +435,7 @@ function sanitizeFile(f: StoredFile): FileObject {
 }
 
 const LAT = 180;
-const DEMO_PHONES = ["9000000001", "9000000002", "9000000003", "9000000004", "9000000005"];
+const DEMO_PHONES = ["9000000001", "9000000002", "9000000003", "9000000004", "9000000005", "9000000006", "9000000007"];
 
 function pinStepUser(token: string) {
   return token.startsWith("pinstep.") ? token.slice(8) : "";
@@ -1060,9 +1095,11 @@ export const mockApi: JeeviaApi = {
   confirmEncounter: (id) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, ["doctor"]);
+      requireRole(me, REVIEWER_ROLES);
       const e = d.encounters.find((x) => x.id === id);
       if (!e) throw new ApiError(404, "Encounter not found");
+      if (!canConfirm(me.role, e.urgency))
+        throw new ApiError(403, `A ${me.role.replace("_", " ")} cannot confirm a ${(e.urgency ?? "").toUpperCase()} note — it needs ${e.urgency === "red" ? "a doctor or medical officer" : "a nurse, doctor or medical officer"}`);
       e.status = "confirmed";
       e.reviewed_by = me.name;
       e.reviewed_at = new Date().toISOString();
@@ -1084,7 +1121,7 @@ export const mockApi: JeeviaApi = {
   overrideUrgency: (id, to, category, reason) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, ["doctor"]);
+      requireRole(me, DOCTOR_ROLES);
       if (reason.trim().length < 15) throw new ApiError(422, "A written reason of at least 15 characters is required");
       const e = d.encounters.find((x) => x.id === id);
       if (!e || !e.urgency) throw new ApiError(404, "Encounter not found");
@@ -1144,7 +1181,7 @@ export const mockApi: JeeviaApi = {
   acknowledgeEscalation: (id, note) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, ["doctor"]);
+      requireRole(me, DOCTOR_ROLES);
       const esc = d.escalations.find((x) => x.id === id);
       if (!esc) throw new ApiError(404, "Escalation not found");
       esc.status = "acknowledged";
@@ -1160,7 +1197,7 @@ export const mockApi: JeeviaApi = {
   createReferral: (encounterId, input) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, ["doctor"]);
+      requireRole(me, DOCTOR_ROLES);
       const e = d.encounters.find((x) => x.id === encounterId);
       if (!e) throw new ApiError(404, "Encounter not found");
       const r: Referral = { ...input, id: uid("ref"), encounter_id: e.id, patient_name: e.patient.name, created_by: me.name, created_at: new Date().toISOString(), status: "sent" };
@@ -1229,7 +1266,7 @@ export const mockApi: JeeviaApi = {
   listAudit: (filter) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, [...ADMIN_ROLES, "doctor"]);
+      requireRole(me, [...ADMIN_ROLES, ...DOCTOR_ROLES]);
       const q = filter?.q?.toLowerCase() ?? "";
       return clone(d.audit)
         .filter((a) => (!filter?.action || a.action === filter.action) && (!q || `${a.actor_name} ${a.detail} ${a.patient_code ?? ""}`.toLowerCase().includes(q)))
@@ -1239,7 +1276,7 @@ export const mockApi: JeeviaApi = {
   verifyAudit: () =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, [...ADMIN_ROLES, "doctor"]);
+      requireRole(me, [...ADMIN_ROLES, ...DOCTOR_ROLES]);
       let prev = "GENESIS";
       for (const a of d.audit) {
         const { prev_hash, hash, ...body } = a;
@@ -1252,7 +1289,7 @@ export const mockApi: JeeviaApi = {
   exportAuditCsv: () =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, [...ADMIN_ROLES, "doctor"]);
+      requireRole(me, [...ADMIN_ROLES, ...DOCTOR_ROLES]);
       await audit(d, me, "EXPORT", "audit", null, "Audit log exported as CSV");
       const rows = [["id", "ts", "actor", "role", "action", "resource", "patient", "detail", "hash"], ...d.audit.map((a) => [a.id, a.ts, a.actor_name, a.actor_role, a.action, `${a.resource_type}:${a.resource_id ?? ""}`, a.patient_code ?? "", a.detail, a.hash].map(String))];
       const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -1284,10 +1321,31 @@ export const mockApi: JeeviaApi = {
       return { patient: clone(patient), encounters, reminders: clone(d.reminders.filter((r) => r.patient_id === patient.id)) };
     }),
 
+  // The regional calendar (F5) lives on the server with its sources; the browser-only demo does not copy it.
+  facilityCalendar: async () => {
+    throw new ApiError(501, "The regional calendar needs the live API");
+  },
+  tryOnset: async () => {
+    throw new ApiError(501, "The regional calendar needs the live API");
+  },
+
+  // No language model runs in the browser-only demo, so there are no second opinions to compare.
+  aiOpinions: async () => {
+    throw new ApiError(501, "AI second opinions need the live API and the local model");
+  },
+
+  // The guard's pattern list lives on the server; the browser-only demo does not copy it.
+  guardTestSamples: async () => {
+    throw new ApiError(501, "The output guard test needs the live API");
+  },
+  guardTest: async () => {
+    throw new ApiError(501, "The output guard test needs the live API");
+  },
+
   deidentifiedCohort: (days = 28) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, ["supervisor", "doctor"]);
+      requireRole(me, ["supervisor", ...DOCTOR_ROLES]);
       const since = Date.now() - days * 86400000;
       const rows = d.encounters.filter((e) => e.facility_id === me.facility_id && Date.parse(e.created_at) >= since);
       await audit(d, me, "VIEW", "cohort", null, `De-identified cohort viewed (${days} days, ${rows.length} cases)`);
@@ -1327,6 +1385,37 @@ export const mockApi: JeeviaApi = {
         removed_fields: ["name", "patient ID", "phone", "village", "exact age", "exact date and time", "free text", "token"],
       };
     }),
+
+  // Alerts in the local demo: the capacity check only; fever clusters and missed visits need the server.
+  listAlerts: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      const cap = mockCapacity(d, me);
+      return cap.alert ? [cap.alert] : [];
+    }),
+
+  acknowledgeAlert: () => Promise.reject(new ApiError(501, "Alerts need the Jeevia server (local demo mode)")),
+
+  capacity: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, REVIEWER_ROLES);
+      return mockCapacity(d, me);
+    }),
+
+  syndromicCsv: async (days = 14) => ({ filename: `syndromic_${days}d.csv`, mime: "text/csv", blob: new Blob(["date,place,visits,fever,respiratory,gastro,rash\n"], { type: "text/csv" }) }),
+
+  listFollowups: async () => [],
+  listHealthWorkers: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      return d.users.filter((u) => u.facility_id === me.facility_id && u.role === "health_worker").map((u) => ({ id: u.id, name: u.name }));
+    }),
+  followupAttempt: () => Promise.reject(new ApiError(501, "Follow-ups need the Jeevia server (local demo mode)")),
+  followupCall: () => Promise.reject(new ApiError(501, "Follow-ups need the Jeevia server (local demo mode)")),
+
+  departmentRates: async (days = 365) => ({ days, k_min: 5, departments: [], note: "Department rates need the Jeevia server (local demo mode)." }),
 
   listCohorts: () =>
     withDb(async (d) => {

@@ -10,6 +10,7 @@ import { cx } from "@/components/ui";
 import { useAsync } from "@/lib/hooks";
 import { api } from "@/lib/api";
 import { PIN_ROLES } from "@/lib/types";
+import { healthWorkerLabel, nurseLabel } from "@/lib/cadres";
 import { ChangePinModal } from "@/components/auth/change-pin";
 import { EmailModal } from "@/components/auth/email-settings";
 
@@ -22,8 +23,10 @@ export interface NavItem {
 }
 
 const ROLE_LABEL: Record<string, string> = {
-  doctor: "Medical Officer",
+  doctor: "Doctor",
+  medical_officer: "Medical Officer",
   nurse: "Nurse / ANM",
+  health_worker: "Health worker / ASHA",
   receptionist: "Receptionist",
   supervisor: "Facility Supervisor",
   patient: "Patient",
@@ -44,7 +47,7 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
   const path = usePathname();
   const router = useRouter();
   const { user, signOut } = useSession();
-  const { tr } = usePrefs();
+  const { tr, lang } = usePrefs();
   const a = ACCENT[accent];
   const { data: facility } = useAsync(() => (user?.facility_id ? api.getFacility(user.facility_id) : Promise.resolve(null)), [user?.facility_id]);
   const [pinOpen, setPinOpen] = useState(false);
@@ -109,7 +112,7 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
                   <span className="grid size-8 place-items-center rounded-full bg-coral-100 text-sm font-bold text-coral-700">{user.name.replace(/^Dr\.\s*/, "").charAt(0)}</span>
                   <div className="leading-tight">
                     <p className="text-sm font-semibold text-ink">{user.name}</p>
-                    <p className="text-[11px] text-muted">{tr(ROLE_LABEL[user.role] ?? user.role)}</p>
+                    <p className="text-[11px] text-muted">{user.role === "nurse" ? nurseLabel(facility?.region, tr, lang) : user.role === "health_worker" ? healthWorkerLabel(facility?.region, tr, lang) : tr(ROLE_LABEL[user.role] ?? user.role)}</p>
                   </div>
                 </div>
               )}

@@ -259,9 +259,9 @@ def test_front_desk_vs_supervisor(client, supervisor):
     assert client.get(f"{API}/audit", headers=rec).status_code == 403
     assert client.get(f"{API}/retention", headers=rec).status_code == 403
     assert client.get(f"{API}/kiosk-links", headers=supervisor).status_code == 200
-    # front desk: doctors and nurses only, and their duty status
+    # front desk: clinicians only (doctor, medical officer, nurse, health worker), and their duty status
     staff = client.get(f"{API}/users", headers=rec).json()
-    assert staff and {u["role"] for u in staff} <= {"doctor", "nurse"}
+    assert staff and {u["role"] for u in staff} <= {"doctor", "medical_officer", "nurse", "health_worker"}
     assert {"supervisor", "receptionist"} <= {u["role"] for u in client.get(f"{API}/users", headers=supervisor).json()}
     doc = next(u for u in staff if u["role"] == "doctor")
     off = client.patch(f"{API}/users/{doc['id']}/duty", json={"on_duty": False}, headers=rec).json()

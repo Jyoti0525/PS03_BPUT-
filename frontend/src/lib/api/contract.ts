@@ -1,8 +1,16 @@
 import type {
+  Alert,
+  Capacity,
+  DepartmentRates,
+  Followup,
+  FollowupAttempt,
   AuditAction,
   AuditEvent,
   Cohort,
   DeidentifiedCohort,
+  GuardTestResult,
+  GuardTestSample,
+  AiOpinionReport,
   Consent,
   ConsentInput,
   Device,
@@ -41,6 +49,8 @@ import type {
   Urgency,
   User,
   VitalsInput,
+  OnsetReading,
+  RegionCalendar,
 } from "@/lib/types";
 
 export interface ExportResult {
@@ -86,6 +96,10 @@ export interface JeeviaApi {
   getFacility(id: string): Promise<Facility>;
   updateFacility(id: string, patch: Partial<Facility>): Promise<Facility>;
   facilityStats(id: string): Promise<FacilityStats>;
+  /** F5: festivals and seasons this facility dates vague onsets by, and its worker names. Staff only. */
+  facilityCalendar(id: string): Promise<RegionCalendar>;
+  /** F5: how the note would read a phrase such as "since Diwali" at this facility. */
+  tryOnset(id: string, text: string): Promise<OnsetReading>;
 
   facilityTokens(id: string): Promise<TokenBoardItem[]>;
 
@@ -157,6 +171,19 @@ export interface JeeviaApi {
   listEscalations(status?: Escalation["status"]): Promise<Escalation[]>;
   acknowledgeEscalation(id: string, note: string): Promise<Escalation>;
 
+  // Alerts (C3 capacity, D3 fever cluster, D4 missed visit) and maternal follow-ups
+  listAlerts(status?: Alert["status"] | "active"): Promise<Alert[]>;
+  acknowledgeAlert(id: string, note: string): Promise<Alert>;
+  capacity(): Promise<Capacity>;
+  /** Doctor / medical officer: daily counts per place and syndrome, small counts written as "<5". */
+  syndromicCsv(days?: number): Promise<ExportResult>;
+  listFollowups(scope?: "active" | "all"): Promise<Followup[]>;
+  /** Active health workers at the caller's facility (names only), to assign a maternal follow-up. */
+  listHealthWorkers(): Promise<{ id: string; name: string }[]>;
+  followupAttempt(id: string, outcome: Exclude<FollowupAttempt["outcome"], "call_placed">, note?: string): Promise<Followup>;
+  /** Simulated in this build: the script is recorded, no call is made. */
+  followupCall(id: string): Promise<Followup>;
+
   // Referrals
   createReferral(
     encounterId: string,
@@ -182,12 +209,19 @@ export interface JeeviaApi {
   retentionStatus(): Promise<RetentionStatus>;
   /** Counts only, small cells suppressed (anonymisation, G3). Supervisor and doctor. */
   deidentifiedCohort(days?: number): Promise<DeidentifiedCohort>;
+  /** C8: where the AI model's urgency differed from the rules. Supervisor and doctor. */
+  aiOpinions(days?: number): Promise<AiOpinionReport>;
+  /** C4 demo: run a typed sentence through the output guard. Supervisor only; logged as a test, touches no record. */
+  guardTestSamples(): Promise<{ guard_version: number; samples: GuardTestSample[] }>;
+  guardTest(text: string, source?: string): Promise<GuardTestResult>;
 
   // Patient self-service (triage status is stripped server-side for this role)
   myRecord(): Promise<{ patient: Patient; encounters: Encounter[]; reminders: Reminder[] }>;
 
   // Employer — fitness status and cohort only, never records
   listCohorts(): Promise<Cohort[]>;
+  /** D2: per department, screened / referred-for-review / PPE-gap shares; no symptoms, departments under 5 hidden. */
+  departmentRates(days?: number): Promise<DepartmentRates>;
 }
 
 export class ApiError extends Error {

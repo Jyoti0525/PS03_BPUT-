@@ -100,6 +100,22 @@ def _alembic_config(connection):
     return cfg
 
 
+def _add_missing_columns() -> None:
+    """SQLite has no migrations here and create_all never alters an existing table, so a local demo database made
+    before a column was added would fail on the first query. Add any missing nullable column in place."""
+    from sqlalchemy import inspect
+
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue
+            have = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name not in have and col.nullable:
+                    conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {col.type.compile(engine.dialect)}'))
+
+
 def init_db() -> None:
     """Bring the schema to the latest version.
 
@@ -110,6 +126,7 @@ def init_db() -> None:
 
     if engine.dialect.name != "postgresql":
         Base.metadata.create_all(engine)
+        _add_missing_columns()
         return
 
     from alembic import command

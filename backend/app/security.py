@@ -70,7 +70,7 @@ def registration_token(phone: str | None = None, email: str | None = None) -> st
     return _encode(claims, timedelta(minutes=get_settings().registration_ttl_min))
 
 
-PIN_ROLES = {"doctor", "nurse", "receptionist", "supervisor", "employer"}
+PIN_ROLES = {"doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor", "employer"}
 _WEAK = {"1234", "12345", "123456", "4321", "54321", "654321", "1212", "121212", "1122", "112233", "2580", "0852", "1111", "0000", "123123", "147258", "159753"}
 
 

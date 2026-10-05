@@ -5,6 +5,11 @@ Each case goes through the real rules engine and note builder, then llm.write_su
 (backend/scripts/start_llm.sh) and JEEVIA_LLM_URL set.
 
     JEEVIA_LLM_URL=http://127.0.0.1:8031 python backend/scripts/eval_llm.py [cases|held_out] [out.json]
+
+Second opinion on urgency (C8): how often the model's own tier matches the rules', in which direction it differs,
+and how often its reason is withheld by the checks. The rules' tier is the reference here, not a clinician's.
+
+    JEEVIA_LLM_URL=http://127.0.0.1:8031 python backend/scripts/eval_llm.py opinion [cases|held_out|all] [out.json]
 """
 
 import json
@@ -60,5 +65,43 @@ def main(which: str = "cases", out: str | None = None) -> None:
         Path(out).write_text(json.dumps({"summary": summary, "rows": rows}, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def opinions(which: str = "all", out: str | None = None) -> None:
+    data = yaml.safe_load(CASES.read_text(encoding="utf-8"))
+    cases = data["cases"] + data["held_out"] if which == "all" else data[which]
+    rows, tiers = [], ("red", "yellow", "green")
+    matrix = {r: dict.fromkeys(tiers, 0) for r in tiers}
+    for i, c in enumerate(cases, 1):
+        patient = SimpleNamespace(name="[NAME]", age=c["age"], sex=c["sex"])
+        intake = intake_for(c)
+        triage = evaluate_full(intake, c["age"], c["sex"])
+        note = build_note(intake=intake, patient=patient, triage=triage, files=[], history=[], proxy=False)
+        r = llm.urgency_opinion(note, intake, patient)
+        if r["status"] == "UNAVAILABLE":
+            sys.exit(f"Model server unavailable: {r['reason_unavailable']}")
+        rows.append({"case": i, "chief": c["chief"], "provisional": triage["provisional"], **r})
+        if r["status"] in ("AGREE", "DISAGREE"):
+            matrix[r["rules_urgency"]][r["model_urgency"]] += 1
+        print(f"{i:2d} rules {r['rules_urgency']:6s} model {r.get('model_urgency', '?'):6s} {r['ms']:5d} ms  {c['chief'][:55]}")
+        print(f"      {r.get('reason') or ('withheld: ' + '; '.join(r['reason_withheld']) if r.get('reason_withheld') else r.get('raw', ''))}")
+    n = len(rows)
+    read = [x for x in rows if x["status"] in ("AGREE", "DISAGREE")]
+    ms = sorted(x["ms"] for x in rows)
+    summary = {
+        "model": llm.model_name(), "set": which, "cases": n, "unreadable": n - len(read),
+        "agree": sum(x["status"] == "AGREE" for x in read), "agreement": round(sum(x["status"] == "AGREE" for x in read) / max(len(read), 1), 3),
+        "model_higher": sum(x.get("direction") == "higher" for x in read), "model_lower": sum(x.get("direction") == "lower" for x in read),
+        "model_lower_on_rules_red": matrix["red"]["yellow"] + matrix["red"]["green"],
+        "model_lower_on_provisional": sum(x.get("direction") == "lower" and x["provisional"] for x in read),
+        "reason_withheld": sum(bool(x.get("reason_withheld")) for x in read), "matrix_rules_by_model": matrix,
+        "median_ms": ms[n // 2], "max_ms": ms[-1],
+    }
+    print(json.dumps(summary, indent=1))
+    if out:
+        Path(out).write_text(json.dumps({"summary": summary, "rows": rows}, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+
+
 if __name__ == "__main__":
-    main(*(sys.argv[1:3]))
+    if sys.argv[1:2] == ["opinion"]:
+        opinions(*(sys.argv[2:4]))
+    else:
+        main(*(sys.argv[1:3]))

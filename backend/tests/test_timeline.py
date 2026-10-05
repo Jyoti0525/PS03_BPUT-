@@ -44,7 +44,7 @@ def test_vague_onset_is_listed_as_missing_and_labelled_on_the_note(client, nurse
     enc = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()
     t = next(x for x in enc["note"]["timeline"] if x["event"].startswith("Onset"))
     assert t["certainty"] == "VAGUE" and t["raw"] == "since Diwali"
-    assert any("approximate date" in m for m in enc["note"]["missing_info"])
+    assert any("since Diwali" in m and "confirm with the patient" in m for m in enc["note"]["missing_info"])  # dated by the calendar (F5)
 
 
 @pytest.mark.parametrize(

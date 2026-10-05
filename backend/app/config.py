@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     otp_provider: str = "mock"
     demo_otp: str | None = "123456"
     # Sample accounts that may use demo_otp even when a real SMS provider is configured.
-    demo_phones: str = "9000000001,9000000002,9000000003,9000000004,9000000005,9876543210"
+    demo_phones: str = "9000000001,9000000002,9000000003,9000000004,9000000005,9000000006,9000000007,9000000008,9000000009,9000000010,9876543210"
     twilio_account_sid: str | None = None
     twilio_api_key_sid: str | None = None
     twilio_api_key_secret: str | None = None
@@ -68,6 +68,7 @@ class Settings(BaseSettings):
     llm_url: str | None = None
     llm_model_name: str = "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)"
     llm_timeout_s: float = 30
+    llm_urgency_opinion: bool = True  # C8: the model's own urgency tier, shown beside the rules' result (never replaces it)
     preload_language_models: bool = False  # load at start-up instead of on the first request
 
     escalate_red_min: int = 15
@@ -82,6 +83,7 @@ class Settings(BaseSettings):
     web_base_url: str = "http://localhost:3000"
     timezone: str = "Asia/Kolkata"
     seed_demo: bool = True
+    seed_scenarios: bool = True  # demo scenarios for campus fevers, missed visits, capacity, workplace screening (app/scenarios.py)
     log_level: str = "INFO"
 
 

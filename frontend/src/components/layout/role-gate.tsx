@@ -8,7 +8,9 @@ import { Spinner } from "@/components/ui";
 
 export const HOME_FOR_ROLE: Record<Role, string> = {
   doctor: "/reviewer",
+  medical_officer: "/reviewer",
   nurse: "/nurse",
+  health_worker: "/nurse",
   receptionist: "/desk",
   supervisor: "/admin",
   patient: "/patient",

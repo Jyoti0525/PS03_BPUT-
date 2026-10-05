@@ -67,12 +67,13 @@ Each step names the feature code (see section 4) and the main file.
    on) and redacted (faces blurred, ID numbers blacked out) before it is stored.
    `backend/app/triage/extraction.py`, `backend/app/triage/images.py`
 6. **Findings and urgency** (C1). The rules engine turns everything into findings (present, absent or unknown) and
-   sets urgency from about 150 cited rules. `backend/app/triage/findings.py`, `backend/app/triage/rules.py`
+   sets urgency from 161 cited rules. `backend/app/triage/findings.py`, `backend/app/triage/rules.py`
 7. **Note** (B4, B5, B6). The note builder lists values with their sources, the onset timeline, missing information
    and flags. A small local model then writes a summary paragraph, which is used only if it passes every check.
    `backend/app/triage/pipeline.py`, `backend/app/llm.py`
 8. **Token and queue** (C3). The patient gets a token (T-001…). The case enters the doctor's queue, ordered by
-   urgency and then waiting time.
+   urgency and then waiting time, and each row says why it is there. If open RED cases outnumber the doctors and
+   medical officers on duty, the medical officer gets a capacity alert.
 9. **Review** (E1, E3). The nurse adds vitals, which re-runs the rules. The doctor confirms, edits, overrides with
    a reason, or escalates. Unreviewed RED cases escalate on their own after 15 minutes.
 10. **Hand-off** (D7, E4, E7). The case is referred with a QR summary, or exported as PDF, JSON, CSV or FHIR.
@@ -252,7 +253,9 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 **B4 Onset timeline with certainty labels** · Working
 - **What:** every onset shows a label, with the patient's own words beside it:
   - **STATED**: "3 days", "since yesterday", ଚାରି ଦିନ ହେଲା;
-  - **VAGUE**: "few days", "since Diwali", कई दिन से;
+  - **VAGUE**: "few days", "since Diwali", कई दिन से. A festival or season is looked up in the facility's regional
+    calendar (F5); the date it points to is shown beside the patient's words, for example "Around 20 Oct 2025
+    (Diwali) · Odisha calendar". The onset stays VAGUE and the rules never use it.
   - **UNKNOWN**: nothing said;
   - **RECORDED**: a dated record.
 
@@ -264,7 +267,6 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
   the fever sentence printed against the headache "for a long time"; fixed 5 Oct.)
 - **Uses:** phrase lists in English, Hindi (Devanagari and romanised) and Odia. No model.
 - **Code:** `backend/app/triage/timeline.py`; 22 tests in `backend/tests/test_timeline.py`.
-- **Left:** a regional festival calendar (F5) so "since Diwali" can suggest a date.
 
 **B5 Structured note with an AI-written summary** · Working
 - **What:** the note holds the summary, flags, rules that fired, vitals and report values with their sources,
@@ -290,9 +292,14 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - The note lists what is missing, for example temperature not measured or onset not given. A case stays at
   provisional YELLOW until it is filled in. Built in `backend/app/triage/rules.py` and `pipeline.py`.
 
-**B7 Follow-up questions by role** · Partial
-- Questions exist for the health worker, nurse and doctor. **Left:** medical-officer questions and a separate view
-  for each role (needs E2).
+**B7 Follow-up questions by role** · Working
+- **What:** questions are picked from the findings and the rules that fired, at most 3 per role. The medical officer
+  gets system-level questions: transfer (vehicle and receiving bed confirmed for a RED case), the obstetrician at the
+  first referral unit for a pregnant woman, and for a workplace case whether to keep the worker away from the
+  exposure and that silicosis is notifiable (Factories Act 1948, s.89).
+- **Who sees what:** a health worker sees health-worker questions; a nurse sees health-worker and nurse questions; a
+  doctor or medical officer sees all. The server filters them, so a role never receives the others' questions.
+- **Code:** `FOLLOWUPS`, `questions_for` in `backend/app/triage/pipeline.py`; `note_for` in `backend/app/services.py`.
 
 **B8 Test names to LOINC codes** · Working
 - 16 of the 25 tests carry a LOINC code (`TESTS` in `extraction.py`), used in the FHIR export.
@@ -323,7 +330,7 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 ### C. Triage decisions
 
 **C1 Risk-category tagging** · Working
-- **What:** 150 rules in YAML files, each citing its published source:
+- **What:** 161 rules in YAML files, each citing its published source:
 
   | Rule file | Rules |
   |---|---|
@@ -332,10 +339,13 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
   | `iitt_paed.yaml` | 45 |
   | `imci.yaml` | 12 |
   | `maternal.yaml` | 14 |
+  | `aiims_hrc.yaml` (C5, adults) | 6 |
+  | `occupational.yaml` (D2, only when a workplace exposure is recorded) | 5 |
   | `labs.yaml` | 3 |
   | `local.yaml` (marked "local", never passed off as a guideline) | 3 |
 
-  Protocols are chosen by age and pregnancy, all applicable sets run, and the highest urgency wins.
+  Protocols are chosen by age, pregnancy and workplace exposure, all applicable sets run, and the highest urgency
+  wins.
 - **Three-valued logic:** each condition is true, false or unknown. Unknown never counts as normal.
 - **Findings** come from staff-recorded signs, then answers, then tapped tiles, then free text in English, Hindi
   and Odia. Negation is understood ("no chest pain", सीने में दर्द नहीं).
@@ -347,11 +357,19 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - Each fired rule shows the rule, the value that triggered it, where the value came from and the protocol it is
   from.
 
-**C3 Queue order** · Partial
-- Ordered by urgency, then waiting time; offline check-ins keep their real capture time. **Left:** a capacity alert
-  when unacknowledged RED cases outnumber reviewers on shift, and the ordering reason shown on each row.
+**C3 Queue order** · Working
+- **Order:** urgency, then waiting time; offline check-ins keep their real capture time. Each row says why it is
+  there, e.g. "RED (ATP-C-SHOCK-INDEX) · 1st of 2 RED · waiting 18 min, longest first", or "provisional until
+  measured" for an undetermined case.
+- **Capacity alert:** when open RED cases (not yet confirmed or referred) outnumber the doctors and medical
+  officers marked on duty at the front desk, the medical officer gets an alert and every clinical screen shows a
+  red banner with the tokens and the longest wait. It closes by itself when the REDs are seen or another doctor
+  comes on duty. Checked on every queue read and whenever a case turns RED.
+- **Demo:** PHC Manikpur has 2 REDs and 2 doctors on duty; mark Dr. Sharma off duty at the front desk.
+- **Code:** `check_capacity`, `order_reasons` in `backend/app/alerts.py`; `GET /capacity`;
+  `frontend/src/components/alerts/capacity-banner.tsx`.
 
-**C4 Non-diagnostic output guard** · Working (demo button still to do)
+**C4 Non-diagnostic output guard** · Working
 - **What:** every sentence the model writes is checked against a pattern list in three categories:
   - disease or condition names;
   - diagnostic wording ("likely", "suggests", "consistent with");
@@ -366,29 +384,95 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
   `backend/tests/data/redteam_outputs.yaml`.
 - **Measured:** 101 of 101 bad sentences blocked; 40 of 40 good sentences passed. We wrote both sets, so this shows
   coverage of the listed patterns, not of every possible phrasing.
-- **Left:** a clearly labelled "guard test" button for the demo.
+- **Guard test page (demo):** Supervisor → *Output guard test* (`/admin/guard-test`). Type a sentence, or pick one
+  of 11 from the red-team set (English, Hindi in both scripts, Odia; 8 that should block, 3 that should pass), and
+  optionally the data the model was given. The same guard runs and the page shows each matched phrase and its
+  category. The page and the audit entry both say it is a test typed by a person, not a model output; it touches no
+  patient record. Names and phone numbers in the typed text are removed before it is logged. Endpoints:
+  `GET /guard-test/samples`, `POST /guard-test` (supervisor only).
 
-**C5 AIIMS high-risk complaints** · Partial
-- Check that all six complaints (breathlessness, altered mental state, vomiting blood, fall from height, one-sided
-  weakness, chest pain) raise urgency.
+**C5 AIIMS high-risk complaints** · Working
+- **Found on 6 Oct:** with normal vital signs, "shortness of breath" and "chest pain" (and the Hindi and Odia
+  equivalents) came out GREEN.
+- **Fix:** a YELLOW floor for the six chief complaints that a prospective AIIMS New Delhi study found to predict
+  death or ICU admission within 72 hours: Rauniyar N, Sahu AK, Gopinath B, et al., *J Emerg Trauma Shock*
+  2025;18(2):62–68 (PMID 40666389), 1,225 adults. Odds ratios: shortness of breath 43.7, altered mental status 6.2,
+  vomiting blood 3.88, fall from height 3.88, one-sided weakness 3.16, chest pain 1.78. ATP and IITT still decide RED.
+- **Applies from age 16** (the study enrolled patients older than 16).
+- **Code:** `backend/app/triage/rules/aiims_hrc.yaml`; tests in `backend/tests/test_wednesday.py`.
 
 **C6 Children and trauma** · Working
 - IITT child rules with age-banded breathing and heart-rate limits; trauma is never GREEN.
 
 **C7 Unknown is never normal** · Working
-- No case is GREEN until vitals, AVPU and the danger-sign check are recorded. Until then it is held at provisional
-  YELLOW, with what to measure.
+- No case is GREEN until vitals, AVPU and the danger-sign check are recorded. Until then it is shown as
+  **UNDETERMINED, held at YELLOW**, with the list of what to measure (rule `SAFE-PROVISIONAL`; the label was
+  "Provisional" before 6 Oct).
 
-**C8 Rule vs model disagreement view** · Not built
+**C8 Rule vs model disagreement view** · Working
+- **What:** the note-summary model (Qwen3-4B, offline) is also asked for its own urgency, given the same facts but
+  **not** the rules' result. It answers with a tier and the facts that decided it. The rules' tier always stands.
+  - **More urgent than the rules:** a warning flag on the note, "AI second opinion is more urgent than the rules —
+    take a second look".
+  - **Less urgent:** shown only. A model must never be able to talk a case down.
+  - **The reason** goes through the faithfulness check and the output guard. A reason that fails is hidden and the
+    tier is still shown. An answer the app cannot read is never guessed.
+- **Where:** doctor's note → *AI second opinion*, under the rules trace (rules tier beside the model's tier).
+  Supervisor → *AI second opinions* (`/admin/ai-opinions`): agreement rate, a rules × model table, and every
+  disagreement with the final urgency and any doctor's override. Doctors can call the same endpoint.
+- **When it runs:** in the background after the summary. It is skipped if the patient chose "continue without AI"
+  (G1), if the model is not running, or if `JEEVIA_LLM_URGENCY_OPINION=false`. Disagreements are written to the
+  audit log.
+- **Code:** `backend/app/llm.py` (`urgency_opinion`, `OPINION_SYSTEM`), `backend/app/routers/admin.py`
+  (`GET /ai-opinions`), `frontend/src/components/triage/note.tsx` (`SecondOpinion`),
+  `frontend/src/app/admin/ai-opinions/page.tsx`.
+- **Measured (50 synthetic cases, 5 Oct):** agrees with the rules on 29 (58 %). The model was less urgent on 4 RED
+  cases and more urgent on 8 provisional YELLOWs; 5 of those 8 are listed for clinician rule review. Median 0.52 s.
+  Details: [EVALUATION.md](EVALUATION.md#second-opinion-on-urgency-c8).
 
 ### D. The seven scenarios
 
 | Scenario | Status | What exists | Left |
 |---|---|---|---|
 | **D1** Outpatient queue | Working | Kiosk → rules → queue → review | — |
-| **D2** Occupational screening | Partial | Employer portal, worker roster with CSV import, fitness status (fit, restrictions, unfit); the employer never sees clinical data | Exposure and PPE questions, occupational rules, department rates |
-| **D3** Campus fever | Partial | Campus facility type | Hostel-block fever cluster alert; count export |
-| **D4** Maternal follow-up | Partial | Pregnancy branch with danger signs; reminders | Missed-visit detection routed to the ASHA; no reproductive details spoken on a shared phone |
+| **D2** Occupational screening | Working | Employer portal, roster, fitness status; exposure and PPE questions at workplace clinics; 5 occupational rules; FEV1 against the worker's own earliest value; PPE-gap flag; department rates for the employer (no symptoms, departments under 5 hidden) | Rules need review by an occupational physician |
+| **D3** Campus fever | Working | Hostel block asked at campus clinics; cluster alert to the campus MO (5+ fevers in 72 h and more than 3× the 14 days before), counts only; syndromic CSV export with counts under 5 written as "<5" | Counts per day and block are small, so most cells are "<5" at demo scale |
+| **D4** Maternal follow-up | Working | Whose phone it is and the assigned ASHA asked at a pregnancy visit; missed check-up detected a day after its due date and sent to that ASHA; after 2 failed attempts a reminder call is due; nothing about pregnancy on a husband's or family phone | The call is simulated and in English only |
+
+**D2 Occupational screening, in detail**
+- **Questions** (workplace clinics and roster workers): exposures (silica, coal, cotton, asbestos, other dust,
+  noise, chemicals, pesticides, heat), years exposed, weeks of cough, breathing compared with the last screening,
+  PPE issued and how often worn; FEV1 and FVC when staff measure them.
+- **Rules** (`occupational.yaml`, no published Indian occupational triage protocol exists, so they are adapted and
+  say so):
+  - RED: silica exposure with a presumptive TB symptom (cough 2 weeks or more, coughing blood, weight loss, night
+    sweats, fever for 2 weeks), NTEP and WHO TB screening 2021; RED here means same-day doctor review and a sputum
+    test.
+  - YELLOW: dust with cough or breathlessness for more than 8 weeks (ERS 2020 chronic cough); cough or
+    breathlessness after 5+ years of silica; breathing worse than at the last screening; FEV1 down 15 % or more from
+    the worker's own earliest value (ATS 2014, without the ageing allowance, so slightly earlier than the standard).
+  - A detail not asked counts as not reported, so a screening is never held up; the note lists what is missing.
+- **PPE-GAP** is a workplace finding about the employer, not a symptom and not part of urgency.
+- **Employer view:** *Workplace screening by department*: screened, % referred for occupational-health review, %
+  PPE gap, and a mark when a department is twice the others. A test checks that no symptom word reaches the employer.
+- **Code:** `backend/app/triage/rules/occupational.yaml`, `with_fev1_baseline` in `services.py`,
+  `GET /employer/department-rates` in `backend/app/routers/alerts.py`, `frontend/src/components/employer/department-rates.tsx`.
+
+**D3 and D4, in detail**
+- **Alerts** are a table of their own (migration 0008): one open alert per facility, kind and key, raised by a fixed
+  rule and closed by itself when the condition stops; acknowledged by a doctor or MO (cluster, capacity) or the
+  assigned health worker (missed visit). Medical officer → *Alerts* (`/reviewer/alerts`); health worker →
+  *Maternal follow-ups* (`/nurse/followups`).
+- **Fever** means the fever finding or a measured temperature of 100.4 °F or more; each patient counts once. The
+  place is the hostel block given at intake, or the village.
+- **Call script:** on her own phone it mentions the check-up; on a husband's, family or unknown phone it only asks for
+  her by first name. With no phone, the call is refused and a home visit is asked for. The reminder shown in the
+  patient's record follows the same rule. A new pregnancy visit closes her open reminders.
+- **Code:** `backend/app/alerts.py`, `backend/app/routers/alerts.py`.
+
+**Demo scenarios** (`backend/app/scenarios.py`, synthetic): campus fevers (4 from Hostel Block C; one more at kiosk
+link `CAMPUS01` raises the alert), Sunita's missed check-up on ASHA Kamla Devi's list, a second RED at PHC Manikpur,
+and 17 workers screened at Kalinga Steel Works, the crusher workers also a year earlier.
 | **D5** Chronic check-in | Working | BP and glucose trends against earlier visits | Check the HbA1c trend |
 | **D6** Health camp, offline | Working | Kiosk works with no network and syncs later | — |
 | **D7** Referral notes | Working | Referral, QR summary, PDF, print, JSON, CSV, FHIR R4 | — |
@@ -401,9 +485,18 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - The note shows who wrote the summary ("AI summary, checked" or "Template summary"), the template beside any AI
   text, and any rejected AI text with its reasons.
 
-**E2 Four reviewer roles** · Partial
-- Roles today: doctor, nurse, receptionist, supervisor, employer, patient. **Left:** health worker (ASHA, ANM, MPW)
-  and medical officer, each with their own limits.
+**E2 Four reviewer roles** · Working
+- **Roles:** health worker (ASHA, ANM, MPW; the title follows the state, e.g. Mitanin), nurse, doctor and medical
+  officer, beside receptionist, supervisor, employer and patient.
+- **Sign-off limits:** a health worker may confirm a GREEN note, a nurse up to YELLOW, a doctor or medical officer
+  any. The server refuses anything above the limit and says who must confirm.
+- **Note density:** the health worker gets a short form (summary, flags, what is missing, their questions, vital
+  signs); the rules trace, labs and documents stay with the nurse and doctors. Doctors can switch to the nurse or
+  health-worker view to see what each receives.
+- **The medical officer** can do everything a doctor can (override, referral, export, fitness, escalations) and
+  receives the capacity and fever-cluster alerts.
+- **Medicines read from photos** are confirmed only by a nurse, doctor or MO.
+- **Code:** `SIGN_OFF`, `DOCTOR_ROLES` in `backend/app/schemas.py`; `can_confirm`, `note_for` in `services.py`.
 
 **E3 Escalation** · Working
 - Manual escalation, plus automatic escalation of unreviewed RED cases after 15 minutes and YELLOW after 60.
@@ -416,7 +509,8 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - **Left:** close a referral only when care is received; flag overdue referrals.
 
 **E5 Scheduling and reminders** · Partial
-- A reminders table exists. **Left:** a visit calendar and missed-visit detection.
+- Maternal check-up reminders with due dates and missed-visit detection (D4). **Left:** a visit calendar from the
+  facility's configuration, and reminders for chronic check-ins.
 
 **E6 Calling agent** · Not built
 
@@ -450,8 +544,41 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 **F4 Long-term records** · Working
 - BP and glucose trends across visits.
 
-**F5 Regional calendar** · Not built
-- A festival and season table per region.
+**F5 Regional calendar and worker names** · Working
+- **What:** patients date illness by festival and season, and the festival differs by region and faith. Each
+  facility's notes use its state's table:
+  - Festivals: 42 multi-faith festivals.
+  - Monsoon: IMD normal onset and withdrawal dates, plus the northeast monsoon in the south.
+  - Seasons and the farming cycle: winter, summer, paddy and wheat harvest, and transplanting.
+- **How a phrase is read:**
+  - "since Diwali", "दिवाली से", "ରଜଠାରୁ", "holi ke baad se", "pujo theke" and "after the rains" all become an
+    approximate date or window.
+  - The plan's two rules hold: a vague reference is never silently made precise (the onset stays VAGUE, `days`
+    stays empty, staff are asked to confirm), and the patient's phrase is always kept.
+  - A word with two meanings ("Eid", "sankranti" in Odisha, "the rains" in Tamil Nadu) shows the latest one and
+    asks which.
+  - A year missing from the table is reported, not guessed.
+- **Worker names:** the state's own title for front-line workers is shown in the staff role label, the staff page
+  and the kiosk helper list. Examples: Mitanin in Chhattisgarh, Sahiya in Jharkhand, VHN in Tamil Nadu, JPHN in
+  Kerala, Arogya Sevika in Maharashtra; first-aider at workplaces.
+- **Facility overrides:** a supervisor can set worker names, local monsoon dates and the facility's own festivals,
+  and can try any phrase on `/admin/calendar`.
+- **Uses:** public data only, cited in the table:
+  - DoPT central holiday lists 2025–2027;
+  - Odisha GAD holiday lists;
+  - IMD CRS Report 3/2020 (new normal monsoon dates);
+  - NCERT crop seasons;
+  - NHM cadres.
+
+  No model.
+- **Code:** `backend/app/regions.yaml`, `backend/app/regions.py`, `backend/app/triage/timeline.py`,
+  `backend/app/routers/facilities.py` (`/facilities/{id}/calendar`, `/facilities/{id}/onset`),
+  `frontend/src/app/admin/calendar`, `frontend/src/lib/cadres.ts`. 28 tests in `backend/tests/test_regions.py`.
+- **Limits:**
+  - Lunar and Islamic dates can differ by a day locally.
+  - Festival dates beyond 2027 must be added each year from the new DoPT list.
+  - A monsoon date is a 1961–2019 normal, not that year's actual onset.
+  - The Odia and Hindi festival spellings need a native speaker's check.
 
 **Screen languages:** the language picker lists English and the 22 scheduled languages. Every screen is fully
 translated into English, Hindi and Odia; for other languages, untranslated text shows in English.
@@ -550,8 +677,11 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 | `PII-REDACTED` | Identifiers were removed from the patient's free text |
 | `NO-AI` | The patient chose to continue without AI |
 | `LLM-FELL-BACK` | The AI summary failed a check; the template summary is shown with the reason |
+| `AI-OPINION-HIGHER` | The AI model's own urgency is higher than the rules'. Take a second look; urgency is unchanged |
 | `PROXY` | The history was given by a family member or caregiver |
 | `OFFLINE` | Captured offline and synced later; waiting time counts from capture |
+| `PPE-GAP` | Workplace finding: protective equipment not issued, or worn only sometimes or never. Not part of urgency |
+| `SAFE-PROVISIONAL` | UNDETERMINED, held at YELLOW until the listed vitals or checks are recorded |
 
 ---
 
@@ -589,21 +719,24 @@ Memory is tight on a 16 GB laptop: quit Docker Desktop before a demo. With every
 ## 7. Tests
 
 ```bash
-cd backend && .venv/Scripts/python.exe -m pytest -q     # 339 tests
+cd backend && .venv/Scripts/python.exe -m pytest -q     # 406 tests
 cd frontend && npx tsc --noEmit && npm run lint
 ```
 
 | Test file | Tests | Covers |
 |---|---|---|
-| `test_output_guard.py` | 142 | Red-team set (101 blocked, 40 allowed) plus normalisation |
+| `test_output_guard.py` | 144 | Red-team set (101 blocked, 40 allowed) plus normalisation; guard test page samples, audit label, scrubbing, supervisor-only |
 | `test_rules.py` | 63 | Rules engine, findings, negation, Hindi and Odia phrases, crush-injury fix |
 | `test_timeline.py` | 22 | Onset labels and conflicts |
+| `test_regions.py` | 28 | Regional calendar: festival and season dates by state, two-meaning words, no guessing, facility overrides, cadre names, every date sourced, every directory state covered |
 | `test_api.py` | 20 | Sign-in, roles, consent, offline replay, overrides, escalations, exports, audit |
+| `test_wednesday.py` | 27 | AIIMS high-risk floor; occupational rules, FEV1 baseline, PPE gap, employer rates without symptoms; sign-off limits and note density by role; queue reasons and capacity alert; fever cluster and suppressed export; missed visit, neutral call script, no-phone refusal; SQLite column patch |
+| `test_zz_scenarios.py` | 1 | Demo scenarios load once and each demo moment works (runs last) |
 | `test_privacy.py` | 19 | Name and number removal, Indian digits, cohort small-count suppression |
 | `test_orgs.py` | 16 | Organisations, roster, fitness, directory |
 | `test_language.py` | 17 | Speech and translation wiring, the two-at-once freeze, and the 5 Oct live-test sentences: spoken spellings, translation cross-check, rewrites, unsure numbers, per-sentence onsets, real-model check |
 | `test_images.py` | 12 | Document type, medicine matching (incl. the 5 Oct real strip photo), face and ID blurring |
-| `test_llm.py` | 10 | Summary checks with a stand-in model (no GPU needed) |
+| `test_llm.py` | 19 | Summary checks and the urgency second opinion with a stand-in model (no GPU needed): never changes urgency, higher-only flag, withheld reasons, no-AI consent, switch, disagreement view roles |
 | `test_kiosk.py` | 7 | Kiosk links, tokens, returning patients, the Twilio path |
 | `test_extraction.py` | 6 | Test-name matching, MCP card values, old-report and name checks, real OCR on a slip |
 | `test_shares.py` | 5 | QR summaries: codes, lockout, expiry |
@@ -627,5 +760,7 @@ cd frontend && npx tsc --noEmit && npm run lint
 | **LOINC** | Standard codes for lab tests |
 | **PMBJP** | Pradhan Mantri Bhartiya Janaushadhi Pariyojana, the government generic-medicine scheme |
 | **ABHA** | Ayushman Bharat Health Account number (14 digits) |
-| **Provisional YELLOW** | Held at YELLOW because something needed to rule out danger has not been recorded yet |
+| **Undetermined (provisional YELLOW)** | Held at YELLOW because something needed to rule out danger has not been recorded yet |
+| **ASHA / ANM / MPW** | Accredited Social Health Activist (village health worker); Auxiliary Nurse Midwife; Multi-Purpose Worker |
+| **FEV1 / FVC** | Air blown out in the first second / in total, measured by spirometry |
 | **Template summary** | The plain summary built by code from the facts, used whenever the AI summary is off or fails a check |

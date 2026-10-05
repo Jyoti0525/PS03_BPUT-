@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Baby, BellRing, HeartPulse, Paperclip, UserRoundCheck, Users } from "lucide-react";
+import { ArrowLeft, Baby, BellRing, CheckCircle2, HeartPulse, Paperclip, UserRoundCheck, Users } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { useAsync, timeAgo } from "@/lib/hooks";
-import { usePrefs } from "@/components/providers";
+import { usePrefs, useSession } from "@/components/providers";
 import { Badge, Button, Card, CardHeader, ErrorNote, FieldError, Label, Modal, Spinner, Textarea, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
@@ -38,10 +38,13 @@ function FileThumb({ id }: { id: string }) {
   );
 }
 
-/** Nurse's view of one patient: bedside vitals and observations, nursing checklist, and alerting the doctor. No referrals, exports or clinical sign-off. */
+/** Nurse's or health worker's view of one patient: bedside vitals and observations, checklist, alerting the doctor, and
+ * sign-off within the role's limit (E2): a health worker may confirm GREEN, a nurse up to YELLOW. No referrals or exports. */
 export default function NursePatient() {
   const { id } = useParams<{ id: string }>();
   const { tr } = usePrefs();
+  const { user } = useSession();
+  const [confirming, setConfirming] = useState(false);
   const { data: enc, error, reload, setData } = useAsync(() => api.getEncounter(id), [id]);
   const [alertOpen, setAlertOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -108,9 +111,37 @@ export default function NursePatient() {
                 )}
               </div>
             </div>
-            <Button variant="danger" icon={<BellRing className="size-4" />} onClick={() => setAlertOpen(true)}>
-              {tr("Alert doctor")}
-            </Button>
+            <div className="flex flex-col items-end gap-2">
+              <Button variant="danger" icon={<BellRing className="size-4" />} onClick={() => setAlertOpen(true)}>
+                {tr("Alert doctor")}
+              </Button>
+              {enc.status === "confirmed" ? (
+                <Badge tone="rout"><CheckCircle2 className="size-3" /> {tr("Confirmed by {n}", { n: enc.reviewed_by ?? "" })}</Badge>
+              ) : enc.can_confirm ? (
+                <Button
+                  variant="teal"
+                  loading={confirming}
+                  icon={<CheckCircle2 className="size-4" />}
+                  onClick={async () => {
+                    setConfirming(true);
+                    try {
+                      setData(await api.confirmEncounter(enc.id));
+                      toast(tr("Note confirmed and signed"));
+                    } catch (e) {
+                      toast(e instanceof Error ? e.message : tr("Failed"), "error");
+                    } finally {
+                      setConfirming(false);
+                    }
+                  }}
+                >
+                  {tr("Confirm note")}
+                </Button>
+              ) : (
+                <p className="max-w-56 text-right text-xs text-muted">
+                  {enc.sign_off === "doctor" ? tr("A RED note is confirmed by a doctor or medical officer.") : tr("A YELLOW note is confirmed by a nurse, doctor or medical officer.")}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </Card>
@@ -121,7 +152,7 @@ export default function NursePatient() {
           <ObservationList items={enc.note?.observations} />
         </div>
         <div className="space-y-4">
-          {enc.note ? <NoteView enc={enc} density="nurse" /> : null}
+          {enc.note ? <NoteView enc={enc} density={user?.role === "health_worker" ? "health_worker" : "nurse"} /> : null}
           {!!enc.intake?.file_ids.length && (
             <Card>
               <CardHeader title={tr("Reports and photos")} icon={<Paperclip className="size-4" />} />

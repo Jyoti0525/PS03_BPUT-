@@ -2,8 +2,8 @@
 
 import { usePrefs } from "@/components/providers";
 import { fmtDateTime } from "@/lib/hooks";
-import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock } from "lucide-react";
-import type { Encounter, ExtractedValue, Flag, TrendRow, Urgency } from "@/lib/types";
+import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays } from "lucide-react";
+import type { AiOpinion, Encounter, ExtractedValue, Flag, TrendRow, Urgency } from "@/lib/types";
 import { Badge, Card, CardHeader, cx } from "@/components/ui";
 import { SourceEvidence } from "./source";
 import { URGENCY_LABEL } from "@/lib/export";
@@ -121,20 +121,92 @@ export function Sparkline({ row }: { row: TrendRow }) {
   );
 }
 
+/** C8: the model's own tier beside the rules' tier. Informational only: it never changes urgency. */
+export function SecondOpinion({ op }: { op: AiOpinion }) {
+  const { tr } = usePrefs();
+  const compared = op.status === "AGREE" || op.status === "DISAGREE";
+  return (
+    <div className="border-t border-line px-4 py-3 text-sm">
+      <p className="flex flex-wrap items-center gap-1.5 font-semibold text-ink">
+        <Bot className="size-4 text-teal-700" /> {tr("AI second opinion")}
+        <span className="text-xs font-normal text-subtle">· {tr("does not change urgency")}</span>
+      </p>
+      {compared ? (
+        <>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <span className="flex items-center gap-1.5 text-xs text-muted">{tr("Rules")} <UrgencyBadge u={op.rules_urgency} size="sm" /></span>
+            <span className="flex items-center gap-1.5 text-xs text-muted">{tr("AI model")} <UrgencyBadge u={op.model_urgency ?? null} size="sm" /></span>
+            {op.status === "AGREE" ? (
+              <Badge tone="rout">{tr("Agrees with the rules")}</Badge>
+            ) : op.direction === "higher" ? (
+              <Badge tone="semi">{tr("More urgent than the rules — take a second look")}</Badge>
+            ) : (
+              <Badge>{tr("Less urgent than the rules — the rules stand")}</Badge>
+            )}
+          </div>
+          {op.reason && <p className="mt-2 rounded-lg bg-canvas px-3 py-2 text-ink-2">“{op.reason}”</p>}
+          {op.reason_withheld && (
+            <details className="mt-2 text-xs">
+              <summary className="cursor-pointer text-muted">{tr("Reason hidden: it failed the safety checks")}</summary>
+              <ul className="mt-1 list-disc pl-5 text-crit">{op.reason_withheld.map((r) => <li key={r}>{r}</li>)}</ul>
+            </details>
+          )}
+        </>
+      ) : (
+        <p className="mt-1 text-muted">
+          {op.status === "UNAVAILABLE" ? tr("AI model not available, so there is no second opinion.") : tr("The model's answer could not be read, so no opinion is shown.")}
+        </p>
+      )}
+      <p className="mt-2 text-xs text-subtle">
+        {tr("Urgency comes only from the rules. Only a doctor can change it, with a written reason.")} · {op.model.split(" (")[0]}
+        {op.ms ? ` · ${(op.ms / 1000).toFixed(1)} s` : ""}
+      </p>
+    </div>
+  );
+}
+
 /**
  * Role-differentiated rendering (E2): the same note at two densities.
  * Doctor = full case with evidence and rules trace. Nurse = actionable checklist.
  */
-export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" | "nurse" }) {
+/** C7: a case the rules cannot yet rule out is shown as UNDETERMINED, held at YELLOW, never as routine. */
+export function Undetermined({ note, compact }: { note: NonNullable<Encounter["note"]>; compact?: boolean }) {
+  const { tr } = usePrefs();
+  const t = note.triage;
+  if (!t?.provisional) return null;
+  const needs = [...new Set([...(t.missing_for_green ?? []), ...(t.unresolved ?? []).flatMap((u) => u.needs.map((x) => (x.startsWith("danger-sign") ? "clinician danger-sign check" : x)))])];
+  return (
+    <div className={cx("border-semi-line bg-semi-bg px-4 py-2.5 text-sm", compact ? "rounded-xl border" : "border-b")}>
+      <p className="font-semibold text-semi">{tr("UNDETERMINED — held at YELLOW until measured")}</p>
+      <p className="text-ink-2">{tr("Unknown is never treated as normal. Measure or check before this case can be routine:")}</p>
+      <ul className="mt-1 flex flex-wrap gap-1.5">
+        {needs.map((x) => (
+          <li key={x} className="rounded-md border border-semi-line bg-surface px-2 py-0.5 text-xs text-ink">{tr(x)}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Note density by role (E2): the doctor and medical officer see everything; the nurse a working view; the health worker
+ * a short form (summary, flags, what is missing, their own questions, vital signs). */
+export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" | "nurse" | "health_worker" }) {
   const { tr } = usePrefs();
   const n = enc.note;
   if (!n) return null;
-  const needsCheck = [...n.vitals, ...n.labs].filter((v) => v.needs_check);
+  const needsCheck = [...n.vitals, ...(n.labs ?? [])].filter((v) => v.needs_check);
 
-  if (density === "nurse") {
-    const nurseQs = n.followup_questions.filter((q) => q.for_role !== "doctor");
+  if (density !== "doctor") {
+    const sees = density === "health_worker" ? ["health_worker"] : ["health_worker", "nurse"];
+    const nurseQs = n.followup_questions.filter((q) => sees.includes(q.for_role));
     return (
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 2xl:grid-cols-2">
+        {density === "health_worker" && (
+          <Card className="2xl:col-span-2">
+            <CardHeader title={tr("Summary")} subtitle={tr("Short form for the health worker; the full note is with the nurse and doctor")} icon={<Scale className="size-4" />} />
+            <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
+          </Card>
+        )}
         <Card>
           <CardHeader title={tr("Do now")} subtitle={tr("Flags from the rules engine and source checks")} icon={<ListChecks className="size-4" />} />
           <div className="p-4">
@@ -156,7 +228,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
                 </span>
               </li>
             ))}
-            {!nurseQs.length && <li className="text-muted">{tr("No nurse questions for this case.")}</li>}
+            {!nurseQs.length && <li className="text-muted">{density === "health_worker" ? tr("No health-worker questions for this case.") : tr("No nurse questions for this case.")}</li>}
           </ol>
         </Card>
         <Card>
@@ -232,17 +304,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
             subtitle={`${tr("Urgency comes only from these deterministic rules")}${n.triage ? ` · ${n.triage.protocols.map((p) => p.key).join(" + ")} · rulepack ${n.triage.rulepack_version}` : ""}`}
             icon={<ListChecks className="size-4" />}
           />
-          {n.triage?.provisional && (
-            <div className="border-b border-semi-line bg-semi-bg px-4 py-2.5 text-sm">
-              <p className="font-semibold text-semi">{tr("Provisional — unknown is never treated as normal")}</p>
-              <p className="text-ink-2">{tr("Measure or check before this case can be routine:")}</p>
-              <ul className="mt-1 flex flex-wrap gap-1.5">
-                {[...new Set([...n.triage.missing_for_green, ...n.triage.unresolved.flatMap((u) => u.needs.map((x) => (x.startsWith("danger-sign") ? "clinician danger-sign check" : x)))])].map((x) => (
-                  <li key={x} className="rounded-md border border-semi-line bg-surface px-2 py-0.5 text-xs text-ink">{tr(x)}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <Undetermined note={n} />
           <ul className="divide-y divide-line">
             {n.rules_fired.map((r) => (
               <li key={r.rule_id} className="flex items-start gap-3 px-4 py-2.5">
@@ -287,6 +349,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
               </ul>
             </details>
           )}
+          {n.llm_opinion && <SecondOpinion op={n.llm_opinion} />}
           {enc.override && (
             <div className="border-t border-line bg-coral-50 px-4 py-2.5 text-sm">
               <p className="font-semibold text-coral-700">
@@ -360,6 +423,11 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
                 </p>
                 <p className="text-ink">{tr(t.event)}</p>
                 {t.raw && <p className="text-xs text-muted">“{t.raw}”</p>}
+                {t.basis && (
+                  <p className="mt-0.5 flex items-center gap-1 text-xs text-subtle" title={tr("Approximate: from the regional calendar. Confirm the date with the patient.")}>
+                    <CalendarDays className="size-3 shrink-0" /> {t.basis}
+                  </p>
+                )}
               </li>
             ))}
           </ol>

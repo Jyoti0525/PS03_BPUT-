@@ -1,0 +1,50 @@
+# Workplace screening (D2). Runs only when the intake records at least one workplace exposure. There is no
+# published Indian occupational triage protocol, so these rules are adapted from the sources named on each
+# rule and must be reviewed by an occupational physician before a pilot. A missing exposure detail (years,
+# cough weeks, spirometry) counts as "not reported", not unknown, so a screening is never held up by it;
+# the note lists what was not recorded.
+protocol: OCC
+name: Occupational screening (adapted)
+source: occ_adapted
+applies: { occupational: true }
+rules:
+  - id: OCC-SILICA-TB
+    description: Silica exposure with a presumptive TB symptom — same-day doctor review and NTEP sputum test (silicotuberculosis risk)
+    urgency: red
+    source: ntep
+    when:
+      all:
+        - { exposure: [silica] }
+        - any:
+            - { finding: haemoptysis }
+            - { finding: weight_loss }
+            - { finding: night_sweats }
+            - { cough_weeks: [gte, 2] }
+            - { all: [ { finding: fever }, { onset_hours: [gte, 336] } ] }
+  - id: OCC-DUST-CHRONIC-RESP
+    description: Dust exposure with cough or breathlessness for more than 8 weeks
+    urgency: yellow
+    source: ers_cough
+    when:
+      all:
+        - { exposure: [silica, coal_dust, cotton_dust, asbestos, other_dust] }
+        - any:
+            - { cough_weeks: [gt, 8] }
+            - { all: [ { any: [ { finding: cough }, { finding: breathless } ] }, { onset_hours: [gt, 1344] } ] }
+  - id: OCC-SILICA-RESP-5Y
+    description: Cough or breathlessness after 5 or more years of silica exposure
+    urgency: yellow
+    when:
+      all:
+        - { exposure: [silica] }
+        - { exposure_years: [gte, 5] }
+        - any: [ { finding: cough }, { finding: breathless } ]
+  - id: OCC-BREATHLESS-WORSE
+    description: Breathing worse than at the last workplace screening
+    urgency: yellow
+    when: { breathless_vs_last: worse }
+  - id: OCC-FEV1-DECLINE
+    description: FEV1 down 15 % or more from the worker's own earliest recorded value
+    urgency: yellow
+    source: ats_occ_spiro
+    when: { fev1_decline_pct: [gte, 15] }

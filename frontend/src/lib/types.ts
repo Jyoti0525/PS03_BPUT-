@@ -8,15 +8,33 @@
 
 export type Role =
   | "doctor"
+  | "medical_officer"
   | "nurse"
+  | "health_worker"
   | "receptionist"
   | "supervisor"
   | "patient"
   | "employer"
   | "kiosk";
 
-export const STAFF_ROLES: Role[] = ["doctor", "nurse", "receptionist", "supervisor"];
-export const REVIEWER_ROLES: Role[] = ["doctor", "nurse"];
+export const STAFF_ROLES: Role[] = ["doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor"];
+export const REVIEWER_ROLES: Role[] = ["doctor", "medical_officer", "nurse", "health_worker"];
+/** The medical officer can do everything a doctor can, and receives capacity and outbreak alerts. */
+export const DOCTOR_ROLES: Role[] = ["doctor", "medical_officer"];
+export const CLINICIAN_ROLES: Role[] = ["doctor", "medical_officer", "nurse", "health_worker"];
+/** Highest urgency each role may confirm (E2): a health worker GREEN, a nurse up to YELLOW, a doctor or MO any. */
+export const SIGN_OFF: Partial<Record<Role, Urgency>> = { health_worker: "green", nurse: "yellow", doctor: "red", medical_officer: "red" };
+export const ROLE_LABEL: Record<Role, string> = {
+  doctor: "Doctor",
+  medical_officer: "Medical officer",
+  nurse: "Nurse",
+  health_worker: "Health worker (ASHA / ANM / MPW)",
+  receptionist: "Front desk",
+  supervisor: "Supervisor",
+  patient: "Patient",
+  employer: "Employer",
+  kiosk: "Kiosk",
+};
 export const ADMIN_ROLES: Role[] = ["receptionist", "supervisor"];
 
 /** Urgency is assigned ONLY by the deterministic rules engine (ATP / IMCI), never by the LLM. */
@@ -100,7 +118,7 @@ export type OtpVerifyResult =
   | { status: "pin_required" | "pin_setup_required"; pin_token: string; name: string; can_reset_pin: boolean };
 
 /** Roles that sign in with phone OTP + PIN. */
-export const PIN_ROLES: Role[] = ["doctor", "nurse", "receptionist", "supervisor", "employer"];
+export const PIN_ROLES: Role[] = ["doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor", "employer"];
 
 export interface RegisterInput {
   registration_token: string;
@@ -233,6 +251,10 @@ export interface Facility {
   offline_mode: boolean;
   /** Answers to the "what services do you have" setup questions. */
   capabilities: Record<string, boolean>;
+  /** F5: worker names and monsoon dates for this facility's state, with its own changes applied. */
+  region?: FacilityRegion | null;
+  /** F5: this facility's own changes to the state table. */
+  region_config?: RegionConfig | null;
   source?: "sample" | "directory" | "organisation" | "user_added";
   verified?: boolean;
   organisation_id?: string | null;
@@ -329,6 +351,41 @@ export interface MaternalIntake {
   anc_visits?: number | null;
   next_checkup?: string | null;
   reminder_channel?: "sms" | "voice" | "none";
+  /** D4: whose phone reminders go to. On a husband's or family phone nothing about pregnancy is said. */
+  phone_belongs_to?: PhoneOwner | null;
+  /** The ASHA / ANM who follows up a missed check-up. */
+  assigned_worker_id?: string | null;
+}
+
+export type PhoneOwner = "self" | "husband" | "household" | "none";
+
+export type Exposure = "silica" | "coal_dust" | "cotton_dust" | "asbestos" | "other_dust" | "noise" | "chemicals" | "pesticides" | "heat";
+
+export const EXPOSURE_LABEL: Record<Exposure, string> = {
+  silica: "Silica / stone dust",
+  coal_dust: "Coal dust",
+  cotton_dust: "Cotton dust",
+  asbestos: "Asbestos",
+  other_dust: "Other dust",
+  noise: "Loud noise",
+  chemicals: "Chemicals or fumes",
+  pesticides: "Pesticides",
+  heat: "Heat",
+};
+
+/** D2 workplace screening answers. */
+export interface OccupationalIntake {
+  exposures: Exposure[];
+  years_exposed?: number | null;
+  cough_weeks?: number | null;
+  breathless_vs_last?: "better" | "same" | "worse" | "unsure" | "first" | null;
+  ppe_issued?: boolean | null;
+  ppe_used?: "always" | "sometimes" | "never" | null;
+  fev1_l?: number | null;
+  fvc_l?: number | null;
+  /** Filled by the server from the worker's earliest recorded FEV1. */
+  fev1_baseline_l?: number | null;
+  fev1_baseline_on?: string | null;
 }
 
 export interface ChronicIntake {
@@ -366,6 +423,9 @@ export interface IntakePayload {
   vitals?: VitalsInput | null;
   maternal?: MaternalIntake | null;
   chronic?: ChronicIntake | null;
+  occupational?: OccupationalIntake | null;
+  /** D3: hostel block (campus) — fevers are counted per place, never shown by name. */
+  cluster_key?: string | null;
   consent_id: string | null;
   /** Client-generated id so offline replays are idempotent. */
   client_ref: string;
@@ -447,15 +507,19 @@ export interface TimelineEvent {
   certainty?: "RECORDED" | "STATED" | "INFERRED" | "VAGUE" | "UNKNOWN";
   /** The patient's own words (or the tapped answer) the time came from. */
   raw?: string | null;
+  /** F5: the festival or season date a vague onset points to, e.g. "Diwali 20 Oct 2025 · Odisha calendar". */
+  basis?: string;
 }
 
 export interface FollowUpQuestion {
   tag: string;
   question: string;
-  for_role: "nurse" | "doctor" | "health_worker";
+  for_role: "nurse" | "doctor" | "health_worker" | "medical_officer";
 }
 
 export interface TriageResult {
+  /** The rules' tier as computed (older notes may lack it). An override changes the encounter, not this. */
+  urgency?: Urgency;
   provisional: boolean;
   protocols: { key: string; name: string }[];
   unresolved: { rule_id: string; urgency: Urgency; description: string; needs: string[] }[];
@@ -487,10 +551,14 @@ export interface TriageNote {
   medications?: { name: string; strength: string | null; source: string; by: string; at: string }[];
   summary_template?: string;
   llm?: { status: "PASS" | "FAIL_FELL_BACK" | "UNAVAILABLE"; model: string; ms?: number; reason?: string; rejected_text?: string; faithfulness?: string[]; guard?: string[] };
+  /** C8: the model's own tier for this case, beside the rules' result. It never changes urgency. */
+  llm_opinion?: AiOpinion;
   generated_at: string;
   edited_by?: string | null;
   observations?: Observation[];
   edited_at?: string | null;
+  /** "summary" for a health worker: summary, flags, missing items, their questions and vital signs only. */
+  detail_level?: "summary" | "full";
 }
 
 export interface Override {
@@ -527,6 +595,10 @@ export interface Encounter {
   /** Present when the patient is on an employer's roster (never sent to patient/kiosk sessions). */
   worker?: WorkerInfo | null;
   consent?: Consent | null;
+  /** Whether the signed-in role may confirm this urgency (E2 sign-off limits). */
+  can_confirm?: boolean;
+  /** Lowest role that may confirm it. */
+  sign_off?: "health_worker" | "nurse" | "doctor" | null;
 }
 
 export type IntakeChannel = "staff_kiosk" | "kiosk_link" | "patient_app";
@@ -628,6 +700,83 @@ export interface QueueItem {
   escalation_due_at: string | null;
   vitals_recorded?: boolean;
   observation_count?: number;
+  /** C3: why this row is here, e.g. "RED (ATP-B-SPO2) · 1st of 3 RED · waiting 12 min, longest first". */
+  order_reason?: string;
+  sign_off?: "health_worker" | "nurse" | "doctor" | null;
+}
+
+export type AlertKind = "capacity" | "fever_cluster" | "missed_visit";
+
+export interface Alert {
+  id: string;
+  facility_id: string;
+  kind: AlertKind;
+  key: string;
+  to_role: "medical_officer" | "health_worker";
+  assigned_to: string | null;
+  title: string;
+  detail: Record<string, unknown>;
+  status: "open" | "acknowledged" | "resolved";
+  raised_at: string;
+  updated_at: string;
+  acknowledged_by?: string | null;
+  acknowledged_at?: string | null;
+  ack_note?: string | null;
+  resolved_at?: string | null;
+}
+
+export interface Capacity {
+  open_red: number;
+  doctors_on_duty: number;
+  over: boolean;
+  reds: { token: string | null; wait_minutes: number; status: string }[];
+  alert: Alert | null;
+}
+
+export interface FollowupAttempt {
+  at: string;
+  by: string;
+  outcome: "reached" | "not_reached" | "came" | "call_placed";
+  note: string | null;
+  script?: string;
+  to?: string;
+}
+
+export interface Followup {
+  id: string;
+  patient_id: string;
+  patient_code: string;
+  patient_name: string;
+  village: string | null;
+  phone: string | null;
+  phone_belongs_to: PhoneOwner | null;
+  kind: string;
+  due_at: string;
+  status: "scheduled" | "missed" | "contacted" | "call_due" | "done" | "cancelled";
+  missed_at: string | null;
+  attempts: FollowupAttempt[];
+  assigned_to: string | null;
+  assigned_name: string | null;
+  gestation_weeks: number | null;
+  /** What the reminder call would say; null when there is no phone to call. */
+  call_script: string | null;
+  resolved_at: string | null;
+}
+
+export interface DepartmentRate {
+  department: string;
+  screened: number | null;
+  follow_up_pct: number | null;
+  ppe_gap_pct: number | null;
+  above_others: boolean;
+  suppressed: boolean;
+}
+
+export interface DepartmentRates {
+  days: number;
+  k_min: number;
+  departments: DepartmentRate[];
+  note: string;
 }
 
 export interface Escalation {
@@ -678,7 +827,8 @@ export type AuditAction =
   | "DISAGREEMENT"
   | "PURGE"
   | "REDACT"
-  | "GUARD_BLOCK";
+  | "GUARD_BLOCK"
+  | "ALERT";
 
 export interface AuditEvent {
   id: number;
@@ -744,6 +894,131 @@ export interface CohortCell {
   count: number | null;
 }
 
+/** C8: the language model's second opinion on urgency. Shown beside the rules; the rules' tier always stands. */
+export interface AiOpinion {
+  status: "AGREE" | "DISAGREE" | "UNAVAILABLE" | "UNREADABLE";
+  model: string;
+  ms?: number;
+  rules_urgency: Urgency;
+  model_urgency?: Urgency;
+  direction?: "higher" | "lower" | null;
+  /** Present only when it passed the faithfulness check and the output guard. */
+  reason?: string;
+  /** Why the reason was hidden (it failed the checks); the tier is still shown. */
+  reason_withheld?: string[];
+}
+
+export type CadreKey = "community" | "nurse" | "nutrition" | "male" | "cho";
+
+/** A front-line worker title as used in the facility's state (ASHA, Mitanin, VHN…). */
+export interface CadreName {
+  en: string;
+  hi?: string;
+  or?: string;
+  full: string;
+  source?: string;
+}
+
+export interface MonsoonDates {
+  onset: string; // MM-DD
+  withdrawal: string; // MM-DD
+  station?: string;
+}
+
+export interface FacilityRegion {
+  state: string | null;
+  cadres: Record<CadreKey, CadreName>;
+  monsoon: MonsoonDates | null;
+  northeast: boolean;
+}
+
+export interface LocalFestival {
+  name: string;
+  aliases?: string[];
+  dates: string[]; // YYYY-MM-DD
+  faith?: string | null;
+}
+
+export interface RegionConfig {
+  cadres?: Partial<Record<CadreKey, string>>;
+  monsoon?: { onset: string; withdrawal: string } | null;
+  festivals?: LocalFestival[];
+}
+
+/** F5: the festival and season table a facility's notes use to date "since Diwali" onsets. */
+export interface RegionCalendar {
+  facility_id: string;
+  state: string | null;
+  as_of: string;
+  version: string;
+  festivals: { key: string; label: string; faith: string; start: string; end: string; source: string; local: boolean; custom: boolean; past: boolean }[];
+  seasons: { key: string; label: string; start: string | null; end: string | null; source: string; names: string[]; station: string | null }[];
+  cadres: Record<CadreKey, CadreName>;
+  monsoon: MonsoonDates | null;
+  northeast: boolean;
+  sources: Record<string, string>;
+  region_config: RegionConfig;
+}
+
+/** How the note would read a phrase: onset with its certainty and, for a festival or season, the date it points to. */
+export interface OnsetReading {
+  on: string;
+  when: string;
+  certainty: "STATED" | "INFERRED" | "VAGUE" | "UNKNOWN";
+  raw: string | null;
+  days: number | null;
+  check: string | null;
+  approx?: { found: boolean; label: string; start?: string; end?: string; source?: string; region?: string | null; reason?: string; others?: { label: string; start: string; end: string }[] };
+}
+
+/** Supervisor/doctor view of where the model's opinion differed from the rules (C8). */
+export interface AiOpinionReport {
+  days: number;
+  model: string | null;
+  encounters: number;
+  counts: Record<AiOpinion["status"], number>;
+  /** rules tier → model tier → cases */
+  matrix: Record<Urgency, Record<Urgency, number>>;
+  higher: number;
+  lower: number;
+  cases: {
+    encounter_id: string;
+    patient_code: string;
+    created_at: string;
+    category: string;
+    rules_urgency: Urgency;
+    model_urgency: Urgency;
+    direction: "higher" | "lower";
+    reason: string | null;
+    reason_withheld: boolean;
+    final_urgency: Urgency;
+    overridden: boolean;
+    status: string;
+  }[];
+}
+
+/** One phrase the output guard (C4) matched. */
+export interface GuardHit {
+  category: "condition" | "diagnostic_phrasing" | "drug_advice" | string;
+  label: string;
+  phrase: string;
+}
+
+/** Result of the supervisor's guard test: a typed sentence, never a model output. */
+export interface GuardTestResult {
+  ok: boolean;
+  hits: GuardHit[];
+  guard_version: number;
+  test: true;
+}
+
+export interface GuardTestSample {
+  text: string;
+  source?: string;
+  language: string;
+  expect: "block" | "allow";
+}
+
 /** Facility cases as counts only (G3): no name, ID, phone, village, exact age, time or free text. */
 export interface DeidentifiedCohort {
   days: number;
@@ -774,7 +1049,7 @@ export interface Reminder {
   kind: "anc_checkup" | "chronic_checkin" | "followup";
   due_at: string;
   channel: "sms" | "voice";
-  status: "scheduled" | "sent" | "done";
+  status: "scheduled" | "sent" | "done" | "missed" | "contacted" | "call_due" | "cancelled";
   message: string;
 }
 

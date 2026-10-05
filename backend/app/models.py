@@ -73,6 +73,8 @@ class Facility(Base):
     beds_occupied: Mapped[int] = mapped_column(Integer, default=0)
     offline_mode: Mapped[bool] = mapped_column(Boolean, default=False)
     capabilities: Mapped[dict] = mapped_column(JSONType, default=dict)
+    # F5: this facility's changes to its state's regional calendar and worker names (see app/regions.yaml)
+    region_config: Mapped[dict | None] = mapped_column(JSONType, nullable=True)
     # Provenance: sample | directory (national list) | organisation (registered by an employer) | user_added
     source: Mapped[str] = mapped_column(String(16), default="sample", server_default="sample")
     directory_ref: Mapped[str | None] = mapped_column(String(40), nullable=True, unique=True)
@@ -84,6 +86,13 @@ class Facility(Base):
     lon: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True, default=utcnow)
+
+    @property
+    def region(self) -> dict:
+        """Worker names and monsoon dates for this facility's state, with its own changes applied."""
+        from .regions import for_facility
+
+        return for_facility(self).summary()
 
 
 class User(Base):
@@ -344,5 +353,37 @@ class Reminder(Base):
     kind: Mapped[str] = mapped_column(String(20))
     due_at: Mapped[datetime] = mapped_column(UTCDateTime)
     channel: Mapped[str] = mapped_column(String(8))
-    status: Mapped[str] = mapped_column(String(12), default="scheduled")
+    status: Mapped[str] = mapped_column(String(12), default="scheduled")  # scheduled | missed | call_due | done | cancelled
     message: Mapped[str] = mapped_column(Text)
+    # D4 maternal follow-up: who chases a missed visit, and whose phone it is (a shared phone gets a neutral message)
+    facility_id: Mapped[str | None] = mapped_column(ForeignKey("facilities.id"), nullable=True, index=True)
+    assigned_to: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    phone_belongs_to: Mapped[str | None] = mapped_column(String(12), nullable=True)  # self | husband | household | none
+    encounter_id: Mapped[str | None] = mapped_column(ForeignKey("encounters.id"), nullable=True)
+    missed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    attempts: Mapped[list | None] = mapped_column(JSONType, nullable=True)  # [{at, by, outcome, note}]
+    resolved_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+
+
+class Alert(Base):
+    """Something a person must act on that is not one patient's note: too many REDs for the doctors on duty (C3),
+    a fever cluster (D3) or a missed maternal visit (D4). Raised by a rule over stored data, never by a model; one open
+    alert per (facility, kind, key). Cluster alerts carry counts only, never names."""
+
+    __tablename__ = "alerts"
+    __table_args__ = (Index("ix_alerts_open", "facility_id", "kind", "key", "status"),)
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("alr"))
+    facility_id: Mapped[str] = mapped_column(ForeignKey("facilities.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(16))  # capacity | fever_cluster | missed_visit
+    key: Mapped[str] = mapped_column(String(120))  # what makes it the same alert: cluster name, reminder id, "red"
+    to_role: Mapped[str] = mapped_column(String(20))  # medical_officer | health_worker
+    assigned_to: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    title: Mapped[str] = mapped_column(String(300))
+    detail: Mapped[dict] = mapped_column(JSONType, default=dict)
+    status: Mapped[str] = mapped_column(String(14), default="open", index=True)  # open | acknowledged | resolved
+    raised_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+    acknowledged_by: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    acknowledged_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    ack_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)

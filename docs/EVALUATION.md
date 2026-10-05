@@ -148,3 +148,64 @@ as a readable paragraph. Its text is used only if it passes two checks; otherwis
 - Re-running the held-out set after a fix makes it less "held out". We report the first run as well.
 - Reproduce: start `backend/scripts/start_llm.sh`, then
   `JEEVIA_LLM_URL=http://127.0.0.1:8031 python backend/scripts/eval_llm.py held_out`.
+
+## Second opinion on urgency (C8)
+
+The same model, given the same fact sheet but **not** the rules' result, names the tier it would pick (RED, YELLOW,
+GREEN) and lists the facts that decided it. The opinion is shown beside the rules' result on the doctor's note and
+never changes urgency. When it is more urgent than the rules, the note gets a "take a second look" flag. When it is less
+urgent, it is shown and nothing else happens. Its reason goes through the faithfulness check and the output guard; a
+reason that fails is hidden and the tier is still shown.
+
+- **Reference:** the rules' tier, not a clinician's. We have no clinician labels, so this measures agreement, not
+  correctness. It tells us where to look, not who is right.
+- **Data:** the same 50 synthetic cases as above (tuning 30 + held out 20), run through the real rules engine.
+
+| 5 Oct, final prompt | Result |
+|---|---|
+| Answers the app could read | 50 of 50 |
+| Agrees with the rules | **29 of 50 (58 %)** |
+| Model more urgent (flag "take a second look") | 8 |
+| Model less urgent (shown only) | 13 |
+| … of which the rules held YELLOW only because vitals were not yet measured | 9 |
+| … of which the rules said RED | 4 |
+| Reason hidden by the checks | 0 |
+| Median time | 0.52 s (max 0.99 s) |
+
+Rules (rows) against the model (columns):
+
+| Rules ↓ / model → | RED | YELLOW | GREEN |
+|---|---|---|---|
+| **RED** | 10 | 3 | 1 |
+| **YELLOW** | 8 | 19 | 9 |
+
+**What the disagreements show**
+- **The model is less urgent on four RED cases:** fever with headache (two cases), right lower stomach pain with
+  vomiting, and a machine cut on the palm (the model said GREEN). These are cases where the rules protect: a small
+  model reading the facts would have under-triaged them. This is why the opinion can never lower urgency.
+- **The model is more urgent on eight YELLOW cases.** All eight were provisional: the rules were still waiting for a
+  full set of vitals or the danger-sign check. Some point at rules worth reviewing with a clinician:
+  - BP 182/110 with headache;
+  - less baby movement at 36 weeks;
+  - not passing urine;
+  - hip pain after a fall with the patient unable to stand;
+  - BP 170/100 with little urine and leg swelling.
+
+  We have **not** changed the rules on the model's word. They are listed for clinician review, and the view exists to
+  surface exactly this.
+- **Most "less urgent" answers (9 of 13) are provisional cases**, which the rules hold at YELLOW until vitals are
+  measured ("unknown is never normal"). The prompt tells the model not to choose GREEN without vitals; it did so anyway
+  on several cases. A further reason the rules decide.
+
+**Prompt change found by reading the reasons.** The first prompt asked for "one short sentence". The model then
+interpreted the facts ("which indicates a possible acute neurological event requiring immediate evaluation"). In
+the first 17 cases, 2 reasons were hidden by the checks ("hypertensive"; "injury" for a snake bite). The final prompt
+asks only for the deciding facts, copied as written ("temperature 102.4 °F, breathing 52 /min"). All 50 reasons then
+passed the checks.
+
+**Limits**
+- Agreement with our own rules, on cases we wrote, in English. Not a measure of clinical accuracy.
+- The opinion runs only when the patient allowed AI (G1) and the local model is running. Otherwise the note says
+  there is no second opinion.
+- Per-case answers: `docs/evaluation/llm_opinion_all.json`. Reproduce:
+  `JEEVIA_LLM_URL=http://127.0.0.1:8031 python backend/scripts/eval_llm.py opinion all`.

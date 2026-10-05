@@ -28,6 +28,9 @@ from .findings import FINDINGS, Finding, extract, resolve
 RULES_DIR = Path(__file__).parent / "rules"
 RANK = {"green": 0, "yellow": 1, "red": 2}
 ROLES = ("health_worker", "nurse", "doctor")
+EXPOSURES = ("silica", "coal_dust", "cotton_dust", "asbestos", "other_dust", "noise", "chemicals", "pesticides", "heat")
+EXPOSURE_LABEL = {"silica": "silica / stone dust", "coal_dust": "coal dust", "cotton_dust": "cotton dust", "asbestos": "asbestos",
+                  "other_dust": "other dust", "noise": "loud noise", "chemicals": "chemicals or fumes", "pesticides": "pesticides", "heat": "heat"}
 
 
 @dataclass(frozen=True)
@@ -118,6 +121,7 @@ class Ctx:
     onset_h: tuple[float, float] | None
     gestation: int | None
     labs: dict[str, float]
+    occ: dict = field(default_factory=dict)  # workplace screening answers (D2), with `fev1_baseline_l` from earlier visits
     unknown: set[str] = field(default_factory=set)
     evidence: list[str] = field(default_factory=list)
 
@@ -210,6 +214,15 @@ def _check(rid: str, cond: Any) -> None:
     elif key == "lab":
         if arg[1] not in OPS:
             raise ValueError(f"{rid}: bad operator in lab")
+    elif key == "exposure":
+        if not arg or any(x not in EXPOSURES for x in arg):
+            raise ValueError(f"{rid}: unknown exposure in {arg}")
+    elif key in ("exposure_years", "cough_weeks", "fev1_decline_pct"):
+        if arg[0] not in OPS:
+            raise ValueError(f"{rid}: bad operator in {key}")
+    elif key == "breathless_vs_last":
+        if arg not in ("better", "same", "worse", "unsure", "first"):
+            raise ValueError(f"{rid}: bad breathless_vs_last {arg}")
     elif key not in ("avpu_in", "sex"):
         raise ValueError(f"{rid}: unknown condition {key}")
 
@@ -299,6 +312,35 @@ def _eval(c: Ctx, cond: dict) -> bool | None:
         if ok:
             c.evidence.append(f"Report: {name} {v:g}")
         return ok
+    # Workplace screening (D2). A detail the worker was not asked counts as not reported (False), not unknown:
+    # the pack runs only for screenings, and the note lists what was not recorded.
+    if key == "exposure":
+        hit = [x for x in c.occ.get("exposures") or [] if x in arg]
+        if hit:
+            c.evidence.append("Works with " + ", ".join(EXPOSURE_LABEL[x] for x in hit))
+        return bool(hit)
+    if key in ("exposure_years", "cough_weeks"):
+        v = c.occ.get("years_exposed" if key == "exposure_years" else key)
+        if v is None:
+            return False
+        ok = OPS[arg[0]](float(v), arg[1])
+        if ok:
+            c.evidence.append(f"{v:g} years of exposure" if key == "exposure_years" else f"Cough for {v:g} weeks")
+        return ok
+    if key == "breathless_vs_last":
+        ok = c.occ.get("breathless_vs_last") == arg
+        if ok:
+            c.evidence.append(f"Breathing {arg} than at the last screening (worker's answer)")
+        return ok
+    if key == "fev1_decline_pct":
+        now_, base = c.occ.get("fev1_l"), c.occ.get("fev1_baseline_l")
+        if not now_ or not base:
+            return False
+        pct = round((base - now_) / base * 100, 1)
+        ok = OPS[arg[0]](pct, arg[1])
+        if ok:
+            c.evidence.append(f"FEV1 {now_:g} L, down {pct:g} % from {base:g} L on {c.occ.get('fev1_baseline_on') or 'an earlier screening'}")
+        return ok
     raise ValueError(f"Unknown rule condition: {key}")
 
 
@@ -309,6 +351,8 @@ def _applies(p: Protocol, c: Ctx) -> bool:
     if "age_max_exclusive" in a and c.age >= a["age_max_exclusive"]:
         return False
     if a.get("pregnant") and resolve(c.findings, "pregnant").value is not True:
+        return False
+    if a.get("occupational") and not c.occ.get("exposures"):
         return False
     return True
 
@@ -335,6 +379,7 @@ def evaluate_full(intake: dict, age: int, sex: str | None = None) -> dict:
         onset_h=onset_hours(intake),
         gestation=(intake.get("maternal") or {}).get("gestation_weeks"),
         labs={k.lower(): float(v) for k, v in (intake.get("lab_values") or {}).items() if v is not None},
+        occ=dict(intake.get("occupational") or {}),
     )
 
     applied, hits, unresolved = [], [], []
@@ -368,7 +413,7 @@ def evaluate_full(intake: dict, age: int, sex: str | None = None) -> dict:
         needs = sorted({"clinician danger-sign check" if n.startswith("danger-sign") else n for u in unresolved for n in u["needs"]} | set(missing))
         hits.append({
             "rule_id": "SAFE-PROVISIONAL", "protocol": "SAFETY", "urgency": "yellow",
-            "description": "Provisional — cannot be routine until measured: " + ", ".join(needs),
+            "description": "UNDETERMINED, held at YELLOW — cannot be routine until measured: " + ", ".join(needs),
             "source": sources["safety"]["short"], "source_key": "safety", "non_downgradable": True, "review_by": "nurse",
             "evidence": [f"{len(could_be_red)} RED rule(s) could not be ruled out: {', '.join(could_be_red)}"] if could_be_red else [],
         })

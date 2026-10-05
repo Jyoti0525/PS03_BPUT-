@@ -1,0 +1,484 @@
+# Regional calendar and worker cadres (F5). Facility configuration, not code: a facility's state picks its region
+# below, and a supervisor can override any of it for their own facility (Facility.region_config).
+#
+# Used for one thing in triage: when a patient dates an illness by a festival or season ("since Diwali", "ରଜଠାରୁ",
+# "after the rains"), the note shows the approximate date or window next to the patient's words. The onset stays
+# VAGUE and the rules never use it; staff confirm the date with the patient.
+#
+# Rules for this file:
+# * Every date has a source. A year whose date was not checked is left out, not guessed. A festival with no date for
+#   the year asked about is still recognised, but the note says the date is not in the calendar.
+# * Lunar dates move every year; Islamic dates depend on the moon and can differ by a day from what is listed.
+version: "2026-10-05"
+
+sources:
+  dopt: >-
+    Government of India, Department of Personnel and Training: holidays (gazetted and restricted) for Central
+    Government offices, 2025; 2026 (O.M. No. 12/2/2023-JCA, 3 July 2025); 2027 (O.M. 16 July 2026).
+  odisha_gad: Government of Odisha, General Administration Department holiday lists 2025 and 2026.
+  derived: >-
+    Worked out from DoPT dates: Ramzan is the 30 days before Id-ul-Fitr; Navratri is the 9 days up to Mahanavami. Approximate
+    (± 1–2 days).
+  fixed: Fixed date in the Gregorian or solar calendar.
+  imd_2020: >-
+    India Meteorological Department, CRS Research Report 3/2020 (Pai et al.), New Normal Dates of Onset/Progress and
+    Withdrawal of Southwest Monsoon over India, Table 2: normal onset 1961–2019, normal withdrawal 1971–2019. Where the
+    report gives no withdrawal date for a southern station, its stated country-wide retreat date (15 October) is used.
+  imd_nem: >-
+    India Meteorological Department: the northeast monsoon season (October–December) over Tamil Nadu, Puducherry,
+    Kerala, coastal Andhra Pradesh and south interior Karnataka; normal onset around 20 October.
+  imd_seasons: >-
+    India Meteorological Department seasons: winter (January–February), pre-monsoon or hot weather (March–May). The
+    cold season people speak of usually includes December.
+  ncert_crops: >-
+    NCERT Class 10 Geography, Agriculture: kharif crops sown with the monsoon (June–July) and harvested
+    September–October; rabi crops sown October–December and harvested April–June.
+  nhm: >-
+    National Health Mission (MoHFW): ASHA, ANM, MPW, Anganwadi worker (Ministry of Women and Child Development) and
+    Community Health Officer at Ayushman Arogya Mandir. State names from the state programmes noted per state.
+
+# How a festival is matched in what the patient said. Latin-script names need a time word before them ("since
+# Diwali", "after the puja"); Indic-script and romanised-Hindi names need one after them ("दिवाली से", "ରଜଠାରୁ",
+# "holi ke baad"). This keeps "Diwali sweets" or the English word "raja" from being read as a date.
+before: [since, after, from, around, during, at the time of, before, till, until]
+after: ["से", "के बाद", "के बाद से", "के आसपास", "के समय", "ଠାରୁ", "ପରଠାରୁ", "ପରଠୁ", "ପରେ", "ଠୁ", "ବେଳେ", "ବେଳୁ", "ସମୟରୁ", "ସମୟରେ", "se", "ke baad", "ke baad se", "ke aas paas", "ke time", "theke", "থেকে", "পর থেকে", "முதல்", "నుండి", "ನಿಂದ", "മുതൽ", "થી", "पासून"]
+
+festivals:
+  diwali:
+    label: Diwali
+    faith: Hindu, Sikh, Jain
+    names: [diwali, deepavali, deepawali, dipawali, divali, deewali, kali puja, "दिवाली", "दीवाली", "दीपावली", "दिवाळी", "ଦୀପାବଳି", "ଦିୱାଲି", "ଦିଆଲି", "কালী পূজা", "দীপাবলি", "தீபாவளி", "దీపావళి", "ದೀಪಾವಳಿ", "ദീപാവലി", "દિવાળી", "ਦੀਵਾਲੀ"]
+    dates: {2025: 2025-10-20, 2026: 2026-11-08, 2027: 2027-10-29}
+    source: dopt
+  holi:
+    label: Holi
+    faith: Hindu
+    names: [holi, "होली", "ହୋଲି", "হোলি", "ਹੋਲੀ", "હોળી", "होळी"]
+    dates: {2025: 2025-03-14, 2026: 2026-03-04, 2027: 2027-03-23}
+    source: dopt
+  dol_purnima:
+    label: Dola Purnima / Dol Jatra
+    faith: Hindu
+    names: [dol purnima, dola purnima, dol jatra, dola jatra, dol, dola, "ଦୋଳ", "ଦୋଳପୂର୍ଣ୍ଣିମା", "ଦୋଳ ପୂର୍ଣ୍ଣିମା", "ଦୋଳଯାତ୍ରା", "দোল", "দোলযাত্রা"]
+    dates: {2025: 2025-03-14, 2026: 2026-03-03, 2027: 2027-03-22}
+    source: dopt
+  dussehra:
+    label: Dussehra (Vijayadashami)
+    faith: Hindu
+    names: [dussehra, dusshera, dasara, dashara, dasera, dashain, vijayadashami, vijaya dashami, "दशहरा", "दसरा", "विजयादशमी", "ଦଶହରା", "ଦଶରା", "ବିଜୟା ଦଶମୀ", "ವಿಜಯದಶಮಿ", "ದಸರಾ", "దసరా", "విజయదశమి", "விஜயதசமி"]
+    dates: {2025: 2025-10-02, 2026: 2026-10-20, 2027: 2027-10-09}
+    source: dopt
+  durga_puja:
+    label: Durga Puja
+    faith: Hindu
+    names: [durga puja, durga pooja, durgapuja, durga pujo, "दुर्गा पूजा", "ଦୁର୍ଗା ପୂଜା", "ଦୁର୍ଗାପୂଜା", "দুর্গা পূজা", "দুর্গাপূজা", "দুর্গা পুজো"]
+    dates: {2025: [2025-09-29, 2025-10-02], 2026: [2026-10-18, 2026-10-20], 2027: [2027-10-06, 2027-10-09]}
+    note: Saptami to Dashami
+    source: dopt
+  navratri:
+    label: Navratri
+    faith: Hindu
+    names: [navratri, navaratri, navratra, nauratri, "नवरात्रि", "नवरात्र", "ନବରାତ୍ରି", "નવરાત્રી", "ನವರಾತ್ರಿ"]
+    dates: {2025: [2025-09-22, 2025-10-01], 2026: [2026-10-11, 2026-10-20], 2027: [2027-09-30, 2027-10-08]}
+    source: derived
+  chhath:
+    label: Chhath Puja
+    faith: Hindu
+    names: [chhath, chhat, chhath puja, chhat puja, "छठ", "छठ पूजा", "ଛଠ"]
+    dates: {2025: 2025-10-28, 2026: 2026-11-15, 2027: 2027-11-04}
+    source: dopt
+  karwa_chauth:
+    label: Karwa Chauth
+    faith: Hindu
+    names: [karwa chauth, karva chauth, karvachauth, "करवा चौथ"]
+    dates: {2025: 2025-10-10, 2026: 2026-10-29, 2027: 2027-10-18}
+    source: dopt
+  ganesh_chaturthi:
+    label: Ganesh Chaturthi
+    faith: Hindu
+    names: [ganesh chaturthi, ganesh puja, ganpati, ganapati, vinayaka chaturthi, vinayaka chavithi, vinayagar chaturthi, "गणेश चतुर्थी", "गणपती", "गणपति", "ଗଣେଶ ପୂଜା", "ଗଣେଶ ଚତୁର୍ଥୀ", "వినాయక చవితి", "ಗಣೇಶ ಚತುರ್ಥಿ", "விநாயகர் சதுர்த்தி"]
+    dates: {2025: 2025-08-27, 2026: 2026-09-14, 2027: 2027-09-04}
+    source: dopt
+  janmashtami:
+    label: Janmashtami
+    faith: Hindu
+    names: [janmashtami, janmasthami, janmashtmi, krishna janmashtami, gokulashtami, "जन्माष्टमी", "ଜନ୍ମାଷ୍ଟମୀ"]
+    dates: {2025: 2025-08-16, 2026: 2026-09-04, 2027: 2027-08-25}
+    source: dopt
+  raksha_bandhan:
+    label: Raksha Bandhan
+    faith: Hindu
+    names: [raksha bandhan, rakshabandhan, rakhi, "राखी", "रक्षाबंधन", "रक्षा बंधन", "ରାକ୍ଷୀ", "ରାଖୀ", "ରକ୍ଷାବନ୍ଧନ"]
+    dates: {2025: 2025-08-09, 2026: 2026-08-28, 2027: 2027-08-17}
+    source: dopt
+  maha_shivratri:
+    label: Maha Shivratri
+    faith: Hindu
+    names: [shivratri, shivaratri, maha shivratri, mahashivratri, "शिवरात्रि", "महाशिवरात्रि", "ଶିବରାତ୍ରି", "ମହାଶିବରାତ୍ରି"]
+    dates: {2025: 2025-02-26, 2026: 2026-02-15, 2027: 2027-03-06}
+    source: dopt
+  ram_navami:
+    label: Ram Navami
+    faith: Hindu
+    names: [ram navami, ramnavami, rama navami, "राम नवमी", "रामनवमी", "ରାମନବମୀ"]
+    dates: {2025: 2025-04-06, 2026: 2026-03-26, 2027: 2027-04-15}
+    source: dopt
+  basant_panchami:
+    label: Basant Panchami / Saraswati Puja
+    faith: Hindu
+    names: [basant panchami, vasant panchami, saraswati puja, sri panchami, "बसंत पंचमी", "वसंत पंचमी", "सरस्वती पूजा", "ସରସ୍ୱତୀ ପୂଜା", "ବସନ୍ତ ପଞ୍ଚମୀ", "সরস্বতী পূজা"]
+    dates: {2026: 2026-01-23, 2027: 2027-02-11}
+    source: dopt
+  ugadi:
+    label: Ugadi / Gudi Padwa / Cheti Chand
+    faith: Hindu
+    names: [ugadi, yugadi, gudi padwa, gudhi padwa, cheti chand, "गुढीपाडवा", "गुड़ी पड़वा", "ఉగాది", "ಯುಗಾದಿ"]
+    dates: {2025: 2025-03-30, 2026: 2026-03-19, 2027: 2027-04-07}
+    source: dopt
+  makar_sankranti:
+    label: Makar Sankranti
+    faith: Hindu
+    names: [makar sankranti, makara sankranti, sankranti, sakrat, uttarayan, "मकर संक्रांति", "संक्रांति", "संक्रान्ति", "ମକର ସଂକ୍ରାନ୍ତି", "ମକର", "ಸಂಕ್ರಾಂತಿ", "సంక్రాంతి", "ઉત્તરાયણ"]
+    dates: {2025: 2025-01-14, 2026: 2026-01-14, 2027: 2027-01-14}
+    source: dopt
+  pongal:
+    label: Pongal
+    faith: Hindu
+    names: [pongal, thai pongal, "பொங்கல்"]
+    dates: {2025: 2025-01-14, 2026: 2026-01-14, 2027: 2027-01-15}
+    source: dopt
+  magh_bihu:
+    label: Magh (Bhogali) Bihu
+    faith: Hindu
+    names: [magh bihu, bhogali bihu, "মাঘ বিহু", "ভোগালী বিহু"]
+    dates: {2025: 2025-01-14, 2026: 2026-01-14, 2027: 2027-01-14}
+    source: dopt
+  lohri:
+    label: Lohri
+    faith: Hindu, Sikh
+    names: [lohri, "लोहड़ी", "ਲੋਹੜੀ"]
+    dates: {2025: 2025-01-13, 2026: 2026-01-13, 2027: 2027-01-13}
+    source: fixed
+  bohag_bihu:
+    label: Bohag (Rongali) Bihu
+    faith: Hindu
+    names: [bihu, bohag bihu, bahag bihu, rongali bihu, "বিহু", "ব'হাগ বিহু", "বহাগ বিহু", "ৰঙালী বিহু"]
+    dates: {2025: 2025-04-15, 2026: 2026-04-15, 2027: 2027-04-15}
+    source: dopt
+  vaisakhi:
+    label: Vaisakhi
+    faith: Sikh, Hindu
+    names: [vaisakhi, baisakhi, "बैसाखी", "ਵਿਸਾਖੀ", "ਵੈਸਾਖੀ"]
+    dates: {2025: 2025-04-13, 2026: 2026-04-14, 2027: 2027-04-14}
+    source: dopt
+  vishu:
+    label: Vishu / Tamil New Year
+    faith: Hindu
+    names: [vishu, puthandu, tamil new year, "വിഷു", "புத்தாண்டு"]
+    dates: {2025: 2025-04-14, 2026: 2026-04-14, 2027: 2027-04-14}
+    source: dopt
+  poila_baishakh:
+    label: Poila Baishakh (Bengali New Year)
+    faith: Hindu
+    names: [poila baishakh, pohela boishakh, bengali new year, "পয়লা বৈশাখ", "পহেলা বৈশাখ"]
+    dates: {2025: 2025-04-15, 2026: 2026-04-15, 2027: 2027-04-15}
+    source: dopt
+  pana_sankranti:
+    label: Pana Sankranti (Odia New Year)
+    faith: Hindu
+    names: [pana sankranti, maha bishuba sankranti, odia new year, "ପଣା ସଂକ୍ରାନ୍ତି", "ପଣାସଂକ୍ରାନ୍ତି", "ମହାବିଷୁବ ସଂକ୍ରାନ୍ତି"]
+    dates: {2025: 2025-04-14, 2026: 2026-04-14}
+    source: odisha_gad
+  raja:
+    label: Raja Parba
+    faith: Hindu
+    names: [raja, raja parba, raja sankranti, raja festival, "ରଜ", "ରଜ ପର୍ବ", "ରଜପର୍ବ", "ରଜ ସଂକ୍ରାନ୍ତି"]
+    dates: {2025: [2025-06-14, 2025-06-16], 2026: [2026-06-14, 2026-06-16]}
+    note: Three days around Mithuna Sankranti (15 June)
+    source: odisha_gad
+  rath_yatra:
+    label: Rath Yatra
+    faith: Hindu
+    names: [rath yatra, ratha yatra, rath jatra, ratha jatra, rathyatra, car festival, "रथ यात्रा", "रथयात्रा", "ରଥଯାତ୍ରା", "ରଥ ଯାତ୍ରା", "ରଥ"]
+    dates: {2025: 2025-06-27, 2026: 2026-07-16, 2027: 2027-07-05}
+    source: dopt
+  nuakhai:
+    label: Nuakhai
+    faith: Hindu
+    names: [nuakhai, nuakhia, nua khai, "ନୂଆଖାଇ", "ନୂଆଁଖାଇ", "ନୂଆ ଖାଇ"]
+    dates: {2025: 2025-08-28, 2026: 2026-09-15}
+    source: odisha_gad
+  onam:
+    label: Onam
+    faith: Hindu
+    names: [onam, thiruvonam, thiru onam, "ഓണം", "തിരുവോണം"]
+    dates: {2025: 2025-09-05, 2026: 2026-08-26, 2027: 2027-09-12}
+    source: dopt
+  eid_ul_fitr:
+    label: Id-ul-Fitr (Eid)
+    faith: Muslim
+    names: [eid ul fitr, eid-ul-fitr, eid al fitr, id ul fitr, idul fitr, ramzan eid, ramadan eid, meethi eid, mithi eid, choti eid, "ईद उल फ़ितर", "ईद-उल-फ़ितर", "मीठी ईद", "ঈদুল ফিতর", "عید الفطر"]
+    dates: {2025: 2025-03-31, 2026: 2026-03-21, 2027: 2027-03-10}
+    source: dopt
+  eid_ul_adha:
+    label: Id-ul-Zuha (Bakrid)
+    faith: Muslim
+    names: [bakrid, bakri eid, bakra eid, bakreed, eid ul adha, eid al adha, eid-ul-adha, eid ul zuha, id ul zuha, "बकरीद", "बक़रीद", "बकरा ईद", "ବକ୍ରିଦ", "ঈদুল আযহা", "عید الاضحی"]
+    dates: {2025: 2025-06-07, 2026: 2026-05-28, 2027: 2027-05-17}
+    source: dopt
+  ramzan:
+    label: Ramzan (month of fasting)
+    faith: Muslim
+    names: [ramzan, ramadan, ramazan, roza, rozas, "रमज़ान", "रमजान", "रोज़ा", "रोजा", "ରମଜାନ", "রমজান", "رمضان"]
+    dates: {2025: [2025-03-01, 2025-03-30], 2026: [2026-02-19, 2026-03-20], 2027: [2027-02-08, 2027-03-09]}
+    source: derived
+  muharram:
+    label: Muharram
+    faith: Muslim
+    names: [muharram, moharram, "मुहर्रम", "ମହରମ", "মহরম"]
+    dates: {2025: 2025-07-06, 2026: 2026-06-26, 2027: 2027-06-16}
+    source: dopt
+  milad_un_nabi:
+    label: Milad-un-Nabi
+    faith: Muslim
+    names: [milad un nabi, milad-un-nabi, eid-e-milad, eid e milad, barawafat, bara wafat, "बारावफ़ात", "ईद-ए-मिलाद"]
+    dates: {2025: 2025-09-05, 2026: 2026-08-26, 2027: 2027-08-15}
+    source: dopt
+  christmas:
+    label: Christmas
+    faith: Christian
+    names: [christmas, xmas, bada din, bara din, "क्रिसमस", "बड़ा दिन", "ଖ୍ରୀଷ୍ଟମାସ", "ବଡ଼ଦିନ", "ବଡଦିନ", "বড়দিন", "கிறிஸ்துமஸ்", "ക്രിസ്മസ്"]
+    dates: {2025: 2025-12-25, 2026: 2026-12-25, 2027: 2027-12-25}
+    source: fixed
+  good_friday:
+    label: Good Friday
+    faith: Christian
+    names: [good friday, "गुड फ्राइडे", "ଗୁଡ୍ ଫ୍ରାଇଡେ"]
+    dates: {2025: 2025-04-18, 2026: 2026-04-03, 2027: 2027-03-26}
+    source: dopt
+  easter:
+    label: Easter
+    faith: Christian
+    names: [easter, "ईस्टर", "ଇଷ୍ଟର"]
+    dates: {2025: 2025-04-20, 2026: 2026-04-05, 2027: 2027-03-28}
+    source: dopt
+  new_year:
+    label: New Year's Day
+    faith: All
+    names: [new year, new year's, "नया साल", "नए साल", "नये साल"]
+    dates: {2025: 2025-01-01, 2026: 2026-01-01, 2027: 2027-01-01}
+    source: fixed
+  guru_nanak_jayanti:
+    label: Guru Nanak Jayanti (Gurpurab)
+    faith: Sikh
+    names: [gurpurab, gurupurab, guru nanak jayanti, guru nanak's birthday, prakash purab, "गुरपुरब", "गुरु नानक जयंती", "ਗੁਰਪੁਰਬ"]
+    dates: {2025: 2025-11-05, 2026: 2026-11-24, 2027: 2027-11-14}
+    source: dopt
+  buddha_purnima:
+    label: Buddha Purnima
+    faith: Buddhist
+    names: [buddha purnima, budh purnima, vesak, "बुद्ध पूर्णिमा", "ବୁଦ୍ଧ ପୂର୍ଣ୍ଣିମା"]
+    dates: {2025: 2025-05-12, 2026: 2026-05-01, 2027: 2027-05-20}
+    source: dopt
+  mahavir_jayanti:
+    label: Mahavir Jayanti
+    faith: Jain
+    names: [mahavir jayanti, mahaveer jayanti, "महावीर जयंती"]
+    dates: {2025: 2025-04-10, 2026: 2026-03-31, 2027: 2027-04-19}
+    source: dopt
+  independence_day:
+    label: Independence Day
+    faith: All
+    names: [independence day, 15 august, 15th august, pandrah august, "15 अगस्त", "पंद्रह अगस्त", "ସ୍ୱାଧୀନତା ଦିବସ"]
+    dates: {2025: 2025-08-15, 2026: 2026-08-15, 2027: 2027-08-15}
+    source: fixed
+  republic_day:
+    label: Republic Day
+    faith: All
+    names: [republic day, 26 january, 26th january, chhabbis january, "26 जनवरी", "छब्बीस जनवरी", "ଗଣତନ୍ତ୍ର ଦିବସ"]
+    dates: {2025: 2025-01-26, 2026: 2026-01-26, 2027: 2027-01-26}
+    source: fixed
+
+# A short word that means different festivals: the most recent one is shown, and the note says to ask which.
+# A region can map a word to one festival instead (see regions below: "puja" means Durga Puja in Odisha).
+ambiguous:
+  eid: [eid_ul_fitr, eid_ul_adha]
+  id: [eid_ul_fitr, eid_ul_adha]
+  "ईद": [eid_ul_fitr, eid_ul_adha]
+  "ଇଦ": [eid_ul_fitr, eid_ul_adha]
+  "ଇଦ୍": [eid_ul_fitr, eid_ul_adha]
+  "ঈদ": [eid_ul_fitr, eid_ul_adha]
+  "عید": [eid_ul_fitr, eid_ul_adha]
+
+# Seasons. Windows are month-day pairs; a window may cross the new year (winter). "monsoon" takes its dates from the
+# region (IMD normals); in a state with `northeast: true`, "the rains" may mean either monsoon, so both are offered. The harvest and sowing windows are national defaults a facility can
+# change.
+seasons:
+  monsoon:
+    label: Southwest monsoon (rainy season)
+    names: [rains, the rains, rainy season, monsoon, monsoons, barsaat, barsat, baarish, barish, "बरसात", "बारिश", "मानसून", "ବର୍ଷା", "ବର୍ଷାଋତୁ", "ବର୍ଷା ଦିନ", "ବର୍ଷାଦିନ", "বর্ষা", "മഴക്കാലം", "மழைக்காலம்", "వర్షాకాలం", "ಮಳೆಗಾಲ", "ચોમાસું", "पावसाळा"]
+    source: imd_2020
+  northeast_monsoon:
+    label: Northeast monsoon
+    names: [northeast monsoon, north east monsoon, retreating monsoon, winter rains, "வடகிழக்கு பருவமழை", "ஐப்பசி மழை"]
+    window: ["10-20", "12-31"]
+    source: imd_nem
+  summer:
+    label: Summer (hot season)
+    names: [summer, summers, hot season, garmi, garmiyon, "गर्मी", "गर्मियों", "गरमी", "ଖରା", "ଖରାଦିନ", "ଖରା ଦିନ", "ଗ୍ରୀଷ୍ମ", "গরম", "গ্রীষ্ম"]
+    window: ["03-01", "05-31"]
+    source: imd_seasons
+  winter:
+    label: Winter (cold season)
+    names: [winter, winters, cold season, the cold, sardi, sardiyon, thand, thandi, "सर्दी", "सर्दियों", "ठंड", "ठंडी", "जाड़ा", "ଶୀତ", "ଶୀତଦିନ", "ଶୀତ ଦିନ", "শীত", "শীতকাল"]
+    window: ["12-01", "02-28"]
+    source: imd_seasons
+  kharif_harvest:
+    label: Paddy (kharif) harvest
+    names: [paddy harvest, rice harvest, kharif harvest, dhan katai, dhaan katai, dhan kataai, "धान कटाई", "धान की कटाई", "ଧାନ କଟା", "ଧାନକଟା", "ଧାନ କାଟିବା"]
+    window: ["09-01", "10-31"]
+    source: ncert_crops
+  rabi_harvest:
+    label: Wheat (rabi) harvest
+    names: [wheat harvest, rabi harvest, gehun katai, gehu katai, "गेहूं कटाई", "गेहूँ की कटाई", "गेहूं की कटाई"]
+    window: ["04-01", "06-30"]
+    source: ncert_crops
+  kharif_sowing:
+    label: Kharif sowing / paddy transplanting
+    names: [paddy transplanting, transplanting, ropai, ropni, rupai, kharif sowing, "रोपाई", "धान रोपाई", "ଧାନ ରୁଆ", "ରୁଆ"]
+    window: ["06-01", "07-31"]
+    source: ncert_crops
+  harvest:
+    label: Harvest
+    names: [harvest, harvest time, katai, kataai, "कटाई", "फसल कटाई", "ଅମଳ"]
+    either: [kharif_harvest, rabi_harvest]
+    source: ncert_crops
+
+# National default cadre names. Keys: community (village health activist), nurse (auxiliary nurse midwife),
+# nutrition (Anganwadi), male (male multipurpose worker), cho (Community Health Officer at Ayushman Arogya Mandir).
+cadres:
+  community: {en: ASHA, hi: "आशा", or: "ଆଶା", full: Accredited Social Health Activist}
+  nurse: {en: ANM, hi: "एएनएम", or: "ଏଏନଏମ", full: Auxiliary Nurse Midwife}
+  nutrition: {en: Anganwadi worker, hi: "आंगनवाड़ी कार्यकर्ता", or: "ଅଙ୍ଗନୱାଡ଼ି କର୍ମୀ", full: Anganwadi worker (ICDS)}
+  male: {en: MPW, hi: "एमपीडब्ल्यू", or: "ଏମପିଡବ୍ଲୁ", full: Multipurpose Health Worker (male)}
+  cho: {en: CHO, hi: "सीएचओ", or: "ସିଏଚଓ", full: Community Health Officer (Ayushman Arogya Mandir)}
+
+# Workplace and campus facilities have their own first-line staff, whatever the state.
+facility_type_cadres:
+  company_clinic:
+    community: {en: First-aider, full: Trained workplace first-aider}
+    nurse: {en: OH nurse, full: Occupational health nurse}
+  industrial_unit:
+    community: {en: First-aider, full: Trained workplace first-aider}
+    nurse: {en: OH nurse, full: Occupational health nurse}
+  campus:
+    community: {en: Peer volunteer, full: Campus health peer volunteer}
+    nurse: {en: Campus nurse, full: Campus health centre nurse}
+
+# One entry per state and union territory, named as in the facility directory. monsoon: normal onset and withdrawal
+# (MM-DD) at the IMD station named; "nearest" marks a state with no station of its own in Table 2. northeast: the
+# state also gets the October–December northeast monsoon. local: festivals of local importance, shown first.
+# aliases: a word that means one festival in this region. cadres: state names that differ from the national ones.
+regions:
+  Andaman and Nicobar Islands: {monsoon: {onset: "05-21", withdrawal: "10-15", station: Port Blair}, local: [christmas, diwali]}
+  Andhra Pradesh:
+    monsoon: {onset: "06-11", withdrawal: "10-15", station: Kalingapatnam}
+    northeast: true
+    local: [makar_sankranti, ugadi, dussehra, ganesh_chaturthi, diwali]
+    aliases: {sankranti: makar_sankranti, "సంక్రాంతి": makar_sankranti}
+  Arunachal Pradesh: {monsoon: {onset: "06-04", withdrawal: "10-14", station: Palin}, local: [christmas, diwali]}
+  Assam:
+    monsoon: {onset: "06-05", withdrawal: "10-14", station: Tezpur}
+    local: [bohag_bihu, magh_bihu, durga_puja, eid_ul_fitr, diwali]
+    aliases: {puja: durga_puja, pujo: durga_puja, "পূজা": durga_puja}
+  Bihar:
+    monsoon: {onset: "06-16", withdrawal: "10-08", station: Patna}
+    local: [chhath, holi, durga_puja, diwali, eid_ul_fitr]
+  Chandigarh: {monsoon: {onset: "06-28", withdrawal: "09-23", station: Chandigarh}, local: [lohri, vaisakhi, diwali, guru_nanak_jayanti]}
+  Chhattisgarh:
+    monsoon: {onset: "06-16", withdrawal: "10-09", station: Raipur}
+    local: [diwali, holi, dussehra, navratri]
+    cadres:
+      community: {en: Mitanin, hi: "मितानिन", full: Mitanin (Chhattisgarh community health worker programme)}
+  Dadra and Nagar Haveli and Daman and Diu: {monsoon: {onset: "06-11", withdrawal: "10-08", station: "Mumbai (nearest)"}, local: [diwali, navratri, christmas]}
+  Delhi: {monsoon: {onset: "06-27", withdrawal: "09-25", station: Delhi}, local: [diwali, holi, eid_ul_fitr, chhath, karwa_chauth]}
+  Goa: {monsoon: {onset: "06-05", withdrawal: "10-14", station: Panjim}, local: [christmas, ganesh_chaturthi, diwali]}
+  Gujarat:
+    monsoon: {onset: "06-26", withdrawal: "09-28", station: Ahmedabad}
+    local: [navratri, diwali, makar_sankranti, holi]
+    aliases: {uttarayan: makar_sankranti}
+    cadres:
+      nurse: {en: FHW, hi: "एफएचडब्ल्यू", full: Female Health Worker (Gujarat)}
+      male: {en: MPHW, full: Multipurpose Health Worker (male, Gujarat)}
+  Haryana: {monsoon: {onset: "06-28", withdrawal: "09-23", station: Ambala}, local: [diwali, holi, karwa_chauth, vaisakhi]}
+  Himachal Pradesh: {monsoon: {onset: "06-22", withdrawal: "09-24", station: Shimla}, local: [dussehra, diwali, lohri]}
+  Jammu and Kashmir: {monsoon: {onset: "06-28", withdrawal: "09-21", station: Jammu}, local: [eid_ul_fitr, eid_ul_adha, diwali, lohri]}
+  Jharkhand:
+    monsoon: {onset: "06-14", withdrawal: "10-09", station: Ranchi}
+    local: [chhath, durga_puja, diwali, holi]
+    cadres:
+      community: {en: Sahiya, hi: "सहिया", full: Sahiya (Jharkhand community health worker)}
+  Karnataka:
+    monsoon: {onset: "06-03", withdrawal: "10-15", station: Bengaluru}
+    northeast: true
+    local: [ugadi, dussehra, ganesh_chaturthi, diwali, makar_sankranti]
+    aliases: {sankranti: makar_sankranti}
+  Kerala:
+    monsoon: {onset: "06-01", withdrawal: "10-15", station: Thiruvananthapuram}
+    northeast: true
+    local: [onam, vishu, christmas, eid_ul_fitr]
+    cadres:
+      nurse: {en: JPHN, full: Junior Public Health Nurse (Kerala)}
+      male: {en: JHI, full: Junior Health Inspector (Kerala)}
+  Ladakh: {monsoon: {onset: "06-24", withdrawal: "09-22", station: Ladakh}, local: [eid_ul_fitr, new_year]}
+  Lakshadweep: {monsoon: {onset: "06-01", withdrawal: "10-15", station: "Kochi (nearest)"}, local: [eid_ul_fitr, eid_ul_adha]}
+  Madhya Pradesh: {monsoon: {onset: "06-20", withdrawal: "10-03", station: Bhopal}, local: [diwali, holi, navratri, dussehra]}
+  Maharashtra:
+    monsoon: {onset: "06-11", withdrawal: "10-08", station: Mumbai}
+    local: [ganesh_chaturthi, ugadi, diwali, navratri]
+    aliases: {"गुढीपाडवा": ugadi}
+    cadres:
+      nurse: {en: Arogya Sevika, hi: "आरोग्य सेविका", full: Arogya Sevika (female health worker, Maharashtra)}
+      male: {en: Arogya Sevak, hi: "आरोग्य सेवक", full: Arogya Sevak (male health worker, Maharashtra)}
+  Manipur: {monsoon: {onset: "06-05", withdrawal: "10-15", station: Imphal}, local: [christmas, diwali]}
+  Meghalaya: {monsoon: {onset: "06-05", withdrawal: "10-14", station: "Silchar, Assam (nearest)"}, local: [christmas, new_year]}
+  Mizoram: {monsoon: {onset: "06-05", withdrawal: "10-14", station: "Silchar, Assam (nearest)"}, local: [christmas, new_year]}
+  Nagaland: {monsoon: {onset: "06-04", withdrawal: "10-14", station: Dimapur}, local: [christmas, new_year]}
+  Odisha:
+    monsoon: {onset: "06-13", withdrawal: "10-13", station: Cuttack}
+    local: [rath_yatra, raja, durga_puja, nuakhai, dol_purnima, pana_sankranti, makar_sankranti, diwali]
+    aliases: {puja: durga_puja, "ପୂଜା": durga_puja, dola: dol_purnima, "ଦୋଳ": dol_purnima}
+    ambiguous: {sankranti: [makar_sankranti, pana_sankranti, raja], "ସଂକ୍ରାନ୍ତି": [makar_sankranti, pana_sankranti, raja]}
+  Puducherry: {monsoon: {onset: "06-05", withdrawal: "10-15", station: "Coimbatore, Tamil Nadu (nearest)"}, northeast: true, local: [pongal, diwali, christmas]}
+  Punjab: {monsoon: {onset: "07-01", withdrawal: "09-21", station: Ludhiana}, local: [vaisakhi, lohri, diwali, guru_nanak_jayanti]}
+  Rajasthan:
+    monsoon: {onset: "06-29", withdrawal: "09-23", station: Jaipur}
+    local: [diwali, holi, makar_sankranti, karwa_chauth]
+    cadres:
+      community: {en: ASHA Sahyogini, hi: "आशा सहयोगिनी", full: ASHA Sahyogini (Rajasthan)}
+  Sikkim: {monsoon: {onset: "06-08", withdrawal: "10-12", station: Gangtok}, local: [dussehra, diwali]}
+  Tamil Nadu:
+    monsoon: {onset: "06-05", withdrawal: "10-15", station: Coimbatore}
+    northeast: true
+    local: [pongal, vishu, diwali, ganesh_chaturthi, christmas]
+    cadres:
+      nurse: {en: VHN, full: Village Health Nurse (Tamil Nadu)}
+  Telangana:
+    monsoon: {onset: "06-12", withdrawal: "10-13", station: Hanamkonda}
+    local: [dussehra, makar_sankranti, ugadi, diwali]
+    aliases: {sankranti: makar_sankranti}
+  Tripura:
+    monsoon: {onset: "06-05", withdrawal: "10-14", station: "Silchar, Assam (nearest)"}
+    local: [durga_puja, diwali]
+    aliases: {puja: durga_puja, pujo: durga_puja, "পূজা": durga_puja}
+  Uttar Pradesh: {monsoon: {onset: "06-23", withdrawal: "10-03", station: Kanpur}, local: [diwali, holi, chhath, eid_ul_fitr]}
+  Uttarakhand: {monsoon: {onset: "06-20", withdrawal: "09-27", station: Dehradun}, local: [diwali, holi, makar_sankranti]}
+  West Bengal:
+    monsoon: {onset: "06-13", withdrawal: "10-12", station: Bankura}
+    local: [durga_puja, poila_baishakh, diwali, eid_ul_fitr, christmas]
+    aliases: {puja: durga_puja, pujo: durga_puja, "পূজা": durga_puja, "পুজো": durga_puja}
+
+# A facility whose state is missing or unknown: national festivals, no monsoon dates (the season is still
+# recognised; the note says the region is not set).
+default:
+  local: [diwali, holi, eid_ul_fitr, christmas]

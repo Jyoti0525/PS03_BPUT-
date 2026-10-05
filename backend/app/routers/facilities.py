@@ -1,16 +1,17 @@
 """Facilities, facility admin (F1), kiosk devices, staff list."""
 
-from datetime import timedelta
+from datetime import date, timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 
-from .. import audit
+from .. import audit, regions
 from ..models import Device, Encounter, Escalation, Facility, Referral, User
 from ..schemas import ADMIN_ROLES, STAFF_ROLES, DeviceIn, DutyIn, DeviceOut, FacilityOut, FacilityPatch, FacilityStats, UserOut, UserPatch
 from ..security import DB, CurrentUser, require
-from ..services import auto_escalate, aware, now
+from ..services import auto_escalate, aware, calendar_context, now
+from ..triage.timeline import onset
 from .auth import user_out
 
 router = APIRouter(tags=["facilities"])
@@ -40,7 +41,7 @@ def update_facility(fid: str, body: FacilityPatch, user: Supervisor, db: DB):
     f = db.get(Facility, fid)
     if not f:
         raise HTTPException(404, "Facility not found")
-    patch = body.model_dump(exclude_unset=True)
+    patch = body.model_dump(exclude_unset=True, mode="json")
     changed = []
     for k, v in patch.items():
         if k == "specialists" and v is not None:
@@ -51,6 +52,30 @@ def update_facility(fid: str, body: FacilityPatch, user: Supervisor, db: DB):
     audit.record(db, user, "CONFIG", "facility", fid, f"Facility configuration updated: {', '.join(changed) or 'no changes'}")
     db.refresh(f)
     return f
+
+
+def _facility(db, fid: str) -> Facility:
+    f = db.get(Facility, fid)
+    if not f:
+        raise HTTPException(404, "Facility not found")
+    return f
+
+
+@router.get("/facilities/{fid}/calendar")
+def facility_calendar(fid: str, user: Staff, db: DB, on: date | None = None):
+    """F5: the festivals (about a year back, four months ahead) and seasons this facility's notes date onsets by,
+    with the worker names it uses. Public data only; no patient information."""
+    f = _facility(db, fid)
+    on = on or calendar_context(f, now())["on"]
+    return {**regions.for_facility(f).view(on), "facility_id": fid, "region_config": f.region_config or {}}
+
+
+@router.get("/facilities/{fid}/onset")
+def try_onset(fid: str, user: Staff, db: DB, text: str = Query(min_length=2, max_length=300), on: date | None = None):
+    """Try a phrase ("since Diwali", "ରଜଠାରୁ") against this facility's calendar, as the note would read it."""
+    f = _facility(db, fid)
+    on = on or calendar_context(f, now())["on"]
+    return {"on": on.isoformat(), **onset({"chief_complaint": text}, regions.for_facility(f), on)}
 
 
 @router.get("/facilities/{fid}/stats", response_model=FacilityStats)
@@ -137,16 +162,16 @@ def list_users(user: Admin, db: DB):
     """Supervisor: every staff account. Front desk: the doctors and nurses (for duty and time management)."""
     q = select(User).where(User.facility_id == user.facility_id, User.role.in_(STAFF_ROLES)).order_by(User.name)
     if user.role != "supervisor":
-        q = q.where(User.role.in_(("doctor", "nurse")))
+        q = q.where(User.role.in_(("doctor", "medical_officer", "nurse", "health_worker")))
     return [user_out(db, u) for u in list(db.scalars(q))]
 
 
 @router.patch("/users/{uid}/duty", response_model=UserOut)
 def set_duty(uid: str, body: DutyIn, user: Admin, db: DB):
-    """Front desk / supervisor: mark a doctor or nurse on or off duty."""
+    """Front desk / supervisor: mark a clinician (doctor, medical officer, nurse or health worker) on or off duty."""
     u = db.get(User, uid)
-    if not u or u.facility_id != user.facility_id or u.role not in ("doctor", "nurse"):
-        raise HTTPException(404, "Doctor or nurse not found")
+    if not u or u.facility_id != user.facility_id or u.role not in ("doctor", "medical_officer", "nurse", "health_worker"):
+        raise HTTPException(404, "Clinician not found")
     if u.on_duty != body.on_duty:
         u.on_duty, u.duty_changed_at = body.on_duty, now()
         audit.record(db, user, "UPDATE", "user", u.id, f"{u.name} marked {'on' if body.on_duty else 'off'} duty")

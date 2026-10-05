@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { useAsync, fmtDate } from "@/lib/hooks";
 import { Badge, Button, Card, CardHeader, Empty, ErrorNote, Spinner, Stat } from "@/components/ui";
 import { FITNESS } from "@/components/employer/status";
+import { DepartmentRates } from "@/components/employer/department-rates";
 import type { FitnessStatus } from "@/lib/types";
 
 export default function EmployerOverview() {
@@ -30,6 +31,7 @@ export default function EmployerOverview() {
         <Stat label={tr("Temporarily unfit")} value={count("temporarily_unfit")} tone="crit" />
         <Stat label={tr("Pending review")} value={count("pending_review")} />
       </div>
+      <DepartmentRates />
       {!data.length && (
         <Card className="mt-5">
           <Empty

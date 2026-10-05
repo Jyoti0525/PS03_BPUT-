@@ -47,7 +47,7 @@ export default function QueuePage() {
     <>
       <PageHeader
         title={tr("Triage queue")}
-        subtitle={tr("Ordered by rules-engine urgency, then waiting time. Critical cases auto-escalate after 15 minutes.")}
+        subtitle={tr("Ordered by rules-engine urgency, then waiting time; each row says why it is where it is. Critical cases auto-escalate after 15 minutes.")}
         actions={
           <Button variant="secondary" onClick={() => reload()} icon={<RefreshCw className="size-4" />}>
             {tr("Refresh")}
@@ -111,6 +111,7 @@ export default function QueuePage() {
                       {i.status === "in_review" && <Badge tone="info">{tr("In review")}</Badge>}
                     </div>
                     <p className="mt-0.5 truncate text-sm text-ink-2">{tr(i.chief_complaint)}</p>
+                    {i.order_reason && <p className="mt-0.5 truncate text-xs text-muted" title={tr("Why this place in the queue")}>{i.order_reason}</p>}
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                       {i.flag_count > 0 && <Badge tone={i.urgency === "red" ? "crit" : "semi"}>{i.flag_count} {tr("flag")}{i.flag_count > 1 && "s"}</Badge>}
                       {i.needs_check_count > 0 && <Badge tone="semi">{i.needs_check_count} {tr("needs checking")}</Badge>}

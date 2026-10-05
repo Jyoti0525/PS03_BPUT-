@@ -7,18 +7,27 @@ truthfully. It never assigns urgency (that is rules.evaluate_full) and never sta
 
 import re
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
+from .. import regions
 from .extraction import document_checks
 from .findings import FINDINGS, translation_check
 from .timeline import onset
 
-# Follow-up questions keyed by findings (negation-aware), so "no chest pain" never asks about chest pain.
+# Follow-up questions keyed by findings (negation-aware), so "no chest pain" never asks about chest pain. A key may
+# also be "urgency:<tier>" or "rule:<id prefix>" (a fired rule). Each role sees its own questions, at most 3 per role
+# (B7): health worker → health worker; nurse → health worker + nurse; doctor and medical officer → all.
 FOLLOWUPS = [
+    ("urgency:red", {"tag": "Transfer", "question": "If this patient must go on, are a vehicle (108 / 102) and a bed at the receiving hospital confirmed before they leave?", "for_role": "medical_officer"}),
+    ("pregnant", {"tag": "Specialist", "question": "Does she need the obstetrician at the first referral unit today, and is blood available there?", "for_role": "medical_officer"}),
+    ("rule:OCC-", {"tag": "Workplace", "question": "Should the worker be kept away from the exposure until reviewed? If silicosis or another listed disease is confirmed, it is notifiable (Factories Act 1948, s.89).", "for_role": "medical_officer"}),
+    ("rule:OCC-SILICA-TB", {"tag": "TB test", "question": "Has a sputum sample been sent for NAAT (CBNAAT / Truenat) under NTEP?", "for_role": "nurse"}),
+    ("rule:OCC-", {"tag": "PPE", "question": "Which mask or respirator does the worker wear, and is it worn for the whole shift?", "for_role": "health_worker"}),
     ("chest_pain", {"tag": "Onset", "question": "Did the chest discomfort start at rest or during effort?", "for_role": "doctor"}),
     ("chest_pain", {"tag": "ECG", "question": "Has a 12-lead ECG been recorded since arrival?", "for_role": "nurse"}),
     ("fever", {"tag": "Fever pattern", "question": "Is the fever continuous or does it come with chills at a fixed time?", "for_role": "health_worker"}),
     ("fever", {"tag": "Rash / bleeding", "question": "Any rash, gum bleeding or black stools since the fever began?", "for_role": "nurse"}),
+    ("fever", {"tag": "Contacts", "question": "Is anyone else in the same hostel, household or workplace ill with fever?", "for_role": "health_worker"}),
     ("breathless", {"tag": "Speech", "question": "Can the patient speak full sentences without pausing for breath?", "for_role": "nurse"}),
     ("headache", {"tag": "Visual change", "question": "Any flashing lights, spots or blurred vision right now?", "for_role": "nurse"}),
     ("cough", {"tag": "Duration", "question": "Has the cough lasted more than 2 weeks? Any blood in sputum?", "for_role": "health_worker"}),
@@ -32,6 +41,35 @@ FOLLOWUPS = [
 
 def _present(triage: dict, fid: str) -> bool:
     return (triage.get("findings") or {}).get(fid, {}).get("value") is True
+
+
+def _asks(triage: dict, key: str) -> bool:
+    if key.startswith("urgency:"):
+        return triage.get("urgency") == key.split(":", 1)[1]
+    if key.startswith("rule:"):
+        return any(h["rule_id"].startswith(key.split(":", 1)[1]) for h in triage.get("hits") or [])
+    return _present(triage, key)
+
+
+PER_ROLE = 3
+ROLE_SEES = {"health_worker": {"health_worker"}, "nurse": {"health_worker", "nurse"}}  # doctor and medical officer see all
+
+
+def questions_for(questions: list[dict], role: str) -> list[dict]:
+    """The follow-up questions a viewer of this role is shown."""
+    sees = ROLE_SEES.get(role)
+    return [q for q in questions if sees is None or q.get("for_role") in sees]
+
+
+def ppe_gap(occ: dict) -> str | None:
+    """Why the worker's protection looks incomplete, or None. A workplace finding about the employer, not a symptom."""
+    if not occ.get("exposures") or occ["exposures"] == ["heat"]:
+        return None
+    if occ.get("ppe_issued") is False:
+        return "No protective equipment issued for this exposure"
+    if occ.get("ppe_used") in ("sometimes", "never"):
+        return f"Protective equipment issued but worn {occ['ppe_used']}"
+    return None
 
 
 def _vid() -> str:
@@ -60,7 +98,9 @@ def _fmt(n: float) -> str:
     return str(int(n)) if float(n).is_integer() else str(n)
 
 
-def build_note(*, intake: dict, patient, triage: dict, files: list, history: list, proxy: bool) -> dict:
+def build_note(*, intake: dict, patient, triage: dict, files: list, history: list, proxy: bool, calendar=None, on=None) -> dict:
+    """`calendar` is the facility's regional calendar (F5) and `on` the visit date: a festival or season onset then
+    shows the date or window it points to."""
     hits = triage["hits"]
     v = {k: x for k, x in (intake.get("vitals") or {}).items() if x is not None}
     flags, vitals, labs, disagreements, missing = [], [], [], [], []
@@ -187,6 +227,17 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
                       "reason": f"{describe(intake['redactions'])} replaced with placeholders before storage; identity is on the registration record"})
     if proxy:
         flags.append({"code": "PROXY", "label": "History given by a proxy", "severity": "info", "reason": "Consent and history captured from a family member or caregiver"})
+    occ = intake.get("occupational") or {}
+    if gap := ppe_gap(occ):
+        flags.append({"code": "PPE-GAP", "label": "Workplace finding: protective equipment gap", "severity": "warning",
+                      "reason": f"{gap} (worker's answer). Not a symptom and not part of urgency; counted in the employer's department rates without names"})
+    if occ.get("exposures"):
+        if occ.get("years_exposed") is None:
+            missing.append("Years of workplace exposure not recorded")
+        if occ.get("breathless_vs_last") in (None, "unsure"):
+            missing.append("Breathing compared with the last screening not recorded")
+        if any(x in occ["exposures"] for x in ("silica", "coal_dust", "cotton_dust", "asbestos", "other_dust")) and not occ.get("fev1_l"):
+            missing.append("Spirometry (FEV1) not recorded for a dust-exposed worker")
     if intake.get("captured_offline"):
         flags.append({"code": "OFFLINE", "label": "Captured offline, synced later", "severity": "info", "reason": "Wait time is counted from the original capture time"})
 
@@ -197,7 +248,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     for n in asks:
         if not any(n.lower() in x.lower() for x in missing):
             missing.append(f"Ask / measure: {n} (a RED rule depends on it)")
-    began = onset(intake)
+    began = onset(intake, calendar, on)
     if began["certainty"] == "UNKNOWN":
         missing.append("Duration of complaint not stated")
     elif began["check"]:
@@ -209,11 +260,12 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     if cat == "chronic" and not any(f.kind == "report" for f in files):
         missing.append("No recent lab report for chronic follow-up")
 
-    followup = []
-    for fid, q in FOLLOWUPS:
-        if _present(triage, fid) and len(followup) < 5:
+    followup, per_role = [], {}
+    for key, q in FOLLOWUPS:
+        if _asks(triage, key) and per_role.get(q["for_role"], 0) < PER_ROLE and q not in followup:
             followup.append(q)
-    if not followup:
+            per_role[q["for_role"]] = per_role.get(q["for_role"], 0) + 1
+    if not per_role.get("health_worker"):
         followup.append({"tag": "Context", "question": "Anything else that changed recently — food, work, travel or medicines?", "for_role": "health_worker"})
 
     timeline = []
@@ -226,14 +278,18 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     # "headache for a long time" are two onsets, and the time from one must not be shown against the other.
     onsets = []
     for s in intake.get("symptoms") or []:
-        o = onset({"symptoms": [s]})
+        o = onset({"symptoms": [s]}, calendar, on)
         if o["certainty"] != "UNKNOWN":
             onsets.append((o, s.get("text") or s.get("original_text")))
     if not onsets or str(began["raw"] or "").startswith("tapped"):
         onsets.insert(0, (began, intake["chief_complaint"]))
     onsets.sort(key=lambda r: (r[0]["days"] is not None, -(r[0]["days"] or 0)))  # unclear first, then earliest
     for o, what in onsets:
-        timeline.append({"when": o["when"], "event": f"Onset: {what}", "certainty": o["certainty"], "raw": o["raw"]})
+        row = {"when": o["when"], "event": f"Onset: {what}", "certainty": o["certainty"], "raw": o["raw"]}
+        if (a := o.get("approx")) and a.get("found"):
+            row["basis"] = f"{a['label']} {regions.fmt_range(date.fromisoformat(a['start']), date.fromisoformat(a['end']))} · " + (
+                f"{a['region']} calendar" if a.get("region") else "national calendar")
+        timeline.append(row)
     src = intake["symptoms"][0]["source"] if intake.get("symptoms") else "text"
     spoken = list(dict.fromkeys(s.get("language") or "en" for s in intake.get("symptoms") or [])) or [intake.get("language", "en")]
     timeline.append({"when": "Today", "event": f"Intake at kiosk ({', '.join(x.upper() for x in spoken)}, {src})", "certainty": "RECORDED", "raw": None})
@@ -266,6 +322,16 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         parts.append(f"Pregnant, {intake['maternal']['gestation_weeks']} weeks by history.")
     if intake.get("chronic"):
         parts.append(f"Known {intake['chronic']['condition']}; patient feels {intake['chronic'].get('feeling_vs_last', 'unsure')} compared with last visit.")
+    if occ.get("exposures"):
+        from .rules import EXPOSURE_LABEL
+
+        yrs = f" for {occ['years_exposed']:g} years" if occ.get("years_exposed") is not None else ""
+        parts.append(f"Works with {', '.join(EXPOSURE_LABEL.get(x, x) for x in occ['exposures'])}{yrs}.")
+        if occ.get("breathless_vs_last") in ("better", "same", "worse"):
+            parts.append(f"Breathing {occ['breathless_vs_last']} than at the last screening, by the worker's account.")
+        if occ.get("fev1_l"):
+            base = f" (earliest recorded {occ['fev1_baseline_l']:g} L)" if occ.get("fev1_baseline_l") else ""
+            parts.append(f"FEV1 {occ['fev1_l']:g} L{', FVC ' + format(occ['fvc_l'], 'g') + ' L' if occ.get('fvc_l') else ''}{base}.")
     abn = [x for x in labs if x["status"] == "abnormal"]
     if abn:
         parts.append("Uploaded report shows " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in abn) + " outside reference range.")
@@ -276,6 +342,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         "flags": flags,
         "rules_fired": hits,
         "triage": {
+            "urgency": triage["urgency"],  # the rules' tier as computed; an override changes the encounter, not this
             "provisional": triage["provisional"],
             "protocols": triage["protocols"],
             "unresolved": [{"rule_id": u["rule_id"], "urgency": u["urgency"], "description": u["description"], "needs": u["needs"]} for u in triage["unresolved"]],

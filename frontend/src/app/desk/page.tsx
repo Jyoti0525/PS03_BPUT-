@@ -1,5 +1,7 @@
 "use client";
 
+import { CLINICIAN_ROLES, DOCTOR_ROLES } from "@/lib/types";
+
 import Link from "next/link";
 import { EyeOff, RefreshCw, Tablet, UserPlus } from "lucide-react";
 import { api } from "@/lib/api";
@@ -24,8 +26,8 @@ export default function DeskHome() {
   const seen = tokens?.filter((t) => ["confirmed", "referred", "closed"].includes(t.status)).length ?? 0;
   const avg = waiting.length ? Math.round(waiting.reduce((s, t) => s + t.wait_minutes, 0) / waiting.length) : 0;
   const longest = waiting.reduce((m, t) => Math.max(m, t.wait_minutes), 0);
-  const onDuty = staff?.filter((u) => (u.role === "doctor" || u.role === "nurse") && u.on_duty !== false && u.is_active !== false) ?? [];
-  const doctorsOn = onDuty.filter((u) => u.role === "doctor").length;
+  const onDuty = staff?.filter((u) => CLINICIAN_ROLES.includes(u.role) && u.on_duty !== false && u.is_active !== false) ?? [];
+  const doctorsOn = onDuty.filter((u) => DOCTOR_ROLES.includes(u.role)).length;
 
   return (
     <>

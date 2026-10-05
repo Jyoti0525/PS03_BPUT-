@@ -21,8 +21,8 @@ State last checked: **5 Oct 2026, evening** (last commit `ca889e7`).
 | Sat 3 Oct | Rules engine v2, real OCR, new repo, free disk space, request Bhashini key | Code on the new repo; 15 GB or more free | Done (`bbf5411`; 99 GB free). Bhashini key still pending |
 | Sun 4 Oct | Server speech recognition; translation of free text | An Odia sentence becomes a transcript plus English translation in the note, with the engine named | Done over HTTP (`bafbe44`). Live voice test in Odia and Hindi done 5 Oct; fixes in §2 |
 | Mon 5 Oct | LLM prose with faithfulness check; output guard; anonymisation; "continue without AI" | Red-team phrases blocked and logged; a typed name shows as [NAME] | **Done 5 Oct** (`ca889e7`): all four, checked live |
-| Tue 6 Oct | Image understanding; timeline certainty labels; deck draft starts | A medicine-strip photo becomes a medication list awaiting confirmation; a face is blurred before storage | Image understanding and timeline labels **done early (5 Oct)**. Deck draft not started. Live strip photo done 5 Oct; two matcher fixes |
-| Wed 7 Oct | Occupational rules, campus cluster alert, maternal missed visit, per-role follow-ups, capacity alert | Each of the seven scenarios has one working demo moment | Not started |
+| Tue 6 Oct | Image understanding; timeline certainty labels; deck draft starts | A medicine-strip photo becomes a medication list awaiting confirmation; a face is blurred before storage | Image understanding and timeline labels **done early (5 Oct)**. Deck draft **done 6 Oct**: 22 slides ([Slides artifact](https://claude.ai/artifact/FsYj1k2qTsaTUZUa44HSRk), private until shared). Live strip photo done 5 Oct; two matcher fixes |
+| Wed 7 Oct | Occupational rules, campus cluster alert, maternal missed visit, per-role follow-ups, capacity alert | Each of the seven scenarios has one working demo moment | **Done early (6 Oct)**, uncommitted: D2, D3, D4, B7/E2, C3, plus C5 and the C7 label; each demo moment checked on the live server (`backend/app/scenarios.py`). 406 tests |
 | Thu 8 Oct | Measured figures; hosted deployment; bug fixes; feature freeze at night | Evaluation table with real numbers; the public link works | ASR figures only |
 | Fri 9 Oct | Deck final (business proposal, market gap, go-to-market); three rehearsals; backup video | Two full runs in a row inside the slot, with no failure | Not started |
 
@@ -81,7 +81,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
   - Ignores "3 times a day", "32 weeks pregnant" and "2 years old".
   - A said-vs-tapped conflict ("3 days" said, "1–4 weeks" tapped) becomes a missing-info question.
   - The rules engine now uses a STATED onset when nothing was tapped, with a wide window. 22 tests.
-  - **Left:** the regional festival calendar (F5) for "since Diwali" hints.
+  - [x] Festival and season onsets are dated by the regional calendar (F5, 5 Oct): the date shows beside the patient's words, the onset stays VAGUE, and the rules never use it.
 - [x] **B5 Structured note** (PS: structured triage note; lightweight LLM summarisation). Done 5 Oct (`ca889e7`); checked live. An Odia chest-pain case was summarised in 1.8 s, the checks passed, and the model badge shows on the note:
   - [x] `app/llm.py`: fact sheet → Qwen3-4B-Instruct-2507 Q4_K_M via llama.cpp llama-server (`JEEVIA_LLM_URL`) → faithfulness check (numbers incl. number words, units, medicines, and every stated or denied symptom against the rules engine's findings) → output guard → else template + FAIL_FELL_BACK.
   - [x] Runs in the background after intake and after new vitals; never overwrites a clinician's edit; skipped for "continue without AI".
@@ -91,7 +91,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
   - [x] Measured (`docs/EVALUATION.md`): tuning set 30/30 after fixes (first prompt 19/30); held-out set 18/20 (first run 19/20, then a framing fix); median 0.8 s.
   - [x] Found and fixed through this work: "normal check-up" framing; an invented "denies chest pain" (from our own prompt example); the rules bug "stone-crushing unit" → crush injury.
 - [x] **B6 Missing information** (PS: identify missing information). The note lists what blocks GREEN (`bbf5411`).
-- [ ] **B7 Follow-up questions by role** (PS: for health worker, nurse, doctor, medical officer). *Partial:* health worker, nurse and doctor questions exist. **Left:** medical-officer questions, and the per-role view (needs the E2 roles).
+- [x] **B7 Follow-up questions by role** (PS: for health worker, nurse, doctor, medical officer): **done 6 Oct** (uncommitted). Medical-officer questions (transfer for RED, obstetrician at the FRU, worker exposure and Factories Act s.89 notification); up to 3 per role; the server sends each role only its own (health worker → own; nurse → health worker + nurse; doctor and MO → all).
 - [x] **B8 Test-name normalisation (LOINC)**: a LOINC code on parsed tests.
 - [ ] **B9 Cross-engine disagreement flag.** Speech: local model vs Bhashini. OCR: second engine (docTR moves after 10 Oct).
 - [ ] **B10 Image understanding without diagnosis** (PS: basic visual inputs; Multimodal 15 %). *Nearly done (5 Oct, `ca889e7`):*
@@ -105,33 +105,37 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 ### C. Triage intelligence
 - [x] **C1 Risk-category tagging** (PS: risk-category tagging; rules-based flags). About 150 cited rules: ATP, IITT adult and paediatric, IMCI, maternal, labs, local (`bbf5411`).
 - [x] **C2 Urgency signal highlighting**: each tier shows its rule, the value and the source.
-- [ ] **C3 Queue prioritisation** (PS: queue prioritisation; patient load varies). *Partial:* urgency, then waiting time. **Left:** capacity alert to the medical officer when unacknowledged REDs outnumber reviewers on shift; ordering reason printed on each row.
-- [ ] **C4 Non-diagnostic output guard** (PS: explicitly non-diagnostic). *Nearly done (5 Oct, `ca889e7`):*
+- [x] **C3 Queue prioritisation** (PS: queue prioritisation; patient load varies): **done 6 Oct** (uncommitted). Each row prints why it is there; open REDs above the doctors and MOs on duty raise a capacity alert to the MO and a banner on clinical screens, closed automatically when resolved. Demo: mark Dr. Sharma off duty at the desk.
+- [x] **C4 Non-diagnostic output guard** (PS: explicitly non-diagnostic). Done 5 Oct (`ca889e7`, demo page 5 Oct, not yet committed):
   - [x] Pattern list (`app/output_guard.yaml`): condition names, diagnostic phrasing, medicine/dose/treatment advice in English, Hindi (Devanagari + romanised), Odia. A phrase passes only if the source data already says it.
   - [x] Red-team set: 101 of 101 blocked, 40 of 40 safe sentences passed (`tests/data/redteam_outputs.yaml`; written in `docs/EVALUATION.md` with its limits).
   - [x] Blocked outputs logged (audit GUARD_BLOCK, with the rejected text) and shown on the note ("Rejected AI text and why").
   - [x] Runs on every real model output (B5 live). The model has produced no blockable phrasing on 50 cases.
-  - [ ] **Demo step 5 needs a visible block.** Plan: a supervisor "guard test" button that runs a red-team sentence through the same guard and logs GUARD_BLOCK. It must be labelled as a test, never passed off as a real model output.
-- [ ] **C5 AIIMS 2025 high-risk complaints.** **Check:** the six complaints (shortness of breath, altered mental status, haematemesis, fall from height, one-sided weakness, chest pain) raise urgency. Only `findings.py` mentions haematemesis today.
+  - [x] **Demo step 5 visible block** (5 Oct, not yet committed): supervisor page *Output guard test* (`/admin/guard-test`, `POST /guard-test`). A typed or picked red-team sentence goes through the same `output_guard.check`; the page shows each matched phrase and why. Labelled "Test only … not written by the AI model" on the page and in the audit entry (GUARD_BLOCK, resource `guard_test`, no patient). Typed text is scrubbed of names/phone numbers before logging. Checked live in the browser (Odia sentence blocked).
+- [x] **C5 AIIMS 2025 high-risk complaints**: **done 6 Oct** (uncommitted). The check found breathlessness and chest pain (English, Hindi, Odia) GREEN with normal vitals. Fixed with `aiims_hrc.yaml`, a YELLOW floor for all six from age 16, cited to Rauniyar et al., J Emerg Trauma Shock 2025;18(2):62–68 (PMID 40666389).
 - [x] **C6 Children 5–13 and trauma rules**: IITT paediatric and adult; trauma is never GREEN (`bbf5411`).
-- [x] **C7 Unknown is never normal**: no GREEN until vitals, AVPU and the danger-sign check are recorded (`bbf5411`). **Check:** whether an explicit UNDETERMINED tier is shown (the plan's wording).
-- [ ] **C8 Rule-vs-LLM disagreement view**: an optional LLM urgency opinion shown beside the rule result, never replacing it.
+- [x] **C7 Unknown is never normal**: no GREEN until vitals, AVPU and the danger-sign check are recorded (`bbf5411`). Check done 6 Oct: it said "Provisional"; now shown as **UNDETERMINED, held at YELLOW** with what to measure (uncommitted).
+- [x] **C8 Rule-vs-LLM disagreement view**: an optional LLM urgency opinion shown beside the rule result, never replacing it. Done 5 Oct (not yet committed):
+  - [x] The same local model (Qwen3-4B), given the fact sheet but not the rules' result, names a tier and the facts that decided it (`llm.urgency_opinion`). Runs in the background after the summary; skipped when the patient chose no AI (G1) or `JEEVIA_LLM_URGENCY_OPINION=false`.
+  - [x] Never changes urgency. More urgent than the rules → warning flag "take a second look"; less urgent → shown only. Its reason goes through faithfulness + output guard; a failed reason is hidden, the tier still shown. Unreadable answers are never guessed. Disagreements are audited.
+  - [x] Doctor's note: "AI second opinion" under the rules trace (rules tier vs model tier). Supervisor page *AI second opinions* (`/admin/ai-opinions`, `GET /ai-opinions`): agreement, rules × model table, every disagreement with the final urgency and any override.
+  - [x] Measured on the 50 synthetic cases: 58 % agreement; model less urgent on 4 rules-RED cases (why it never decides), more urgent on 8 provisional YELLOWs (5 listed for clinician rule review). `docs/EVALUATION.md`. 9 tests. Checked live: the real model on 7 local demo cases agreed on 6 and was more urgent on one (glucose 318); the flag, the note panel and the supervisor page showed it.
 
 ### D. The seven scenarios (all suggested in the PS)
 - [x] **D1 Outpatient queue triage**
-- [ ] **D2 Occupational screening, industrial estates.** *Partial:* employer portal, roster, fitness status. **Left:** exposure and PPE questions; occupational rules (respiratory symptoms with dust, TB signs with silica → RED, PPE gap); spirometry or year-on-year breathlessness; department rates; a check that the employer never sees a symptom.
-- [ ] **D3 Campus fever triage.** *Partial:* campus facility type. **Left:** hostel-block cluster alert (5 or more fevers in 72 h and more than 3× the 14-day average), sent de-identified to the campus medical officer, plus a syndromic count export.
-- [ ] **D4 Maternal follow-up reminders.** *Partial:* maternal branch and reminders. **Left:** missed-visit detection, routed to the assigned ASHA first and then a reminder call; `phone_belongs_to` rule (nothing reproductive is spoken on a shared phone).
+- [x] **D2 Occupational screening, industrial estates**: **done 6 Oct** (uncommitted). Exposure and PPE questions; `occupational.yaml` (silica + presumptive TB symptom → RED per NTEP/WHO 2021; dust + cough or breathlessness > 8 weeks, silica 5+ years, breathing worse than last time, FEV1 down 15 % from own baseline per ATS 2014 → YELLOW); PPE-GAP flag (not urgency); employer department rates with k ≥ 5; a test that no symptom word reaches the employer. Rules are adapted (no Indian occupational triage protocol) and need an occupational physician's review.
+- [x] **D3 Campus fever triage**: **done 6 Oct** (uncommitted). Hostel block asked at campus clinics; cluster alert (5+ fevers in 72 h and more than 3× the 14 days before) to the campus MO with counts only; syndromic CSV per day and place with counts under 5 written as "<5". Demo: one more Block C fever at kiosk link CAMPUS01.
+- [x] **D4 Maternal follow-up reminders**: **done 6 Oct** (uncommitted). Missed check-up (a day past due) alerts the assigned ASHA; attempts recorded; after 2 failed attempts a reminder call is due. `phone_belongs_to`: only her own phone hears about the check-up; husband's, family or unknown phone gets a neutral message; no phone → home visit. The call is simulated and English only.
 - [x] **D5 Chronic disease check-in**: trend against earlier visits. **Check:** HbA1c trend and the "what changed" flow.
 - [x] **D6 Public health camp, offline**: offline kiosk with sync.
 - [x] **D7 Referral notes for higher facilities**: referral, QR summary, PDF, print, JSON, CSV, FHIR R4.
 
 ### E. Human review and workflow
 - [x] **E1 Reviewer dashboard** (PS: reviewer dashboard)
-- [ ] **E2 Four reviewer roles** (PS: health worker, nurse, doctor, medical officer). *Partial:* the roles are doctor, nurse, receptionist, supervisor and employer. **Left:** health worker (ASHA, ANM, MPW) and medical officer roles, each with its own note density and sign-off limit. A health worker cannot confirm RED or YELLOW.
+- [x] **E2 Four reviewer roles** (PS: health worker, nurse, doctor, medical officer): **done 6 Oct** (uncommitted). Health worker and medical officer roles; sign-off limits (health worker GREEN, nurse up to YELLOW, doctor and MO any), enforced by the server; short note for the health worker; the MO can do all a doctor can and receives alerts. Sample accounts 9000000006 (ASHA) and 9000000007 (MO).
 - [x] **E3 Escalation and handoff**: auto-escalation timers. **Check:** escalation climbs to the next role and the timer restarts.
 - [ ] **E4 Referral preparation** (PS: referral preparation). *Partial:* referral packet and exports. **Left:** close a referral only when care is received (status today is `sent`); surface open referrals past their due date; use the facility's specialist list.
-- [ ] **E5 Scheduling and reminders.** *Partial:* reminders table. **Left:** visit calendar from facility config, due dates, missed-visit detection (with D4).
+- [ ] **E5 Scheduling and reminders.** *Partial:* reminders table; due dates and missed-visit detection done with D4 (6 Oct). **Left:** visit calendar from facility config; chronic check-in reminders.
 - [ ] **E6 Calling agent (simulated in the browser).** Logistics and bounded questions only; a red flag ends the call and pages a human.
 - [x] **E7 Note export**: PDF, print, JSON, CSV, FHIR. HL7 CDA moves after 10 Oct.
 - [ ] **E8 Patient slip.** **Check:** printed slip with follow-up date, referral and QR, and never an urgency tier. The patient screens already hide urgency.
@@ -142,7 +146,19 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [ ] **F2 Four variance axes in config**: patient load, languages, specialists, digital maturity. *Partial:* facility types exist. **Left:** each axis visibly changes behaviour (question budget or capacity alert, languages offered, referral path, offline mode).
 - [ ] **F3 Accessibility.** **Check:** low-literacy icons, a complete voice path for blind users (spoken consent and disclaimer), a complete tap path for non-speaking users, caregiver proxy, large type and contrast, 48 px touch targets, low-end Android.
 - [x] **F4 Longitudinal records**: BP and glucose trends.
-- [ ] **F5 Regional calendar and cadres**: festival and season table per region (feeds B4); local cadre names.
+- [x] **F5 Regional calendar and cadres**: festival and season table per region (feeds B4); local cadre names. Done 5 Oct (not yet committed).
+  - [x] `backend/app/regions.yaml` is facility configuration, not code. It covers every state and UT in the facility directory (36 entries).
+    - Festivals: 42 multi-faith festivals with names in English, Hindi, Odia and other scripts. The 2025–2027 dates come from the DoPT gazetted and restricted holiday lists, and Raja, Nuakhai and Pana Sankranti from the Odisha GAD list. A year that could not be checked is left out.
+    - Monsoon: IMD's normal onset and withdrawal dates (CRS Report 3/2020) at a station in each state, plus the northeast monsoon for the southern states.
+    - Seasons and the farming cycle: from IMD and NCERT.
+  - [x] `app/regions.py` reads "since Diwali", "दिवाली से", "ରଜଠାରୁ", "holi ke baad se" and "pujo theke".
+    - A word only counts as a date when a time word goes with it, so "Diwali sweets" is not an onset.
+    - It returns the most recent date or window. A word with two meanings ("Eid", Odia "sankranti", "the rains" in Tamil Nadu) shows the latest one and asks which.
+    - If the table doesn't have the date, the note says so and doesn't guess.
+  - [x] Facility overrides: a supervisor can set local worker names, local monsoon dates and the facility's own festivals (`Facility.region_config`, migration 0007, validated).
+  - [x] Cadre names: ASHA, Mitanin (Chhattisgarh), Sahiya (Jharkhand), ASHA Sahyogini (Rajasthan), VHN (Tamil Nadu), JPHN/JHI (Kerala), FHW/MPHW (Gujarat), Arogya Sevika/Sevak (Maharashtra), and first-aider or OH nurse at workplaces. They appear in the staff role label, the staff page and the kiosk helper list.
+  - [x] The supervisor page `/admin/calendar` has a "Try a phrase" box, the festivals and seasons with their sources, and the overrides.
+  - [x] 28 tests (`tests/test_regions.py`).
 
 ### G. Privacy, safety and responsible AI (PS mandatory: consent, minimal retention, anonymisation, auditability, handoff)
 - [x] **G1 Consent** (5 Oct, `ca889e7`). Self or proxy consent, plus **"Continue without AI"** on the kiosk consent step (scope `no_ai`). With it: the mic is hidden, voice entries are refused by the server, nothing is translated, uploaded reports are not OCR-read (staff are told to view the image), and the note carries the NO-AI flag with renderer TEMPLATE. Checked live in the kiosk, plus 4 tests. **When B5 lands:** the LLM must also skip these notes (test to add then).
@@ -256,30 +272,34 @@ Targets are the bar we set for ourselves, not results. Report each actual figure
 
 ## 7. Deck (PPT): every item before every sitting
 
-- [ ] Problem in India: patient load, languages, specialist gaps, digital maturity (sourced figures only)
-- [ ] What we built in one sentence, plus the non-diagnostic boundary
-- [ ] Architecture diagram
-- [ ] Safety architecture: rules decide, the LLM writes, humans confirm, with the LLM-triage meta-analysis figure (re-open the source first)
-- [ ] Protocols: ATP, IMCI, IITT, maternal and occupational sources
-- [ ] PS compliance matrix (one slide, every phrase ticked)
-- [ ] Multimodal: four channels and image understanding without diagnosis
-- [ ] India-wide: facility types, live switch, languages measured
-- [ ] Privacy and responsible AI mapped to DPDP Rules 2025 and ICMR 2023
-- [ ] Evaluation results with targets and misses
-- [ ] **Business proposal / business model:** who pays (state NHM programmes, employers' statutory health examinations, campus health budgets, CSR) and a **researched cost per facility**
-- [ ] **Market gap:** symptom checkers diagnose, eSanjeevani teleconsults, and nothing produces safe multilingual triage notes for public facilities
-- [ ] **Go-to-market and expansion:** pilot PHCs, then district, then state; ABDM integration; industrial-estate partnerships
-- [ ] Impact metrics we would track in a pilot
-- [ ] Limitations and what is not validated
-- [ ] Team and roadmap
+Draft of 6 Oct: 22 slides in the [Slides artifact](https://claude.ai/artifact/FsYj1k2qTsaTUZUa44HSRk) (downloads as .pptx or PDF; private until shared from its Share menu). Every figure on it was opened at its source on 6 Oct; the sources are in each slide's footer. Re-check every slide against the build on 9 Oct.
+
+- [x] Problem in India: patient load, languages, specialist gaps, digital maturity (sourced figures only). Slides 2–3 (6 Oct): 79.9 % specialist shortfall at rural CHCs (HDI 2022-23), 1,81,873 AAMs with 494.71 crore footfall (MoHFW Achievements 2025), 22 scheduled languages
+- [x] What we built in one sentence, plus the non-diagnostic boundary. Slide 4 (6 Oct)
+- [x] Architecture diagram. Slides 5–6 (6 Oct): five-step flow and component diagram
+- [x] Safety architecture: rules decide, the LLM writes, humans confirm, with the LLM-triage meta-analysis figure (re-open the source first). Slide 7 (6 Oct): 61 % pooled sensitivity, re-read on PubMed (PMID 42298434), plus our C8 result
+- [x] Protocols: ATP, IMCI, IITT, maternal and occupational sources. Slide 8 (6 Oct, version 10 of the deck): 161 rules, adding the AIIMS 2025 high-risk floor and the adapted occupational pack with its sources
+- [ ] PS compliance matrix (one slide, every phrase ticked). *Partial:* slide 15 maps every criterion with its honest state, updated 6 Oct after the Wednesday build (four roles, capacity alert, all seven scenarios). **Left:** final state on 9 Oct
+- [x] Multimodal: four channels and image understanding without diagnosis. Slide 9 (6 Oct)
+- [x] India-wide: facility types, live switch, languages measured. Slide 12 (6 Oct); add the FLEURS languages after Thursday's measurement
+- [x] Privacy and responsible AI mapped to DPDP Rules 2025 and ICMR 2023. Slide 13 (6 Oct)
+- [x] Evaluation results with targets and misses. Slide 14 (6 Oct): voice-to-transcript target missed (2.7 s vs 2 s); missed REDs vs a clinician still open
+- [x] **Business proposal / business model:** who pays (state NHM programmes, employers' statutory health examinations, campus health budgets, CSR) and a **researched cost per facility**. Slides 17–18 (6 Oct): four payers sized from HDI 2022-23, ASI 2024-25 (2.67 lakh factories), AISHE 2021-22 and the OSH Code; hosting ≈ ₹5,000 per PHC a year from Render and Neon prices. **Prices (₹12,000 / ₹60,000 / ₹36,000 / ₹5,000) are proposals for Jyoti to confirm**
+- [x] **Market gap:** symptom checkers diagnose, eSanjeevani teleconsults, and nothing produces safe multilingual triage notes for public facilities. Slide 16 (6 Oct)
+- [x] **Go-to-market and expansion:** pilot PHCs, then district, then state; ABDM integration; industrial-estate partnerships. Slide 19 (6 Oct), with a gate per phase
+- [x] Impact metrics we would track in a pilot. Slide 20 (6 Oct)
+- [x] Limitations and what is not validated. Slide 21 (6 Oct)
+- [ ] Team and roadmap. *Partial:* slide 22 (6 Oct) has the roadmap. **Left:** team name, members and roles (placeholders on slides 1 and 22)
 
 ---
 
 ## 8. To verify or ask
 
 **Re-open before any slide cites it**
-- [ ] LLM-triage meta-analysis (BMC Emerg Med 2026)
-- [ ] AIIMS 2025 presenting-complaints study
+- [x] LLM-triage meta-analysis (BMC Emerg Med 2026): re-read 6 Oct on PubMed (PMID 42298434, Cui et al.): 11 studies, 3,088 cases, sensitivity 61 % (48–73 %), specificity 97 %
+- [x] AIIMS 2025 presenting-complaints study: re-read 6 Oct on PubMed (PMID 40666389, Rauniyar et al., J Emerg Trauma Shock 2025;18(2):62–68): 1,225 adults, 6 of 34 complaints high risk; ORs in `sources.yaml`
+- [x] Occupational sources: re-read 6 Oct on PubMed: ATS 2014 workplace spirometry (PMID 24735032, 15 % FEV1 decline plus ageing), ERS 2020 chronic cough > 8 weeks (PMID 31515408)
+- [ ] IITT adult "any two of fever, headache, altered mental status, stiff neck" → RED (IITT-A-MENINGISM): makes every febrile headache RED. Check against the full WHO tool (found 6 Oct while building the campus fever demo)
 - [ ] Indian clinical ASR paper (arXiv 2512.10967)
 - [ ] CDSCO medical-device software guidance, current status
 - [ ] ATP adoption sites named in the 16 Sep plan

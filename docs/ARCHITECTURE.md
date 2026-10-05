@@ -177,7 +177,7 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 
 ## 5. Verification done
 
-* Backend: 339 pytest tests as of 5 Oct (see FEATURES.md §7); the list below is the original platform set: 54 tests (incl. front desk vs supervisor, nurse observations vs doctor-only actions, sign-up number reuse, language preference) — rules; auth (OTP lockout and rate limits, two-factor PIN: setup, verify, lockout, forgot,
+* Backend: 406 pytest tests as of 6 Oct (see FEATURES.md §7); the list below is the original platform set: 54 tests (incl. front desk vs supervisor, nurse observations vs doctor-only actions, sign-up number reuse, language preference) — rules; auth (OTP lockout and rate limits, two-factor PIN: setup, verify, lockout, forgot,
   change, supervisor reset; refresh rotation; logout revocation); bound-device intake; idempotent replay; overrides;
   escalation acknowledgement; exports; RBAC for every role; patient isolation on a shared household phone; document
   access (treating clinicians only); directory search; organisation onboarding; roster and CSV import; fitness →

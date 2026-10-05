@@ -11,10 +11,13 @@ import { toast } from "@/components/ui/toast";
 import { langByCode } from "@/lib/i18n/languages";
 import { DutyList } from "@/components/staff/duty";
 import type { Role, User } from "@/lib/types";
+import { healthWorkerLabel, nurseLabel } from "@/lib/cadres";
 
 const STAFF_ROLES: { v: Role; label: string }[] = [
   { v: "doctor", label: "Doctor" },
+  { v: "medical_officer", label: "Medical officer" },
   { v: "nurse", label: "Nurse / ANM" },
+  { v: "health_worker", label: "Health worker / ASHA" },
   { v: "receptionist", label: "Receptionist" },
   { v: "supervisor", label: "Supervisor" },
 ];
@@ -22,9 +25,10 @@ const STAFF_ROLES: { v: Role; label: string }[] = [
 type Pending = { user: User; kind: "reset" | "deactivate" | "reactivate" };
 
 export default function StaffPage() {
-  const { tr } = usePrefs();
+  const { tr, lang } = usePrefs();
   const { user: me } = useSession();
   const canManage = me?.role === "supervisor";
+  const { data: facility } = useAsync(() => (me?.facility_id ? api.getFacility(me.facility_id) : Promise.resolve(null)), [me?.facility_id]);
   const { data, error, loading, reload } = useAsync(() => api.listUsers(), []);
   const [pending, setPending] = useState<Pending | null>(null);
   const [busy, setBusy] = useState(false);
@@ -96,7 +100,7 @@ export default function StaffPage() {
                       <Select aria-label={`Role for ${u.name}`} value={u.role} disabled={busy || inactive} onChange={(e) => run(() => api.updateUser(u.id, { role: e.target.value as Role }), `Role changed to ${e.target.value}`)} className="h-9 w-36 text-sm">
                         {STAFF_ROLES.map((r) => (
                           <option key={r.v} value={r.v}>
-                            {tr(r.label)}
+                            {r.v === "nurse" ? nurseLabel(facility?.region, tr, lang) : r.v === "health_worker" ? healthWorkerLabel(facility?.region, tr, lang) : tr(r.label)}
                           </option>
                         ))}
                       </Select>

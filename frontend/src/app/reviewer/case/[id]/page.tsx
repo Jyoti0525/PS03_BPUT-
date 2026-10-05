@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
 import { DocumentLabels, MedicationsPanel } from "@/components/triage/medications";
 import { useFile } from "@/components/triage/source";
-import type { Encounter, ExportFormat, Facility, ShareLink, Urgency } from "@/lib/types";
+import { DOCTOR_ROLES, type Encounter, type ExportFormat, type Facility, type ShareLink, type Urgency } from "@/lib/types";
 import { ShareQrModal } from "@/components/triage/share-qr";
 import { PatientEditModal } from "@/components/triage/patient-edit";
 import { WorkerPanel } from "@/components/triage/worker-panel";
@@ -74,10 +74,10 @@ export default function CasePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useSession();
-  const isDoctor = user?.role === "doctor";
+  const isDoctor = !!user && DOCTOR_ROLES.includes(user.role);
   const { data: enc, error, loading, reload, setData } = useAsync(() => api.getEncounter(id), [id]);
   const { data: facility } = useAsync<Facility | null>(() => (enc ? api.getFacility(enc.facility_id) : Promise.resolve(null)), [enc?.facility_id]);
-  const [density, setDensity] = useState<"doctor" | "nurse">(isDoctor ? "doctor" : "nurse");
+  const [density, setDensity] = useState<"doctor" | "nurse" | "health_worker">(isDoctor ? "doctor" : "nurse");
   const [start] = useState(() => Date.now());
   const now = useNow(1000);
   const [modal, setModal] = useState<null | "override" | "escalate" | "referral" | "edit" | "share" | "patient">(null);
@@ -254,6 +254,7 @@ export default function CasePage() {
               options={[
                 { value: "doctor", label: <span className="inline-flex items-center gap-1"><Stethoscope className="size-3.5" /> {tr("Doctor view")}</span> },
                 { value: "nurse", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Nurse view")}</span> },
+                { value: "health_worker", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Health-worker view")}</span> },
               ]}
             />
           </div>

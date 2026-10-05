@@ -65,6 +65,52 @@ sources:
       World Health Organization. Haemoglobin concentrations for the diagnosis of anaemia and assessment
       of severity. Vitamin and Mineral Nutrition Information System. Geneva; 2011 (WHO/NMH/NHD/MNM/11.1).
     scope: Severe anaemia — Hb below 7.0 g/dL in pregnancy and children 6–59 months; below 8.0 g/dL in children 5 years and over, non-pregnant women and men.
+  aiims_hrc:
+    short: AIIMS New Delhi 2025 — six high-risk chief complaints (yellow floor)
+    full: >-
+      Rauniyar N, Sahu AK, Gopinath B, et al. High-risk chief complaints in the emergency department: a
+      prospective study from AIIMS New Delhi. J Emerg Trauma Shock. 2025;18(2):62-68.
+      doi:10.4103/jets.jets_127_24. PMID 40666389.
+    scope: >-
+      1,225 adult emergency patients older than 16; six of 34 chief complaints predicted death or ICU
+      admission within 72 h (odds ratios — shortness of breath 43.7, altered mental status 6.2,
+      haematemesis 3.88, fall from height 3.88, one-sided weakness 3.16, chest pain 1.78). Used only as a
+      floor: none of the six can be routine (GREEN). Applied from age 16.
+  ntep:
+    short: NTEP (India) — presumptive TB symptoms
+    full: >-
+      Central TB Division, Ministry of Health and Family Welfare. Technical and Operational Guidelines for
+      TB Control in India, 2016 (presumptive pulmonary TB: cough or fever for 2 weeks or more,
+      significant weight loss, haemoptysis). With WHO consolidated guidelines on tuberculosis, Module 2:
+      Screening — systematic screening for TB disease (2021): its symptom screen adds night sweats, and it
+      recommends screening people with silicosis and people with workplace silica exposure.
+    scope: >-
+      Silica-exposed workers with a presumptive TB symptom. Jeevia raises them to RED to mean same-day
+      doctor review and an NTEP sputum test, not resuscitation; this escalation is our own adaptation.
+  ats_occ_spiro:
+    short: ATS 2014 — spirometry in the occupational setting (15 % FEV1 decline)
+    full: >-
+      Redlich CA, Tarlo SM, Hankinson JL, et al. Official American Thoracic Society technical standards:
+      spirometry in the occupational setting. Am J Respir Crit Care Med. 2014;189(8):983-993.
+      doi:10.1164/rccm.201402-0337ST. PMID 24735032.
+    scope: >-
+      Compare each test with the worker's earlier tests; an FEV1 loss of more than 15 % plus the loss
+      expected from ageing is excessive. Jeevia uses 15 % from the worker's earliest recorded value
+      without the ageing allowance, so it flags slightly earlier than the standard.
+  ers_cough:
+    short: ERS 2020 — chronic cough is cough for more than 8 weeks
+    full: >-
+      Morice AH, Millqvist E, Bieksiene K, et al. ERS guidelines on the diagnosis and treatment of
+      chronic cough in adults and children. Eur Respir J. 2020;55(1):1901136. PMID 31515408.
+    scope: The 8-week definition of chronic cough in adults, applied here to dust-exposed workers.
+  occ_adapted:
+    short: Occupational screening — adapted (no published Indian occupational triage protocol)
+    full: >-
+      Adapted by the Jeevia team from OSHA 29 CFR 1910.1053(i) (medical surveillance of silica-exposed
+      workers: history, chest X-ray, spirometry, TB testing) and the Factories Act 1948, s.41C (medical
+      examination of workers in hazardous processes). There is no published Indian triage protocol for
+      occupational screening; these rules must be reviewed by an occupational physician before use.
+    scope: Workers who report a dust exposure, at workplace clinics and industrial-estate camps.
   local:
     short: Local facility rule (not from a published protocol)
     full: >-

@@ -8,10 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from .. import audit, exports, language, privacy
+from .. import alerts, audit, exports, language, privacy
 from ..config import get_settings
 from ..models import Consent, Device, Encounter, FileObject, Escalation, Facility, FitnessAssessment, Patient, Referral, Reminder, User
 from ..schemas import (
+    DOCTOR_ROLES,
     NO_AI_SCOPE,
     REVIEWER_ROLES,
     AckIn,
@@ -33,18 +34,19 @@ from ..schemas import (
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
 from ..triage.findings import FINDINGS
-from ..services import auto_escalate, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient, record_observations, summarise_later
+from ..services import auto_escalate, can_confirm, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient, record_observations, sign_off_role, summarise_later
 from .facilities import get_facility
 
 router = APIRouter(tags=["encounters"])
 Reviewer = Annotated[User, Depends(require(*REVIEWER_ROLES))]
-Doctor = Annotated[User, Depends(require("doctor"))]
+Doctor = Annotated[User, Depends(require(*DOCTOR_ROLES))]  # doctor or medical officer
+Clinician = Annotated[User, Depends(require("nurse", *DOCTOR_ROLES))]
 RANK = {"red": 0, "yellow": 1, "green": 2}
 
 
 @router.post("/encounters", response_model=EncounterOut)
 def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHeader = None):
-    if user.role not in ("nurse", "doctor", "receptionist", "supervisor", "patient", "kiosk"):
+    if user.role not in ("nurse", "doctor", "medical_officer", "health_worker", "receptionist", "supervisor", "patient", "kiosk"):
         raise HTTPException(403, "Not allowed")
     dup = db.scalar(select(Encounter).where(Encounter.client_ref == body.client_ref))
     if dup:
@@ -54,6 +56,10 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
         raise HTTPException(404, "Patient not found")
     if not db.get(Facility, body.facility_id):
         raise HTTPException(422, "Unknown facility")
+    if body.maternal and body.maternal.assigned_worker_id:
+        w = db.get(User, body.maternal.assigned_worker_id)
+        if not w or w.role != "health_worker" or w.facility_id != body.facility_id or not w.is_active:
+            raise HTTPException(422, "The assigned worker must be an active health worker (ASHA / ANM) at this facility")
     if user.role == "patient":
         mine = own_patient(db, user)
         if not mine or mine.id != p.id:
@@ -101,20 +107,32 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
         dup = db.scalar(select(Encounter).where(Encounter.client_ref == body.client_ref))
         return encounter_out(dup, user)
     m = body.maternal
-    if m and m.next_checkup and m.reminder_channel != "none":
-        try:
-            from datetime import datetime, timezone
+    if body.category == "maternal" or m:
+        alerts.close_on_visit(db, p.id, user)  # she came: earlier check-up reminders are done
+    if m and m.next_checkup:
+        from datetime import datetime, timezone
 
+        try:
             due = datetime.fromisoformat(m.next_checkup).replace(tzinfo=timezone.utc)
-            db.add(Reminder(patient_id=p.id, kind="anc_checkup", due_at=due, channel=m.reminder_channel or "sms", message=f"ANC check-up reminder for {p.name}"))
         except ValueError:
-            pass
+            due = None
+        if due:
+            # D4: the reminder always exists so a missed visit is noticed; the channel only decides whether a message goes
+            # out, and a phone that is not hers gets wording that says nothing about pregnancy.
+            owner = m.phone_belongs_to or ("none" if not p.phone else None)
+            db.add(Reminder(patient_id=p.id, kind="anc_checkup", due_at=due, channel=m.reminder_channel or "sms", facility_id=enc.facility_id,
+                            assigned_to=m.assigned_worker_id, phone_belongs_to=owner, encounter_id=enc.id,
+                            message=alerts.reminder_message(p, alerts.facility_name(db, enc.facility_id), due, owner)))
     audit.record(db, user, "CREATE", "encounter", enc.id, f"Intake submitted{' (offline, synced)' if body.captured_offline else ''}; rules engine: {enc.urgency}", p.code, enc.facility_id)
     if removed:
         audit.record(db, user, "REDACT", "encounter", enc.id, f"Removed from free text before storage: {privacy.describe(removed)}", p.code, enc.facility_id)
     if enc.note and enc.note["disagreements"]:
         detail = "; ".join(f"{d['field']}: " + " vs ".join(v["value"] for v in d["values"]) for d in enc.note["disagreements"])
         audit.record(db, None, "DISAGREEMENT", "encounter", enc.id, detail, p.code, enc.facility_id)
+    db.commit()
+    alerts.check_fever_cluster(db, enc.facility_id, alerts.cluster_of(enc))
+    if enc.urgency == "red":
+        alerts.check_capacity(db, enc.facility_id)
     db.commit()
     if enc.intake.get("ai_assist", True):
         summarise_later(enc.id)
@@ -126,8 +144,11 @@ def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
     if facility_id != user.facility_id:
         raise HTTPException(403, "You can only view your own facility's queue")
     auto_escalate(db)
-    rows = db.scalars(select(Encounter).where(Encounter.facility_id == facility_id, Encounter.status.in_(("queued", "in_review", "escalated"))))
+    rows = list(db.scalars(select(Encounter).where(Encounter.facility_id == facility_id, Encounter.status.in_(("queued", "in_review", "escalated")))))
+    alerts.check_capacity(db, facility_id)
     t = now()
+    wait = {e.id: max(0, round((t - e.created_at).total_seconds() / 60)) for e in rows}
+    why = alerts.order_reasons([{"id": e.id, "urgency": e.urgency, "wait": wait[e.id], "why": alerts.why_tier(e)} for e in rows])
     items = []
     for e in rows:
         n = e.note or {}
@@ -145,13 +166,15 @@ def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
                 urgency=e.urgency,
                 status=e.status,
                 created_at=e.created_at,
-                wait_minutes=max(0, round((t - e.created_at).total_seconds() / 60)),
+                wait_minutes=wait[e.id],
                 flag_count=sum(1 for f in n.get("flags", []) if f["severity"] != "info"),
                 needs_check_count=sum(1 for v in [*n.get("vitals", []), *n.get("labs", [])] if v.get("needs_check")),
                 language=e.patient.language,
                 escalation_due_at=e.escalation_due_at,
                 vitals_recorded=bool(n.get("vitals")),
                 observation_count=len(n.get("observations") or []),
+                order_reason=why[e.id],
+                sign_off=sign_off_role(e.urgency),
             )
         )
     return sorted(items, key=lambda i: (RANK[i.urgency], -i.wait_minutes))
@@ -176,7 +199,7 @@ def patch_encounter(eid: str, body: EncounterPatch, user: Doctor, db: DB):
 
 
 @router.post("/encounters/{eid}/medications", response_model=EncounterOut)
-def review_medications(eid: str, body: MedicationReview, user: Reviewer, db: DB):
+def review_medications(eid: str, body: MedicationReview, user: Clinician, db: DB):
     """Medicines read from a photo enter the record only here, one by one, by a nurse or doctor."""
     e = load_encounter(db, eid, user)
     note, intake = dict(e.note or {}), dict(e.intake or {})
@@ -217,16 +240,25 @@ def add_observations(eid: str, body: ObservationIn, user: Reviewer, db: DB):
     parts = [f"{k}={v}" for k, v in vitals.items()] + ([f"signs: {', '.join(signs)}"] if signs else []) + (["danger-sign check done"] if body.exam_done else []) + ([f"note: {note[:120]}"] if note else [])
     change = f"; urgency {before} → {e.urgency} (rules)" if e.urgency != before else ""
     audit.record(db, user, "UPDATE", "encounter", e.id, f"Observations recorded by {user.role}: {', '.join(parts)}{change}", e.patient.code, e.facility_id)
+    alerts.check_fever_cluster(db, e.facility_id, alerts.cluster_of(e))  # a measured temperature can make a case a fever
+    if e.urgency != before:
+        alerts.check_capacity(db, e.facility_id)
     if (e.intake or {}).get("ai_assist", True):
         summarise_later(e.id)  # the note was rebuilt from the new vitals, so its summary is rewritten too
     return encounter_out(e, user)
 
 
 @router.post("/encounters/{eid}/confirm", response_model=EncounterOut)
-def confirm(eid: str, user: Doctor, db: DB):
+def confirm(eid: str, user: Reviewer, db: DB):
+    """Sign-off limits (E2): a health worker may confirm GREEN, a nurse up to YELLOW, a doctor or medical officer any tier."""
     e = load_encounter(db, eid, user)
+    if not can_confirm(user.role, e.urgency):
+        need = "a doctor or medical officer" if e.urgency == "red" else "a nurse, doctor or medical officer"
+        raise HTTPException(403, f"A {user.role.replace('_', ' ')} cannot confirm a {e.urgency.upper()} note — it needs {need}")
     e.status, e.reviewed_by, e.reviewed_at = "confirmed", user.name, now()
-    audit.record(db, user, "CONFIRM", "encounter", eid, "Triage note reviewed and confirmed", e.patient.code, e.facility_id)
+    audit.record(db, user, "CONFIRM", "encounter", eid, f"Triage note ({e.urgency.upper()}) reviewed and confirmed by {user.role.replace('_', ' ')}", e.patient.code, e.facility_id)
+    if e.urgency == "red":
+        alerts.check_capacity(db, e.facility_id)
     return encounter_out(e, user)
 
 

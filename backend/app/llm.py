@@ -8,6 +8,11 @@ template stays and the attempt is recorded (status FAIL_FELL_BACK) with the reas
    every symptom it mentions agrees with the rules engine's findings (catches "no chest pain" → "chest pain").
 2. Output guard — no condition name, diagnostic phrasing or medicine/treatment advice the facts do not contain.
 
+Second opinion on urgency (C8): the same model, given the same fact sheet but not the rules' result, names the tier it
+would pick and why. It is shown beside the rules' result and never replaces it: urgency stays with the rules engine,
+and only a doctor can change it (audited override). An opinion higher than the rules adds a "take a second look"
+flag; a lower one is only shown. Its reason goes through the same checks; a reason that fails is withheld.
+
 Engine: Qwen3-4B-Instruct-2507 (Alibaba Qwen, Apache-2.0), 4-bit GGUF, served by llama.cpp's llama-server on the
 facility machine (`JEEVIA_LLM_URL`, OpenAI-compatible). No server configured or reachable → template note, and the
 note says so. Patients who chose "continue without AI" never reach this module.
@@ -141,15 +146,15 @@ def faithfulness(output: str, facts: str, findings: dict) -> list[str]:
 # ---------------------------------------------------------------- model call
 
 
-def _complete(facts: str) -> str:
+def _chat(system: str, user: str, max_tokens: int) -> str:
     s = get_settings()
     if not s.llm_url:
         raise LlmUnavailable("No language model server configured")
     body = {
         "model": s.llm_model_name,
-        "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": "Fact sheet:\n" + facts}],
+        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         "temperature": 0,
-        "max_tokens": 260,
+        "max_tokens": max_tokens,
     }
     req = urllib.request.Request(s.llm_url.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
     try:
@@ -157,7 +162,11 @@ def _complete(facts: str) -> str:
             out = json.loads(r.read())
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         raise LlmUnavailable(f"Language model server not reachable: {e}") from e
-    text = re.sub(r"<think>.*?</think>", "", out["choices"][0]["message"]["content"], flags=re.S)
+    return re.sub(r"<think>.*?</think>", "", out["choices"][0]["message"]["content"], flags=re.S).strip()
+
+
+def _complete(facts: str) -> str:
+    text = _chat(SYSTEM, "Fact sheet:\n" + facts, 260)
     text = re.sub(r",?\s+(named|called)\s+\[[A-Z]+\]", "", text)  # "a 58-year-old woman named [NAME]" → "a 58-year-old woman"
     return text.strip()
 
@@ -179,14 +188,89 @@ def write_summary(note: dict, intake: dict, patient) -> dict:
     return {**base, "status": "PASS", "text": text}
 
 
+# ---------------------------------------------------------------- second opinion on urgency (C8)
+
+OPINION_SYSTEM = (
+    "You are helping staff double-check a triage rules engine in an Indian public health facility. Read the fact sheet "
+    "and say how soon this patient should be seen, using one of three tiers:\n"
+    "RED: could be life-threatening; a doctor must see the patient now.\n"
+    "YELLOW: should be seen soon, ahead of routine patients.\n"
+    "GREEN: routine; can wait in the normal queue.\n"
+    "If no vital signs were measured, do not choose GREEN.\n"
+    "Answer in exactly two lines:\n"
+    "URGENCY: RED or YELLOW or GREEN\n"
+    "REASON: the facts from the sheet that decided it, as a short list separated by commas, copied as written "
+    "(for example: temperature 102.4 °F, breathing 52 /min, fever for 2 days).\n"
+    "The reason only lists facts. Do not explain or interpret them or say what they might mean or be caused by. Never "
+    "name a disease or condition the sheet does not name, and never suggest any medicine, test or treatment. Never "
+    "mention a name."
+)
+TIERS = ("green", "yellow", "red")
+
+
+def _opinion_text(facts: str) -> str:
+    return _chat(OPINION_SYSTEM, "Fact sheet:\n" + facts, 120)
+
+
+def parse_opinion(text: str) -> tuple[str | None, str]:
+    """(tier or None, reason) from the model's two-line answer. Anything else is unreadable, never guessed."""
+    m = re.search(r"urgency\W*\s*(red|yellow|green)\b", text, re.I)
+    if not m:
+        named = set(re.findall(r"\b(red|yellow|green)\b", text.split("\n")[0], re.I))
+        m_tier = named.pop().lower() if len(named) == 1 else None
+    else:
+        m_tier = m.group(1).lower()
+    r = re.search(r"reason\W*\s*(.+)", text, re.I | re.S)
+    return m_tier, (r.group(1).strip().split("\n")[0].strip(" *") if r else "")
+
+
+def urgency_opinion(note: dict, intake: dict, patient) -> dict | None:
+    """The model's own tier for this case, compared with the rules' tier. Never changes the encounter's urgency."""
+    rules = (note.get("triage") or {}).get("urgency")
+    if rules not in TIERS:
+        return None
+    facts = fact_sheet(note, intake, patient)
+    t = time.perf_counter()
+    try:
+        text = _opinion_text(facts)
+    except LlmUnavailable as e:
+        return {"status": "UNAVAILABLE", "model": model_name(), "rules_urgency": rules, "reason_unavailable": str(e)}
+    out = {"model": model_name(), "ms": round((time.perf_counter() - t) * 1000), "rules_urgency": rules, "guard_version": output_guard.version()}
+    tier, reason = parse_opinion(text)
+    if tier is None:
+        return {**out, "status": "UNREADABLE", "raw": text[:300]}
+    rank = TIERS.index(tier) - TIERS.index(rules)
+    out |= {"status": "AGREE" if rank == 0 else "DISAGREE", "model_urgency": tier, "direction": None if rank == 0 else ("higher" if rank > 0 else "lower")}
+    if reason:
+        problems = faithfulness(reason, facts, (note.get("triage") or {}).get("findings") or {})
+        verdict = output_guard.check(reason, facts)
+        if problems or not verdict.ok:
+            out["reason_withheld"] = verdict.reasons() + problems  # the tier is shown; the reason that failed the checks is not
+        else:
+            out["reason"] = reason
+    return out
+
+
 def apply(note: dict, intake: dict, patient) -> dict:
-    """Note with the model's summary when it passed every check; otherwise the template note plus a record of why."""
+    """Note with the model's summary when it passed every check; otherwise the template note plus a record of why.
+    Also adds the model's second opinion on urgency (C8) beside the rules' result."""
     if intake.get("ai_assist") is False:
         return note
     result = write_summary(note, intake, patient)
     note = dict(note)
     note["llm"] = result
-    flags = [f for f in note.get("flags") or [] if f.get("code") not in ("LLM-FELL-BACK", "LLM-OFF")]
+    flags = [f for f in note.get("flags") or [] if f.get("code") not in ("LLM-FELL-BACK", "LLM-OFF", "AI-OPINION-HIGHER")]
+    if get_settings().llm_urgency_opinion:
+        if result["status"] == "UNAVAILABLE":  # same server: don't wait for a second timeout
+            op = {"status": "UNAVAILABLE", "model": result["model"], "rules_urgency": (note.get("triage") or {}).get("urgency"), "reason_unavailable": result["reason"]}
+        else:
+            op = urgency_opinion(note, intake, patient)
+        if op:
+            note["llm_opinion"] = op
+            if op.get("direction") == "higher":
+                said = f": {op['reason']}" if op.get("reason") else ""
+                flags.append({"code": "AI-OPINION-HIGHER", "label": "AI second opinion is more urgent than the rules — take a second look", "severity": "warning",
+                              "reason": f"{op['model']} would choose {op['model_urgency'].upper()}{said}. Urgency stays {op['rules_urgency'].upper()} from the rules; only a doctor can change it."})
     if result["status"] == "PASS":
         note["summary_template"] = note["summary"]
         note["summary"] = result["text"] + " Summary written from the recorded facts only; it is not a diagnosis."

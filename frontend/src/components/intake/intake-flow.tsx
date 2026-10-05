@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Mic, Square, Volume2, Check, RotateCcw, Camera, FileText, UserRound, Users, Lock, Eye, HandHeart, Stethoscope, Baby, HeartPulse, ArrowLeft, ArrowRight,
-  Search, UserPlus, WifiOff, Trash2, Keyboard, CheckCircle2, Activity, Sparkles,
+  Search, UserPlus, WifiOff, Trash2, Keyboard, CheckCircle2, Activity, Sparkles, HardHat, Building2,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { usePrefs } from "@/components/providers";
@@ -17,7 +17,8 @@ import { SAMPLE_FACILITY_ID, SAMPLE_REPORTS, sampleReportImage } from "@/lib/sam
 import { API_MODE } from "@/lib/api";
 import { langByCode } from "@/lib/i18n/languages";
 import type { DictKey } from "@/lib/i18n/dict";
-import type { ConsentMode, FileObject, IntakeAnswer, Patient, PatientCandidate, PatientCategory, PrivacyContext, SymptomEntry, NumericVital, VitalsInput } from "@/lib/types";
+import { cadreName, isNational } from "@/lib/cadres";
+import { EXPOSURE_LABEL, type Exposure, type FacilityRegion, type ConsentMode, type FileObject, type IntakeAnswer, type OccupationalIntake, type Patient, type PatientCandidate, type PatientCategory, type PhoneOwner, type PrivacyContext, type SymptomEntry, type NumericVital, type VitalsInput } from "@/lib/types";
 import { DURATIONS, SEVERITIES, SYMPTOMS, contextQuestions } from "./catalog";
 
 type Step = "consent" | "identity" | "visit" | "symptoms" | "details" | "uploads" | "followup" | "vitals" | "review";
@@ -74,6 +75,22 @@ export function IntakeFlow({
   organisationName?: string | null;
 }) {
   const { tr, t, lang, readAloud } = usePrefs();
+  // F5: the helper list names the state's community health worker (ASHA, Mitanin, Sahiya…). Facility details are public.
+  const [region, setRegion] = useState<FacilityRegion | null>(null);
+  const [facType, setFacType] = useState<string | null>(null);
+  useEffect(() => {
+    api.getFacility(facilityId).then((f) => {
+      setRegion(f.region ?? null);
+      setFacType(f.type);
+    }, () => undefined);
+  }, [facilityId]);
+  // D4: staff at the kiosk can hand a pregnant woman's follow-up to a named health worker.
+  const [healthWorkers, setHealthWorkers] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    if (mode !== "kiosk") return;
+    api.listHealthWorkers().then(setHealthWorkers, () => undefined);
+  }, [mode, facilityId]);
+  const communityWorker = isNational(region, "community") ? "ASHA worker" : cadreName(region, "community", lang);
   const [voiceOk, setVoiceOk] = useState(true);
   useEffect(() => {
     // Voices load asynchronously; check now and again once the list arrives.
@@ -133,7 +150,10 @@ export function IntakeFlow({
   // details
   const [duration, setDuration] = useState<string | null>(null);
   const [severity, setSeverity] = useState<number | null>(null);
-  const [maternal, setMaternal] = useState({ gestation_weeks: "", anc_visits: "", next_checkup: "", reminder_channel: "sms" as "sms" | "voice" | "none" });
+  const [maternal, setMaternal] = useState({ gestation_weeks: "", anc_visits: "", next_checkup: "", reminder_channel: "sms" as "sms" | "voice" | "none", phone_belongs_to: "" as PhoneOwner | "", assigned_worker_id: "" });
+  // D3: campus clinics count fevers per hostel block. D2: workplace clinics ask about exposure and protection.
+  const [hostel, setHostel] = useState("");
+  const [occ, setOcc] = useState({ exposures: [] as Exposure[], years: "", cough_weeks: "", breathless_vs_last: "" as NonNullable<OccupationalIntake["breathless_vs_last"]> | "", ppe_issued: "" as "" | "yes" | "no", ppe_used: "" as NonNullable<OccupationalIntake["ppe_used"]> | "", fev1: "", fvc: "" });
   const [chronic, setChronic] = useState({ condition: "", last_checkup: "", current_medicines: "", feeling_vs_last: "same" as "better" | "same" | "worse" | "unsure" });
 
   // uploads / follow-up / vitals
@@ -376,8 +396,18 @@ export function IntakeFlow({
       vitals: Object.values(v).some((x) => x != null) ? v : null,
       maternal:
         category === "maternal"
-          ? { gestation_weeks: num(maternal.gestation_weeks), anc_visits: num(maternal.anc_visits), next_checkup: maternal.next_checkup || null, reminder_channel: maternal.reminder_channel }
+          ? {
+              gestation_weeks: num(maternal.gestation_weeks), anc_visits: num(maternal.anc_visits), next_checkup: maternal.next_checkup || null, reminder_channel: maternal.reminder_channel,
+              phone_belongs_to: maternal.phone_belongs_to || null, assigned_worker_id: maternal.assigned_worker_id || null,
+            }
           : null,
+      cluster_key: facType === "campus" && hostel.trim() ? hostel.trim() : null,
+      occupational: occ.exposures.length
+        ? {
+            exposures: occ.exposures, years_exposed: num(occ.years), cough_weeks: num(occ.cough_weeks), breathless_vs_last: occ.breathless_vs_last || null,
+            ppe_issued: occ.ppe_issued ? occ.ppe_issued === "yes" : null, ppe_used: occ.ppe_used || null, fev1_l: num(occ.fev1), fvc_l: num(occ.fvc),
+          }
+        : null,
       chronic: category === "chronic" ? { condition: chronic.condition, last_checkup: chronic.last_checkup || null, current_medicines: chronic.current_medicines || null, feeling_vs_last: chronic.feeling_vs_last } : null,
       client_ref: clientRef.current,
       captured_at: capturedAt.current,
@@ -486,7 +516,7 @@ export function IntakeFlow({
                   <Label htmlFor="px-rel">{tr("Relationship")}</Label>
                   <Select id="px-rel" value={proxyRel} onChange={(e) => setProxyRel(e.target.value)} className="h-12 text-lg">
                     <option value="">{tr("Choose")}</option>
-                    {["Mother", "Father", "Husband", "Wife", "Son", "Daughter", "Mother-in-law", "Other family", "ASHA worker", "Caregiver"].map((r) => (
+                    {["Mother", "Father", "Husband", "Wife", "Son", "Daughter", "Mother-in-law", "Other family", communityWorker, "Caregiver"].map((r) => (
                       <option key={r}>{r}</option>
                     ))}
                   </Select>
@@ -768,11 +798,112 @@ export function IntakeFlow({
                     <Label htmlFor="m-rem">{tr("Remind me by")}</Label>
                     <Select id="m-rem" value={maternal.reminder_channel} onChange={(e) => setMaternal({ ...maternal, reminder_channel: e.target.value as "sms" | "voice" | "none" })} className="h-12">
                       <option value="sms">{tr("SMS")}</option>
-                      <option value="voice">{tr("Voice call in my language")}</option>
+                      <option value="voice">{tr("Voice call")}</option>
                       <option value="none">{tr("No reminder")}</option>
                     </Select>
                   </div>
+                  <div>
+                    <Label htmlFor="m-phone">{tr("Whose phone is this number?")}</Label>
+                    <Select id="m-phone" value={maternal.phone_belongs_to} onChange={(e) => setMaternal({ ...maternal, phone_belongs_to: e.target.value as PhoneOwner | "" })} className="h-12">
+                      <option value="">{tr("Not asked")}</option>
+                      <option value="self">{tr("My own phone")}</option>
+                      <option value="husband">{tr("My husband's phone")}</option>
+                      <option value="household">{tr("A family phone")}</option>
+                      <option value="none">{tr("No phone")}</option>
+                    </Select>
+                    <p className="mt-1 text-xs text-muted">{tr("On a phone that is not hers, reminders never mention pregnancy.")}</p>
+                  </div>
+                  {mode === "kiosk" && healthWorkers.length > 0 && (
+                    <div>
+                      <Label htmlFor="m-hw">{tr("Follow-up by")}</Label>
+                      <Select id="m-hw" value={maternal.assigned_worker_id} onChange={(e) => setMaternal({ ...maternal, assigned_worker_id: e.target.value })} className="h-12">
+                        <option value="">{tr("Not assigned")}</option>
+                        {healthWorkers.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                      </Select>
+                      <p className="mt-1 text-xs text-muted">{tr("If the check-up is missed, this {w} is told first.", { w: communityWorker })}</p>
+                    </div>
+                  )}
                 </div>
+              </div>
+            )}
+
+            {facType === "campus" && (
+              <div className="rounded-2xl border border-line p-4">
+                <Label htmlFor="hostel" hint={tr("(optional)")}><span className="inline-flex items-center gap-1.5"><Building2 className="size-4" /> {tr("Hostel or block where you stay")}</span></Label>
+                <Input id="hostel" value={hostel} onChange={(e) => setHostel(e.target.value.slice(0, 80))} className="h-12" placeholder={tr("e.g. Hostel Block C")} />
+                <p className="mt-1 text-xs text-muted">{tr("Used only to count fevers per hostel, so the campus doctor can spot an outbreak. Your name is never shown with it.")}</p>
+              </div>
+            )}
+
+            {(facType === "industrial_unit" || facType === "company_clinic" || !!patient?.organisation_id) && (
+              <div className="rounded-2xl border border-semi-line bg-semi-bg/40 p-4">
+                <p className="mb-1 flex items-center gap-2 font-semibold text-ink"><HardHat className="size-5" /> {tr("Work and exposure")}</p>
+                <p className="mb-3 text-xs text-muted">{tr("For the workplace health check. Your employer never sees these answers or any symptom, only department totals.")}</p>
+                <Label>{tr("At work, are you exposed to")}</Label>
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {(Object.keys(EXPOSURE_LABEL) as Exposure[]).map((x) => {
+                    const on = occ.exposures.includes(x);
+                    return (
+                      <button key={x} type="button" aria-pressed={on} onClick={() => setOcc({ ...occ, exposures: on ? occ.exposures.filter((y) => y !== x) : [...occ.exposures, x] })}
+                        className={cx("min-h-11 rounded-xl border-2 px-3 text-sm font-semibold", on ? "border-ink bg-white text-ink" : "border-line text-ink-2")}>
+                        {tr(EXPOSURE_LABEL[x])}
+                      </button>
+                    );
+                  })}
+                </div>
+                {occ.exposures.length > 0 && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <Label htmlFor="o-years">{tr("Years in this work")}</Label>
+                      <Input id="o-years" inputMode="decimal" value={occ.years} onChange={(e) => setOcc({ ...occ, years: e.target.value.replace(/[^\d.]/g, "").slice(0, 4) })} className="h-12" />
+                    </div>
+                    <div>
+                      <Label htmlFor="o-cough" hint={tr("(0 if no cough)")}>{tr("Weeks of cough")}</Label>
+                      <Input id="o-cough" inputMode="numeric" value={occ.cough_weeks} onChange={(e) => setOcc({ ...occ, cough_weeks: e.target.value.replace(/\D/g, "").slice(0, 3) })} className="h-12" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label>{tr("Breathing compared with the last workplace check")}</Label>
+                      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                        {(["better", "same", "worse", "unsure", "first"] as const).map((f) => (
+                          <button key={f} type="button" aria-pressed={occ.breathless_vs_last === f} onClick={() => setOcc({ ...occ, breathless_vs_last: f })}
+                            className={cx("h-11 rounded-xl border-2 text-sm font-semibold", occ.breathless_vs_last === f ? "border-ink bg-white text-ink" : "border-line text-ink-2")}>
+                            {tr(f === "first" ? "First check" : f === "unsure" ? "Not sure" : f[0].toUpperCase() + f.slice(1))}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="o-ppe">{tr("Mask, ear plugs or gloves given?")}</Label>
+                      <Select id="o-ppe" value={occ.ppe_issued} onChange={(e) => setOcc({ ...occ, ppe_issued: e.target.value as "" | "yes" | "no" })} className="h-12">
+                        <option value="">{tr("Not asked")}</option>
+                        <option value="yes">{tr("Yes")}</option>
+                        <option value="no">{tr("No")}</option>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="o-ppeuse">{tr("Worn during work")}</Label>
+                      <Select id="o-ppeuse" value={occ.ppe_used} onChange={(e) => setOcc({ ...occ, ppe_used: e.target.value as "" | "always" | "sometimes" | "never" })} className="h-12" disabled={occ.ppe_issued === "no"}>
+                        <option value="">{tr("Not asked")}</option>
+                        <option value="always">{tr("Always")}</option>
+                        <option value="sometimes">{tr("Sometimes")}</option>
+                        <option value="never">{tr("Never")}</option>
+                      </Select>
+                    </div>
+                    {mode === "kiosk" && (
+                      <>
+                        <div>
+                          <Label htmlFor="o-fev1" hint={tr("(spirometry, staff)")}>FEV1 (L)</Label>
+                          <Input id="o-fev1" inputMode="decimal" value={occ.fev1} onChange={(e) => setOcc({ ...occ, fev1: e.target.value.replace(/[^\d.]/g, "").slice(0, 4) })} className="h-12" />
+                        </div>
+                        <div>
+                          <Label htmlFor="o-fvc" hint={tr("(spirometry, staff)")}>FVC (L)</Label>
+                          <Input id="o-fvc" inputMode="decimal" value={occ.fvc} onChange={(e) => setOcc({ ...occ, fvc: e.target.value.replace(/[^\d.]/g, "").slice(0, 4) })} className="h-12" />
+                        </div>
+                        <p className="text-xs text-muted sm:col-span-2">{tr("FEV1 is compared with this worker's own earliest recorded value; a fall of 15 % or more raises the case to YELLOW (ATS 2014).")}</p>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

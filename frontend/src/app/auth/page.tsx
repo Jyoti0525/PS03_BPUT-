@@ -27,8 +27,10 @@ type PinGate = Extract<OtpVerifyResult, { pin_token: string }>;
 type StepKey = "role" | "info" | "workplace" | "phone" | "otp" | "pin" | "terms";
 
 const ROLE_CARDS: { role: RegRole; label: string; body: string; icon: React.ReactNode }[] = [
-  { role: "doctor", label: "Doctor / Medical Officer", body: "Review triage notes, override, refer", icon: <Stethoscope /> },
-  { role: "nurse", label: "Nurse / ANM", body: "Run the kiosk, record vitals, follow-ups", icon: <Syringe /> },
+  { role: "doctor", label: "Doctor", body: "Review triage notes, override, refer", icon: <Stethoscope /> },
+  { role: "medical_officer", label: "Medical Officer", body: "As a doctor, plus capacity and outbreak alerts", icon: <Stethoscope /> },
+  { role: "nurse", label: "Nurse / ANM", body: "Run the kiosk, record vitals, confirm up to YELLOW", icon: <Syringe /> },
+  { role: "health_worker", label: "Health worker (ASHA / MPW)", body: "Short notes, confirm GREEN, maternal follow-ups", icon: <HeartPulse /> },
   { role: "receptionist", label: "Receptionist", body: "Register patients, manage kiosk devices", icon: <ClipboardList /> },
   { role: "supervisor", label: "Supervisor", body: "Facility setup, staff, audit", icon: <ShieldCheck /> },
   { role: "patient", label: "Patient", body: "Add problems, upload reports, reminders", icon: <HeartPulse /> },
@@ -37,7 +39,7 @@ const ROLE_CARDS: { role: RegRole; label: string; body: string; icon: React.Reac
 
 const STEP_LABEL: Record<StepKey, string> = { role: "User type", info: "Personal info", workplace: "Workplace", phone: "Phone", otp: "OTP", pin: "PIN", terms: "Terms" };
 
-const CLINICAL: RegRole[] = ["doctor", "nurse"];
+const CLINICAL: RegRole[] = ["doctor", "medical_officer", "nurse"];  // registration number required; a health worker has none
 
 const ORG_KINDS: { v: OrgKind; label: string }[] = [
   { v: "company", label: "Company" },
@@ -415,7 +417,7 @@ function AuthInner() {
       const r = await api.register({
         registration_token: regToken,
         phone: byEmail ? phone : null,
-        name: role === "doctor" && !/^dr\.?\s/i.test(name) ? `Dr. ${name.trim()}` : name.trim(),
+        name: (role === "doctor" || role === "medical_officer") && !/^dr\.?\s/i.test(name) ? `Dr. ${name.trim()}` : name.trim(),
         role,
         facility_id: workplace?.kind === "existing" && role !== "employer" ? workplace.facility_id : null,
         directory_ref: workplace?.kind === "directory" && role !== "employer" ? workplace.directory_ref : null,

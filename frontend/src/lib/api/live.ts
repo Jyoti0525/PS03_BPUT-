@@ -6,7 +6,18 @@ import type { Tokens } from "@/lib/types";
 export const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
 const BASE = API_ORIGIN + "/api/v1";
 
-async function refresh(): Promise<boolean> {
+// Several screens poll at once, so an expired access token can trigger parallel refreshes. Refresh tokens work once,
+// so they share a single request: a second one would be refused and sign the user out.
+let refreshing: Promise<boolean> | null = null;
+
+function refresh(): Promise<boolean> {
+  refreshing ??= doRefresh().finally(() => {
+    refreshing = null;
+  });
+  return refreshing;
+}
+
+async function doRefresh(): Promise<boolean> {
   const t = getTokens();
   if (!t?.refresh_token) return false;
   const res = await fetch(`${BASE}/auth/refresh`, {
@@ -100,6 +111,8 @@ export const liveApi: JeeviaApi = {
   listFacilities: () => json("/facilities"),
   getFacility: (id) => json(`/facilities/${id}`),
   updateFacility: (id, p) => patch(`/facilities/${id}`, p),
+  facilityCalendar: (id) => json(`/facilities/${id}/calendar`),
+  tryOnset: (id, text) => json(`/facilities/${id}/onset?text=${encodeURIComponent(text)}`),
   facilityStats: (id) => json(`/facilities/${id}/stats`),
 
   facilityTokens: (id) => json(`/facilities/${id}/tokens`),
@@ -165,6 +178,14 @@ export const liveApi: JeeviaApi = {
   escalate: (encounterId, to_role, reason) => post(`/encounters/${encounterId}/escalations`, { to_role, reason }),
   listEscalations: (status) => json(`/escalations${status ? `?status=${status}` : ""}`),
   acknowledgeEscalation: (id, note) => post(`/escalations/${id}/acknowledge`, { note }),
+  listAlerts: (status) => json(`/alerts${status ? `?status=${status}` : ""}`),
+  acknowledgeAlert: (id, note) => post(`/alerts/${id}/acknowledge`, { note }),
+  capacity: () => json("/capacity"),
+  syndromicCsv: (days = 14) => download(`/surveillance/syndromic.csv?days=${days}`, `syndromic_${days}d.csv`),
+  listFollowups: (scope = "active") => json(`/followups?scope=${scope}`),
+  listHealthWorkers: () => json("/health-workers"),
+  followupAttempt: (id, outcome, note = "") => post(`/followups/${id}/attempt`, { outcome, note }),
+  followupCall: (id) => post(`/followups/${id}/call`, {}),
 
   createReferral: (encounterId, input) => post(`/encounters/${encounterId}/referrals`, input),
   listReferrals: () => json("/referrals"),
@@ -198,10 +219,14 @@ export const liveApi: JeeviaApi = {
 
   retentionStatus: () => json("/retention"),
   deidentifiedCohort: (days = 28) => json(`/cohort?days=${days}`),
+  aiOpinions: (days = 28) => json(`/ai-opinions?days=${days}`),
+  guardTestSamples: () => json("/guard-test/samples"),
+  guardTest: (text, source = "") => post("/guard-test", { text, source }),
 
   myRecord: () => json("/me/record"),
 
   listCohorts: () => json("/employer/cohorts"),
+  departmentRates: (days = 365) => json(`/employer/department-rates?days=${days}`),
 };
 
 export const API_BASE = BASE;

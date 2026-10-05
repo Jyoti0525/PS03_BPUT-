@@ -1,24 +1,28 @@
 """API schemas. Mirrors frontend/src/lib/types.ts — keep the two in sync."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import model_validator, BaseModel, ConfigDict, Field, field_validator
 
-Role = Literal["doctor", "nurse", "receptionist", "supervisor", "patient", "employer", "kiosk"]
+Role = Literal["doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor", "patient", "employer", "kiosk"]
 Urgency = Literal["red", "yellow", "green"]
 Category = Literal["normal", "maternal", "chronic"]
 FileKind = Literal["report", "image", "audio"]
 ExportFormat = Literal["pdf", "json", "csv", "fhir", "print"]
 
-STAFF_ROLES = {"doctor", "nurse", "receptionist", "supervisor"}
+STAFF_ROLES = {"doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor"}
 FacilityType = Literal[
     "phc", "chc", "sub_centre", "district_hospital", "hospital", "clinic", "health_camp", "company_clinic", "industrial_unit", "campus"
 ]
 ORG_FACILITY_TYPES = {"company_clinic", "industrial_unit", "campus", "health_camp"}
 OrgKind = Literal["company", "industrial", "campus", "ngo", "government_programme"]
 FitnessStatus = Literal["fit", "fit_with_restrictions", "temporarily_unfit", "pending_review"]
-REVIEWER_ROLES = {"doctor", "nurse"}
+REVIEWER_ROLES = {"doctor", "medical_officer", "nurse", "health_worker"}
+DOCTOR_ROLES = {"doctor", "medical_officer"}  # the medical officer can do everything a doctor can, and receives escalations and alerts
+# E2 sign-off limits: the highest urgency each role may confirm. A health worker (ASHA, ANM, MPW…) confirms GREEN only,
+# a nurse up to YELLOW; RED needs a doctor or the medical officer.
+SIGN_OFF = {"health_worker": "green", "nurse": "yellow", "doctor": "red", "medical_officer": "red"}
 ADMIN_ROLES = {"receptionist", "supervisor"}  # front desk + supervisor (tokens, patients, duty)
 SUPERVISOR_ROLES = {"supervisor"}
 NO_AI_SCOPE = "no_ai"  # consent scope: the patient chose to continue without AI (G1)  # facility setup, kiosk links, devices, staff, audit, retention
@@ -176,7 +180,7 @@ class RegisterIn(BaseModel):
     # Required when the registration token came from an email code (the mobile number is still recorded).
     phone: str | None = Field(default=None, pattern=r"^\d{10}$")
     name: str = Field(min_length=2, max_length=200)
-    role: Literal["doctor", "nurse", "receptionist", "supervisor", "patient", "employer"]
+    role: Literal["doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor", "patient", "employer"]
     facility_id: str | None = None
     registration_no: str | None = None
     language: str = "en"
@@ -234,6 +238,56 @@ class FacilityOut(ORM):
     beds_occupied: int
     offline_mode: bool
     capabilities: dict[str, bool]
+    region: dict | None = None
+    region_config: dict | None = None
+
+
+_MMDD = r"^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"
+
+
+class LocalFestival(BaseModel):
+    name: str = Field(min_length=2, max_length=40)
+    aliases: list[str] = Field(default_factory=list, max_length=10)
+    dates: list[date] = Field(min_length=1, max_length=10)
+    faith: str | None = Field(default=None, max_length=40)
+
+    @field_validator("aliases")
+    @classmethod
+    def _aliases(cls, v: list[str]) -> list[str]:
+        v = [a.strip() for a in v if a.strip()]
+        if any(len(a) < 2 or len(a) > 40 for a in v):
+            raise ValueError("each other name must be 2–40 characters")
+        return v
+
+
+class MonsoonDates(BaseModel):
+    onset: str = Field(pattern=_MMDD)
+    withdrawal: str = Field(pattern=_MMDD)
+
+    @model_validator(mode="after")
+    def _real(self):
+        for v in (self.onset, self.withdrawal):
+            m, d = map(int, v.split("-"))
+            date(2024, m, d)  # raises for 02-30, 04-31
+        if self.withdrawal <= self.onset:
+            raise ValueError("monsoon withdrawal must come after onset in the same year")
+        return self
+
+
+class RegionConfig(BaseModel):
+    """A facility's changes to its state's calendar (F5): local worker names, monsoon dates, local festivals."""
+
+    cadres: dict[Literal["community", "nurse", "nutrition", "male", "cho"], str] = Field(default_factory=dict)
+    monsoon: MonsoonDates | None = None
+    festivals: list[LocalFestival] = Field(default_factory=list, max_length=20)
+
+    @field_validator("cadres")
+    @classmethod
+    def _cadres(cls, v: dict) -> dict:
+        v = {k: s.strip() for k, s in v.items() if s and s.strip()}
+        if any(len(s) > 60 for s in v.values()):
+            raise ValueError("a worker name must be at most 60 characters")
+        return v
 
 
 class FacilityPatch(BaseModel):
@@ -248,6 +302,7 @@ class FacilityPatch(BaseModel):
     beds_occupied: int | None = Field(default=None, ge=0)
     offline_mode: bool | None = None
     capabilities: dict[str, bool] | None = None
+    region_config: RegionConfig | None = None
 
 
 class FacilityStats(BaseModel):
@@ -376,6 +431,26 @@ class Maternal(BaseModel):
     anc_visits: int | None = None
     next_checkup: str | None = None
     reminder_channel: Literal["sms", "voice", "none"] | None = "sms"
+    # D4: whose phone the reminder goes to. A husband's or family phone gets a message that does not mention pregnancy.
+    phone_belongs_to: Literal["self", "husband", "household", "none"] | None = None
+    assigned_worker_id: str | None = None  # the ASHA / ANM who follows up a missed visit
+
+
+Exposure = Literal["silica", "coal_dust", "cotton_dust", "asbestos", "other_dust", "noise", "chemicals", "pesticides", "heat"]
+DUST_EXPOSURES = {"silica", "coal_dust", "cotton_dust", "asbestos", "other_dust"}
+
+
+class Occupational(BaseModel):
+    """D2 workplace screening: what the worker is exposed to and how their breathing compares with the last screening."""
+
+    exposures: list[Exposure] = []
+    years_exposed: float | None = Field(default=None, ge=0, le=60)
+    cough_weeks: float | None = Field(default=None, ge=0, le=520)
+    breathless_vs_last: Literal["better", "same", "worse", "unsure", "first"] | None = None
+    ppe_issued: bool | None = None
+    ppe_used: Literal["always", "sometimes", "never"] | None = None
+    fev1_l: float | None = Field(default=None, ge=0.2, le=8)
+    fvc_l: float | None = Field(default=None, ge=0.2, le=10)
 
 
 class Chronic(BaseModel):
@@ -401,6 +476,9 @@ class IntakeIn(BaseModel):
     vitals: Vitals | None = None
     maternal: Maternal | None = None
     chronic: Chronic | None = None
+    occupational: Occupational | None = None
+    # D3: where the patient sleeps on campus (hostel block). Used only to count fevers per place; never shown by name.
+    cluster_key: str | None = Field(default=None, max_length=80)
     consent_id: str | None = None
     client_ref: str = Field(min_length=4, max_length=80)
     captured_offline: bool = False
@@ -430,6 +508,8 @@ class EncounterOut(BaseModel):
     channel: str = "staff_kiosk"
     worker: "WorkerInfo | None" = None
     consent: ConsentOut | None = None
+    can_confirm: bool = False  # whether this viewer's role may sign off this urgency (E2)
+    sign_off: str | None = None  # lowest role that may confirm it
 
 
 class QueueItem(BaseModel):
@@ -452,6 +532,8 @@ class QueueItem(BaseModel):
     escalation_due_at: datetime | None
     vitals_recorded: bool = False
     observation_count: int = 0
+    order_reason: str = ""  # C3: why the case is at this place in the queue, in words
+    sign_off: str | None = None  # the lowest role that may confirm this note (green: health worker, yellow: nurse, red: doctor)
 
 
 class NotePatch(BaseModel):
@@ -529,7 +611,7 @@ class ReferralOut(BaseModel):
 
 
 class UserPatch(BaseModel):
-    role: Literal["doctor", "nurse", "receptionist", "supervisor"] | None = None
+    role: Literal["doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor"] | None = None
     is_active: bool | None = None
 
 
@@ -787,6 +869,59 @@ class ReminderOut(ORM):
     channel: str
     status: str
     message: str
+
+
+class AlertOut(ORM):
+    id: str
+    facility_id: str
+    kind: str
+    key: str
+    to_role: str
+    assigned_to: str | None = None
+    title: str
+    detail: dict[str, Any]
+    status: str
+    raised_at: datetime
+    updated_at: datetime
+    acknowledged_by: str | None = None
+    acknowledged_at: datetime | None = None
+    ack_note: str | None = None
+    resolved_at: datetime | None = None
+
+
+class CapacityOut(BaseModel):
+    open_red: int
+    doctors_on_duty: int
+    over: bool
+    reds: list[dict[str, Any]]  # token, wait, order reason; no names
+    alert: AlertOut | None = None
+
+
+class FollowupOut(BaseModel):
+    id: str
+    patient_id: str
+    patient_code: str
+    patient_name: str
+    village: str | None
+    phone: str | None
+    phone_belongs_to: str | None
+    kind: str
+    due_at: datetime
+    status: str
+    missed_at: datetime | None
+    attempts: list[dict[str, Any]]
+    assigned_to: str | None
+    assigned_name: str | None
+    gestation_weeks: int | None
+    call_script: str | None  # what the call would say; None when there is no phone to call
+    resolved_at: datetime | None
+
+
+class FollowupAttemptIn(BaseModel):
+    outcome: Literal["reached", "not_reached", "came"]
+    note: str = Field(default="", max_length=500)
+
+    _scrub = field_validator("note")(_no_id_numbers)
 
 
 class MyRecord(BaseModel):

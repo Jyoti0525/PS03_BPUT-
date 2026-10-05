@@ -198,7 +198,7 @@ Jeevia/
 │   ├── app/triage/           rules engine + YAML rules, findings, OCR, image labels, timeline, note pipeline
 │   ├── app/*.py              models, schemas, services, security, audit, storage, otp, exports, observability, seed,
 │   │                         language (speech + translation), privacy, llm, output_guard
-│   └── tests/                339 pytest tests
+│   └── tests/                406 pytest tests
 ├── docs/                     FEATURES.md · EVALUATION.md · TODO.md · WORKFLOW.md · ARCHITECTURE.md · OPERATIONS.md
 ├── prototype/                Original static HTML prototype (design reference)
 ├── docker-compose.yml        Postgres + API + web for local full-stack runs
@@ -244,7 +244,7 @@ then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEAT
 | `JWT_SECRET` | Signs sessions (also used by the web app's restart route) | random, 48+ characters |
 | `OTP_PROVIDER` | `mock` (local dev) or `twilio` | `twilio` |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY_SID`, `TWILIO_API_KEY_SECRET`, `TWILIO_VERIFY_SERVICE_SID` | Twilio Verify | set |
-| `DEMO_OTP`, `DEMO_PHONES` | Sample accounts that accept a fixed code | `123456`, six sample numbers |
+| `DEMO_OTP`, `DEMO_PHONES` | Sample accounts that accept a fixed code | `123456`, eleven sample numbers |
 | `STORAGE_BACKEND` | `local`, `cloudinary` or `s3` | `cloudinary` |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary | set |
 | `S3_*` | Optional S3-compatible storage (e.g. Cloudflare R2) | unset |
@@ -271,7 +271,7 @@ Secrets live only in the Render and Vercel dashboards — never in the repositor
 ## 10. Testing
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 339 tests
+cd backend && .venv/bin/pytest -q                  # 406 tests
 cd frontend && npm run lint && npx tsc --noEmit && npm run build
 ```
 Backend tests cover the rules engine, OTP (including lockout, rate limits and the Twilio path), the two-factor PIN
@@ -306,11 +306,17 @@ production (sign-in code `123456`, then staff PIN `4826`). Everything else is cr
 | Role | Phone | Opens |
 |---|---|---|
 | Doctor | 9000000001 | `/reviewer` |
-| Nurse / ANM | 9000000002 | `/reviewer`, `/kiosk` |
-| Receptionist | 9000000003 | `/admin` |
+| Medical officer (PHC Manikpur) | 9000000007 | `/reviewer`, alerts |
+| Nurse / ANM | 9000000002 | `/nurse`, `/kiosk` |
+| Health worker / ASHA | 9000000006 | `/nurse`, maternal follow-ups |
+| Receptionist | 9000000003 | `/desk` |
 | Supervisor | 9000000004 | `/admin` |
 | Employer | 9000000005 | `/employer` |
 | Patient | 9876543210 | `/patient` |
+
+The demo scenarios (`backend/app/scenarios.py`, loaded at start-up unless `JEEVIA_SEED_SCENARIOS=false`) add a campus
+health centre with a campus medical officer (9000000008), a campus nurse (9000000009) and kiosk link `CAMPUS01`, and an
+occupational health physician at the Kalinganagar unit (9000000010).
 
 Real staff register at `/auth` with their own phone and pick their workplace from the national directory; employers
 register their organisation first so its clinics appear.

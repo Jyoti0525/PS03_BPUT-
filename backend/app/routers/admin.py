@@ -1,4 +1,4 @@
-"""Audit log (G4), retention status, patient self-service, employer cohorts."""
+"""Audit log (G4), retention status, AI second-opinion view, guard test, patient self-service, employer cohorts."""
 
 import csv
 import io
@@ -6,17 +6,18 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import BaseModel, Field
 from sqlalchemy import or_, select
 
-from .. import audit, privacy, storage
+from .. import audit, output_guard, privacy, storage
 from ..models import AuditEvent, Encounter, FileObject, Reminder, User
-from ..schemas import ADMIN_ROLES, AuditOut, AuditVerify, MyRecord, PatientOut, ReminderOut, RetentionOut
+from ..schemas import ADMIN_ROLES, DOCTOR_ROLES, AuditOut, AuditVerify, MyRecord, PatientOut, ReminderOut, RetentionOut
 from ..security import DB, require
 from ..services import encounter_out, now, own_patient
 from .files import file_out
 
 router = APIRouter(tags=["governance"])
-Auditor = Annotated[User, Depends(require("supervisor", "doctor"))]
+Auditor = Annotated[User, Depends(require("supervisor", *DOCTOR_ROLES))]
 
 
 @router.get("/audit", response_model=list[AuditOut])
@@ -62,8 +63,73 @@ def deidentified_cohort(user: Auditor, db: DB, days: int = 28):
     return privacy.cohort(rows, days)
 
 
+@router.get("/ai-opinions")
+def ai_opinions(user: Auditor, db: DB, days: int = 28):
+    """Where the model's second opinion on urgency differed from the rules (C8), for rule review.
+
+    The opinion never changed any urgency; this shows how often it differed, in which direction, and what the
+    clinician finally decided."""
+    days = max(1, min(days, 180))
+    since = now() - timedelta(days=days)
+    counts = {"AGREE": 0, "DISAGREE": 0, "UNAVAILABLE": 0, "UNREADABLE": 0}
+    matrix = {r: {m: 0 for m in ("red", "yellow", "green")} for r in ("red", "yellow", "green")}
+    cases, model, total = [], None, 0
+    stmt = select(Encounter).where(Encounter.facility_id == user.facility_id, Encounter.created_at >= since).order_by(Encounter.created_at.desc())
+    for e in db.scalars(stmt):
+        total += 1
+        op = (e.note or {}).get("llm_opinion")
+        if not op or op.get("status") not in counts:
+            continue
+        counts[op["status"]] += 1
+        model = model or op.get("model")
+        if op["status"] not in ("AGREE", "DISAGREE"):
+            continue
+        matrix[op["rules_urgency"]][op["model_urgency"]] += 1
+        if op["status"] == "DISAGREE":
+            cases.append({
+                "encounter_id": e.id, "patient_code": e.patient.code, "created_at": e.created_at, "category": e.category,
+                "rules_urgency": op["rules_urgency"], "model_urgency": op["model_urgency"], "direction": op["direction"],
+                "reason": op.get("reason"), "reason_withheld": bool(op.get("reason_withheld")),
+                "final_urgency": e.urgency, "overridden": bool(e.override), "status": e.status,
+            })
+    audit.record(db, user, "VIEW", "ai_opinions", None, f"AI second-opinion disagreements viewed ({days} days, {len(cases)} cases)", None, user.facility_id)
+    return {"days": days, "model": model, "encounters": total, "counts": counts, "matrix": matrix,
+            "higher": sum(c["direction"] == "higher" for c in cases), "lower": sum(c["direction"] == "lower" for c in cases),
+            "cases": cases[:200]}
+
+
+class GuardTestIn(BaseModel):
+    text: str = Field(min_length=1, max_length=1000)
+    source: str = Field("", max_length=2000)
+
+
+Supervisor = Annotated[User, Depends(require("supervisor"))]
+
+
+@router.get("/guard-test/samples")
+def guard_test_samples(user: Supervisor):
+    return {"guard_version": output_guard.version(), "samples": output_guard.TEST_SAMPLES}
+
+
+@router.post("/guard-test")
+def guard_test(body: GuardTestIn, user: Supervisor, db: DB):
+    """Run a typed sentence through the same output guard every model summary passes (C4, demo step 5).
+
+    This is a test of the guard, never a model output: it touches no patient record and the audit entry says so.
+    Identifiers in the typed text are scrubbed before it is logged."""
+    verdict = output_guard.check(body.text, body.source)
+    hits = [{"category": h.category, "label": h.label, "phrase": h.phrase} for h in verdict.hits]
+    logged, _ = privacy.scrub(body.text)
+    if verdict.ok:
+        audit.record(db, user, "VIEW", "guard_test", None, f'Guard test by {user.role} (typed, not a model output): passed. Text: "{logged[:600]}"', None, user.facility_id)
+    else:
+        why = "; ".join(verdict.reasons())
+        audit.record(db, user, "GUARD_BLOCK", "guard_test", None, f'Guard test by {user.role} (typed, not a model output): blocked ({why}). Text: "{logged[:600]}"', None, user.facility_id)
+    return {"ok": verdict.ok, "hits": hits, "guard_version": output_guard.version(), "test": True}
+
+
 @router.get("/retention", response_model=RetentionOut)
-def retention(user: Annotated[User, Depends(require("supervisor"))], db: DB):
+def retention(user: Supervisor, db: DB):
     t = now()
     files = list(db.scalars(select(FileObject).order_by(FileObject.expires_at)))
     return RetentionOut(

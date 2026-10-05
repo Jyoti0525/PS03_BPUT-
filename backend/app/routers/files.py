@@ -8,7 +8,7 @@ from starlette.concurrency import run_in_threadpool
 from .. import audit, storage
 from ..config import get_settings
 from ..models import Encounter, FileObject, User
-from ..schemas import ADMIN_ROLES, FileKind, FileOut
+from ..schemas import ADMIN_ROLES, REVIEWER_ROLES, FileKind, FileOut
 from ..security import DB, CurrentUser, decode, file_token
 from ..services import now, own_patient
 from ..triage.extraction import extract_document
@@ -100,9 +100,9 @@ def get_file(fid: str, request: Request, user: CurrentUser, db: DB):
             mine = own_patient(db, user)
             if not enc or not mine or enc.patient_id != mine.id:
                 raise HTTPException(403, "Not your file")
-        elif user.role not in ("doctor", "nurse") or not enc or enc.facility_id != user.facility_id:
+        elif user.role not in REVIEWER_ROLES or not enc or enc.facility_id != user.facility_id:
             raise HTTPException(403, "Only the doctors and nurses treating this patient can open their documents")
-    if enc and user.role in ("doctor", "nurse", "patient"):
+    if enc and (user.role in REVIEWER_ROLES or user.role == "patient"):
         audit.record(db, user, "VIEW", "file", f.id, f"Document opened: {f.kind} {f.filename}", enc.patient.code, enc.facility_id)
     return file_out(f, request, user)
 

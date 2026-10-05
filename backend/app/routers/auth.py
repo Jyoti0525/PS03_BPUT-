@@ -5,6 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func, or_, select
 
 from .. import audit
@@ -289,7 +290,7 @@ def register(body: RegisterIn, db: DB):
         problem = pin_problem(body.pin)
         if problem:
             raise HTTPException(422, problem)
-    if body.role in ("doctor", "nurse") and not (body.registration_no and len(body.registration_no.strip()) >= 4):
+    if body.role in ("doctor", "medical_officer", "nurse") and not (body.registration_no and len(body.registration_no.strip()) >= 4):
         raise HTTPException(422, "Registration number is required for clinical staff")
     user = User(phone=phone, name=body.name.strip(), role=body.role, facility_id=body.facility_id if body.role != "patient" else None, registration_no=body.registration_no, language=body.language, organisation_id=org_id)
     if email:  # verified by an email code; the mobile number was typed, not verified
@@ -313,7 +314,11 @@ def refresh(body: RefreshIn, db: DB):
     if not user or not user.is_active:
         raise HTTPException(401, "Account not found")
     db.add(RevokedToken(jti=data["jti"]))  # rotate: each refresh token works once
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:  # the same token used twice at once: only the first wins
+        db.rollback()
+        raise HTTPException(401, "Session ended")
     return issue_tokens(user, data.get("dev"))
 
 

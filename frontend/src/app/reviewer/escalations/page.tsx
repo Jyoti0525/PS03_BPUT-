@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Label, Modal, Segmented, Spinner, Textarea } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { UrgencyBadge } from "@/components/triage/note";
-import type { Escalation } from "@/lib/types";
+import { DOCTOR_ROLES, type Escalation } from "@/lib/types";
 
 const TO = { senior_mo: "Senior MO", specialist: "Specialist", doctor: "Doctor on duty" };
 
@@ -64,7 +64,7 @@ export default function EscalationsPage() {
                 {e.status === "open" && (
                   <div className="flex gap-2">
                     <Link href={`/reviewer/case/${e.encounter_id}`}><Button variant="secondary">{tr("Open case")}</Button></Link>
-                    {user?.role === "doctor" && <Button variant="danger" onClick={() => { setAck(e); setNote(""); }}>{tr("Acknowledge")}</Button>}
+                    {user && DOCTOR_ROLES.includes(user.role) && <Button variant="danger" onClick={() => { setAck(e); setNote(""); }}>{tr("Acknowledge")}</Button>}
                   </div>
                 )}
               </div>

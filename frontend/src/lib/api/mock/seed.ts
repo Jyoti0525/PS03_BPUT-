@@ -56,6 +56,8 @@ export const SEED_USERS: (User & { pin?: string })[] = [
   { id: "usr_recep1", phone: "9000000003", name: "Rakesh Tiwari", role: "receptionist", facility_id: "fac_phc_manikpur", registration_no: null, language: "hi", has_pin: false, created_at: iso(70 * DAY) },
   { id: "usr_sup1", phone: "9000000004", name: "Meera Nair", role: "supervisor", facility_id: "fac_phc_manikpur", registration_no: null, language: "en", has_pin: false, created_at: iso(120 * DAY) },
   { id: "usr_emp1", phone: "9000000005", name: "Arjun Patnaik (HR — Safety)", role: "employer", facility_id: "fac_kalinganagar", registration_no: null, language: "en", has_pin: false, created_at: iso(60 * DAY) },
+  { id: "usr_hw1", phone: "9000000006", name: "Kamla Devi (ASHA)", role: "health_worker", facility_id: "fac_phc_manikpur", registration_no: null, language: "hi", has_pin: false, created_at: iso(50 * DAY) },
+  { id: "usr_mo1", phone: "9000000007", name: "Dr. Anil Verma (Medical Officer i/c)", role: "medical_officer", facility_id: "fac_phc_manikpur", registration_no: "UPMC-51207", language: "en", has_pin: false, created_at: iso(100 * DAY) },
   { id: "usr_pat1", phone: "9876543210", name: "Priya Sharma", role: "patient", facility_id: null, registration_no: null, language: "hi", has_pin: false, created_at: iso(40 * DAY) },
 ];
 

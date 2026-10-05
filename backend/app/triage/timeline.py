@@ -5,6 +5,9 @@ Every onset shown to the reviewer carries one label and the patient's raw words:
 * STATED   — an explicit time from the patient: "3 days", "since yesterday", "ଚାରି ଦିନ ହେଲା", or a tapped duration.
 * INFERRED — worked out from something else (a dated record), never from a guess.
 * VAGUE    — a time the patient could not pin down: "few days", "for a long time", "since Diwali", "कई दिन से".
+             A festival or season is looked up in the facility's regional calendar (app/regions.py) and the
+             approximate date or window is shown beside the patient's words; it stays VAGUE and `days` stays empty,
+             so the rules never use it.
 * UNKNOWN  — nothing said.
 
 When the patient's words and the tapped answer disagree ("3 days" said, "1–4 weeks" tapped), the note asks staff to
@@ -12,7 +15,9 @@ check instead of picking one. Deterministic phrase lists, English, Hindi (Devana
 """
 
 import re
+from datetime import date
 
+from .. import regions
 from ..privacy import _norm as ascii_digits
 
 NUM = {
@@ -41,12 +46,14 @@ RELATIVE = [  # (pattern, days)
 ]
 VAGUE = re.compile(
     r"\b(few|some|several|many) (days|weeks|months)\b|\ba (long )?while\b|\blong time\b|\bfor ages\b|\bever since\b|\bsince childhood\b|\bon and off\b"
-    r"|\bsince (the )?(diwali|deepavali|holi|dussehra|dasara|durga puja|puja|navratri|raja|rath ?yatra|ratha ?yatra|pongal|sankranti|onam|bihu|eid|ramzan|ramadan|christmas|new year|harvest|monsoon|rains|rainy season|summer|winter|marriage|wedding|delivery)\b"
-    r"|\b(kuch|kai|bahut|kaafi) (din|samay|time)\b|\b(diwali|holi|barsaat) se\b"
-    r"|कुछ दिन|कई दिन|काफी समय|काफ़ी समय|बहुत दिन|बहुत समय|दिवाली से|होली से|बरसात से|शादी से"
-    r"|କିଛି ଦିନ|ଅନେକ ଦିନ|ବହୁତ ଦିନ|ବହୁ ଦିନ|ବହୁତ ସମୟ|ଦୀପାବଳି|ରଜ ପରଠାରୁ|ରଜଠାରୁ|ରଥଯାତ୍ରା|ଦଶହରା|ପୂଜା ପରଠାରୁ|ବର୍ଷା ଦିନ",
+    r"|\bsince (the |my |her |his )?(marriage|wedding|delivery|puja|pooja|festival|festivals|tyohar)\b"
+    r"|\b(kuch|kai|bahut|kaafi) (din|samay|time)\b"
+    r"|कुछ दिन|कई दिन|काफी समय|काफ़ी समय|बहुत दिन|बहुत समय|शादी से|त्योहार से|त्यौहार से|पूजा से"
+    r"|କିଛି ଦିନ|ଅନେକ ଦିନ|ବହୁତ ଦିନ|ବହୁ ଦିନ|ବହୁତ ସମୟ|ପର୍ବ ପରଠାରୁ|ପୂଜା ପରଠାରୁ|ପୂଜାଠାରୁ",
     re.I,
 )
+# Festivals and seasons ("since Diwali", "ରଜଠାରୁ", "after the rains") come from the regional calendar (F5).
+
 # Tapped answers (kiosk catalogue) → day range
 TAPPED = {"today": (0, 0), "1-2 days": (1, 2), "3-7 days": (3, 7), "1-4 weeks": (7, 28), "more than a month": (30, 10_000)}
 
@@ -83,9 +90,13 @@ def _texts(intake: dict) -> list[str]:
     return [ascii_digits(t) for t in out if t]
 
 
-def onset(intake: dict) -> dict:
-    """{'when', 'certainty', 'raw', 'days', 'check'} for the current complaint. `check` is set when sources disagree."""
-    said = vague = None
+def onset(intake: dict, cal: "regions.Calendar | None" = None, on: date | None = None) -> dict:
+    """{'when', 'certainty', 'raw', 'days', 'check'} for the current complaint. `check` is set when sources disagree.
+
+    `cal` is the facility's regional calendar and `on` the visit date; with both, a festival or season onset also
+    carries `approx` (the date or window it points to)."""
+    cal = cal or regions.for_facility(None)
+    said = vague = dated = None
     for t in _texts(intake):
         if not said and (m := next((x for x in EXPLICIT.finditer(t) if _is_onset(t, x)), None)):
             said = (m.group(0), _days(m.group(1), m.group(2)))
@@ -94,6 +105,8 @@ def onset(intake: dict) -> dict:
                 if m := re.search(pat, t, re.I):
                     said = (m.group(0).strip(), d)
                     break
+        if not vague and (hit := cal.match(t)):
+            vague, dated = hit[0], hit
         if not vague and (m := VAGUE.search(t)):
             vague = m.group(0)
     tapped = intake.get("duration") or next((a.get("answer") for a in intake.get("answers") or [] if a.get("qid") == "dur"), None)
@@ -111,5 +124,9 @@ def onset(intake: dict) -> dict:
             out["raw"] += f'; also said "{vague}"'
         return out
     if vague:
-        return {"when": "Not clear", "certainty": "VAGUE", "raw": vague, "days": None, "check": f'Onset given only as "{vague}" — ask for an approximate date'}
+        out = {"when": "Not clear", "certainty": "VAGUE", "raw": vague, "days": None, "check": f'Onset given only as "{vague}" — ask for an approximate date'}
+        if dated and on:
+            out["approx"] = cal.resolve(dated[1], dated[2], on)
+            out["when"], out["check"] = cal.describe(vague, out["approx"])
+        return out
     return {"when": "Not stated", "certainty": "UNKNOWN", "raw": None, "days": None, "check": None}

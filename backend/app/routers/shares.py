@@ -17,12 +17,12 @@ from .. import audit
 from ..config import get_settings
 from ..exports import DISCLAIMER
 from ..models import Facility, FileObject, Referral, ShareLink, User
-from ..schemas import REVIEWER_ROLES, SharedDocument, SharedSummary, ShareIn, ShareOpenIn, ShareOut
+from ..schemas import DOCTOR_ROLES, REVIEWER_ROLES, SharedDocument, SharedSummary, ShareIn, ShareOpenIn, ShareOut
 from ..security import DB, file_token, hash_secret, require, verify_secret
 from ..services import load_encounter, now
 
 router = APIRouter(tags=["shares"])
-Reviewer = Annotated[User, Depends(require("doctor"))]  # QR summaries are shared by the treating doctor
+Reviewer = Annotated[User, Depends(require(*DOCTOR_ROLES))]  # QR summaries are shared by the treating doctor
 MAX_FAILED = 8
 
 
