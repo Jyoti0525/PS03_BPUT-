@@ -117,9 +117,9 @@ FINDINGS: dict[str, tuple[str, str]] = {
 # romanised forms. Odia terms should be confirmed by a native speaker before a field pilot.
 LEXICON: dict[str, dict[str, list[str]]] = {
     "chest_pain": {
-        "en": [r"chest (pain|ache|tightness|heaviness|pressure|discomfort)", r"pain in (the |my )?chest", r"heart pain", r"seene? (me|mein|mai) dard", r"chhati (me|mein) dard"],
-        "hi": ["सीने में दर्द", "सीने मे दर्द", "छाती में दर्द", "छाती मे दर्द", "सीने में भारीपन", "सीने में जकड़न"],
-        "or": ["ଛାତି ଯନ୍ତ୍ରଣା", "ଛାତି ବିନ୍ଧା", "ଛାତିରେ ଯନ୍ତ୍ରଣା", "ଛାତିରେ ଦରଜ", "ଛାତି ଭାରି"],
+        "en": [r"chest (pain|ache|tightness|heaviness|pressure|discomfort)", r"pain in (the |my )?chest", r"chest (hurts?|is hurting|is paining)", r"heart pain", r"seene? (me|mein|mai) dard", r"chhati (me|mein) dard"],
+        "hi": ["सीने … दर्द", "छाती … दर्द", "सीने … भारीपन", "सीने … जकड़न", "सीने … दबाव", "सीने … दिक्कत", "सीने … तकलीफ", "छाती … दिक्कत"],
+        "or": ["ଛାତି … ଯନ୍ତ୍ରଣା", "ଛାତି … ବିନ୍ଧ", "ଛାତି … ଦରଜ", "ଛାତି … ଦରଦ", "ଛାତି … ଦର୍ଦ", "ଛାତି … ଭାରି", "ଛାତି … ଚାପି"],
     },
     "chest_pain_radiating": {
         "en": [r"(spread|spreads|spreading|radiat\w*|going|goes|moving) (to|into|towards) (the |my )?(left )?(arm|jaw|back|shoulder)", r"(arm|jaw) pain"],
@@ -129,10 +129,10 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "sweating": {"en": [r"sweat(ing|y|s|ed)?", r"paseena"], "hi": ["पसीना", "पसीने"], "or": ["ଝାଳ"]},
     "breathless": {
         "en": [r"breathless\w*", r"short(ness)? of breath", r"(difficulty|trouble|problem) (in )?breathing", r"(can\'?t|cannot|can not|unable to|not able to) breathe", r"breathing (problem|difficulty|trouble)", r"saans (lene )?(me|mein) (taklif|dikkat|pareshani)", r"saans phool"],
-        "hi": ["सांस लेने में", "साँस लेने में", "सांस फूल", "साँस फूल", "दम फूल", "सांस की तकलीफ"],
-        "or": ["ନିଶ୍ୱାସ ନେବାରେ କଷ୍ଟ", "ନିଶ୍ୱାସ କଷ୍ଟ", "ଶ୍ୱାସକଷ୍ଟ", "ଶ୍ୱାସ କଷ୍ଟ", "ଦମ୍ ଫୁଲୁଛି"],
+        "hi": ["सांस लेने में", "सांस फूल", "दम फूल", "सांस … तकलीफ", "सांस … दिक्कत", "सांस … परेशानी", "सांस नहीं ले पा"],
+        "or": ["ନିଶ୍ୱାସ … କଷ୍ଟ", "ଶ୍ୱାସ … କଷ୍ଟ", "ଶ୍ୱାସକଷ୍ଟ", "ନିଶ୍ୱାସ ନେଇ ପାରୁନି", "ନିଶ୍ୱାସ ନେଇପାରୁନି", "ଦମ୍ ଫୁଲୁଛି", "ଦମ୍ … ଲାଗୁଛି"],
     },
-    "cough": {"en": [r"cough\w*", r"khansi"], "hi": ["खांसी", "खाँसी"], "or": ["କାଶ"]},
+    "cough": {"en": [r"cough\w*", r"khansi"], "hi": ["खांसी", "^खासी"], "or": ["^କାଶ"]},
     "haemoptysis": {"en": [r"cough\w* (up )?blood", r"blood in (the )?(sputum|phlegm|cough)", r"ha?emoptysis"], "hi": ["खांसी में खून", "बलगम में खून"], "or": ["କାଶରେ ରକ୍ତ"]},
     "incomplete_sentences": {"en": [r"(can'?t|cannot|unable to) (speak|talk|finish) (in )?(full|complete) sentences?", r"difficulty breathing while talking"], "hi": [], "or": []},
     "wheeze": {"en": [r"wheez\w*", r"whistling (sound|breath)"], "hi": ["सीटी जैसी आवाज"], "or": ["ସିଟି ଭଳି ଶବ୍ଦ"]},
@@ -159,18 +159,18 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "one_sided_weakness": {"en": [r"one[- ]sided (weakness|numbness|paralysis)", r"(weakness|numbness|paralysis) (on|of) (one|the (left|right)) side", r"(face|mouth) (droop\w*|deviat\w*)", r"slurred speech", r"stroke", r"paralys\w*", r"lakwa"], "hi": ["लकवा", "एक तरफ कमजोरी", "मुंह टेढ़ा", "जुबान लड़खड़"], "or": ["ପକ୍ଷାଘାତ", "ଗୋଟିଏ ପଟ ଦୁର୍ବଳ", "ମୁହଁ ବାଙ୍କି"]},
     "limb_weakness": {"en": [r"(arm|leg|hand|limb) (is |became )?(weak|numb)", r"weakness (in|of) (the |my )?(arm|leg|hand|limb)", r"can'?t (move|lift) (the |my )?(arm|leg|hand)"], "hi": ["हाथ में कमजोरी", "पैर में कमजोरी", "हाथ नहीं उठ"], "or": ["ହାତ ଦୁର୍ବଳ", "ଗୋଡ଼ ଦୁର୍ବଳ"]},
     "weakness_general": {"en": [r"(sudden|acute|extreme|severe) weakness", r"(too|very) weak to (walk|stand)", r"can'?t (walk|stand)"], "hi": ["बहुत कमजोरी", "चल नहीं पा"], "or": ["ବହୁତ ଦୁର୍ବଳ", "ଚାଲି ପାରୁନି"]},
-    "headache": {"en": [r"head ?ache", r"pain in (the |my )?head", r"sir ?dard"], "hi": ["सिरदर्द", "सिर दर्द", "सिर में दर्द"], "or": ["ମୁଣ୍ଡବିନ୍ଧା", "ମୁଣ୍ଡ ବିନ୍ଧା", "ମୁଣ୍ଡ ଯନ୍ତ୍ରଣା"]},
+    "headache": {"en": [r"head ?ache", r"pain in (the |my )?head", r"sir ?dard"], "hi": ["सिरदर्द", "सरदर्द", "सिर … दर्द", "^सर$ … दर्द"], "or": ["ମୁଣ୍ଡବିନ୍ଧ", "ମୁଣ୍ଡ … ବିନ୍ଧ", "ମୁଣ୍ଡ … ଯନ୍ତ୍ରଣା", "ମୁଣ୍ଡ … ଦରଜ", "ମୁଣ୍ଡ … ଦରଦ", "ମୁଣ୍ଡ … ଦର୍ଦ"]},
     "headache_sudden": {"en": [r"(sudden|thunderclap|worst)[\w ]{0,20}headache", r"headache[\w ]{0,15}(sudden(ly)?|worst (ever|of my life))"], "hi": ["अचानक तेज सिरदर्द", "अचानक सिर दर्द"], "or": ["ହଠାତ୍ ମୁଣ୍ଡବିନ୍ଧା"]},
     "visual_disturbance": {"en": [r"blur\w* vision", r"vision (is )?blur\w*", r"seeing (spots|flashes|lights|double)", r"double vision", r"(loss of|lost|sudden) vision", r"can'?t see", r"dhundh?la"], "hi": ["धुंधला", "आंखों के आगे अंधेरा", "दिखाई नहीं"], "or": ["ଝାପ୍ସା", "ଦେଖିପାରୁନି"]},
     "stiff_neck": {"en": [r"stiff neck", r"neck (stiffness|is stiff)", r"can'?t bend (the |my )?neck"], "hi": ["गर्दन अकड़", "गर्दन में जकड़न"], "or": ["ବେକ ଟାଣି"]},
     "agitated": {"en": [r"agitat\w*", r"violent", r"aggressive"], "hi": ["हिंसक", "आक्रामक"], "or": ["ହିଂସ୍ର"]},
-    "fever": {"en": [r"fever\w*", r"febrile", r"high temperature", r"bukhar", r"bukhaar", r"jwar"], "hi": ["बुखार", "ज्वर"], "or": ["ଜ୍ୱର"]},
-    "abdominal_pain": {"en": [r"(abdominal|stomach|belly|tummy) (pain|ache|cramp\w*)", r"pain in (the |my )?(abdomen|stomach|belly)", r"stomach ?ache", r"pet (me |mein |mai )?dard"], "hi": ["पेट में दर्द", "पेट दर्द", "पेट मे दर्द"], "or": ["ପେଟ ବିନ୍ଧା", "ପେଟ ଯନ୍ତ୍ରଣା", "ପେଟରେ ଯନ୍ତ୍ରଣା", "ପେଟ ବିନ୍ଧୁଛି"]},
+    "fever": {"en": [r"fever\w*", r"febrile", r"high temperature", r"bukhar", r"bukhaar", r"jwar"], "hi": ["बुखार", "ज्वर", "^ताप$"], "or": ["^ଜ୍ୱର$", "^ଜ୍ୱରରେ$", "^ଜ୍ୱରଟା$", "ଦେହ … ଗରମ", "ଦେହ … ତାତି"]},
+    "abdominal_pain": {"en": [r"(abdominal|stomach|belly|tummy) (pain|ache|cramp\w*)", r"pain in (the |my )?(abdomen|stomach|belly)", r"stomach ?ache", r"pet (me |mein |mai )?dard"], "hi": ["पेट … दर्द"], "or": ["ପେଟ … ବିନ୍ଧ", "ପେଟ … ଯନ୍ତ୍ରଣା", "ପେଟ … ଦରଜ", "ପେଟ … ଦରଦ", "ପେଟ … ଦର୍ଦ"]},
     "abdominal_pain_sudden": {"en": [r"sudden[\w ]{0,20}(abdominal|stomach|belly) pain", r"(abdominal|stomach|belly) pain[\w ]{0,15}sudden(ly)?"], "hi": ["अचानक पेट में दर्द", "अचानक पेट दर्द"], "or": ["ହଠାତ୍ ପେଟ"]},
     "upper_abdominal_pain": {"en": [r"upper (abdominal|stomach|belly) pain", r"pain (in|at) (the )?upper (abdomen|stomach)", r"epigastric", r"right upper"], "hi": ["पेट के ऊपर दर्द", "ऊपरी पेट"], "or": ["ପେଟ ଉପରେ"]},
     "vomiting": {"en": [r"vomit\w*", r"throwing up", r"ulti"], "hi": ["उल्टी", "उलटी"], "or": ["ବାନ୍ତି"]},
     "vomits_everything": {"en": [r"vomits? everything", r"can'?t keep (anything|food|water) down", r"vomiting everything"], "hi": ["सब उल्टी", "कुछ नहीं पचता"], "or": ["ସବୁ ବାନ୍ତି"]},
-    "diarrhoea": {"en": [r"diarrh\w*", r"loose (motions?|stools?)", r"watery stools?", r"dast"], "hi": ["दस्त", "पतले दस्त", "लूज मोशन"], "or": ["ଝାଡ଼ା", "ତରଳ ଝାଡ଼ା"]},
+    "diarrhoea": {"en": [r"diarrh\w*", r"loose (motions?|stools?)", r"watery stools?", r"dast"], "hi": ["^दस्त$", "^दस्तों$", "लूज मोशन", "पतली टट्टी"], "or": ["ଝାଡ଼ା", "ପତଳା ଝାଡ଼ା"]},
     "unable_to_drink": {"en": [r"(unable|not able|can'?t|cannot|refus\w*) to (drink|breast ?feed|feed|suck)", r"not (drinking|feeding|breast ?feeding)", r"unable to drink"], "hi": ["दूध नहीं पी", "पानी नहीं पी"], "or": ["କ୍ଷୀର ପିଉନି", "ପାଣି ପିଉନି"]},
     "drinks_poorly": {"en": [r"drink\w* (poorly|very little|less)"], "hi": ["कम पी"], "or": []},
     "sunken_eyes": {"en": [r"sunken eyes?"], "hi": ["धंसी आंखें", "आंखें धंस"], "or": ["ଆଖି ପଶିଯାଇଛି"]},
@@ -181,7 +181,7 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "rash": {"en": [r"rash\w*", r"spots on (the )?skin", r"hives"], "hi": ["दाने", "चकत्ते"], "or": ["ଚର୍ମରେ ଦାଗ", "ଫୋଟକା"]},
     "rash_spreading": {"en": [r"rash[\w ]{0,20}(spread\w*|worsen\w*|peel\w*)", r"skin (is )?peeling"], "hi": ["दाने फैल", "त्वचा उतर"], "or": []},
     "malnutrition": {"en": [r"severe(ly)? (wasting|wasted|malnourish\w*)", r"swelling of both feet", r"skin and bones"], "hi": ["बहुत दुबला", "कुपोषण"], "or": ["ପୁଷ୍ଟିହୀନ"]},
-    "pain": {"en": [r"pain\w*", r"ache", r"dard", r"hurts?"], "hi": ["दर्द"], "or": ["ଯନ୍ତ୍ରଣା", "ବିନ୍ଧା", "ଦରଜ"]},
+    "pain": {"en": [r"pain\w*", r"ache", r"dard", r"hurts?"], "hi": ["दर्द"], "or": ["ଯନ୍ତ୍ରଣା", "ବିନ୍ଧା", "ବିନ୍ଧୁ", "ଦରଜ", "ଦରଦ", "ଦର୍ଦ"]},
     "injury": {"en": [r"injur\w*", r"wound\w*", r"\bcut\b", r"hurt (my|his|her)", r"accident", r"fell (down|off)", r"chot"], "hi": ["चोट", "घाव", "दुर्घटना"], "or": ["ଆଘାତ", "କ୍ଷତ", "ଦୁର୍ଘଟଣା"]},
     "burn": {"en": [r"burn\w*", r"scald\w*", r"jal (gaya|gayi|gaye)"], "hi": ["जल गया", "जल गई", "जलना"], "or": ["ପୋଡ଼ି", "ଜଳିଗଲା"]},
     "head_injury": {"en": [r"head (injury|trauma)", r"hit (the |his |her |my )?head", r"injur\w* (to|on) (the )?head", r"fainted / head injury"], "hi": ["सिर में चोट"], "or": ["ମୁଣ୍ଡରେ ଆଘାତ"]},
@@ -277,7 +277,7 @@ ANSWERS: list[tuple[str, str, dict[str, bool]]] = [
 # symptom; a missed negation only over-triages, so the window is deliberately short).
 NEGATION_PRE = re.compile(r"\b(no|not|never|denies|denied|without|absent|free of|negative for|nahi|nahin)\b((?!\s+(and|with|aur|plus)\b)\s+\w+){0,2}\s*$")
 NEGATION_POST_EN = re.compile(r"^\s*(\w+\s+){0,2}(nahi|nahin|nai|na)\b")
-NEGATION_POST_INDIC = ("नहीं", "नही", "ନାହିଁ", "ନାହି", "ନାଇଁ", "ନାଇ", "ହେଉନି")
+NEGATION_POST_INDIC = ("नहीं", "नही", "ନାହିଁ", "ନାହି", "ନାଇଁ", "ନାଇ", "ହେଉନି", "ହୋଇନି", "ହଉନି")
 CLAUSE_SPLIT = re.compile(r"[.;!?।|\n]|,\s|\bbut\b|\bhowever\b|\blekin\b|\bpar\b|लेकिन|परंतु|किंतु|ପରନ୍ତୁ|କିନ୍ତୁ|ମାତ୍ର")
 
 
@@ -291,14 +291,42 @@ def _norm(s: str) -> str:
     return unicodedata.normalize("NFC", s or "").lower()
 
 
+# Spoken Hindi and Odia, as speech recognition writes it, varies in spelling where the sound does not: ଝାଡ଼ା/ଝାଡା,
+# ଜ୍ୱର/ଜର (the ୱ is not pronounced), ଶ/ଷ/ସ (all "s" in Odia), long and short i/u, chandrabindu and anusvara.
+# Matching runs on a "loose" form of both the text and the lexicon so each spelling of a word matches.
+_LOOSE = str.maketrans({
+    "़": None, "଼": None, "‌": None, "‍": None,  # nukta, ZWNJ, ZWJ
+    "ँ": "ं", "ଁ": "ଂ",  # chandrabindu → anusvara
+    "ी": "ि", "ू": "ु", "ई": "इ", "ऊ": "उ",  # Devanagari ī ū → i u
+    "ୀ": "ି", "ୂ": "ୁ", "ଈ": "ଇ", "ଊ": "ଉ",  # Odia ī ū → i u
+    "ଶ": "ସ", "ଷ": "ସ", "ଣ": "ନ",  # Odia ଶ ଷ → ସ, ଣ → ନ
+})
+
+
+def _loose(s: str) -> str:
+    return _norm(s).replace("୍ୱ", "").translate(_LOOSE)  # Odia ୍ୱ (wa-phala) is silent
+
+
+def _indic_regex(pattern: str) -> re.Pattern:
+    """Indic lexicon entries are substrings, with two additions: "A … B" allows up to two words between A and B
+    ("ଛାତି ବି ଦରଦ", "सीने में बहुत दर्द"), and "^"/"$" pin a short word to the start/end of a word so ଜ୍ୱର does not
+    match inside ଜରୁରୀ ("urgent") once loosened to ଜର."""
+    parts = []
+    for part in pattern.split(" … "):
+        start, end = part.startswith("^"), part.endswith("$")
+        body = re.escape(_loose(part.strip("^$")))
+        parts.append(("(?<!\\S)" if start else "") + body + ("(?!\\S)" if end else ""))
+    return re.compile(r"\S*(?:\s+\S+){0,2}?\s+\S*?".join(parts))
+
+
+_INDIC: dict[str, re.Pattern] = {}
+
+
 def _clause_hits(clause: str, pattern: str, latin: bool) -> list[tuple[int, int]]:
     if latin:
         return [m.span() for m in re.finditer(rf"(?<![\w]){pattern}(?![\w])", clause)]
-    out, i = [], clause.find(pattern)
-    while i >= 0:
-        out.append((i, i + len(pattern)))
-        i = clause.find(pattern, i + 1)
-    return out
+    rx = _INDIC.get(pattern) or _INDIC.setdefault(pattern, _indic_regex(pattern))
+    return [m.span() for m in rx.finditer(clause)]
 
 
 def _negated(clause: str, start: int, end: int) -> bool:
@@ -308,7 +336,7 @@ def _negated(clause: str, start: int, end: int) -> bool:
     if NEGATION_POST_EN.search(after):
         return True
     tail = after[:24]
-    return any(n in tail for n in NEGATION_POST_INDIC)
+    return any(_loose(n) in tail for n in NEGATION_POST_INDIC)
 
 
 def scan_text(text: str, source: str) -> dict[str, Finding]:
@@ -317,11 +345,12 @@ def scan_text(text: str, source: str) -> dict[str, Finding]:
     clauses = [c for c in CLAUSE_SPLIT.split(_norm(text)) if c and c.strip()]
     for fid, langs in LEXICON.items():
         for clause in clauses:
+            loose = _loose(clause)
+            snippet = clause.strip()[:80]  # evidence shows the words as written, not the loose form
             for lang, pats in langs.items():
                 for pat in pats:
-                    for s, e in _clause_hits(clause, pat if lang == "en" else _norm(pat), lang == "en"):
-                        neg = _negated(clause, s, e)
-                        snippet = clause.strip()[:80]
+                    for s, e in _clause_hits(clause if lang == "en" else loose, pat, lang == "en"):
+                        neg = _negated(clause if lang == "en" else loose, s, e)
                         cur = found.get(fid)
                         if not neg:
                             if not cur or cur.value is not True:
@@ -329,6 +358,29 @@ def scan_text(text: str, source: str) -> dict[str, Finding]:
                         elif not cur:
                             found[fid] = Finding(False, [f'{source} (denied): "{snippet}"'])
     return found
+
+
+# Generic findings that every specific one implies; a translation that says "pain" where the patient said
+# "chest pain" is not a mismatch worth a flag.
+_TOO_GENERIC = {"pain", "bleeding", "injury"}
+
+
+def translation_check(symptom: dict) -> dict | None:
+    """Compare what the lexicon finds in the patient's own words with what it finds in the machine translation.
+    Only for languages the lexicon covers (Hindi, Odia), and for a finding only when that language has words for it,
+    so a gap in the word list is not reported as a translation error. Returns None when they agree."""
+    lang = symptom.get("language") or "en"
+    orig, english = symptom.get("original_text") or "", symptom.get("text") or ""
+    if lang == "en" or not orig or orig == english or not any(lang in v for v in LEXICON.values()):
+        return None
+    said = {f for f, x in scan_text(orig, "").items() if x.value is True}
+    rendered = {f for f, x in scan_text(english, "").items() if x.value is True}
+    covered = {f for f, v in LEXICON.items() if v.get(lang)}
+    missed = sorted(f for f in said - rendered - _TOO_GENERIC)
+    added = sorted(f for f in rendered - said - _TOO_GENERIC if f in covered)
+    if not missed and not added:
+        return None
+    return {"language": lang, "original": orig, "english": english, "missed": missed, "added": added}
 
 
 def _merge(into: dict[str, Finding], fid: str, value: bool, evidence: str) -> None:
@@ -356,15 +408,22 @@ def extract(intake: dict, category: str | None = None) -> dict[str, Finding]:
                 for fid, val in values.items():
                     _merge(out, fid, val, f'answer to "{a.get("question") or qid}": {ans}')
 
-    texts = [("chief complaint", intake.get("chief_complaint", ""))]
+    cc = intake.get("chief_complaint", "")
+    texts = [("chief complaint", cc, set())]
     for s in intake.get("symptoms", []) or []:
-        texts.append((f"{s.get('source', 'text')} intake", s.get("text", "")))
+        chk = translation_check(s)
+        unconfirmed = set(chk["added"]) if chk else set()
+        if cc and cc == s.get("text"):  # the kiosk uses the first sentence's English as the chief complaint
+            texts[0] = ("chief complaint", cc, unconfirmed)
+        texts.append((f"{s.get('source', 'text')} intake", s.get("text", ""), unconfirmed))
         if s.get("original_text") and s.get("original_text") != s.get("text"):
-            texts.append((f"{s.get('source', 'text')} intake (original {s.get('language', '')})", s["original_text"]))
-    for src, t in texts:
+            texts.append((f"{s.get('source', 'text')} intake (original {s.get('language', '')})", s["original_text"], set()))
+    for src, t, unconfirmed in texts:
+        # A finding only the translation produced still counts (missing a real symptom is worse than over-triage),
+        # but its evidence says so, and the note's MT-CHECK flag names the sentence.
         for fid, f in scan_text(t, src).items():
             for ev in f.evidence:
-                _merge(out, fid, f.value, ev)
+                _merge(out, fid, f.value, ev.replace(f"{src}:", f"{src} (machine translation only — not found in the patient's words):", 1) if fid in unconfirmed else ev)
 
     # Clinician danger-sign check (nurse observations). Checked signs are present; once the
     # check is recorded, every unchecked sign is absent rather than unknown.

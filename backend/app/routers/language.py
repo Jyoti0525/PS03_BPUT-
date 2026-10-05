@@ -47,8 +47,8 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
     result["translation"] = None
     if translate:
         try:
-            tr = await run_in_threadpool(language.translate, [result["text"]], language_code, "en")
-            result["translation"] = {"text": tr["texts"][0], "language": "en", "engine": tr["engine"]}
+            tr = await run_in_threadpool(language.translate_patient, result["text"], language_code)
+            result["translation"] = {"text": tr["text"], "language": "en", "engine": tr["engine"], "rewrites": tr["rewrites"], "unsure": tr["unsure"]}
         except language.LanguageUnavailable as e:
             result["translation_error"] = str(e)
     return result

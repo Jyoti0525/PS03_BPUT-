@@ -57,33 +57,69 @@ def _names() -> tuple[dict[str, str], list[str]]:
     return best, sorted(best)
 
 
-_STRENGTH = re.compile(r"(\d+(?:\.\d+)?)\s*(mg|mcg|µg|g|ml|iu|%)\b", re.I)
+# "2m9", "10rng": OCR misreads of "mg" on foil (seen on a real strip photo, 5 Oct).
+_STRENGTH = re.compile(r"(\d+(?:\.\d+)?)\s*(mg|m9|rng|mcg|µg|g|ml|iu|%)(?![a-z])", re.I)
+_BARE_NUMBER = re.compile(r"^\s*(\d{1,4}(?:\.\d+)?)\s*$")
+
+
+def _words(text: str) -> list[str]:
+    """Words of 5+ letters. Strip print is tightly set and OCR glues words together ("ChlorpheniramineMaleate IP",
+    "patacetamolIP"), so a lower-to-upper case change also splits."""
+    return re.findall(r"[A-Za-z]{5,}", re.sub(r"(?<=[a-z])(?=[A-Z])", " ", text))
+
+
+def _strength(lines: list[dict], i: int, word: str) -> str | None:
+    """Strength printed after the name on the same line, or in a separate box on the same printed row to its right
+    (strips set the strength in a column: "Paracetamol IP ........ 500 mg", which OCR reads as two boxes)."""
+    text = lines[i]["text"]
+    at = text.lower().find(word.lower())
+    if s := _STRENGTH.search(text[at:] if at >= 0 else text):
+        return f"{s.group(1)} {'mg' if s.group(2).lower() in ('m9', 'rng') else s.group(2).lower()}"
+    box = lines[i].get("bbox")
+    if not box:
+        return None
+    x, y, w, h = box
+    row = [ln for j, ln in enumerate(lines) if j != i and ln.get("bbox") and ln["bbox"][0] >= x + w * 0.5
+           and abs((ln["bbox"][1] + ln["bbox"][3] / 2) - (y + h / 2)) < max(h, ln["bbox"][3]) * 0.6]
+    for ln in sorted(row, key=lambda ln: ln["bbox"][0]):
+        if s := _STRENGTH.search(ln["text"]):
+            return f"{s.group(1)} {'mg' if s.group(2).lower() in ('m9', 'rng') else s.group(2).lower()}"
+        if b := _BARE_NUMBER.match(ln["text"]):
+            return f"{b.group(1)} (unit not read)"
+    return None
 
 
 def medicines(lines: list[dict]) -> list[dict]:
-    """Medicine names (and strength, when printed next to them) found in OCR lines [{'text','conf'}]."""
+    """Medicine names (and strength, when printed next to them) found in OCR lines [{'text','conf','bbox'}]."""
     names, keys = _names()
-    found: dict[str, dict] = {}
+    cands = []  # (word, key, confidence, strength, line text)
     for i, ln in enumerate(lines):
-        text = ln["text"]
-        for w in re.findall(r"[A-Za-z]{5,}", text):
+        for w in _words(ln["text"]):
             wl = w.lower()
             key, score = (wl, 1.0) if wl in names else (None, 0.0)
             if not key:
                 close = difflib.get_close_matches(wl, keys, n=1, cutoff=0.86)
                 if close:
                     key, score = close[0], difflib.SequenceMatcher(None, wl, close[0]).ratio()
-            if not key or key in found:
-                continue
-            near = text + " " + (lines[i + 1]["text"] if i + 1 < len(lines) else "")
-            s = _STRENGTH.search(near[near.lower().find(wl):] if wl in near.lower() else near)
-            found[key] = {
-                "name": names[key],
-                "strength": f"{s.group(1)} {s.group(2).lower()}" if s else None,
-                "seen": text[:120],
-                "confidence": round(float(ln.get("conf", 1.0)) * score, 2),
-                "status": "awaiting_confirmation",
-            }
+            if key:
+                cands.append((wl, key, round(float(ln.get("conf", 1.0)) * score, 2), _strength(lines, i, w), ln["text"]))
+    # A torn or folded strip leaves pieces of a name ("heniramine" from "Chlorpheniramine") that fuzzy-match a different
+    # medicine (pheniramine). A word that sits inside a longer word read elsewhere on the same picture is that fragment.
+    read = {c[0] for c in cands}
+    found: dict[str, dict] = {}
+    for wl, key, conf, strength, text in cands:
+        if any(wl != other and wl in other for other in read):
+            continue
+        cur = found.get(key)
+        if cur and (cur["strength"] or not strength) and cur["confidence"] >= conf:
+            continue
+        found[key] = {
+            "name": names[key],
+            "strength": strength or (cur or {}).get("strength"),
+            "seen": text[:120],
+            "confidence": max(conf, (cur or {}).get("confidence", 0)),
+            "status": "awaiting_confirmation",
+        }
     return list(found.values())
 
 

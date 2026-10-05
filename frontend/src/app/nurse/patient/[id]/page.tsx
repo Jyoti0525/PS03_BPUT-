@@ -17,6 +17,14 @@ import { langByCode } from "@/lib/i18n/languages";
 function FileThumb({ id }: { id: string }) {
   const f = useFile(id);
   if (!f) return <div className="h-20 w-28 animate-pulse rounded-lg bg-canvas" />;
+  if (f.url && f.content_type.startsWith("audio"))
+    // The patient's own recording: what to listen to when the note says the translation may be wrong.
+    return (
+      <div className="w-64 rounded-lg border border-line bg-canvas p-2" title={f.filename}>
+        <audio controls preload="none" src={f.url} className="h-9 w-full" />
+        <p className="mt-1 truncate text-[11px] text-muted">{f.filename}</p>
+      </div>
+    );
   return (
     <a href={f.url ?? undefined} target="_blank" rel="noreferrer" className="block w-28" title={f.filename}>
       {f.url && f.content_type.startsWith("image") ? (

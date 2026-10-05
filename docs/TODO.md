@@ -19,9 +19,9 @@ State last checked: **5 Oct 2026, evening** (last commit `ca889e7`).
 | Day | Build | Done when | State |
 |---|---|---|---|
 | Sat 3 Oct | Rules engine v2, real OCR, new repo, free disk space, request Bhashini key | Code on the new repo; 15 GB or more free | Done (`bbf5411`; 99 GB free). Bhashini key still pending |
-| Sun 4 Oct | Server speech recognition; translation of free text | An Odia sentence becomes a transcript plus English translation in the note, with the engine named | Done over HTTP (`bafbe44`). **Left:** test with a live voice at the kiosk (§2) |
+| Sun 4 Oct | Server speech recognition; translation of free text | An Odia sentence becomes a transcript plus English translation in the note, with the engine named | Done over HTTP (`bafbe44`). Live voice test in Odia and Hindi done 5 Oct; fixes in §2 |
 | Mon 5 Oct | LLM prose with faithfulness check; output guard; anonymisation; "continue without AI" | Red-team phrases blocked and logged; a typed name shows as [NAME] | **Done 5 Oct** (`ca889e7`): all four, checked live |
-| Tue 6 Oct | Image understanding; timeline certainty labels; deck draft starts | A medicine-strip photo becomes a medication list awaiting confirmation; a face is blurred before storage | Image understanding and timeline labels **done early (5 Oct)**. Deck draft not started. **Left:** a live photo of a real strip |
+| Tue 6 Oct | Image understanding; timeline certainty labels; deck draft starts | A medicine-strip photo becomes a medication list awaiting confirmation; a face is blurred before storage | Image understanding and timeline labels **done early (5 Oct)**. Deck draft not started. Live strip photo done 5 Oct; two matcher fixes |
 | Wed 7 Oct | Occupational rules, campus cluster alert, maternal missed visit, per-role follow-ups, capacity alert | Each of the seven scenarios has one working demo moment | Not started |
 | Thu 8 Oct | Measured figures; hosted deployment; bug fixes; feature freeze at night | Evaluation table with real numbers; the public link works | ASR figures only |
 | Fri 9 Oct | Deck final (business proposal, market gap, go-to-market); three rehearsals; backup video | Two full runs in a row inside the slot, with no failure | Not started |
@@ -32,8 +32,14 @@ State last checked: **5 Oct 2026, evening** (last commit `ca889e7`).
 
 No speech recogniser is 100 % accurate. The goal is that **no recognition error reaches the note unnoticed**, and that every accuracy figure we show is measured.
 
-- [ ] **Live-voice kiosk test, Odia:** 2–3 spoken symptom sentences. *Done when:* transcript, English line, engine name and MT-CHECK flag all appear in the note.
-- [ ] **Same live test in Hindi and English.**
+- [x] **Live-voice kiosk test, Odia:** done 5 Oct by Jyoti, 3 sentences on the laptop microphone. Transcript, English line, engine name and MT-CHECK flag all appeared. Found: translation dropped fever (ଜର), turned ଝାଡ଼ା into "sweating", 56 into "sixty-six"; the word list missed spoken spellings; the timeline put "2 days" against the wrong complaint. All fixed the same evening (not yet committed), see the next items.
+- [x] **Same live test in Hindi** (5 Oct, 2 sentences): transcripts word-perfect, translations right.
+- [ ] **Same live test in English.**
+- [x] Symptom word list matches spoken Hindi/Odia spellings (nukta, long/short vowels, ଶ/ଷ/ସ, silent ୱ) and allows up to two words in between ("ଛାତି ବି ଦରଦ") (5 Oct, not yet committed).
+- [x] Translation cross-check: symptoms in the patient's words vs in the English; a difference makes MT-CHECK a warning naming the sentence, and translation-only evidence is labelled (5 Oct, not yet committed).
+- [x] Translator gets standard words and digits (ଜର → ଜ୍ୱର, ଝାଡ଼ା → ଅତିସାର, ଛପନ ବର୍ଷ → 56 ବର୍ଷ); the record keeps the patient's words; rewrites listed on the note (5 Oct, not yet committed).
+- [x] Near-equal translation candidates compared for numbers and symptoms, all languages, no word list ("number unclear: 66 or 56") (5 Oct, not yet committed).
+- [ ] A native Odia speaker checks the Odia number list (1–100) and spoken-spelling list in `backend/app/mt_checks.py` and `findings.py`.
 - [ ] Measure the 8-bit model with RNNT decoding. Figures to beat: 19.7 % WER for fp32 RNNT, 21.6 % for int8 CTC. Make RNNT the default if it is accurate enough and fast enough.
 - [ ] **Measure every Indian language in FLEURS** (25 clips each, same script): as, bn, gu, hi, kn, ml, mr, ne, or ✅, pa, sd, ta, te, ur. Add per-language WER and CER to `docs/EVALUATION.md`.
 - [ ] For the languages FLEURS does not cover (brx, doi, kok, ks, mai, mni, sa, sat), find an openly licensed public test set and check its licence first. Until one is measured, label that language "unmeasured" in the app.
@@ -93,7 +99,8 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
   - [x] Medicine names matched to the **PMBJP list of 2,110 generic medicines** (PIB, Govt of India, free to reproduce with acknowledgement; 1,087 names, `scripts/build_medicine_list.py`). Strength is read too. Each name awaits confirmation; nurse/doctor Confirm or "Not this", audited. Checked live in the browser.
   - [x] Faces pixelated (YuNet, MIT, vendored; checked on a public-domain portrait) and phone/Aadhaar/ABHA lines blacked out **before storage**. Photos are always re-encoded, which drops EXIF/GPS.
   - [x] A photo of the problem gets zero interpretation. 11 tests (`tests/test_images.py`).
-  - [ ] Live test with a phone photo of a real medicine strip and a real prescription. Handwritten prescriptions will mostly fail OCR; say so.
+  - [x] Live test with a phone photo of a real medicine strip (5 Oct, Jyoti): labelled correctly, all three medicines found. Fixed the same evening (not yet committed): a torn fragment matched a different medicine (pheniramine); strengths in a column on the same row are now read.
+  - [ ] Live test with a real printed prescription (blank out the patient's name first). Handwritten prescriptions will mostly fail OCR; say so.
 
 ### C. Triage intelligence
 - [x] **C1 Risk-category tagging** (PS: risk-category tagging; rules-based flags). About 150 cited rules: ATP, IITT adult and paediatric, IMCI, maternal, labs, local (`bbf5411`).

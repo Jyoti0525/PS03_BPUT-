@@ -176,7 +176,7 @@ def test_overlapping_translations_do_not_hang(monkeypatch):
     class Model:
         def generate(self, **kw):
             time.sleep(0.05)
-            return kw["input_ids"]
+            return type("Out", (), {"sequences": kw["input_ids"]})()
 
     monkeypatch.setattr(language, "_indictrans", lambda d: (Tok(), Model(), Processor.shared, "cpu"))
     Processor.shared = Processor()
@@ -194,3 +194,84 @@ def test_overlapping_translations_do_not_hang(monkeypatch):
     for t in threads:
         t.join(10)
     assert not errors and not any(t.is_alive() for t in threads)
+
+
+# ── translation checks, from a live kiosk test on 5 Oct (Odia and Hindi, laptop microphone) ──
+# What IndicConformer heard, and what IndicTrans2 made of it before these checks existed:
+HEARD = [
+    ("ମୋର ବହୁତ ଦିନ ହେଲା ଜର ଆଉ ମୁଣ୍ଡ ବିନ୍ଧୁଛି", "I've had a headache for a long time."),  # fever dropped
+    ("ପିଲାଟି ଦିଇ ଦିନ ହେଲା କିଛି ଖାଉନି ଆଉ ତାକୁ ବହୁତ ଝାଡ଼ା ବି ହୋଇଉଛି", "The child has not eaten for days and is sweating a lot."),  # diarrhoea → sweating
+    ("ମୋ ବୟସ ଛପନ ବର୍ଷ ଆଉ ମୋର ଛାତି ବି ଦରଦ ହଉଛି", "I'm sixty-six years old and my chest hurts too."),  # 56 → 66
+    ("मुझे दो दिन से तेज बुखार और खांसी है", "I have a high fever and cough for two days."),
+    ("मुझे सीने में दिक्कत है और सांस लेने में तकलीफ है", "I have chest pain and shortness of breath."),
+]
+
+
+def test_spoken_odia_and_hindi_spellings_are_read_from_the_patients_own_words():
+    from app.triage.findings import scan_text
+
+    found = [{f for f, x in scan_text(orig, "").items() if x.value is True} - {"pain"} for orig, _ in HEARD]
+    assert found == [{"fever", "headache"}, {"diarrhoea"}, {"chest_pain"}, {"fever", "cough"}, {"chest_pain", "breathless"}]
+    assert not any(x.value for x in scan_text("ଏହା ଜରୁରୀ ନୁହେଁ", "").values())  # ଜରୁରୀ ("urgent") is not ଜର (fever)
+    assert scan_text("ତିନି ଦିନ ହେଲା ଝାଡ଼ା ହୋଇନି", "")["diarrhoea"].value is False
+
+
+def test_translation_errors_are_caught_against_the_patients_words_and_labelled():
+    from app.triage.findings import extract, translation_check
+
+    sym = [{"text": en, "original_text": orig, "language": "or" if i < 3 else "hi", "source": "voice", "confirmed_by_readback": True} for i, (orig, en) in enumerate(HEARD)]
+    checks = [translation_check(s) for s in sym]
+    assert checks[0]["missed"] == ["fever"] and checks[1] == {**checks[1], "missed": ["diarrhoea"], "added": ["sweating"]}
+    assert checks[3] is None and checks[4] is None
+    sweat = extract({"chief_complaint": "", "symptoms": sym})["sweating"]
+    assert sweat.value is True and "machine translation only" in sweat.evidence[0]  # still counted (over-triage is safer), but labelled
+
+
+def test_translator_is_given_standard_words_and_digits_but_the_record_keeps_the_patients_words():
+    from app.mt_checks import prepare
+
+    assert prepare(HEARD[0][0], "or")[0] == "ମୋର ବହୁତ ଦିନ ହେଲା ଜ୍ୱର ଆଉ ମୁଣ୍ଡ ବିନ୍ଧୁଛି"
+    assert prepare(HEARD[1][0], "or")[0] == "ପିଲାଟି ଦିଇ ଦିନ ହେଲା କିଛି ଖାଉନି ଆଉ ତାକୁ ବହୁତ ଅତିସାର ବି ହୋଇଉଛି"
+    given, changes = prepare(HEARD[2][0], "or")
+    assert given.startswith("ମୋ ବୟସ 56 ବର୍ଷ") and changes[0] == {"from": "ଛପନ", "to": "56", "why": "number word written as digits"}
+    assert prepare("ଝାଡ଼ାରେ ରକ୍ତ ଯାଉଛି", "or")[0] == "ମଳରେ ରକ୍ତ ଯାଉଛି"
+    assert prepare("ତିନି ଦିନ ହେଲା ଝାଡ଼ା ହୋଇନି", "or")[0] == "3 ଦିନ ହେଲା ମଳ ବାହାରୁ ନାହିଁ"
+    assert prepare("मुझे दो दिन से बुखार है, दवा दो", "hi")[0] == "मुझे 2 दिन से बुखार है, दवा दो"  # "give the medicine" stays a word
+
+
+def test_unsure_translation_numbers_and_symptoms_are_named():
+    from app.mt_checks import english_numbers, unsure
+
+    assert english_numbers("I'm sixty-six, fever for 3 days, twenty two times") == [66, 3, 22]
+    alts = [("I'm sixty-six years old and my chest hurts too.", -0.546), ("I'm fifty-six years old and my chest hurts too.", -0.547),
+            ("I'm sixty-six years old and my chest is hurting too.", -0.583)]
+    assert unsure("ମୋ ବୟସ ଛପନ ବର୍ଷ", alts[0][0], alts) == ["number unclear: 66 or 56"]
+    assert unsure("ମୋ ବୟସ 56 ବର୍ଷ", "I am 6 years old", [("I am 6 years old", -0.4)]) == ["the patient's words have 56, the translation does not"]
+    stool = [("The child is sweating a lot", -0.50), ("The child has a lot of diarrhoea", -0.55), ("The child has fever", -0.9)]
+    assert unsure("…", stool[0][0], stool) == ["may also mean: diarrhoea", "unsure of: sweating with symptoms"]  # far candidate ignored
+
+
+def test_note_names_the_translation_problem_and_keeps_each_onset_with_its_own_complaint(client, nurse, monkeypatch):
+    """The kiosk's English is kept only when the server cannot translate; the lexicon check still catches its errors."""
+    def unavailable(direction):
+        raise language.LanguageUnavailable("not in this test")
+
+    monkeypatch.setattr(language, "_indictrans", unavailable)  # an earlier test may have loaded the real model
+    sym = [{"text": en, "original_text": orig, "language": "or" if i < 3 else "hi", "source": "voice", "confirmed_by_readback": True} for i, (orig, en) in enumerate(HEARD)]
+    _, body = new_intake(client, nurse, symptoms=sym, chief_complaint=HEARD[0][1])
+    enc = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()
+    flag = next(f for f in enc["note"]["flags"] if f["code"] == "MT-CHECK")
+    assert flag["severity"] == "warning" and "translation leaves out fever" in flag["reason"]
+    assert "translation says sweating with symptoms, the patient's words do not" in flag["reason"]
+    onsets = {t["event"]: (t["certainty"], t["raw"]) for t in enc["note"]["timeline"] if t["event"].startswith("Onset")}
+    assert onsets[f"Onset: {HEARD[3][1]}"] == ("STATED", "दो दिन")  # two days belongs to the fever and cough …
+    assert onsets[f"Onset: {HEARD[0][1]}"][0] == "VAGUE"  # … not to the headache "for a long time"
+    assert "OR, HI" in enc["note"]["timeline"][-1]["event"]
+
+
+@needs("torch", "transformers", "IndicTransToolkit")
+def test_real_translator_gets_the_three_odia_sentences_right_after_preparation(real_models):
+    out = [language.translate_patient(orig, "or") for orig, _ in HEARD[:3]]
+    assert "fever" in out[0]["text"].lower() and "headache" in out[0]["text"].lower()
+    assert "diarrh" in out[1]["text"].lower() and "sweat" not in out[1]["text"].lower()
+    assert "56" in out[2]["text"] and "chest" in out[2]["text"].lower()

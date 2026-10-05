@@ -198,7 +198,7 @@ Jeevia/
 │   ├── app/triage/           rules engine + YAML rules, findings, OCR, image labels, timeline, note pipeline
 │   ├── app/*.py              models, schemas, services, security, audit, storage, otp, exports, observability, seed,
 │   │                         language (speech + translation), privacy, llm, output_guard
-│   └── tests/                332 pytest tests
+│   └── tests/                339 pytest tests
 ├── docs/                     FEATURES.md · EVALUATION.md · TODO.md · WORKFLOW.md · ARCHITECTURE.md · OPERATIONS.md
 ├── prototype/                Original static HTML prototype (design reference)
 ├── docker-compose.yml        Postgres + API + web for local full-stack runs
@@ -271,7 +271,7 @@ Secrets live only in the Render and Vercel dashboards — never in the repositor
 ## 10. Testing
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 332 tests
+cd backend && .venv/bin/pytest -q                  # 339 tests
 cd frontend && npm run lint && npx tsc --noEmit && npm run build
 ```
 Backend tests cover the rules engine, OTP (including lockout, rate limits and the Twilio path), the two-factor PIN

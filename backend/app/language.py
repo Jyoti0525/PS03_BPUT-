@@ -185,8 +185,12 @@ def _indictrans(direction: str):
         return _mt[direction]
 
 
-def translate(texts: list[str], src: str, tgt: str) -> dict:
-    """Translate a batch of sentences. One of src/tgt must be English."""
+BEAMS = 5
+
+
+def translate(texts: list[str], src: str, tgt: str, alternatives: bool = False) -> dict:
+    """Translate a batch of sentences. One of src/tgt must be English. With `alternatives`, also returns every beam's
+    candidate with its average log-probability, best first ({'alternatives': [[(text, score), …], …]})."""
     if src == tgt:
         return {"texts": list(texts), "engine": None}
     if src not in IT2_TAGS or tgt not in IT2_TAGS or "en" not in (src, tgt):
@@ -195,28 +199,51 @@ def translate(texts: list[str], src: str, tgt: str) -> dict:
     tok, model, ip, device = _indictrans(direction)
     import torch
 
+    n = BEAMS if alternatives else 1
     with _mt_run[direction]:
-        batch = ip.preprocess_batch(texts, src_lang=IT2_TAGS[src], tgt_lang=IT2_TAGS[tgt])
+        # postprocess_batch takes one placeholder map per output sentence off the processor's queue, so with n
+        # outputs per input the input is preprocessed n times (one copy each is used).
+        batch = ip.preprocess_batch([t for t in texts for _ in range(n)], src_lang=IT2_TAGS[src], tgt_lang=IT2_TAGS[tgt])[::n]
         enc = tok(batch, truncation=True, padding="longest", return_tensors="pt", return_attention_mask=True).to(device)
         with torch.inference_mode():
             # use_cache=False: the model repo's decoder expects the legacy tuple KV-cache that transformers 4.4x+ replaced.
-            out = model.generate(**enc, use_cache=False, min_length=0, max_length=256, num_beams=5, num_return_sequences=1)
-        decoded = tok.batch_decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True)
-        return {"texts": ip.postprocess_batch(decoded, lang=IT2_TAGS[tgt]), "engine": MT_ENGINE}
+            out = model.generate(**enc, use_cache=False, min_length=0, max_length=256, num_beams=BEAMS, num_return_sequences=n,
+                                 output_scores=alternatives, return_dict_in_generate=True)
+        decoded = ip.postprocess_batch(tok.batch_decode(out.sequences, skip_special_tokens=True, clean_up_tokenization_spaces=True), lang=IT2_TAGS[tgt])
+    if not alternatives:
+        return {"texts": decoded, "engine": MT_ENGINE}
+    scores = out.sequences_scores.tolist()
+    alts = [[(decoded[i * n + j], round(scores[i * n + j], 4)) for j in range(n)] for i in range(len(texts))]
+    return {"texts": [a[0][0] for a in alts], "alternatives": alts, "engine": MT_ENGINE}
+
+
+def translate_patient(text: str, lang: str) -> dict:
+    """A patient's sentence → English, with the checks in mt_checks: what was rewritten for the translator, and
+    where the translation is unsure. {'text', 'engine', 'rewrites', 'unsure'}."""
+    from .mt_checks import prepare, unsure
+
+    given, rewrites = prepare(text, lang)
+    out = translate([given], lang, "en", alternatives=True)
+    best = out["texts"][0]
+    return {"text": best, "engine": out["engine"], "rewrites": rewrites, "unsure": unsure(given, best, out["alternatives"][0])}
 
 
 def translate_symptoms(intake: dict) -> dict:
-    """Fill in English for free-text symptoms entered in another language. The patient's own words stay in
-    `original_text`; if translation cannot run, `text` keeps the original and no engine is claimed."""
+    """English for every free-text symptom entered in another language, translated here from the patient's own
+    words (`original_text`, kept unchanged) — English sent by the browser is not trusted. If translation cannot
+    run, whatever English came with the entry stays and no engine is claimed for it."""
     out = []
     for s in intake.get("symptoms") or []:
         s = dict(s)
         lang = s.get("language") or "en"
-        if lang != "en" and s.get("original_text") and s.get("text") == s.get("original_text"):
+        if lang != "en" and s.get("original_text"):
             try:
-                s["text"] = translate([s["original_text"]], lang, "en")["texts"][0]
-                heard_by = s.get("engine") or ("Browser speech recognition" if s.get("source") == "voice" else None)
+                tr = translate_patient(s["original_text"], lang)
+                prior = s.get("engine") or ""
+                heard_by = prior.split(" + ")[0] if prior and prior != MT_ENGINE else ("Browser speech recognition" if s.get("source") == "voice" else None)
+                s["text"] = tr["text"]
                 s["engine"] = f"{heard_by} + {MT_ENGINE}" if heard_by else MT_ENGINE
+                s["mt_rewrites"], s["mt_unsure"] = tr["rewrites"], tr["unsure"]
             except LanguageUnavailable as e:
                 log.warning("symptom left untranslated: %s", e)
             except Exception:

@@ -157,19 +157,39 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - **Code:** `backend/app/language.py`, `backend/app/routers/language.py` (`POST /speech/transcribe`);
   `frontend/src/lib/speech.ts`.
 - **Measured:** Odia, 25 FLEURS clips: 21.6 % word error, 5.6 % character error (details in EVALUATION.md).
-- **Left:** a live-voice test at the kiosk; measuring the other languages; a confidence threshold; Bhashini as a
-  second engine.
+- **Live test (5 Oct, laptop microphone, 3 Odia + 2 Hindi sentences):** Hindi transcripts were word-perfect. Odia was
+  close but written as spoken: ଜର for ଜ୍ୱର, ଦରଦ for ଦରଜ, ଦିଇ for ଦୁଇ. The symptom word list now matches spoken
+  spellings (see A3).
+- **Left:** measuring the other languages; a confidence threshold; Bhashini as a second engine.
 
 **A3 Translation** · Partial
 - **What:**
-  - Indian-language text is translated to English on submission. The original words stay beside the translation.
-  - The rules read both, so a wrong translation cannot hide a symptom. For example, ଝାଡ଼ା (loose stools) was
-    translated as "sweating", and the rules still caught it from the Odia.
-  - Every translated note carries the MT-CHECK flag.
+  - Indian-language text is translated to English on submission, by the server, from the patient's own words (English
+    sent by the browser is not trusted). The original words stay beside the translation, unchanged.
+  - The rules read both, so a wrong translation cannot hide a symptom.
+  - **What the live test found (5 Oct):** the translator dropped "fever" when it was spoken as ଜର, turned ଝାଡ଼ା
+    (loose stools) into "sweating" every time, and turned ଛପନ (56) into "sixty-six". Three fixes:
+    1. **Standard words for the translator only** (`prepare` in `backend/app/mt_checks.py`): ଜର → ଜ୍ୱର, ଝାଡ଼ା as loose
+       stools → ଅତିସାର, ଝାଡ଼ାରେ → ମଳରେ, negated ଝାଡ଼ା → "ମଳ ବାହାରୁ ନାହିଁ", and number words before a time unit or age
+       → digits (Hindi and Odia, 1–100). Each rewrite was tested on the model; ଡାଇରିଆ was rejected because the
+       model read it as "diary". The note lists every rewrite.
+    2. **Cross-check against the patient's words** (`translation_check` in `backend/app/triage/findings.py`): the
+       symptoms found in the Hindi/Odia are compared with those found in the English. A symptom the translation
+       left out, or one it added, turns MT-CHECK into a warning that names the sentence. A symptom found only in the
+       translation still counts for urgency (missing a real symptom is worse) but its evidence says "machine
+       translation only".
+    3. **Near-equal candidates** (`unsure` in `mt_checks.py`, all 22 languages, no word list needed): the beam
+       search's other top translations are compared with the best one. If they disagree on a number ("66 or 56")
+       or a symptom, the note says so. Digits in the patient's words that are missing from the English are flagged
+       too.
+  - Every translated note carries the MT-CHECK flag; it is a warning when any check above finds a problem.
 - **Uses:** IndicTrans2 distilled 200M, full precision. An 8-bit copy was tried and rejected because it turned
   "vomiting" into "nausea".
-- **Code:** `backend/app/language.py`. Translations run one at a time per direction: two at once froze the server
-  (fixed 5 Oct, regression test in `backend/tests/test_language.py`).
+- **Code:** `backend/app/language.py` (`translate_patient`), `backend/app/mt_checks.py`. Translations run one at a
+  time per direction: two at once froze the server (fixed 5 Oct, regression test in `backend/tests/test_language.py`).
+- **Measured:** with the fixes, the three Odia sentences from the live test translate correctly (fever kept,
+  diarrhoea not sweating, 56 not 66), checked by a test that runs the real model.
+- **Needs a native speaker:** the Odia number list and spoken-spelling list in `mt_checks.py` and `findings.py`.
 - **Left:** Bhashini online; English → Indian language for patient slips.
 
 **A4 Report upload** · Working
@@ -239,6 +259,9 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
   It ignores phrases that are not onsets ("3 times a day", "32 weeks pregnant", "2 years old"). If the patient says
   "3 days" but taps "1–4 weeks", the note asks staff to check. A stated onset also feeds the rules when nothing was
   tapped.
+
+  Each sentence the patient said gets its own onset row, from its own words. (The live test showed "2 days" from
+  the fever sentence printed against the headache "for a long time"; fixed 5 Oct.)
 - **Uses:** phrase lists in English, Hindi (Devanagari and romanised) and Odia. No model.
 - **Code:** `backend/app/triage/timeline.py`; 22 tests in `backend/tests/test_timeline.py`.
 - **Left:** a regional festival calendar (F5) so "since Diwali" can suggest a date.
@@ -277,7 +300,7 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 **B9 Two engines disagree → flag** · Not built
 - Needs Bhashini (speech) or a second OCR engine.
 
-**B10 Image understanding without diagnosis** · Working (a live test with a real strip is still to do)
+**B10 Image understanding without diagnosis** · Working
 - **What:**
   - **Document type:** lab report, prescription, medicine strip, discharge summary, mother-and-child (MCP) card,
     other document, or not a document. Decided by keyword rules, and the label shows the words that decided it.
@@ -285,9 +308,16 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
     one shows "awaiting confirmation" until a nurse or doctor taps Confirm or "Not this". Both actions are audited,
     and only confirmed names enter the record.
 - **Uses:** OCR text from B1; Python `difflib` fuzzy matching (similarity of 0.86 or more); the PMBJP list.
+- **Live test (5 Oct, phone photo of a paracetamol + phenylephrine + chlorpheniramine strip):** labelled "Medicine
+  strip or pack"; all three medicines found. Two fixes followed:
+  - a torn piece of a name ("heniramine" from Chlorpheniramine) had matched a different medicine, pheniramine. A
+    word that sits inside a longer medicine name read on the same photo is now ignored;
+  - strengths printed in a column ("Paracetamol IP …… 500 mg") are now read from the same printed row, including
+    OCR's "2m9" for 2 mg. A number with no readable unit shows as "500 (unit not read)".
+  The manufacturer's customer-care phone number was blacked out by the privacy step, as designed.
 - **Code:** `backend/app/triage/images.py`; `POST /encounters/{id}/medications`;
   `frontend/src/components/triage/medications.tsx`; `backend/scripts/build_medicine_list.py` rebuilds the list;
-  11 tests in `backend/tests/test_images.py`.
+  12 tests in `backend/tests/test_images.py`.
 - **Limit:** handwritten prescriptions will mostly fail.
 
 ### C. Triage decisions
@@ -513,7 +543,7 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 | Flag | Meaning |
 |---|---|
 | `ASR-UNCONFIRMED` | The patient skipped the spoken read-back of their transcript |
-| `MT-CHECK` | History was machine-translated; check it against the patient's own words shown beside it |
+| `MT-CHECK` | History was machine-translated; check it against the patient's own words shown beside it. A warning (not info) when the translation left out or added a symptom, or was unsure of a number or symptom |
 | `DISAGREE` | Two sources disagree, such as today's BP and the BP on a report |
 | `DOC-CHECK` | A report looks old, its name does not match, or a value needs checking |
 | `MEDS-UNCONFIRMED` | Medicine names were read from a strip or prescription and await confirmation |
@@ -559,7 +589,7 @@ Memory is tight on a 16 GB laptop: quit Docker Desktop before a demo. With every
 ## 7. Tests
 
 ```bash
-cd backend && .venv/Scripts/python.exe -m pytest -q     # 332 tests
+cd backend && .venv/Scripts/python.exe -m pytest -q     # 339 tests
 cd frontend && npx tsc --noEmit && npm run lint
 ```
 
@@ -571,8 +601,8 @@ cd frontend && npx tsc --noEmit && npm run lint
 | `test_api.py` | 20 | Sign-in, roles, consent, offline replay, overrides, escalations, exports, audit |
 | `test_privacy.py` | 19 | Name and number removal, Indian digits, cohort small-count suppression |
 | `test_orgs.py` | 16 | Organisations, roster, fitness, directory |
-| `test_language.py` | 11 | Speech and translation wiring, the ଝାଡ଼ା case, the two-at-once freeze |
-| `test_images.py` | 11 | Document type, medicine matching, face and ID blurring |
+| `test_language.py` | 17 | Speech and translation wiring, the two-at-once freeze, and the 5 Oct live-test sentences: spoken spellings, translation cross-check, rewrites, unsure numbers, per-sentence onsets, real-model check |
+| `test_images.py` | 12 | Document type, medicine matching (incl. the 5 Oct real strip photo), face and ID blurring |
 | `test_llm.py` | 10 | Summary checks with a stand-in model (no GPU needed) |
 | `test_kiosk.py` | 7 | Kiosk links, tokens, returning patients, the Twilio path |
 | `test_extraction.py` | 6 | Test-name matching, MCP card values, old-report and name checks, real OCR on a slip |

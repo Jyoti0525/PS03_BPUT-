@@ -10,6 +10,7 @@ import uuid
 from datetime import datetime, timezone
 
 from .extraction import document_checks
+from .findings import FINDINGS, translation_check
 from .timeline import onset
 
 # Follow-up questions keyed by findings (negation-aware), so "no chest pain" never asks about chest pain.
@@ -157,8 +158,22 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     machine = [x for x in intake.get("symptoms", []) if x.get("original_text") and x.get("text") != x.get("original_text")]
     if machine:
         langs = ", ".join(sorted({x.get("language", "") for x in machine}))
-        flags.append({"code": "MT-CHECK", "label": "Machine-translated history — check against the patient's own words", "severity": "info",
-                      "reason": f"English rendered by {machine[0].get('engine') or 'machine translation'} from {langs}; rules also read the original-language text"})
+        problems, rewrites = [], []
+        for x in machine:
+            notes = list(x.get("mt_unsure") or [])
+            if chk := translation_check(x):
+                notes += [f"translation leaves out {FINDINGS[f][0].lower()}" for f in chk["missed"]]
+                notes += [f"translation says {FINDINGS[f][0].lower()}, the patient's words do not" for f in chk["added"]]
+            if notes:
+                problems.append(f'"{x["original_text"]}" → "{x["text"]}": {"; ".join(notes)}')
+            rewrites += [f'{r["from"]} → {r["to"]}' for r in x.get("mt_rewrites") or []]
+        base = f"English rendered by {machine[0].get('engine') or 'machine translation'} from {langs}; rules also read the original-language text"
+        if rewrites:
+            base += f"; given to the translator in standard form: {', '.join(dict.fromkeys(rewrites))}"
+        if problems:
+            flags.append({"code": "MT-CHECK", "label": "Translation may be wrong — check with the patient", "severity": "warning", "reason": " | ".join(problems) + f" — {base}"})
+        else:
+            flags.append({"code": "MT-CHECK", "label": "Machine-translated history — check against the patient's own words", "severity": "info", "reason": base})
     if meds_pending:
         flags.append({"code": "MEDS-UNCONFIRMED", "label": f"{len(meds_pending)} medicine name(s) read from a strip or prescription — awaiting confirmation", "severity": "warning",
                       "reason": "Read by OCR and matched to the PMBJP generic list; not part of the record until a nurse or doctor confirms each one"})
@@ -207,9 +222,21 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         timeline.append({"when": e.created_at.strftime("%d/%m/%Y"), "event": f"Previous visit: {e.chief_complaint}", "certainty": "RECORDED", "raw": None})
     if (intake.get("chronic") or {}).get("last_checkup"):
         timeline.append({"when": intake["chronic"]["last_checkup"], "event": f"Last {intake['chronic']['condition']} check-up", "certainty": "STATED", "raw": "as told by the patient"})
-    timeline.append({"when": began["when"], "event": f"Onset: {intake['chief_complaint']}", "certainty": began["certainty"], "raw": began["raw"]})
+    # One onset per thing the patient said, each from that sentence's own words: "fever and cough for two days" and
+    # "headache for a long time" are two onsets, and the time from one must not be shown against the other.
+    onsets = []
+    for s in intake.get("symptoms") or []:
+        o = onset({"symptoms": [s]})
+        if o["certainty"] != "UNKNOWN":
+            onsets.append((o, s.get("text") or s.get("original_text")))
+    if not onsets or str(began["raw"] or "").startswith("tapped"):
+        onsets.insert(0, (began, intake["chief_complaint"]))
+    onsets.sort(key=lambda r: (r[0]["days"] is not None, -(r[0]["days"] or 0)))  # unclear first, then earliest
+    for o, what in onsets:
+        timeline.append({"when": o["when"], "event": f"Onset: {what}", "certainty": o["certainty"], "raw": o["raw"]})
     src = intake["symptoms"][0]["source"] if intake.get("symptoms") else "text"
-    timeline.append({"when": "Today", "event": f"Intake at kiosk ({intake.get('language', 'en').upper()}, {src})", "certainty": "RECORDED", "raw": None})
+    spoken = list(dict.fromkeys(s.get("language") or "en" for s in intake.get("symptoms") or [])) or [intake.get("language", "en")]
+    timeline.append({"when": "Today", "event": f"Intake at kiosk ({', '.join(x.upper() for x in spoken)}, {src})", "certainty": "RECORDED", "raw": None})
 
     trend = []
     ordered = list(reversed(history))

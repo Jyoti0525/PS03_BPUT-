@@ -35,6 +35,20 @@ def test_medicine_names_are_matched_to_the_generic_list_with_strength():
     assert all(m["status"] == "awaiting_confirmation" for m in meds)
 
 
+def test_real_strip_photo_reads_each_medicine_once_with_its_strength_column():
+    """OCR lines (text, box) from a phone photo of a paracetamol + phenylephrine + chlorpheniramine strip, 5 Oct.
+    The strength column is a separate box on the same row; the torn lower half left "heniramine", which used to
+    fuzzy-match pheniramine, a different medicine."""
+    read = [("gcnuncoated tablelcontains", [0.143, 0.243, 0.306, 0.028]), ("500", [0.554, 0.254, 0.069, 0.017]),
+            ("patacetamolIP", [0.147, 0.259, 0.149, 0.021]), ("10mg", [0.562, 0.264, 0.064, 0.016]),
+            ("Phenylephrine Hydrochloride Ip", [0.147, 0.266, 0.289, 0.023]), ("2m9", [0.576, 0.274, 0.053, 0.016]),
+            ("ChlorpheniramineMaleate IP", [0.149, 0.278, 0.269, 0.021]), ("Paracetamol+", [0.182, 0.49, 0.351, 0.045]),
+            ("Phenylephrine", [0.185, 0.518, 0.354, 0.048]), ("Chlorpheniramine", [0.192, 0.57, 0.433, 0.055]),
+            ("acetamolIP", [0.244, 0.703, 0.121, 0.031]), ("ylephrine Hy", [0.264, 0.712, 0.126, 0.033]), ("heniramine", [0.286, 0.726, 0.1, 0.027])]
+    meds = {m["name"]: m["strength"] for m in images.medicines([{"text": t, "conf": 0.95, "bbox": b} for t, b in read])}
+    assert meds == {"paracetamol": "500 (unit not read)", "phenylephrine": "10 mg", "chlorpheniramine": "2 mg"}
+
+
 @pytest.mark.parametrize(
     "text, expected",
     [
