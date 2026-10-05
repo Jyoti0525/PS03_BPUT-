@@ -138,6 +138,7 @@ def test_rules_read_the_original_words_when_translation_is_wrong(client, nurse):
     assert language.MT_ENGINE in flag["reason"] and "or" in flag["reason"]
 
 
+@needs("torch")
 def test_overlapping_translations_do_not_hang(monkeypatch):
     """IndicProcessor hands placeholder maps from preprocess to postprocess through one shared queue and clears it
     afterwards; two overlapping translations used to leave one waiting forever (seen live, 5 Oct)."""

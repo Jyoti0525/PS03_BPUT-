@@ -10,7 +10,7 @@ Nothing the problem statement names may be missing, including what it calls "may
 - Never delete an item. If we drop something, strike it through and write why.
 
 **Deadline:** mid-evaluation **Sat 10 Oct 2026**. The top 5 of 84 teams are chosen on POC and PPT together.
-State last checked: **5 Oct 2026, evening** (last commit `bafbe44`; everything marked 5 Oct is uncommitted).
+State last checked: **5 Oct 2026, evening** (last commit `ca889e7`).
 
 ---
 
@@ -20,7 +20,7 @@ State last checked: **5 Oct 2026, evening** (last commit `bafbe44`; everything m
 |---|---|---|---|
 | Sat 3 Oct | Rules engine v2, real OCR, new repo, free disk space, request Bhashini key | Code on the new repo; 15 GB or more free | Done (`bbf5411`; 99 GB free). Bhashini key still pending |
 | Sun 4 Oct | Server speech recognition; translation of free text | An Odia sentence becomes a transcript plus English translation in the note, with the engine named | Done over HTTP (`bafbe44`). **Left:** test with a live voice at the kiosk (§2) |
-| Mon 5 Oct | LLM prose with faithfulness check; output guard; anonymisation; "continue without AI" | Red-team phrases blocked and logged; a typed name shows as [NAME] | **Done 5 Oct** (uncommitted): all four, checked live |
+| Mon 5 Oct | LLM prose with faithfulness check; output guard; anonymisation; "continue without AI" | Red-team phrases blocked and logged; a typed name shows as [NAME] | **Done 5 Oct** (`ca889e7`): all four, checked live |
 | Tue 6 Oct | Image understanding; timeline certainty labels; deck draft starts | A medicine-strip photo becomes a medication list awaiting confirmation; a face is blurred before storage | Image understanding and timeline labels **done early (5 Oct)**. Deck draft not started. **Left:** a live photo of a real strip |
 | Wed 7 Oct | Occupational rules, campus cluster alert, maternal missed visit, per-role follow-ups, capacity alert | Each of the seven scenarios has one working demo moment | Not started |
 | Thu 8 Oct | Measured figures; hosted deployment; bug fixes; feature freeze at night | Evaluation table with real numbers; the public link works | ASR figures only |
@@ -60,7 +60,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [ ] **A2 Voice intake** (PS: voice; speech-to-text). *Partial:* offline IndicConformer is done. **Left:** everything in §2, plus Bhashini online.
 - [ ] **A3 Translation English / Hindi / regional** (PS: translation). *Partial:* offline IndicTrans2, original words kept, MT-CHECK flag. **Left:** Bhashini online; check that the note shows the original beside the translation, marked "machine translated"; English → Indic for advice and slips.
 - [x] **A4 Report upload**: PDF and images, multiple files.
-- [x] **A5 Basic visual inputs** (5 Oct, uncommitted). Report photos and "photo of the problem" are both accepted. Each is redacted before storage and routed to B10, which labels it; a photo of the problem is never interpreted.
+- [x] **A5 Basic visual inputs** (5 Oct, `ca889e7`). Report photos and "photo of the problem" are both accepted. Each is redacted before storage and routed to B10, which labels it; a photo of the problem is never interpreted.
 - [ ] **A6 Patient identity and matching.** *Partial:* lookup by number. **Check:** match candidates are confirmed by a human, never auto-merged, and every pick is logged.
 - [ ] **A7 Spoken read-back and prompts.** *Partial:* browser speech synthesis. Indic Parler-TTS moves after 10 Oct. **Check:** Odia voice quality on the demo laptop.
 - [ ] **A8 Vitals entry.** *Partial:* the nurse UI has vitals and AVPU. **Check:** unit lock, plausibility bounds, and a "not measured" option.
@@ -70,13 +70,13 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **B1 OCR for lab reports** (PS: OCR). RapidOCR with PaddleOCR models, offline (`bbf5411`).
 - [ ] **B2 Numeric validation.** *Partial:* lab parser, stale-date and name-mismatch checks. **Left:** flag-versus-range consistency, unit plausibility, physiological bounds, arithmetic checks (WBC differential near 100 %, absolute count = % × total, globulin = total protein − albumin).
 - [x] **B3 Key-detail extraction**: test, value, unit, range, traced to the image.
-- [x] **B4 Timeline summary with certainty labels** (5 Oct, uncommitted).
+- [x] **B4 Timeline summary with certainty labels** (5 Oct, `ca889e7`).
   - `app/triage/timeline.py` labels each onset STATED, INFERRED, VAGUE or UNKNOWN (plus RECORDED for dated records), with the patient's raw words. Works in English, Hindi (both scripts) and Odia.
   - Ignores "3 times a day", "32 weeks pregnant" and "2 years old".
   - A said-vs-tapped conflict ("3 days" said, "1–4 weeks" tapped) becomes a missing-info question.
   - The rules engine now uses a STATED onset when nothing was tapped, with a wide window. 22 tests.
   - **Left:** the regional festival calendar (F5) for "since Diwali" hints.
-- [x] **B5 Structured note** (PS: structured triage note; lightweight LLM summarisation). Done 5 Oct, uncommitted; checked live. An Odia chest-pain case was summarised in 1.8 s, the checks passed, and the model badge shows on the note:
+- [x] **B5 Structured note** (PS: structured triage note; lightweight LLM summarisation). Done 5 Oct (`ca889e7`); checked live. An Odia chest-pain case was summarised in 1.8 s, the checks passed, and the model badge shows on the note:
   - [x] `app/llm.py`: fact sheet → Qwen3-4B-Instruct-2507 Q4_K_M via llama.cpp llama-server (`JEEVIA_LLM_URL`) → faithfulness check (numbers incl. number words, units, medicines, and every stated or denied symptom against the rules engine's findings) → output guard → else template + FAIL_FELL_BACK.
   - [x] Runs in the background after intake and after new vitals; never overwrites a clinician's edit; skipped for "continue without AI".
   - [x] The note shows who wrote the summary (model badge or "Template summary"), the template beside it, and any rejected text with reasons.
@@ -88,7 +88,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [ ] **B7 Follow-up questions by role** (PS: for health worker, nurse, doctor, medical officer). *Partial:* health worker, nurse and doctor questions exist. **Left:** medical-officer questions, and the per-role view (needs the E2 roles).
 - [x] **B8 Test-name normalisation (LOINC)**: a LOINC code on parsed tests.
 - [ ] **B9 Cross-engine disagreement flag.** Speech: local model vs Bhashini. OCR: second engine (docTR moves after 10 Oct).
-- [ ] **B10 Image understanding without diagnosis** (PS: basic visual inputs; Multimodal 15 %). *Nearly done (5 Oct, uncommitted):*
+- [ ] **B10 Image understanding without diagnosis** (PS: basic visual inputs; Multimodal 15 %). *Nearly done (5 Oct, `ca889e7`):*
   - [x] Document-type label: lab report, prescription, medicine strip, discharge summary, MCP card, other, or non-document. Deterministic, with the deciding words shown.
   - [x] Medicine names matched to the **PMBJP list of 2,110 generic medicines** (PIB, Govt of India, free to reproduce with acknowledgement; 1,087 names, `scripts/build_medicine_list.py`). Strength is read too. Each name awaits confirmation; nurse/doctor Confirm or "Not this", audited. Checked live in the browser.
   - [x] Faces pixelated (YuNet, MIT, vendored; checked on a public-domain portrait) and phone/Aadhaar/ABHA lines blacked out **before storage**. Photos are always re-encoded, which drops EXIF/GPS.
@@ -99,7 +99,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **C1 Risk-category tagging** (PS: risk-category tagging; rules-based flags). About 150 cited rules: ATP, IITT adult and paediatric, IMCI, maternal, labs, local (`bbf5411`).
 - [x] **C2 Urgency signal highlighting**: each tier shows its rule, the value and the source.
 - [ ] **C3 Queue prioritisation** (PS: queue prioritisation; patient load varies). *Partial:* urgency, then waiting time. **Left:** capacity alert to the medical officer when unacknowledged REDs outnumber reviewers on shift; ordering reason printed on each row.
-- [ ] **C4 Non-diagnostic output guard** (PS: explicitly non-diagnostic). *Nearly done (5 Oct, uncommitted):*
+- [ ] **C4 Non-diagnostic output guard** (PS: explicitly non-diagnostic). *Nearly done (5 Oct, `ca889e7`):*
   - [x] Pattern list (`app/output_guard.yaml`): condition names, diagnostic phrasing, medicine/dose/treatment advice in English, Hindi (Devanagari + romanised), Odia. A phrase passes only if the source data already says it.
   - [x] Red-team set: 101 of 101 blocked, 40 of 40 safe sentences passed (`tests/data/redteam_outputs.yaml`; written in `docs/EVALUATION.md` with its limits).
   - [x] Blocked outputs logged (audit GUARD_BLOCK, with the rejected text) and shown on the note ("Rejected AI text and why").
@@ -138,9 +138,9 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [ ] **F5 Regional calendar and cadres**: festival and season table per region (feeds B4); local cadre names.
 
 ### G. Privacy, safety and responsible AI (PS mandatory: consent, minimal retention, anonymisation, auditability, handoff)
-- [x] **G1 Consent** (5 Oct, uncommitted). Self or proxy consent, plus **"Continue without AI"** on the kiosk consent step (scope `no_ai`). With it: the mic is hidden, voice entries are refused by the server, nothing is translated, uploaded reports are not OCR-read (staff are told to view the image), and the note carries the NO-AI flag with renderer TEMPLATE. Checked live in the kiosk, plus 4 tests. **When B5 lands:** the LLM must also skip these notes (test to add then).
+- [x] **G1 Consent** (5 Oct, `ca889e7`). Self or proxy consent, plus **"Continue without AI"** on the kiosk consent step (scope `no_ai`). With it: the mic is hidden, voice entries are refused by the server, nothing is translated, uploaded reports are not OCR-read (staff are told to view the image), and the note carries the NO-AI flag with renderer TEMPLATE. Checked live in the kiosk, plus 4 tests. **When B5 lands:** the LLM must also skip these notes (test to add then).
 - [x] **G2 Minimal retention**: purge job and retention page.
-- [x] **G3 Anonymisation** (PS mandatory). Done 5 Oct, uncommitted:
+- [x] **G3 Anonymisation** (PS mandatory). Done 5 Oct (`ca889e7`):
   - [x] Names (registered patient and proxy, plus "my name is …" in English, Hindi, Odia, Kannada), phone, Aadhaar, ABHA and e-mail scrubbed from the patient's free text **before storage and before translation** (`app/privacy.py`). Checked live: an Odia intake shows `[NAME]` and `[PHONE]` in both the Odia and the English line.
   - [x] A word the triage lexicon reads as a symptom is never removed as a name (ସୀତା ଜ୍ୱର keeps ଜ୍ୱର).
   - [x] Staff free text (observation note, override, escalation and acknowledgement reasons): ID numbers scrubbed, names kept.
