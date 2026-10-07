@@ -112,6 +112,7 @@ export const liveApi: JeeviaApi = {
   getFacility: (id) => json(`/facilities/${id}`),
   updateFacility: (id, p) => patch(`/facilities/${id}`, p),
   facilityCalendar: (id) => json(`/facilities/${id}/calendar`),
+  visitDays: (id, kind, after) => json(`/facilities/${id}/visit-days?kind=${kind}${after ? `&after=${after}` : ""}`),
   tryOnset: (id, text) => json(`/facilities/${id}/onset?text=${encodeURIComponent(text)}`),
   facilityStats: (id) => json(`/facilities/${id}/stats`),
 
@@ -134,6 +135,7 @@ export const liveApi: JeeviaApi = {
   revokeShare: (id) => json(`/shares/${id}`, { method: "DELETE" }),
   shareMeta: (token) => json(`/share/${encodeURIComponent(token)}`),
   openShare: (token, access_code) => post(`/share/${encodeURIComponent(token)}/open`, { access_code }),
+  shareReceived: (token, access_code, confirmed_by, note) => post(`/share/${encodeURIComponent(token)}/received`, { access_code, confirmed_by, note }),
 
   searchDirectory: (q, state) => json(`/directory/search?q=${encodeURIComponent(q)}${state ? `&state=${encodeURIComponent(state)}` : ""}`),
   directoryStates: () => json("/directory/states"),
@@ -161,6 +163,7 @@ export const liveApi: JeeviaApi = {
   searchPatients: (q) => json(`/patients?q=${encodeURIComponent(q)}`),
   getPatient: (id) => json(`/patients/${id}`),
   getPatientByCode: (code) => json(`/patients/by-code/${encodeURIComponent(code)}`),
+  pickPatient: (id, match_reason, candidates) => post(`/patients/${id}/pick`, { match_reason, candidates }),
   createPatient: (input) => post("/patients", input),
   patientEncounters: (id) => json(`/patients/${id}/encounters`),
 
@@ -193,10 +196,12 @@ export const liveApi: JeeviaApi = {
   endCall: (cid, outcome) => post(`/calls/${cid}/end`, { outcome }),
   getCall: (cid) => json(`/calls/${cid}`),
   callAudio: async (cid, i) => (await raw(`/calls/${cid}/turns/${i}/audio`)).blob(),
+  speakOnline: async (text, language) => (await raw("/language/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, language }) })).blob(),
   listCalls: (id) => json(`/followups/${id}/calls`),
 
   createReferral: (encounterId, input) => post(`/encounters/${encounterId}/referrals`, input),
   listReferrals: () => json("/referrals"),
+  referralReceived: (id, confirmed_by, note) => post(`/referrals/${id}/received`, { confirmed_by, note }),
 
   uploadFile: (file, kind, encounterId, sampleKey, read = true, online = false) => {
     const fd = new FormData();
@@ -231,6 +236,7 @@ export const liveApi: JeeviaApi = {
   retentionStatus: () => json("/retention"),
   deidentifiedCohort: (days = 28) => json(`/cohort?days=${days}`),
   aiOpinions: (days = 28) => json(`/ai-opinions?days=${days}`),
+  overrideStats: (days = 28) => json(`/override-stats?days=${days}`),
   guardTestSamples: () => json("/guard-test/samples"),
   guardTest: (text, source = "") => post("/guard-test", { text, source }),
 

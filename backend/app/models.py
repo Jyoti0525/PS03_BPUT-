@@ -72,6 +72,8 @@ class Facility(Base):
     beds_total: Mapped[int] = mapped_column(Integer, default=0)
     beds_occupied: Mapped[int] = mapped_column(Integer, default=0)
     offline_mode: Mapped[bool] = mapped_column(Boolean, default=False)
+    # F2: low | normal | high. On a high-load day the kiosk asks only the safety questions.
+    patient_load: Mapped[str] = mapped_column(String(8), default="normal", server_default="normal")
     capabilities: Mapped[dict] = mapped_column(JSONType, default=dict)
     # F5: this facility's changes to its state's regional calendar and worker names (see app/regions.yaml)
     region_config: Mapped[dict | None] = mapped_column(JSONType, nullable=True)
@@ -155,6 +157,12 @@ class Device(Base):
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
+def _data_origin() -> str:
+    from .config import get_settings
+
+    return get_settings().data_origin
+
+
 class Patient(Base):
     __tablename__ = "patients"
     __table_args__ = (UniqueConstraint("organisation_id", "employee_code", name="uq_patient_employee_code"),)
@@ -167,6 +175,7 @@ class Patient(Base):
     language: Mapped[str] = mapped_column(String(8), default="en")
     category: Mapped[str] = mapped_column(String(16), default="normal")
     village: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    data_origin: Mapped[str] = mapped_column(String(16), default=_data_origin, server_default="SYNTHETIC")  # G8
     employer_id: Mapped[str | None] = mapped_column(String(64), nullable=True)  # legacy, superseded by organisation_id
     # Workers: linked to their employer's roster
     organisation_id: Mapped[str | None] = mapped_column(ForeignKey("organisations.id"), nullable=True, index=True)
@@ -234,6 +243,7 @@ class Encounter(Base):
     # When the patient reached the facility. Waiting time and escalation timers count from here, so filling the form
     # at home never moves anyone ahead of people already waiting. An intake from home has none until the desk checks it in.
     arrived_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    data_origin: Mapped[str] = mapped_column(String(16), default=_data_origin, server_default="SYNTHETIC")  # G8
     patient: Mapped[Patient] = relationship(lazy="joined")
     consent: Mapped[Consent | None] = relationship(lazy="joined")
 
@@ -304,7 +314,13 @@ class Referral(Base):
     transport: Mapped[str] = mapped_column(String(20))
     created_by: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
-    status: Mapped[str] = mapped_column(String(16), default="sent")
+    status: Mapped[str] = mapped_column(String(16), default="sent")  # sent | received
+    # E4: closed only when the receiving side confirms care. Due by urgency; an open referral past due raises an alert.
+    due_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    received_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    received_by: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    received_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    received_via: Mapped[str | None] = mapped_column(String(16), nullable=True)  # qr (receiving clinician) | phone (referring doctor)
     encounter: Mapped[Encounter] = relationship(lazy="joined")
 
 

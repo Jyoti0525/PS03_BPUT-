@@ -1,6 +1,7 @@
 from functools import lru_cache
+from typing import Literal
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,6 +9,14 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_prefix="JEEVIA_", extra="ignore")
 
     env: str = "dev"
+    # H3: how much runs on this machine. stub = rules only (no speech, translation, OCR, summary model or online engines:
+    # CI and the free cloud demo); demo = everything loads on first use (laptop default); full = models load at
+    # start-up and the summary model is expected. A setting given explicitly always wins over the profile.
+    profile: Literal["stub", "demo", "full"] = "demo"
+    language_models: bool = True  # offline speech recognition and translation
+    ocr_enabled: bool = True
+    # G8: where this deployment's records come from. Only SYNTHETIC or PUBLIC_SAMPLE; real patient data is out of scope.
+    data_origin: Literal["SYNTHETIC", "PUBLIC_SAMPLE"] = "SYNTHETIC"
     database_url: str = "sqlite:///./data/jeevia.db"
     jwt_secret: str = "change-me-in-production-please-32b+"
     jwt_alg: str = "HS256"
@@ -116,6 +125,19 @@ class Settings(BaseSettings):
     seed_demo: bool = True
     seed_scenarios: bool = True  # demo scenarios for campus fevers, missed visits, capacity, workplace screening (app/scenarios.py)
     log_level: str = "INFO"
+
+
+    @model_validator(mode="after")
+    def _profile(self):
+        given = self.model_fields_set
+        preset = {"stub": {"language_models": False, "ocr_enabled": False, "asr_second_offline": False, "llm_url": None,
+                           "llm_urgency_opinion": False, "preload_language_models": False, "sarvam_api_key": None},
+                  "demo": {},
+                  "full": {"preload_language_models": True}}[self.profile]
+        for k, v in preset.items():
+            if k not in given:
+                object.__setattr__(self, k, v)
+        return self
 
 
 @lru_cache

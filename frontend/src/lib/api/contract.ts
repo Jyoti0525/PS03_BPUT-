@@ -13,6 +13,7 @@ import type {
   GuardTestResult,
   GuardTestSample,
   AiOpinionReport,
+  OverrideStats,
   Consent,
   ConsentInput,
   Device,
@@ -54,6 +55,8 @@ import type {
   VitalsInput,
   OnsetReading,
   RegionCalendar,
+  VisitCalendar,
+  VisitKind,
 } from "@/lib/types";
 
 export interface ExportResult {
@@ -101,6 +104,8 @@ export interface JeeviaApi {
   facilityStats(id: string): Promise<FacilityStats>;
   /** F5: festivals and seasons this facility dates vague onsets by, and its worker names. Staff only. */
   facilityCalendar(id: string): Promise<RegionCalendar>;
+  /** E5: the next days this facility holds this kind of follow-up visit. */
+  visitDays(id: string, kind: VisitKind, after?: string): Promise<{ kind: VisitKind; rule: string; days: string[]; calendar: VisitCalendar }>;
   /** F5: how the note would read a phrase such as "since Diwali" at this facility. */
   tryOnset(id: string, text: string): Promise<OnsetReading>;
 
@@ -123,6 +128,8 @@ export interface JeeviaApi {
   revokeShare(id: string): Promise<void>;
   shareMeta(token: string): Promise<{ facility_name: string; purpose: string; expires_at: string }>;
   openShare(token: string, accessCode: string): Promise<SharedSummary>;
+  /** E4: the receiving clinician confirms the patient reached care; closes the referral. */
+  shareReceived(token: string, accessCode: string, confirmedBy: string, note: string): Promise<{ status: string; received_by: string; received_at: string }>;
 
   // National facility directory (public, used at sign-up)
   searchDirectory(q: string, state?: string | null): Promise<DirectoryHit[]>;
@@ -155,6 +162,8 @@ export interface JeeviaApi {
   searchPatients(q: string): Promise<PatientCandidate[]>;
   getPatient(id: string): Promise<Patient>;
   getPatientByCode(code: string): Promise<Patient>;
+  /** A6: a person chose this patient from the candidates; logged, never an automatic merge. */
+  pickPatient(id: string, matchReason: string, candidates: number): Promise<Patient>;
   createPatient(input: Omit<Patient, "id" | "code" | "created_at">): Promise<Patient>;
   patientEncounters(patientId: string): Promise<Encounter[]>;
 
@@ -199,6 +208,8 @@ export interface JeeviaApi {
   listCalls(followupId: string): Promise<Call[]>;
   /** One agent line spoken by Sarvam's voice (MP3). Rejects with 503 when Sarvam is not set up. */
   callAudio(callId: string, turnIndex: number): Promise<Blob>;
+  /** A7: a line read aloud by the online voice when the device has none for the language. */
+  speakOnline(text: string, lang: string): Promise<Blob>;
 
   // Referrals
   createReferral(
@@ -206,6 +217,8 @@ export interface JeeviaApi {
     input: Pick<Referral, "destination" | "specialty" | "reason" | "transport" | "note_text">,
   ): Promise<Referral>;
   listReferrals(): Promise<Referral[]>;
+  /** E4: the referring doctor records that care was received (e.g. confirmed by phone). */
+  referralReceived(id: string, confirmedBy: string, note: string): Promise<Referral>;
 
   // Files
   /** `sampleKey` marks one of the bundled synthetic reports so OCR crops can be generated. */
@@ -231,6 +244,7 @@ export interface JeeviaApi {
   deidentifiedCohort(days?: number): Promise<DeidentifiedCohort>;
   /** C8: where the AI model's urgency differed from the rules. Supervisor and doctor. */
   aiOpinions(days?: number): Promise<AiOpinionReport>;
+  overrideStats(days?: number): Promise<OverrideStats>;
   /** C4 demo: run a typed sentence through the output guard. Supervisor only; logged as a test, touches no record. */
   guardTestSamples(): Promise<{ guard_version: number; samples: GuardTestSample[] }>;
   guardTest(text: string, source?: string): Promise<GuardTestResult>;

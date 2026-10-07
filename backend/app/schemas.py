@@ -217,6 +217,7 @@ class Specialist(BaseModel):
     label: str
     available: bool
     schedule: str | None = None
+    refer_to: str | None = None  # E4: where this specialty is referred when it is not on site
 
 
 class FacilityOut(ORM):
@@ -237,6 +238,7 @@ class FacilityOut(ORM):
     beds_total: int
     beds_occupied: int
     offline_mode: bool
+    patient_load: str = "normal"  # F2: low | normal | high
     capabilities: dict[str, bool]
     region: dict | None = None
     region_config: dict | None = None
@@ -274,12 +276,41 @@ class MonsoonDates(BaseModel):
         return self
 
 
+class VisitDays(BaseModel):
+    weekdays: list[int] = Field(default_factory=list, max_length=7)  # 0 = Monday
+    monthdays: list[int] = Field(default_factory=list, max_length=31)
+
+    @field_validator("weekdays")
+    @classmethod
+    def _wd(cls, v: list[int]) -> list[int]:
+        if any(not 0 <= d <= 6 for d in v):
+            raise ValueError("weekdays are 0 (Monday) to 6 (Sunday)")
+        return sorted(set(v))
+
+    @field_validator("monthdays")
+    @classmethod
+    def _md(cls, v: list[int]) -> list[int]:
+        if any(not 1 <= d <= 28 for d in v):
+            raise ValueError("days of the month are 1 to 28, so every month has them")
+        return sorted(set(v))
+
+
+class VisitCalendar(BaseModel):
+    """E5: the days this facility holds each kind of follow-up visit, and the days it is closed."""
+
+    anc_checkup: VisitDays | None = None
+    chronic_checkin: VisitDays | None = None
+    closed_weekdays: list[int] | None = None
+    closed_dates: list[date] | None = Field(default=None, max_length=60)
+
+
 class RegionConfig(BaseModel):
     """A facility's changes to its state's calendar (F5): local worker names, monsoon dates, local festivals."""
 
     cadres: dict[Literal["community", "nurse", "nutrition", "male", "cho"], str] = Field(default_factory=dict)
     monsoon: MonsoonDates | None = None
     festivals: list[LocalFestival] = Field(default_factory=list, max_length=20)
+    visits: VisitCalendar | None = None
 
     @field_validator("cadres")
     @classmethod
@@ -301,6 +332,7 @@ class FacilityPatch(BaseModel):
     beds_total: int | None = Field(default=None, ge=0)
     beds_occupied: int | None = Field(default=None, ge=0)
     offline_mode: bool | None = None
+    patient_load: Literal["low", "normal", "high"] | None = None
     capabilities: dict[str, bool] | None = None
     region_config: RegionConfig | None = None
 
@@ -366,6 +398,7 @@ class PatientOut(ORM):
     organisation_id: str | None = None
     employee_code: str | None = None
     department: str | None = None
+    data_origin: str = "SYNTHETIC"  # G8
     created_at: datetime
 
 
@@ -432,6 +465,13 @@ class Vitals(BaseModel):
     resp_rate: float | None = Field(default=None, ge=4, le=80)
     glucose: float | None = Field(default=None, ge=10, le=1000)
     avpu: Literal["A", "V", "P", "U"] | None = None  # Alert / responds to Voice / to Pain / Unresponsive
+
+    @model_validator(mode="after")
+    def _plausible(self):
+        """A8: units are fixed (°F, mmHg); a Celsius temperature is refused, never converted. None = not measured."""
+        if self.bp_systolic is not None and self.bp_diastolic is not None and self.bp_systolic <= self.bp_diastolic:
+            raise ValueError("BP systolic must be higher than diastolic")
+        return self
 
 
 class Maternal(BaseModel):
@@ -519,6 +559,7 @@ class EncounterOut(BaseModel):
     token: str | None = None
     channel: str = "staff_kiosk"
     arrived_at: datetime | None = None  # None: filled in from home, not checked in yet
+    data_origin: str = "SYNTHETIC"  # G8: SYNTHETIC or PUBLIC_SAMPLE, never real patient data
     home_advice: str | None = None  # from home only: "emergency" (go now / call 108) or "show_at_desk"; never a tier
     worker: "WorkerInfo | None" = None
     consent: ConsentOut | None = None
@@ -564,14 +605,12 @@ class EncounterPatch(BaseModel):
 
 class OverrideIn(BaseModel):
     to_urgency: Urgency
-    category: str = Field(min_length=3, max_length=120)
-    reason: str = Field(min_length=15, max_length=2000)
+    category: str = Field("Clinical judgement — other", min_length=3, max_length=120)
+    reason: str = Field("", max_length=2000)  # required (15+ characters) only to lower the urgency
 
     @field_validator("reason")
     @classmethod
     def _strip(cls, v: str) -> str:
-        if len(v.strip()) < 15:
-            raise ValueError("A written reason of at least 15 characters is required")
         return _no_id_numbers(v.strip())
 
 
@@ -624,6 +663,22 @@ class ReferralOut(BaseModel):
     created_by: str
     created_at: datetime
     status: str
+    due_at: datetime | None = None
+    overdue: bool = False
+    received_at: datetime | None = None
+    received_by: str | None = None
+    received_note: str | None = None
+    received_via: str | None = None
+
+
+class ReferralReceivedIn(BaseModel):
+    """E4: care received at the destination. `confirmed_by`: who confirmed it (name, role, place)."""
+    confirmed_by: str = Field(min_length=3, max_length=200)
+    note: str = Field("", max_length=1000)
+
+
+class ShareReceivedIn(ReferralReceivedIn):
+    access_code: str = Field(min_length=6, max_length=6)
 
 
 class UserPatch(BaseModel):

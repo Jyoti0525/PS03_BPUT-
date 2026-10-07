@@ -25,7 +25,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import audit
-from .models import Alert, Encounter, Facility, Patient, Reminder, User
+from .models import Alert, Encounter, Facility, Patient, Referral, Reminder, User
 from .privacy import K_MIN
 from .schemas import DOCTOR_ROLES
 from .config import get_settings
@@ -247,6 +247,21 @@ def call_script(r: Reminder, p: Patient, facility: str) -> str | None:
         return (f"Namaste {first_name(p)}. This is {facility}. Your pregnancy check-up was due on {aware(r.due_at).strftime('%d %b')}. "
                 f"Please come this week and bring your MCP card. If you cannot come, your ASHA will visit you.")
     return f"Namaste. This is {facility}. Please ask {first_name(p)} to visit {facility} this week. Thank you."
+
+
+def check_overdue_referrals(db: Session, facility_id: str) -> int:
+    """E4: a referral still open after its due time: someone should check that the patient reached care."""
+    t, n = now(), 0
+    q = select(Referral).join(Encounter).where(Encounter.facility_id == facility_id, Referral.status != "received", Referral.due_at.is_not(None))
+    for r in db.scalars(q).unique():
+        if aware(r.due_at) > t:
+            continue
+        p = r.encounter.patient
+        _, new = _raise(db, facility_id, "referral_overdue", r.id, "medical_officer", f"Referral not confirmed: {p.name} to {r.destination}",
+                        {"referral_id": r.id, "encounter_id": r.encounter_id, "patient_code": p.code, "destination": r.destination,
+                         "urgency": r.encounter.urgency, "due": aware(r.due_at).isoformat()})
+        n += new
+    return n
 
 
 def check_missed_visits(db: Session, facility_id: str) -> int:

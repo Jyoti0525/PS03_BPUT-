@@ -8,7 +8,7 @@ import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, CardHeader, ErrorNote, Input, Label, Spinner, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
-import type { CadreKey, LocalFestival, OnsetReading, RegionCalendar, RegionConfig } from "@/lib/types";
+import type { CadreKey, LocalFestival, OnsetReading, RegionCalendar, RegionConfig, VisitCalendar, VisitKind } from "@/lib/types";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const day = (iso: string) => {
@@ -165,6 +165,8 @@ function CalendarView({ data, fid, canEdit, onSaved }: { data: RegionCalendar; f
 
       <LocalFestivals cfg={cfg} setCfg={setCfg} canEdit={canEdit} />
 
+      <VisitDaysCard fid={fid} cfg={cfg} setCfg={setCfg} canEdit={canEdit} />
+
       <Card className="mt-4">
         <CardHeader title={tr("Sources")} subtitle={`${tr("Table version")} ${data.version}`} />
         <dl className="space-y-2 p-4 text-xs">
@@ -319,6 +321,57 @@ function TryPhrase({ fid, sources }: { fid: string; sources: Record<string, stri
             {r.certainty === "VAGUE" && <p className="mt-1 text-xs text-subtle">{tr("Stays VAGUE: the rules never use this date.")}</p>}
           </div>
         )}
+      </div>
+    </Card>
+  );
+}
+
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const VISIT_KINDS: [VisitKind, string][] = [["anc_checkup", "Antenatal check-up"], ["chronic_checkin", "Chronic check-in"]];
+
+/** E5: the days this facility holds each kind of follow-up visit. Follow-up dates move to the next such day. */
+function VisitDaysCard({ fid, cfg, setCfg, canEdit }: { fid: string; cfg: RegionConfig; setCfg: (c: RegionConfig) => void; canEdit: boolean }) {
+  const { tr } = usePrefs();
+  const { data } = useAsync(() => api.visitDays(fid, "anc_checkup"), [fid, JSON.stringify(cfg.visits ?? null)]);
+  if (!data) return null;
+  const cal: VisitCalendar = { ...data.calendar, ...(cfg.visits ?? {}) };
+  const set = (v: VisitCalendar) => setCfg({ ...cfg, visits: { ...cal, ...v } });
+  const toggle = (list: number[] | null | undefined, d: number) => (list ?? []).includes(d) ? (list ?? []).filter((x) => x !== d) : [...(list ?? []), d].sort();
+  return (
+    <Card className="mt-4">
+      <CardHeader title={tr("Visit days")} subtitle={tr("Which days this facility holds follow-up visits. A follow-up date is moved to the next such day, never earlier and never on a closed day.")} icon={<CalendarDays className="size-4" />} />
+      <div className="space-y-4 p-4">
+        {VISIT_KINDS.map(([k, label]) => (
+          <div key={k}>
+            <p className="text-sm font-semibold text-ink">{tr(label)}</p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              {WEEKDAYS.map((w, i) => (
+                <button key={w} type="button" disabled={!canEdit} aria-pressed={(cal[k]?.weekdays ?? []).includes(i)} onClick={() => set({ [k]: { ...cal[k], weekdays: toggle(cal[k]?.weekdays, i) } })}
+                  className={cx("rounded-lg border px-2.5 py-1 text-xs font-semibold", (cal[k]?.weekdays ?? []).includes(i) ? "border-teal-600 bg-teal-50 text-teal-800" : "border-line text-ink-2")}>
+                  {tr(w)}
+                </button>
+              ))}
+              <label htmlFor={`vd-${k}`} className="ml-2 text-xs text-muted">{tr("and days of the month")}</label>
+              <Input id={`vd-${k}`} disabled={!canEdit} className="h-8 w-28 text-sm" defaultValue={(cal[k]?.monthdays ?? []).join(", ")} placeholder="9"
+                onBlur={(e) => set({ [k]: { ...cal[k], weekdays: cal[k]?.weekdays ?? [], monthdays: e.target.value.split(/[ ,]+/).map(Number).filter((n) => n >= 1 && n <= 28) } })} />
+            </div>
+          </div>
+        ))}
+        <div>
+          <p className="text-sm font-semibold text-ink">{tr("Closed")}</p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            {WEEKDAYS.map((w, i) => (
+              <button key={w} type="button" disabled={!canEdit} aria-pressed={(cal.closed_weekdays ?? []).includes(i)} onClick={() => set({ closed_weekdays: toggle(cal.closed_weekdays, i) })}
+                className={cx("rounded-lg border px-2.5 py-1 text-xs font-semibold", (cal.closed_weekdays ?? []).includes(i) ? "border-ink bg-canvas text-ink" : "border-line text-ink-2")}>
+                {tr(w)}
+              </button>
+            ))}
+          </div>
+          <label htmlFor="vd-hol" className="mt-2 block text-xs text-muted">{tr("Holidays (YYYY-MM-DD, comma separated)")}</label>
+          <Input id="vd-hol" disabled={!canEdit} className="h-9 text-sm" defaultValue={(cal.closed_dates ?? []).join(", ")}
+            onBlur={(e) => set({ closed_dates: e.target.value.split(/[ ,]+/).filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x)) })} />
+        </div>
+        <p className="text-xs text-muted">{tr(data.rule)} · {tr("Next")}: {data.days.join(", ")}</p>
       </div>
     </Card>
   );

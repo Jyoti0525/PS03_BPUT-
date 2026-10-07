@@ -98,6 +98,37 @@ def ai_opinions(user: Auditor, db: DB, days: int = 28):
             "cases": cases[:200]}
 
 
+@router.get("/override-stats")
+def override_stats(user: Auditor, db: DB, days: int = 28):
+    """How often clinicians changed the rules' urgency, per rule (E9). A rule overruled often is a rule to review.
+
+    For each rule that fired: cases, cases lowered below it by a doctor, cases raised. Only the rules' own output is
+    counted (`rules_fired`); the override never rewrites it."""
+    days = max(1, min(days, 180))
+    since = now() - timedelta(days=days)
+    rank = {"green": 0, "yellow": 1, "red": 2}
+    per: dict[str, dict] = {}
+    total = up = down = 0
+    for e in db.scalars(select(Encounter).where(Encounter.facility_id == user.facility_id, Encounter.created_at >= since)):
+        total += 1
+        o = e.override or {}
+        to = o.get("to_urgency")
+        up += bool(o) and rank.get(to, 0) > rank.get(o.get("from_urgency"), 0)
+        down += bool(o) and rank.get(to, 0) < rank.get(o.get("from_urgency"), 0)
+        for h in (e.note or {}).get("rules_fired") or []:
+            r = per.setdefault(h["rule_id"], {"rule_id": h["rule_id"], "urgency": h.get("urgency"), "description": h.get("description"), "fired": 0, "lowered": 0, "raised": 0})
+            r["fired"] += 1
+            if o and rank.get(to, 0) < rank.get(h.get("urgency"), 0):
+                r["lowered"] += 1
+            elif o and rank.get(to, 0) > rank.get(o.get("from_urgency"), 0):
+                r["raised"] += 1
+    rules = sorted(per.values(), key=lambda r: (-r["lowered"] / r["fired"], -r["fired"]))
+    for r in rules:
+        r["lowered_rate"] = round(r["lowered"] / r["fired"], 3)
+    audit.record(db, user, "VIEW", "override_stats", None, f"Override rates per rule viewed ({days} days)", None, user.facility_id)
+    return {"days": days, "encounters": total, "overrides": up + down, "raised": up, "lowered": down, "rules": rules}
+
+
 class GuardTestIn(BaseModel):
     text: str = Field(min_length=1, max_length=1000)
     source: str = Field("", max_length=2000)

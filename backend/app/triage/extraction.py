@@ -28,6 +28,7 @@ import unicodedata
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
+from ..config import get_settings
 
 CONF_FLOOR = 0.85  # OCR confidence below this is shown as "needs checking"
 STALE_DAYS = 90
@@ -73,6 +74,8 @@ def _rapidocr():
 
 
 def ocr_available() -> bool:
+    if not get_settings().ocr_enabled:  # H3: the stub profile reads no documents
+        return False
     try:
         import rapidocr_onnxruntime  # noqa: F401
 

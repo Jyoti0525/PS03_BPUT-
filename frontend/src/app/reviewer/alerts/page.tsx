@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BellRing, CheckCircle2, Download, Thermometer, Users, Baby, PhoneCall } from "lucide-react";
+import { BellRing, CheckCircle2, Download, Thermometer, Users, Baby, PhoneCall, Send } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, timeAgo } from "@/lib/hooks";
 import { usePrefs } from "@/components/providers";
@@ -16,6 +16,7 @@ const KIND: Record<AlertKind, { label: string; icon: React.ReactNode }> = {
   fever_cluster: { label: "Fever cluster", icon: <Thermometer className="size-5" /> },
   missed_visit: { label: "Missed check-up", icon: <Baby className="size-5" /> },
   call_escalation: { label: "Reminder call", icon: <PhoneCall className="size-5" /> },
+  referral_overdue: { label: "Referral overdue", icon: <Send className="size-5" /> },
 };
 
 /** What the alert's numbers mean, in words. Cluster alerts carry counts only — never names. */
@@ -29,6 +30,12 @@ function Detail({ a }: { a: Alert }) {
           n: String(d.cases_72h), p: String(d.cluster), h: String(d.window_hours), b: "14", e: String(d.expected_72h), c: String(d.baseline_14d),
         })}{" "}
         <span className="text-muted">{tr("Rule")}: {String(d.rule)}.</span>
+      </p>
+    );
+  if (a.kind === "referral_overdue")
+    return (
+      <p className="mt-1 text-sm text-ink-2">
+        {tr("Not confirmed received at {d}; was due {when}. Phone the destination, then close it on the Referrals page.", { d: String(d.destination), when: timeAgo(String(d.due)) })}
       </p>
     );
   if (a.kind === "capacity")

@@ -19,7 +19,9 @@ import { API_MODE } from "@/lib/api";
 import { langByCode } from "@/lib/i18n/languages";
 import type { DictKey } from "@/lib/i18n/dict";
 import { cadreName, isNational } from "@/lib/cadres";
-import { EXPOSURE_LABEL, type Exposure, type FacilityRegion, type ConsentMode, type FileObject, type IntakeAnswer, type OccupationalIntake, type Patient, type PatientCandidate, type PatientCategory, type PhoneOwner, type PrivacyContext, type SymptomEntry, type NumericVital, type VitalsInput } from "@/lib/types";
+import { EXPOSURE_LABEL, type Exposure, type FacilityRegion, type ConsentMode, type FileObject, type IntakeAnswer, type OccupationalIntake, type Patient, type PatientCandidate, type PatientCategory, type PhoneOwner, type PrivacyContext, type SymptomEntry, type NumericVital, type VitalsInput, type VisitKind } from "@/lib/types";
+import { fmtDate } from "@/lib/hooks";
+import { FIELDS as VITAL_FIELDS } from "@/components/triage/observations";
 import { DURATIONS, SEVERITIES, SYMPTOMS, contextQuestions } from "./catalog";
 
 /** One speech engine's hearing of a recording (B9); `differences` non-empty = the two engines disagree. */
@@ -65,6 +67,8 @@ export function IntakeFlow({
   facilityId,
   fixedPatient,
   offline,
+  offlineQueue = true,
+  patientLoad = "normal",
   onFinished,
   onReset,
   organisationName,
@@ -74,6 +78,10 @@ export function IntakeFlow({
   facilityId: string;
   fixedPatient?: Patient | null;
   offline: boolean;
+  /** F2: whether this facility queues intakes on the device when the network is down. */
+  offlineQueue?: boolean;
+  /** F2: on a high-load day only the safety questions are asked. */
+  patientLoad?: "low" | "normal" | "high";
   onFinished?: (r: IntakeResult) => void;
   /** Start a fresh intake (next patient) without reloading, so kiosk state such as offline mode survives. */
   onReset?: () => void;
@@ -208,8 +216,8 @@ export function IntakeFlow({
   }, [entries, typed, selected, category, chronic.condition]);
 
   const questions = useMemo(
-    () => (category ? contextQuestions({ chief_complaint: chief, selected_symptoms: selected, category, symptoms: entries, duration }, age) : []),
-    [chief, selected, category, entries, duration, age],
+    () => (category ? contextQuestions({ chief_complaint: chief, selected_symptoms: selected, category, symptoms: entries, duration }, age, patientLoad) : []),
+    [chief, selected, category, entries, duration, age, patientLoad],
   );
 
   const STEP_TITLE: Record<Step, DictKey> = {
@@ -265,6 +273,8 @@ export function IntakeFlow({
         if (pending) return "Confirm or re-record the voice note first";
         if (!entries.length && !typed.trim() && !selected.length && category === "normal") return "Tell us at least one problem — speak, type or tap";
         return null;
+      case "vitals":
+        return vitalsProblem(vitals);
       case "details":
         if (category === "maternal" && maternal.gestation_weeks && (Number(maternal.gestation_weeks) < 1 || Number(maternal.gestation_weeks) > 42)) return "Weeks of pregnancy should be 1–42";
         if (category === "chronic" && !chronic.condition.trim()) return "Which long-term illness?";
@@ -276,7 +286,7 @@ export function IntakeFlow({
 
   const next = () => {
     const e = validate();
-    if (e) return setErr(e);
+    if (e) return setErr(tr(e));
     go(1);
   };
 
@@ -352,7 +362,7 @@ export function IntakeFlow({
       return;
     }
     setPending(next);
-    speak(`${t("kiosk.symptoms.readback")} ${next.original}`, lang);
+    speak(`${t("kiosk.symptoms.readback")} ${next.original}`, lang, undefined, { online: aiAssist });
   };
 
   // B9: the patient says the second engine heard them right; the first engine's words are kept beside it
@@ -367,7 +377,7 @@ export function IntakeFlow({
       engine: s.translation && pending.mt ? `${s.engine} + ${pending.mt}` : s.engine,
       second: { engine: first, text: pending.original, translation: pending.text !== pending.original ? pending.text : null, differences: s.differences },
     });
-    speak(`${t("kiosk.symptoms.readback")} ${s.text}`, lang);
+    speak(`${t("kiosk.symptoms.readback")} ${s.text}`, lang, undefined, { online: aiAssist });
   };
 
   const confirmVoice = async (ok: boolean) => {
@@ -484,6 +494,10 @@ export function IntakeFlow({
       : null;
 
     try {
+      if (offline && !offlineQueue) {
+        setErr(tr("No network, and this facility does not queue intakes on the device. Use the paper form and enter it when the connection is back."));
+        return;
+      }
       if (offline) {
         await enqueue({ client_ref: clientRef.current, new_patient: newPatient, consent, intake: { ...intake, patient_id: patient?.id ?? null } });
         const r = { token: `OFF-${clientRef.current.slice(3, 7).toUpperCase()}`, patientCode: patient?.code ?? null, offline: true };
@@ -727,11 +741,11 @@ export function IntakeFlow({
                   <div className="space-y-2">
                     <p className="text-sm font-semibold text-ink-2">{candidates.length > 1 ? tr("Several people use this phone — who is the patient?") : tr("Is this the patient?")}</p>
                     {candidates.map((c) => (
-                      <button key={c.patient.id} type="button" onClick={() => setPatient(c.patient)} className="flex w-full items-center gap-3 rounded-2xl border-2 border-line p-3 text-left hover:border-teal-300">
+                      <button key={c.patient.id} type="button" onClick={() => { setPatient(c.patient); void api.pickPatient(c.patient.id, c.match_reason, candidates.length).catch(() => undefined); }} className="flex w-full items-center gap-3 rounded-2xl border-2 border-line p-3 text-left hover:border-teal-300">
                         <span className="grid size-11 place-items-center rounded-xl bg-coral-100 font-bold text-coral-700">{c.patient.name.charAt(0)}</span>
                         <span className="flex-1">
                           <span className="block font-semibold text-ink">{c.patient.name}</span>
-                          <span className="block text-sm text-muted">{c.patient.age} y · {c.patient.sex} · {c.patient.code}</span>
+                          <span className="block text-sm text-muted">{c.patient.age} y · {c.patient.sex} · {c.patient.code}{c.match_reason ? ` · ${tr(c.match_reason)}` : ""}</span>
                         </span>
                       </button>
                     ))}
@@ -797,14 +811,14 @@ export function IntakeFlow({
                     <p className="mt-2 text-sm text-ink-2">{tr("Ask the patient which is right.")}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <Button size="sm" variant="secondary" onClick={useOtherHearing}>{tr("Use this one instead")}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => speak(pending.second!.text, lang)} icon={<Volume2 className="size-4" />}>{t("common.listen")}</Button>
+                      <Button size="sm" variant="ghost" onClick={() => speak(pending.second!.text, lang, undefined, { online: aiAssist })} icon={<Volume2 className="size-4" />}>{t("common.listen")}</Button>
                     </div>
                   </div>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button size="lg" variant="teal" onClick={() => confirmVoice(true)} icon={<Check className="size-5" />}>{t("kiosk.symptoms.correct")}</Button>
                   <Button size="lg" variant="secondary" onClick={() => confirmVoice(false)} icon={<RotateCcw className="size-5" />}>{t("kiosk.symptoms.again")}</Button>
-                  <Button size="lg" variant="ghost" onClick={() => speak(pending.original, lang)} icon={<Volume2 className="size-5" />}>{t("common.listen")}</Button>
+                  <Button size="lg" variant="ghost" onClick={() => speak(pending.original, lang, undefined, { online: aiAssist })} icon={<Volume2 className="size-5" />}>{t("common.listen")}</Button>
                 </div>
               </div>
             )}
@@ -891,6 +905,7 @@ export function IntakeFlow({
                   <div>
                     <Label htmlFor="m-next">{tr("Next check-up date")}</Label>
                     <Input id="m-next" type="date" value={maternal.next_checkup} onChange={(e) => setMaternal({ ...maternal, next_checkup: e.target.value })} className="h-12" />
+                    <ClinicDays facilityId={facilityId} kind="anc_checkup" value={maternal.next_checkup} onPick={(d) => setMaternal({ ...maternal, next_checkup: d })} />
                   </div>
                   <div>
                     <Label htmlFor="m-rem">{tr("Remind me by")}</Label>
@@ -1105,6 +1120,7 @@ export function IntakeFlow({
 
         {step === "followup" && (
           <div className="space-y-5">
+            {patientLoad === "high" && <p className="mb-3 text-sm text-muted">{tr("Busy day at this facility: only the safety questions are asked. The nurse asks the rest.")}</p>}
             {questions.length === 0 && <p className="text-lg text-muted">{tr("No more questions. Thank you!")}</p>}
             {questions.map((q) => (
               <div key={q.qid}>
@@ -1132,7 +1148,7 @@ export function IntakeFlow({
 
         {step === "vitals" && (
           <div>
-            <p className="mb-4 text-sm text-muted">{tr("Optional. Entered by the nurse / ANM. Readings feed the deterministic rules engine.")}</p>
+            <p className="mb-4 text-sm text-muted">{tr("Optional. Entered by the nurse / ANM. Readings feed the deterministic rules engine.")} {tr("Leave a box blank if it was not measured; the note lists it as not measured.")}</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(
                 [
@@ -1147,7 +1163,7 @@ export function IntakeFlow({
               ).map(([k, label, unit]) => (
                 <div key={k}>
                   <Label htmlFor={`v-${k}`} hint={unit}>{label}</Label>
-                  <Input id={`v-${k}`} inputMode="decimal" value={vitals[k]} onChange={(e) => setVitals({ ...vitals, [k]: e.target.value.replace(/[^\d.]/g, "").slice(0, 5) })} className="h-12 text-lg tabular-nums" />
+                  <Input id={`v-${k}`} inputMode="decimal" value={vitals[k]} placeholder={tr("Not measured")} onChange={(e) => setVitals({ ...vitals, [k]: e.target.value.replace(/[^\d.]/g, "").slice(0, 5) })} className="h-12 text-lg tabular-nums placeholder:text-sm" />
                 </div>
               ))}
             </div>
@@ -1194,6 +1210,45 @@ export function IntakeFlow({
       </Card>
     </div>
   );
+}
+
+/** E5: the facility's next clinic days for this visit; a date on another day is moved to the next clinic day. */
+function ClinicDays({ facilityId, kind, value, onPick }: { facilityId: string; kind: VisitKind; value: string; onPick: (d: string) => void }) {
+  const { tr } = usePrefs();
+  const [v, setV] = useState<{ rule: string; days: string[] } | null>(null);
+  useEffect(() => {
+    let live = true;
+    api.visitDays(facilityId, kind).then((r) => live && setV(r)).catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [facilityId, kind]);
+  if (!v?.days.length) return null;
+  return (
+    <div className="mt-1.5">
+      <div className="flex flex-wrap gap-1.5">
+        {v.days.map((d) => (
+          <button key={d} type="button" onClick={() => onPick(d)} aria-pressed={value === d} className={cx("rounded-lg border px-2 py-1 text-xs font-semibold", value === d ? "border-teal-600 bg-teal-50 text-teal-800" : "border-line text-ink-2")}>
+            {fmtDate(d)}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1 text-xs text-muted">{tr(v.rule)}. {tr("Another date moves to the next clinic day.")}</p>
+    </div>
+  );
+}
+
+/** A8: units are fixed (°F, mmHg …); a value outside the plausible range is refused, not converted. Blank = not measured. */
+function vitalsProblem(v: Record<NumericVital, string>): string | null {
+  for (const f of VITAL_FIELDS) {
+    if (!v[f.key].trim()) continue;
+    const n = Number(v[f.key]);
+    if (f.key === "temp_f" && n >= 30 && n <= 45) return "Temperature looks like °C — enter it in °F (for example 98.6)";
+    if (!Number.isFinite(n) || n < f.min || n > f.max) return `${f.label}: should be ${f.min}–${f.max} ${f.unit}`;
+  }
+  if (v.bp_systolic && v.bp_diastolic && Number(v.bp_systolic) <= Number(v.bp_diastolic)) return "BP systolic must be higher than diastolic — check the reading";
+  if (!!v.bp_systolic !== !!v.bp_diastolic) return "Enter both BP numbers, or leave both blank";
+  return null;
 }
 
 function Row({ k, v }: { k: string; v: string }) {

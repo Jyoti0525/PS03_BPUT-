@@ -101,6 +101,8 @@ _asr_lock = threading.Lock()
 
 def _conformer():
     global _asr
+    if not get_settings().language_models:
+        raise LanguageUnavailable(f"Speech recognition is off in the '{get_settings().profile}' profile")
     with _asr_lock:
         if _asr is None:
             root = models_dir() / get_settings().asr_model
@@ -163,6 +165,8 @@ _mt_run = {"indic-en": threading.Lock(), "en-indic": threading.Lock()}
 
 def _indictrans(direction: str):
     """direction: 'indic-en' or 'en-indic' → (tokenizer, model, processor, device)."""
+    if not get_settings().language_models:
+        raise LanguageUnavailable(f"Translation is off in the '{get_settings().profile}' profile")
     with _mt_lock:
         if direction not in _mt:
             root = models_dir() / f"indictrans2-{direction}-dist-200M"
@@ -267,6 +271,7 @@ def status() -> dict:
         return all(importlib.util.find_spec(m) is not None for m in mods)
 
     return {
+        "profile": get_settings().profile,
         "asr": {
             "engine": asr_engine_name(),
             "installed": (root / get_settings().asr_model / "assets" / "encoder.onnx").exists()

@@ -50,7 +50,19 @@ export interface ContextQuestion {
  * Context engine: asks what the reviewer will need that the patient has not yet said.
  * Bounded, closed-ended questions only — answers feed the deterministic rules engine.
  */
-export function contextQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_symptoms" | "category" | "symptoms" | "duration">, age: number): ContextQuestion[] {
+/** Questions whose answer can make a case RED. Always asked, whatever the facility's load. */
+const SAFETY = new Set(["conscious", "mechanism", "one_side", "sudden_head", "sudden_abd", "chest_radiation", "chest_sweat", "breath_speech", "child_danger", "fever_bleed", "mat_vision", "mat_movement", "mat_bleed", "dehyd", "inj_loc"]);
+
+/** F2: the question budget follows the facility's patient load. High: safety questions only. Normal: up to 7. Low: all. */
+export function contextQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_symptoms" | "category" | "symptoms" | "duration">, age: number, load: "low" | "normal" | "high" = "normal"): ContextQuestion[] {
+  const all = allQuestions(draft, age);
+  if (load === "low") return all;
+  if (load === "high") return all.filter((q) => SAFETY.has(q.qid));
+  let room = 7 - all.filter((q) => SAFETY.has(q.qid)).length; // every safety question, then others while there is room
+  return all.filter((q) => SAFETY.has(q.qid) || room-- > 0);
+}
+
+function allQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_symptoms" | "category" | "symptoms" | "duration">, age: number): ContextQuestion[] {
   const text = [draft.chief_complaint, ...draft.selected_symptoms, ...draft.symptoms.map((s) => s.text)].join(" ").toLowerCase();
   const qs: ContextQuestion[] = [];
   const has = (...w: string[]) => w.some((x) => text.includes(x));
@@ -80,5 +92,5 @@ export function contextQuestions(draft: Pick<IntakePayload, "chief_complaint" | 
   if (has("stomach")) qs.push({ qid: "abd_where", question: "Where is the pain?", options: ["Upper", "Lower right", "Lower left", "All over"] });
   if (!draft.duration || draft.duration === "today") qs.unshift({ qid: "dur", question: "Since when do you have this problem?", options: ["In the last few hours", "Today", "1–2 days", "3–7 days", "More than a week"] });
   if (draft.category === "chronic") qs.push({ qid: "chr_meds", question: "Are you taking your medicines every day?", options: ["Yes, every day", "Sometimes miss", "Stopped taking"] });
-  return qs.slice(0, 7);
+  return qs;
 }

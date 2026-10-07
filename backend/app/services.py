@@ -249,6 +249,7 @@ def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
         token=e.token,
         channel=e.channel,
         arrived_at=aware(e.arrived_at),
+        data_origin=e.data_origin or "SYNTHETIC",
         home_advice=home_advice(e),
         worker=_worker_info(e) if viewer.role != "kiosk" else None,
         consent=ConsentOut.model_validate(e.consent) if e.consent else None,

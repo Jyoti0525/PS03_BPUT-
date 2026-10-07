@@ -38,6 +38,7 @@ def list_alerts(user: Reviewer, db: DB, status: str | None = Query(None, pattern
     auto_escalate(db)
     al.check_capacity(db, user.facility_id)
     al.check_missed_visits(db, user.facility_id)
+    al.check_overdue_referrals(db, user.facility_id)
     q = select(Alert).where(Alert.facility_id == user.facility_id).order_by(Alert.raised_at.desc())
     if status == "active":
         q = q.where(Alert.status != "resolved")

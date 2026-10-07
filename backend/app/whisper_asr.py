@@ -42,7 +42,9 @@ def model_dir(lang: str) -> Path | None:
 
 
 def available(lang: str) -> bool:
-    if lang not in LANGS or model_dir(lang) is None:
+    from .config import get_settings
+
+    if not get_settings().language_models or lang not in LANGS or model_dir(lang) is None:
         return False
     import importlib.util
 

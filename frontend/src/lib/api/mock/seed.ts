@@ -13,8 +13,8 @@ export const SEED_FACILITIES: Facility[] = [
     languages: ["hi", "en"],
     specialists: [
       { key: "genmed", label: "General Medicine", available: true, schedule: "Daily" },
-      { key: "obgyn", label: "Obstetrics & Gynaecology", available: false, schedule: "Visiting Thursday" },
-      { key: "cardio", label: "Cardiology", available: false, schedule: null },
+      { key: "obgyn", label: "Obstetrics & Gynaecology", available: false, schedule: "Visiting Thursday", refer_to: "District Women's Hospital, Chitrakoot (8 km)" },
+      { key: "cardio", label: "Cardiology", available: false, schedule: null, refer_to: "District Hospital Gorakhpur — Cardiology (42 km)" },
       { key: "pulmo", label: "Pulmonology", available: false, schedule: null },
       { key: "paeds", label: "Paediatrics", available: false, schedule: "Visiting Monday" },
       { key: "endo", label: "Endocrinology", available: false, schedule: null },
@@ -35,7 +35,7 @@ export const SEED_FACILITIES: Facility[] = [
     specialists: [
       { key: "genmed", label: "Occupational Health Physician", available: true, schedule: "Shift A & B" },
       { key: "ortho", label: "Orthopaedics", available: false, schedule: "Visiting Saturday" },
-      { key: "burns", label: "Burns & Plastic Surgery", available: false, schedule: null },
+      { key: "burns", label: "Burns & Plastic Surgery", available: false, schedule: null, refer_to: "SCB Medical College Burns Unit, Cuttack (95 km)" },
     ],
     referral_destination: "SCB Medical College, Cuttack (95 km)",
     beds_total: 6,

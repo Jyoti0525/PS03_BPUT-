@@ -17,10 +17,21 @@ const VALIDITY = [
   { h: 720, label: "30 days" },
 ];
 
-export function printShareSlip(enc: Encounter, link: ShareLink, facilityName?: string) {
+/** E8: what the patient takes home. Next visit and referral, never an urgency tier. */
+export type SlipExtras = { nextVisit?: string | null; referral?: { destination: string; specialty: string } | null };
+
+async function slipExtras(enc: Encounter): Promise<SlipExtras> {
+  const [fu, refs] = await Promise.all([api.listFollowups("active").catch(() => []), api.listReferrals().catch(() => [])]);
+  const due = fu.filter((f) => f.patient_id === enc.patient.id && f.status !== "done" && f.status !== "cancelled").map((f) => f.due_at).sort()[0];
+  const ref = refs.filter((r) => r.encounter_id === enc.id).sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+  return { nextVisit: due ?? null, referral: ref ? { destination: ref.destination, specialty: ref.specialty } : null };
+}
+
+export async function printShareSlip(enc: Encounter, link: ShareLink, facilityName?: string) {
   const svg = document.getElementById(`share-qr-${link.id}`)?.outerHTML ?? "";
-  const w = window.open("", "_blank");
+  const w = window.open("", "_blank"); // opened inside the click, before any await, so it is not blocked
   if (!w) return;
+  const extras = await slipExtras(enc);
   const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
   w.document.write(`<html><head><title>Referral summary ${esc(enc.patient.code)}</title>
 <style>body{font-family:system-ui,sans-serif;max-width:520px;margin:32px auto;color:#111;text-align:center}
@@ -30,6 +41,8 @@ export function printShareSlip(enc: Encounter, link: ShareLink, facilityName?: s
 <p class="muted">${esc(facilityName ?? "")}</p>
 <p><b>${esc(enc.patient.name)}</b> · ${enc.patient.age}/${enc.patient.sex} · ${esc(enc.patient.code)}${enc.token ? ` · Token ${esc(enc.token)}` : ""}</p>
 ${svg.replace(/width="\d+"/, 'width="260"').replace(/height="\d+"/, 'height="260"')}
+${extras.referral ? `<p style="margin-top:12px"><b>Referred to:</b> ${esc(extras.referral.destination)}${extras.referral.specialty ? ` (${esc(extras.referral.specialty)})` : ""}</p>` : ""}
+${extras.nextVisit ? `<p><b>Next visit:</b> ${new Date(extras.nextVisit).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
 <p class="muted">Access code</p><p class="code">${esc(link.access_code ?? "••••••")}</p>
 <p class="muted">Valid until ${new Date(link.expires_at).toLocaleString("en-IN")}</p>
 <p class="muted" style="word-break:break-all">${esc(link.url)}</p>
@@ -82,7 +95,7 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
             </p>
             <p className="mt-2 font-mono text-xs break-all text-subtle">{created.url}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button icon={<Printer className="size-4" />} onClick={() => printShareSlip(enc, created, facilityName)}>
+              <Button icon={<Printer className="size-4" />} onClick={() => void printShareSlip(enc, created, facilityName)}>
                 {tr("Print slip")}
               </Button>
               <Button

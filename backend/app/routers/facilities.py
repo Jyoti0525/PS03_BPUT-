@@ -70,6 +70,17 @@ def facility_calendar(fid: str, user: Staff, db: DB, on: date | None = None):
     return {**regions.for_facility(f).view(on), "facility_id": fid, "region_config": f.region_config or {}}
 
 
+@router.get("/facilities/{fid}/visit-days")
+def visit_days(fid: str, user: Staff, db: DB, kind: str = Query("anc_checkup", pattern="^(anc_checkup|chronic_checkin)$"), after: date | None = None):
+    """E5: the next days this facility holds this kind of follow-up visit, and the rule in words."""
+    from .. import visits
+
+    f = _facility(db, fid)
+    start = after or calendar_context(f, now())["on"]
+    return {"kind": kind, "rule": visits.describe(f, kind), "days": [d.isoformat() for d in visits.upcoming(f, kind, start)],
+            "calendar": visits.rules(f)}
+
+
 @router.get("/facilities/{fid}/onset")
 def try_onset(fid: str, user: Staff, db: DB, text: str = Query(min_length=2, max_length=300), on: date | None = None):
     """Try a phrase ("since Diwali", "ରଜଠାରୁ") against this facility's calendar, as the note would read it."""

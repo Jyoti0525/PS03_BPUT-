@@ -31,6 +31,7 @@ import type {
   KioskLink,
   Alert,
   Capacity,
+  OverrideStats,
 } from "@/lib/types";
 import { ADMIN_ROLES, DOCTOR_ROLES, PIN_ROLES, REVIEWER_ROLES, SIGN_OFF, STAFF_ROLES } from "@/lib/types";
 import { SAMPLE_PIN, pinProblem } from "@/lib/pin";
@@ -840,12 +841,28 @@ export const mockApi: JeeviaApi = {
         patient: { name: e.patient.name, code: e.patient.code, age: e.patient.age, sex: e.patient.sex, language: e.patient.language, phone: e.patient.phone },
         encounter: { token: e.token ?? null, created_at: e.created_at, category: e.category, chief_complaint: e.chief_complaint, status: e.status, urgency: e.urgency, urgency_source: e.urgency_source, override: e.override ?? null, reviewed_by: e.reviewed_by ?? null, reviewed_at: e.reviewed_at ?? null, maternal: e.intake?.maternal ?? null, chronic: e.intake?.chronic ?? null, consent: e.consent ? { mode: e.consent.mode, proxy_name: e.consent.proxy_name ?? null, proxy_relation: e.consent.proxy_relation ?? null } : null },
         note: n ? { summary: n.summary, flags: n.flags, vitals: n.vitals, labs: n.labs, timeline: n.timeline, missing_info: n.missing_info, disagreements: n.disagreements, rules_fired: n.rules_fired } : null,
-        referral: ref ? { destination: ref.destination, specialty: ref.specialty, reason: ref.reason, transport: ref.transport, created_by: ref.created_by, created_at: ref.created_at, note_text: ref.note_text } : null,
+        referral: ref ? { destination: ref.destination, specialty: ref.specialty, reason: ref.reason, transport: ref.transport, created_by: ref.created_by, created_at: ref.created_at, note_text: ref.note_text, status: ref.status, received_by: ref.received_by ?? null, received_at: ref.received_at ?? null } : null,
         documents: docs.map((x) => ({ id: x.id, filename: x.filename, kind: x.kind, content_type: x.content_type, uploaded_at: x.uploaded_at, url: x.purged_at ? null : x.data_url })),
         shared_by: s.created_by,
         expires_at: s.expires_at,
         disclaimer: "Triage support only. Not a diagnosis.",
       };
+    }),
+
+  shareReceived: (token, accessCode, confirmedBy, note) =>
+    withDb(async (d) => {
+      const s = (d.shares ?? []).find((x) => x.token === token && !x.revoked);
+      if (!s) throw new ApiError(404, "This summary link is not valid.");
+      if (s.code !== accessCode) {
+        s.failed++;
+        throw new ApiError(403, "Wrong access code.");
+      }
+      const ref = d.referrals.filter((r) => r.encounter_id === s.encounter_id).pop();
+      if (!ref) throw new ApiError(404, "No referral on this summary.");
+      if (ref.status === "received") throw new ApiError(409, `Already confirmed received by ${ref.received_by}`);
+      Object.assign(ref, { status: "received", received_at: new Date().toISOString(), received_by: confirmedBy.trim(), received_note: note.trim() || null, received_via: "qr" });
+      await audit(d, null, "REFERRAL", "referral", ref.id, `Care received at ${ref.destination}; confirmed by ${confirmedBy.trim()}, recorded by the receiving clinician (QR summary)`);
+      return { status: "received", received_by: ref.received_by!, received_at: ref.received_at! };
     }),
 
   searchDirectory: (q, state) =>
@@ -987,6 +1004,16 @@ export const mockApi: JeeviaApi = {
       const p = d.patients.find((x) => x.id === id);
       if (!p) throw new ApiError(404, "Patient not found");
       await audit(d, me, "VIEW", "patient", id, "Patient identity viewed", p.code);
+      return clone(p);
+    }),
+
+  pickPatient: (id, matchReason, candidates) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, STAFF_ROLES);
+      const p = d.patients.find((x) => x.id === id);
+      if (!p) throw new ApiError(404, "Patient not found");
+      await audit(d, me, "VIEW", "patient", p.id, `Patient picked by staff from ${candidates} candidate(s); match: ${matchReason || "not given"}`, p.code);
       return clone(p);
     }),
 
@@ -1163,11 +1190,14 @@ export const mockApi: JeeviaApi = {
   overrideUrgency: (id, to, category, reason) =>
     withDb(async (d) => {
       const me = await current(d);
-      requireRole(me, DOCTOR_ROLES);
-      if (reason.trim().length < 15) throw new ApiError(422, "A written reason of at least 15 characters is required");
       const e = d.encounters.find((x) => x.id === id);
       if (!e || !e.urgency) throw new ApiError(404, "Encounter not found");
-      e.override = { from_urgency: e.urgency, to_urgency: to, category, reason: reason.trim(), by: me.name, at: new Date().toISOString() };
+      if (to === e.urgency) throw new ApiError(400, `The urgency is already ${e.urgency.toUpperCase()}`);
+      // E9: raising is open to any reviewer; lowering needs a doctor and a written reason.
+      const down = RANK[to] < RANK[e.urgency];
+      if (down && !DOCTOR_ROLES.includes(me.role)) throw new ApiError(403, "Only a doctor or medical officer can lower the urgency; you can raise it or escalate");
+      if (down && reason.trim().length < 15) throw new ApiError(422, "A written reason of at least 15 characters is required to lower the urgency");
+      e.override = { from_urgency: e.urgency, to_urgency: to, category, reason: reason.trim(), by: me.name, by_role: me.role, at: new Date().toISOString(), direction: down ? "down" : "up" };
       e.urgency = to;
       e.urgency_source = "override";
       const esc = ESCALATE_AFTER_MIN[to];
@@ -1242,7 +1272,8 @@ export const mockApi: JeeviaApi = {
       requireRole(me, DOCTOR_ROLES);
       const e = d.encounters.find((x) => x.id === encounterId);
       if (!e) throw new ApiError(404, "Encounter not found");
-      const r: Referral = { ...input, id: uid("ref"), encounter_id: e.id, patient_name: e.patient.name, created_by: me.name, created_at: new Date().toISOString(), status: "sent" };
+      const dueH = e.urgency === "red" ? 6 : e.urgency === "yellow" ? 48 : 336;
+      const r: Referral = { ...input, id: uid("ref"), encounter_id: e.id, patient_name: e.patient.name, created_by: me.name, created_at: new Date().toISOString(), status: "sent", due_at: new Date(Date.now() + dueH * 3600000).toISOString() };
       d.referrals.push(r);
       e.status = "referred";
       e.referral_needed = true;
@@ -1252,11 +1283,26 @@ export const mockApi: JeeviaApi = {
       return r;
     }),
 
+  referralReceived: (id, confirmedBy, note) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, DOCTOR_ROLES);
+      const r = d.referrals.find((x) => x.id === id);
+      if (!r) throw new ApiError(404, "Referral not found");
+      if (r.status === "received") throw new ApiError(409, `Already confirmed received by ${r.received_by}`);
+      Object.assign(r, { status: "received", received_at: new Date().toISOString(), received_by: confirmedBy.trim(), received_note: note.trim() || null, received_via: "phone" });
+      await audit(d, me, "REFERRAL", "referral", r.id, `Care received at ${r.destination}; confirmed by ${confirmedBy.trim()}, recorded by the referring doctor`);
+      return clone(r);
+    }),
+
   listReferrals: () =>
     withDb(async (d) => {
       const me = await current(d);
       requireRole(me, REVIEWER_ROLES);
-      return clone(d.referrals).sort((a, b) => b.created_at.localeCompare(a.created_at));
+      const t = Date.now();
+      return clone(d.referrals)
+        .map((r) => ({ ...r, overdue: r.status !== "received" && !!r.due_at && Date.parse(r.due_at) < t }))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at));
     }),
 
   uploadFile: (file, kind, encounterId, sampleKey) =>
@@ -1356,6 +1402,12 @@ export const mockApi: JeeviaApi = {
     }),
 
   // The regional calendar (F5) lives on the server with its sources; the browser-only demo does not copy it.
+  speakOnline: async () => {
+    throw new ApiError(501, "The online voice needs the live API");
+  },
+  visitDays: async () => {
+    throw new ApiError(501, "The visit calendar needs the live API");
+  },
   facilityCalendar: async () => {
     throw new ApiError(501, "The regional calendar needs the live API");
   },
@@ -1364,6 +1416,32 @@ export const mockApi: JeeviaApi = {
   },
 
   // No language model runs in the browser-only demo, so there are no second opinions to compare.
+  overrideStats: (days = 28) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["supervisor", ...DOCTOR_ROLES]);
+      const since = Date.now() - days * 86400000;
+      const rows = d.encounters.filter((e) => e.facility_id === me.facility_id && Date.parse(e.created_at) >= since);
+      const per = new Map<string, OverrideStats["rules"][number]>();
+      let raised = 0;
+      let lowered = 0;
+      for (const e of rows) {
+        const o = e.override;
+        if (o && RANK[o.to_urgency] > RANK[o.from_urgency]) raised++;
+        else if (o) lowered++;
+        for (const h of e.note?.rules_fired ?? []) {
+          const r = per.get(h.rule_id) ?? { rule_id: h.rule_id, urgency: h.urgency, description: h.description, fired: 0, lowered: 0, raised: 0, lowered_rate: 0 };
+          r.fired++;
+          if (o && RANK[o.to_urgency] < RANK[h.urgency]) r.lowered++;
+          else if (o && RANK[o.to_urgency] > RANK[o.from_urgency]) r.raised++;
+          r.lowered_rate = Math.round((1000 * r.lowered) / r.fired) / 1000;
+          per.set(h.rule_id, r);
+        }
+      }
+      await audit(d, me, "VIEW", "override_stats", null, `Override rates per rule viewed (${days} days)`);
+      return { days, encounters: rows.length, overrides: raised + lowered, raised, lowered, rules: [...per.values()].sort((a, b) => b.lowered_rate - a.lowered_rate || b.fired - a.fired) };
+    }),
+
   aiOpinions: async () => {
     throw new ApiError(501, "AI second opinions need the live API and the local model");
   },

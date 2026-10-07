@@ -237,6 +237,8 @@ export interface Specialist {
   label: string;
   available: boolean;
   schedule?: string | null;
+  /** E4: where this specialty is referred when it is not on site. */
+  refer_to?: string | null;
 }
 
 export interface Facility {
@@ -251,6 +253,8 @@ export interface Facility {
   beds_total: number;
   beds_occupied: number;
   offline_mode: boolean;
+  /** F2: low | normal | high. On a high-load day the kiosk asks only the safety questions. */
+  patient_load?: "low" | "normal" | "high";
   /** Answers to the "what services do you have" setup questions. */
   capabilities: Record<string, boolean>;
   /** F5: worker names and monsoon dates for this facility's state, with its own changes applied. */
@@ -565,6 +569,8 @@ export interface TriageNote {
   generated_by: string;
   /** Who wrote `summary`: the fixed template, or the local language model after passing the faithfulness check and output guard. */
   renderer?: "TEMPLATE" | "LLM";
+  /** H5: what ran on this case; `degraded` when a stage failed, fell back or is unsure. */
+  processing_status?: { overall: "ok" | "degraded"; stages: { stage: string; status: "ok" | "failed" | "fallback" | "unsure" | "unconfirmed"; detail: string }[] };
   /** Uploads: what kind of document each is (B10) and what was hidden before storage (G3). */
   documents?: { file_id: string; filename: string; kind: string; read: boolean; doc_type: { type: string; label: string; why: string } | null; redaction: { faces: number; id_numbers: number; engine?: string; skipped?: string } | null }[];
   /** Medicine names read from a strip or prescription — not part of the record until confirmed. */
@@ -589,7 +595,20 @@ export interface Override {
   category: string;
   reason: string;
   by: string;
+  by_role?: string;
   at: string;
+  /** Raising is open to any reviewer; lowering needs a doctor and a reason (E9). */
+  direction?: "up" | "down";
+}
+
+/** How often clinicians changed the rules' urgency, per rule (E9). */
+export interface OverrideStats {
+  days: number;
+  encounters: number;
+  overrides: number;
+  raised: number;
+  lowered: number;
+  rules: { rule_id: string; urgency: Urgency; description: string; fired: number; lowered: number; raised: number; lowered_rate: number }[];
 }
 
 export interface Encounter {
@@ -603,6 +622,8 @@ export interface Encounter {
   /** null in any response delivered to a patient-role session. */
   urgency: Urgency | null;
   urgency_source: "rules" | "override";
+  /** G8: SYNTHETIC or PUBLIC_SAMPLE; never real patient data. */
+  data_origin?: "SYNTHETIC" | "PUBLIC_SAMPLE";
   note: TriageNote | null;
   intake: IntakePayload | null;
   override?: Override | null;
@@ -693,7 +714,7 @@ export interface SharedSummary {
     consent: { mode: ConsentMode; proxy_name: string | null; proxy_relation: string | null } | null;
   };
   note: Pick<TriageNote, "summary" | "flags" | "vitals" | "labs" | "timeline" | "missing_info" | "disagreements" | "rules_fired"> | null;
-  referral: { destination: string; specialty: string; reason: string; transport: string; created_by: string; created_at: string; note_text: string } | null;
+  referral: { destination: string; specialty: string; reason: string; transport: string; created_by: string; created_at: string; note_text: string; status?: string; received_by?: string | null; received_at?: string | null } | null;
   documents: { id: string; filename: string; kind: string; content_type: string; uploaded_at: string; url: string | null }[];
   shared_by: string;
   expires_at: string;
@@ -741,7 +762,7 @@ export interface QueueItem {
   sign_off?: "health_worker" | "nurse" | "doctor" | null;
 }
 
-export type AlertKind = "capacity" | "fever_cluster" | "missed_visit" | "call_escalation";
+export type AlertKind = "capacity" | "fever_cluster" | "missed_visit" | "call_escalation" | "referral_overdue";
 
 export interface Alert {
   id: string;
@@ -922,6 +943,13 @@ export interface Referral {
   created_by: string;
   created_at: string;
   status: "draft" | "sent" | "received";
+  /** E4: open until the receiving side confirms care; past this time it is overdue. */
+  due_at?: string | null;
+  overdue?: boolean;
+  received_at?: string | null;
+  received_by?: string | null;
+  received_note?: string | null;
+  received_via?: "qr" | "phone" | null;
 }
 
 export type AuditAction =
@@ -1055,10 +1083,24 @@ export interface LocalFestival {
   faith?: string | null;
 }
 
+/** E5: the days a facility holds each kind of follow-up visit (weekday 0 = Monday). */
+export interface VisitDays {
+  weekdays: number[];
+  monthdays?: number[];
+}
+export interface VisitCalendar {
+  anc_checkup?: VisitDays | null;
+  chronic_checkin?: VisitDays | null;
+  closed_weekdays?: number[] | null;
+  closed_dates?: string[] | null;
+}
+export type VisitKind = "anc_checkup" | "chronic_checkin";
+
 export interface RegionConfig {
   cadres?: Partial<Record<CadreKey, string>>;
   monsoon?: { onset: string; withdrawal: string } | null;
   festivals?: LocalFestival[];
+  visits?: VisitCalendar | null;
 }
 
 /** F5: the festival and season table a facility's notes use to date "since Diwali" onsets. */

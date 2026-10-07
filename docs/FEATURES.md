@@ -210,23 +210,31 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
   the clinician, and **never interpreted**.
 - **Code:** `backend/app/routers/files.py`, `backend/app/triage/images.py`.
 
-**A6 Patient identity and matching** · Partial
+**A6 Patient identity and matching** · Working
 - **What:** returning patients are found by patient ID and phone. On a shared household phone, the patient picks
-  their own name.
-- **Code:** `backend/app/routers/kiosk.py` (`/kiosk/identify`), `backend/app/services.py` (`own_patient`).
-- **Left:** confirm that matches are always picked by a human and logged.
+  their own name. Each candidate shows why it matched (exact ID, shared household phone, name). A person always
+  picks; the pick is logged with the match reason and the number of candidates. Records are never merged.
+- **Code:** `backend/app/routers/kiosk.py` (`/kiosk/identify`), `backend/app/routers/patients.py`
+  (`POST /patients/{id}/pick`), `backend/app/services.py` (`own_patient`).
 
 **A7 Spoken read-back and prompts** · Partial
 - **What:** read-back in the patient's language using a voice installed on the device. If the device has no voice
   for that language, nothing is spoken, rather than an English voice mangling Odia.
-- **Uses:** browser `speechSynthesis` (`frontend/src/lib/speech.ts`).
-- **Left:** check Odia voice quality on the demo laptop.
+- **Online voice:** the demo laptop (Windows) has no Hindi or Odia voice. When the device has none and there is a
+  connection, the kiosk plays Sarvam Bulbul audio from the server (`POST /language/speak`, kept in memory only). The
+  patient's own words are sent only if they chose AI helpers; fixed prompts always may be.
+- **Uses:** browser `speechSynthesis` (`frontend/src/lib/speech.ts`), Sarvam Bulbul v3 (`backend/app/sarvam.py`).
+- **Left:** an offline Odia voice for camps with no network.
 
-**A8 Vitals entry** · Partial
+**A8 Vitals entry** · Working
 - **What:** nurses record BP, pulse, temperature, SpO₂, breathing rate, glucose, AVPU and the danger-sign
   checklist. New vitals re-run the rules.
-- **Code:** `frontend/src/components/triage/observations.tsx`; `POST /encounters/{id}/observations`.
-- **Left:** unit lock, plausibility bounds, and a "not measured" option.
+- **Units and ranges:** one fixed unit per vital (°F, mmHg, bpm, %, /min, mg/dL). The kiosk and the nurse form share
+  the plausible ranges. A temperature typed in Celsius is refused, never converted. Systolic must be higher than
+  diastolic (the API checks it too).
+- **Not measured:** a blank box says "Not measured" and is never given a default value.
+- **Code:** `frontend/src/components/triage/observations.tsx`, `frontend/src/components/intake/intake-flow.tsx`;
+  `Vitals` in `backend/app/schemas.py`; `POST /encounters/{id}/observations`.
 
 ### B. Reading and understanding
 
@@ -609,18 +617,24 @@ call after two failed ASHA attempts; Kusum's last visit was RED, so only a perso
 - Manual escalation, plus automatic escalation of unreviewed RED cases after 15 minutes and YELLOW after 60.
   Escalations must be acknowledged.
 
-**E4 Referral preparation** · Partial
-- **What:** the referral destination is suggested from the specialists on duty.
+**E4 Referral preparation** · Working
+- **What:** the referral destination is suggested from the specialists on duty; a specialty not on site is referred
+  to its configured place (`refer_to`), then the facility's default referral hospital.
+- **Closed only when care is received:** the receiving clinician confirms from the QR summary (with the access code),
+  or the referring doctor records who confirmed it. Due in 6 h (RED), 48 h (YELLOW) or 14 days (GREEN); past due
+  it is listed first on the Referrals page and raises a "Referral overdue" alert to the medical officer.
 - **QR summary:** a time-limited link plus a 6-digit code. It locks after 8 wrong codes, can be revoked, and every
   opening is audited (`backend/app/routers/shares.py`, `/s/<token>`).
-- **Left:** close a referral only when care is received; flag overdue referrals.
 
-**E5 Scheduling and reminders** · Partial
+**E5 Scheduling and reminders** · Working
 - Maternal check-up reminders with due dates and missed-visit detection (D4).
 - Chronic check-ins: a chronic visit can set the next check-in date and assign a health worker. A missed one goes
   the same way as a maternal one (health worker, then a reminder call), and the next chronic visit closes it. The
   reminder text never names the condition.
-- **Left:** a visit calendar from the facility's configuration.
+- **Visit calendar** (`backend/app/visits.py`): antenatal days (default weekly VHND on Wednesday and PMSMA on the
+  9th), the chronic clinic day (default Tuesday), closed weekdays and holidays. The supervisor sets them on the
+  Regional calendar page. A future follow-up date moves to the next clinic day; the kiosk offers the next clinic
+  days as buttons (`GET /facilities/{id}/visit-days`).
 
 **E6 Reminder calls (calling agent)** · Working in the browser; real SMS live (Vonage); real phone calls built, blocked by trial accounts
 - **For:** maternal and chronic follow-ups, as the fallback after the assigned health worker could not reach the
@@ -686,13 +700,20 @@ call after two failed ASHA attempts; Kusum's last visit was RED, so only a perso
 - PDF (fpdf2), print page, JSON, CSV, FHIR R4 bundle. Every export carries the disclaimer.
 - **Code:** `backend/app/exports.py`.
 
-**E8 Patient slip** · Partial
-- Patient screens already hide urgency. A printed slip still has to be checked.
+**E8 Patient slip** · Working
+- The printed QR slip has the patient, the QR and access code, the referral destination and the next follow-up date,
+  and the disclaimer. It never shows an urgency tier; patient screens hide it too.
+- **Code:** `frontend/src/components/triage/share-qr.tsx` (`printShareSlip`).
 
-**E9 Overrides with reasons** · Partial
-- **What:** only doctors override, with a written reason of at least 15 characters; the original rules result is
-  kept.
-- **Left:** free upgrades, role rules for downgrades, and override rate per rule.
+**E9 Overrides with reasons** · Working
+- **Raising** the urgency is free: any reviewer (nurse, health worker, doctor), reason optional.
+- **Lowering** needs a doctor or medical officer and a written reason of at least 15 characters. Lowering below a
+  RED rule is allowed (people decide) but the audit entry names every such rule.
+- The rules' own result and every rule that fired stay on the note.
+- **Override rate per rule:** the supervisor's "Urgency overrides" page lists, for each rule, how often it fired,
+  was lowered and was raised. A rule that doctors often lower is a rule to review.
+- **Code:** `POST /encounters/{id}/override`, `GET /override-stats` (`backend/app/routers/admin.py`),
+  `frontend/src/app/admin/overrides/page.tsx`.
 
 ### F. India context and set-up
 
@@ -702,8 +723,13 @@ call after two failed ASHA attempts; Kusum's last visit was RED, so only a perso
   after their organisation registers.
 - **Code:** `backend/app/directory.py`, `backend/app/routers/organisations.py`, `frontend/src/app/admin/facility`.
 
-**F2 Load, language, specialist and digital-maturity settings** · Partial
-- Facility types exist. **Left:** each setting visibly changing behaviour.
+**F2 Load, language, specialist and digital-maturity settings** · Working
+- **Patient load** (low / normal / high): the kiosk's question budget. High asks only the questions whose answer can
+  make a case RED, and says so; normal asks up to 7, safety first; low asks all.
+- **Languages:** the facility's own languages head the kiosk's language list.
+- **Specialists:** decide the referral destinations (E4).
+- **Offline mode:** on, the kiosk queues intakes on the device with no network; off, it refuses and tells staff to
+  use the paper form.
 
 **F3 Accessibility** · Partial
 - **What:** icon mode, large text, read-aloud, 56–64 px kiosk buttons, proxy consent for caregivers.
@@ -815,25 +841,27 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
   urgency.
 - **Code:** `backend/app/security.py`, `backend/app/routers/auth.py`, `backend/app/otp.py`, `backend/app/mailer.py`.
 
-**G6 Disclaimer** · Partial
-- On every screen and export. **Left:** the patient slip, and spoken at the kiosk.
+**G6 Disclaimer** · Working
+- On every screen and every printed page; in PDF, print, CSV, JSON and FHIR exports; on the QR slip and the
+  referral text. The kiosk reads it aloud as part of the consent text.
 
 **G7 Responsible-AI dossier** · Partial
 - EVALUATION.md has the measured figures. **Left:** model cards, error rates by language, sex and age, and an "about
   the models" page.
 
-**G8 Data-origin tagging** · Partial
-- The FHIR export is tagged synthetic. **Left:** a tag on every record and a banner on every screen.
+**G8 Data-origin tagging** · Working
+- `data_origin` (SYNTHETIC or PUBLIC_SAMPLE, set by `JEEVIA_DATA_ORIGIN`) on every patient and encounter
+  (migration 0011), in `/health` and in every export. Every screen says "Synthetic demo data — no real patients".
 
 ### H. Platform
 
 | Feature | Status | What and where |
 |---|---|---|
-| **H1** Database | Working | `backend/app/models.py`; migrations `backend/migrations/versions/0001`–`0006`, applied at start-up |
+| **H1** Database | Working | `backend/app/models.py`; migrations `backend/migrations/versions/0001`–`0013`, applied at start-up |
 | **H2** API | Working | FastAPI under `/api/v1`, routers in `backend/app/routers/`. Interactive docs at `/docs` |
-| **H3** Model serving | Partial | Speech, translation and OCR load inside the API (`JEEVIA_PRELOAD_LANGUAGE_MODELS=true` loads them at start-up). The summary model is a separate `llama-server` process. **Left:** switchable profiles |
+| **H3** Model serving | Working | `JEEVIA_PROFILE`: `stub` (rules only, no models or online engines; the cloud instance), `demo` (models load on first use), `full` (models load at start-up). An explicit setting wins over the profile. The summary model is a separate llama.cpp `llama-server` process |
 | **H4** File storage with expiry | Working | `backend/app/storage.py` |
-| **H5** Visible fallback when an engine is down | Partial | `GET /language/engines` lists what is installed and loaded; a missing engine answers 503 and never a fake result; the note says when the summary model was unavailable. **Left:** a per-stage status on every note |
+| **H5** Visible fallback when an engine is down | Working | `GET /language/engines` lists what is installed and loaded; a missing engine answers 503 and never a fake result. Every note has `processing_status`: report reading, translation, speech and AI summary, each ok / failed / fallback / unsure. A failed stage raises `STAGE-DEGRADED`; a missing summary model raises `LLM-OFF` |
 | **H6** Offline kiosk | Working | `frontend/src/lib/offline/outbox.ts`, `precache.ts`, `public/sw.js`. Check-ins wait in IndexedDB and replay without duplicates (`client_ref`) |
 | **H7** Speed targets | Partial | Speech and summary measured. **Left:** the rest |
 | **H8** Logging | Working | `backend/app/observability.py`: JSON logs with request IDs and no request bodies; `/metrics`; `/health` |
@@ -854,6 +882,8 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 | `MEDS-UNCONFIRMED` | Medicine names were read from a strip or prescription and await confirmation |
 | `PII-REDACTED` | Identifiers were removed from the patient's free text |
 | `NO-AI` | The patient chose to continue without AI |
+| `STAGE-DEGRADED` | Part of the automatic processing failed (for example a report the OCR could not read). The note's `processing_status` lists every stage and what happened |
+| `LLM-OFF` | The AI summary model was not available; the template summary is shown. Urgency always comes from the rules |
 | `LLM-FELL-BACK` | The AI summary failed a check; the template summary is shown with the reason |
 | `AI-OPINION-HIGHER` | The AI model's own urgency is higher than the rules'. Take a second look; urgency is unchanged |
 | `PROXY` | The history was given by a family member or caregiver |
@@ -907,6 +937,8 @@ cd frontend && npx tsc --noEmit && npm run lint
 | `test_rules.py` | 63 | Rules engine, findings, negation, Hindi and Odia phrases, crush-injury fix |
 | `test_timeline.py` | 22 | Onset labels and conflicts |
 | `test_regions.py` | 28 | Regional calendar: festival and season dates by state, two-meaning words, no guessing, facility overrides, cadre names, every date sourced, every directory state covered |
+| `test_referrals.py` | 7 | E4 referral closed only on receipt (QR code or doctor), overdue alert raised and resolved; E5 clinic days, facility's own days and holidays, follow-up moved; F2 patient load; A7 online voice; H3 profiles |
+| `test_override.py` | 7 | E9 raise free and lower by a doctor with a reason, override rate per rule; G6/G8 disclaimer and data origin in every export; H5 stage status and fallback flag; A6 logged pick, no merge; A8 Celsius, BP order and range refused |
 | `test_api.py` | 20 | Sign-in, roles, consent, offline replay, overrides, escalations, exports, audit |
 | `test_wednesday.py` | 27 | AIIMS high-risk floor; occupational rules, FEV1 baseline, PPE gap, employer rates without symptoms; sign-off limits and note density by role; queue reasons and capacity alert; fever cluster and suppressed export; missed visit, neutral call, no-phone refusal; SQLite column patch |
 | `test_telephony.py` | 8 | Real calls and SMS against a fake Twilio and Vonage: only the demo phone is dialled, unsigned webhooks refused, keypad answers, a keyed danger sign texts staff without a name, no key twice hands over, a recorded answer is read and deleted, not answered and cut off, SMS says nothing about health; Vonage: keypad danger sign over NCCO, recorded answer read and deleted |

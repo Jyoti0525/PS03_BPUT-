@@ -1,5 +1,6 @@
 import type { JeeviaApi } from "./contract";
 import { liveApi } from "./live";
+import { setOnlineVoice } from "@/lib/speech";
 
 /**
  * `NEXT_PUBLIC_API_MODE=live` talks to FastAPI at NEXT_PUBLIC_API_URL.
@@ -21,6 +22,9 @@ function lazyMock(): JeeviaApi {
 }
 
 export const api: JeeviaApi = API_MODE === "live" ? liveApi : lazyMock();
+
+// A7: kiosk lines in a language the device has no voice for are read by the server's online voice (live API only).
+if (API_MODE === "live") setOnlineVoice((text, lang) => liveApi.speakOnline(text, lang));
 
 export { ApiError } from "./contract";
 export { getDeviceId } from "./tokens";

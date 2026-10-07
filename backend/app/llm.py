@@ -271,6 +271,18 @@ def apply(note: dict, intake: dict, patient) -> dict:
                 said = f": {op['reason']}" if op.get("reason") else ""
                 flags.append({"code": "AI-OPINION-HIGHER", "label": "AI second opinion is more urgent than the rules — take a second look", "severity": "warning",
                               "reason": f"{op['model']} would choose {op['model_urgency'].upper()}{said}. Urgency stays {op['rules_urgency'].upper()} from the rules; only a doctor can change it."})
+    from .triage.pipeline import processing_status
+
+    stages = [s for s in (note.get("processing_status") or {}).get("stages", []) if s["stage"] != "AI summary"]
+    if result["status"] == "PASS":
+        stages.append({"stage": "AI summary", "status": "ok", "detail": result["model"]})
+    elif result["status"] == "UNAVAILABLE":
+        stages.append({"stage": "AI summary", "status": "fallback", "detail": f"model not available ({result['reason']}); template summary shown"})
+        flags.append({"code": "LLM-OFF", "label": "AI summary not available — template summary shown", "severity": "info",
+                      "reason": f"{result['reason']}. The note is complete without it; urgency always comes from the rules."})
+    else:
+        stages.append({"stage": "AI summary", "status": "fallback", "detail": "model output failed the checks; template summary shown"})
+    note["processing_status"] = processing_status(stages)
     if result["status"] == "PASS":
         note["summary_template"] = note["summary"]
         note["summary"] = result["text"] + " Summary written from the recorded facts only; it is not a diagnosis."

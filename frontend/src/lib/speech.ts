@@ -31,6 +31,7 @@ export function voiceFor(lang: string): SpeechSynthesisVoice | null {
 
 /** Whether this device can read text aloud in the language (English always falls back to the default voice). */
 export function hasVoice(lang: string): boolean {
+  if (lang !== "en" && !voiceFor(lang) && onlineVoice && typeof navigator !== "undefined" && navigator.onLine) return true; // A7: online voice
   return canSpeak() && (lang === "en" || !!voiceFor(lang));
 }
 
@@ -38,13 +39,18 @@ export function hasVoice(lang: string): boolean {
  * Reads text aloud in the patient's language. If the device has no voice for that language we do not
  * let an English voice mangle Odia or Hindi text — nothing is spoken and `false` is returned.
  */
-export function speak(text: string, lang: string, onEnd?: () => void): boolean {
-  if (!canSpeak()) {
+export function speak(text: string, lang: string, onEnd?: () => void, opts: { online?: boolean } = {}): boolean {
+  const voice = canSpeak() ? voiceFor(lang) : null;
+  if (!voice && lang !== "en") {
+    // A7: no device voice (Windows has none for Odia). Online voice if allowed; the patient's own words only with consent.
+    if (opts.online !== false && onlineVoice && typeof navigator !== "undefined" && navigator.onLine) {
+      playOnline(text, lang, onEnd);
+      return true;
+    }
     onEnd?.();
     return false;
   }
-  const voice = voiceFor(lang);
-  if (!voice && lang !== "en") {
+  if (!canSpeak()) {
     onEnd?.();
     return false;
   }
@@ -59,7 +65,33 @@ export function speak(text: string, lang: string, onEnd?: () => void): boolean {
   return true;
 }
 
+/** A7: the server's online voice (Sarvam Bulbul), registered by the API layer so this file has no API import. */
+let onlineVoice: ((text: string, lang: string) => Promise<Blob>) | null = null;
+let playing: HTMLAudioElement | null = null;
+
+export function setOnlineVoice(fn: ((text: string, lang: string) => Promise<Blob>) | null) {
+  onlineVoice = fn;
+}
+
+function playOnline(text: string, lang: string, onEnd?: () => void) {
+  stopSpeaking();
+  onlineVoice!(text, lang)
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = new Audio(url);
+      playing = a;
+      a.onended = a.onerror = () => {
+        URL.revokeObjectURL(url);
+        onEnd?.();
+      };
+      return a.play();
+    })
+    .catch(() => onEnd?.());
+}
+
 export function stopSpeaking() {
+  playing?.pause();
+  playing = null;
   if (canSpeak()) window.speechSynthesis.cancel();
 }
 

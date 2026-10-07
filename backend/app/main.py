@@ -132,6 +132,8 @@ def health():
     body = {
         "status": "ok" if db_ok else "degraded",
         "version": app.version,
+        "data_origin": s.data_origin,
+        "profile": s.profile,
         "uptime_s": int(time.time() - STARTED),
         "db": {"engine": engine.dialect.name, "ok": db_ok, "latency_ms": db_ms},
         "storage": storage.health(),

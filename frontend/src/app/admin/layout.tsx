@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Building2, CalendarDays, TabletSmartphone, Users, ScrollText, Trash2, Tablet, Link2, ChartColumn, FlaskConical, Bot } from "lucide-react";
+import { LayoutDashboard, Building2, CalendarDays, TabletSmartphone, Users, ScrollText, Trash2, Tablet, Link2, ChartColumn, FlaskConical, Bot, ShieldAlert } from "lucide-react";
 import { RoleGate } from "@/components/layout/role-gate";
 import { AppShell } from "@/components/layout/app-shell";
 import { usePrefs } from "@/components/providers";
@@ -22,6 +22,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         { href: "/admin/audit", label: tr("Audit log"), icon: <ScrollText /> },
         { href: "/admin/retention", label: tr("Data retention"), icon: <Trash2 /> },
         { href: "/admin/cohort", label: tr("De-identified cohort"), icon: <ChartColumn /> },
+        { href: "/admin/overrides", label: tr("Urgency overrides"), icon: <ShieldAlert /> },
         { href: "/admin/ai-opinions", label: tr("AI second opinions"), icon: <Bot /> },
         { href: "/admin/guard-test", label: tr("Output guard test"), icon: <FlaskConical /> },
         { href: "/kiosk", label: tr("Staff kiosk"), icon: <Tablet /> },

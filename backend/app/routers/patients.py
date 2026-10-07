@@ -3,6 +3,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 from sqlalchemy import or_, select
 
 from .. import audit
@@ -37,6 +38,22 @@ def search(q: str, user: Staff, db: DB):
         reason = "Exact patient ID" if p.code.lower() == s else "Shared household phone" if p.phone and s in p.phone else "Name match"
         out.append(PatientCandidate(patient=PatientOut.model_validate(p), last_visit_at=aware(last), match_reason=reason))
     return out
+
+
+class PickIn(BaseModel):
+    match_reason: str = Field("", max_length=60)
+    candidates: int = Field(1, ge=1, le=50)
+
+
+@router.post("/patients/{pid}/pick", response_model=PatientOut)
+def pick(pid: str, body: PickIn, user: Staff, db: DB):
+    """A6: a person chose this patient from the search candidates. Records are never merged automatically;
+    the choice is written to the audit log with what the match was based on."""
+    p = db.get(Patient, pid)
+    if not p:
+        raise HTTPException(404, "Patient not found")
+    audit.record(db, user, "VIEW", "patient", p.id, f"Patient picked by staff from {body.candidates} candidate(s); match: {body.match_reason or 'not given'}", p.code)
+    return p
 
 
 @router.get("/patients/by-code/{code}", response_model=PatientOut)

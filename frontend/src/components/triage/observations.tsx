@@ -11,7 +11,8 @@ import type { Encounter, NumericVital, Observation, VitalsInput } from "@/lib/ty
 
 type Field = { key: NumericVital; label: string; unit: string; min: number; max: number; step?: number };
 
-const FIELDS: Field[] = [
+/** A8: one fixed unit per vital and the plausible range; shared by the kiosk and the nurse's re-measure form. */
+export const FIELDS: Field[] = [
   { key: "bp_systolic", label: "BP systolic", unit: "mmHg", min: 50, max: 260 },
   { key: "bp_diastolic", label: "BP diastolic", unit: "mmHg", min: 30, max: 160 },
   { key: "pulse", label: "Pulse", unit: "bpm", min: 20, max: 250 },

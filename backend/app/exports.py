@@ -15,6 +15,12 @@ DISCLAIMER = (
 LABEL = {"red": "Critical", "yellow": "Semi-urgent", "green": "Routine"}
 
 
+def origin_line(e: dict) -> str:
+    """G8: every export says where its data came from."""
+    o = e.get("data_origin") or "SYNTHETIC"
+    return f"Data origin: {o} ({'synthetic demo data, no real patient' if o == 'SYNTHETIC' else 'public sample data'})"
+
+
 def _dt(s) -> str:
     if isinstance(s, datetime):
         return s.strftime("%d/%m/%Y %H:%M")
@@ -23,7 +29,7 @@ def _dt(s) -> str:
 
 def note_lines(e: dict, facility: dict | None) -> list[str]:
     p, n = e["patient"], e.get("note")
-    L = ["JEEVIA TRIAGE NOTE", DISCLAIMER, ""]
+    L = ["JEEVIA TRIAGE NOTE", DISCLAIMER, origin_line(e), ""]
     L.append(f"Patient: {p['name']} ({p['code']})  Age/Sex: {p['age']}/{p['sex']}  Language: {p['language']}")
     if facility:
         L.append(f"Facility: {facility['name']}, {facility['district']}, {facility['state']}")
@@ -59,6 +65,8 @@ def to_csv(e: dict) -> str:
     buf = io.StringIO()
     w = csv.writer(buf, quoting=csv.QUOTE_ALL)
     w.writerow(["section", "label", "value", "unit", "reference", "needs_check", "source"])
+    w.writerow(["meta", "disclaimer", DISCLAIMER, "", "", "", ""])
+    w.writerow(["meta", "data_origin", e.get("data_origin") or "SYNTHETIC", "", "", "", ""])
     w.writerow(["patient", "code", e["patient"]["code"], "", "", "", ""])
     w.writerow(["patient", "age_sex", f"{e['patient']['age']}/{e['patient']['sex']}", "", "", "", ""])
     w.writerow(["encounter", "urgency", e.get("urgency") or "", "", "", "", e.get("urgency_source")])
@@ -96,7 +104,7 @@ def to_fhir(e: dict) -> dict:
         "resourceType": "Bundle",
         "type": "document",
         "timestamp": datetime.utcnow().isoformat() + "Z",
-        "meta": {"tag": [{"system": "https://jeevia.example/tags", "code": "synthetic", "display": "Synthetic demo data"}]},
+        "meta": {"tag": [{"system": "https://jeevia.example/tags", "code": (e.get("data_origin") or "SYNTHETIC").lower(), "display": origin_line(e)}]},
         "entry": [
             {
                 "fullUrl": f"urn:uuid:{e['id']}",
@@ -109,6 +117,7 @@ def to_fhir(e: dict) -> dict:
                     "date": str(e["created_at"]),
                     "title": "Jeevia triage note",
                     "section": [
+                        {"title": "Disclaimer", "text": {"status": "generated", "div": div(DISCLAIMER)}},
                         {"title": "Summary", "text": {"status": "generated", "div": div(n.get("summary", ""))}},
                         {"title": "Flags", "text": {"status": "generated", "div": div("; ".join(f["label"] for f in n.get("flags", [])))}},
                     ],
@@ -181,7 +190,8 @@ def to_pdf(e: dict, facility: dict | None) -> bytes:
 def build(e: dict, fmt: str, facility: dict | None) -> tuple[bytes, str, str]:
     base = f"jeevia-{e['patient']['code']}-{e['id'][-6:]}"
     if fmt == "json":
-        return json.dumps(e, indent=2, default=str).encode(), "application/json", f"{base}.json"
+        body = {"disclaimer": DISCLAIMER, "data_origin": e.get("data_origin") or "SYNTHETIC", **e}
+        return json.dumps(body, indent=2, default=str).encode(), "application/json", f"{base}.json"
     if fmt == "csv":
         return to_csv(e).encode(), "text/csv", f"{base}.csv"
     if fmt == "fhir":

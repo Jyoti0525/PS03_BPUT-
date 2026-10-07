@@ -25,8 +25,8 @@ DAY = timedelta(days=1)
 FACILITIES = [
     dict(id="fac_phc_manikpur", name="PHC Manikpur", type="phc", district="Chitrakoot", state="Uttar Pradesh", languages=["hi", "en"],
          specialists=[{"key": "genmed", "label": "General Medicine", "available": True, "schedule": "Daily"},
-                      {"key": "obgyn", "label": "Obstetrics & Gynaecology", "available": False, "schedule": "Visiting Thursday"},
-                      {"key": "cardio", "label": "Cardiology", "available": False, "schedule": None},
+                      {"key": "obgyn", "label": "Obstetrics & Gynaecology", "available": False, "schedule": "Visiting Thursday", "refer_to": "District Women's Hospital, Chitrakoot (8 km)"},
+                      {"key": "cardio", "label": "Cardiology", "available": False, "schedule": None, "refer_to": "District Hospital Gorakhpur — Cardiology (42 km)"},
                       {"key": "pulmo", "label": "Pulmonology", "available": False, "schedule": None},
                       {"key": "paeds", "label": "Paediatrics", "available": False, "schedule": "Visiting Monday"},
                       {"key": "endo", "label": "Endocrinology", "available": False, "schedule": None}],
@@ -35,7 +35,7 @@ FACILITIES = [
     dict(id="fac_kalinganagar", name="Kalinganagar Industrial Estate Health Unit", type="industrial_unit", district="Jajpur", state="Odisha", languages=["or", "hi", "en"],
          specialists=[{"key": "genmed", "label": "Occupational Health Physician", "available": True, "schedule": "Shift A & B"},
                       {"key": "ortho", "label": "Orthopaedics", "available": False, "schedule": "Visiting Saturday"},
-                      {"key": "burns", "label": "Burns & Plastic Surgery", "available": False, "schedule": None}],
+                      {"key": "burns", "label": "Burns & Plastic Surgery", "available": False, "schedule": None, "refer_to": "SCB Medical College Burns Unit, Cuttack (95 km)"}],
          referral_destination="SCB Medical College, Cuttack (95 km)", beds_total=6, beds_occupied=1, offline_mode=False,
          capabilities={"lab": False, "xray": True, "ecg": True, "oxygen": True, "ambulance": True, "pharmacy": True}),
 ]

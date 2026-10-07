@@ -125,7 +125,7 @@ export default function KioskPage() {
           <div className="ml-auto flex items-center gap-2">
             {offline ? <Badge tone="semi"><WifiOff className="size-3" /> {tr("Offline")}</Badge> : <Badge tone="rout"><Wifi className="size-3" /> {tr("Online")}</Badge>}
             {outbox.length > 0 && <Badge tone="info"><CloudUpload className="size-3" /> {outbox.length} {tr("queued")}</Badge>}
-            <LanguageButton />
+            <LanguageButton offered={facility?.languages} />
             <A11yButton />
             <Button
               variant="ghost"
@@ -142,14 +142,18 @@ export default function KioskPage() {
         </div>
       </header>
       <main className="px-4 py-6">
-        {user?.facility_id && <IntakeFlow key={session} mode="kiosk" facilityId={user.facility_id} organisationName={facility?.organisation_id ? facility.name : null} offline={offline} onReset={() => setSession((n) => n + 1)} />}
+        {user?.facility_id && <IntakeFlow key={session} mode="kiosk" facilityId={user.facility_id} organisationName={facility?.organisation_id ? facility.name : null} offline={offline} offlineQueue={facility?.offline_mode ?? true} patientLoad={facility?.patient_load ?? "normal"} onReset={() => setSession((n) => n + 1)} />}
         <div className="no-print mx-auto mt-8 max-w-3xl rounded-2xl border border-dashed border-line bg-white/70 p-4">
-          <Toggle
-            checked={simOffline}
-            onChange={setSimOffline}
-            label={tr("Simulate offline (rural camp)")}
-            description={tr("Intakes are queued in IndexedDB on this device and synced automatically when you switch back online.")}
-          />
+          {facility?.offline_mode === false ? (
+            <p className="text-sm text-muted">{tr("This facility is set to online only: with no network, the kiosk asks staff to use the paper form. A supervisor can turn on offline-first kiosks in Facility setup.")}</p>
+          ) : (
+            <Toggle
+              checked={simOffline}
+              onChange={setSimOffline}
+              label={tr("Simulate offline (rural camp)")}
+              description={tr("Intakes are queued in IndexedDB on this device and synced automatically when you switch back online.")}
+            />
+          )}
           <p className="mt-2 text-xs text-muted">{tr("Staff on duty:")} {user?.name}</p>
         </div>
       </main>

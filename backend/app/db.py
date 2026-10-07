@@ -112,8 +112,14 @@ def _add_missing_columns() -> None:
                 continue
             have = {c["name"] for c in insp.get_columns(table.name)}
             for col in table.columns:
-                if col.name not in have and col.nullable:
+                if col.name in have:
+                    continue
+                if col.nullable:
                     conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {col.type.compile(engine.dialect)}'))
+                elif col.server_default is not None:  # NOT NULL with a default (data_origin, patient_load): existing rows get it
+                    default = col.server_default.arg if isinstance(col.server_default.arg, str) else str(col.server_default.arg)
+                    sql = f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {col.type.compile(engine.dialect)} NOT NULL DEFAULT ' + "'" + default + "'"
+                    conn.execute(text(sql))
 
 
 def init_db() -> None:

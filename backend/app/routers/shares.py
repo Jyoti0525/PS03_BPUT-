@@ -17,7 +17,7 @@ from .. import audit
 from ..config import get_settings
 from ..exports import DISCLAIMER
 from ..models import Facility, FileObject, Referral, ShareLink, User
-from ..schemas import DOCTOR_ROLES, REVIEWER_ROLES, SharedDocument, SharedSummary, ShareIn, ShareOpenIn, ShareOut
+from ..schemas import DOCTOR_ROLES, REVIEWER_ROLES, SharedDocument, SharedSummary, ShareIn, ShareOpenIn, ShareOut, ShareReceivedIn
 from ..security import DB, file_token, hash_secret, require, verify_secret
 from ..services import load_encounter, now
 
@@ -79,6 +79,23 @@ def share_meta(token: str, db: DB):
     return {"facility_name": f.name if f else "", "purpose": s.purpose, "expires_at": s.expires_at}
 
 
+@router.post("/share/{token}/received")
+def share_received(token: str, body: ShareReceivedIn, db: DB):
+    """E4: the receiving clinician, with the access code, confirms the patient reached care. Closes the referral."""
+    from .encounters import mark_received
+
+    s = _active(db, token)
+    if not verify_secret(body.access_code, s.token, s.code_hash):
+        s.failed_attempts += 1
+        db.commit()
+        raise HTTPException(403, "Wrong access code.")
+    ref = db.scalar(select(Referral).where(Referral.encounter_id == s.encounter_id).order_by(Referral.created_at.desc()))
+    if not ref:
+        raise HTTPException(404, "No referral on this summary.")
+    mark_received(db, ref, body.confirmed_by, body.note, "qr", None)
+    return {"status": "received", "received_by": ref.received_by, "received_at": ref.received_at}
+
+
 @router.post("/share/{token}/open", response_model=SharedSummary)
 def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
     s = _active(db, token)
@@ -114,7 +131,8 @@ def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
             "consent": {"mode": e.consent.mode, "proxy_name": e.consent.proxy_name, "proxy_relation": e.consent.proxy_relation} if e.consent else None,
         },
         note=note,
-        referral={"destination": ref.destination, "specialty": ref.specialty, "reason": ref.reason, "transport": ref.transport, "created_by": ref.created_by, "created_at": ref.created_at, "note_text": ref.note_text} if ref else None,
+        referral={"destination": ref.destination, "specialty": ref.specialty, "reason": ref.reason, "transport": ref.transport, "created_by": ref.created_by, "created_at": ref.created_at, "note_text": ref.note_text,
+                  "status": ref.status, "received_by": ref.received_by, "received_at": ref.received_at} if ref else None,
         documents=docs,
         shared_by=s.created_by,
         expires_at=s.expires_at,

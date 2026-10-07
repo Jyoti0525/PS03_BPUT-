@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
-import { Badge, Button, Card, CardHeader, ErrorNote, Input, Label, Spinner, Toggle, cx } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, ErrorNote, Input, Label, Select, Spinner, Toggle, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import type { Facility, FacilityType } from "@/lib/types";
 import { LANGUAGES } from "@/lib/i18n/languages";
@@ -100,6 +100,14 @@ function FacilityForm({ data, onSaved }: { data: Facility; onSaved: () => void }
           <div>
             <Label htmlFor="f-occ">{tr("Occupied")}</Label>
             <Input id="f-occ" inputMode="numeric" value={f.beds_occupied} onChange={(e) => setF({ ...f, beds_occupied: Number(e.target.value.replace(/\D/g, "")) || 0 })} />
+          </div>
+          <div className="sm:col-span-2">
+            <Label htmlFor="f-load" hint={tr("High: the kiosk asks only the safety questions")}>{tr("Patient load")}</Label>
+            <Select id="f-load" value={f.patient_load ?? "normal"} onChange={(e) => setF({ ...f, patient_load: e.target.value as "low" | "normal" | "high" })}>
+              <option value="low">{tr("Low — ask every follow-up question")}</option>
+              <option value="normal">{tr("Normal — up to 7 questions, safety first")}</option>
+              <option value="high">{tr("High — safety questions only")}</option>
+            </Select>
           </div>
           <div className="flex items-end sm:col-span-2">
             <div className="w-full rounded-xl border border-line p-3">

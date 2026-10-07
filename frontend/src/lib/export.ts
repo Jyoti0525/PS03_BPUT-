@@ -5,6 +5,10 @@ export const URGENCY_LABEL = { red: "Critical", yellow: "Semi-urgent", green: "R
 export const DISCLAIMER =
   "Triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional before any clinical decision.";
 
+/** G8: every export says where its data came from. */
+export const originLine = (e: Encounter) =>
+  (e.data_origin ?? "SYNTHETIC") === "SYNTHETIC" ? "Data origin: SYNTHETIC (synthetic demo data, no real patient)" : "Data origin: PUBLIC_SAMPLE (public sample data)";
+
 /** Plain-text lines of a triage note; the base for PDF, print and referral text. */
 export function noteLines(e: Encounter, facility?: Facility | null): string[] {
   const n = e.note;
@@ -12,6 +16,7 @@ export function noteLines(e: Encounter, facility?: Facility | null): string[] {
   const L: string[] = [];
   L.push("JEEVIA TRIAGE NOTE");
   L.push(DISCLAIMER);
+  L.push(originLine(e));
   L.push("");
   L.push(`Patient: ${p.name} (${p.code})  Age/Sex: ${p.age}/${p.sex}  Language: ${p.language}`);
   if (facility) L.push(`Facility: ${facility.name}, ${facility.district}, ${facility.state}`);
@@ -242,6 +247,7 @@ export function referralText(e: Encounter, facility: Facility | null, destinatio
     ...(n?.missing_info.length ? ["", "Not yet available:", ...n.missing_info.map((m) => `  • ${m}`)] : []),
     "",
     DISCLAIMER,
+    originLine(e),
   ];
   return lines.filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n");
 }

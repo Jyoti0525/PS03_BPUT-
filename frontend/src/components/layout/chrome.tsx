@@ -24,19 +24,25 @@ export function Logo({ className, light }: { className?: string; light?: boolean
   );
 }
 
-/** G6 — non-diagnostic disclaimer, visible on every screen. */
+/** G6 — non-diagnostic disclaimer, and G8 — synthetic-data notice, visible on every screen and on every printed page. */
 export function DisclaimerBar() {
   const { t } = usePrefs();
   return (
-    <div className="no-print flex items-center justify-center gap-2 bg-ink px-4 py-1.5 text-center text-[11px] font-medium text-white/85 sm:text-xs" role="note">
-      <ShieldAlert className="size-3.5 shrink-0 text-coral-300" aria-hidden />
-      <span>{t("disclaimer.short")}</span>
-    </div>
+    <>
+      <div className="no-print flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 bg-ink px-4 py-1.5 text-center text-[11px] font-medium text-white/85 sm:text-xs" role="note">
+        <ShieldAlert className="size-3.5 shrink-0 text-coral-300" aria-hidden />
+        <span>{t("disclaimer.short")}</span>
+        <span className="font-semibold text-coral-300">· {t("disclaimer.data")}</span>
+      </div>
+      <p className="hidden border-b border-black px-1 pb-1 text-[11px] print:block" role="note">
+        {t("disclaimer.short")} · {t("disclaimer.data")}
+      </p>
+    </>
   );
 }
 
 /** Language dropdown: the fully translated interfaces first, then every scheduled language for voice/text input. */
-export function LanguageButton({ compact, className, align = "right" }: { compact?: boolean; className?: string; align?: "left" | "right" }) {
+export function LanguageButton({ compact, className, align = "right", offered }: { compact?: boolean; className?: string; align?: "left" | "right"; offered?: string[] }) {
   const { tr, lang, setLanguage } = usePrefs();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -55,11 +61,14 @@ export function LanguageButton({ compact, className, align = "right" }: { compac
     };
   }, [open]);
 
-  const { full, voice } = useMemo(() => {
+  const { here, full, voice } = useMemo(() => {
     const s = q.trim().toLowerCase();
     const list = LANGUAGES.filter((l) => !s || l.name.toLowerCase().includes(s) || l.native.includes(q.trim()));
-    return { full: list.filter((l) => FULLY_TRANSLATED.includes(l.code)), voice: list.filter((l) => !FULLY_TRANSLATED.includes(l.code)) };
-  }, [q]);
+    // F2: the languages this facility offers come first, under their own heading.
+    const own = offered?.length ? list.filter((l) => offered.includes(l.code)) : [];
+    const rest = list.filter((l) => !own.includes(l));
+    return { here: own, full: rest.filter((l) => FULLY_TRANSLATED.includes(l.code)), voice: rest.filter((l) => !FULLY_TRANSLATED.includes(l.code)) };
+  }, [q, offered]);
 
   const pick = (code: string) => {
     setLanguage(code);
@@ -127,6 +136,14 @@ export function LanguageButton({ compact, className, align = "right" }: { compac
             </div>
           </div>
           <div className="max-h-[min(24rem,60vh)] overflow-y-auto p-1.5" role="listbox">
+            {here.length > 0 && (
+              <>
+                <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-semibold tracking-wider text-ink uppercase">{tr("Offered at this facility")}</p>
+                <ul className="mb-1 border-b border-line pb-1">
+                  {here.map((l) => renderItem(l.code))}
+                </ul>
+              </>
+            )}
             {full.length > 0 && (
               <>
                 <p className="px-2.5 pt-1.5 pb-1 text-[11px] font-semibold tracking-wider text-coral-500 uppercase">{tr("Full interface")}</p>
@@ -144,7 +161,7 @@ export function LanguageButton({ compact, className, align = "right" }: { compac
                 </ul>
               </>
             )}
-            {!full.length && !voice.length && <p className="px-3 py-6 text-center text-sm text-muted">{tr("No language matches “")}{q}”</p>}
+            {!here.length && !full.length && !voice.length && <p className="px-3 py-6 text-center text-sm text-muted">{tr("No language matches “")}{q}”</p>}
           </div>
         </div>
       )}

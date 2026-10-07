@@ -31,11 +31,12 @@ from ..schemas import (
     OverrideIn,
     QueueItem,
     ReferralIn,
+    ReferralReceivedIn,
     ReferralOut,
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
 from ..triage.findings import FINDINGS
-from ..services import (auto_escalate, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, record_observations, sign_off_role,
+from ..services import (auto_escalate, aware, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, record_observations, sign_off_role,
                         summarise_later, wait_minutes)
 from .facilities import get_facility
 
@@ -110,8 +111,9 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
         alerts.close_on_visit(db, p.id, user)  # she came: earlier check-up reminders are done
     if body.category == "chronic" or body.chronic:
         alerts.close_on_visit(db, p.id, user, kind="chronic_checkin")
+    fac = db.get(Facility, enc.facility_id)
     if m and m.next_checkup:
-        due = _date(m.next_checkup)
+        due = _visit_day(fac, "anc_checkup", _date(m.next_checkup))
         if due:
             # D4: the reminder always exists so a missed visit is noticed; the channel only decides whether a message goes
             # out, and a phone that is not hers gets wording that says nothing about pregnancy.
@@ -120,7 +122,7 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
                             assigned_to=m.assigned_worker_id, phone_belongs_to=owner, encounter_id=enc.id,
                             message=alerts.reminder_message(p, alerts.facility_name(db, enc.facility_id), due, owner)))
     c = body.chronic
-    if c and c.next_checkup and (due := _date(c.next_checkup)):
+    if c and c.next_checkup and (due := _visit_day(fac, "chronic_checkin", _date(c.next_checkup))):
         # E5: the next check-in for a long-term condition. Missed → the assigned health worker, then a reminder call.
         owner = "self" if p.phone else "none"
         db.add(Reminder(patient_id=p.id, kind="chronic_checkin", due_at=due, channel="voice" if p.phone else "none", facility_id=enc.facility_id,
@@ -140,6 +142,16 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
     if enc.intake.get("ai_assist", True):
         summarise_later(enc.id)
     return encounter_out(enc, user)
+
+
+def _visit_day(fac, kind: str, when):
+    """E5: a follow-up date lands on the facility's next clinic day for that kind of visit."""
+    from .. import visits
+
+    if when is None or fac is None or when < now():  # a date already past is a record, not a booking: kept as given
+        return when
+    d, _ = visits.snap(fac, kind, when.date())
+    return when.replace(year=d.year, month=d.month, day=d.day)
 
 
 def _date(s: str):
@@ -308,21 +320,31 @@ def edit_note(eid: str, body: NotePatch, user: Reviewer, db: DB):
 
 
 @router.post("/encounters/{eid}/override", response_model=EncounterOut)
-def override(eid: str, body: OverrideIn, user: Doctor, db: DB):
-    """Human-in-the-loop override. The rules-engine output stays in `rules_urgency`; a written reason is mandatory."""
+def override(eid: str, body: OverrideIn, user: Reviewer, db: DB):
+    """Human-in-the-loop override (E9). The rules-engine output stays in `rules_urgency`.
+
+    Raising the urgency is free: any reviewer may do it, a reason is optional. Lowering it needs a doctor or
+    medical officer and a written reason of at least 15 characters."""
     e = load_encounter(db, eid, user)
     frm = e.urgency
+    rank = {"green": 0, "yellow": 1, "red": 2}
+    if body.to_urgency == frm:
+        raise HTTPException(400, "The urgency is already " + frm.upper())
+    down = rank[body.to_urgency] < rank.get(frm, 0)
+    if down and user.role not in DOCTOR_ROLES:
+        raise HTTPException(403, "Only a doctor or medical officer can lower the urgency; you can raise it or escalate")
+    if down and len(body.reason) < 15:
+        raise HTTPException(422, "A written reason of at least 15 characters is required to lower the urgency")
     # Rules marked non-downgradable can still be overruled by a doctor (humans decide), but never
     # silently: the audit entry names every such rule that the new urgency goes below.
-    rank = {"green": 0, "yellow": 1, "red": 2}
     overruled = [h["rule_id"] for h in ((e.note or {}).get("rules_fired") or [])
                  if h.get("non_downgradable") and rank.get(h["urgency"], 0) > rank[body.to_urgency]]
-    e.override = {"from_urgency": frm, "to_urgency": body.to_urgency, "category": body.category, "reason": body.reason, "by": user.name, "at": now().isoformat(), "overruled_non_downgradable": overruled}
+    e.override = {"from_urgency": frm, "to_urgency": body.to_urgency, "category": body.category, "reason": body.reason, "by": user.name, "by_role": user.role, "at": now().isoformat(), "direction": "down" if down else "up", "overruled_non_downgradable": overruled}
     e.urgency = body.to_urgency
     e.urgency_source = "override"
     esc = escalate_after(body.to_urgency)
     e.escalation_due_at = e.created_at + timedelta(minutes=esc) if esc else None
-    audit.record(db, user, "OVERRIDE", "encounter", eid, f'Urgency {frm} → {body.to_urgency} ({body.category}). Reason: "{body.reason}". Rules-engine output ({e.rules_urgency}) retained.{(" Overrules non-downgradable rule(s): " + ", ".join(overruled)) if overruled else ""}', e.patient.code, e.facility_id)
+    audit.record(db, user, "OVERRIDE", "encounter", eid, f'Urgency {frm} → {body.to_urgency} ({"lowered" if down else "raised"}; {body.category}). Reason: "{body.reason or "none given"}". Rules-engine output ({e.rules_urgency}) retained.{(" Overrules non-downgradable rule(s): " + ", ".join(overruled)) if overruled else ""}', e.patient.code, e.facility_id)
     return encounter_out(e, user)
 
 
@@ -401,13 +423,19 @@ def ref_out(r: Referral) -> ReferralOut:
     return ReferralOut(
         id=r.id, encounter_id=r.encounter_id, patient_name=r.encounter.patient.name, destination=r.destination, specialty=r.specialty,
         reason=r.reason, note_text=r.note_text, transport=r.transport, created_by=r.created_by, created_at=r.created_at, status=r.status,
+        due_at=aware(r.due_at), overdue=r.status != "received" and r.due_at is not None and aware(r.due_at) < now(),
+        received_at=aware(r.received_at), received_by=r.received_by, received_note=r.received_note, received_via=r.received_via,
     )
+
+
+# E4: how long a referral may stay open before someone checks whether the patient arrived.
+REFERRAL_DUE = {"red": timedelta(hours=6), "yellow": timedelta(hours=48), "green": timedelta(days=14)}
 
 
 @router.post("/encounters/{eid}/referrals", response_model=ReferralOut)
 def create_referral(eid: str, body: ReferralIn, user: Doctor, db: DB):
     e = load_encounter(db, eid, user)
-    r = Referral(encounter_id=e.id, created_by=user.name, **body.model_dump())
+    r = Referral(encounter_id=e.id, created_by=user.name, due_at=now() + REFERRAL_DUE.get(e.urgency or "green", REFERRAL_DUE["green"]), **body.model_dump())
     db.add(r)
     e.status, e.referral_needed = "referred", True
     e.reviewed_by = e.reviewed_by or user.name
@@ -416,6 +444,28 @@ def create_referral(eid: str, body: ReferralIn, user: Doctor, db: DB):
     audit.record(db, user, "REFERRAL", "encounter", e.id, f"Referral to {body.destination} ({body.specialty}); transport: {body.transport}", e.patient.code, e.facility_id)
     db.refresh(r)
     return ref_out(r)
+
+
+@router.post("/referrals/{rid}/received", response_model=ReferralOut)
+def referral_received(rid: str, body: ReferralReceivedIn, user: Doctor, db: DB):
+    """E4: the referring doctor records that care was received (for example confirmed by phone with the destination)."""
+    r = db.get(Referral, rid)
+    if not r or r.encounter.facility_id != user.facility_id:
+        raise HTTPException(404, "Referral not found")
+    mark_received(db, r, body.confirmed_by, body.note, "phone", user)
+    return ref_out(r)
+
+
+def mark_received(db, r: Referral, by: str, note: str, via: str, user) -> None:
+    from ..alerts import _resolve
+
+    if r.status == "received":
+        raise HTTPException(409, f"Already confirmed received by {r.received_by}")
+    r.status, r.received_at, r.received_by, r.received_note, r.received_via = "received", now(), by.strip(), note.strip() or None, via
+    _resolve(db, r.encounter.facility_id, "referral_overdue", r.id, f"care received ({by.strip()})")
+    how = "the receiving clinician (QR summary)" if via == "qr" else "the referring doctor"
+    audit.record(db, user, "REFERRAL", "referral", r.id, f"Care received at {r.destination}; confirmed by {by.strip()}, recorded by {how}",
+                 r.encounter.patient.code, r.encounter.facility_id)
 
 
 @router.get("/referrals", response_model=list[ReferralOut])

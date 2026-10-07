@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { KeyRound, Printer, FileText, Building2, Clock, Send, AlertOctagon, AlertTriangle, Info, Lock, ExternalLink } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { Logo, LanguageButton } from "@/components/layout/chrome";
-import { Badge, Button, Card, CardHeader, Input, Spinner, cx } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, FieldError, Input, Label, Spinner, cx } from "@/components/ui";
 import { UrgencyBadge } from "@/components/triage/note";
 import type { SharedSummary } from "@/lib/types";
 
@@ -134,6 +134,7 @@ export default function SharedSummaryPage() {
               <Card>
                 <CardHeader title={tr("Referred to {d}", { d: data.referral.destination })} subtitle={`${data.referral.specialty} · ${data.referral.transport.replace(/_/g, " ")} · by ${data.referral.created_by}`} icon={<Send className="size-4" />} />
                 <p className="px-4 py-3 text-sm text-ink">{tr(data.referral.reason)}</p>
+                <ReceivedForm token={token} code={code} referral={data.referral} />
               </Card>
             )}
 
@@ -231,6 +232,44 @@ export default function SharedSummaryPage() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+/** E4: the receiving clinician confirms the patient reached care; this closes the referral at the sending facility. */
+function ReceivedForm({ token, code, referral }: { token: string; code: string; referral: NonNullable<SharedSummary["referral"]> }) {
+  const { tr } = usePrefs();
+  const [who, setWho] = useState("");
+  const [done, setDone] = useState<string | null>(referral.status === "received" ? referral.received_by ?? "" : null);
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  if (done !== null) return <p className="border-t border-line px-4 py-3 text-sm font-semibold text-teal-700">{tr("Care received — confirmed by {who}", { who: done })}</p>;
+  return (
+    <div className="no-print flex flex-wrap items-end gap-2 border-t border-line px-4 py-3">
+      <div className="min-w-[220px] flex-1">
+        <Label htmlFor="rcv-who">{tr("Patient seen here? Your name and role")}</Label>
+        <Input id="rcv-who" value={who} onChange={(e) => setWho(e.target.value)} placeholder={tr("e.g. Dr Rao, casualty")} />
+      </div>
+      <Button
+        variant="teal"
+        loading={busy}
+        onClick={async () => {
+          setErr(null);
+          if (who.trim().length < 3) return setErr(tr("Enter your name and role"));
+          setBusy(true);
+          try {
+            const r = await api.shareReceived(token, code, who, "");
+            setDone(r.received_by);
+          } catch (e) {
+            setErr(e instanceof Error ? e.message : tr("Failed"));
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {tr("Confirm care received")}
+      </Button>
+      <FieldError>{err}</FieldError>
     </div>
   );
 }

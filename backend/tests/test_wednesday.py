@@ -330,3 +330,22 @@ def test_sqlite_adds_missing_columns(tmp_path):
         dbmod.engine = old
     cols = {c["name"] for c in sa.inspect(eng).get_columns("reminders")}
     assert {"facility_id", "assigned_to", "phone_belongs_to", "attempts", "missed_at"} <= cols
+
+
+def test_sqlite_adds_required_columns_with_their_default(tmp_path):
+    import sqlalchemy as sa
+
+    from app import db as dbmod
+
+    eng = sa.create_engine(f"sqlite:///{tmp_path}/old.db")
+    with eng.begin() as c:
+        c.execute(sa.text("CREATE TABLE facilities (id VARCHAR(64) PRIMARY KEY, name VARCHAR(200))"))
+        c.execute(sa.text("INSERT INTO facilities VALUES ('f1', 'Old PHC')"))
+    old = dbmod.engine
+    dbmod.engine = eng
+    try:
+        dbmod._add_missing_columns()
+    finally:
+        dbmod.engine = old
+    with eng.connect() as c:
+        assert c.execute(sa.text("SELECT patient_load FROM facilities")).scalar() == "normal"

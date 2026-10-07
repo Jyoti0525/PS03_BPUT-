@@ -7,7 +7,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
@@ -182,3 +182,24 @@ async def translate(body: TranslateIn, user: CurrentUser):
     except language.LanguageUnavailable as e:
         raise HTTPException(503, str(e)) from e
     return {"text": tr["texts"][0], "source": body.source, "target": body.target, "engine": tr["engine"]}
+
+
+class SpeakIn(BaseModel):
+    text: str = Field(min_length=1, max_length=1500)
+    language: str = Field(min_length=2, max_length=4)
+
+
+@router.post("/language/speak")
+async def speak(body: SpeakIn, user: CurrentUser):
+    """A7: read a kiosk line aloud when the device has no voice for the language (Windows has no Odia voice).
+    Sarvam Bulbul, online, in India. The kiosk sends the patient's own words only when they chose AI helpers.
+    Audio is kept in memory only; nothing is stored."""
+    if not sarvam.enabled():
+        raise HTTPException(503, "No online voice configured on this server")
+    if body.language not in sarvam.TTS_LANGS:
+        raise HTTPException(422, f"No online voice for '{body.language}'")
+    try:
+        audio = await run_in_threadpool(sarvam.speak, body.text.strip(), body.language)
+    except sarvam.SarvamUnavailable as e:
+        raise HTTPException(503, str(e)) from e
+    return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "no-store"})

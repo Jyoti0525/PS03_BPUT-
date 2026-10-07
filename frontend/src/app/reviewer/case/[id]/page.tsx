@@ -209,11 +209,10 @@ export default function CasePage() {
           <Button variant="secondary" onClick={() => setModal("edit")} icon={<Pencil className="size-4" />}>
             {tr("Edit")}
           </Button>
-          {isDoctor && (
-            <Button variant="secondary" onClick={() => setModal("override")} icon={<ShieldAlert className="size-4" />}>
-              {tr("Override urgency")}
-            </Button>
-          )}
+          {/* E9: anyone reviewing may raise the urgency; only a doctor may lower it. */}
+          <Button variant="secondary" onClick={() => setModal("override")} icon={<ShieldAlert className="size-4" />}>
+            {tr(isDoctor ? "Override urgency" : "Raise urgency")}
+          </Button>
           <Button variant="secondary" onClick={() => setModal("escalate")} icon={<Siren className="size-4" />}>
             {tr("Escalate")}
           </Button>
@@ -344,11 +343,17 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
   const [reason, setReason] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const options = (["red", "yellow", "green"] as Urgency[]).filter((u) => u !== enc.urgency);
+  const { user } = useSession();
+  const isDoctor = !!user && DOCTOR_ROLES.includes(user.role);
+  const rank: Record<Urgency, number> = { green: 0, yellow: 1, red: 2 };
+  const cur = enc.urgency ?? "green";
+  // E9: raising is free for every reviewer; lowering is a doctor's decision with a written reason.
+  const options = (["red", "yellow", "green"] as Urgency[]).filter((u) => u !== cur && (isDoctor || rank[u] > rank[cur]));
+  const down = !!to && rank[to] < rank[cur];
   const submit = async () => {
     setErr(null);
     if (!to) return setErr(tr("Choose the new urgency"));
-    if (reason.trim().length < 15) return setErr(tr("Write a reason of at least 15 characters"));
+    if (down && reason.trim().length < 15) return setErr(tr("Write a reason of at least 15 characters"));
     setBusy(true);
     try {
       onDone(await api.overrideUrgency(enc.id, to, category, reason));
@@ -364,7 +369,7 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
       open={open}
       onClose={onClose}
       title={tr("Override rules-engine urgency")}
-      subtitle={tr("The original rules output is kept. Your reason is permanently written to the audit log.")}
+      subtitle={tr(isDoctor ? "The original rules output is kept. Your reason is permanently written to the audit log." : "You can raise the urgency at any time; only a doctor can lower it. The original rules output is kept.")}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>{tr("Cancel")}</Button>
@@ -372,6 +377,7 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
         </>
       }
     >
+      {!options.length && <p className="mb-2 text-sm text-muted">{tr("This case is already RED. Only a doctor can lower it; use Escalate to call one.")}</p>}
       <p className="text-sm text-muted">{tr("Current:")} <UrgencyBadge u={enc.urgency} size="sm" /> {tr("from rules")} {enc.note?.rules_fired.map((r) => r.rule_id).join(", ")}</p>
       <div className="mt-4 grid grid-cols-2 gap-2">
         {options.map((u) => (
@@ -388,7 +394,7 @@ function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
         </Select>
       </div>
       <div className="mt-4">
-        <Label htmlFor="ov-reason" hint={tr("{n}/15 characters minimum", { n: reason.trim().length })}>{tr("Written reason (required)")}</Label>
+        <Label htmlFor="ov-reason" hint={down ? tr("{n}/15 characters minimum", { n: reason.trim().length }) : undefined}>{tr(down ? "Written reason (required)" : "Reason (optional)")}</Label>
         <Textarea id="ov-reason" rows={4} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr("e.g. Repeat BP 132/84 after rest; chest wall tenderness reproduces pain; ECG normal.")} />
       </div>
       <FieldError>{err}</FieldError>
@@ -496,7 +502,7 @@ function EditModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encount
 function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean; enc: Encounter; facility: Facility | null; onClose: () => void; onDone: (share: ShareLink | null) => void }) {
   const { tr } = usePrefs();
   const spec = facility?.specialists.find((s) => s.key === enc.specialist_required);
-  const defaultDest = spec?.available ? `${facility?.name} — ${spec.label} (in-house)` : facility?.referral_destination ?? "";
+  const defaultDest = spec?.available ? `${facility?.name} — ${spec.label} (in-house)` : spec?.refer_to || (facility?.referral_destination ?? "");
   const [destination, setDestination] = useState(defaultDest);
   const [specialty, setSpecialty] = useState(spec?.label ?? "General Medicine");
   const [reason, setReason] = useState("");
@@ -566,6 +572,8 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
             <Label htmlFor="rf-dest">{tr("Destination")}</Label>
             <Select id="rf-dest" value={destination} onChange={(e) => setDestination(e.target.value)}>
               {spec?.available && <option value={`${facility?.name} — ${spec.label} (in-house)`}>{`${facility?.name} — ${tr(spec.label)} (${tr("in-house")})`}</option>}
+              {/* E4: each specialty's referral place from the facility's configuration, then the default referral hospital */}
+              {[...new Set([spec?.refer_to, ...(facility?.specialists ?? []).filter((s) => !s.available).map((s) => s.refer_to)].filter((x): x is string => !!x))].map((d) => <option key={d}>{d}</option>)}
               {facility && <option>{facility.referral_destination}</option>}
               <option>{tr("Tele-consultation (eSanjeevani hub)")}</option>
             </Select>

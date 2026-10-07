@@ -72,6 +72,11 @@ def ppe_gap(occ: dict) -> str | None:
     return None
 
 
+def processing_status(stages: list[dict]) -> dict:
+    """H5: `degraded` when any stage failed, fell back or is unsure; the stages say which and why."""
+    return {"overall": "ok" if all(s["status"] == "ok" for s in stages) else "degraded", "stages": stages}
+
+
 def _vid() -> str:
     return "v" + uuid.uuid4().hex[:10]
 
@@ -156,10 +161,16 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         for m in ex.get("medicines") or []:
             if m["name"] not in confirmed and all(x["name"] != m["name"] for x in meds_pending):
                 meds_pending.append({**m, "file_id": f.id, "filename": f.filename})
+    stages = []  # H5: what ran on this case, and what fell back or failed
     for f in files:
         if f.kind != "report":
             continue
         ex = f.extraction
+        if not ex or ex.get("engine") in (None, "none"):
+            why = next((w for w in reversed((ex or {}).get("warnings") or []) if "OCR" in w or "read" in w), "no reading was stored")
+            stages.append({"stage": "Report reading", "status": "failed", "detail": f'"{f.filename}": {why}'})
+        else:
+            stages.append({"stage": "Report reading", "status": "ok", "detail": f'"{f.filename}": {ex["engine"]}'})
         if not ex:
             missing.append(f'Uploaded report "{f.filename}" was not read — review the image directly')
             continue
@@ -240,10 +251,16 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         base = f"English rendered by {machine[0].get('engine') or 'machine translation'} from {langs}; rules also read the original-language text"
         if rewrites:
             base += f"; given to the translator in standard form: {', '.join(dict.fromkeys(rewrites))}"
+        stages.append({"stage": "Translation", "status": "unsure" if problems else "ok", "detail": machine[0].get("engine") or "machine translation"})
         if problems:
             flags.append({"code": "MT-CHECK", "label": "Translation may be wrong — check with the patient", "severity": "warning", "reason": " | ".join(problems) + f" — {base}"})
         else:
             flags.append({"code": "MT-CHECK", "label": "Machine-translated history — check against the patient's own words", "severity": "info", "reason": base})
+    if voice:
+        stages.append({"stage": "Speech recognition", "status": "ok" if voice.get("confirmed_by_readback") else "unconfirmed", "detail": voice.get("engine") or "Browser speech recognition"})
+    if bad := [s for s in stages if s["status"] == "failed"]:
+        flags.append({"code": "STAGE-DEGRADED", "label": "Part of the automatic processing failed — check the source directly", "severity": "warning",
+                      "reason": " | ".join(f'{s["stage"]}: {s["detail"]}' for s in bad)})
     if meds_pending:
         flags.append({"code": "MEDS-UNCONFIRMED", "label": f"{len(meds_pending)} medicine name(s) read from a strip or prescription — awaiting confirmation", "severity": "warning",
                       "reason": "Read by OCR and matched to the PMBJP generic list; not part of the record until a nurse or doctor confirms each one"})
@@ -393,6 +410,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         "transcript": {"original": voice["original_text"], "translated": voice["text"], "language": voice["language"]} if voice else None,
         "generated_by": f"rules engine (rulepack {triage['rulepack_version']}) + template summariser",
         "renderer": "TEMPLATE",
+        "processing_status": processing_status(stages),
         "ai_assist": intake.get("ai_assist", True),
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }

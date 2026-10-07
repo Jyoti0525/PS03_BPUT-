@@ -6,6 +6,7 @@
 const en = {
   "app.tagline": "Human-in-the-loop triage support for India's health facilities",
   "disclaimer.short": "Triage support only · not a diagnosis · every entry is reviewed by qualified health staff",
+  "disclaimer.data": "Synthetic demo data — no real patients",
   "common.next": "Next",
   "common.back": "Back",
   "common.cancel": "Cancel",
@@ -122,6 +123,7 @@ export type DictKey = keyof typeof en;
 const hi: Partial<Record<DictKey, string>> = {
   "app.tagline": "भारत की स्वास्थ्य सुविधाओं के लिए मानव-निगरानी वाली ट्रायेज सहायता",
   "disclaimer.short": "केवल ट्रायेज सहायता · निदान नहीं · हर प्रविष्टि योग्य स्वास्थ्य कर्मी देखते हैं",
+  "disclaimer.data": "कृत्रिम डेमो डेटा — कोई असली मरीज़ नहीं",
   "common.next": "आगे",
   "common.back": "पीछे",
   "common.cancel": "रद्द करें",
@@ -230,6 +232,7 @@ const hi: Partial<Record<DictKey, string>> = {
 const or: Partial<Record<DictKey, string>> = {
   "app.tagline": "ଭାରତର ସ୍ୱାସ୍ଥ୍ୟ କେନ୍ଦ୍ର ପାଇଁ ମଣିଷ-ତଦାରଖ ଟ୍ରାଇଏଜ୍ ସହାୟତା",
   "disclaimer.short": "କେବଳ ଟ୍ରାଇଏଜ୍ ସହାୟତା · ରୋଗ ନିର୍ଣ୍ଣୟ ନୁହେଁ · ପ୍ରତ୍ୟେକ ତଥ୍ୟ ଯୋଗ୍ୟ ସ୍ୱାସ୍ଥ୍ୟକର୍ମୀ ଦେଖନ୍ତି",
+  "disclaimer.data": "କୃତ୍ରିମ ଡେମୋ ତଥ୍ୟ — କୌଣସି ପ୍ରକୃତ ରୋଗୀ ନୁହେଁ",
   "common.next": "ଆଗକୁ",
   "common.back": "ପଛକୁ",
   "common.cancel": "ବାତିଲ",
