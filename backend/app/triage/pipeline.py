@@ -39,6 +39,18 @@ FOLLOWUPS = [
 ]
 
 
+
+def original_words(intake: dict) -> list[dict]:
+    """A3: every answer given in another language, the patient's words beside the English, marked machine translated."""
+    out = []
+    for e in intake.get("symptoms", []):
+        if e.get("original_text") and e["original_text"].strip() != e.get("text", "").strip():
+            engines = (e.get("engine") or "").split(" + ")
+            out.append({"original": e["original_text"], "translated": e["text"], "language": e["language"], "source": e.get("source"),
+                        "speech_engine": engines[0] if e.get("source") == "voice" and engines[0] else None,
+                        "translation_engine": engines[-1] if len(engines) > 1 or e.get("source") != "voice" else None})
+    return out
+
 def _present(triage: dict, fid: str) -> bool:
     return (triage.get("findings") or {}).get(fid, {}).get("value") is True
 
@@ -242,6 +254,9 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         why = "; ".join(h.get("evidence") or []) or "matched on intake data"
         flags.append({"code": h["rule_id"], "label": h["description"], "severity": "critical" if h["urgency"] == "red" else "warning",
                       "reason": f"{why} — {h.get('source', h['protocol'])}", "non_downgradable": h.get("non_downgradable", False)})
+    for f in triage.get("followups", []):  # never changes the colour
+        why = "; ".join(f["evidence"]) or "matched on intake data"
+        flags.append({"code": f["id"], "label": f"Follow-up: {f['description']}", "severity": "info", "reason": f"{why} — {f['source']}"})
     for s in intake.get("symptoms", []):
         if d := heard_differently(s):
             disagreements.append(d)
@@ -429,6 +444,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         "medications_pending": meds_pending,
         "medications": list(intake.get("medications_confirmed") or []),
         "transcript": {"original": voice["original_text"], "translated": voice["text"], "language": voice["language"]} if voice else None,
+        "original_words": original_words(intake),
         "generated_by": f"rules engine (rulepack {triage['rulepack_version']}) + template summariser",
         "renderer": "TEMPLATE",
         "processing_status": processing_status(stages),

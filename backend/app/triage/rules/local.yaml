@@ -28,3 +28,16 @@ rules:
         - all:
             - any: [ { vital_if_measured: [bp_systolic, gte, 160] }, { vital_if_measured: [bp_diastolic, gte, 100] } ]
             - any: [ { finding: headache }, { finding: visual_disturbance }, { finding: chest_pain }, { finding: breathless }, { finding: one_sided_weakness } ]
+  - id: NTEP-PRESUMPTIVE-TB
+    description: Presumptive TB (cough or fever for 2 weeks or more, or cough with weight loss or night sweats) — sputum test (NAAT) referral today
+    urgency: yellow
+    source: ntep
+    when:
+      any:
+        - all: [ { finding: cough }, { any: [ { finding: weight_loss }, { finding: night_sweats } ] } ]
+        - all: [ { any: [ { finding: cough }, { finding: fever } ] }, { onset_hours: [gte, 336] } ]
+  - id: GINA-ASTHMA-LOW-SPO2
+    description: Asthma or wheeze with SpO₂ below 94 % — not a mild flare; treat now and reassess within the hour
+    urgency: yellow
+    source: gina
+    when: { all: [ { any: [ { finding: asthma }, { finding: wheeze } ] }, { vital: [spo2, lt, 94] } ] }

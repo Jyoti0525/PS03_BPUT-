@@ -574,6 +574,8 @@ export interface TriageNote {
   trend: TrendRow[];
   disagreements: Disagreement[];
   transcript?: { original: string; translated: string; language: string } | null;
+  /** A3: every answer not given in English, the patient's words beside the machine translation. */
+  original_words?: { original: string; translated: string; language: string; source?: string | null; speech_engine?: string | null; translation_engine?: string | null }[];
   generated_by: string;
   /** Who wrote `summary`: the fixed template, or the local language model after passing the faithfulness check and output guard. */
   renderer?: "TEMPLATE" | "LLM";

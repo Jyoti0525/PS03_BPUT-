@@ -61,7 +61,7 @@ def load_pack() -> tuple[dict, tuple[Protocol, ...], str]:
     for f in sorted(RULES_DIR.glob("*.yaml")):
         raw = f.read_text(encoding="utf-8")
         digest.update(raw.encode())
-        if f.name == "sources.yaml":
+        if f.name in ("sources.yaml", "followup.yaml"):
             continue
         doc = yaml.safe_load(raw)
         rules = []
@@ -82,6 +82,18 @@ def load_pack() -> tuple[dict, tuple[Protocol, ...], str]:
                               bool(r.get("non_downgradable", r["urgency"] == "red")), review))
         protocols.append(Protocol(doc["protocol"], doc["name"], doc.get("applies", {}), tuple(rules)))
     return sources, tuple(protocols), digest.hexdigest()[:10]
+
+
+def load_followups() -> tuple[dict, ...]:
+    """Follow-up flags (rules/followup.yaml): shown on the note, never change the colour."""
+    sources = yaml.safe_load((RULES_DIR / "sources.yaml").read_text(encoding="utf-8"))["sources"]
+    out = []
+    for r in yaml.safe_load((RULES_DIR / "followup.yaml").read_text(encoding="utf-8"))["followups"]:
+        if r["source"] not in sources:
+            raise ValueError(f"{r['id']}: unknown source {r['source']!r}")
+        _check(r["id"], r["when"])
+        out.append(r)
+    return tuple(out)
 
 
 def load_rules() -> tuple[Rule, ...]:
@@ -397,6 +409,13 @@ def evaluate_full(intake: dict, age: int, sex: str | None = None) -> dict:
             elif v is None:
                 unresolved.append({**base, "needs": sorted(c.unknown)})
 
+    followups = []
+    for r in load_followups():
+        c.unknown, c.evidence = set(), []
+        if _eval(c, r["when"]) is True:
+            followups.append({"id": r["id"], "description": r["description"], "source": sources[r["source"]]["short"],
+                              "source_key": r["source"], "evidence": list(dict.fromkeys(c.evidence))})
+
     required = REQUIRED_ADULT if age >= 12 else REQUIRED_CHILD
     missing = [VITAL_LABEL[k] for k in required if k not in vit]
     if c.avpu is None:
@@ -429,6 +448,7 @@ def evaluate_full(intake: dict, age: int, sex: str | None = None) -> dict:
         "provisional": provisional,
         "hits": hits,
         "unresolved": unresolved,
+        "followups": followups,
         "missing_for_green": missing,
         "protocols": applied,
         "findings": {k: {"label": FINDINGS[k][0], "value": f.value, "evidence": f.evidence} for k, f in c.findings.items()},

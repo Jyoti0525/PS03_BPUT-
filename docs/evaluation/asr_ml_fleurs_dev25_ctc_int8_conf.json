@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "ml",
+  "clips": 25,
+  "audio_seconds": 303.1,
+  "wer": 0.207,
+  "cer": 0.036,
+  "real_time_factor": 0.233,
+  "process_private_gb": 4.02,
+  "process_peak_working_set_gb": 2.48,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 62.0,
+   "bleu": 37.4
+  }
+ },
+ "clips": [
+  {
+   "file": "10132261924607763748.wav",
+   "reference": "പോയിന്റ് മരിയനും ഫെയർ‌മോണ്ടും തമ്മിലുള്ള ദൂരം ഒറ്റപ്പെട്ട ബാക്ക്‌വുഡ് ഭൂപ്രദേശങ്ങളിലൂടെ കടന്നുപോകുന്ന ബഫല്ലോ-പിറ്റ്സ്ബർഗ് ഹൈവേയിലെ ഏറ്റവും വെല്ലുവിളി നിറഞ്ഞ ഡ്രൈവിംഗ് സാഹചര്യങ്ങൾ സൃഷ്ടിക്കുന്നു.",
+   "heard": "പോയിൻറ് മരിയനും പെയർമോണ്ടും തമ്മിലുള്ള ദൂരം ഒറ്റപ്പെട്ട ബാക്ക്വുഡ് ഭൂപ്രദേശങ്ങളിലൂടെ കടന്നുപോകുന്ന ബഫല്ലോ പിറ്റ്സ്ബർഗ് ഹൈവേയിലെ ഏറ്റവും വെല്ലുവിളി നിറഞ്ഞ ഡ്രൈവിംഗ് സാഹചര്യങ്ങൾ സൃഷ്ടിക്കുന്നു",
+   "wer": 0.167,
+   "confidence": 0.936,
+   "english": "The distance between Point Marion and Peermont creates some of the most challenging driving conditions on the Buffalo-Pittsburgh Highway, passing through isolated backwoods.",
+   "english_reference": "The stretch between Point Marion and Fairmont presents the most challenging driving conditions on the Buffalo-Pittsburgh Highway, passing frequently through isolated backwoods terrain."
+  },
+  {
+   "file": "11150828812905750569.wav",
+   "reference": "പോയിന്റ് മരിയനും ഫെയർ‌മോണ്ടും തമ്മിലുള്ള ദൂരം ഒറ്റപ്പെട്ട ബാക്ക്‌വുഡ് ഭൂപ്രദേശങ്ങളിലൂടെ കടന്നുപോകുന്ന ബഫല്ലോ-പിറ്റ്സ്ബർഗ് ഹൈവേയിലെ ഏറ്റവും വെല്ലുവിളി നിറഞ്ഞ ഡ്രൈവിംഗ് സാഹചര്യങ്ങൾ സൃഷ്ടിക്കുന്നു.",
+   "heard": "പോയിൻറ് മരിയനും ഫെയർമോണ്ടും തമ്മിലുള്ള ദൂരം ഒറ്റപ്പെട്ട ബാക്ക്വുഡ് ഭൂപ്രദേശങ്ങളിലൂടെ കടന്നുപോകുന്ന ബഫെല്ലോ പിറ്റ്സ്ബെർഗ് ഹൈവേയിലെ ഏറ്റവും വെല്ലുവിളി നിറഞ്ഞ ഡ്രൈവിംഗ് സാഹചര്യങ്ങൾ സൃഷ്ടിക്കുന്നു",
+   "wer": 0.278,
+   "confidence": 0.933,
+   "english": "The distance between Point Marion and Fairmont creates some of the most challenging driving conditions on the Buffalo Pittsburgh Highway, passing through isolated backwoods.",
+   "english_reference": "The stretch between Point Marion and Fairmont presents the most challenging driving conditions on the Buffalo-Pittsburgh Highway, passing frequently through isolated backwoods terrain."
+  },
+  {
+   "file": "11411170303119605873.wav",
+   "reference": "സ്പാനിഷ് വംശജർ കോളനിവത്ക്കരണ കാലഘട്ടത്തിന് തുടക്കമിട്ടു,ഇത് മൂന്ന് നൂറ്റാണ്ടുകളോളം നീണ്ടുനിന്നു.",
+   "heard": "സ്പാനിഷ് വംശജര് കോളനിവൽക്കരണ കാലഘട്ടത്തിന് തുടക്കമിട്ടു ഇത് മൂന്നു നൂറ്റാണ്ടുകളോളം നീണ്ടുനിന്നു",
+   "wer": 0.333,
+   "confidence": 0.918,
+   "english": "The period of Spanish colonization began and lasted for three centuries.",
+   "english_reference": "The Spaniards started the colonization period which lasted for three centuries."
+  },
+  {
+   "file": "11589644180524018789.wav",
+   "reference": "ഡോക്ടർ മോൾ കരുതുന്നത് ചില രോഗികൾക്ക് ആശുപത്രിയിൽ വെച്ചാവാം വൈറസ് ബാധിച്ചതെന്നാണ്, കൂടാതെ കുറഞ്ഞത് രണ്ട് പേരെങ്കിലും ആശുപത്രിയിലെ ആരോഗ്യപ്രവർത്തകരായിരുന്നു.",
+   "heard": "ഡോക്ടർമോള് കരുതുന്നത് ചില രോഗികൾക്ക് ആശുപത്രിയില് വെച്ചാവാം വൈറസ് ബാധിച്ചതെന്നാണ് കൂടാതെ കുറഞ്ഞത് രണ്ടു പേരെങ്കിലും ആശുപത്രിയിലെ ആരോഗ്യപവർത്തകരായിരുന്നു",
+   "wer": 0.333,
+   "confidence": 0.93,
+   "english": "The doctor believes that some of the patients may have contracted the virus while in the hospital and at least two of them were health workers at the hospital.",
+   "english_reference": "Some patients might have contracted the bug in the hospital, Dr. Moll thinks, and at least two were hospital health workers."
+  },
+  {
+   "file": "11851171521267700852.wav",
+   "reference": "ഉപദ്രവിക്കലാണെന്ന് അവർ കരുതുന്ന സംഭവങ്ങളിലേക്ക് സാംസ്കാരിക വ്യത്യാസങ്ങൾ നയിച്ചേക്കാമെന്നും, പിന്തുടരുന്നതും കയ്യിൽ പിടിക്കുന്നതും തുടങ്ങിയ കാര്യങ്ങൾ അസാധാരണം അല്ലെന്നും സ്ത്രീകൾ തിരിച്ചറിയണം.",
+   "heard": "ഉപദ്രവിക്കലാണെന്ന് അവർ കരുതുന്ന സംഭവങ്ങളിലേക്ക് സാംസ്കാരിക വ്യത്യാസങ്ങൾ നയിച്ചേക്കാമെന്നും പിന്തുടരുന്നതും കയ്യിൽ പിടിക്കുന്നതും തുടങ്ങിയ കാര്യങ്ങൾ അസാധാരണം അല്ലെന്നും സ്ത്രീകൾ തിരിച്ചറിയണം",
+   "wer": 0.0,
+   "confidence": 0.967,
+   "english": "Women should recognize that cultural differences can lead to events they consider harassment, and that things like stalking and hand-holding are not uncommon.",
+   "english_reference": "Women should realize that cultural differences may result in what they would consider harassment and it is not uncommon to be followed, grabbed by the arm, etc."
+  },
+  {
+   "file": "12641520938384550145.wav",
+   "reference": "ബഹിരാകാശ ഉപഗ്രഹത്തിന് കോൾ ലഭിക്കുകയും തൽക്ഷണം താഴേക്ക് കൈമാറുകയും ചെയ്യുന്നു.",
+   "heard": "ബഹിരാകാശ ഉപഗ്രഹത്തിന് കോൾ ലഭിക്കുകയും തൽക്ഷണം താഴേക്ക് കൈമാറുകയും ചെയ്യുന്നു",
+   "wer": 0.0,
+   "confidence": 0.962,
+   "english": "The space satellite receives the call and transmits it down instantly.",
+   "english_reference": "The satellite in space gets the call and then reflects it back down, almost instantly."
+  },
+  {
+   "file": "14040818578467312056.wav",
+   "reference": "പോലീസ് പറയുന്നതനുസരിച്ച്, ഫോട്ടോഗ്രാഫറെ തട്ടിയ വാഹനത്തിന്റെ ഡ്രൈവർ ക്രിമിനൽ കേസ് നേരിടാൻ സാധ്യതയില്ല.",
+   "heard": "പോലീസ് പറയുന്നതനുസരിച്ച് ഫോട്ടോഗ്രാഫറെ തട്ടിയ വാഹനത്തിന്റെ ഡ്രൈവർ ക്രിമിനൽ കേസ് നേരിടാന് സാധ്യതയില്ല",
+   "wer": 0.1,
+   "confidence": 0.96,
+   "english": "According to police, the driver of the vehicle that hit the photographer is unlikely to face a criminal case.",
+   "english_reference": "According to police, the driver of the vehicle that hit the photographer is unlikely to face criminal charges."
+  },
+  {
+   "file": "1657209205736547102.wav",
+   "reference": "ലോകത്തിലെ ഏറ്റവും നല്ല പോളോ ടീമുകളിൽ ഒന്നും, മികച്ച കളിക്കാരും അർജന്റീനക്കുണ്ട്.",
+   "heard": "ലോകത്തിലെ ഏറ്റവും നല്ല പോളോ ടീമുകളിൽ ഒന്നും മികച്ച കളിക്കാരും അര്ജന്റീനയ്ക്കുണ്ട്",
+   "wer": 0.111,
+   "confidence": 0.954,
+   "english": "Argentina has one of the best polo teams in the world.",
+   "english_reference": "Argentina is well known for having one of the best polo teams and players in the world."
+  },
+  {
+   "file": "1689640773290469530.wav",
+   "reference": "സ്പാനിഷ് വംശജർ കോളനിവത്ക്കരണ കാലഘട്ടത്തിന് തുടക്കമിട്ടു,ഇത് മൂന്ന് നൂറ്റാണ്ടുകളോളം നീണ്ടുനിന്നു.",
+   "heard": "സ്പാനിഷ് വംശജർ കോളനിവത്കരണ കാലഘട്ടത്തിന് തുടക്കമിട്ടു ഇത് മൂന്നു നൂറ്റാണ്ടുകളോളം നീണ്ടുനിന്നു",
+   "wer": 0.222,
+   "confidence": 0.938,
+   "english": "The Spanish began a period of colonization that lasted for three centuries.",
+   "english_reference": "The Spaniards started the colonization period which lasted for three centuries."
+  },
+  {
+   "file": "17524535263017360980.wav",
+   "reference": "ലോകത്തിലെ ഏറ്റവും നല്ല പോളോ ടീമുകളിൽ ഒന്നും, മികച്ച കളിക്കാരും അർജന്റീനക്കുണ്ട്.",
+   "heard": "ലോകത്തിലെ ഏറ്റവും നല്ല പോളോ ടീമുകളില് ഒന്നും മികച്ച കളിക്കാരും അര്ജന്റീനയ്ക്കുണ്ട്",
+   "wer": 0.222,
+   "confidence": 0.957,
+   "english": "Argentina has one of the best polo teams in the world.",
+   "english_reference": "Argentina is well known for having one of the best polo teams and players in the world."
+  },
+  {
+   "file": "17571032581508371434.wav",
+   "reference": "ആഭ്യന്തര, സൈനിക പ്രവർത്തനങ്ങൾക്കായി മോശമായി പരിപാലിക്കപ്പെട്ടതും പഴക്കം ചെന്നതുമായ വിമാനങ്ങൾ ഉപയോഗിക്കുന്ന ഇറാനിൽ വ്യോമ അപകടങ്ങൾ സാധാരണമാണ്.",
+   "heard": "ആഭ്യന്തര സൈനിക പ്രവർത്തനങ്ങൾക്കായി മോശമായി പരിപാലിക്കപ്പെട്ടതും പഴക്കം ചെന്നതുമായ വിമാനങ്ങൾ ഉപയോഗിക്കുന്ന ഇറാനിൽ വ്യോമ അപകടങ്ങൾ സാധാരണമാണ്",
+   "wer": 0.0,
+   "confidence": 0.956,
+   "english": "Air accidents are common in Iran, which uses poorly maintained and outdated aircraft for domestic military operations.",
+   "english_reference": "Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations."
+  },
+  {
+   "file": "17983457388264253077.wav",
+   "reference": "ആഭ്യന്തര, സൈനിക പ്രവർത്തനങ്ങൾക്കായി മോശമായി പരിപാലിക്കപ്പെട്ടതും പഴക്കം ചെന്നതുമായ വിമാനങ്ങൾ ഉപയോഗിക്കുന്ന ഇറാനിൽ വ്യോമ അപകടങ്ങൾ സാധാരണമാണ്.",
+   "heard": "ആഭ്യന്തര സൈനികപ്രവർത്തനങ്ങൾക്കായി മോശമായി പരിപാലിക്കപ്പെട്ടതും പഴക്കം ചെന്നതുമായ വിമാനങ്ങൾ ഉപയോഗിക്കുന്ന ഇറാനിൽ വ്യോമ അപകടങ്ങൾ സാധാരണമാണ്",
+   "wer": 0.154,
+   "confidence": 0.956,
+   "english": "Air accidents are common in Iran, which uses poorly maintained and outdated aircraft for domestic military operations.",
+   "english_reference": "Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations."
+  },
+  {
+   "file": "18107375760118442519.wav",
+   "reference": "പോലീസ് പറയുന്നതനുസരിച്ച്, ഫോട്ടോഗ്രാഫറെ തട്ടിയ വാഹനത്തിന്റെ ഡ്രൈവർ ക്രിമിനൽ കേസ് നേരിടാൻ സാധ്യതയില്ല.",
+   "heard": "പോലീസ് പറയുന്നതനുസരിച്ച് ഫോട്ടോഗ്രാഫറെ തട്ടിയ വാഹനത്തിന്റെ ഡ്രൈവര് ക്രിമിനല് കേസ് നേരിടാന് സാധ്യതയില്ല",
+   "wer": 0.3,
+   "confidence": 0.96,
+   "english": "According to police, the driver of the vehicle that hit the photographer is unlikely to face a criminal case.",
+   "english_reference": "According to police, the driver of the vehicle that hit the photographer is unlikely to face criminal charges."
+  },
+  {
+   "file": "18440192758792110438.wav",
+   "reference": "ഉപദ്രവിക്കലാണെന്ന് അവർ കരുതുന്ന സംഭവങ്ങളിലേക്ക് സാംസ്കാരിക വ്യത്യാസങ്ങൾ നയിച്ചേക്കാമെന്നും, പിന്തുടരുന്നതും കയ്യിൽ പിടിക്കുന്നതും തുടങ്ങിയ കാര്യങ്ങൾ അസാധാരണം അല്ലെന്നും സ്ത്രീകൾ തിരിച്ചറിയണം.",
+   "heard": "ഉപദ്രവിക്കലാണെന്ന് അവർ കരുതുന്ന സംഭവങ്ങളിലേക്ക് സാംസ്കാരിക വ്യത്യാസങ്ങൾ നയിച്ചേക്കാമെന്നും പിന്തുടരുന്നതും കയ്യിൽ പിടിക്കുന്നതും തുടങ്ങിയ കാര്യങ്ങൾ അസാധാരണ അല്ലെന്നും സ്ത്രീകൾ തിരിച്ചറിയണം",
+   "wer": 0.062,
+   "confidence": 0.949,
+   "english": "Women should recognize that cultural differences can lead to events they consider harassment, and that things like stalking and hand-holding are not uncommon.",
+   "english_reference": "Women should realize that cultural differences may result in what they would consider harassment and it is not uncommon to be followed, grabbed by the arm, etc."
+  },
+  {
+   "file": "2118558089323673959.wav",
+   "reference": "സ്പാനിഷ് വംശജർ കോളനിവത്ക്കരണ കാലഘട്ടത്തിന് തുടക്കമിട്ടു,ഇത് മൂന്ന് നൂറ്റാണ്ടുകളോളം നീണ്ടുനിന്നു.",
+   "heard": "സ്പാനിഷ് വംശജർ കോളനി വത്കരണ കാലഘട്ടത്തിന് തുടക്കമിട്ടു ഇത് മൂന്ന നൂറ്റാണ്ടുകളോളം നീണ്ടുനിന്നു",
+   "wer": 0.333,
+   "confidence": 0.936,
+   "english": "The Spanish began a period of colonization that lasted for three centuries.",
+   "english_reference": "The Spaniards started the colonization period which lasted for three centuries."
+  },
+  {
+   "file": "2399802684598041404.wav",
+   "reference": "ഡോക്ടർ മോൾ കരുതുന്നത് ചില രോഗികൾക്ക് ആശുപത്രിയിൽ വെച്ചാവാം വൈറസ് ബാധിച്ചതെന്നാണ്, കൂടാതെ കുറഞ്ഞത് രണ്ട് പേരെങ്കിലും ആശുപത്രിയിലെ ആരോഗ്യപ്രവർത്തകരായിരുന്നു.",
+   "heard": "ഡോക്ടര്മോള് കരുതുന്നത് ചില രോഗികള്ക്ക് ആശുപത്രിയില് വെച്ചാവാം വൈറസ് ബാധിച്ചതെന്നാണ് കൂടാതെ കുറഞ്ഞത് രണ്ട പേര്ക്കെങ്കിലും ആശുപത്രിയിലെ ആരോഗ്യപ്രവര്ത്തകരായിരുന്നു",
+   "wer": 0.467,
+   "confidence": 0.937,
+   "english": "Doctors believe some patients may have been hospitalized with the virus and at least two were health workers at the hospital.",
+   "english_reference": "Some patients might have contracted the bug in the hospital, Dr. Moll thinks, and at least two were hospital health workers."
+  },
+  {
+   "file": "3711988505997395251.wav",
+   "reference": "ഡോക്ടർ മോൾ കരുതുന്നത് ചില രോഗികൾക്ക് ആശുപത്രിയിൽ വെച്ചാവാം വൈറസ് ബാധിച്ചതെന്നാണ്, കൂടാതെ കുറഞ്ഞത് രണ്ട് പേരെങ്കിലും ആശുപത്രിയിലെ ആരോഗ്യപ്രവർത്തകരായിരുന്നു.",
+   "heard": "ഡോക്ടര്മോള് കരുതുന്നത് ചില രോഗികള്ക്ക് ആശുപത്രിയില് വച്ചാവും വൈറസ് ബാധിച്ചതെന്നാണ് കൂടാതെ കുറഞ്ഞത് രണ്ടു പേരെങ്കിലും ആശുപത്രിയിലെ ആരോഗ്യപ്രവര്ത്തകരായിരുന്നു",
+   "wer": 0.467,
+   "confidence": 0.933,
+   "english": "Doctors believe some of the patients contracted the virus in the hospital and at least two were health workers at the hospital.",
+   "english_reference": "Some patients might have contracted the bug in the hospital, Dr. Moll thinks, and at least two were hospital health workers."
+  },
+  {
+   "file": "4124464535300557233.wav",
+   "reference": "ഉപദ്രവിക്കലാണെന്ന് അവർ കരുതുന്ന സംഭവങ്ങളിലേക്ക് സാംസ്കാരിക വ്യത്യാസങ്ങൾ നയിച്ചേക്കാമെന്നും, പിന്തുടരുന്നതും കയ്യിൽ പിടിക്കുന്നതും തുടങ്ങിയ കാര്യങ്ങൾ അസാധാരണം അല്ലെന്നും സ്ത്രീകൾ തിരിച്ചറിയണം.",
+   "heard": "ഉപദ്രവിക്കലാണെന്ന് അവര് കരുതുന്ന സംഭവങ്ങളിലേക്ക് സാംസ്കാരിക വ്യത്യാസങ്ങള് നയിച്ചേക്കാമെന്നും പിന്തുടരുന്നതും കയ്യില് പിടിക്കുന്നതും തുടങ്ങിയ കാര്യങ്ങള് അസാധാരണ അല്ലെന്നും സ്ത്രീകള് തിരിച്ചറിയണം",
+   "wer": 0.375,
+   "confidence": 0.929,
+   "english": "Women should recognize that cultural differences can lead to events they consider harassment, and that things like stalking and hand-holding are not uncommon.",
+   "english_reference": "Women should realize that cultural differences may result in what they would consider harassment and it is not uncommon to be followed, grabbed by the arm, etc."
+  },
+  {
+   "file": "4222837735343955113.wav",
+   "reference": "കൗതുകകരമായ ഗ്രാമത്തിലൂടെ അരമണിക്കൂർ നടക്കുന്നത് സമയനഷ്ടമാവില്ല.",
+   "heard": "കൗതുകകരമായ ഗ്രാമത്തിലൂടെ അരമണിക്കൂര് നടക്കുന്നത് സമയനഷ്ടമാവില്ല",
+   "wer": 0.2,
+   "confidence": 0.972,
+   "english": "A half-hour walk through the curious village won't be a waste of time.",
+   "english_reference": "It's worth half an hour to stroll about the intriguing village."
+  },
+  {
+   "file": "4699361043692079905.wav",
+   "reference": "പോലീസ് പറയുന്നതനുസരിച്ച്, ഫോട്ടോഗ്രാഫറെ തട്ടിയ വാഹനത്തിന്റെ ഡ്രൈവർ ക്രിമിനൽ കേസ് നേരിടാൻ സാധ്യതയില്ല.",
+   "heard": "പോലീസ് പറയുന്നതനുസരിച്ച് ഫോട്ടോഗ്രാഫറെ തട്ടിയ വാഹനത്തിന്റെ ഡ്രൈവര് ക്രിമിനല് കേസ് നേരിടാന് സാധ്യതയില്ല",
+   "wer": 0.3,
+   "confidence": 0.962,
+   "english": "According to police, the driver of the vehicle that hit the photographer is unlikely to face a criminal case.",
+   "english_reference": "According to police, the driver of the vehicle that hit the photographer is unlikely to face criminal charges."
+  },
+  {
+   "file": "4704057085871480081.wav",
+   "reference": "ആഭ്യന്തര, സൈനിക പ്രവർത്തനങ്ങൾക്കായി മോശമായി പരിപാലിക്കപ്പെട്ടതും പഴക്കം ചെന്നതുമായ വിമാനങ്ങൾ ഉപയോഗിക്കുന്ന ഇറാനിൽ വ്യോമ അപകടങ്ങൾ സാധാരണമാണ്.",
+   "heard": "ആഭ്യന്തര സൈനിക പ്രവർത്തനങ്ങൾക്കായി മോശമായി പരിപാലിക്കപ്പെട്ടതും പഴക്കം ചെന്നതുമായ വിമാനങ്ങൾ ഉപയോഗിക്കുന്ന ഇറാനിൽ വ്യോമ അപകടങ്ങൾ സാധാരണമാണ്",
+   "wer": 0.0,
+   "confidence": 0.966,
+   "english": "Air accidents are common in Iran, which uses poorly maintained and outdated aircraft for domestic military operations.",
+   "english_reference": "Air accidents are common in Iran, which has an aging fleet that is poorly maintained both for civil and military operations."
+  },
+  {
+   "file": "7493056361723210558.wav",
+   "reference": "പോയിന്റ് മരിയനും ഫെയർ‌മോണ്ടും തമ്മിലുള്ള ദൂരം ഒറ്റപ്പെട്ട ബാക്ക്‌വുഡ് ഭൂപ്രദേശങ്ങളിലൂടെ കടന്നുപോകുന്ന ബഫല്ലോ-പിറ്റ്സ്ബർഗ് ഹൈവേയിലെ ഏറ്റവും വെല്ലുവിളി നിറഞ്ഞ ഡ്രൈവിംഗ് സാഹചര്യങ്ങൾ സൃഷ്ടിക്കുന്നു.",
+   "heard": "പോയിന്റ് മരിയനും ഫെയർമോണ്ടും തമ്മിലുള്ള ദൂരം ഒറ്റപ്പെട്ട ബാക്ക്വുഡ് ഭൂപ്രദേശങ്ങളിലൂടെ കടന്നു പോോകുന്ന ബഫലോ പിറ്റ്സ്ബർഗ് ഹൈവേയിലെ ഏറ്റവും വെല്ലുവിളി നിറഞ്ഞ ഡ്രൈവിംഗ് സാഹചര്യങ്ങൾ സൃഷ്ടിക്കുന്നു",
+   "wer": 0.278,
+   "confidence": 0.928,
+   "english": "The distance between Point Marion and Fairmont creates some of the most challenging driving conditions on the Buffalo-Pittsburgh Highway, passing through isolated backwoods.",
+   "english_reference": "The stretch between Point Marion and Fairmont presents the most challenging driving conditions on the Buffalo-Pittsburgh Highway, passing frequently through isolated backwoods terrain."
+  },
+  {
+   "file": "9074300694947532501.wav",
+   "reference": "ബഹിരാകാശ ഉപഗ്രഹത്തിന് കോൾ ലഭിക്കുകയും തൽക്ഷണം താഴേക്ക് കൈമാറുകയും ചെയ്യുന്നു.",
+   "heard": "ബഹിരാകാശ ഉപഗ്രഹത്തിന് കോൾ ലഭിക്കുകയും തൽക്ഷണം താഴേക്ക് കൈമാറുകയും ചെയ്യുന്നു",
+   "wer": 0.0,
+   "confidence": 0.944,
+   "english": "The space satellite receives the call and transmits it down instantly.",
+   "english_reference": "The satellite in space gets the call and then reflects it back down, almost instantly."
+  },
+  {
+   "file": "9393528555277854391.wav",
+   "reference": "ബഹിരാകാശ ഉപഗ്രഹത്തിന് കോൾ ലഭിക്കുകയും തൽക്ഷണം താഴേക്ക് കൈമാറുകയും ചെയ്യുന്നു.",
+   "heard": "ബഹിരാകാശ ഉപഗ്രഹത്തിന് കോൾ ലഭിക്കുകയും തല്ക്ഷണം താഴേക്ക് കൈമാറുകയും ചെയ്യുന്നു",
+   "wer": 0.125,
+   "confidence": 0.941,
+   "english": "The space satellite receives the call and transmits it down instantly.",
+   "english_reference": "The satellite in space gets the call and then reflects it back down, almost instantly."
+  },
+  {
+   "file": "9989953851987180936.wav",
+   "reference": "ലോകത്തിലെ ഏറ്റവും നല്ല പോളോ ടീമുകളിൽ ഒന്നും, മികച്ച കളിക്കാരും അർജന്റീനക്കുണ്ട്.",
+   "heard": "ലോകത്തിലെ ഏറ്റവും നല്ല പോളോ ടീമുകളിൽ ഒന്നും മികച്ച കളിക്കാരും അർജന്റീനയ്ക്കുണ്ട്",
+   "wer": 0.111,
+   "confidence": 0.958,
+   "english": "Argentina has one of the best polo teams in the world.",
+   "english_reference": "Argentina is well known for having one of the best polo teams and players in the world."
+  }
+ ]
+}

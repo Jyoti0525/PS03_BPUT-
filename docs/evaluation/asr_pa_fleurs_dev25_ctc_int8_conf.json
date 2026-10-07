@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "pa",
+  "clips": 25,
+  "audio_seconds": 275.2,
+  "wer": 0.142,
+  "cer": 0.075,
+  "real_time_factor": 0.26,
+  "process_private_gb": 3.43,
+  "process_peak_working_set_gb": 2.48,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 61.8,
+   "bleu": 36.6
+  }
+ },
+ "clips": [
+  {
+   "file": "11218397018962677416.wav",
+   "reference": "2010 ਦੀਆਂ ਸੰਘੀ ਚੋਣਾਂ ਤੋਂ ਪਹਿਲਾਂ 1,400 ਲੋਕਾਂ ਵਿੱਚੋਂ, ਜਿਨ੍ਹਾਂ ਨੇ ਆਸਟ੍ਰੇਲੀਆ ਦੇ ਗਣਤੰਤਰ ਬਣਨ ਦਾ ਵਿਰੋਧ ਕੀਤਾ ਸੀ 2008 ਵਿੱਚ ਉਹਨਾਂ ਦੀ ਗਿਣਤੀ ਵਿੱਚ 8 ਪ੍ਰਤੀਸ਼ਤ ਦਾ ਵਾਧਾ ਹੋ ਗਿਆ।",
+   "heard": "ਦੋ ਹਜ਼ਾਰ ਦਸ ਦੀਆਂ ਸੰਘੀ ਚੋਣਾਂ ਤੋਂ ਪਹਿਲਾਂ ਚੌਦਾਂ ਸੌ ਲੋਕਾਂ ਵਿੱਚੋਂ ਜਿਨ੍ਹਾਂ ਨੇ ਆਸਟ੍ਰੇਲੀਆ ਦੇ ਗਣਤੰਤਰ ਬਣਨ ਦਾ ਵਿਰੋਧ ਕੀਤਾ ਸੀ ਦੋ ਹਜ਼ਾਰ ਅੱਠ ਵਿੱਚ ਉਹਨਾਂ ਦੀ ਗਿਣਤੀ ਵਿੱਚ ਅੱਠ ਪ੍ਰਤੀਸ਼ਤ ਦਾ ਵਾਧਾ ਹੋ ਗਿਆ",
+   "wer": 0.281,
+   "confidence": 0.971,
+   "english": "Out of the fourteen hundred people who opposed Australia becoming a republic before the federal election of two thousand ten, their number increased by eight percent in two thousand eight.",
+   "english_reference": "Out of 1,400 people polled prior to the 2010 federal election, those who oppose Australia becoming a republic grew by 8 per cent since 2008."
+  },
+  {
+   "file": "11364449980793617560.wav",
+   "reference": "ਕੁਝ ਤਿਉਹਾਰਾਂ ਵਿੱਚ ਨੌਜਵਾਲ ਬੱਚਿਆਂ ਵਾਲੇ ਪਰਿਵਾਰਾਂ ਲਈ ਵਿਸ਼ੇਸ਼ ਕੈਂਪਿੰਗ ਖੇਤਰ ਹੁੰਦੇ ਹਨ।",
+   "heard": "ਕੁਝ ਤਿਉਹਾਰਾਂ ਵਿੱਚ ਨੌਜਵਾਨ ਬੱਚਿਆਂ ਵਾਲੇ ਪਰਿਵਾਰਾਂ ਲਈ ਵਿਸ਼ੇਸ਼ ਕੈਂਪਿੰਗ ਖੇਤਰ ਹੁੰਦੇ ਹਨ",
+   "wer": 0.077,
+   "confidence": 0.98,
+   "english": "Some festivals have special camping areas for families with young children.",
+   "english_reference": "Some festivals have special camping areas for families with young children."
+  },
+  {
+   "file": "1208323158152653506.wav",
+   "reference": "ਉਸਨੂੰ ਰਾਜਾਂ ਦੇ ਵਿਚਕਾਰ ਟੈਕਸ ਸਬੰਧੀ ਕਾਨੂੰਨਾਂ ਅਤੇ ਦਰਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਨ ਦਾ ਵੀ ਅਧਿਕਾਰ ਨਹੀਂ ਸੀ।",
+   "heard": "ਉਸ ਨੂੰੂੰ ਰਾਜਾਂ ਦੇ ਵਿਚਕਾਰ ਟੈਕਸ ਸਬੰਧੀ ਕਾਨੂੰਨਾਂ ਅਤੇ ਦਰਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਨ ਦਾ ਵੀ ਅਧਿਕਾਰ ਨਹੀਂ ਸੀ",
+   "wer": 0.118,
+   "confidence": 0.938,
+   "english": "He also did not have the authority to override tax laws and rates between states.",
+   "english_reference": "It also had no authority to override tax laws and tariffs between states."
+  },
+  {
+   "file": "12653360485882846103.wav",
+   "reference": "ਗੈਪ ਦੇ ਸਾਲ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣ ਵਾਲਿਆਂ ਲੋਕਾਂ ਲਈ ਇੱਕ ਹੋਰ ਵਧੇਰੇ ਪ੍ਰਸਿੱਧ ਵਿਕਲਪ ਹੈ ਸੈਰ-ਸਪਾਟਾ ਕਰਨਾ ਅਤੇ ਸਿੱਖਣਾ।",
+   "heard": "ਗੈਪ ਦੇ ਸਾਲ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣ ਵਾਲੇ ਲੋਕਾਂ ਲਈ ਇੱਕ ਹੋਰ ਵਧੇਰੇ ਪ੍ਰਸਿੱਧ ਵਿਕਲਪ ਹੈ ਸੈਰ ਸਪਾਟਾ ਕਰਨਾ ਅਤੇ ਸਿੱਖਣਾ",
+   "wer": 0.05,
+   "confidence": 0.981,
+   "english": "Another more popular option for people planning a gap year is to travel and learn.",
+   "english_reference": "An increasingly more popular option for those planning a gap-year is to travel and learn."
+  },
+  {
+   "file": "12876192597064410243.wav",
+   "reference": "ਗੈਪ ਦੇ ਸਾਲ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣ ਵਾਲਿਆਂ ਲੋਕਾਂ ਲਈ ਇੱਕ ਹੋਰ ਵਧੇਰੇ ਪ੍ਰਸਿੱਧ ਵਿਕਲਪ ਹੈ ਸੈਰ-ਸਪਾਟਾ ਕਰਨਾ ਅਤੇ ਸਿੱਖਣਾ।",
+   "heard": "ਗੈਪ ਦੇ ਸਾਲ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣ ਵਾਲੇ ਲੋਕਲ ਲਈ ਇੱਕ ਹੋਰ ਵਧੇਰੇ ਪ੍ਰਸਿੱਧ ਵਿਕਲਪ ਹੈ ਸੈਰ ਸਪਾਟਾ ਕਰਨਾ ਅਤੇ ਸਿੱਖਣਾ",
+   "wer": 0.1,
+   "confidence": 0.95,
+   "english": "Another more popular option for locals planning a gap year is to travel and learn.",
+   "english_reference": "An increasingly more popular option for those planning a gap-year is to travel and learn."
+  },
+  {
+   "file": "12989829873756541400.wav",
+   "reference": "ਉਸਨੂੰ ਰਾਜਾਂ ਦੇ ਵਿਚਕਾਰ ਟੈਕਸ ਸਬੰਧੀ ਕਾਨੂੰਨਾਂ ਅਤੇ ਦਰਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਨ ਦਾ ਵੀ ਅਧਿਕਾਰ ਨਹੀਂ ਸੀ।",
+   "heard": "ਉਸ ਨੂੰੂੰ ਰਾਜਾਂ ਦੇ ਵਿਚਕਾਰ ਟੈਕਸ ਸਬੰਧੀ ਕਾਨੂੰਨਾਂ ਅਤੇ ਦਰਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਨ ਦਾ ਵੀ ਅਧਿਕਾਰ ਨਹੀਂ ਸੀ",
+   "wer": 0.118,
+   "confidence": 0.937,
+   "english": "He also did not have the authority to override tax laws and rates between states.",
+   "english_reference": "It also had no authority to override tax laws and tariffs between states."
+  },
+  {
+   "file": "13047034461617407448.wav",
+   "reference": "ਕਰੂਗਰ ਨੈਸ਼ਨਲ ਪਾਰਕ (ਕੇਐਨਪੀ) ਦੱਖਣੀ ਅਫਰੀਕਾ ਦੇ ਉੱਤਰ-ਪੂਰਬ ਵਿੱਚ ਸਥਿਤ ਹੈ ਅਤੇ ਪੂਰਬ ਵਿੱਚ ਮੋਜ਼ਾਮਬੀਕ ਦੀ ਸਰਹੱਦ, ਉੱਤਰ ਵਿੱਚ ਜ਼ਿੰਬਾਬਵੇ ਦੀ ਸਰਹੱਦ ਨਾਲ, ਅਤੇ ਦੱਖਣ ਵਿੱਚ ਕ੍ਰੋਕੋਡਾਈਲ ਨਦੀ ਨਾਲ ਘਿਰਿਆ ਹੈ।",
+   "heard": "ਕਰੂਗਰ ਨੈਸ਼ਨਲ ਪਾਰਕ ਕੇਐਨਪੀ ਦੱਖਣੀ ਅਫਰੀਕਾ ਦੇ ਉੱਤਰ ਪੂਰਬ ਵਿੱਚ ਸਥਿਤ ਹੈ ਅਤੇ ਪੂਰਬ ਵਿੱਚ ਮੋਜ਼ਾਮਬੀਕ ਦੀ ਸਰਹੱਦ ਉੱਤਰ ਵਿੱਚ ਜ਼ਿੰਬਾਵੇ ਦੀ ਸਰਹੱਦ ਨਾਲ ਅਤੇ ਦੱਖਣ ਵਿੱਚ ਕਰੋਕੋਡਾਇਲ ਨਦੀ ਨਾਲ ਘਿਰਿਆ ਹੈ",
+   "wer": 0.062,
+   "confidence": 0.964,
+   "english": "Kruger National Park is located in the northeast of KNP South Africa and is bordered by Mozambique to the east, Zimbabwe to the north, and the Crocodile River to the south.",
+   "english_reference": "The Kruger National Park (KNP) lies in the north-east of South Africa and runs along the border of Mozambique in the east, Zimbabwe in the north, and the southern border is the Crocodile River."
+  },
+  {
+   "file": "13276850748640665366.wav",
+   "reference": "ਪੁਲਾੜ ਵਿੱਚ ਮੌਜੂਦ ਉਪਗ੍ਰਿਹ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸ ਨੂੰ ਤੁਰੰਤ ਹੇਠਾਂ ਵਾਪਸ ਭੇਜ ਦਿੰਦਾ ਹੈ।",
+   "heard": "ਪੁਲਾੜ ਵਿੱਚ ਮੌਜੂਦ ਉਪਗ੍ਰਹਿ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਨੂੰ ਤੁਰੰਤ ਹੇਠਾਂ ਵਾਪਸ ਭੇਜ ਦਿੰਦਾ ਹੈ",
+   "wer": 0.176,
+   "confidence": 0.952,
+   "english": "The satellite in space receives the call and sends it back down immediately.",
+   "english_reference": "The satellite in space gets the call and then reflects it back down, almost instantly."
+  },
+  {
+   "file": "15547741103533352837.wav",
+   "reference": "ਟਿੱਪਣੀ ਦੀ ਮੰਗ ਕਰਨ ‘ਤੇ ਮਿੱਲਰ ਨੇ ਕਿਹਾ, \"ਮਾਈਕ ਸੁਣਨ ਵੇਲੇ ਬਹੁਤ ਗੱਲਾਂ ਕਰਦਾ ਹੈ...ਮੈਂ ਤਿਆਰ ਹੋ ਰਿਹਾ ਸੀ ਇਸਲਈ ਮੈਂ ਉਸਦੀ ਗੱਲ ਨਹੀਂ ਸੁਣ ਰਿਹਾ ਸੀ।\"",
+   "heard": "ਟਿੱਪਣੀ ਦੀ ਮੰਗ ਕਰਨ 'ਤੇ ਮਿਲਰ ਨੇ ਕਿਹਾ ਮਾਈਕ ਸੁਣਨ ਵੇਲੇ ਬਹੁਤ ਗੱਲਾਂ ਕਰਦਾ ਹੈ ਮੈਂ ਤਿਆਰ ਹੋ ਰਿਹਾ ਸੀ ਇਸ ਲਈ ਮੈਂ ਉਸਦੀ ਗੱਲ ਨਹੀਂ ਸੁਣ ਰਿਹਾ ਸੀ",
+   "wer": 0.107,
+   "confidence": 0.967,
+   "english": "\"Asked for comment, Miller said:\" \"Mike talks a lot when he listens, I was getting ready so I wasn't listening to him.\" \"\"",
+   "english_reference": "When asked for comment, Miller said, \"Mike talks a lot during the hearing...I was getting ready so I wasn't really hearing what he was saying.\""
+  },
+  {
+   "file": "1739835065458706104.wav",
+   "reference": "ਗੈਪ ਦੇ ਸਾਲ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣ ਵਾਲਿਆਂ ਲੋਕਾਂ ਲਈ ਇੱਕ ਹੋਰ ਵਧੇਰੇ ਪ੍ਰਸਿੱਧ ਵਿਕਲਪ ਹੈ ਸੈਰ-ਸਪਾਟਾ ਕਰਨਾ ਅਤੇ ਸਿੱਖਣਾ।",
+   "heard": "ਗੈਪ ਦੇ ਸਾਲ ਦੀ ਯੋਜਨਾ ਬਣਾਉਣ ਵਾਲਿਆਂ ਲੋਕਾਂ ਲਈ ਇੱਕ ਹੋ ਹੋਰ ਵਧੇਰੇ ਪ੍ਰਸਿੱਧ ਵਿਕਲਪ ਹੈ ਸੈਰ ਸਪਾਟਾ ਕਰਨਾ ਅਤੇ ਸਿੱਖਣਾ",
+   "wer": 0.05,
+   "confidence": 0.966,
+   "english": "Another more popular option for people planning a gap year is to travel and learn.",
+   "english_reference": "An increasingly more popular option for those planning a gap-year is to travel and learn."
+  },
+  {
+   "file": "17691138157745518539.wav",
+   "reference": "ਜੇਕਰ ਤੁਸੀਂ ਸਰਦੀਆਂ ਵਿੱਚ ਇਕ ਆਰਕਟਿਕ ਜਾਂ ਅੰਟਾਰਕਟਿਕ ਖੇਤਰ ਦੀ ਯਾਤਰਾ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਸੀਂ ਧਰੁਵੀ ਰਾਤ ਦਾ ਅਭਿਆਸ ਕਰੋਗੇ, ਜਿਸਦਾ ਅਰਥ ਹੈ ਕਿ ਸੂਰਜ ਦਿਗਮੰਡਲ ਤੋਂ ਉੱਪਰ ਨਹੀਂ ਉੱਠਦਾ ਹੈ।",
+   "heard": "ਜੇਕਰ ਤੁਸੀਂ ਸਰਦੀਆਂ ਵਿੱਚ ਇੱਕ ਆਰਕਟਿਕ ਜਾਂ ਅੰਟਾਰਕਟਿਕ ਖੇਤਰ ਦੀ ਯਾਤਰਾ ਕਰਦੇ ਹੋ ਤਾਂ ਤੁਸੀਂ ਧਰੁਵੀ ਰਾਤ ਦਾ ਅਭਿਆਸ ਕਰੋਗੇ ਜਿਸਦਾ ਅਰਥ ਹੈ ਕਿ ਸੂਰਜ ਦਿਗਮੰਡਲ ਤੋਂ ਉੱਪਰ ਨਹੀਂ ਉੱਠਦਾ ਹੈ",
+   "wer": 0.032,
+   "confidence": 0.928,
+   "english": "If you travel to an Arctic or Antarctic region in winter you will practice polar night which means the sun does not rise above the Milky Way.",
+   "english_reference": "If you visit the Arctic or Antarctic areas in the winter you will experience the polar night, which means that the sun doesn't rise above the horizon."
+  },
+  {
+   "file": "17991404509717396190.wav",
+   "reference": "ਸੰਯੁਕਤ ਰਾਜ ਦੇ ਰਾਸ਼ਟਰਪਤੀ ਜਾਰਜ ਡਬਲਯੂ ਬੁਸ਼ ਨੇ ਘੋਸ਼ਣਾ ਦਾ ਸਵਾਗਤ ਕੀਤਾ।",
+   "heard": "ਸੰਯੁਕਤ ਰਾਜ ਰਾਸ਼ਟਰਪਤੀ ਜਾਰਜ ਡਬਲਿਊ ਬੁਸ਼ ਨੇ ਘੋਸ਼ਣਾ ਦਾ ਸਵਾਗਤ ਕੀਤਾ",
+   "wer": 0.167,
+   "confidence": 0.962,
+   "english": "United States President George W. Bush welcomed the announcement.",
+   "english_reference": "U.S. President George W. Bush welcomed the announcement."
+  },
+  {
+   "file": "1808245583271863418.wav",
+   "reference": "2010 ਦੀਆਂ ਸੰਘੀ ਚੋਣਾਂ ਤੋਂ ਪਹਿਲਾਂ 1,400 ਲੋਕਾਂ ਵਿੱਚੋਂ, ਜਿਨ੍ਹਾਂ ਨੇ ਆਸਟ੍ਰੇਲੀਆ ਦੇ ਗਣਤੰਤਰ ਬਣਨ ਦਾ ਵਿਰੋਧ ਕੀਤਾ ਸੀ 2008 ਵਿੱਚ ਉਹਨਾਂ ਦੀ ਗਿਣਤੀ ਵਿੱਚ 8 ਪ੍ਰਤੀਸ਼ਤ ਦਾ ਵਾਧਾ ਹੋ ਗਿਆ।",
+   "heard": "ਦੋ ਹਜ਼ਾਰ ਦਸ ਦੀਆਂ ਸੰਘੀ ਚੋਣਾਂ ਤੋਂ ਪਹਿਲਾਂ ਚੌਦਾਂ ਸੌ ਲੋਕਾਂ ਵਿੱਚੋਂ ਜਿਨ੍ਹਾਂ ਨੇ ਆਸਟ੍ਰੇਲੀਆ ਦੇ ਗਣਤੰਤਰ ਬਣਨ ਦਾ ਵਿਰੋਧ ਕੀਤਾ ਸੀ ਦੋ ਹਜ਼ਾਰ ਅੱਠ ਵਿੱਚ ਉਹਨਾਂ ਦੀ ਗਿਣਤੀ ਵਿੱਚ ਅੱਠ ਪ੍ਰਤੀਸ਼ਤ ਦਾ ਵਾਧਾ ਹੋ ਗਿਆ",
+   "wer": 0.281,
+   "confidence": 0.973,
+   "english": "Out of the fourteen hundred people who opposed Australia becoming a republic before the federal election of two thousand ten, their number increased by eight percent in two thousand eight.",
+   "english_reference": "Out of 1,400 people polled prior to the 2010 federal election, those who oppose Australia becoming a republic grew by 8 per cent since 2008."
+  },
+  {
+   "file": "18240306485838012709.wav",
+   "reference": "ਸੰਯੁਕਤ ਰਾਜ ਦੇ ਰਾਸ਼ਟਰਪਤੀ ਜਾਰਜ ਡਬਲਯੂ ਬੁਸ਼ ਨੇ ਘੋਸ਼ਣਾ ਦਾ ਸਵਾਗਤ ਕੀਤਾ।",
+   "heard": "ਸੰਯੁਕਤ ਰਾਜ ਦੇ ਰਾਸ਼ਟਰਪਤੀ ਜਾਰਜ ਡਬਲਿਊ ਬੁਸ਼ ਨੇ ਘੋਸ਼ਣਾ ਦਾ ਸਵਾਗਤ ਕੀਤਾ",
+   "wer": 0.083,
+   "confidence": 0.94,
+   "english": "United States President George W. Bush welcomed the announcement.",
+   "english_reference": "U.S. President George W. Bush welcomed the announcement."
+  },
+  {
+   "file": "2209515574935073488.wav",
+   "reference": "ਜਾਪਾਨ ਵਿੱਚ, ਪਹਿਲੀ ਚੈਰੀ ਬਲਾਸਮ ਪਾਰਟੀਆਂ ਦੀ ਮੇਜ਼ਬਾਨੀ ਸ਼ਾਸਕ ਦੁਆਰਾ ਕੇਵਲ ਆਪਣੇ ਆਪ ਲਈ ਅਤੇ ਸ਼ਾਹੀ ਦਰਬਾਰ ਦੇ ਆਲੇ-ਦੁਆਲੇ ਉੱਚ ਵਰਗ ਦਿਆਂ ਲੋਕਾਂ ਲਈ ਕੀਤੀ ਜਾਂਦੀ ਸੀ।",
+   "heard": "ਜਾਪਾਨ ਵਿੱਚ ਪਹਿਲੀ ਚੈਰੀ ਬਲਾਸਮ ਪਾਰਟੀਆਂ ਦੀ ਮੇਜ਼ਬਾਨੀ ਸ਼ਾਸਕ ਦੁਆਰਾ ਕੇਵਲ ਆਪਣੇ ਆਪ ਲਈ ਅਤੇ ਸ਼ਾਹੀ ਦਰਬਾਰ ਦੇ ਆਲੇ ਦੁਆਲੇ ਉੱਚ ਵਰਗ ਦੀਆਂ ਲੋਕਾਂ ਲਈ ਕੀਤੀ ਜਾਂਦੀ ਸੀ",
+   "wer": 0.036,
+   "confidence": 0.964,
+   "english": "The first cherry blossom parties in Japan were hosted by the ruler only for himself and the upper classes around the imperial court.",
+   "english_reference": "In Japan, the first cherry blossom parties were hosted by the emperor only for himself and other members of the aristocracy around the Imperial Court."
+  },
+  {
+   "file": "2866916614495344409.wav",
+   "reference": "ਪ੍ਰਕਿਰਤੀਵਾਦੀਆਂ ਅਤੇ ਫ਼ਿਲਾਸਫ਼ਰਾਂ ਨੇ ਕਲਾਸਿਕਲ ਲਿਖਤਾਂ ਅਤੇ, ਖਾਸ ਤੌਰ ‘ਤੇ, ਲਾਤੀਨੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬਾਈਬਲ ਉੱਤੇ ਧਿਆਨ ਕੇਂਦਰਿਤ ਕੀਤਾ।",
+   "heard": "ਪ੍ਰਕਿਰਤੀਵਾਦੀਆਂ ਅਤੇ ਫਲਾਸਫਰਾਂ ਨੇ ਕਲਾਸੀਕਲ ਲਿਖਤਾਂ ਅਤੇ ਖਾਸ ਤੌਰ 'ਤੇ ਲਾਤੀਨੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬਾਈਬਲ ਉੱਤੇ ਧਿਆਨ ਕੇਂਦਰਿਤ ਕੀਤਾ",
+   "wer": 0.111,
+   "confidence": 0.956,
+   "english": "Naturalists and philosophers focused on classical writings, and especially the Bible in Latin.",
+   "english_reference": "Naturalists and philosophers focused on classical texts and, in particular, on the Bible in Latin."
+  },
+  {
+   "file": "3242085198071864636.wav",
+   "reference": "ਟਿੱਪਣੀ ਦੀ ਮੰਗ ਕਰਨ ‘ਤੇ ਮਿੱਲਰ ਨੇ ਕਿਹਾ, \"ਮਾਈਕ ਸੁਣਨ ਵੇਲੇ ਬਹੁਤ ਗੱਲਾਂ ਕਰਦਾ ਹੈ...ਮੈਂ ਤਿਆਰ ਹੋ ਰਿਹਾ ਸੀ ਇਸਲਈ ਮੈਂ ਉਸਦੀ ਗੱਲ ਨਹੀਂ ਸੁਣ ਰਿਹਾ ਸੀ।\"",
+   "heard": "ਟਿੱਪੜੀ ਦੀ ਮੰਗ ਕਰਨ ਤੋਂ ਮਿਲਰ ਨੇ ਕਿਹਾ ਮਾਈਕ ਸੁਣਨ ਵੇਲੇ ਬਹੁਤ ਗੱਲਾਂ ਕਰਦਾ ਹੈ ਮੈਂ ਤਿਆਰ ਹੋ ਰਿਹਾ ਸੀ ਇਸ ਲਈ ਮੈਂ ਉਸਦੀ ਗੱਲ ਨਹੀਂ ਸੁਣ ਰਿਹਾ ਸੀ",
+   "wer": 0.179,
+   "confidence": 0.952,
+   "english": "When asked for a tip, Miller said, \"Mike talks a lot when he listens, I was getting ready so I wasn't listening to him.\"",
+   "english_reference": "When asked for comment, Miller said, \"Mike talks a lot during the hearing...I was getting ready so I wasn't really hearing what he was saying.\""
+  },
+  {
+   "file": "3430321218591968503.wav",
+   "reference": "ਜੇਕਰ ਤੁਸੀਂ ਸਰਦੀਆਂ ਵਿੱਚ ਇਕ ਆਰਕਟਿਕ ਜਾਂ ਅੰਟਾਰਕਟਿਕ ਖੇਤਰ ਦੀ ਯਾਤਰਾ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਸੀਂ ਧਰੁਵੀ ਰਾਤ ਦਾ ਅਭਿਆਸ ਕਰੋਗੇ, ਜਿਸਦਾ ਅਰਥ ਹੈ ਕਿ ਸੂਰਜ ਦਿਗਮੰਡਲ ਤੋਂ ਉੱਪਰ ਨਹੀਂ ਉੱਠਦਾ ਹੈ।",
+   "heard": "ਜੇਕਰ ਤੁਸੀਂ ਸਰਦੀਆਂ ਵਿੱਚ ਇੱਕ ਆਰਕਟਿਕ ਜਾਂ ਅੰਟਾਰਕਟਿਕ ਖੇਤਰ ਦੀ ਯਾਤਰਾ ਕਰਦੇ ਹੋ ਤਾਂ ਤੁਸੀਂ ਧਰੁਵੀ ਰਾਤ ਦਾ ਅਭਿਆਸ ਕਰੋਗੇ ਜਿਸਦਾ ਅਰਥ ਹੈ ਕਿ ਸੂਰਜ ਦਿੱਗਮੰਡਲ ਤੋਂ ਉੱਪਰ ਨਹੀਂ ਉੱਠਦਾ ਹੈ",
+   "wer": 0.065,
+   "confidence": 0.968,
+   "english": "If you travel to an Arctic or Antarctic region in winter you will practice polar night which means the sun does not rise above the Milky Way.",
+   "english_reference": "If you visit the Arctic or Antarctic areas in the winter you will experience the polar night, which means that the sun doesn't rise above the horizon."
+  },
+  {
+   "file": "352997724147388709.wav",
+   "reference": "ਆਖਰਕਾਰ, ਲੱਕੜ ਦੇ ਪਹੀਏ ਦੀ ਜਗ੍ਹਾ ਲੋਹੇ ਦੇ ਪਹੀਏ ਨੇ ਲਈ ਲਈ। 1767 ਵਿੱਚ, ਪਹਿਲੀ ਪੂਰੀ-ਲੋਹੇ ਦੀਆਂ ਪਟੜੀਆਂ ਪੇਸ਼ ਕੀਤੀਆਂ ਗਈਆਂ।",
+   "heard": "ਆਖਰਕਾਰ ਲੱਕੜ ਦੇ ਪਹੀਏ ਦੀ ਜਗ੍ਹਾ ਲੋਹੇ ਦੇ ਪਹੀਏ ਨੇ ਲਈ ਲਈ ਸਤਾਰਾਂ ਸੌ ਸਤਾਹਠ ਵਿੱਚ ਪਹਿਲੀ ਪੁਰੀ ਲੋਹੇ ਦੀਆਂ ਪਟਰੀਆ ਪੇਸ਼ ਕੀਤਾ ਗਿਆਆਂ",
+   "wer": 0.318,
+   "confidence": 0.894,
+   "english": "Eventually, iron wheels replaced wooden wheels, and in seventeen hundred and seventy-seven the first full-iron tracks were introduced.",
+   "english_reference": "Eventually, wooden wheels were replaced by iron wheels. In 1767, the first full-iron rails were introduced."
+  },
+  {
+   "file": "3585894317105436153.wav",
+   "reference": "ਉਸਨੂੰ ਰਾਜਾਂ ਦੇ ਵਿਚਕਾਰ ਟੈਕਸ ਸਬੰਧੀ ਕਾਨੂੰਨਾਂ ਅਤੇ ਦਰਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਨ ਦਾ ਵੀ ਅਧਿਕਾਰ ਨਹੀਂ ਸੀ।",
+   "heard": "ਉਸਨੂੰ ਰਾਜਾਂ ਦੇ ਵਿਚਕਾਰ ਟੈਕਸ ਸੰਬੰਧੀ ਕਾਨੂੰਨਾਂ ਅਤੇ ਦਰਾਂ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਨ ਦਾ ਵੀ ਅਧਿਕਾਰ ਨਹੀਂ ਸੀ",
+   "wer": 0.059,
+   "confidence": 0.94,
+   "english": "He also did not have the authority to override tax laws and rates between states.",
+   "english_reference": "It also had no authority to override tax laws and tariffs between states."
+  },
+  {
+   "file": "4230440988673052642.wav",
+   "reference": "ਸੰਯੁਕਤ ਰਾਜ ਦੇ ਰਾਸ਼ਟਰਪਤੀ ਜਾਰਜ ਡਬਲਯੂ ਬੁਸ਼ ਨੇ ਘੋਸ਼ਣਾ ਦਾ ਸਵਾਗਤ ਕੀਤਾ।",
+   "heard": "ਸੰਯੁਕਤ ਰਾਜ ਦੇ ਰਾਸ਼ਟਰਪਤੀ ਜਾਰਜ ਡਬਲਿਊ ਬੁਸ਼ ਨੇ ਘੋਸ਼ਣਾ ਦਾ ਸਵਾਗਤ ਕੀਤਾ",
+   "wer": 0.083,
+   "confidence": 0.958,
+   "english": "United States President George W. Bush welcomed the announcement.",
+   "english_reference": "U.S. President George W. Bush welcomed the announcement."
+  },
+  {
+   "file": "8458516119676466650.wav",
+   "reference": "2010 ਦੀਆਂ ਸੰਘੀ ਚੋਣਾਂ ਤੋਂ ਪਹਿਲਾਂ 1,400 ਲੋਕਾਂ ਵਿੱਚੋਂ, ਜਿਨ੍ਹਾਂ ਨੇ ਆਸਟ੍ਰੇਲੀਆ ਦੇ ਗਣਤੰਤਰ ਬਣਨ ਦਾ ਵਿਰੋਧ ਕੀਤਾ ਸੀ 2008 ਵਿੱਚ ਉਹਨਾਂ ਦੀ ਗਿਣਤੀ ਵਿੱਚ 8 ਪ੍ਰਤੀਸ਼ਤ ਦਾ ਵਾਧਾ ਹੋ ਗਿਆ।",
+   "heard": "ਦੋ ਹਜ਼ਾਰ ਦਸ ਦੀ ਅਸੈਂਬਲੀ ਚੋਣਾਂ ਤੋਂ ਪਹਿਲਾਂ ਚੌਦ੍ਹਾਂ ਸੌ ਲੋਕਾਂ ਵਿੱਚੋਂ ਜਿਨ੍ਹਾਂ ਨੇ ਆਸਟ੍ਰੇਲੀਆ ਦੇ ਗਣਤੰਤਰ ਬਣਨ ਦਾ ਵਿਰੋਧ ਕੀਤਾ ਸੀ ਦੋ ਹਜ਼ਾਰ ਅੱਠ ਵਿੱਚ ਉਹਨਾਂ ਦੀ ਗਿਣਤੀ ਵਿੱਚ ਅੱਠ ਪ੍ਰਤੀਸ਼ਤ ਦਾ ਵਾਧਾ ਹੋ ਗਿਆ",
+   "wer": 0.344,
+   "confidence": 0.955,
+   "english": "Out of the fourteen hundred people who opposed Australia becoming a republic before the assembly elections of two thousand ten, their number increased by eight percent in two thousand eight.",
+   "english_reference": "Out of 1,400 people polled prior to the 2010 federal election, those who oppose Australia becoming a republic grew by 8 per cent since 2008."
+  },
+  {
+   "file": "9157907179871362788.wav",
+   "reference": "ਜੇਕਰ ਤੁਸੀਂ ਸਰਦੀਆਂ ਵਿੱਚ ਇਕ ਆਰਕਟਿਕ ਜਾਂ ਅੰਟਾਰਕਟਿਕ ਖੇਤਰ ਦੀ ਯਾਤਰਾ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਸੀਂ ਧਰੁਵੀ ਰਾਤ ਦਾ ਅਭਿਆਸ ਕਰੋਗੇ, ਜਿਸਦਾ ਅਰਥ ਹੈ ਕਿ ਸੂਰਜ ਦਿਗਮੰਡਲ ਤੋਂ ਉੱਪਰ ਨਹੀਂ ਉੱਠਦਾ ਹੈ।",
+   "heard": "ਜੇਕਰ ਤੁਸੀਂ ਸਰਦੀਆਂ ਵਿੱਚ ਇੱਕ ਆਰਕਟਿਕ ਜਾਂ ਅੰਟਾਰਕਟਿਕ ਖੇਤਰ ਦੀ ਯਾਤਰਾ ਕਰਦੇ ਹੋ ਤਾਂ ਤੁਸੀਂ ਧਰੁਵੀ ਰਾਤ ਦਾ ਅਭਿਆਸ ਕਰੋਗੇ ਜਿਸਦਾ ਅਰਥ ਹੈ ਕਿ ਸੂਰਜ ਦਿੱਿਗਮੰਡਲ ਤੋਂ ਉੱਪਰ ਨਹੀਂ ਉੱਠਦਾ ਹੈ",
+   "wer": 0.065,
+   "confidence": 0.957,
+   "english": "If you travel to an Arctic or Antarctic region in winter you will practice polar night which means the sun does not rise above the Milky Way.",
+   "english_reference": "If you visit the Arctic or Antarctic areas in the winter you will experience the polar night, which means that the sun doesn't rise above the horizon."
+  },
+  {
+   "file": "9314440570419171111.wav",
+   "reference": "ਟਿੱਪਣੀ ਦੀ ਮੰਗ ਕਰਨ ‘ਤੇ ਮਿੱਲਰ ਨੇ ਕਿਹਾ, \"ਮਾਈਕ ਸੁਣਨ ਵੇਲੇ ਬਹੁਤ ਗੱਲਾਂ ਕਰਦਾ ਹੈ...ਮੈਂ ਤਿਆਰ ਹੋ ਰਿਹਾ ਸੀ ਇਸਲਈ ਮੈਂ ਉਸਦੀ ਗੱਲ ਨਹੀਂ ਸੁਣ ਰਿਹਾ ਸੀ।\"",
+   "heard": "ਟਿੱਪਣੀ ਦੀ ਮੰਗ ਕਰਨ 'ਤੇ ਮਿਲਰ ਨੇ ਕਿਹਾ ਮਾਈਕ ਸੁਣਨ ਵੇਲੇ ਬਹੁਤ ਗਦਾ ਕਰਦਾ ਹੈ ਮੈਂ ਤਿਆਰ ਹੋ ਰਿਹਾ ਸੀ ਇਸ ਲਈ ਮੈਂਜ਼ ਦੀ ਗਮ ਨਹੀਂ ਸੁੌਣ ਰਿਹਾ ਸੀ",
+   "wer": 0.286,
+   "confidence": 0.884,
+   "english": "Asked for comment, Miller said: \"Mike does a lot of mugging when he listens, I was getting ready so I wasn't listening.\"",
+   "english_reference": "When asked for comment, Miller said, \"Mike talks a lot during the hearing...I was getting ready so I wasn't really hearing what he was saying.\""
+  },
+  {
+   "file": "9585652353547713605.wav",
+   "reference": "ਕੁਝ ਤਿਉਹਾਰਾਂ ਵਿੱਚ ਨੌਜਵਾਲ ਬੱਚਿਆਂ ਵਾਲੇ ਪਰਿਵਾਰਾਂ ਲਈ ਵਿਸ਼ੇਸ਼ ਕੈਂਪਿੰਗ ਖੇਤਰ ਹੁੰਦੇ ਹਨ।",
+   "heard": "ਕੁਝ ਤਿਉਹਾਰਾਂ ਵਿੱਚ ਨੌਜਵਾਨ ਬੱਚਿਆਂ ਵਾਲੇ ਪਰਿਵਾਰਾਂ ਲਈ ਵਿਸ਼ੇਸ਼ ਕੈਂਪਿੰਗ ਖੇਤਰ ਹੁੰਦੇ ਹਨ",
+   "wer": 0.077,
+   "confidence": 0.976,
+   "english": "Some festivals have special camping areas for families with young children.",
+   "english_reference": "Some festivals have special camping areas for families with young children."
+  }
+ ]
+}

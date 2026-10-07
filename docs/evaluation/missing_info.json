@@ -1,0 +1,121 @@
+{
+ "cases": 50,
+ "removals": 493,
+ "not_matter": 349,
+ "required": 344,
+ "required_named": 344,
+ "extra_named": 49,
+ "matter": 144,
+ "matter_named": 141,
+ "green_while_missing": 1,
+ "recall_pct": 97.9,
+ "required_named_pct": 100.0,
+ "misses": [
+  {
+   "case": 12,
+   "chief": "Sudden weakness of the right arm and slurred speech since one hour",
+   "item": "onset",
+   "low": "red",
+   "high": "yellow",
+   "with_it_missing": "red"
+  },
+  {
+   "case": 15,
+   "chief": "Breathless when walking, worse over the last week, works in a stone-crushing unit",
+   "item": "onset",
+   "low": "red",
+   "high": "yellow",
+   "with_it_missing": "yellow"
+  },
+  {
+   "case": 46,
+   "chief": "Fell from a bicycle, scraped knee, no head injury",
+   "item": "bp_diastolic",
+   "low": "green",
+   "high": "yellow",
+   "with_it_missing": "green"
+  }
+ ],
+ "extra_examples": [
+  {
+   "case": 1,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 1,
+   "item": "severity"
+  },
+  {
+   "case": 2,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 2,
+   "item": "severity"
+  },
+  {
+   "case": 3,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 4,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 4,
+   "item": "severity"
+  },
+  {
+   "case": 5,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 6,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 7,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 10,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 10,
+   "item": "severity"
+  },
+  {
+   "case": 11,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 12,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 13,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 14,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 15,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 16,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 17,
+   "item": "bp_diastolic"
+  },
+  {
+   "case": 18,
+   "item": "bp_diastolic"
+  }
+ ]
+}

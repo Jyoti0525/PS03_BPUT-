@@ -107,3 +107,12 @@ def test_photo_of_the_problem_is_not_interpreted(client, nurse):
     enc = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()
     doc = enc["note"]["documents"][0]
     assert doc["doc_type"]["type"] == "non_document" and doc["read"] is False and not enc["note"]["medications_pending"]
+
+
+@pytest.mark.parametrize("text,want", [
+    ("Azithromycin IP5oo mg", "500 mg"), ("LosartanIPS0mg", "50 mg"), ("Ciprofloxacin Ip 5o0 mg", "500 mg"), ("Losartan IPSomg", "50 mg"),
+])
+def test_strength_with_letters_read_for_digits_is_read_whole(text, want):
+    """A strip photo's OCR writes o for 0 and S for 5; the strength must not become the tail of the number ("0 mg")."""
+    meds = images.medicines([{"text": text, "conf": 0.9, "bbox": [0.1, 0.1, 0.5, 0.05]}])
+    assert meds and meds[0]["strength"] == want

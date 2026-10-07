@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "te",
+  "clips": 25,
+  "audio_seconds": 252.8,
+  "wer": 0.315,
+  "cer": 0.136,
+  "real_time_factor": 0.274,
+  "process_private_gb": 3.35,
+  "process_peak_working_set_gb": 2.71,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 57.2,
+   "bleu": 29.9
+  }
+ },
+ "clips": [
+  {
+   "file": "10455780686531859277.wav",
+   "reference": "ఇది సాధారణ ఆచారంగా మారింది, కానీ ఇనుము బండ్ల యొక్క చెక్క చక్రాలపై మరింత అరుగుదల కలిగించింది.",
+   "heard": "ఇది సాధారణ ఆచారంగా మారింది కానీ ఇనుముబండ్ల యొక్క చక్ర చక్రాలపై మరింత అరుగుదల కలిగించింది",
+   "wer": 0.231,
+   "confidence": 0.953,
+   "english": "This became common practice but caused further wear and tear on the wheel wheels of the iron ingots.",
+   "english_reference": "This became common practice, but the iron caused more wear on the wooden wheels of the wagons."
+  },
+  {
+   "file": "1073990465254974841.wav",
+   "reference": "ప్రపంచంలోఅత్యుత్తమ పోలో జట్లలో మరియు క్రీడాకారులలో ఒకరిగా అర్జెంటీనా ప్రసిద్ధి చెందింది.",
+   "heard": "ప్రపంచంలో అత్యుత్తమ పోలో జట్లలో మరియు క్రీడాకారులలో ఒకరిగా అర్జెంటీనా ప్రసిద్ధి చెందింది",
+   "wer": 0.222,
+   "confidence": 0.957,
+   "english": "Argentina is known for having one of the best polo teams and players in the world.",
+   "english_reference": "Argentina is well known for having one of the best polo teams and players in the world."
+  },
+  {
+   "file": "12842301634423427917.wav",
+   "reference": "మెట్రిక్ వ్యవస్థను వినియోగించడం, నియంతృత్వం నుండి ప్రజాప్రభుత్వ ధర్మానికి మారడం, జాతీయవాదం మరియు దేశం పాలకుడికి మాత్రమే కాకుండా ప్రజలకు కూడా చెందినది అని నమ్మడం వంటి సామాజిక మరియు రాజకీయ ప్రభావాలు చాలా ఉన్నాయి.",
+   "heard": "మెట్రిక్ వ్యవస్థను వినియోగించడం నేతృత్వం నుండి ప్రజాప్రభుత్వ ధర్మానికి మారడం జాతీయవాదం మరియు దేశం పాలకుడికి మాత్రమే కాకుండా ప్రజలకు కూడా చెందిదిది అని నమ్మడం వంటి సామాజిక మరియు రాజకీయ ప్రభావాలు చాలా ఉన్నాయి",
+   "wer": 0.077,
+   "confidence": 0.955,
+   "english": "The use of the metric system has many social and political implications, such as nationalism and the belief that the transition from leadership to democracy belongs not only to the ruler of the country but also to the people.",
+   "english_reference": "There are a lot of social and political effects such as the use of metric system, a shift from absolutism to republicanism, nationalism and the belief the country belongs to the people not to one sole ruler."
+  },
+  {
+   "file": "13095435438373566100.wav",
+   "reference": "గత 4 సంవత్సరాలలో వరుసగా ఐదవ సారి Martelly మెంబర్‌గా ఏర్పడిన CEP.",
+   "heard": "గత నాలుగు సంవత్సరాలలో వరుసగా ఐదవసారి మార్టెల్లి మెంబర్గా ఏర్పడిన సీఈపి",
+   "wer": 0.6,
+   "confidence": 0.912,
+   "english": "CEP formed as a member of Martelli for the fifth consecutive time in the last four years",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "13290966131679054330.wav",
+   "reference": "ఇది సాధారణ ఆచారంగా మారింది, కానీ ఇనుము బండ్ల యొక్క చెక్క చక్రాలపై మరింత అరుగుదల కలిగించింది.",
+   "heard": "ఇది సాధారణ ఆచారంగా మారింది కానీ ఎనుగు పండ్ల యొక్క చెక్కచక్రాలపై మరింత అరుగుదల కలిగించింది",
+   "wer": 0.308,
+   "confidence": 0.931,
+   "english": "This became common practice but caused further deterioration on the wooden wheels of the bamboo shoots.",
+   "english_reference": "This became common practice, but the iron caused more wear on the wooden wheels of the wagons."
+  },
+  {
+   "file": "13833447757010675224.wav",
+   "reference": "కారు డీకొట్టినప్పుడు ముగ్గురు వ్యక్తులు ఇంట్లో ఉన్నప్పటికీ,  ఎవ్వరూ గాయపడలేదు.",
+   "heard": "కారు ఢీకొట్టినప్పుడు ముగ్గురు వ్యక్తులు ఇంట్లో ఉన్నప్పటికీ ఎవ్వరూ గాయపడలేదు",
+   "wer": 0.125,
+   "confidence": 0.961,
+   "english": "Three people were in the house when the car collided, but no one was injured.",
+   "english_reference": "Although three people were inside the house when the car impacted it, none of them were hurt."
+  },
+  {
+   "file": "15255890129727160142.wav",
+   "reference": "కారు డీకొట్టినప్పుడు ముగ్గురు వ్యక్తులు ఇంట్లో ఉన్నప్పటికీ,  ఎవ్వరూ గాయపడలేదు.",
+   "heard": "కారు డీకొట్టినప్పుడు ముగ్గురు వ్యక్తులు ఇంట్లో ఉన్నప్పటికీ ఎవరూ గాయపడలేదు",
+   "wer": 0.125,
+   "confidence": 0.891,
+   "english": "Three people were in the house when the car crashed, but no one was injured.",
+   "english_reference": "Although three people were inside the house when the car impacted it, none of them were hurt."
+  },
+  {
+   "file": "15768531293470193219.wav",
+   "reference": "ఈ సిద్ధాంతాలు వ్యక్తులకు నిర్దిష్ట  అవసరాలు మరియు/లేదా కోరికలు ఉంటాయని సూచిస్తున్నాయి, వారు యుక్తవయస్సుకి చేరుకునేటప్పటికి అంతర్గతంగా ఉంటాయి.",
+   "heard": "ఈ సిద్ధాంతాల వ్యక్తులకు నిర్దిష్ట అవసరాలు మరియు లేదా కోరికలు ఉంటాయనిూ సూచిస్తున్నాయి వారు యుక్త వయసుకి చేరుకున్నప్పటికీ అంతర్గతంగా ఉంటాయి",
+   "wer": 0.5,
+   "confidence": 0.954,
+   "english": "These theories also suggest that individuals have specific needs and or desires that are intrinsic even when they reach puberty.",
+   "english_reference": "These theories suggest that people have certain needs and/or desires which have been internalized as they mature to adulthood."
+  },
+  {
+   "file": "16000040920331765798.wav",
+   "reference": "చాలా జిల్లాలకు చిన్న జపనీస్ కోస్టర్ బస్సులు సేవలను అందిస్తున్నాయి, ఇవి సౌకర్యవంతంగా మరియు దృఢ నిర్మాణం కలిగి ఉండి చాలాకాలం మన్నుతాయి.",
+   "heard": "చాలా జిల్లాలకు చిన్న జపనీస్ కోస్టార్ బస్సులు సేవలను అందిస్తున్నాయి ఇవి సౌకర్యవంతంగా మరియు రుణ నిర్మాణం కలిగి ఉండి చాలాకాలం మన్నుతాయి",
+   "wer": 0.118,
+   "confidence": 0.967,
+   "english": "Many districts are served by small Japanese coaster buses, which are convenient and have a debt structure and last a long time.",
+   "english_reference": "Most districts are served by small Japanese Coaster Buses, which are comfortable and sturdy."
+  },
+  {
+   "file": "16631971486461133981.wav",
+   "reference": "మెట్రిక్ వ్యవస్థను వినియోగించడం, నియంతృత్వం నుండి ప్రజాప్రభుత్వ ధర్మానికి మారడం, జాతీయవాదం మరియు దేశం పాలకుడికి మాత్రమే కాకుండా ప్రజలకు కూడా చెందినది అని నమ్మడం వంటి సామాజిక మరియు రాజకీయ ప్రభావాలు చాలా ఉన్నాయి.",
+   "heard": "మెట్రిక్ వ్యవస్థను వినియోగించడం నియంతృత్వం నుండి ప్రజాప్రభుత్వ ధర్మానికి మారడం జాతీయవాదం మరియు దేశం పాలకుడికి మాత్రమే కాకుండా ప్రజలకు కూడా చెందినది అని నమ్మడం వంటి సామాజిక మరియు రాజకీయ ప్రభావాలు చాలా ఉన్నాయి",
+   "wer": 0.0,
+   "confidence": 0.989,
+   "english": "The use of the metric system has many social and political implications, such as the shift from dictatorship to democracy, nationalism, and the belief that the country belongs not only to the ruler but also to the people.",
+   "english_reference": "There are a lot of social and political effects such as the use of metric system, a shift from absolutism to republicanism, nationalism and the belief the country belongs to the people not to one sole ruler."
+  },
+  {
+   "file": "18291096371895393218.wav",
+   "reference": "\"ఇక్కడి ప్రధాన స్థానిక బీర్ 'Number One', ఇది మంచి బీర్ కాదు, ఇది ఆహ్లాదకరం మరియు కొత్త ఉత్సహాన్ని కలిగిస్తుంది. ఇక్కడి మరో స్థానిక బీరును \"\"Manta\"\" అని పిలుస్తారు.\"",
+   "heard": "ఇక్కడి ప్రధాన స్థానిక బీర్ నెంబర్ వన్ ఇది మంచి బీర్ కాదు ఇది ఆహ్లాదకరం మరియు కొత్త ఉత్సాహాన్ని కలిగిస్తుంది ఇక్కడి మరో స్థానిక బీర్ను మంటా అని పిలుస్తారు",
+   "wer": 0.217,
+   "confidence": 0.966,
+   "english": "The main local beer here is number one, it is not a good beer, it is pleasant and brings new enthusiasm. Another local beer here is called Manta",
+   "english_reference": "The main local beer is 'Number One', it is not a complex beer, but pleasant and refreshing. The other local beer is called \"Manta\"."
+  },
+  {
+   "file": "3562888686069295002.wav",
+   "reference": "U.S. అధ్యక్షుడు, George W. Bush ఆ ప్రకటనతో ఏకీభవించారు.",
+   "heard": "యుఎస్ అధ్యక్షుడు జార్జ్ డబ్ల్యూ బుష్ ఆ ప్రకటనతో ఏక విభవించారు",
+   "wer": 0.778,
+   "confidence": 0.919,
+   "english": "U.S. President George W. Bush echoed that statement",
+   "english_reference": "U.S. President George W. Bush welcomed the announcement."
+  },
+  {
+   "file": "4858045044291332247.wav",
+   "reference": "పోర్చుగల్ వాసులు దాన్ని  నాశనం చేసి, కాసా బ్రంకా అనే పేరుతో పునర్నిర్మించారు, 1755 లో వచ్చిన భూకంపం తరువాత మాత్రమే దీనిని వదిలి వెళ్లారు.",
+   "heard": "పోర్చుగల్ వాసులు దాని నాశనం చేసి కాసాబ్రంకా అనే పేరుతో పునర్నిర్మించారు పదిహేడు వందల యాభై ఐదులో వచ్చిన భూకంపం తరువాత మాత్రమే దీనిని వదిలి వెెళ్లారు",
+   "wer": 0.421,
+   "confidence": 0.948,
+   "english": "The Portuguese destroyed it and rebuilt it under the name of Casabranca, leaving it only after an earthquake in seventeen fifty-five.",
+   "english_reference": "The Portuguese destroyed it and rebuilt it under the name Casa Branca, only to abandon it after an earthquake in 1755."
+  },
+  {
+   "file": "5819100676444608484.wav",
+   "reference": "పోర్చుగల్ వాసులు దాన్ని  నాశనం చేసి, కాసా బ్రంకా అనే పేరుతో పునర్నిర్మించారు, 1755 లో వచ్చిన భూకంపం తరువాత మాత్రమే దీనిని వదిలి వెళ్లారు.",
+   "heard": "పోర్చుగల్ వాసులు దాన్ని నాశనం చేసి కాసాబ్రంకా అనే పేరుతో పునర్నిర్మించారు పదిహేడు వందల యాభై ఐదులో వచ్చిన భూకంపం తరువాత మాత్రమే దీనిని వదిలి వెెళ్లారు",
+   "wer": 0.368,
+   "confidence": 0.96,
+   "english": "The Portuguese destroyed it and rebuilt it under the name of Casabranca, leaving it only after an earthquake in seventeen fifty-five.",
+   "english_reference": "The Portuguese destroyed it and rebuilt it under the name Casa Branca, only to abandon it after an earthquake in 1755."
+  },
+  {
+   "file": "5895545146732980365.wav",
+   "reference": "U.S. అధ్యక్షుడు, George W. Bush ఆ ప్రకటనతో ఏకీభవించారు.",
+   "heard": "యుఎస్ అధ్యక్షుడు జార్జ్ డబ్ల్యూ బుష్ ఆ ప్రకటనతో ఎక్కిీభవించారు",
+   "wer": 0.667,
+   "confidence": 0.924,
+   "english": "US President George W Bush was taken aback by the announcement",
+   "english_reference": "U.S. President George W. Bush welcomed the announcement."
+  },
+  {
+   "file": "7147861329898567249.wav",
+   "reference": "U.S. అధ్యక్షుడు, George W. Bush ఆ ప్రకటనతో ఏకీభవించారు.",
+   "heard": "యుఎస్ అధ్యక్షుడు జార్జ్ డబ్ల్యూ బుష్ ఆ ప్రకటనతో ఏకీభవించారు",
+   "wer": 0.556,
+   "confidence": 0.949,
+   "english": "U.S. President George W. Bush agreed with that statement",
+   "english_reference": "U.S. President George W. Bush welcomed the announcement."
+  },
+  {
+   "file": "7673768465088337954.wav",
+   "reference": "ఇది సాధారణ ఆచారంగా మారింది, కానీ ఇనుము బండ్ల యొక్క చెక్క చక్రాలపై మరింత అరుగుదల కలిగించింది.",
+   "heard": "ఇది సాధారణ ఆచరంగా మారింది కానీ ఎనువుబండ్ల యొక్క చక్రాలపై మరింత అరుగుదల కలిగించింది",
+   "wer": 0.308,
+   "confidence": 0.92,
+   "english": "This became common practice but caused further deterioration on the wheels of the eight bonds.",
+   "english_reference": "This became common practice, but the iron caused more wear on the wooden wheels of the wagons."
+  },
+  {
+   "file": "8095748166957232223.wav",
+   "reference": "ఈ పార్కు 19,500 km² విస్తీర్ణంలో ఉంది, మరియు 14 భిన్నమైన ఎకోజోన్‌లుగా విభజించబడింది, ఒక్కొకటి ప్రత్యేకమైన వన్యప్రాణులను కలిగి ఉంటుంది.",
+   "heard": "ఈ పార్కు పంతొమ్మిది వేల ఐదు వందల స్క్వేర్ కిలోమీటర్ల విస్తీర్ణంలో ఉంది మరియు పద్నాలుగు భిన్నమైన ఎకోజోన్లుగా విభజించబడింది ఒక్కొక్కటి ప్రత్యేకమైన వన్యప్రాాణులను కలిగి ఉంటుంది",
+   "wer": 0.588,
+   "confidence": 0.936,
+   "english": "The park covers an area of nineteen thousand five hundred square kilometers and is divided into fourteen distinct ecozones each with unique wildlife.",
+   "english_reference": "The park covers 19,500 km² and is divided in 14 different ecozones, each supporting different wildlife."
+  },
+  {
+   "file": "8280931612775164442.wav",
+   "reference": "గత 4 సంవత్సరాలలో వరుసగా ఐదవ సారి Martelly మెంబర్‌గా ఏర్పడిన CEP.",
+   "heard": "గత నాలుగు సంవత్సరాల్లో వరుసగా ఐదవసారి మాచల్లి మెంబర్గా ఏర్పడిన సీఈపి",
+   "wer": 0.7,
+   "confidence": 0.906,
+   "english": "The CEP was elected as a Machalli member for the fifth consecutive time in the last four years.",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "8684909798557270524.wav",
+   "reference": "ఈ పార్కు 19,500 km² విస్తీర్ణంలో ఉంది, మరియు 14 భిన్నమైన ఎకోజోన్‌లుగా విభజించబడింది, ఒక్కొకటి ప్రత్యేకమైన వన్యప్రాణులను కలిగి ఉంటుంది.",
+   "heard": "ఈ పార్కు పంతొమ్మిది వేల ఐదుొందల కిలోమీటర్ విస్తీర్ణంలో ఉంది మరియు పద్నాలుగు భిన్నమైన ఎకోజోన్లుగా విభజించబడింది ఒక్కొక్కటి ప్రత్యేకమైన వన్యప్రాణులను కలిగి ఉంటుంది",
+   "wer": 0.412,
+   "confidence": 0.948,
+   "english": "The park covers an area of nineteen thousand five hundred kilometers and is divided into fourteen distinct ecozones each containing unique wildlife.",
+   "english_reference": "The park covers 19,500 km² and is divided in 14 different ecozones, each supporting different wildlife."
+  },
+  {
+   "file": "8717352903139183502.wav",
+   "reference": "చాలా జిల్లాలకు చిన్న జపనీస్ కోస్టర్ బస్సులు సేవలను అందిస్తున్నాయి, ఇవి సౌకర్యవంతంగా మరియు దృఢ నిర్మాణం కలిగి ఉండి చాలాకాలం మన్నుతాయి.",
+   "heard": "చాలా జిల్లాలకు చిన్న జపనీస్ కోస్టల్ బస్సులు సేవలను అందిస్తున్నాయి ఇవి సౌకర్యవంతంగా మరియు దృఢ నిర్మాణం కలిగి ఉండి చాలా కాలం మండుతాయి",
+   "wer": 0.235,
+   "confidence": 0.973,
+   "english": "Many districts are served by small Japanese coastal buses, which are comfortable and sturdy and burn for long periods of time.",
+   "english_reference": "Most districts are served by small Japanese Coaster Buses, which are comfortable and sturdy."
+  },
+  {
+   "file": "9209031149386244039.wav",
+   "reference": "చాలా జిల్లాలకు చిన్న జపనీస్ కోస్టర్ బస్సులు సేవలను అందిస్తున్నాయి, ఇవి సౌకర్యవంతంగా మరియు దృఢ నిర్మాణం కలిగి ఉండి చాలాకాలం మన్నుతాయి.",
+   "heard": "చాలా జిల్లాలకు చిన్న జపనీస్ కోస్టల్ బస్సులు సేవలను అందిస్తున్నాయి ఇవి సౌకర్యవంతంగా మరియు దృఢ నిర్మాణం కలిగి ఉండి చాలా కాలం మన్నుతాయి",
+   "wer": 0.176,
+   "confidence": 0.97,
+   "english": "Many districts are served by small Japanese coastal buses, which are comfortable and sturdy and last a long time.",
+   "english_reference": "Most districts are served by small Japanese Coaster Buses, which are comfortable and sturdy."
+  },
+  {
+   "file": "9612110499543158730.wav",
+   "reference": "గత 4 సంవత్సరాలలో వరుసగా ఐదవ సారి Martelly మెంబర్‌గా ఏర్పడిన CEP.",
+   "heard": "గత నాలుగు సంవత్సరాలలో వరుసగా ఐదవసారి మాటల్లి మెంబర్గా ఏర్పడిన సీఈపి",
+   "wer": 0.6,
+   "confidence": 0.906,
+   "english": "CEP formed as a member of Matalli for the fifth consecutive time in the last four years",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "9655441251681907683.wav",
+   "reference": "విశాలమైన బౌలేవార్డ్లు, గాజు-ముందు భవనాలు ఇంకా ఆధునిక షాపింగ్ కేంద్రాలు సంప్రదాయ ఎరుపు-పెంకుల పైకప్పులతో, 18వ శతాబ్దపు మార్కెట్, పాత మసీదులు ఇంకా చర్చిలతో నిండి ఉన్నాయి, అయినప్పటికీ ఈ నగరం సంప్రదాయ టర్కీ కంటే మధ్యధరా ఐరోపాకంటే ఎక్కువ వాతావరణాన్ని కలిగి ఉంది.",
+   "heard": "విశాలమైన బౌలేవార్డులు గాజుముందు భవనాలు ఇంకా ఆధునిక షాపింగ్ కేంద్రాలు సంప్రదాయ ఎరుపు పెంకుల పైకప్పులతో పద్దెనిమిదివ శతాబ్దపు మార్కెట్ పాత మసీదులు ఇంకా చర్చిలతో నిండి ఉన్నాయి అయినప్పటికీ ఈ నగరం సంప్రదాయ టర్కీ కంటే మధ్యతర ఐరోపా కంటే ఎక్కువ వాతావరణాన్ని కలిగి ఉంది",
+   "wer": 0.206,
+   "confidence": 0.955,
+   "english": "Spacious boulevards, glass-fronted buildings, and modern shopping centres dot the eighteenth-century market with old mosques and churches with traditional red shell roofs, yet the city has a more medieval than traditional Turkish atmosphere.",
+   "english_reference": "The broad boulevards, glass-fronted buildings and modern shopping centers are dotted with traditional red-tiled roofs, the 18th century market, and old mosques and churches, although the city has an atmosphere more of Mediterranean Europe than traditional Turkey."
+  },
+  {
+   "file": "9835495517270649407.wav",
+   "reference": "ఈ సిద్ధాంతాలు వ్యక్తులకు నిర్దిష్ట  అవసరాలు మరియు/లేదా కోరికలు ఉంటాయని సూచిస్తున్నాయి, వారు యుక్తవయస్సుకి చేరుకునేటప్పటికి అంతర్గతంగా ఉంటాయి.",
+   "heard": "ఈ సిద్ధాంతాలు వ్యక్తులకు నిర్దిష్ట అవసరాలు మరియు లేదా కోరికలు ఉంటాయని సూచిస్తున్నాయి వారు యుక్త వయసుకు చేరుకునేటప్పటికీ అంతర్ధంతంగా ఉంటాయి",
+   "wer": 0.429,
+   "confidence": 0.965,
+   "english": "These theories suggest that individuals have specific needs and or desires that become implicit as they reach adulthood.",
+   "english_reference": "These theories suggest that people have certain needs and/or desires which have been internalized as they mature to adulthood."
+  }
+ ]
+}

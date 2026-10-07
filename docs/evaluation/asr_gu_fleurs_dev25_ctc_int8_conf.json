@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "gu",
+  "clips": 25,
+  "audio_seconds": 243.0,
+  "wer": 0.159,
+  "cer": 0.045,
+  "real_time_factor": 0.273,
+  "process_private_gb": 3.98,
+  "process_peak_working_set_gb": 2.23,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 62.2,
+   "bleu": 37.5
+  }
+ },
+ "clips": [
+  {
+   "file": "10986185159616074386.wav",
+   "reference": "પોલીસે કહ્યું કે શરીર લગભગ એક દિવસથી ત્યાં પડી રહ્યું હોવાનું દેખાય છે.",
+   "heard": "પોલીસે કહ્યું કે શરીર લગભગ એક દિવસથી ત્યાં પડી રહ્યું હોવાનું દેખાય છે",
+   "wer": 0.0,
+   "confidence": 0.984,
+   "english": "Police said the body appeared to have been lying there for about a day.",
+   "english_reference": "Police said that the body appeared to have been there for about a day."
+  },
+  {
+   "file": "11811454996129179523.wav",
+   "reference": "તરત જ, રમખાણ સમયે પહેરાતા સાધનોથી સજ્જ અધિકારીઓએ પ્રાંગણમાં પ્રવેશ કર્યો અને કેદીઓ પર અશ્રુ વાયુનો મારો કરીને ખૂણામાં ધકેલી દીધા.",
+   "heard": "તરત જ રમખાણ સમયે પહેરાતા સાધનોથી સજ્જ અધિકારીઓએ પ્રાંગણમાં પ્રવેશ કર્યો અને કેદીઓ પર અશ્રુવાયુનો મારો કરીને ખૂણામાં ધકેરી દીધા",
+   "wer": 0.143,
+   "confidence": 0.969,
+   "english": "Immediately, officers equipped with riot gear entered the courtyard and pushed the prisoners into the corner, firing tear gas at them.",
+   "english_reference": "Soon, officers equipped with riot gear entered the yard and cornered the inmates with tear gas."
+  },
+  {
+   "file": "1372664568745940604.wav",
+   "reference": "કારણ કે વિદ્યાર્થીઓ ઘણી વાર સૌથી વધુ વિવેચક શ્રોતા હોય, બ્લોગ લેખક ટીકાથી બચવા લેખનમાં સુધારો કરવાનો પ્રયાસ કરે છે.",
+   "heard": "કારણ કે વિદ્યાર્થીઓ ઘણીવાર સૌથી વધુ વિવેચક શ્રોતા હોઈ બ્લોગ લેખક ટીકાથી બચવા લેખનમાં સુધારો કરવાનો પ્રયાસ કરે છે",
+   "wer": 0.15,
+   "confidence": 0.959,
+   "english": "Because students are often the most critical listeners, the blog writer tries to improve the writing to avoid criticism.",
+   "english_reference": "Since students are often the most critical audience, the blog writer begins to strive to improve writing to avoid criticism."
+  },
+  {
+   "file": "14677614580523799695.wav",
+   "reference": "જ્યારે તમે પહેલી વાર વિદેશ ગયા, ત્યારે લોકોએ કદાચ ધીરજ અને સમજદારી દાખવી હશે, કારણ કે તેઓ જાણતાં હોય છે કે નવા દેશમાં લોકોએ અનુકૂળ થવું જરૂરી હોય છે.",
+   "heard": "જ્યારે તમે પહેલીવાર વિદેશ ગયા ત્યારે લોકોએ કદાચ ધીરજ અને સમજદારી દાખવી હશે કારણ કે તેઓ જાણતા હોય કે નવા દેશમાં લોકોએ અનુકૂળ થવું જરૂરી હોય છે",
+   "wer": 0.138,
+   "confidence": 0.968,
+   "english": "People may have shown patience and discernment when you first moved abroad because they know that people in a new country need to adapt.",
+   "english_reference": "When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt."
+  },
+  {
+   "file": "1468577784271456694.wav",
+   "reference": "ઉત્તરીય ભાગ કે સેન્ટીનેલ હારમાળામાં એન્ટાર્કટિકાની સૌથી ઉંચી પર્વતમાળા માઉન્ટ વિન્સન આવેલ છે, જેમાંના વિન્સન  મૅસિફ પર્વતની ઉંચાઈ 4892 મીટર છે.",
+   "heard": "ઉત્તરીય ભાગ કે સેન્ટિનેલ હારમાળામાં એન્ટાર્ક્ટિકાની સૌથી ઊંચી પર્વતમાળા માઉન્ટ વિન્સન આવેલ છે જેમાંના વિન્સન મેસિફ પર્વતની ઊંચાઈ ચાર હજાર આઠસો બાણું મીટર છે",
+   "wer": 0.429,
+   "confidence": 0.953,
+   "english": "In the northern part of the Sentinel Range lies Mount Vinson, the highest mountain range in Antarctica, with the Vinson Massif at four thousand eight hundred and fifty-two meters.",
+   "english_reference": "The northern part or Sentinel Range has Antarctica's highest mountains, the Vinson Massif, peaking at 4892 m Mount Vinson."
+  },
+  {
+   "file": "1489350084313472965.wav",
+   "reference": "કરાર ઉપર સહી થયા બાદ ઇઝરાયલ ખીણમાં ચાલુ મીલીટરીની હાજરી દસ વર્ષ માટે રાખવાની માંગ કરી રહ્યું છે જ્યારે PA આવી હાજરી માત્ર પાંચ વર્ષો માટે જ મૂકવા માટે સહમત થાય છે.",
+   "heard": "કરાર ઉપર સહી થયા બાદ ઈઝરાયેલ ખીણમાં ચાલુ મિલિટરીની હાજરી દસ વર્ષ માટે રાખવાની માંગ કરી રહ્યું છે જ્યારે પીએ આવી હાજરી માત્ર પાંચ વર્ષ માટે જ મુૂકવા માટે સંમત થાય છે",
+   "wer": 0.188,
+   "confidence": 0.945,
+   "english": "Following the signing of the agreement, Israel is seeking to maintain an ongoing military presence in the Valley for ten years while the PA agrees to close such a presence for only five years.",
+   "english_reference": "Israel demands an ongoing military presence in the valley for ten years once an agreement is signed while the PA agrees to leave such presence only for five years."
+  },
+  {
+   "file": "14949495644504143427.wav",
+   "reference": "તરત જ, રમખાણ સમયે પહેરાતા સાધનોથી સજ્જ અધિકારીઓએ પ્રાંગણમાં પ્રવેશ કર્યો અને કેદીઓ પર અશ્રુ વાયુનો મારો કરીને ખૂણામાં ધકેલી દીધા.",
+   "heard": "તરત જ રમખાણ સમયે પહેરાતા સાધનોથી સજ્જ અધિકારીઓએ પ્રાંગણમાં પ્રવેશ કર્યો અને કેદીઓ પર અશ્રુવાયુનો મારો કરીને ખૂણામાં ધકેલી દીધા",
+   "wer": 0.095,
+   "confidence": 0.978,
+   "english": "Immediately, officers equipped with riot gear entered the courtyard and pushed the prisoners into the corner, firing tear gas at them.",
+   "english_reference": "Soon, officers equipped with riot gear entered the yard and cornered the inmates with tear gas."
+  },
+  {
+   "file": "15037083960357829393.wav",
+   "reference": "પછી, કેટલાક સેડલ્સ, ખાસ કરીને ઇંગ્લિશ સેડલ્સ, સેફ્ટી બાર ધરાવે છે, જેને જો પાછળથી ખેંચવામાં આવે તો ચામડાને સેડલ પરથી નીચે પડવાની મંજૂરી આપે છે.",
+   "heard": "પછી કેટલાક સેડલ્સ ખાસ કરીને ઇંગ્લિશ સેડલ્સ સેફ્ટીબાર ધરાવે છે જેને જો પાછળથી ખેંચવામાં આવે તો ચામડાને સેડલ પરથી નીચે પડવાની મંજૂરી આપે છે",
+   "wer": 0.08,
+   "confidence": 0.943,
+   "english": "Then some saddles, especially English saddles, have a safety bar that allows the leather to fall off the saddle if pulled back.",
+   "english_reference": "Next, some saddles, particularly English saddles, have safety bars that allow a stirrup leather to fall off the saddle if pulled backwards by a falling rider."
+  },
+  {
+   "file": "15527380387976605815.wav",
+   "reference": "જ્યારે તમે પહેલી વાર વિદેશ ગયા, ત્યારે લોકોએ કદાચ ધીરજ અને સમજદારી દાખવી હશે, કારણ કે તેઓ જાણતાં હોય છે કે નવા દેશમાં લોકોએ અનુકૂળ થવું જરૂરી હોય છે.",
+   "heard": "જ્યારે તમે પહેલીવાર વિદેશ ગયા ત્યારે લોકોએ કદાચ ધીરજ અને સમજદારી દાખવી હશે કારણ કે તેઓ જાણતા હોય છે કે નવા દેશમાં લોકોએ અનુકૂળ થવું જરૂરી હોય છે",
+   "wer": 0.103,
+   "confidence": 0.978,
+   "english": "People may have shown patience and discernment when you first moved abroad because they know that people in a new country need to adapt.",
+   "english_reference": "When you went abroad at first, people were probably patient and understanding, knowing that travellers in a new country need to adapt."
+  },
+  {
+   "file": "16062227141931684316.wav",
+   "reference": "પછી, કેટલાક સેડલ્સ, ખાસ કરીને ઇંગ્લિશ સેડલ્સ, સેફ્ટી બાર ધરાવે છે, જેને જો પાછળથી ખેંચવામાં આવે તો ચામડાને સેડલ પરથી નીચે પડવાની મંજૂરી આપે છે.",
+   "heard": "પછી કેટલાક શેડલ્સ ખાસ કરીને ઇંગ્લિશ શેડલ્સ સેફ્ટી બાર ધરાવે છે જેને જો પાછળથી ખેંચવામાં આવે તો ચામડાનો શેડલ પરથી નીચે પડવાની મંજૂરી આપે છે",
+   "wer": 0.16,
+   "confidence": 0.95,
+   "english": "Then some sheds, especially English sheds, have safety bars that allow leather to fall off the shed if pulled back.",
+   "english_reference": "Next, some saddles, particularly English saddles, have safety bars that allow a stirrup leather to fall off the saddle if pulled backwards by a falling rider."
+  },
+  {
+   "file": "16655501276626399420.wav",
+   "reference": "પોલીસે કહ્યું કે શરીર લગભગ એક દિવસથી ત્યાં પડી રહ્યું હોવાનું દેખાય છે.",
+   "heard": "પોલીસે કહ્યું કે શરીર લગભગ એક દિવસથી ત્યાં પડી રહ્યું હોવાનું દેખાય છે",
+   "wer": 0.0,
+   "confidence": 0.976,
+   "english": "Police said the body appeared to have been lying there for about a day.",
+   "english_reference": "Police said that the body appeared to have been there for about a day."
+  },
+  {
+   "file": "1676604908861072618.wav",
+   "reference": "ઉત્તરીય ભાગ કે સેન્ટીનેલ હારમાળામાં એન્ટાર્કટિકાની સૌથી ઉંચી પર્વતમાળા માઉન્ટ વિન્સન આવેલ છે, જેમાંના વિન્સન  મૅસિફ પર્વતની ઉંચાઈ 4892 મીટર છે.",
+   "heard": "ઉત્તરીય ભાગ કે સેન્ટિનેલ હારમાળામાં એન્ટાર્ક્ટિકાની સૌથી ઊંચી પર્વતમાળા માઉન્ટ વિન્સન આવેલ છે જેમાંના વિન્સન મેસિફ પર્વતની ઊંચાઈ ચાર હજાર આઠસોને બાણુ મીટર છે",
+   "wer": 0.429,
+   "confidence": 0.956,
+   "english": "In the northern part of the Sentinel Range lies Mount Vinson, the highest mountain range in Antarctica, of which Mount Vinson Massif is four thousand eight hundred and fifty five meters high.",
+   "english_reference": "The northern part or Sentinel Range has Antarctica's highest mountains, the Vinson Massif, peaking at 4892 m Mount Vinson."
+  },
+  {
+   "file": "2286021728682664669.wav",
+   "reference": "પોલીસે કહ્યું કે શરીર લગભગ એક દિવસથી ત્યાં પડી રહ્યું હોવાનું દેખાય છે.",
+   "heard": "પોલીસે કહ્યું કે શરીર લગભગ એક દિવસથી ત્યાં પડી રહ્યું હોવાનું દેખાય છે",
+   "wer": 0.0,
+   "confidence": 0.987,
+   "english": "Police said the body appeared to have been lying there for about a day.",
+   "english_reference": "Police said that the body appeared to have been there for about a day."
+  },
+  {
+   "file": "2824588628961488010.wav",
+   "reference": "ઉત્તરીય ભાગ કે સેન્ટીનેલ હારમાળામાં એન્ટાર્કટિકાની સૌથી ઉંચી પર્વતમાળા માઉન્ટ વિન્સન આવેલ છે, જેમાંના વિન્સન  મૅસિફ પર્વતની ઉંચાઈ 4892 મીટર છે.",
+   "heard": "ઉત્તરીય ભાગ કે સેન્ટિનેલને હારમાળામાં એન્ટાર્ક્ટિકાના સૌથી ઊંચી પર્વતમાળા માઉન્ટ વિન્સન આવેલી છે જેમાંના વિન્સન મેસિફ પર્વતની ઊંચાઈ ચાર હજાર આઠસો બાણું મીટર છે",
+   "wer": 0.476,
+   "confidence": 0.938,
+   "english": "In the northern part of the Sentinel Range lies Antarctica's highest mountain range, Mount Vinson, of which Mount Vinson Massif is four thousand eight hundred and fifty-two meters high.",
+   "english_reference": "The northern part or Sentinel Range has Antarctica's highest mountains, the Vinson Massif, peaking at 4892 m Mount Vinson."
+  },
+  {
+   "file": "3412850694535118735.wav",
+   "reference": "પછી, કેટલાક સેડલ્સ, ખાસ કરીને ઇંગ્લિશ સેડલ્સ, સેફ્ટી બાર ધરાવે છે, જેને જો પાછળથી ખેંચવામાં આવે તો ચામડાને સેડલ પરથી નીચે પડવાની મંજૂરી આપે છે.",
+   "heard": "પછી કેટલાક સેડલસ ખાસ કરીને ઇંગ્લિશ સેડલ સેફ્ટી બાર ધરાવે છે જેને જો પાછળથી ખેંચવામાં આવે તો ચામડાની સેડલ પરથી નીચે પાડવાની મંજૂરી આપે છે",
+   "wer": 0.16,
+   "confidence": 0.94,
+   "english": "Then some saddles typically have an English saddle safety bar that allows them to be lowered from the leather saddle if pulled back.",
+   "english_reference": "Next, some saddles, particularly English saddles, have safety bars that allow a stirrup leather to fall off the saddle if pulled backwards by a falling rider."
+  },
+  {
+   "file": "3904231287451365550.wav",
+   "reference": "કરાર ઉપર સહી થયા બાદ ઇઝરાયલ ખીણમાં ચાલુ મીલીટરીની હાજરી દસ વર્ષ માટે રાખવાની માંગ કરી રહ્યું છે જ્યારે PA આવી હાજરી માત્ર પાંચ વર્ષો માટે જ મૂકવા માટે સહમત થાય છે.",
+   "heard": "કરાર ઉપર સહી થયા બાદ ઇઝરાયેલ ખીણમાં ચાલુ મિલિટરીની હાજરીમાં દસ વર્ષ માટે રાખવાની માંગ કરી રહ્યું છે જ્યારે પીએ આવી હાજરી માત્ર પાંચ વર્ષો માટે જ મુૂકવા માટે સહમત થાય છે",
+   "wer": 0.156,
+   "confidence": 0.95,
+   "english": "Following the signing of the agreement, Israel is seeking to maintain an ongoing military presence in the Valley for ten years while the PA agrees to close such a presence for only five years.",
+   "english_reference": "Israel demands an ongoing military presence in the valley for ten years once an agreement is signed while the PA agrees to leave such presence only for five years."
+  },
+  {
+   "file": "6028210628243250107.wav",
+   "reference": "મૂળભૂત વસ્તી સહેજ પણ બદલાઈ નથી, તેમને હજુ પણ પહેલાં જેવી જ અનુરૂપતાની જરૂર છે.",
+   "heard": "મૂળભૂત વસ્તી સહેજ પણ બદલાઈ નથી તેમને હજુ પણ પહેલાં જેવી જ અનુરૂપતાની જરૂર છે",
+   "wer": 0.0,
+   "confidence": 0.968,
+   "english": "The basic population has not changed at all they still need the same conformity as before.",
+   "english_reference": "The original population hasn't changed at all, they still need the same adaptations as before."
+  },
+  {
+   "file": "6404351031472049424.wav",
+   "reference": "તમે તેને અનુભવો છો કે નહીં તેની મને ખબર  નથી, પરંતુ સેન્ટ્રલ અમેરિકામાંથી મોટા ભાગનો સામાન આ દેશમાં કર મુક્ત આવ્યો હતો.",
+   "heard": "તમે તેને અનુભવો છો કે નહીં તેની મને ખબર નથી પરંતુ સેન્ટ્રલ અમેરિકામાંથી મોટા ભાગના સામાન આ દેશમાં કરમુક્ત આવ્યો હતો",
+   "wer": 0.136,
+   "confidence": 0.945,
+   "english": "I don't know if you feel it or not but most of the goods from Central America came tax-free to this country.",
+   "english_reference": "I don't know if you realize it or not, but most of the goods from Central America came into this country duty-free."
+  },
+  {
+   "file": "6554126667799269706.wav",
+   "reference": "તરત જ, રમખાણ સમયે પહેરાતા સાધનોથી સજ્જ અધિકારીઓએ પ્રાંગણમાં પ્રવેશ કર્યો અને કેદીઓ પર અશ્રુ વાયુનો મારો કરીને ખૂણામાં ધકેલી દીધા.",
+   "heard": "તરત જ રમખાણ સમયે પહેરાતા સાધનોથી સજ્જ અધિકારીઓએ પ્રાંગણમાં પ્રવેશ કર્યો અને કેદીઓ પર અશ્રુવાયુનો મારો કરીને ખૂણામાં ધકેલી દીધા",
+   "wer": 0.095,
+   "confidence": 0.973,
+   "english": "Immediately, officers equipped with riot gear entered the courtyard and pushed the prisoners into the corner, firing tear gas at them.",
+   "english_reference": "Soon, officers equipped with riot gear entered the yard and cornered the inmates with tear gas."
+  },
+  {
+   "file": "6579344352549612794.wav",
+   "reference": "તમે તેને અનુભવો છો કે નહીં તેની મને ખબર  નથી, પરંતુ સેન્ટ્રલ અમેરિકામાંથી મોટા ભાગનો સામાન આ દેશમાં કર મુક્ત આવ્યો હતો.",
+   "heard": "તમે તેને અનુભવો છો કે નહીં તેની મને ખબર નથી પરંતુ સેન્ટ્રલ અમેરિકામાંથી મોટાભાગનો સામાન આ દેશમાં કર મુુક્ત આવ્યો હતો",
+   "wer": 0.136,
+   "confidence": 0.959,
+   "english": "I don't know if you feel it, but most of the goods from Central America came tax-free to this country.",
+   "english_reference": "I don't know if you realize it or not, but most of the goods from Central America came into this country duty-free."
+  },
+  {
+   "file": "7001893758680766209.wav",
+   "reference": "મૂળભૂત વસ્તી સહેજ પણ બદલાઈ નથી, તેમને હજુ પણ પહેલાં જેવી જ અનુરૂપતાની જરૂર છે.",
+   "heard": "મૂળભૂત વસ્તી સહેજ પણ બદલાઈ નથી તેમને હજુ પણ પહેલાં જેવી અનુરૂપતાની જરૂર છે",
+   "wer": 0.067,
+   "confidence": 0.969,
+   "english": "The basic population has not changed at all they still need the same conformity as before.",
+   "english_reference": "The original population hasn't changed at all, they still need the same adaptations as before."
+  },
+  {
+   "file": "7822698385126718813.wav",
+   "reference": "મૂળભૂત વસ્તી સહેજ પણ બદલાઈ નથી, તેમને હજુ પણ પહેલાં જેવી જ અનુરૂપતાની જરૂર છે.",
+   "heard": "મૂળભૂત વસ્તી સહેજ પણ બદલાઈ નથી તેમને હજુ પણ પહેલાં જ એવી જ અનુરૂપતાની જરૂર છે",
+   "wer": 0.133,
+   "confidence": 0.945,
+   "english": "The basic population has not changed at all they still need the same conformity as before.",
+   "english_reference": "The original population hasn't changed at all, they still need the same adaptations as before."
+  },
+  {
+   "file": "8046424630388932837.wav",
+   "reference": "કારણ કે વિદ્યાર્થીઓ ઘણી વાર સૌથી વધુ વિવેચક શ્રોતા હોય, બ્લોગ લેખક ટીકાથી બચવા લેખનમાં સુધારો કરવાનો પ્રયાસ કરે છે.",
+   "heard": "કારણ કે વિદ્યાર્થીઓ ઘણીવાર સૌથી વધુ વિવેચક શ્રોતા હોઈ બ્લોગલેેખક ટીકાથી બચવા લેખનમાં સુધારો કરવાનો પ્રયાસ કરે છે",
+   "wer": 0.25,
+   "confidence": 0.959,
+   "english": "Because students are often the most critical listeners, bloggers try to improve writing to avoid criticism.",
+   "english_reference": "Since students are often the most critical audience, the blog writer begins to strive to improve writing to avoid criticism."
+  },
+  {
+   "file": "8118317607312840790.wav",
+   "reference": "તમે તેને અનુભવો છો કે નહીં તેની મને ખબર  નથી, પરંતુ સેન્ટ્રલ અમેરિકામાંથી મોટા ભાગનો સામાન આ દેશમાં કર મુક્ત આવ્યો હતો.",
+   "heard": "તમે તેને અનુભવો છો કે નહીં તેની મને ખબર નથી પરંતુ સેન્ટ્રલ અમેરિકામાંથી મોટા ભાગના સામાન આ દેશમાં કર મુક્ત આવ્યો હતો",
+   "wer": 0.045,
+   "confidence": 0.961,
+   "english": "I don't know if you feel it or not but most of the goods from Central America came tax-free to this country.",
+   "english_reference": "I don't know if you realize it or not, but most of the goods from Central America came into this country duty-free."
+  },
+  {
+   "file": "955578443551243767.wav",
+   "reference": "કારણ કે વિદ્યાર્થીઓ ઘણી વાર સૌથી વધુ વિવેચક શ્રોતા હોય, બ્લોગ લેખક ટીકાથી બચવા લેખનમાં સુધારો કરવાનો પ્રયાસ કરે છે.",
+   "heard": "કારણ કે વિદ્યાર્થીઓ ઘણીવાર સૌથી વધુ વિવેચક શ્રોતા હોય બ્લોગલેેખક ટીકાથી બચવા લેખનમાં સુધારો કરવાનો પ્રયાસ કરે છે",
+   "wer": 0.2,
+   "confidence": 0.957,
+   "english": "Because students are often the most critical listeners, bloggers try to improve writing to avoid criticism.",
+   "english_reference": "Since students are often the most critical audience, the blog writer begins to strive to improve writing to avoid criticism."
+  }
+ ]
+}

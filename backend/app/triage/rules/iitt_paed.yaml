@@ -86,6 +86,11 @@ rules:
     urgency: red
     source: iitt_card
     when: { all: [ { finding: burn }, { age_years: [lt, 2] } ] }
+  - id: IITT-P-MAJOR-BURN
+    description: Major burn — face or neck, circumferential, or more than 15 % of the body (both arms are 18 % in an adult, more in a child)
+    urgency: red
+    source: iitt_card
+    when: { all: [ { finding: burn }, { finding: burn_major } ] }
   - id: IITT-P-THREATENED-LIMB
     description: Threatened limb
     urgency: red

@@ -235,6 +235,12 @@ export function buildNote(args: {
     trend,
     disagreements,
     transcript: voice ? { original: voice.original_text, translated: voice.text, language: voice.language } : null,
+    original_words: intake.symptoms
+      .filter((e) => e.original_text && e.original_text.trim() !== e.text.trim())
+      .map((e) => {
+        const engines = (e.engine ?? "").split(" + ");
+        return { original: e.original_text, translated: e.text, language: e.language, source: e.source, speech_engine: e.source === "voice" ? engines[0] || null : null, translation_engine: engines.length > 1 ? engines[engines.length - 1] : null };
+      }),
     generated_by: "mock-pipeline (rules v1 + template summariser)",
     generated_at: new Date().toISOString(),
   };

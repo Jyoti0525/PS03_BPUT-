@@ -85,8 +85,9 @@ sources:
       Screening — systematic screening for TB disease (2021): its symptom screen adds night sweats, and it
       recommends screening people with silicosis and people with workplace silica exposure.
     scope: >-
-      Silica-exposed workers with a presumptive TB symptom. Jeevia raises them to RED to mean same-day
-      doctor review and an NTEP sputum test, not resuscitation; this escalation is our own adaptation.
+      Anyone with presumptive TB symptoms is YELLOW (sputum test referral today). Silica-exposed workers with
+      a presumptive TB symptom are raised to RED to mean same-day doctor review and an NTEP sputum test, not
+      resuscitation; this escalation is our own adaptation.
   ats_occ_spiro:
     short: ATS 2014 — spirometry in the occupational setting (15 % FEV1 decline)
     full: >-
@@ -124,3 +125,17 @@ sources:
       check are missing, or while any rule is undecided because of missing data. Such cases are held at
       provisional YELLOW listing what to measure.
     scope: All patients.
+  gina:
+    short: GINA 2024 — acute asthma in primary care (SpO₂ < 94 % is not mild)
+    full: >-
+      Global Initiative for Asthma. Global Strategy for Asthma Management and Prevention, 2024 update,
+      Box 9-3 (management of asthma exacerbations in primary care): mild or moderate exacerbations have
+      SpO₂ 90–95 %, severe < 90 %; oxygen target 93–95 %. https://ginasthma.org/reports/
+    scope: People with known asthma or wheeze. Jeevia uses SpO₂ below 94 % to mean "treat now", YELLOW.
+  ihci:
+    short: India Hypertension Control Initiative — treatment protocol
+    full: >-
+      Indian Council of Medical Research, Ministry of Health and Family Welfare, WHO India. India
+      Hypertension Control Initiative (IHCI) standard treatment protocol (2019, updated 2023): BP ≥ 140/90
+      start treatment; BP not controlled on treatment, step up the dose; follow up monthly until controlled.
+    scope: Adults. Used only for a follow-up flag; the urgent part is LOCAL-SEVERE-HTN.

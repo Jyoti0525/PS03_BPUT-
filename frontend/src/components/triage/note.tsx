@@ -307,13 +307,24 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
             </ul>
           </details>
         )}
-        {n.transcript && (
-          <details className="border-t border-line px-4 py-2.5 text-sm">
+        {(n.original_words?.length ? n.original_words : n.transcript ? [n.transcript] : []).length > 0 && (
+          <details open className="border-t border-line px-4 py-2.5 text-sm">
             <summary className="flex cursor-pointer items-center gap-1.5 font-medium text-muted">
-              <Languages className="size-4" /> {tr("Original words (")}{tr(langByCode(n.transcript.language).name)})
+              <Languages className="size-4" /> {tr("Original words (")}{tr(langByCode((n.original_words?.[0] ?? n.transcript)!.language).name)})
             </summary>
-            <p className="mt-2 rounded-lg bg-canvas p-2.5 text-ink">{n.transcript.original}</p>
-            <p className="mt-1.5 text-xs text-muted">{tr("Translated:")} {n.transcript.translated}</p>
+            {(n.original_words?.length ? n.original_words : [n.transcript!]).map((w, i) => (
+              <div key={i} className="mt-2 grid gap-2 sm:grid-cols-2">
+                <p lang={w.language} className="rounded-lg bg-canvas p-2.5 text-ink">{w.original}</p>
+                <div>
+                  <p className="rounded-lg border border-line p-2.5 text-ink-2">{w.translated}</p>
+                  <p className="mt-1 text-xs text-muted">
+                    {tr("Machine translated")}
+                    {"translation_engine" in w && w.translation_engine ? ` (${w.translation_engine})` : ""}
+                    {tr(" — check against the patient's own words")}
+                  </p>
+                </div>
+              </div>
+            ))}
           </details>
         )}
       </Card>

@@ -226,3 +226,17 @@ def test_engines_that_agree_add_nothing_to_the_note(client, nurse):
     _, body = new_intake(client, nurse, chief_complaint="fever", vitals={}, symptoms=[voice])
     note = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()["note"]
     assert not any(x["field"] == "Voice transcript" for x in note["disagreements"])
+
+
+def test_note_keeps_every_answer_in_the_patients_words_beside_the_translation(client, nurse):
+    """A3: each answer not given in English, the original beside the English, the translator named."""
+    first = {"text": "fever for three days", "original_text": "ତିନି ଦିନ ହେଲା ଜ୍ୱର", "language": "or", "source": "voice",
+             "confirmed_by_readback": True, "engine": f"{OFFLINE} + {language.MT_ENGINE}"}
+    second = {"text": "cough at night", "original_text": "ରାତିରେ କାଶ", "language": "or", "source": "voice",
+              "confirmed_by_readback": True, "engine": f"{OFFLINE} + {language.MT_ENGINE}"}
+    english = {"text": "no vomiting", "original_text": "no vomiting", "language": "en", "source": "text"}
+    _, body = new_intake(client, nurse, chief_complaint="fever", vitals={}, symptoms=[first, second, english])
+    words = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()["note"]["original_words"]
+    assert [w["original"] for w in words] == ["ତିନି ଦିନ ହେଲା ଜ୍ୱର", "ରାତିରେ କାଶ"]  # the English answer needs no translation
+    assert words[1]["translated"] == "cough at night"
+    assert words[0]["speech_engine"] == OFFLINE and words[0]["translation_engine"] == language.MT_ENGINE

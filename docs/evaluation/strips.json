@@ -1,0 +1,511 @@
+{
+ "seed": 1008,
+ "per_variant": 8,
+ "by_variant": {
+  "clean": {
+   "n": 8,
+   "labelled_strip": 8,
+   "medicine_found": 8,
+   "strength_right": 8,
+   "false_medicines": 0
+  },
+  "photo": {
+   "n": 8,
+   "labelled_strip": 8,
+   "medicine_found": 8,
+   "strength_right": 8,
+   "false_medicines": 0
+  },
+  "glare": {
+   "n": 8,
+   "labelled_strip": 8,
+   "medicine_found": 8,
+   "strength_right": 8,
+   "false_medicines": 0
+  },
+  "blurred": {
+   "n": 8,
+   "labelled_strip": 8,
+   "medicine_found": 8,
+   "strength_right": 8,
+   "false_medicines": 0
+  },
+  "torn": {
+   "n": 8,
+   "labelled_strip": 8,
+   "medicine_found": 8,
+   "strength_right": 8,
+   "false_medicines": 0
+  }
+ },
+ "all": {
+  "n": 40,
+  "labelled_strip": 40,
+  "medicine_found": 40,
+  "strength_right": 40,
+  "false_medicines": 0
+ },
+ "pictures": [
+  {
+   "file": "clean_00.jpg",
+   "variant": "clean",
+   "truth": "Paracetamol 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "paracetamol 500 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "clean_01.jpg",
+   "variant": "clean",
+   "truth": "Amlodipine 5 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "amlodipine 5 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "clean_02.jpg",
+   "variant": "clean",
+   "truth": "Metformin 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "metformin 500 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "clean_03.jpg",
+   "variant": "clean",
+   "truth": "Atorvastatin 10 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "atorvastatin 10 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "clean_04.jpg",
+   "variant": "clean",
+   "truth": "Telmisartan 40 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "telmisartan 40 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "clean_05.jpg",
+   "variant": "clean",
+   "truth": "Losartan 50 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "losartan 50 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "clean_06.jpg",
+   "variant": "clean",
+   "truth": "Cetirizine 10 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "cetirizine 10 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "clean_07.jpg",
+   "variant": "clean",
+   "truth": "Pantoprazole 40 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "pantoprazole 40 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_00.jpg",
+   "variant": "photo",
+   "truth": "Omeprazole 20 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "omeprazole 20 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_01.jpg",
+   "variant": "photo",
+   "truth": "Azithromycin 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "azithromycin 500 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_02.jpg",
+   "variant": "photo",
+   "truth": "Glimepiride 2 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "glimepiride 2 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_03.jpg",
+   "variant": "photo",
+   "truth": "Metoprolol 25 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "metoprolol 25 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_04.jpg",
+   "variant": "photo",
+   "truth": "Ibuprofen 400 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "ibuprofen 400 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_05.jpg",
+   "variant": "photo",
+   "truth": "Diclofenac 50 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "diclofenac 50 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_06.jpg",
+   "variant": "photo",
+   "truth": "Salbutamol 4 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "salbutamol 4 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "photo_07.jpg",
+   "variant": "photo",
+   "truth": "Levocetirizine 5 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "levocetirizine 5 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_00.jpg",
+   "variant": "glare",
+   "truth": "Montelukast 10 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "montelukast 10 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_01.jpg",
+   "variant": "glare",
+   "truth": "Ondansetron 4 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "ondansetron 4 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_02.jpg",
+   "variant": "glare",
+   "truth": "Doxycycline 100 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "doxycycline 100 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_03.jpg",
+   "variant": "glare",
+   "truth": "Ciprofloxacin 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "ciprofloxacin 500 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_04.jpg",
+   "variant": "glare",
+   "truth": "Paracetamol 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "paracetamol 500 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_05.jpg",
+   "variant": "glare",
+   "truth": "Amlodipine 5 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "amlodipine 5 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_06.jpg",
+   "variant": "glare",
+   "truth": "Metformin 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "metformin 500 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "glare_07.jpg",
+   "variant": "glare",
+   "truth": "Atorvastatin 10 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "atorvastatin 10 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "blurred_00.jpg",
+   "variant": "blurred",
+   "truth": "Telmisartan 40 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "telmisartan 40 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "blurred_01.jpg",
+   "variant": "blurred",
+   "truth": "Losartan 50 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "losartan 50 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Low contrast / glare — retake without flash, flat to the camera",
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "blurred_02.jpg",
+   "variant": "blurred",
+   "truth": "Cetirizine 10 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "cetirizine 10 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "blurred_03.jpg",
+   "variant": "blurred",
+   "truth": "Pantoprazole 40 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "pantoprazole 40 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Low contrast / glare — retake without flash, flat to the camera",
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "blurred_04.jpg",
+   "variant": "blurred",
+   "truth": "Omeprazole 20 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "omeprazole 20 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "blurred_05.jpg",
+   "variant": "blurred",
+   "truth": "Azithromycin 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "azithromycin 500 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Low contrast / glare — retake without flash, flat to the camera",
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "blurred_06.jpg",
+   "variant": "blurred",
+   "truth": "Glimepiride 2 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "glimepiride 2 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Low contrast / glare — retake without flash, flat to the camera",
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "blurred_07.jpg",
+   "variant": "blurred",
+   "truth": "Metoprolol 25 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "metoprolol 25 mg"
+   ],
+   "strength_right": true,
+   "quality": [
+    "Low contrast / glare — retake without flash, flat to the camera",
+    "Blurry — hold the phone steady and retake"
+   ]
+  },
+  {
+   "file": "torn_00.jpg",
+   "variant": "torn",
+   "truth": "Ibuprofen 400 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "ibuprofen 400 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "torn_01.jpg",
+   "variant": "torn",
+   "truth": "Diclofenac 50 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "diclofenac 50 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "torn_02.jpg",
+   "variant": "torn",
+   "truth": "Salbutamol 4 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "salbutamol 4 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "torn_03.jpg",
+   "variant": "torn",
+   "truth": "Levocetirizine 5 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "levocetirizine 5 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "torn_04.jpg",
+   "variant": "torn",
+   "truth": "Montelukast 10 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "montelukast 10 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "torn_05.jpg",
+   "variant": "torn",
+   "truth": "Ondansetron 4 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "ondansetron 4 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "torn_06.jpg",
+   "variant": "torn",
+   "truth": "Doxycycline 100 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "doxycycline 100 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  },
+  {
+   "file": "torn_07.jpg",
+   "variant": "torn",
+   "truth": "Ciprofloxacin 500 mg",
+   "doc_type": "medicine_strip",
+   "found": [
+    "ciprofloxacin 500 mg"
+   ],
+   "strength_right": true,
+   "quality": []
+  }
+ ]
+}

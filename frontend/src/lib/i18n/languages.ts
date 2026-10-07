@@ -39,7 +39,18 @@ export const langByCode = (code: string) => LANGUAGES.find((l) => l.code === cod
  * Any language not listed is unmeasured: the kiosk says so, and the health worker checks the transcript.
  */
 export const ASR_MEASURED: Record<string, { wer: number; clips: number }> = {
-  or: { wer: 21.6, clips: 25 },
+  as: { wer: 23.1, clips: 25 },
+  bn: { wer: 11.5, clips: 25 },
+  gu: { wer: 15.9, clips: 25 },
   hi: { wer: 10.7, clips: 25 },
   kn: { wer: 20.6, clips: 25 },
+  ml: { wer: 20.7, clips: 25 },
+  mr: { wer: 21.3, clips: 25 },
+  ne: { wer: 29.1, clips: 25 },
+  or: { wer: 21.6, clips: 25 },
+  pa: { wer: 14.2, clips: 25 },
+  ta: { wer: 38.1, clips: 25 },
+  te: { wer: 31.5, clips: 25 },
+  ur: { wer: 25.2, clips: 25 },
+  // sd left out: the model writes Sindhi in Devanagari and FLEURS in Arabic script, so its WER measures the script.
 };

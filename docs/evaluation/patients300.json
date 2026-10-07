@@ -1,0 +1,1156 @@
+{
+ "patients": 300,
+ "vignettes": 50,
+ "agree_pct": 78.0,
+ "under_triage": 49,
+ "over_triage": 17,
+ "by_expected": {
+  "green": {
+   "n": 90,
+   "agree_pct": 93.3,
+   "under_triage": 0,
+   "over_triage": 6
+  },
+  "red": {
+   "n": 108,
+   "agree_pct": 88.0,
+   "under_triage": 13,
+   "over_triage": 0
+  },
+  "yellow": {
+   "n": 102,
+   "agree_pct": 53.9,
+   "under_triage": 36,
+   "over_triage": 11
+  }
+ },
+ "by_language": {
+  "en": {
+   "n": 100,
+   "agree_pct": 78.0,
+   "under_triage": 16,
+   "over_triage": 6
+  },
+  "hi": {
+   "n": 100,
+   "agree_pct": 79.0,
+   "under_triage": 16,
+   "over_triage": 5
+  },
+  "or": {
+   "n": 100,
+   "agree_pct": 77.0,
+   "under_triage": 17,
+   "over_triage": 6
+  }
+ },
+ "by_sex": {
+  "F": {
+   "n": 165,
+   "agree_pct": 80.0,
+   "under_triage": 25,
+   "over_triage": 8
+  },
+  "M": {
+   "n": 135,
+   "agree_pct": 75.6,
+   "under_triage": 24,
+   "over_triage": 9
+  }
+ },
+ "by_age_band": {
+  "12–17": {
+   "n": 8,
+   "agree_pct": 75.0,
+   "under_triage": 2,
+   "over_triage": 0
+  },
+  "18–39": {
+   "n": 110,
+   "agree_pct": 81.8,
+   "under_triage": 13,
+   "over_triage": 7
+  },
+  "40–59": {
+   "n": 94,
+   "agree_pct": 78.7,
+   "under_triage": 14,
+   "over_triage": 6
+  },
+  "5–11": {
+   "n": 15,
+   "agree_pct": 66.7,
+   "under_triage": 4,
+   "over_triage": 1
+  },
+  "60+": {
+   "n": 54,
+   "agree_pct": 79.6,
+   "under_triage": 8,
+   "over_triage": 3
+  },
+  "under 5": {
+   "n": 19,
+   "agree_pct": 57.9,
+   "under_triage": 8,
+   "over_triage": 0
+  }
+ },
+ "vignettes_consistent": 48,
+ "incomplete": {
+  "n": 30,
+  "green": 0,
+  "colours": {
+   "green": 0,
+   "yellow": 23,
+   "red": 7
+  }
+ },
+ "disagreements": [
+  {
+   "id": "P025",
+   "vignette": "R05",
+   "expect": "red",
+   "got": "yellow",
+   "language": "en",
+   "sex": "M",
+   "age": 3,
+   "band": "under 5",
+   "rules": [
+    "IITT-P-V-RR-1-4",
+    "IITT-P-V-TEMP",
+    "IMCI-FAST-BREATHING-CHILD"
+   ]
+  },
+  {
+   "id": "P026",
+   "vignette": "R05",
+   "expect": "red",
+   "got": "yellow",
+   "language": "en",
+   "sex": "F",
+   "age": 3,
+   "band": "under 5",
+   "rules": [
+    "IITT-P-V-RR-1-4",
+    "IITT-P-V-TEMP",
+    "IMCI-FAST-BREATHING-CHILD"
+   ]
+  },
+  {
+   "id": "P027",
+   "vignette": "R05",
+   "expect": "red",
+   "got": "yellow",
+   "language": "hi",
+   "sex": "M",
+   "age": 2,
+   "band": "under 5",
+   "rules": [
+    "IITT-P-V-RR-1-4",
+    "IITT-P-V-TEMP",
+    "IMCI-FAST-BREATHING-CHILD"
+   ]
+  },
+  {
+   "id": "P028",
+   "vignette": "R05",
+   "expect": "red",
+   "got": "yellow",
+   "language": "hi",
+   "sex": "F",
+   "age": 4,
+   "band": "under 5",
+   "rules": [
+    "IITT-P-V-RR-1-4",
+    "IITT-P-V-TEMP",
+    "IMCI-FAST-BREATHING-CHILD"
+   ]
+  },
+  {
+   "id": "P029",
+   "vignette": "R05",
+   "expect": "red",
+   "got": "yellow",
+   "language": "or",
+   "sex": "M",
+   "age": 1,
+   "band": "under 5",
+   "rules": [
+    "IITT-P-V-RR-1-4",
+    "IITT-P-V-TEMP",
+    "IMCI-FAST-BREATHING-CHILD"
+   ]
+  },
+  {
+   "id": "P030",
+   "vignette": "R05",
+   "expect": "red",
+   "got": "yellow",
+   "language": "or",
+   "sex": "F",
+   "age": 2,
+   "band": "under 5",
+   "rules": [
+    "IITT-P-V-RR-1-4",
+    "IITT-P-V-TEMP",
+    "IMCI-FAST-BREATHING-CHILD"
+   ]
+  },
+  {
+   "id": "P055",
+   "vignette": "R10",
+   "expect": "red",
+   "got": "yellow",
+   "language": "en",
+   "sex": "M",
+   "age": 40,
+   "band": "40–59",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P056",
+   "vignette": "R10",
+   "expect": "red",
+   "got": "yellow",
+   "language": "en",
+   "sex": "F",
+   "age": 25,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P057",
+   "vignette": "R10",
+   "expect": "red",
+   "got": "yellow",
+   "language": "hi",
+   "sex": "M",
+   "age": 33,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P058",
+   "vignette": "R10",
+   "expect": "red",
+   "got": "yellow",
+   "language": "hi",
+   "sex": "F",
+   "age": 55,
+   "band": "40–59",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P059",
+   "vignette": "R10",
+   "expect": "red",
+   "got": "yellow",
+   "language": "or",
+   "sex": "M",
+   "age": 48,
+   "band": "40–59",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P060",
+   "vignette": "R10",
+   "expect": "red",
+   "got": "yellow",
+   "language": "or",
+   "sex": "F",
+   "age": 18,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P090",
+   "vignette": "R15",
+   "expect": "red",
+   "got": "yellow",
+   "language": "or",
+   "sex": "F",
+   "age": 5,
+   "band": "5–11",
+   "rules": [
+    "IITT-P-V-AVPU",
+    "IITT-P-Y-DIARRHOEA",
+    "IITT-P-Y-UNABLE-TO-DRINK"
+   ]
+  },
+  {
+   "id": "P109",
+   "vignette": "Y01",
+   "expect": "yellow",
+   "got": "red",
+   "language": "en",
+   "sex": "M",
+   "age": 43,
+   "band": "40–59",
+   "rules": [
+    "IITT-A-MENINGISM"
+   ]
+  },
+  {
+   "id": "P110",
+   "vignette": "Y01",
+   "expect": "yellow",
+   "got": "red",
+   "language": "en",
+   "sex": "F",
+   "age": 35,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-MENINGISM"
+   ]
+  },
+  {
+   "id": "P111",
+   "vignette": "Y01",
+   "expect": "yellow",
+   "got": "red",
+   "language": "hi",
+   "sex": "M",
+   "age": 60,
+   "band": "60+",
+   "rules": [
+    "IITT-A-MENINGISM"
+   ]
+  },
+  {
+   "id": "P112",
+   "vignette": "Y01",
+   "expect": "yellow",
+   "got": "red",
+   "language": "hi",
+   "sex": "F",
+   "age": 26,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-MENINGISM"
+   ]
+  },
+  {
+   "id": "P113",
+   "vignette": "Y01",
+   "expect": "yellow",
+   "got": "red",
+   "language": "or",
+   "sex": "M",
+   "age": 52,
+   "band": "40–59",
+   "rules": [
+    "IITT-A-MENINGISM"
+   ]
+  },
+  {
+   "id": "P114",
+   "vignette": "Y01",
+   "expect": "yellow",
+   "got": "red",
+   "language": "or",
+   "sex": "F",
+   "age": 18,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-MENINGISM"
+   ]
+  },
+  {
+   "id": "P115",
+   "vignette": "Y02",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "M",
+   "age": 65,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P116",
+   "vignette": "Y02",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "F",
+   "age": 20,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P117",
+   "vignette": "Y02",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "M",
+   "age": 38,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P118",
+   "vignette": "Y02",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "F",
+   "age": 29,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P119",
+   "vignette": "Y02",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "M",
+   "age": 56,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P120",
+   "vignette": "Y02",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "F",
+   "age": 47,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P139",
+   "vignette": "Y06",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "M",
+   "age": 63,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P140",
+   "vignette": "Y06",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "F",
+   "age": 45,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P141",
+   "vignette": "Y06",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "M",
+   "age": 57,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P142",
+   "vignette": "Y06",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "F",
+   "age": 51,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P143",
+   "vignette": "Y06",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "M",
+   "age": 75,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P144",
+   "vignette": "Y06",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "F",
+   "age": 69,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P157",
+   "vignette": "Y09",
+   "expect": "yellow",
+   "got": "red",
+   "language": "en",
+   "sex": "M",
+   "age": 65,
+   "band": "60+",
+   "rules": [
+    "ATP-T-SEVERE-PAIN",
+    "IITT-A-Y-SEVERE-PAIN"
+   ]
+  },
+  {
+   "id": "P158",
+   "vignette": "Y09",
+   "expect": "yellow",
+   "got": "red",
+   "language": "en",
+   "sex": "F",
+   "age": 43,
+   "band": "40–59",
+   "rules": [
+    "ATP-T-SEVERE-PAIN",
+    "IITT-A-Y-SEVERE-PAIN"
+   ]
+  },
+  {
+   "id": "P159",
+   "vignette": "Y09",
+   "expect": "yellow",
+   "got": "red",
+   "language": "hi",
+   "sex": "M",
+   "age": 54,
+   "band": "40–59",
+   "rules": [
+    "ATP-T-SEVERE-PAIN",
+    "IITT-A-Y-SEVERE-PAIN"
+   ]
+  },
+  {
+   "id": "P161",
+   "vignette": "Y09",
+   "expect": "yellow",
+   "got": "red",
+   "language": "or",
+   "sex": "M",
+   "age": 32,
+   "band": "18–39",
+   "rules": [
+    "ATP-T-SEVERE-PAIN",
+    "IITT-A-Y-SEVERE-PAIN"
+   ]
+  },
+  {
+   "id": "P162",
+   "vignette": "Y09",
+   "expect": "yellow",
+   "got": "red",
+   "language": "or",
+   "sex": "F",
+   "age": 21,
+   "band": "18–39",
+   "rules": [
+    "ATP-T-SEVERE-PAIN",
+    "IITT-A-Y-SEVERE-PAIN"
+   ]
+  },
+  {
+   "id": "P169",
+   "vignette": "Y11",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "M",
+   "age": 54,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P170",
+   "vignette": "Y11",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "F",
+   "age": 38,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P171",
+   "vignette": "Y11",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "M",
+   "age": 70,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P172",
+   "vignette": "Y11",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "F",
+   "age": 46,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P173",
+   "vignette": "Y11",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "M",
+   "age": 30,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P174",
+   "vignette": "Y11",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "F",
+   "age": 62,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P181",
+   "vignette": "Y13",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "M",
+   "age": 60,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P182",
+   "vignette": "Y13",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "F",
+   "age": 33,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P183",
+   "vignette": "Y13",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "M",
+   "age": 51,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P184",
+   "vignette": "Y13",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "F",
+   "age": 42,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P185",
+   "vignette": "Y13",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "M",
+   "age": 15,
+   "band": "12–17",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P186",
+   "vignette": "Y13",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "F",
+   "age": 24,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P187",
+   "vignette": "Y14",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "M",
+   "age": 4,
+   "band": "under 5",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P188",
+   "vignette": "Y14",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "F",
+   "age": 12,
+   "band": "12–17",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P189",
+   "vignette": "Y14",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "M",
+   "age": 8,
+   "band": "5–11",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P190",
+   "vignette": "Y14",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "F",
+   "age": 6,
+   "band": "5–11",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P191",
+   "vignette": "Y14",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "M",
+   "age": 10,
+   "band": "5–11",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P192",
+   "vignette": "Y14",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "F",
+   "age": 2,
+   "band": "under 5",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P193",
+   "vignette": "Y15",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "M",
+   "age": 35,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P194",
+   "vignette": "Y15",
+   "expect": "yellow",
+   "got": "green",
+   "language": "en",
+   "sex": "F",
+   "age": 43,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P195",
+   "vignette": "Y15",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "M",
+   "age": 18,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P196",
+   "vignette": "Y15",
+   "expect": "yellow",
+   "got": "green",
+   "language": "hi",
+   "sex": "F",
+   "age": 60,
+   "band": "60+",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P197",
+   "vignette": "Y15",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "M",
+   "age": 52,
+   "band": "40–59",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P198",
+   "vignette": "Y15",
+   "expect": "yellow",
+   "got": "green",
+   "language": "or",
+   "sex": "F",
+   "age": 26,
+   "band": "18–39",
+   "rules": [
+    "TRIAGE-GREEN"
+   ]
+  },
+  {
+   "id": "P265",
+   "vignette": "G10",
+   "expect": "green",
+   "got": "yellow",
+   "language": "en",
+   "sex": "M",
+   "age": 40,
+   "band": "40–59",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P266",
+   "vignette": "G10",
+   "expect": "green",
+   "got": "yellow",
+   "language": "en",
+   "sex": "F",
+   "age": 50,
+   "band": "40–59",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P267",
+   "vignette": "G10",
+   "expect": "green",
+   "got": "yellow",
+   "language": "hi",
+   "sex": "M",
+   "age": 10,
+   "band": "5–11",
+   "rules": [
+    "IITT-P-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P268",
+   "vignette": "G10",
+   "expect": "green",
+   "got": "yellow",
+   "language": "hi",
+   "sex": "F",
+   "age": 60,
+   "band": "60+",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P269",
+   "vignette": "G10",
+   "expect": "green",
+   "got": "yellow",
+   "language": "or",
+   "sex": "M",
+   "age": 30,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  },
+  {
+   "id": "P270",
+   "vignette": "G10",
+   "expect": "green",
+   "got": "yellow",
+   "language": "or",
+   "sex": "F",
+   "age": 20,
+   "band": "18–39",
+   "rules": [
+    "IITT-A-Y-TRAUMA"
+   ]
+  }
+ ],
+ "inconsistent": [
+  {
+   "vignette": "R15",
+   "expect": "red",
+   "patients": [
+    {
+     "id": "P085",
+     "language": "en",
+     "sex": "M",
+     "age": 1,
+     "got": "red",
+     "rules": [
+      "IITT-P-SEVERE-DEHYDRATION",
+      "IITT-P-V-AVPU",
+      "IITT-P-Y-DIARRHOEA",
+      "IITT-P-Y-IRRITABLE",
+      "IITT-P-Y-UNABLE-TO-DRINK",
+      "IMCI-DANGER-SIGN",
+      "IMCI-SEVERE-DEHYDRATION"
+     ]
+    },
+    {
+     "id": "P086",
+     "language": "en",
+     "sex": "F",
+     "age": 4,
+     "got": "red",
+     "rules": [
+      "IITT-P-SEVERE-DEHYDRATION",
+      "IITT-P-V-AVPU",
+      "IITT-P-Y-DIARRHOEA",
+      "IITT-P-Y-IRRITABLE",
+      "IITT-P-Y-UNABLE-TO-DRINK",
+      "IMCI-DANGER-SIGN",
+      "IMCI-SEVERE-DEHYDRATION"
+     ]
+    },
+    {
+     "id": "P087",
+     "language": "hi",
+     "sex": "M",
+     "age": 3,
+     "got": "red",
+     "rules": [
+      "IITT-P-SEVERE-DEHYDRATION",
+      "IITT-P-V-AVPU",
+      "IITT-P-Y-DIARRHOEA",
+      "IITT-P-Y-IRRITABLE",
+      "IITT-P-Y-UNABLE-TO-DRINK",
+      "IMCI-DANGER-SIGN",
+      "IMCI-SEVERE-DEHYDRATION"
+     ]
+    },
+    {
+     "id": "P088",
+     "language": "hi",
+     "sex": "F",
+     "age": 2,
+     "got": "red",
+     "rules": [
+      "IITT-P-SEVERE-DEHYDRATION",
+      "IITT-P-V-AVPU",
+      "IITT-P-Y-DIARRHOEA",
+      "IITT-P-Y-IRRITABLE",
+      "IITT-P-Y-UNABLE-TO-DRINK",
+      "IMCI-DANGER-SIGN",
+      "IMCI-SEVERE-DEHYDRATION"
+     ]
+    },
+    {
+     "id": "P089",
+     "language": "or",
+     "sex": "M",
+     "age": 3,
+     "got": "red",
+     "rules": [
+      "IITT-P-V-AVPU",
+      "IITT-P-Y-DIARRHOEA",
+      "IITT-P-Y-UNABLE-TO-DRINK",
+      "IMCI-DANGER-SIGN"
+     ]
+    },
+    {
+     "id": "P090",
+     "language": "or",
+     "sex": "F",
+     "age": 5,
+     "got": "yellow",
+     "rules": [
+      "IITT-P-V-AVPU",
+      "IITT-P-Y-DIARRHOEA",
+      "IITT-P-Y-UNABLE-TO-DRINK"
+     ]
+    }
+   ]
+  },
+  {
+   "vignette": "Y09",
+   "expect": "yellow",
+   "patients": [
+    {
+     "id": "P157",
+     "language": "en",
+     "sex": "M",
+     "age": 65,
+     "got": "red",
+     "rules": [
+      "ATP-T-SEVERE-PAIN",
+      "IITT-A-Y-SEVERE-PAIN"
+     ]
+    },
+    {
+     "id": "P158",
+     "language": "en",
+     "sex": "F",
+     "age": 43,
+     "got": "red",
+     "rules": [
+      "ATP-T-SEVERE-PAIN",
+      "IITT-A-Y-SEVERE-PAIN"
+     ]
+    },
+    {
+     "id": "P159",
+     "language": "hi",
+     "sex": "M",
+     "age": 54,
+     "got": "red",
+     "rules": [
+      "ATP-T-SEVERE-PAIN",
+      "IITT-A-Y-SEVERE-PAIN"
+     ]
+    },
+    {
+     "id": "P160",
+     "language": "hi",
+     "sex": "F",
+     "age": 10,
+     "got": "yellow",
+     "rules": [
+      "IITT-P-Y-SEVERE-PAIN"
+     ]
+    },
+    {
+     "id": "P161",
+     "language": "or",
+     "sex": "M",
+     "age": 32,
+     "got": "red",
+     "rules": [
+      "ATP-T-SEVERE-PAIN",
+      "IITT-A-Y-SEVERE-PAIN"
+     ]
+    },
+    {
+     "id": "P162",
+     "language": "or",
+     "sex": "F",
+     "age": 21,
+     "got": "red",
+     "rules": [
+      "ATP-T-SEVERE-PAIN",
+      "IITT-A-Y-SEVERE-PAIN"
+     ]
+    }
+   ]
+  }
+ ]
+}

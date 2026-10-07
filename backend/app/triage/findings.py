@@ -32,6 +32,9 @@ FINDINGS: dict[str, tuple[str, str]] = {
     "haemoptysis": ("Coughing blood", SYMPTOM),
     "incomplete_sentences": ("Cannot speak full sentences", SIGN),
     "wheeze": ("Audible wheeze", SIGN),
+    "asthma": ("Known asthma", SYMPTOM),
+    "jaundice": ("Yellow eyes or skin (jaundice)", SYMPTOM),
+    "haematuria": ("Blood in the urine", SYMPTOM),
     "stridor": ("Stridor / noisy breathing", SIGN),
     "respiratory_distress": ("Respiratory distress (accessory muscles, flaring, grunting)", SIGN),
     "chest_indrawing": ("Lower chest indrawing", SIGN),
@@ -88,6 +91,7 @@ FINDINGS: dict[str, tuple[str, str]] = {
     # trauma and exposures
     "injury": ("Injury", SYMPTOM),
     "burn": ("Burn", SYMPTOM),
+    "burn_major": ("Burn of face, neck, both arms or legs, or most of the body", SYMPTOM),
     "head_injury": ("Head injury", SYMPTOM),
     "fall_from_height": ("Fall from height", SYMPTOM),
     "road_traffic_high_risk": ("Road crash — high-risk mechanism", SYMPTOM),
@@ -133,7 +137,7 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "breathless": {
         "en": [r"breathless\w*", r"short(ness)? of breath", r"(difficulty|trouble|problem) (in )?breathing", r"(can\'?t|cannot|can not|unable to|not able to) breathe", r"breathing (problem|difficulty|trouble)", r"saans (lene )?(me|mein) (taklif|dikkat|pareshani)", r"saans phool"],
         "hi": ["सांस लेने में", "सांस फूल", "दम फूल", "सांस … तकलीफ", "सांस … दिक्कत", "सांस … परेशानी", "सांस नहीं ले पा"],
-        "or": ["ନିଶ୍ୱାସ … କଷ୍ଟ", "ଶ୍ୱାସ … କଷ୍ଟ", "ଶ୍ୱାସକଷ୍ଟ", "ନିଶ୍ୱାସ ନେଇ ପାରୁନି", "ନିଶ୍ୱାସ ନେଇପାରୁନି", "ଦମ୍ ଫୁଲୁଛି", "ଦମ୍ … ଲାଗୁଛି"],
+        "or": ["ନିଶ୍ୱାସ … କଷ୍ଟ", "ଶ୍ୱାସ … କଷ୍ଟ", "ଶ୍ୱାସକଷ୍ଟ", "ନିଶ୍ୱାସ ନେଇ ପାରୁନି", "ନିଶ୍ୱାସ ନେଇପାରୁନି", "ନିଶ୍ୱାସ ଫୁଲୁଛି", "ନିଶ୍ୱାସ ଫୁଲେ", "ଦମ୍ ଫୁଲୁଛି", "ଦମ୍ … ଲାଗୁଛି"],
     },
     "cough": {"en": [r"cough\w*", r"khansi"], "hi": ["खांसी", "^खासी"], "or": ["^କାଶ"]},
     "haemoptysis": {"en": [r"cough\w* (up )?blood", r"blood in (the )?(sputum|phlegm|cough)", r"ha?emoptysis"], "hi": ["खांसी में खून", "बलगम में खून"], "or": ["କାଶରେ ରକ୍ତ"]},
@@ -159,11 +163,11 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "lethargy": {"en": [r"letharg\w*", r"(very|abnormally|unusually) sleepy", r"floppy"], "hi": ["सुस्त", "बहुत नींद"], "or": ["ଅଳସୁଆ", "ବହୁତ ନିଦ"]},
     "irritable": {"en": [r"(continuously|constantly|very) (irritable|crying)", r"restless", r"inconsolable"], "hi": ["बेचैन", "लगातार रो"], "or": ["ଅସ୍ଥିର"]},
     "seizure": {"en": [r"seizures?", r"fits", r"had an? fit", r"(fit|fits) (of|aa)", r"convuls\w*", r"jerking", r"epilep\w*", r"mirgi", r"daura"], "hi": ["दौरा पड़", "दौरे", "मिर्गी", "झटके"], "or": ["ମିର୍ଗୀ", "ଝଟକା", "ଝିଙ୍କି"]},
-    "one_sided_weakness": {"en": [r"one[- ]sided (weakness|numbness|paralysis)", r"(weakness|numbness|paralysis) (on|of) (one|the (left|right)) side", r"(face|mouth) (droop\w*|deviat\w*)", r"slurred speech", r"stroke", r"paralys\w*", r"lakwa"], "hi": ["लकवा", "एक तरफ कमजोरी", "मुंह टेढ़ा", "जुबान लड़खड़"], "or": ["ପକ୍ଷାଘାତ", "ଗୋଟିଏ ପଟ ଦୁର୍ବଳ", "ମୁହଁ ବାଙ୍କି"]},
-    "limb_weakness": {"en": [r"(arm|leg|hand|limb) (is |became )?(weak|numb)", r"weakness (in|of) (the |my )?(arm|leg|hand|limb)", r"can'?t (move|lift) (the |my )?(arm|leg|hand)"], "hi": ["हाथ में कमजोरी", "पैर में कमजोरी", "हाथ नहीं उठ"], "or": ["ହାତ ଦୁର୍ବଳ", "ଗୋଡ଼ ଦୁର୍ବଳ"]},
+    "one_sided_weakness": {"en": [r"one[- ]sided (weakness|numbness|paralysis)", r"(weakness|numbness|paralysis) (on|of) (one|the (left|right)) side", r"(face|mouth) (droop\w*|deviat\w*)", r"slurred speech", r"stroke", r"paralys\w*", r"lakwa"], "hi": ["लकवा", "एक तरफ कमजोरी", "मुंह टेढ़ा", "जुबान लड़खड़", "बोली लड़खड़", "बोलने में लड़खड़", "आवाज लड़खड़"], "or": ["ପକ୍ଷାଘାତ", "ଗୋଟିଏ ପଟ ଦୁର୍ବଳ", "ମୁହଁ ବାଙ୍କି", "କଥା ଅସ୍ପଷ୍ଟ", "କଥା ଜଡ଼ି"]},
+    "limb_weakness": {"en": [r"(arm|leg|hand|limb) (is |became )?(weak|numb)", r"weakness (in|of) (the |my )?(arm|leg|hand|limb)", r"can'?t (move|lift) (the |my )?(arm|leg|hand)"], "hi": ["हाथ में कमजोरी", "पैर में कमजोरी", "हाथ नहीं उठ", "हाथ … कमजोर", "पैर … कमजोर"], "or": ["ହାତ … ଦୁର୍ବଳ", "ଗୋଡ଼ … ଦୁର୍ବଳ"]},
     "weakness_general": {"en": [r"(sudden|acute|extreme|severe) weakness", r"(too|very) weak to (walk|stand)", r"can'?t (walk|stand)"], "hi": ["बहुत कमजोरी", "चल नहीं पा"], "or": ["ବହୁତ ଦୁର୍ବଳ", "ଚାଲି ପାରୁନି"]},
     "headache": {"en": [r"head ?ache", r"pain in (the |my )?head", r"sir ?dard"], "hi": ["सिरदर्द", "सरदर्द", "सिर … दर्द", "^सर$ … दर्द"], "or": ["ମୁଣ୍ଡବିନ୍ଧ", "ମୁଣ୍ଡ … ବିନ୍ଧ", "ମୁଣ୍ଡ … ଯନ୍ତ୍ରଣା", "ମୁଣ୍ଡ … ଦରଜ", "ମୁଣ୍ଡ … ଦରଦ", "ମୁଣ୍ଡ … ଦର୍ଦ"]},
-    "headache_sudden": {"en": [r"(sudden|thunderclap|worst)[\w ]{0,20}headache", r"headache[\w ]{0,15}(sudden(ly)?|worst (ever|of my life))"], "hi": ["अचानक तेज सिरदर्द", "अचानक सिर दर्द"], "or": ["ହଠାତ୍ ମୁଣ୍ଡବିନ୍ଧା"]},
+    "headache_sudden": {"en": [r"(sudden|thunderclap|worst)[\w ]{0,20}headache", r"headache[\w ]{0,15}(sudden(ly)?|worst (ever|of my life))"], "hi": ["अचानक तेज सिरदर्द", "अचानक सिर दर्द", "अचानक … सिर", "सबसे तेज़ सिर", "सबसे तेज सिर", "सबसे बुरा सिर"], "or": ["ହଠାତ୍ ମୁଣ୍ଡବିନ୍ଧା", "ହଠାତ୍ … ମୁଣ୍ଡ", "ହଠାତ … ମୁଣ୍ଡ", "ସବୁଠୁ … ମୁଣ୍ଡ"]},
     "visual_disturbance": {"en": [r"blur\w* vision", r"vision (is )?blur\w*", r"seeing (spots|flashes|lights|double)", r"double vision", r"(loss of|lost|sudden) vision", r"can'?t see", r"dhundh?la"], "hi": ["धुंधला", "आंखों के आगे अंधेरा", "दिखाई नहीं"], "or": ["ଝାପ୍ସା", "ଦେଖିପାରୁନି"]},
     "stiff_neck": {"en": [r"stiff neck", r"neck (stiffness|is stiff)", r"can'?t bend (the |my )?neck"], "hi": ["गर्दन अकड़", "गर्दन में जकड़न"], "or": ["ବେକ ଟାଣି"]},
     "agitated": {"en": [r"agitat\w*", r"violent", r"aggressive"], "hi": ["हिंसक", "आक्रामक"], "or": ["ହିଂସ୍ର"]},
@@ -172,7 +176,7 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "abdominal_pain_sudden": {"en": [r"sudden[\w ]{0,20}(abdominal|stomach|belly) pain", r"(abdominal|stomach|belly) pain[\w ]{0,15}sudden(ly)?"], "hi": ["अचानक पेट में दर्द", "अचानक पेट दर्द"], "or": ["ହଠାତ୍ ପେଟ"]},
     "upper_abdominal_pain": {"en": [r"upper (abdominal|stomach|belly) pain", r"pain (in|at) (the )?upper (abdomen|stomach)", r"epigastric", r"right upper"], "hi": ["पेट के ऊपर दर्द", "ऊपरी पेट"], "or": ["ପେଟ ଉପରେ"]},
     "vomiting": {"en": [r"vomit\w*", r"throwing up", r"ulti"], "hi": ["उल्टी", "उलटी"], "or": ["ବାନ୍ତି"]},
-    "vomits_everything": {"en": [r"vomits? everything", r"can'?t keep (anything|food|water) down", r"vomiting everything"], "hi": ["सब उल्टी", "कुछ नहीं पचता"], "or": ["ସବୁ ବାନ୍ତି"]},
+    "vomits_everything": {"en": [r"vomits? everything", r"(can'?t|cannot|unable to|not able to) keep (anything|food|water) down", r"vomiting everything"], "hi": ["सब उल्टी", "कुछ नहीं पचता", "पानी भी नहीं टिक", "कुछ नहीं टिक"], "or": ["ସବୁ ବାନ୍ତି", "ପାଣି ବି ରହୁନି", "କିଛି ରହୁନି"]},
     "diarrhoea": {"en": [r"diarrh\w*", r"loose (motions?|stools?)", r"watery stools?", r"dast"], "hi": ["^दस्त$", "^दस्तों$", "लूज मोशन", "पतली टट्टी"], "or": ["ଝାଡ଼ା", "ପତଳା ଝାଡ଼ା",
                   # spoken without the final ା, as both speech engines wrote it (6 Oct); only with a "happening" verb, as ଝାଡ଼ alone is "bush"
                   "^ଝାଡ଼ ହେଉଛି", "^ଝାଡ଼ ହଉଛି", "^ଝାଡ଼ ଲାଗୁଛି", "^ଝାଡ଼ ହେଲାଣି"]},
@@ -191,8 +195,16 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "night_sweats": {"en": [r"night sweats?", r"sweat\w* (at|in the|during the) night", r"raat (ko|me|mein) paseena"], "hi": ["रात … पसीना", "रात … पसीने"], "or": ["ରାତି … ଝାଳ"]},
     "fatigue": {"en": [r"tired\w*", r"fatigue\w*", r"exhaust\w*", r"no energy", r"thak(an|aan|awat|a hua|i hui)"], "hi": ["थकान", "थकावट", "थका हुआ", "थकी हुई", "थक जा"], "or": ["କ୍ଳାନ୍ତ", "କ୍ଲାନ୍ତ", "ଥକା ଲାଗୁ", "ଥକି ଯାଉ"]},
     "pain": {"en": [r"pain\w*", r"ache", r"dard", r"hurts?"], "hi": ["दर्द"], "or": ["ଯନ୍ତ୍ରଣା", "ବିନ୍ଧା", "ବିନ୍ଧୁ", "ଦରଜ", "ଦରଦ", "ଦର୍ଦ"]},
-    "injury": {"en": [r"injur\w*", r"wound\w*", r"\bcut\b", r"hurt (my|his|her)", r"accident", r"fell (down|off)", r"chot"], "hi": ["चोट", "घाव", "दुर्घटना"], "or": ["ଆଘାତ", "କ୍ଷତ", "ଦୁର୍ଘଟଣା"]},
-    "burn": {"en": [r"burn\w*", r"scald\w*", r"jal (gaya|gayi|gaye)"], "hi": ["जल गया", "जल गई", "जलना"], "or": ["ପୋଡ଼ି", "ଜଳିଗଲା"]},
+    "injury": {"en": [r"injur\w*", r"wound\w*", r"\bcut\b", r"hurt (my|his|her)", r"accident", r"fell (down|off)", r"chot"], "hi": ["चोट", "घाव", "दुर्घटना", "कट गया", "कट गई", "कट गयी", "छोटा कट"], "or": ["ଆଘାତ", "କ୍ଷତ", "ଦୁର୍ଘଟଣା", "କଟିଗଲା", "କଟି ଯାଇଛି"]},
+    # "burning" is a sensation (in the chest, while passing urine); a burn is burn / burns / burnt / burned
+    "burn": {"en": [r"burn(s|t|ed)?\b", r"scald\w*", r"jal (gaya|gayi|gaye)"], "hi": ["जल गया", "जल गई", "जल गए", "जल गयी", "झुलस", "जलना"], "or": ["ପୋଡ଼ି", "ଜଳିଗଲା"]},
+    # IITT reference card, major burns: face or neck, circumferential, or more than 15 % of the body (both arms are 18 %)
+    "burn_major": {"en": [r"burn\w*\b.{0,60}\b(face|neck|both (arms|legs|hands)|whole body|all over)", r"\b(face|neck|both (arms|legs|hands)|whole body)\b.{0,40}\bburn(s|t|ed)?\b"],
+                   "hi": ["दोनों हाथ … जल ग", "दोनों पैर … जल ग", "चेहरा … जल ग", "चेहरे … जल ग", "गर्दन … जल ग", "पूरा शरीर … जल ग", "पूरे शरीर … जल ग", "दोनों हाथ … झुलस", "चेहरा … झुलस"],
+                   "or": ["ଦୁଇ ହାତ … ପୋଡ଼", "ଦୁଇ ଗୋଡ଼ … ପୋଡ଼", "ମୁହଁ … ପୋଡ଼", "ବେକ … ପୋଡ଼", "ସାରା ଦେହ … ପୋଡ଼"]},
+    "asthma": {"en": [r"asthma\w*", r"\bdama\b"], "hi": ["दमा", "अस्थमा"], "or": ["ଶ୍ୱାସ ରୋଗ", "ଆଜମା", "ଆସ୍ଥମା", "ହାପଜ୍ୱର"]},
+    "jaundice": {"en": [r"jaundice\w*", r"yellow(ish|ness)? (of )?(the )?(eyes|skin)", r"(eyes|skin) (are |is |turned |look )?yellow", r"piliya"], "hi": ["पीलिया", "आंखें पीली", "आँखें पीली", "आंखों में पीला"], "or": ["ଜଣ୍ଡିସ", "ଆଖି ହଳଦିଆ", "କାମଳ"]},
+    "haematuria": {"en": [r"blood (in|with) (the |my )?(urine|pee)", r"(bloody|red) urine", r"ha?ematuria", r"urine (is )?(red|bloody)"], "hi": ["पेशाब में खून", "पेशाब … खून", "पेशाब लाल"], "or": ["ପରିସ୍ରାରେ ରକ୍ତ", "ପରିସ୍ରା … ରକ୍ତ"]},
     "head_injury": {"en": [r"head (injury|trauma)", r"hit (the |his |her |my )?head", r"injur\w* (to|on) (the )?head", r"fainted / head injury"], "hi": ["सिर में चोट"], "or": ["ମୁଣ୍ଡରେ ଆଘାତ"]},
     "fall_from_height": {"en": [r"fell (from|off) (a |the )?(tree|roof|terrace|height|building|ladder|scaffold\w*|stairs)", r"fall from (a |the )?(height|tree|roof|terrace|building|ladder)"], "hi": ["पेड़ से गिर", "छत से गिर", "ऊंचाई से गिर"], "or": ["ଗଛରୁ ପଡ଼ି", "ଛାତରୁ ପଡ଼ି", "ଉଚ୍ଚରୁ ପଡ଼ି"]},
     "road_traffic_high_risk": {"en": [r"(hit|knocked down|run over) by (a |the )?(car|bus|truck|vehicle|lorry|bike)", r"(high[- ]speed|head[- ]on) (crash|collision|accident)", r"thrown (from|off) (the )?(vehicle|bike|motorcycle)", r"trapped in (the )?(car|vehicle)", r"without (a )?(seat ?belt|helmet)"], "hi": ["गाड़ी ने टक्कर", "ट्रक ने टक्कर"], "or": ["ଗାଡ଼ି ଧକ୍କା", "ଟ୍ରକ୍ ଧକ୍କା"]},
@@ -204,7 +216,7 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "drowning_hanging_electrocution": {"en": [r"drown\w*", r"hanging", r"hanged", r"electr\w* (shock|cution)", r"electrocut\w*", r"current (laga|lagi|lag gaya)", r"lightning"], "hi": ["डूब", "फांसी", "करंट लग", "बिजली गिर"], "or": ["ବୁଡ଼ି", "ଫାଶୀ", "କରେଣ୍ଟ", "ବିଜୁଳି"]},
     "snake_bite": {"en": [r"snake ?bite", r"bitten by (a )?snake", r"snake bit", r"saanp (ne )?kaat", r"sap (ne )?kaat"], "hi": ["सांप ने काट", "साँप ने काट", "सर्पदंश", "सांप काट"], "or": ["ସାପ କାମୁଡ଼ି", "ସାପ କାମୁଡ଼ା", "ସର୍ପଦଂଶନ"]},
     "animal_bite": {"en": [r"(dog|monkey|cat|animal|rat|jackal) ?bite", r"bitten by (a |the )?(dog|monkey|cat|animal|rat|jackal)", r"kutte ne kaat"], "hi": ["कुत्ते ने काट", "बंदर ने काट"], "or": ["କୁକୁର କାମୁଡ଼ି", "ମାଙ୍କଡ଼ କାମୁଡ଼ି"]},
-    "poisoning": {"en": [r"poison\w*", r"overdose", r"swallow\w* (pesticide|kerosene|acid|bleach|tablets|pills)", r"pesticide", r"insecticide", r"kerosene", r"(chemical|gas) (exposure|leak|inhal\w*)", r"drank (pesticide|poison|acid)", r"zeher"], "hi": ["जहर", "ज़हर", "कीटनाशक", "मिट्टी का तेल पी"], "or": ["ବିଷ ଖାଇ", "ବିଷ ପିଇ", "ବିଷାକ୍ତ", "କୀଟନାଶକ"]},
+    "poisoning": {"en": [r"poison\w*", r"overdose", r"swallow\w* (pesticide|kerosene|acid|bleach|tablets|pills)", r"pesticide", r"insecticide", r"(drank|drunk|swallowed|ingested) kerosene",r"(chemical|gas) (exposure|leak|inhal\w*)", r"drank (pesticide|poison|acid)", r"zeher"], "hi": ["जहर", "ज़हर", "कीटनाशक", "मिट्टी का तेल पी"], "or": ["ବିଷ ଖାଇ", "ବିଷ ପିଇ", "ବିଷାକ୍ତ", "କୀଟନାଶକ"]},
     "needle_stick": {"en": [r"needle ?(stick|prick)", r"pricked by (a |the )?(used )?needle"], "hi": ["सुई चुभ"], "or": ["ଛୁଞ୍ଚି ଫୋଡ଼ି"]},
     "allergic_reaction": {"en": [r"allerg\w*", r"anaphyla\w*", r"hives all over", r"reaction (to|after) (the )?(injection|medicine|tablet|food|sting)", r"(bee|wasp) sting"], "hi": ["एलर्जी"], "or": ["ଆଲର୍ଜି"]},
     "sexual_assault": {"en": [r"sexual(ly)? assault\w*", r"\braped?\b", r"molest\w*"], "hi": ["बलात्कार", "यौन उत्पीड़न"], "or": ["ଧର୍ଷଣ", "ଯୌନ ନିର୍ଯାତନା"]},
@@ -285,7 +297,7 @@ ANSWERS: list[tuple[str, str, dict[str, bool]]] = [
 # Negation scope: at most two words, and never across "and"/"with"/"aur" (a false negation hides a
 # symptom; a missed negation only over-triages, so the window is deliberately short).
 NEGATION_PRE = re.compile(r"\b(no|not|never|denies|denied|without|absent|free of|negative for|nahi|nahin)\b((?!\s+(and|with|aur|plus)\b)\s+\w+){0,2}\s*$")
-NEGATION_POST_EN = re.compile(r"^\s*(\w+\s+){0,2}(nahi|nahin|nai|na)\b")
+NEGATION_POST_EN = re.compile(r"^\s*(\w+\s+){0,2}(nahi|nahin|nai|na)\b|^\s*(has |had )?(stopped|settled)\b")  # "bleeding stopped"
 NEGATION_POST_INDIC = ("नहीं", "नही", "ନାହିଁ", "ନାହି", "ନାଇଁ", "ନାଇ", "ହେଉନି", "ହୋଇନି", "ହଉନି")
 CLAUSE_SPLIT = re.compile(r"[.;!?।|\n]|,\s|\bbut\b|\bhowever\b|\blekin\b|\bpar\b|लेकिन|परंतु|किंतु|ପରନ୍ତୁ|କିନ୍ତୁ|ମାତ୍ର")
 

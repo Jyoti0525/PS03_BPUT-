@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "ur",
+  "clips": 25,
+  "audio_seconds": 288.4,
+  "wer": 0.252,
+  "cer": 0.12,
+  "real_time_factor": 0.25,
+  "process_private_gb": 3.35,
+  "process_peak_working_set_gb": 2.71,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 61.3,
+   "bleu": 35.3
+  }
+ },
+ "clips": [
+  {
+   "file": "10362129035333824462.wav",
+   "reference": "یہ پارک 19،500 کلومیٹر رقبے پر محیط ہے اور یہ 14 مختلف ماحولیاتی علاقوں میں تقسیم کیا ہوا ہے، جن میں سے ہر علاقہ ایک الگ جنگلی حیات کے لیے سازگار ہے۔",
+   "heard": "یہ پارک انیس ہزار پانچ سو کلومییٹر رقبے پر محیط ہے یہ چودہ مختلف ماحولیاتی علاقوں میں تقسیم ہوا ہے جن میں سے ہر ایک کی الگ جنگلی حیات کے لئے کارساز ہے",
+   "wer": 0.438,
+   "confidence": 0.955,
+   "english": "The park covers an area of nineteen thousand five hundred kilometres and is divided into fourteen different ecoregions, each of which has its own unique wildlife habitat.",
+   "english_reference": "The park covers 19,500 km² and is divided in 14 different ecozones, each supporting different wildlife."
+  },
+  {
+   "file": "11282148400168627969.wav",
+   "reference": "جب ان سے اپنی رائے پوچھی گئی، تو ملر نے کہا، \"سماعت کے دوران مائیک بہت زیادہ بات کرتا ہے ... میں تیار ہو رہا تھا، اس لیے میں واقعی نہیں سن پایا کہ وہ کیا کہہ رہا تھا۔\"",
+   "heard": "جب ان سے اپنی رائے پوچھی گئی تو ملر نے کہا سماعت کے دوران مائیک بہت زیادہ بات کرتا ہے میں تیار ہو رہا تھا اس لئے میں واقعی نہیں سن پایا کہ وہ کیا کہہ رہا تھا",
+   "wer": 0.132,
+   "confidence": 0.932,
+   "english": "When asked for his opinion, Miller said Mike talks too much during the hearing. I was getting ready so I didn't really hear what he was saying.",
+   "english_reference": "When asked for comment, Miller said, \"Mike talks a lot during the hearing...I was getting ready so I wasn't really hearing what he was saying.\""
+  },
+  {
+   "file": "11957570857488846908.wav",
+   "reference": "ہم ماحول کے ساتھ زیادہ دوستانہ زندگی گزار سکتے ہیں، ہم ماحولیاتی تحریک میں شامل ہوسکتے ہیں، اور ہم سرگرم رکن بن سکتے ہیں تاکہ کسی حد تک مستقبل کی تکالیف کو کم کیا جاسکے۔",
+   "heard": "ہم ماحول کے ساتھ زیادہ دوستانہ زدیر گزار سکتے ہیں ہم ماحولیاتی تحریک میں شامل ہو سکتے ہیں اور ہم سرگرم رکن بن سکتے ہیں تاکہ کسی حد تک مستقبل کی تکلیف کو کم کیا جاسکے",
+   "wer": 0.2,
+   "confidence": 0.949,
+   "english": "We can be more environmentally friendly, we can be involved in the environmental movement, and we can be active members to reduce future suffering to some extent.",
+   "english_reference": "We can start living more friendly to the environment, we can join to the environmental movement, and we can even be activists in order to reduce the future suffering in some degree."
+  },
+  {
+   "file": "12177559229588597057.wav",
+   "reference": "نقطہ پر اس نے خبردار کیا کہ کوئی بھی گارنٹی نہیں دے سکتا کہ عراق میں اس نقطہ پر کوئی بھی خُطۃ عمل طائفی جنگ، متنامی عُنف، یا عام خلفشار کو روک سکتا ہے۔",
+   "heard": "نقطہ پر اس نے خبردار کیا کہ کوئی بھی گارنٹی نہیں دے سکتا کہ عراق میں اس نقطہ پر کوئی بھی خطہ عمل طائپ کی جنگ متنامی عنف یا عام خلفشار کو روک سکتا ہے",
+   "wer": 0.176,
+   "confidence": 0.948,
+   "english": "At this point he warned that no one could guarantee that any territorial action at this point in Iraq could prevent a war of attrition or general disarray.",
+   "english_reference": "It warns No one can guarantee that any course of action in Iraq at this point will stop sectarian warfare, growing violence, or a slide toward chaos."
+  },
+  {
+   "file": "13224202044146426739.wav",
+   "reference": "اس نے قومی سلامتی مشیر کی حیثیت سے عالمی معاملات کو سفارتی طور پر سنبھالنے میں کارٹر کی مدد کی، جیسے کیمپ ڈیوڈ معاہدہ 1978ء، 1970ء کی دہائی کے آخر میں امریکہ اور چین کے تعلقات کو معمول پر لانا، ایرانی انقلاب، جو ایرانی یرغمال بحران 1979ء کا باعث بنا اور 1979ء میں سوویت کا افغانستان پر قبضہ۔",
+   "heard": "اس نے قومی سلامتی مشیر کی حیثیت سے عالمی معاملات کو سفارتی طور پر سنبھالنے میں کارٹر کی مدد کی جیسے کیمپ ڈیوڈ معاہدہ انیس سو ستر سے انیس سو اٹھتر کی دہائی کے آخر میں امریکہ اور چین کے تعلقات کو معمول پر ڈالا ایرانی انقلاب جو ایرانی اغمال بحران انیس سو اناسی کے بائیعث بنا اور انیس سو اناسی میں سوت کا افغانستان پر قبضہ",
+   "wer": 0.362,
+   "confidence": 0.958,
+   "english": "He helped Carter manage world affairs diplomatically as national security adviser, such as the Camp David Accords that normalized U.S.-China relations in the late 1970s, the Iranian Revolution that led to the Iranian Civil War, and Sutta's occupation of Afghanistan in 1986.",
+   "english_reference": "As NSA, he assisted Carter in diplomatically handling world affairs, such as the Camp David Accords, 1978; normalizing US–China relations thought the late 1970s; the Iranian Revolution, which led to the Iran hostage crisis, 1979; and the Soviet invasion in Afghanistan, 1979."
+  },
+  {
+   "file": "13707846126494361184.wav",
+   "reference": "یہ ایک عام طریقہ رواج پاگیا، لیکن لوہے کی وجہ سے لکڑی کی گاڑیوں کے پہیوں میں زیادہ زیبائش کی جانے لگی۔",
+   "heard": "یہ ایک عام طریقہ رواج و گیا لیکن لوہے کی وجہ سے لکڑی کی گاڑیوں کے پہیوں میں زیادہ سےبائش کی جانے لگی",
+   "wer": 0.182,
+   "confidence": 0.936,
+   "english": "This became a common practice, but due to iron, the wheels of wooden vehicles began to be over-priced.",
+   "english_reference": "This became common practice, but the iron caused more wear on the wooden wheels of the wagons."
+  },
+  {
+   "file": "13721430105567717046.wav",
+   "reference": "عرب جزیرے میں اسلام بھی لےکر آئے، اور انہوں نےکوموروز اور مایوٹ میں بڑے پیمانے پر کام کیا۔",
+   "heard": "عرب جزیرے میں اسلام بھی لے کر آئے اور انہوں نے کوموس اور مایوٹ میں بڑے پیمانے پر کام کیا",
+   "wer": 0.333,
+   "confidence": 0.946,
+   "english": "The Arabs also brought Islam to the island and worked extensively in Comos and Mayotte.",
+   "english_reference": "The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte."
+  },
+  {
+   "file": "14590242840249247391.wav",
+   "reference": "جب ان سے اپنی رائے پوچھی گئی، تو ملر نے کہا، \"سماعت کے دوران مائیک بہت زیادہ بات کرتا ہے ... میں تیار ہو رہا تھا، اس لیے میں واقعی نہیں سن پایا کہ وہ کیا کہہ رہا تھا۔\"",
+   "heard": "جب ان سے اپنی رائے پوچھی گئی تو ملر نے کہا سماعت کے دوران مائک بہت زیادہ بات کرتا ہے میں وہاں میں تیار ہو رہا تھا اس لئے میں واقعی نہیں سن پایا کہ وہ کیا کہہ رہا تھا",
+   "wer": 0.211,
+   "confidence": 0.929,
+   "english": "\"When asked for his opinion, Miller said,\" \"Mike talks a lot during the hearing, I was getting ready there so I didn't really hear what he was saying.\" \"\"",
+   "english_reference": "When asked for comment, Miller said, \"Mike talks a lot during the hearing...I was getting ready so I wasn't really hearing what he was saying.\""
+  },
+  {
+   "file": "14939203005867572743.wav",
+   "reference": "مشرقی افریقی جزیرہ بحر ہند میں ہے اور افریقہ کے مشرقی ساحل سے دور ہے۔",
+   "heard": "مشرقی افریقی جزیرہ بحر ہند میں ہیں اور افریقہ کے مشرقی ساحل سے دور ہیں",
+   "wer": 0.133,
+   "confidence": 0.96,
+   "english": "The East African islands are in the Indian Ocean and off the east coast of Africa.",
+   "english_reference": "The East African Islands are in the Indian Ocean off the eastern coast of Africa."
+  },
+  {
+   "file": "1546663420691352697.wav",
+   "reference": "این پی ڈبلو ایس اور اسپورٹنگ شوٹرس اسوسی ایشن آف آسٹریلیا (این ایس ڈبلو) انک کی شراکت میں اہل رضاکاروں کو اسپورٹنگ شوٹرس اسوسی ایشن کے ہنٹنگ پروگرام کے تحت بھرتی کیا گیا تھا۔",
+   "heard": "پی این ڈبلیو ایس اور اسپورٹنگ شوٹرس ایسوسی ایشن آف آسٹریلیا این ایس ڈبلیو ان کی شراکت میں اہل رضاکاروں کو اسپورٹنگ شوٹرس ایسوسی ایشن کی ہنٹنگ پروگرام کے تحت بھرتی کیا گیا تھا",
+   "wer": 0.265,
+   "confidence": 0.94,
+   "english": "Qualified volunteers in partnership with the PNWS and the Sporting Shooters Association of Australia NSW were recruited under the Sporting Shooters Association's hunting program.",
+   "english_reference": "In a partnership of NPWS and the Sporting Shooters Association of Australia (NSW) Inc, qualified volunteers were recruited, under the Sporting Shooters Association's hunting program."
+  },
+  {
+   "file": "1549359331696083700.wav",
+   "reference": "یہ پارک 19،500 کلومیٹر رقبے پر محیط ہے اور یہ 14 مختلف ماحولیاتی علاقوں میں تقسیم کیا ہوا ہے، جن میں سے ہر علاقہ ایک الگ جنگلی حیات کے لیے سازگار ہے۔",
+   "heard": "یہ پارک انیس ہزار پانچ سو کلومییٹر رقبے پر محیط ہے اور یہ چودہ مختلف ماحولیاتی علاقوں میں تقسیم کیا ہوا ہے جن میں سے ہر علاقہ ایک جنگلی حیات کے لئے کارسس ہے",
+   "wer": 0.344,
+   "confidence": 0.956,
+   "english": "The park covers an area of nineteen thousand five hundred kilometres and is divided into fourteen different ecoregions, each of which is a wildlife hotspot.",
+   "english_reference": "The park covers 19,500 km² and is divided in 14 different ecozones, each supporting different wildlife."
+  },
+  {
+   "file": "1564130973221653244.wav",
+   "reference": "مشرقی افریقی جزیرہ بحر ہند میں ہے اور افریقہ کے مشرقی ساحل سے دور ہے۔",
+   "heard": "مشرقی افریقی جزیرہ بحیر ہند میں ہیں اور افریقہ کے مشرقی ساحل سے دور ہے",
+   "wer": 0.2,
+   "confidence": 0.959,
+   "english": "The East African islands are in the Indian Ocean and off the east coast of Africa.",
+   "english_reference": "The East African Islands are in the Indian Ocean off the eastern coast of Africa."
+  },
+  {
+   "file": "16297327959802313202.wav",
+   "reference": "اس موسم میں بیماری کے اولین کیسز جولائی کے اواخر میں رپورٹ ہوئے۔",
+   "heard": "اس موسم میں بیماری کے اولین کیسز جولائی کے اواخر میں رپورٹ ہوئے",
+   "wer": 0.077,
+   "confidence": 0.985,
+   "english": "The first cases of the disease this season were reported in late July.",
+   "english_reference": "The first cases of the disease this season were reported in late July."
+  },
+  {
+   "file": "16399250504877067478.wav",
+   "reference": "نقطہ پر اس نے خبردار کیا کہ کوئی بھی گارنٹی نہیں دے سکتا کہ عراق میں اس نقطہ پر کوئی بھی خُطۃ عمل طائفی جنگ، متنامی عُنف، یا عام خلفشار کو روک سکتا ہے۔",
+   "heard": "نقطہ پر اس نے خبردار کیا کہ کوئی بھی گارنٹی نہیں دے سکتا کہ عراق میں اس نقطہ پر کوئی بھی خط عمل طائفی جنگ متنامی عنف یا عام حلفشار کو روک سکتا ہے",
+   "wer": 0.147,
+   "confidence": 0.962,
+   "english": "At this point, he warned, no one can guarantee that any correspondence at this point in Iraq will prevent a ceasefire or a general ceasefire.",
+   "english_reference": "It warns No one can guarantee that any course of action in Iraq at this point will stop sectarian warfare, growing violence, or a slide toward chaos."
+  },
+  {
+   "file": "16789583230684004724.wav",
+   "reference": "ہم ماحول کے ساتھ زیادہ دوستانہ زندگی گزار سکتے ہیں، ہم ماحولیاتی تحریک میں شامل ہوسکتے ہیں، اور ہم سرگرم رکن بن سکتے ہیں تاکہ کسی حد تک مستقبل کی تکالیف کو کم کیا جاسکے۔",
+   "heard": "ہم ماحول کے ساتھ زیادہ دوستانہ زندگی گُزار سکتے ہیں ہم ماحولیاتی تحریک میں شامل ہوسکتے ہیں اور ہم سرگرم رکن بن سکتے ہیں تاکہ کسی حد تک مستقبل کی تکالیف کو کم کیا جاسکے",
+   "wer": 0.114,
+   "confidence": 0.947,
+   "english": "We can live more environmentally friendly lives, we can join the environmental movement and we can be active members to reduce future suffering to some extent.",
+   "english_reference": "We can start living more friendly to the environment, we can join to the environmental movement, and we can even be activists in order to reduce the future suffering in some degree."
+  },
+  {
+   "file": "17634228829488695515.wav",
+   "reference": "عرب جزیرے میں اسلام بھی لےکر آئے، اور انہوں نےکوموروز اور مایوٹ میں بڑے پیمانے پر کام کیا۔",
+   "heard": "عرب جزیرے میں اسلام بھی لے کر آئے اور انہوں نے کومروس اور مایوت میں بڑے پیمانے پر کام کیا",
+   "wer": 0.389,
+   "confidence": 0.948,
+   "english": "The Arabs also brought Islam to the island and worked extensively in the Comoros and Mayut.",
+   "english_reference": "The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte."
+  },
+  {
+   "file": "2603741376622467820.wav",
+   "reference": "یہ پارک 19،500 کلومیٹر رقبے پر محیط ہے اور یہ 14 مختلف ماحولیاتی علاقوں میں تقسیم کیا ہوا ہے، جن میں سے ہر علاقہ ایک الگ جنگلی حیات کے لیے سازگار ہے۔",
+   "heard": "یہ پارک انیس ہزار پانچ سو کلومییٹر رقبے پر محیط ہے اور یہ چودہ مختلف ماحولیاتی علاقوں میں تقسیم کیا ہوا ہے جن میں سے ہر ایک الگ جنگلی حیات کے لئے کارساز ہے",
+   "wer": 0.344,
+   "confidence": 0.959,
+   "english": "The park covers an area of nineteen thousand five hundred kilometres and is divided into fourteen different ecoregions, each of which is home to distinct wildlife.",
+   "english_reference": "The park covers 19,500 km² and is divided in 14 different ecozones, each supporting different wildlife."
+  },
+  {
+   "file": "4507004131605517476.wav",
+   "reference": "این پی ڈبلو ایس اور اسپورٹنگ شوٹرس اسوسی ایشن آف آسٹریلیا (این ایس ڈبلو) انک کی شراکت میں اہل رضاکاروں کو اسپورٹنگ شوٹرس اسوسی ایشن کے ہنٹنگ پروگرام کے تحت بھرتی کیا گیا تھا۔",
+   "heard": "این پی ڈبلیو ایس اسپورڈنگ شوٹرز ایسوسی ایشن آف آسٹریلیا این ایس ڈبلیو انک کی شراکت میں اہل رضاکاروں کو اسپارڈنگ شوٹرز ایسوسی ایشن کے ہنٹنگ پروگرام کے تحت بھرتی کیا گیا تھا",
+   "wer": 0.294,
+   "confidence": 0.948,
+   "english": "Eligible volunteers were recruited under the Sporting Shooters Association's hunting program in partnership with the NPWS Sporting Shooters Association of Australia NSW Inc.",
+   "english_reference": "In a partnership of NPWS and the Sporting Shooters Association of Australia (NSW) Inc, qualified volunteers were recruited, under the Sporting Shooters Association's hunting program."
+  },
+  {
+   "file": "5328395665040936200.wav",
+   "reference": "اس نے قومی سلامتی مشیر کی حیثیت سے عالمی معاملات کو سفارتی طور پر سنبھالنے میں کارٹر کی مدد کی، جیسے کیمپ ڈیوڈ معاہدہ 1978ء، 1970ء کی دہائی کے آخر میں امریکہ اور چین کے تعلقات کو معمول پر لانا، ایرانی انقلاب، جو ایرانی یرغمال بحران 1979ء کا باعث بنا اور 1979ء میں سوویت کا افغانستان پر قبضہ۔",
+   "heard": "اس نے قومی سلامتی مشیر کی حیثیت سے عالمی معاملات کو سفارتی طور پر سنبھالنے میں کوارٹر کی مدد کی جیسے کیمپ ڈیوڈ معاہدہ انیس سو اٹھتر سے انیس سو ستر کی دہائی کے آخر میں امریکہ اور چین کے تعلقات کو معمول پر لانا ایرانی انقلاب جو ایرانی یرغمال بحران انیس سو انسی کا باعث بنا اور انیس سو انسی میں سوید کا افغانستان پر قبضہ",
+   "wer": 0.328,
+   "confidence": 0.969,
+   "english": "He helped the quarter in its diplomatic handling of global affairs as national security adviser, such as the Camp David Accords, the normalization of US-China relations in the late 1970s, the Iranian Revolution that led to the Iranian hostage crisis, and the Suid occupation of Afghanistan in the 1970s.",
+   "english_reference": "As NSA, he assisted Carter in diplomatically handling world affairs, such as the Camp David Accords, 1978; normalizing US–China relations thought the late 1970s; the Iranian Revolution, which led to the Iran hostage crisis, 1979; and the Soviet invasion in Afghanistan, 1979."
+  },
+  {
+   "file": "6764570223182014636.wav",
+   "reference": "این پی ڈبلو ایس اور اسپورٹنگ شوٹرس اسوسی ایشن آف آسٹریلیا (این ایس ڈبلو) انک کی شراکت میں اہل رضاکاروں کو اسپورٹنگ شوٹرس اسوسی ایشن کے ہنٹنگ پروگرام کے تحت بھرتی کیا گیا تھا۔",
+   "heard": "پی ایس ڈبلیو ایس او اسپورٹنگ شوٹرز ایسوسی ایشن آف آسٹریلیا این ایس ڈبلیو انک کی شراکت میں اہل رضاکاروں کو اسپورٹنگ شوٹرز ایسوسی ایشن کے ہنٹنگ پروگرام کے تحت بھرتی کیا گیا تھا",
+   "wer": 0.294,
+   "confidence": 0.962,
+   "english": "Eligible volunteers were recruited under the Sporting Shooters Association's hunting program in partnership with the PSWSO Sporting Shooters Association of Australia NSW Inc.",
+   "english_reference": "In a partnership of NPWS and the Sporting Shooters Association of Australia (NSW) Inc, qualified volunteers were recruited, under the Sporting Shooters Association's hunting program."
+  },
+  {
+   "file": "7403792130098535949.wav",
+   "reference": "مشرقی افریقی جزیرہ بحر ہند میں ہے اور افریقہ کے مشرقی ساحل سے دور ہے۔",
+   "heard": "مشرقی افریقی جزیرہ بحر ہند میں ہے اور افریقہ کے شمال ساحل سے دور ہے",
+   "wer": 0.133,
+   "confidence": 0.967,
+   "english": "The East African island is in the Indian Ocean and off the northern coast of Africa.",
+   "english_reference": "The East African Islands are in the Indian Ocean off the eastern coast of Africa."
+  },
+  {
+   "file": "7578294615762591907.wav",
+   "reference": "اس موسم میں بیماری کے اولین کیسز جولائی کے اواخر میں رپورٹ ہوئے۔",
+   "heard": "اس موسم میں بیماری کے اولین کیسز جولائی کے اوخر میں رپورٹ ہوئے",
+   "wer": 0.154,
+   "confidence": 0.979,
+   "english": "The first cases of the disease this season were reported in late July.",
+   "english_reference": "The first cases of the disease this season were reported in late July."
+  },
+  {
+   "file": "833305250583810251.wav",
+   "reference": "امیزن سطح زمین پر سب سے چوڑا دریا بھی ہے۔ کہیں کہیں اس کی چوڑائی چھ میل ہے۔",
+   "heard": "امیزن سطح زمین پر سب سے چوڑا دریا بھی ہے کہیں کہیں اس کی چوڑائی چھ میل ہے",
+   "wer": 0.111,
+   "confidence": 0.947,
+   "english": "The Amazon is also the widest river on Earth and is six miles wide.",
+   "english_reference": "The Amazon is also the widest river on Earth, at times six miles wide."
+  },
+  {
+   "file": "841029133484546057.wav",
+   "reference": "یہ ایک عام طریقہ رواج پاگیا، لیکن لوہے کی وجہ سے لکڑی کی گاڑیوں کے پہیوں میں زیادہ زیبائش کی جانے لگی۔",
+   "heard": "یہ ایک عام طریقہ رواج پا گیا لیکن لوہے کی وجہ سے لکڑی کی گاڑیوں کی پہیوں میں زیادہ زبائش کی جانے لگی",
+   "wer": 0.227,
+   "confidence": 0.959,
+   "english": "This became a common practice, but iron became more common in wooden car wheels.",
+   "english_reference": "This became common practice, but the iron caused more wear on the wooden wheels of the wagons."
+  },
+  {
+   "file": "8549146832122906564.wav",
+   "reference": "عرب جزیرے میں اسلام بھی لےکر آئے، اور انہوں نےکوموروز اور مایوٹ میں بڑے پیمانے پر کام کیا۔",
+   "heard": "عرب جزیرے میں اسلام بھی لے کر آئے اور انہوں نے کوموروز اور مایوٹ میں بڑے پیمانے پر کام کیا",
+   "wer": 0.333,
+   "confidence": 0.956,
+   "english": "Arabs also brought Islam to the island and worked extensively in the Comoros and Mayotte.",
+   "english_reference": "The Arabs also brought Islam to the lands, and it took in a big way in the Comoros and Mayotte."
+  }
+ ]
+}

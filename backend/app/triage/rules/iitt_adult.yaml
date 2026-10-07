@@ -72,6 +72,11 @@ rules:
     urgency: red
     source: iitt_card
     when: { all: [ { finding: burn }, { age_years: [gt, 70] } ] }
+  - id: IITT-A-MAJOR-BURN
+    description: Major burn — face or neck, circumferential, or more than 15 % of the body (both arms are 18 %)
+    urgency: red
+    source: iitt_card
+    when: { all: [ { finding: burn }, { finding: burn_major } ] }
   - id: IITT-A-POISONING
     description: Poisoning / ingestion or dangerous chemical exposure
     urgency: red

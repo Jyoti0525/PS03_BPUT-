@@ -1,0 +1,15 @@
+# Follow-up flags. These never change the colour: no published triage protocol makes them urgent, but each
+# needs an action at this visit or soon, so the note shows it to the health worker. Every flag cites its source; `local` marks a facility practice, not a guideline.
+followups:
+  - id: FU-HTN-STAGE2
+    description: BP 160/100 or above without symptoms — start or step up treatment at this visit and recheck within 1–2 weeks
+    source: ihci
+    when: { any: [ { vital_if_measured: [bp_systolic, gte, 160] }, { vital_if_measured: [bp_diastolic, gte, 100] } ] }
+  - id: FU-JAUNDICE
+    description: Yellow eyes or skin — liver function tests and a doctor review this week
+    source: local
+    when: { finding: jaundice }
+  - id: FU-HAEMATURIA
+    description: Blood in the urine — urine test and a doctor review this week
+    source: local
+    when: { finding: haematuria }

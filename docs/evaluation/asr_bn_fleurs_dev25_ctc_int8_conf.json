@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "bn",
+  "clips": 25,
+  "audio_seconds": 278.7,
+  "wer": 0.115,
+  "cer": 0.036,
+  "real_time_factor": 0.272,
+  "process_private_gb": 4.01,
+  "process_peak_working_set_gb": 2.23,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 58.1,
+   "bleu": 32.2
+  }
+ },
+ "clips": [
+  {
+   "file": "10568480622240220798.wav",
+   "reference": "আসল জনসংখ্যার পরিবর্তন একেবারেই হয়নি, এখনও তাদের আগের মতো একই অভিযোজনের প্রয়োজন হয়।",
+   "heard": "আসল জনসংখ্যার পরিবর্তন একেবারেই হয়নি এখনও তাদের আগের মতো একই অভিযোজনের প্রয়োজন হয়",
+   "wer": 0.0,
+   "confidence": 0.941,
+   "english": "The original populations have not changed at all and still require the same adaptations as before.",
+   "english_reference": "The original population hasn't changed at all, they still need the same adaptations as before."
+  },
+  {
+   "file": "11014815973899133823.wav",
+   "reference": "দু'ঘন্টার মধ্যে সরকারী ভবনের কাছে আরও তিনটি বোমা বিস্ফোরিত হয়েছিল।",
+   "heard": "দু ঘণ্টার মধ্যে সরকারি ভবনের কাছে আরও তিনটি বোমা বিস্ফোরিত হয়েছিল",
+   "wer": 0.182,
+   "confidence": 0.96,
+   "english": "Within two hours, three more bombs exploded near the government building.",
+   "english_reference": "Three more bombs exploded near government buildings in a period of two hours."
+  },
+  {
+   "file": "11071827028331550510.wav",
+   "reference": "এটিকে মঙ্গলবার কেটে ফেলার কথা ছিল, তবে আদালতের জরুরী রায় আসার পরে এটি বাঁচানো হয়।",
+   "heard": "এটিকে মঙ্গলবার কেটে ফেলার কথা ছিল তবে আদালতের জরুরি রায় আসার পরে এটি বাঁচানো হয়",
+   "wer": 0.067,
+   "confidence": 0.979,
+   "english": "It was due to be cut on Tuesday but was saved after the court's emergency ruling.",
+   "english_reference": "It had been scheduled to be cut down on Tuesday, but was saved after an emergency court ruling."
+  },
+  {
+   "file": "11527688246139290134.wav",
+   "reference": "যতশীঘ্র সম্ভৰ স্রোতের বাইরে চলে আসতে পারলে, আপনার সাঁতার কেটে ফেরা সাধারণত কঠিন নয়।",
+   "heard": "যত শীঘ্র সম্ভব স্রোতের বাইরে চলে আসতে পারলে আপনার সাঁতার কেটেে ফেরা সাধারণত কঠিন নয়",
+   "wer": 0.286,
+   "confidence": 0.973,
+   "english": "Getting out of the stream as soon as possible isn't usually hard to get back into your swimming.",
+   "english_reference": "As soon as you get out of the current, swimming back is no more difficult than normally."
+  },
+  {
+   "file": "11904134025735871593.wav",
+   "reference": "যতশীঘ্র সম্ভৰ স্রোতের বাইরে চলে আসতে পারলে, আপনার সাঁতার কেটে ফেরা সাধারণত কঠিন নয়।",
+   "heard": "যত শীঘ্র সম্ভব স্রোতের বাহিরে চলে আসতে পারলে আপনার সাঁতার কেটে ফেরা সাধারণত কঠিন নয়",
+   "wer": 0.286,
+   "confidence": 0.958,
+   "english": "Getting out of the stream as soon as possible isn't usually hard for you to get back into swimming.",
+   "english_reference": "As soon as you get out of the current, swimming back is no more difficult than normally."
+  },
+  {
+   "file": "1229814173981427347.wav",
+   "reference": "চক্রান্ত বিশ্লেষণ করে ফলাফল একটি পাবলিক ওয়েবসাইটে পোস্ট করা হবে।",
+   "heard": "চক্রান্ত বিশ্লেষণ করে ফলাফল একটি পাবলিক ওয়েবসাইটে প্রকাশ করা হবে",
+   "wer": 0.1,
+   "confidence": 0.974,
+   "english": "The results of the plot analysis will be published on a public website.",
+   "english_reference": "The result of plotting analysis will be posted to a public website."
+  },
+  {
+   "file": "13332943693727564966.wav",
+   "reference": "আসল জনসংখ্যার পরিবর্তন একেবারেই হয়নি, এখনও তাদের আগের মতো একই অভিযোজনের প্রয়োজন হয়।",
+   "heard": "আসল জনসংখ্যা পরিবর্তন একেবারেই হয়নি এখনও তাদের আগের মতো একই অভিযোজনের প্রয়োজন হয়",
+   "wer": 0.077,
+   "confidence": 0.948,
+   "english": "The actual population has not changed at all yet they require the same adaptation as before.",
+   "english_reference": "The original population hasn't changed at all, they still need the same adaptations as before."
+  },
+  {
+   "file": "13598542426524513377.wav",
+   "reference": "এটি চার বছরের মধ্যে মার্টলির পঞ্চম CEP।",
+   "heard": "এটি চার বছরের মধ্যে মাটলের পঞ্চম সিইপি",
+   "wer": 0.286,
+   "confidence": 0.937,
+   "english": "This is MOTL's fifth CEP in four years.",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "1399455681453606522.wav",
+   "reference": "এই নতুন পরিবেশে ভিন্ন ভিন্ন সংস্থান এবং বিভিন্ন প্রতিযোগী রয়েছে, সুতরাং বেশি শক্তিশালী প্রতিযোগী হওয়ার জন্য তাদের আগের তুলনায় ভিন্ন বৈশিষ্ট্য বা অভিযোজন প্রয়োজন হয়।",
+   "heard": "এই নতুন পরিবেশে ভিন্ন ভিন্ন সংস্থান এবং বিভিন্ন প্রতিযোগী রয়েছে সুতরাং বেশি শক্তিশালী প্রতিযোগী হওয়ার জন্য তাদের আগের তুলনায় ভিন্ন বৈশিষ্ট্য বা অভিযোজন প্রয়োজন হয়",
+   "wer": 0.0,
+   "confidence": 0.981,
+   "english": "This new environment has different resources and different competitors, so they need different features or adaptations than before in order to be more powerful competitors.",
+   "english_reference": "This new environment has different resources and different competitors, so the new population will need different features or adaptations to be a strong competitor than what they had needed before."
+  },
+  {
+   "file": "15363941654090781259.wav",
+   "reference": "মার্কিন যুক্তরাষ্ট্র জুড়ে প্রায় 400,000 সংখ্যক মাল্টিপল স্ক্লেরোসিসের (এমএস) পরিচিত ঘটনা রয়েছে যেটিকে অল্প বয়সী ও মধ্যবয়স্কদের মাঝে প্রথম সারির স্নায়বিক রোগ হিসাবে দেখা হচ্ছে।",
+   "heard": "মার্কিন যুক্তরাষ্ট্র জুড়ে প্রায় চার লাখ সংখ্যক মাল্টিপল স্েরোসিসের এমএস পরিচিত ঘটনা রয়েছে যেটিকে অল্প বয়সী ও মধ্যবয়স্কদের মাঝে প্রথম সারির স্নায়বিক রোগ হিসেবে দেখা হচ্ছে",
+   "wer": 0.154,
+   "confidence": 0.962,
+   "english": "There are about 400,000 known cases of multiple cirrhosis MS across the United States, which is seen as a leading neurological disease among young and middle-aged people.",
+   "english_reference": "Across the United States of America, there are approximately 400,000 known cases of Multiple Sclerosis (MS), leaving it as the leading neurological disease in younger and middle aged adults."
+  },
+  {
+   "file": "16196394685277854011.wav",
+   "reference": "মার্কিন যুক্তরাষ্ট্র জুড়ে প্রায় 400,000 সংখ্যক মাল্টিপল স্ক্লেরোসিসের (এমএস) পরিচিত ঘটনা রয়েছে যেটিকে অল্প বয়সী ও মধ্যবয়স্কদের মাঝে প্রথম সারির স্নায়বিক রোগ হিসাবে দেখা হচ্ছে।",
+   "heard": "মার্কিন যুক্তরাষ্ট্র জুড়ে প্রায় চার লাখ সংখ্যক মাল্টিপোল সস্কলেেরোসিসের এমেস পরিচিত ঘটনা রয়েছে যেটিকে অল্প বয়সী ও মধ্যবয়স্কদের মাঝে প্রথম সারির স্নায়বিক রোগ হিসেবে দেখা হচ্ছে",
+   "wer": 0.231,
+   "confidence": 0.941,
+   "english": "There are about 400,000 known cases of multiple sclerosis across the United States, which is seen as a leading neurological disease among young and middle-aged people.",
+   "english_reference": "Across the United States of America, there are approximately 400,000 known cases of Multiple Sclerosis (MS), leaving it as the leading neurological disease in younger and middle aged adults."
+  },
+  {
+   "file": "16251216647522660811.wav",
+   "reference": "কিছু প্রাণী, যেমন হাতি এবং জিরাফের ক্ষেত্রে, গাড়ির কাছাকাছি আসার প্রবণতা দেখা যায় এবং নির্দিষ্ট উপকরণ থাকলে সেগুলো ভালোভাবে দেখতে সাহায্য করবে।",
+   "heard": "কিছু প্রাণী যেমন হাতি এবং জিরাফের ক্ষেত্রে গাড়ির কাছাকাছি আসার প্রবণতা দেখা যায় এবং নির্দিষ্ট উপকরণ থাকলে সেগুলো ভালোভাবে দেখতে সাহায্য করবে",
+   "wer": 0.0,
+   "confidence": 0.978,
+   "english": "Some animals, such as elephants and giraffes, tend to come close to cars, and having certain materials will help them see better.",
+   "english_reference": "Some animals, such as elephants and giraffes, tend to approach closely to cars and standard equipment will allow good viewing."
+  },
+  {
+   "file": "16900188062139112054.wav",
+   "reference": "এটি চার বছরের মধ্যে মার্টলির পঞ্চম CEP।",
+   "heard": "এটি চার বছরের মধ্যে মার্টলির পঞ্চম সিই পি",
+   "wer": 0.286,
+   "confidence": 0.922,
+   "english": "This is Martley's fifth CEP in four years.",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "16955747957993030398.wav",
+   "reference": "এটিকে মঙ্গলবার কেটে ফেলার কথা ছিল, তবে আদালতের জরুরী রায় আসার পরে এটি বাঁচানো হয়।",
+   "heard": "এটিকে মঙ্গলবার কেটে ফেলার কথা ছিল তবে আদালতে জরুরি রায় আসার পরে এটি বাঁচানো হয়",
+   "wer": 0.133,
+   "confidence": 0.98,
+   "english": "It was due to be cut on Tuesday but was saved after an emergency ruling in court.",
+   "english_reference": "It had been scheduled to be cut down on Tuesday, but was saved after an emergency court ruling."
+  },
+  {
+   "file": "1723510036052163780.wav",
+   "reference": "কিছু প্রাণী, যেমন হাতি এবং জিরাফের ক্ষেত্রে, গাড়ির কাছাকাছি আসার প্রবণতা দেখা যায় এবং নির্দিষ্ট উপকরণ থাকলে সেগুলো ভালোভাবে দেখতে সাহায্য করবে।",
+   "heard": "কিছু প্রাণী যেমন হাতি এবং জিরাফের ক্ষেত্রে গাড়ির কাছাকাছি আসার প্রবণতা দেখা যায় এবং নির্দিষ্ট উপকরণ থাকলেও সেগুলো ভালোভাবে দেখতে সাহায্য করবে",
+   "wer": 0.045,
+   "confidence": 0.988,
+   "english": "Some animals, such as elephants and giraffes, have a tendency to come close to cars, and having certain materials will help them see better.",
+   "english_reference": "Some animals, such as elephants and giraffes, tend to approach closely to cars and standard equipment will allow good viewing."
+  },
+  {
+   "file": "3289492805494426112.wav",
+   "reference": "এটিকে মঙ্গলবার কেটে ফেলার কথা ছিল, তবে আদালতের জরুরী রায় আসার পরে এটি বাঁচানো হয়।",
+   "heard": "এটিকে মঙ্গলবার কেটে ফেলার কথা ছিল তবে আদালতের জরুরি রায় আসার পরে এটি বাঁচানো হয়",
+   "wer": 0.067,
+   "confidence": 0.985,
+   "english": "It was due to be cut on Tuesday but was saved after the court's emergency ruling.",
+   "english_reference": "It had been scheduled to be cut down on Tuesday, but was saved after an emergency court ruling."
+  },
+  {
+   "file": "345124860452287425.wav",
+   "reference": "যতশীঘ্র সম্ভৰ স্রোতের বাইরে চলে আসতে পারলে, আপনার সাঁতার কেটে ফেরা সাধারণত কঠিন নয়।",
+   "heard": "যত শীঘ্র সম্ভব স্রোতের বাইরে চলে আসতে পারলে আপনার সাঁতার কেটে ফেরা সাধারণত কঠিন নয়",
+   "wer": 0.214,
+   "confidence": 0.987,
+   "english": "Getting out of the stream as soon as possible isn't usually hard to get back into your swimming.",
+   "english_reference": "As soon as you get out of the current, swimming back is no more difficult than normally."
+  },
+  {
+   "file": "366832706965766873.wav",
+   "reference": "চক্রান্ত বিশ্লেষণ করে ফলাফল একটি পাবলিক ওয়েবসাইটে পোস্ট করা হবে।",
+   "heard": "চক্রান্ত বিশ্লেষণ করে ফলাফল একটি পাবলিক ওয়েবসাইটে পোস্ট করা হবে",
+   "wer": 0.0,
+   "confidence": 0.962,
+   "english": "The results will be posted on a public website analyzing the plot.",
+   "english_reference": "The result of plotting analysis will be posted to a public website."
+  },
+  {
+   "file": "4357318287744549874.wav",
+   "reference": "চক্রান্ত বিশ্লেষণ করে ফলাফল একটি পাবলিক ওয়েবসাইটে পোস্ট করা হবে।",
+   "heard": "চক্রান্ত বিশ্লেষণ করে ফলাফল একটি পাবলিক ওয়েবসাইটে পোস্ট করা হবে",
+   "wer": 0.0,
+   "confidence": 0.991,
+   "english": "The results will be posted on a public website analyzing the plot.",
+   "english_reference": "The result of plotting analysis will be posted to a public website."
+  },
+  {
+   "file": "4979193689007360160.wav",
+   "reference": "এই নতুন পরিবেশে ভিন্ন ভিন্ন সংস্থান এবং বিভিন্ন প্রতিযোগী রয়েছে, সুতরাং বেশি শক্তিশালী প্রতিযোগী হওয়ার জন্য তাদের আগের তুলনায় ভিন্ন বৈশিষ্ট্য বা অভিযোজন প্রয়োজন হয়।",
+   "heard": "এই নতুন পরিবেশে ভিন্ন ভিন্ন সংস্থান এবং বিভিন্ন প্রতিযোগী রয়েছে সুতরাং বেশি শক্তিশালী প্রতিযোগী হওয়ার জন্য তাদের আগের তুলনায় ভিন্ন বৈশিষ্ট্য বা অভিযোজন প্রয়োজন হয়",
+   "wer": 0.0,
+   "confidence": 0.985,
+   "english": "This new environment has different resources and different competitors, so they need different features or adaptations than before in order to be more powerful competitors.",
+   "english_reference": "This new environment has different resources and different competitors, so the new population will need different features or adaptations to be a strong competitor than what they had needed before."
+  },
+  {
+   "file": "5710120067138595848.wav",
+   "reference": "আসল জনসংখ্যার পরিবর্তন একেবারেই হয়নি, এখনও তাদের আগের মতো একই অভিযোজনের প্রয়োজন হয়।",
+   "heard": "আসল জনসংখ্যার পরিবর্তন একেবারেই হয়নি এখনও তাদের আগের মতো একই অভিযোজনের প্রয়োজন হয়",
+   "wer": 0.0,
+   "confidence": 0.945,
+   "english": "The original populations have not changed at all and still require the same adaptations as before.",
+   "english_reference": "The original population hasn't changed at all, they still need the same adaptations as before."
+  },
+  {
+   "file": "6531235543927998554.wav",
+   "reference": "এই নতুন পরিবেশে ভিন্ন ভিন্ন সংস্থান এবং বিভিন্ন প্রতিযোগী রয়েছে, সুতরাং বেশি শক্তিশালী প্রতিযোগী হওয়ার জন্য তাদের আগের তুলনায় ভিন্ন বৈশিষ্ট্য বা অভিযোজন প্রয়োজন হয়।",
+   "heard": "এই নতুন পরিবেশে ভিন্ন ভিন্ন সংস্থান এবং বিভিন্ন প্রতিযোগী রয়েছে সুতরাং বেশি শক্তিশালী প্রতিযোগী হওয়ার জন্য তাদের আগের এ তুলনায় ভিন্ন বৈশিষ্ট্য বা অভিযোজন প্রয়োজন হয়",
+   "wer": 0.04,
+   "confidence": 0.96,
+   "english": "This new environment has different resources and different competitors, so they need different features or adaptations to be more powerful competitors than they were before.",
+   "english_reference": "This new environment has different resources and different competitors, so the new population will need different features or adaptations to be a strong competitor than what they had needed before."
+  },
+  {
+   "file": "7315268769860290594.wav",
+   "reference": "মার্কিন যুক্তরাষ্ট্র জুড়ে প্রায় 400,000 সংখ্যক মাল্টিপল স্ক্লেরোসিসের (এমএস) পরিচিত ঘটনা রয়েছে যেটিকে অল্প বয়সী ও মধ্যবয়স্কদের মাঝে প্রথম সারির স্নায়বিক রোগ হিসাবে দেখা হচ্ছে।",
+   "heard": "মার্কিন যুক্তরাষ্ট্র জুড়ে প্রায় চার লাখ সংখ্যক মাল্টিপল স্কেরোসিস এের এমএস পরিচিত ঘটনা রয়েছে যেটিকে অল্পবয়সী ও মধ্যবয়স্কদের মাঝে প্রথম সারির স্নায়বিক রোগ হিসেবে দেখা হছে",
+   "wer": 0.308,
+   "confidence": 0.951,
+   "english": "There are about 400,000 known cases of multiple sclerosis A MS across the United States, making it the leading neurological disease among young and middle-aged people.",
+   "english_reference": "Across the United States of America, there are approximately 400,000 known cases of Multiple Sclerosis (MS), leaving it as the leading neurological disease in younger and middle aged adults."
+  },
+  {
+   "file": "7512546682123636165.wav",
+   "reference": "কিছু প্রাণী, যেমন হাতি এবং জিরাফের ক্ষেত্রে, গাড়ির কাছাকাছি আসার প্রবণতা দেখা যায় এবং নির্দিষ্ট উপকরণ থাকলে সেগুলো ভালোভাবে দেখতে সাহায্য করবে।",
+   "heard": "কিছু প্রাণী যেমন হাতি এবং জিরাফের ক্ষেত্রে গাড়ি কাছাকাছি আসার প্রবণতা দেখা যায় এবং নির্দিষ্ট উপকরণ থাকলেও সেগুলো ভালোভাবে দেখতে সাহায্য করবে",
+   "wer": 0.091,
+   "confidence": 0.987,
+   "english": "Some animals, such as elephants and giraffes, have a tendency to come close to cars, and having certain materials will help them see better.",
+   "english_reference": "Some animals, such as elephants and giraffes, tend to approach closely to cars and standard equipment will allow good viewing."
+  },
+  {
+   "file": "9910387992661129209.wav",
+   "reference": "এটি চার বছরের মধ্যে মার্টলির পঞ্চম CEP।",
+   "heard": "এটি চার বছরের মধ্যে মকলির পঞ্চম সিইপি",
+   "wer": 0.286,
+   "confidence": 0.926,
+   "english": "This is Mockley's fifth CEP in four years.",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  }
+ ]
+}

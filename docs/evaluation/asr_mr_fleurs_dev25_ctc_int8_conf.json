@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "mr",
+  "clips": 25,
+  "audio_seconds": 366.3,
+  "wer": 0.213,
+  "cer": 0.091,
+  "real_time_factor": 0.214,
+  "process_private_gb": 3.99,
+  "process_peak_working_set_gb": 2.48,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 60.0,
+   "bleu": 31.4
+  }
+ },
+ "clips": [
+  {
+   "file": "10291007344285599051.wav",
+   "reference": "विज्ञान आता दर्शविते की या प्रचंड कार्बन अर्थव्यवस्थेने गेल्या 2 दशलक्ष वर्षांपासून मानवी उत्क्रांतीला पाठिंबा देणाऱ्या जीवावरणाच्या 1 स्थिर स्थितीत बदल घडवून आणला आहे.",
+   "heard": "विज्ञान आता दर्शविते की या प्रचंड कार्बन अर्थव्यवस्थेने गेल्या दोन दशलक्ष वर्षापासून मानवी उत्क्रांतीला पाठिंबा देणाऱ्या जीवावरणाच्या एक स्थिर स्थितीतील बदल घडवून आणला आहे",
+   "wer": 0.167,
+   "confidence": 0.959,
+   "english": "Science now shows that this huge carbon economy has transformed a stable state of life that has supported human evolution for the past two million years.",
+   "english_reference": "Science now indicates that this massive carbon economy has dislodged the biosphere from one of its stable states that has supported human evolution for the past two million years."
+  },
+  {
+   "file": "10725237308538641999.wav",
+   "reference": "पहिल्या महायुद्धातील अत्याचार आणि भयाणता पाहिल्यानंतर, सर्व देशांनी इच्छा व्यक्त केली की भविष्यात अशा प्रकारची स्थिती टाळायला हवी.",
+   "heard": "पहिल्या महायुद्धातील अत्याचार आणि भयानता वर्षानंतर सर्व देशांनी इच्छा व्यक्त केली की भविष्यात अशा प्रकारची स्थिती टाळायला हवी",
+   "wer": 0.111,
+   "confidence": 0.976,
+   "english": "After years of persecution and horror in World War I, all countries wished that such a situation should be avoided in the future.",
+   "english_reference": "After seeing the horrors and atrocities of war during World War I, nations desired to avoid such a situation again in the future."
+  },
+  {
+   "file": "12279956939721942360.wav",
+   "reference": "उपसंस्कृतीचे सभासद त्यांचे सदस्यत्व वेगळ्या प्रकारच्या आणि प्रतीकात्मक शैलीने दर्शवतात, ज्यामध्ये फॅशन, चालीरीती आणि बोलीभाषेचा समावेश होतो.",
+   "heard": "उपसंस्कृतीचे सभासद त्यांचे सदस्यत्व वेगळ्या प्रकारच्या आणि प्रतीिकात्मक शैलीने दर्शवतात ज्यामध्ये फॅशनचालरीती आणि बोलीभाषेचा समावेश होतो",
+   "wer": 0.176,
+   "confidence": 0.954,
+   "english": "Members of the subculture represent their membership in a distinct and symbolic style that includes fashion and dialect.",
+   "english_reference": "Members of a subculture often signal their membership through a distinctive and symbolic use of style, which includes fashions, mannerisms, and argot."
+  },
+  {
+   "file": "12288464925857261394.wav",
+   "reference": "जखमींना रुग्णालयात हलविल्यानंतर लढाई थांबली तेव्हा उर्वरित सुमारे 40 कैदी यार्डमध्येच थांबले आणि त्यांनी त्यांच्या सेलकडे परत जाण्यास नकार दिला.",
+   "heard": "जखमींना रुग्णालयात हलविल्यानंतर लढाई थांबली तेव्हा उर्वरित सुमारे चाळीस कैदी यार्डमध्येच थांबले आणि त्यांनी त्यांच्या सेलकडे परत जाण्यास नकार दिला",
+   "wer": 0.05,
+   "confidence": 0.977,
+   "english": "When the fighting stopped after the wounded were moved to the hospital, about forty of the remaining prisoners stayed in the yard and refused to return to their cells.",
+   "english_reference": "When the fighting ceased after the wounded were transported to the hospital, about 40 of the other remaining inmates stayed in the yard and refused to return to their cells."
+  },
+  {
+   "file": "13017334727041208136.wav",
+   "reference": "पहिल्या महायुद्धातील अत्याचार आणि भयाणता पाहिल्यानंतर, सर्व देशांनी इच्छा व्यक्त केली की भविष्यात अशा प्रकारची स्थिती टाळायला हवी.",
+   "heard": "पहिल्या महायुद्धातील अत्याचार आणि भयानकता पाहिल्यानंतर सर्व देशांनी इच्छा व्यक्त केली की भविष्यात अशा प्रकारची स्थिती टाळायला हवी",
+   "wer": 0.056,
+   "confidence": 0.977,
+   "english": "After witnessing the atrocities and horrors of World War I, all countries wished that such a situation should be avoided in the future.",
+   "english_reference": "After seeing the horrors and atrocities of war during World War I, nations desired to avoid such a situation again in the future."
+  },
+  {
+   "file": "13705342063766525078.wav",
+   "reference": "उपसंस्कृतीचे सभासद त्यांचे सदस्यत्व वेगळ्या प्रकारच्या आणि प्रतीकात्मक शैलीने दर्शवतात, ज्यामध्ये फॅशन, चालीरीती आणि बोलीभाषेचा समावेश होतो.",
+   "heard": "उपसंस्कृतीचे सभासद त्यांचे सदस्यत् वेगळ्या प्रकारच्या आणि प्रतिकात्मक शैलीने दर्शवतात ज्यामध्ये फॅशन चालीरीती आणि बोलीभाषेचा समावेश होतो",
+   "wer": 0.118,
+   "confidence": 0.964,
+   "english": "Members of the subculture represent their membership in a diverse and symbolic style that includes fashion customs and dialects.",
+   "english_reference": "Members of a subculture often signal their membership through a distinctive and symbolic use of style, which includes fashions, mannerisms, and argot."
+  },
+  {
+   "file": "1386792290905745766.wav",
+   "reference": "एखादी संस्था नाविन्यपूर्ण होण्यापूर्वी, त्यातील प्रमुखांनी नाविन्यतेची एक संस्कृती निर्माण केली पाहिजे तसेच ज्ञानाची देवाण-घेवाण आणि संस्थात्मक अध्ययन केले पाहिजे.",
+   "heard": "एखादी संस्था नावीन्यपूर्ण होण्यासाठी त्यातील प्रामुख्याने नावीन्यतेची एक संस्कृती निर्माण केली पाहिजे तसेच ज्ञानाची देवाणघेवाण आणि संस्थात्मक अध्ययन केले पाहिजे",
+   "wer": 0.286,
+   "confidence": 0.955,
+   "english": "For an organization to be innovative, it must primarily create a culture of innovation, as well as knowledge sharing and institutional learning.",
+   "english_reference": "Before an organization can be innovative, leadership must create a culture of innovation as well as shared knowledge and organizational learning."
+  },
+  {
+   "file": "15202642097924799046.wav",
+   "reference": "AI मधील संशोधनात, ज्यासाठी बुद्धीचा वापर करावा लागतो अशी क्रिया स्वयंचलित करणारी यंत्रे तयार करणे अंतर्भूत आहे.",
+   "heard": "एआयमधील संशोधनता ज्यासाठी बुद्धीचा वापर करावा लागतो अशी क्रिया स्वयंचलित करणारे यंत्र तयार करणे अंतर्भूत आहे",
+   "wer": 0.294,
+   "confidence": 0.959,
+   "english": "Research in AI involves creating machines that automate actions that require the use of intelligence.",
+   "english_reference": "Research in AI involves making machines to automate tasks that require intelligent behavior."
+  },
+  {
+   "file": "15448168706998996139.wav",
+   "reference": "विज्ञान आता दर्शविते की या प्रचंड कार्बन अर्थव्यवस्थेने गेल्या 2 दशलक्ष वर्षांपासून मानवी उत्क्रांतीला पाठिंबा देणाऱ्या जीवावरणाच्या 1 स्थिर स्थितीत बदल घडवून आणला आहे.",
+   "heard": "विज्ञान आता दर्शविते की या प्रचंड कार्बन अर्थव्यवस्थेने गेल्या दोन दशलक्ष वर्षांपासून मानवी उत्क्रांतीला पाठिंबा देणाऱ्या जीवावरच्या एक स्थिर स्थितीत बदल घडवून आणला आहे",
+   "wer": 0.125,
+   "confidence": 0.97,
+   "english": "Science now shows that this huge carbon economy has altered a stable state of life on Earth that has supported human evolution for the past two million years.",
+   "english_reference": "Science now indicates that this massive carbon economy has dislodged the biosphere from one of its stable states that has supported human evolution for the past two million years."
+  },
+  {
+   "file": "15621698142036867425.wav",
+   "reference": "निसर्गवादी आणि तत्वज्ञ यांनी अभिजात साहित्यावर लक्ष केंद्रित केले आणि विशेषत: लॅटिन मधील बायबल वर.",
+   "heard": "निसर्गवादी आणि तत्त्वज्ञ यांनी अभिजात साहित्यावर लक्ष केंद्रित केले आणि विशेषतः लॅटिन भामधील बायबलवर",
+   "wer": 0.333,
+   "confidence": 0.935,
+   "english": "Naturalists and philosophers focused on classical literature, and in particular the Bible in Latin Bhama.",
+   "english_reference": "Naturalists and philosophers focused on classical texts and, in particular, on the Bible in Latin."
+  },
+  {
+   "file": "15941510481964908520.wav",
+   "reference": "पहिल्या महायुद्धातील अत्याचार आणि भयाणता पाहिल्यानंतर, सर्व देशांनी इच्छा व्यक्त केली की भविष्यात अशा प्रकारची स्थिती टाळायला हवी.",
+   "heard": "पहिल्या महायुद्धातील अत्याचार आणि भयानता पाळल्यानंतर सर्व देशांनी इच्छा व्यक्त केली की भविष्यात अशा प्रकारची स्थिती टाळायला हवी",
+   "wer": 0.111,
+   "confidence": 0.957,
+   "english": "After observing the atrocities and horrors of World War I, all countries wished that such a situation should be avoided in the future.",
+   "english_reference": "After seeing the horrors and atrocities of war during World War I, nations desired to avoid such a situation again in the future."
+  },
+  {
+   "file": "16682408320293279298.wav",
+   "reference": "उपसंस्कृतीचे सभासद त्यांचे सदस्यत्व वेगळ्या प्रकारच्या आणि प्रतीकात्मक शैलीने दर्शवतात, ज्यामध्ये फॅशन, चालीरीती आणि बोलीभाषेचा समावेश होतो.",
+   "heard": "उपसंस्कृतीचे सभासद त्यांचे सदस्यत्व वेगळ्या प्रकारच्या आणि प्रतिकात्मक शैलीने दर्शवितात ज्यामध्ये फॅशन चालीरीती आणि बोलीभाषेचा समावेश होतो",
+   "wer": 0.118,
+   "confidence": 0.967,
+   "english": "Members of the subculture represent their membership in a diverse and symbolic style that includes fashion customs and dialects.",
+   "english_reference": "Members of a subculture often signal their membership through a distinctive and symbolic use of style, which includes fashions, mannerisms, and argot."
+  },
+  {
+   "file": "17310440479459170449.wav",
+   "reference": "विज्ञान आता दर्शविते की या प्रचंड कार्बन अर्थव्यवस्थेने गेल्या 2 दशलक्ष वर्षांपासून मानवी उत्क्रांतीला पाठिंबा देणाऱ्या जीवावरणाच्या 1 स्थिर स्थितीत बदल घडवून आणला आहे.",
+   "heard": "विज्ञान आता दर्शवते की या प्रचंड कार्बन अर्थव्यवस्थेने गेल्या दोन दशलक्ष वर्षापासून मानवी उत्कांतील पाठिंबा देणाऱ्या जीवावरणाच्या एक स्थिर स्थिती बदल घडवून आणला आहे",
+   "wer": 0.25,
+   "confidence": 0.891,
+   "english": "Science now shows that this huge carbon economy has brought about a steady state change of life that will support human activity for the last two million years.",
+   "english_reference": "Science now indicates that this massive carbon economy has dislodged the biosphere from one of its stable states that has supported human evolution for the past two million years."
+  },
+  {
+   "file": "4004891247186415102.wav",
+   "reference": "एखादी संस्था नाविन्यपूर्ण होण्यापूर्वी, त्यातील प्रमुखांनी नाविन्यतेची एक संस्कृती निर्माण केली पाहिजे तसेच ज्ञानाची देवाण-घेवाण आणि संस्थात्मक अध्ययन केले पाहिजे.",
+   "heard": "एखादी संस्था नावीन्यपूर्ण होण्यापूर्वी त्यातील प्रामुख्याने नावीन्यतेची एक संस्कृती निर्माण केली पाहिजे तसेच ज्ञानाची देवाणघेवाण आणि संस्थात्मक अध्ययन केले पाहिजे",
+   "wer": 0.238,
+   "confidence": 0.963,
+   "english": "Before an organization can be innovative, it must primarily create a culture of innovation, as well as knowledge sharing and institutional learning.",
+   "english_reference": "Before an organization can be innovative, leadership must create a culture of innovation as well as shared knowledge and organizational learning."
+  },
+  {
+   "file": "4505159429098835480.wav",
+   "reference": "सॅटेलाइट फोन ही सामान्यत: मोबाइल फोनची बदल्ण्याची जागा नसते, कारण फोन कॉल करण्यासाठी आपण सॅटेलाइट दर्शवण्यासाठी स्पष्ट लाइन सह घराबाहेर असणे आवश्यक आहे",
+   "heard": "सॅटेलाइट फोन ही सामान्यत मोबाईल फोनची बदलण्याची जागा नसते कारण फोन कॉल करण्यासाठी आपण सॅटेलाइट दर्शवण्यासाठी स्पष्ट लाईनसह घराबाहेर असणे आवश्यक आहे",
+   "wer": 0.174,
+   "confidence": 0.969,
+   "english": "Satellite phones are usually not a replacement for mobile phones because to make a phone call, you must be outdoors with a clear line to show the satellite.",
+   "english_reference": "A satellite phone is not generally a replacement for a mobile phone, as you have to be outdoors with clear line of sight to the satellite to make a phone call."
+  },
+  {
+   "file": "4522207654741871585.wav",
+   "reference": "जखमींना रुग्णालयात हलविल्यानंतर लढाई थांबली तेव्हा उर्वरित सुमारे 40 कैदी यार्डमध्येच थांबले आणि त्यांनी त्यांच्या सेलकडे परत जाण्यास नकार दिला.",
+   "heard": "जखमींना रुग्णालयात हलविल्यानंतर लढाई थांबली तेव्हा उर्वरित सुमारे चाळीस कैदी यार्डमध्ये थांबले आणि त्यांनी त्यांच्या सेलकडे परत जाण्यास नकार दिला",
+   "wer": 0.1,
+   "confidence": 0.981,
+   "english": "When the fighting stopped after the wounded were moved to the hospital, about forty of the remaining prisoners stayed in the yard and refused to return to their cells.",
+   "english_reference": "When the fighting ceased after the wounded were transported to the hospital, about 40 of the other remaining inmates stayed in the yard and refused to return to their cells."
+  },
+  {
+   "file": "4583514843444856152.wav",
+   "reference": "AI मधील संशोधनात, ज्यासाठी बुद्धीचा वापर करावा लागतो अशी क्रिया स्वयंचलित करणारी यंत्रे तयार करणे अंतर्भूत आहे.",
+   "heard": "एआयमधील संशोधनातमध्ये ज्यासाठी बुद्धीचा वापर करावा लागतो अशी क्रिया स्वयंचलित करणारी यंत्रे तयार करणे अंतर्भूत आहे",
+   "wer": 0.176,
+   "confidence": 0.944,
+   "english": "Research in AI involves creating machines that automate actions that require the use of intelligence.",
+   "english_reference": "Research in AI involves making machines to automate tasks that require intelligent behavior."
+  },
+  {
+   "file": "5047932576739526436.wav",
+   "reference": "निसर्गवादी आणि तत्वज्ञ यांनी अभिजात साहित्यावर लक्ष केंद्रित केले आणि विशेषत: लॅटिन मधील बायबल वर.",
+   "heard": "निसर्गवादी आणि तत्त्वज्ञ यांनी अभिजा साहित्यावर लक्ष केंद्रित केले आणि विशेषतः लॅटिन भामधील बायबलवर",
+   "wer": 0.4,
+   "confidence": 0.949,
+   "english": "Naturalists and philosophers focused on Abhija literature, and in particular the Bible in Latin Bhama.",
+   "english_reference": "Naturalists and philosophers focused on classical texts and, in particular, on the Bible in Latin."
+  },
+  {
+   "file": "5606187684528431267.wav",
+   "reference": "AI मधील संशोधनात, ज्यासाठी बुद्धीचा वापर करावा लागतो अशी क्रिया स्वयंचलित करणारी यंत्रे तयार करणे अंतर्भूत आहे.",
+   "heard": "एआयमधील संशोधनात ज्यासाठी बुद्धीचा वापर करावा लागतो अशी क्रिया स्वयंचलित करणारी यंत्रे तयार करणे अंतर्भूत आहे",
+   "wer": 0.118,
+   "confidence": 0.955,
+   "english": "Research in AI involves creating machines that automate actions that require the use of intelligence.",
+   "english_reference": "Research in AI involves making machines to automate tasks that require intelligent behavior."
+  },
+  {
+   "file": "6240777679217321109.wav",
+   "reference": "सॅटेलाइट फोन ही सामान्यत: मोबाइल फोनची बदल्ण्याची जागा नसते, कारण फोन कॉल करण्यासाठी आपण सॅटेलाइट दर्शवण्यासाठी स्पष्ट लाइन सह घराबाहेर असणे आवश्यक आहे",
+   "heard": "सॅटेलाइट फोन ही सामान्यतः मोबाईल फोनची बदलण्याची जागा नसते कारण फोनकॉल करण्यासाठी आपण सॅटेलाइट दर्शवण्यासाठी स्पष्टलाईनसह घराबाहेर असणे आवश्यक आहे",
+   "wer": 0.348,
+   "confidence": 0.948,
+   "english": "Satellite phones are usually not a replacement for mobile phones because to make a phone call, you must be outdoors with a clear line to show the satellite.",
+   "english_reference": "A satellite phone is not generally a replacement for a mobile phone, as you have to be outdoors with clear line of sight to the satellite to make a phone call."
+  },
+  {
+   "file": "6795770913256119760.wav",
+   "reference": "निसर्गवादी आणि तत्वज्ञ यांनी अभिजात साहित्यावर लक्ष केंद्रित केले आणि विशेषत: लॅटिन मधील बायबल वर.",
+   "heard": "निसर्गवादी आणि तत्त्वज्ञज्ञान यांनी अभिजात साहित्यावर लक्ष केंद्रित केले आणि विशेषत लॅटिनमधील बायबलवर",
+   "wer": 0.333,
+   "confidence": 0.925,
+   "english": "Naturalists and philosophers focused on classical literature, and especially on the Bible in Latin.",
+   "english_reference": "Naturalists and philosophers focused on classical texts and, in particular, on the Bible in Latin."
+  },
+  {
+   "file": "7562865341894342018.wav",
+   "reference": "NSA म्हणून त्यांनी जागतिक बाबींना मुत्सद्दीपणाने हाताळण्यास कार्टर यांना मदत केली जसे की कॅम्प डेव्हिड अ‍ॅकार्ड्स,1978; 1970 दशकाच्या उत्तरार्धात अमेरिका-चीन संबंधांना सामान्य करण्याच्या विचारात; इराण क्रांती, ज्यामुळे इराण बंधक संकट ओढावले1979; आणि 1979 मध्ये अफगाणिस्तानात सोव्हिएत आक्रमण.",
+   "heard": "एनएसए म्हणून त्यांनी जागतिक बाबींना मुत्सद्दीपणे हाताळण्यास कार्टर यांना मदत केली जसे की कॅम्प डेव्हिड अॅक्कॉट्स एकोणीसशे अठ्ठ्याहत्तर एकोणीसशे सत्तर दशकाच्या उत्तरार्धात अमेरिका चीन संबंधांना सामान्य करण्याच्या विचारात इराण क्रांती ज्यामुळे इराण बांधक संकट ओळवले एकोणीसशे एकोणऐंशी आणि एकोणीसशे एकोणऐंशीमध्येध्ये अफगाणिस्तानात सिव्हियत आक्रमण",
+   "wer": 0.359,
+   "confidence": 0.913,
+   "english": "As an NSA, he helped Carter handle world affairs diplomatically, such as Camp David Akkots's Iran Revolution in the late nineteen seventy-eight, with the intention of normalizing US-China relations that precipitated the Iran construction crisis and the civil war in Afghanistan in the nineteen eighties and nineteen nineties.",
+   "english_reference": "As NSA, he assisted Carter in diplomatically handling world affairs, such as the Camp David Accords, 1978; normalizing US–China relations thought the late 1970s; the Iranian Revolution, which led to the Iran hostage crisis, 1979; and the Soviet invasion in Afghanistan, 1979."
+  },
+  {
+   "file": "8029541134099426304.wav",
+   "reference": "सॅटेलाइट फोन ही सामान्यत: मोबाइल फोनची बदल्ण्याची जागा नसते, कारण फोन कॉल करण्यासाठी आपण सॅटेलाइट दर्शवण्यासाठी स्पष्ट लाइन सह घराबाहेर असणे आवश्यक आहे",
+   "heard": "सॅटेलाइट फोन ही सामान्यतः मोबाईल फोनची बदलण्याची जागा नसते कारण फोन कॉल करण्यासाठी आपण सॅटेलाइट दर्शवण्यासाठी स्पष्टलाईनसह घराबाहेर असणे आवश्यक आहे",
+   "wer": 0.261,
+   "confidence": 0.958,
+   "english": "Satellite phones are generally not a replacement for mobile phones because to make a phone call, you must be outdoors with a clear line to show the satellite.",
+   "english_reference": "A satellite phone is not generally a replacement for a mobile phone, as you have to be outdoors with clear line of sight to the satellite to make a phone call."
+  },
+  {
+   "file": "9174037328737055724.wav",
+   "reference": "जखमींना रुग्णालयात हलविल्यानंतर लढाई थांबली तेव्हा उर्वरित सुमारे 40 कैदी यार्डमध्येच थांबले आणि त्यांनी त्यांच्या सेलकडे परत जाण्यास नकार दिला.",
+   "heard": "जखमींना रुग्णालयात हलविल्यानंतर लढाई थांबली तेव्हा उर्वरित सुमारे चाळीस कैदी यार्डमध्येच थांबले आणि त्यांनी त्यांच्या सेलकडे परत जाण्यास नकार दिला",
+   "wer": 0.05,
+   "confidence": 0.967,
+   "english": "When the fighting stopped after the wounded were moved to the hospital, about forty of the remaining prisoners stayed in the yard and refused to return to their cells.",
+   "english_reference": "When the fighting ceased after the wounded were transported to the hospital, about 40 of the other remaining inmates stayed in the yard and refused to return to their cells."
+  },
+  {
+   "file": "9336917656976472552.wav",
+   "reference": "NSA म्हणून त्यांनी जागतिक बाबींना मुत्सद्दीपणाने हाताळण्यास कार्टर यांना मदत केली जसे की कॅम्प डेव्हिड अ‍ॅकार्ड्स,1978; 1970 दशकाच्या उत्तरार्धात अमेरिका-चीन संबंधांना सामान्य करण्याच्या विचारात; इराण क्रांती, ज्यामुळे इराण बंधक संकट ओढावले1979; आणि 1979 मध्ये अफगाणिस्तानात सोव्हिएत आक्रमण.",
+   "heard": "एनएसए म्हणून त्यांनी जागतिक बाबींना मुत्सदीपणाने हाताळण्यास कार्टर यांना मदत केली जसे की कॅम्प डेव्हिड अॅकाड्स एकोणीसशे अठ्याहत्तर एकोणीसशे सत्तर दशकाच्या उत्तरार्धात अमेरिका चीन संबंधांना सामान्य करण्याच्या विचारात इराण क्रांती ज्यामुळे इराण बंधक संकट डावले एकोणीसशे एकोणऐंशी आणि एकोणीसशे एकोणऐंशीमध्येध्ये अफगाणिस्तानात सोव्हियत आक्रमण",
+   "wer": 0.333,
+   "confidence": 0.898,
+   "english": "As an NSA, he helped Carter handle world affairs diplomatically, such as at Camp David Accades in the late nineteen seventy-eight Iran Revolution with the intention of normalizing US-China relations that led to the Iran hostage crisis and the Soviet invasion of Afghanistan in the nineteen eighties and nineteen nineties.",
+   "english_reference": "As NSA, he assisted Carter in diplomatically handling world affairs, such as the Camp David Accords, 1978; normalizing US–China relations thought the late 1970s; the Iranian Revolution, which led to the Iran hostage crisis, 1979; and the Soviet invasion in Afghanistan, 1979."
+  }
+ ]
+}

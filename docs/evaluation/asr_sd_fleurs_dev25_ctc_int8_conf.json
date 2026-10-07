@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "sd",
+  "clips": 25,
+  "audio_seconds": 347.3,
+  "wer": 1.017,
+  "cer": 1.167,
+  "real_time_factor": 0.223,
+  "process_private_gb": 4.09,
+  "process_peak_working_set_gb": 2.48,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 45.3,
+   "bleu": 15.5
+  }
+ },
+ "clips": [
+  {
+   "file": "10623887655002540817.wav",
+   "reference": "اڳوڻي هائوس اسپيڪر نيوٽ گنگرچ، ٽيڪساس جي گورنر رِڪ پيري، ۽ ڪانگريس خاتون مِشيل باڪمين، ترتيب وار چوٿين، پنجين ۽ ڇهين نمبر تي پورو ڪيو.",
+   "heard": "अॻूरे हाउस स्पीकर नेविड गंगरिच टेक्सास जे गवर्नर रिक पैेरी ऐं कांग्रेस ख़ातून मिशेल बाकमेन तरतीब वार चौथें पंजे ऐं छह नंबर ते पूरो कयो",
+   "wer": 1.0,
+   "confidence": 0.927,
+   "english": "Former House Speaker Nevid Gangrich, Texas Governor Rick Perry, and Congressman Michelle Bachman finished fourth and sixth, respectively.",
+   "english_reference": "Former House Speaker Newt Gingrich, Texas governor Rick Perry, and Congresswoman Michele Bachmann finished in fourth, fifth, and sixth place, respectively."
+  },
+  {
+   "file": "10657492446985754651.wav",
+   "reference": "اڳوڻي هائوس اسپيڪر نيوٽ گنگرچ، ٽيڪساس جي گورنر رِڪ پيري، ۽ ڪانگريس خاتون مِشيل باڪمين، ترتيب وار چوٿين، پنجين ۽ ڇهين نمبر تي پورو ڪيو.",
+   "heard": "अॻूणे हाउस स्पीकर नेविड गंगरिच टेक्सास जे गवर्नर रिक पैेरी ऐं कांग्रेस ख़ातून मिशल बाकमैन तरतीबव वार चोथें पंजे ऐं छह नंबर ते पूरो कयो",
+   "wer": 1.0,
+   "confidence": 0.935,
+   "english": "Former House Speaker Nevid Gangrich, Texas Governor Rick Perry, and Congressman Michelle Bachman finished fourth and sixth, respectively.",
+   "english_reference": "Former House Speaker Newt Gingrich, Texas governor Rick Perry, and Congresswoman Michele Bachmann finished in fourth, fifth, and sixth place, respectively."
+  },
+  {
+   "file": "10975206573323060488.wav",
+   "reference": "سائنس جو بنيادي مقصد اهو معلوم ڪرڻ آهي تہ سائنسي طريقن جي ذريعي دنيا ڪيئن ڪم ڪري ٿي. حقيقت ۾ اهو طريقو گهڻو ڪري سائنسي تحقيق جي رهنمائي ڪري ٿو.",
+   "heard": "साइंस जो बुनियादी मक़सदु उहो मालूम करणु आहे त साइंसी तरीक़नि जे ज़रिए दुनिया जे कीअं कमु करे थी हक़ीक़त में उहो तरीक़ो घणनि घणो करे साइंसी तहक़क़ जी रहनुमाई करे थो",
+   "wer": 1.067,
+   "confidence": 0.946,
+   "english": "The basic purpose of science is to find out how the world works through scientific methods.",
+   "english_reference": "Science’s main goal is to figure out the way the world works through the scientific method. This method in fact guides most scientific research."
+  },
+  {
+   "file": "11342657348306432589.wav",
+   "reference": "سائنس جو بنيادي مقصد اهو معلوم ڪرڻ آهي تہ سائنسي طريقن جي ذريعي دنيا ڪيئن ڪم ڪري ٿي. حقيقت ۾ اهو طريقو گهڻو ڪري سائنسي تحقيق جي رهنمائي ڪري ٿو.",
+   "heard": "साइंस जो बुनियादी मक़सदु इहो मालूम करणु आहे त साइंसी तरीक़नि जे ज़रिए दुनिया कीअं कमु करे थी हक़ीक़त में इहो तरीक़ो घणो करे साइंसी तहक़ीक़ जी रहिनुमाई करे थो",
+   "wer": 1.0,
+   "confidence": 0.976,
+   "english": "The basic purpose of science is to find out how the world works through scientific methods.",
+   "english_reference": "Science’s main goal is to figure out the way the world works through the scientific method. This method in fact guides most scientific research."
+  },
+  {
+   "file": "11604350943740532670.wav",
+   "reference": "چرچ يارڊ ۾، ڪجهه مقبرن مٿان ڪبوتر جا دلچسپ سنگ مرمر جا مجسما ٺهيل آهن.",
+   "heard": "चर्चयार्ड में कुझु मुक़बरनि मथां कबूतर जा दिलचस्प संगमरमर जा मुजसमा ठहियलु आहिनि",
+   "wer": 1.0,
+   "confidence": 0.954,
+   "english": "Some of the murals in the churchyard are carved out of interesting marble reliefs of pigeons on top.",
+   "english_reference": "In the churchyard, there are interesting marble sculptures of doves over some tombs."
+  },
+  {
+   "file": "11751211981796852699.wav",
+   "reference": "بش جي ترجمان گورڊن جانڊرو اتر ڪوريا جي عهد نامي کي \"ڪوريائي پيننسيولا جا قابل تصديق ڊي نيوڪليئرائيزشن حاصل ڪرڻ جي مقصد ڏانهن هڪ اهم قدم قرار ڏنو.\"",
+   "heard": "बुश जे तर्जमान गोर््डन जॉनट्रो उत्तर कोरिया जे हदनामे खे कोरियाई पैनि सिवलाज जा क़ाबिले तसदीक़ डीिन्यूक्लराइज़ेशन हासिलु करण जे मक़सदु ॾांहुं हिकु अहम क़दम क़रारु ॾिनो",
+   "wer": 1.0,
+   "confidence": 0.895,
+   "english": "Bush's spokesman, Gordon Jontrow, called North Korea's denuclearization an important step towards achieving a credible denuclearization of Korean Pan-Civilization.",
+   "english_reference": "Bush spokesman Gordon Johndroe called North Korea's pledge \"a major step towards the goal of achieving the verifiable denuclearization of the Korean peninsula.\""
+  },
+  {
+   "file": "15338619041024156177.wav",
+   "reference": "سائنس جو بنيادي مقصد اهو معلوم ڪرڻ آهي تہ سائنسي طريقن جي ذريعي دنيا ڪيئن ڪم ڪري ٿي. حقيقت ۾ اهو طريقو گهڻو ڪري سائنسي تحقيق جي رهنمائي ڪري ٿو.",
+   "heard": "साइंस जो बुनियादी मक़सदु उहो मालूम करणु आहे त साइंसी तरीक़नि जे ज़रिए दुनिया कीअं कमु करे थी हक़ीक़त में उहो नज़रियो उहो तरीक़ो घणो करे साइंसी तहक़ीक़त जी रहमुमाई करे थो",
+   "wer": 1.067,
+   "confidence": 0.955,
+   "english": "The basic purpose of science is to find out how the world works through scientific methods.",
+   "english_reference": "Science’s main goal is to figure out the way the world works through the scientific method. This method in fact guides most scientific research."
+  },
+  {
+   "file": "15744557046059842206.wav",
+   "reference": "جيتوڻڪ اهو لفظ \"خانہ بدوش\" خاص طور تي غير رومانين ۾ اڪثر استعمال ٿيندو آهي جنهن کي نازيبا سمجهيو ويندو آهي ڇاڪاڻ تہ ان جو تعلق نفي لڪير جي فقيرن ۽ روماني ماڻهن جي غلط خيالن سان آهي.",
+   "heard": "जेतोणीकि उहो लफ़्ज़ ख़ानाइबदोश ख़ासि तौर ते ग़ै़रु रोमनिुनि में अक्सरु इस्तेमालु थींदो आहे जंहिंखे नाज़िबा सम्झो वेंदो आहे छाकाणि त उन जो ताल्ुक़ु नफ़ी लकीर जे फ़क़ीरनि ऐं रोमानी माण्हुनि जे ग़लति ख़्यालनि सां आहे",
+   "wer": 1.0,
+   "confidence": 0.901,
+   "english": "However, the same term anomaly is particularly used in Latin, which is understood to mean anomaly, as it is related to the sin of the sin line and the sin of the Roman people.",
+   "english_reference": "Though it is widely used, especially among non-Romani, the word \"Gypsy\" is often considered offensive because of its associations with negative stereotypes and inaccurate perceptions of Romani people."
+  },
+  {
+   "file": "16350293234105661168.wav",
+   "reference": "ڪروگر نيشنل پارڪ (KNP) ڏکڻ آفريقا جي اتر-اوپر پاسي ۾ واقع آهي ۽ اوڀر ۾ موزمبيق جي سرحد، اتر ۾ زمبابوي، ۽ ڏکڻ سرحد جيڪو ڪروڪوڊائيل ندي آهي سان گڏ هلندي اچي ٿي.",
+   "heard": "ॾखणु केएनएफ क्रोगर नेशनल पार्क अफ्रीका जे उत्तर ओभर पासे में वाक़ि आहे ऐं ओभर में मौज़म्बीक जी सरहद उत्तर में ज़म्बाब्वे ऐं ॾखिणु सरहद जेको क्रोकोंडाइल नदी आहे सां गॾु हलंदी अचे थी",
+   "wer": 1.0,
+   "confidence": 0.931,
+   "english": "The southern KNF Kroger National Park is located near the northern tip of Africa and runs along the border of Mozambique to the north with Zimbabwe and the southern border which is the Crocodile River.",
+   "english_reference": "The Kruger National Park (KNP) lies in the north-east of South Africa and runs along the border of Mozambique in the east, Zimbabwe in the north, and the southern border is the Crocodile River."
+  },
+  {
+   "file": "16389118403938705666.wav",
+   "reference": "اڳوڻي هائوس اسپيڪر نيوٽ گنگرچ، ٽيڪساس جي گورنر رِڪ پيري، ۽ ڪانگريس خاتون مِشيل باڪمين، ترتيب وار چوٿين، پنجين ۽ ڇهين نمبر تي پورو ڪيو.",
+   "heard": "अॻूणे हाउस स्पीकर नेविट गंगरच टेक्सास जे गवर्नर रिक पैेरी ऐं कांग्रेस ख़ातून मशील बाकमैन तरतीब वार चोथे पंजे ऐं छहे नंबर ते पूरो कयो",
+   "wer": 1.0,
+   "confidence": 0.929,
+   "english": "Former House Speaker Nevitt Gangrich, Texas Governor Rick Perry, and Congresswoman Michelle Bachmann finished fourth and sixth, respectively.",
+   "english_reference": "Former House Speaker Newt Gingrich, Texas governor Rick Perry, and Congresswoman Michele Bachmann finished in fourth, fifth, and sixth place, respectively."
+  },
+  {
+   "file": "16829666030444843181.wav",
+   "reference": "هزارين سال پهرين، هڪ ارسطارڪس نالي ماڻهو چيو تہ شمسي نظام سج جي چوڌاري گهمي ٿو.",
+   "heard": "हज़ारे साल पहिरीं हिकु अरस्तराक्स नाले माण्हुनि चयो त तु शमशी निज़ामु सिज जे चौधारी घुमे थो",
+   "wer": 1.062,
+   "confidence": 0.903,
+   "english": "Thousands of years ago, an Aristocrat said that you visited Shamshi Nizam-i-Sijj.",
+   "english_reference": "Thousands of years ago, a man called Aristarchus said that the Solar System moved around the Sun."
+  },
+  {
+   "file": "16924470152383692400.wav",
+   "reference": "جيتوڻڪ اهو لفظ \"خانہ بدوش\" خاص طور تي غير رومانين ۾ اڪثر استعمال ٿيندو آهي جنهن کي نازيبا سمجهيو ويندو آهي ڇاڪاڻ تہ ان جو تعلق نفي لڪير جي فقيرن ۽ روماني ماڻهن جي غلط خيالن سان آهي.",
+   "heard": "जेतोणीकि इहो लफ़्ज़ु ख़ानाबदोश ख़ासि तौर ते ग़र रोमानियन में अक्सर इस्तेमालु थींदो आहे जंहिंखे नादेबा सम्झो वेंदो आहे छाकाणि त उनजो तालुक़ु नफ़ी लकीर जे फ़क़ीरनि ऐं रोमानी माण्हुनि जे ग़लति ख़्यालनि सां आहे",
+   "wer": 1.0,
+   "confidence": 0.902,
+   "english": "Although this term nomadism is particularly common in Romanian, it is understood as nadeba because Unzo belongs to the Nefi line and to the fault of the Roman people.",
+   "english_reference": "Though it is widely used, especially among non-Romani, the word \"Gypsy\" is often considered offensive because of its associations with negative stereotypes and inaccurate perceptions of Romani people."
+  },
+  {
+   "file": "3866299466423033799.wav",
+   "reference": "عورتن کي اهو سمجهڻ گهرجي ته ثقافتي فرق جي نتيي ۾ اهو ٿي سگهي جن کي اهي بدسلوڪي سمجهن ٿيون ۽ انهي جي پيروي ڪرڻ، هٿ کان ڦري وٺڻ، وغيره غير معمولي ناهي.",
+   "heard": "औरतुनि खे सम्झणु घुरिजे त सकाफ़ती फ़र्क़ जे नतीअ में उहो थी सघे जिन खे उहे बदसलूकी सम्झनि थियूं ऐं उननि जी पैरवी करणु हथ खां फुरे वठणु वग़ैरह वग़ैरह मामूली न आहे",
+   "wer": 1.0,
+   "confidence": 0.947,
+   "english": "Women should remember that cultural differences can result in those who remember the abuse and that it is not trivial to pursue the latter.",
+   "english_reference": "Women should realize that cultural differences may result in what they would consider harassment and it is not uncommon to be followed, grabbed by the arm, etc."
+  },
+  {
+   "file": "4290087681473395219.wav",
+   "reference": "ڪروگر نيشنل پارڪ (KNP) ڏکڻ آفريقا جي اتر-اوپر پاسي ۾ واقع آهي ۽ اوڀر ۾ موزمبيق جي سرحد، اتر ۾ زمبابوي، ۽ ڏکڻ سرحد جيڪو ڪروڪوڊائيل ندي آهي سان گڏ هلندي اچي ٿي.",
+   "heard": "ॾखणु केएनपी क्रूगर नेशनल पार्क अफ्रीका जे उतर ओभरि पासे में वाक़ि आहे ऐं ओभरि में मोज़म्बिक जी सरहद उतर में ज़म्बाबावे ऐं ॾखणु सरहद जेको क्रोकोडाल नदी आहे सां गॾु हलदी अचे थो",
+   "wer": 1.0,
+   "confidence": 0.928,
+   "english": "The southern KNP Kruger National Park is located near North Ouari in Africa and borders Mozambique to the north with Zimbabwe and the southern border with the Crocodile River in Ouari.",
+   "english_reference": "The Kruger National Park (KNP) lies in the north-east of South Africa and runs along the border of Mozambique in the east, Zimbabwe in the north, and the southern border is the Crocodile River."
+  },
+  {
+   "file": "4618492833421049250.wav",
+   "reference": "عورتن کي اهو سمجهڻ گهرجي ته ثقافتي فرق جي نتيي ۾ اهو ٿي سگهي جن کي اهي بدسلوڪي سمجهن ٿيون ۽ انهي جي پيروي ڪرڻ، هٿ کان ڦري وٺڻ، وغيره غير معمولي ناهي.",
+   "heard": "औरतुनि खे उहो सम्झणु घुरिजे त सकाफ़ती फ़र्क़ु जे नतीजे में उहो थी सघे थो जंहिंखे उहो बदसलूकी सम्झनि थियूं ऐं उननि जी पैरवी करणु हथ खां फ्री वठणु वग़ैरह गै़र मामूली नाहे",
+   "wer": 1.0,
+   "confidence": 0.899,
+   "english": "Women should also remember that cultural differences can result in the same abuse as they recall and that pursuing the latter is not as trivial as taking it out of hand.",
+   "english_reference": "Women should realize that cultural differences may result in what they would consider harassment and it is not uncommon to be followed, grabbed by the arm, etc."
+  },
+  {
+   "file": "5498979878266695585.wav",
+   "reference": "بش جي ترجمان گورڊن جانڊرو اتر ڪوريا جي عهد نامي کي \"ڪوريائي پيننسيولا جا قابل تصديق ڊي نيوڪليئرائيزشن حاصل ڪرڻ جي مقصد ڏانهن هڪ اهم قدم قرار ڏنو.\"",
+   "heard": "बुश जे तर्जमान गोर्डन जॉनड्रो उतर कोरियाई जे अहदनामे खे कोरियाई पेंसिल्वेनिया जा क़ाबिले तस्दीक़ ड्यन्यूक्लराइज़ेशन हासिलु करण जे मक़सदु ॾांहुं हिकु अहम क़दम क़रारु ॾिनो",
+   "wer": 1.0,
+   "confidence": 0.925,
+   "english": "Bush's spokesman, Gordon Jondro, called the North Korean regime an important step towards achieving the desired denuclearization of Korean Pennsylvania.",
+   "english_reference": "Bush spokesman Gordon Johndroe called North Korea's pledge \"a major step towards the goal of achieving the verifiable denuclearization of the Korean peninsula.\""
+  },
+  {
+   "file": "6019440476207411849.wav",
+   "reference": "هزارين سال پهرين، هڪ ارسطارڪس نالي ماڻهو چيو تہ شمسي نظام سج جي چوڌاري گهمي ٿو.",
+   "heard": "हज़ारे साल पहिरीं हिकु अरस तारक्स नाले माण्हू चयो त शमसी निज़ामु सिज जे चौधारी घुमी थो",
+   "wer": 1.062,
+   "confidence": 0.94,
+   "english": "Thousands of years ago, an emperor named Taraks said that the Shamsi Nizam used to roam around in the courtyard of the mosque.",
+   "english_reference": "Thousands of years ago, a man called Aristarchus said that the Solar System moved around the Sun."
+  },
+  {
+   "file": "6244640329161267909.wav",
+   "reference": "تحقيق ڪارن تجويز ڏني تہ، جيتوڻڪ اهو نوجوان ڊائنوسار جي پڇ آهي، سيمپل وڏي پر جو آهي نہ ڪي ڪنهن ڪڪڙي جو هلڪو پر.",
+   "heard": "हिकु कारण तजवीज़ डॾिनी त जेतोणीकि उहो नौजवान डायनोसॉरनि जी पुछ आहे सिंपल वॾे पर जो आहे नकि कंहिं कुकड़ जो हल्को पर",
+   "wer": 1.0,
+   "confidence": 0.881,
+   "english": "One reason proposed is that while the question of the same young dinosaur is simple, it is not the same as that of a rooster.",
+   "english_reference": "The researchers suggested that, even though this is the tail of a young dinosaur, the sample shows adult plumage and not a chick's down."
+  },
+  {
+   "file": "6591357536908607001.wav",
+   "reference": "بش جي ترجمان گورڊن جانڊرو اتر ڪوريا جي عهد نامي کي \"ڪوريائي پيننسيولا جا قابل تصديق ڊي نيوڪليئرائيزشن حاصل ڪرڻ جي مقصد ڏانهن هڪ اهم قدم قرار ڏنو.\"",
+   "heard": "बुश जे तर्जुमान गोर््डन जॉनरो उत्तर कोरिया जे अहदनामे खे कोरियाई पेनसुला जा क़ाबिलु तसदीक़ु डी न्यूक्लराइज़ेशन हासिलु करण जे मक़सदु ॾांहुं हिकु अहम क़दम क़रारु ॾिनो",
+   "wer": 1.0,
+   "confidence": 0.943,
+   "english": "Bush's spokesman, Gordon Jonro, called North Korea's denuclearization an important step towards achieving the denuclearization of the Korean Peninsula.",
+   "english_reference": "Bush spokesman Gordon Johndroe called North Korea's pledge \"a major step towards the goal of achieving the verifiable denuclearization of the Korean peninsula.\""
+  },
+  {
+   "file": "7623436288669800532.wav",
+   "reference": "هزارين سال پهرين، هڪ ارسطارڪس نالي ماڻهو چيو تہ شمسي نظام سج جي چوڌاري گهمي ٿو.",
+   "heard": "हज़ारे साल पहिरीं हिकु अरस्तारस अस्तस्तारक्स नाले माण्हू हुयो चयो त शमशी निज़ामु सिज जे चौधारी घुमे थो",
+   "wer": 1.125,
+   "confidence": 0.924,
+   "english": "Thousands of years ago, a man named Aristarchus Astarchus said that the Shamsi Nizam visited the Chaudhury of Sijj.",
+   "english_reference": "Thousands of years ago, a man called Aristarchus said that the Solar System moved around the Sun."
+  },
+  {
+   "file": "8199574121177753349.wav",
+   "reference": "عورتن کي اهو سمجهڻ گهرجي ته ثقافتي فرق جي نتيي ۾ اهو ٿي سگهي جن کي اهي بدسلوڪي سمجهن ٿيون ۽ انهي جي پيروي ڪرڻ، هٿ کان ڦري وٺڻ، وغيره غير معمولي ناهي.",
+   "heard": "औरतुनि खे इहो सम्झणु घुरिजे त सकाफ़ती फ़र्क़ु जे नतीजे में इहो थी सघे थो जंहिंखे इहे बदलूकी सम्झनि थियूं ऐं उन जी पैरवी करणु हथु खां फिरी वठणु वग़ैरह वग़ैरह मामूलु नाहे",
+   "wer": 1.0,
+   "confidence": 0.941,
+   "english": "Women should remember that cultural differences can result in changes that are not as common as remembering and following them.",
+   "english_reference": "Women should realize that cultural differences may result in what they would consider harassment and it is not uncommon to be followed, grabbed by the arm, etc."
+  },
+  {
+   "file": "8395983325011348473.wav",
+   "reference": "جيتوڻڪ اهو لفظ \"خانہ بدوش\" خاص طور تي غير رومانين ۾ اڪثر استعمال ٿيندو آهي جنهن کي نازيبا سمجهيو ويندو آهي ڇاڪاڻ تہ ان جو تعلق نفي لڪير جي فقيرن ۽ روماني ماڻهن جي غلط خيالن سان آهي.",
+   "heard": "जेतोणीकि इहो लफ़्ज़ु ख़ानाबदोश ख़ासि तौर ते ग़रु रोमनिुनि में अक्सर इस्तेमालु थींदो आहे जंकखे नाज़ैबा सम्झो वेंदो आहे छाकाणि त उनजो तालुक़ु नफ़ी लकीर जे फ़क़ीरनि ऐं रोमानी माण्हुनि जे ग़लति ख़्यालनि सां आहे",
+   "wer": 1.0,
+   "confidence": 0.891,
+   "english": "While this term nomadism is particularly frequently used in Romance, the term naziba is considered to be derived from the Nafī line of fiqh and the fault of the Romani people.",
+   "english_reference": "Though it is widely used, especially among non-Romani, the word \"Gypsy\" is often considered offensive because of its associations with negative stereotypes and inaccurate perceptions of Romani people."
+  },
+  {
+   "file": "9487292436294257771.wav",
+   "reference": "ڪروگر نيشنل پارڪ (KNP) ڏکڻ آفريقا جي اتر-اوپر پاسي ۾ واقع آهي ۽ اوڀر ۾ موزمبيق جي سرحد، اتر ۾ زمبابوي، ۽ ڏکڻ سرحد جيڪو ڪروڪوڊائيل ندي آهي سان گڏ هلندي اچي ٿي.",
+   "heard": "॒खण के एनपी क्रूगर नेशनल पार्क अफ्रीका जे उतर ओभर पासे में वाक़ि आहे ऐं ओभरि में मोज़म्बिक जी सरहद उतर में ज़म्बाववे ऐं ॾखणु सरहद जेको क्रोकोडायल नदी आहे सां गॾु अची हलंदी अचे थी",
+   "wer": 1.059,
+   "confidence": 0.915,
+   "english": "In the south, NP Kruger National Park is located near the northern tip of Africa and runs along the border of Mozambique to the north with Zimbabwe and the southern border which is the Crocodile River.",
+   "english_reference": "The Kruger National Park (KNP) lies in the north-east of South Africa and runs along the border of Mozambique in the east, Zimbabwe in the north, and the southern border is the Crocodile River."
+  },
+  {
+   "file": "9757606586364370143.wav",
+   "reference": "تحقيق ڪارن تجويز ڏني تہ، جيتوڻڪ اهو نوجوان ڊائنوسار جي پڇ آهي، سيمپل وڏي پر جو آهي نہ ڪي ڪنهن ڪڪڙي جو هلڪو پر.",
+   "heard": "तहक़ीक़कारनि तजवीज़ डि॒नी आहे त जेतोणीकि उहो नौजवान डायनसॉर जो पुछु आहे सिम्पल वॾे पर जो आहे न की कंहिं कुकड़ जे हलु को पुछु पर",
+   "wer": 1.083,
+   "confidence": 0.887,
+   "english": "Researchers have proposed that while asking the same young dinosaur is simple, asking for a cockroach is not.",
+   "english_reference": "The researchers suggested that, even though this is the tail of a young dinosaur, the sample shows adult plumage and not a chick's down."
+  },
+  {
+   "file": "9968243257702491677.wav",
+   "reference": "تحقيق ڪارن تجويز ڏني تہ، جيتوڻڪ اهو نوجوان ڊائنوسار جي پڇ آهي، سيمپل وڏي پر جو آهي نہ ڪي ڪنهن ڪڪڙي جو هلڪو پر.",
+   "heard": "तक़ीकरन तजवीज़ डि॒नी त जेतोणीकि उहो नौजवान डायनोसॉार जी पुछ आहे सैम्पल वॾे जो पर जो आहे पर नकी कंहिं कुकड़े जो हल्को पर",
+   "wer": 1.0,
+   "confidence": 0.882,
+   "english": "Technicians have proposed that although the same young dinosaur has a larger sample size, it is not the same as a rooster.",
+   "english_reference": "The researchers suggested that, even though this is the tail of a young dinosaur, the sample shows adult plumage and not a chick's down."
+  }
+ ]
+}

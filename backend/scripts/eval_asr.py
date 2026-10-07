@@ -52,10 +52,14 @@ def main(folder: str, lang: str) -> None:
         proc = None
     w_err = w_tot = c_err = c_tot = 0
     audio_s = taken_s = 0.0
-    rows = []
+    rows, rejected = [], []
     for p in clips:
         t = time.perf_counter()
-        out = language.transcribe(p.read_bytes(), lang)
+        try:
+            out = language.transcribe(p.read_bytes(), lang)
+        except language.AudioRejected as e:  # the app refuses it too (e.g. under the minimum length); counted, not scored
+            rejected.append({"file": p.name, "why": str(e)})
+            continue
         taken_s += time.perf_counter() - t
         audio_s += out["seconds_audio"]
         ref, hyp = norm(refs[p.name]), norm(out["text"])
@@ -69,7 +73,7 @@ def main(folder: str, lang: str) -> None:
         r["english"] = e
     summary = {
         "engine": language.asr_engine_name(), "decoding": language.get_settings().asr_decoding, "language": lang,
-        "clips": len(rows), "audio_seconds": round(audio_s, 1),
+        "clips": len(rows), "rejected_by_app": rejected, "audio_seconds": round(audio_s, 1),
         "wer": round(w_err / max(1, w_tot), 3), "cer": round(c_err / max(1, c_tot), 3),
         "real_time_factor": round(taken_s / max(1e-9, audio_s), 3),
         "process_private_gb": round(getattr(mem, "private", mem.vms) / 2**30, 2) if mem else None,

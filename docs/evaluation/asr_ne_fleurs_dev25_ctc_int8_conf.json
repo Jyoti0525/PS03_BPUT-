@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "ne",
+  "clips": 25,
+  "audio_seconds": 298.6,
+  "wer": 0.291,
+  "cer": 0.126,
+  "real_time_factor": 0.249,
+  "process_private_gb": 3.43,
+  "process_peak_working_set_gb": 2.48,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 60.1,
+   "bleu": 35.0
+  }
+ },
+ "clips": [
+  {
+   "file": "10457792816923327789.wav",
+   "reference": "पोल्याण्डका पुरुषतर्फको दृष्टिविहीन स्कीयर Maciej Krezel र मार्गदर्शक Anna Ogarzynska ले सुपर-जीमा तेह्रौं स्थानमा खेल पूरा गरे। पुरुषतर्फको सुपर-जीमा दक्षिण कोरियाका Jong Seork Park ले चौबीसौं स्थानमा खेल पूरा गरे‌।",
+   "heard": "पोल्यान्डका पुरुषतर्फ दृष्टिविहीन स्ेबकार म्याक्सेज र मार्गदर्शन एना ओर्ग्याजीले सुपर जीमा तेस्रो स्थ गरे पुरुषतर्फको सुपर जीमा दक्षिण कोरियाका जोन पार्कले चौबिसौँ स्थानमा खेल पूरा गरे",
+   "wer": 0.594,
+   "confidence": 0.871,
+   "english": "The Polish men's side finished third in the Super G with blind Sbakar Maxz and guidance Ana Orgzy. In the men's Super G, South Korea's John Park finished in twenty-fourth place.",
+   "english_reference": "Poland's men's visually impaired skier Maciej Krezel and guide Anna Ogarzynska finished thirteenth in the Super-G. South Korea's Jong Seork Park finished twenty-fourth in the men's sitting Super-G."
+  },
+  {
+   "file": "10947613517732429675.wav",
+   "reference": "उनको पहिलो स्लालोम थियो, जहाँ उनले आफ्नो पहिलो दौडमा डिड नट फिनिस कमाइन्। त्यो दौडमा 116 मध्ये 36 जनाको उस्तै नतिजा थियो।",
+   "heard": "उनको पहिलो सलालोम थियो जहाँ उनले आफ्नो पहिलो दौडमा डिड नट फिनिस कमाइन् त्यो दौडमा एक सय सोह्र मध्ये छत्तिसजनाको उस्तै नतिजा थियो",
+   "wer": 0.273,
+   "confidence": 0.958,
+   "english": "Her first Salalom was where she earned a Did Not Finish in her first race with the same result as thirty-six of the one hundred and sixteen in that race.",
+   "english_reference": "Her first was the Slalom, where she earned a Did Not Finish in her first run. 36 of the 116 competitors had the same result in that race."
+  },
+  {
+   "file": "12830597223951814537.wav",
+   "reference": "यसका साथै, विश्वव्यापी उष्णताले प्रभाव पारेका देशहरूलाई यसका असरहरूसँग सामना गर्न सहयोग गर्न संयुक्त राष्ट्रसङ्घले यससम्बन्धी कोशलाई अन्तिम रूप दिने आशा राखेको छ।",
+   "heard": "यसका साथै विश्वव्यापी उष्णताले प्रभाव पारेका देशहरूलाई यसका असरहरूसँग सामना गर्न सहयोग गर्न संयुक्त राष्ट्रसङ्घले यस सम्बन्धी कोषलाई अन्तिम रूप दिने आशा राखेको छ",
+   "wer": 0.13,
+   "confidence": 0.979,
+   "english": "In addition, the United Nations hopes to finalize funding to help countries affected by global warming cope with its effects.",
+   "english_reference": "The U.N. also hopes to finalize a fund to help countries affected by global warming to cope with the impacts."
+  },
+  {
+   "file": "135394400890940563.wav",
+   "reference": "कुनै सङ्गठनमा नयाँ परिवर्तन हुन सक्नुअघि, नेतृत्वले नवीनताका साथै साझा ज्ञान र सङ्गठनात्मक शिक्षाको संस्कृति सिर्जना गर्नुपर्दछ।",
+   "heard": "कुनै सङ्गठनमा नयाँ परिवर्तन हुन सक्नुअघि नेतृत्वले नवीनताको साथै साझा ज्ञान र सङ्गठनात्मक शिक्षाको संस्कृत सिर्जना गर्नुपर्र्दछ",
+   "wer": 0.176,
+   "confidence": 0.944,
+   "english": "Leadership must create a culture of innovation as well as shared knowledge and organizational learning before new changes can take place in an organization.",
+   "english_reference": "Before an organization can be innovative, leadership must create a culture of innovation as well as shared knowledge and organizational learning."
+  },
+  {
+   "file": "13616061689571201944.wav",
+   "reference": "कुरियर कम्पनीहरूलाई चीजहरू छिटो डेलिभर गर्न राम्रो तरिकाले भुक्तानी गरिन्छ। व्यावहारिक कागजात, व्यापारिक सामान वा स्पेयर पार्टहरूको तत्काल मर्मतका लागि समय धेरै महत्त्वपूर्ण हुन्छ।",
+   "heard": "कुरयर कम्पनीहरूलाई चिजहरू छिटो डेलिभर गर्न राम्रो तरिकाले भुक्तानी गरिन्छ व्यावहारिक कागजात व्यापारिक सामान र स्पेयर पार्टहरूको तत्काल मरम्मतका लागि समय धेरै महत्त्वपूर्ण हुन्छ",
+   "wer": 0.167,
+   "confidence": 0.962,
+   "english": "Courier companies are well paid to deliver items quickly Practical documentation Time is very important for immediate repair of merchandise and spare parts.",
+   "english_reference": "Courier companies are well paid for delivering things quickly. Frequently, time is very important with business documents, merchandise or spare parts for an urgent repair."
+  },
+  {
+   "file": "14300765519960117713.wav",
+   "reference": "एउटा कोर्सले सामान्यतयाः व्यवहारिक अनुभवसहित यहाँ अझ विस्तृतमा छलफल गरिएको सबै मुद्दाहरूको समेट्दछ।",
+   "heard": "एउटा कोर्सले सामान्यत व्यावहारिक अनुभाषित यहाँ विस्तृत छलफल गरिएको मुद्दाहरूमा समर्थछ",
+   "wer": 0.615,
+   "confidence": 0.943,
+   "english": "A course generally capable of defining practical issues discussed in detail here.",
+   "english_reference": "A course will normally cover all the issues discussed here in far greater detail, usually with practical experience."
+  },
+  {
+   "file": "14857601904351289404.wav",
+   "reference": "स्पेनीहरूले औपनिवेशीकरण सुरु गरे जुन तीन शताब्दीसम्म रह्यो।",
+   "heard": "स्पेनीहरूले औपनिवेशीकरण सुरु गरे जुन तीन शताब्दीसम्म रहयो",
+   "wer": 0.125,
+   "confidence": 0.928,
+   "english": "The Spanish began a colonization that lasted for three centuries.",
+   "english_reference": "The Spaniards started the colonization period which lasted for three centuries."
+  },
+  {
+   "file": "15083325650250155028.wav",
+   "reference": "कुरियर कम्पनीहरूलाई चीजहरू छिटो डेलिभर गर्न राम्रो तरिकाले भुक्तानी गरिन्छ। व्यावहारिक कागजात, व्यापारिक सामान वा स्पेयर पार्टहरूको तत्काल मर्मतका लागि समय धेरै महत्त्वपूर्ण हुन्छ।",
+   "heard": "कुरियर कम्पनीहरूलाई चिजहरू छिटो डेलिभर गर्न राम्रो तरिकाले भुक्तानी गरिन्छ व्यावहारिक कागजात व्यापारिक सामान वा स्पेयर पार्टहरूको तत्काल मर्म्मतका लागि समय धेरै महत्त्वपूर्ण हुन्छ",
+   "wer": 0.083,
+   "confidence": 0.965,
+   "english": "Courier companies are well paid to deliver items quickly Practical documentation Time is very important for immediate repair of merchandise or spare parts.",
+   "english_reference": "Courier companies are well paid for delivering things quickly. Frequently, time is very important with business documents, merchandise or spare parts for an urgent repair."
+  },
+  {
+   "file": "15750094249377020369.wav",
+   "reference": "एउटा कोर्सले सामान्यतयाः व्यवहारिक अनुभवसहित यहाँ अझ विस्तृतमा छलफल गरिएको सबै मुद्दाहरूको समेट्दछ।",
+   "heard": "एउटा कोर्सले सामान्यत व्यावहारिक अनुभवसहित यहाँ अझ विस्तृत्वमा छलफल गरिएको सबै मुद्दाहरूको समृद्ध छ",
+   "wer": 0.385,
+   "confidence": 0.94,
+   "english": "A course is typically rich in all the issues discussed here in more detail, along with practical experience.",
+   "english_reference": "A course will normally cover all the issues discussed here in far greater detail, usually with practical experience."
+  },
+  {
+   "file": "1662582047725040878.wav",
+   "reference": "कुनै सङ्गठनमा नयाँ परिवर्तन हुन सक्नुअघि, नेतृत्वले नवीनताका साथै साझा ज्ञान र सङ्गठनात्मक शिक्षाको संस्कृति सिर्जना गर्नुपर्दछ।",
+   "heard": "कुनै सङ्गठनमा नयाँ परिवर्तन हुन सक्नुअघि नेतृत्वले नवीनताका साथै साझा ज्ञान र सङ्गठनात्मक शिक्षाको संस्कृति सिर्जना गर्नुपर्र्दछ",
+   "wer": 0.059,
+   "confidence": 0.953,
+   "english": "Leadership must create a culture of innovation as well as shared knowledge and organizational learning before new changes can take place in an organization.",
+   "english_reference": "Before an organization can be innovative, leadership must create a culture of innovation as well as shared knowledge and organizational learning."
+  },
+  {
+   "file": "17491031427140782332.wav",
+   "reference": "बिरूवा वरपरका बासिन्दाहरूलाई घरभित्र रहन, वातानुकूलन बन्द गर्न र नलका पानी नपिउन स्थानीय अधिकारीहरूले चेतावनी दिइरहेका छन्।",
+   "heard": "बिरुवा वरपरका बासिन्दाहरूलाई घरभित्र रहन वातानुकूलन बन्द गर्न र नलका पानी नपिउन स्थानीय अधिकारीहरूले चेतावनी दिइरहेका छन्",
+   "wer": 0.059,
+   "confidence": 0.952,
+   "english": "Local authorities are warning residents around the plant to stay indoors, turn off the air conditioning and not drink tap water.",
+   "english_reference": "Local authorities are warning residents in the vicinity of the plant to stay indoors, turn off air-conditioners and not to drink tap water."
+  },
+  {
+   "file": "18204524895380835109.wav",
+   "reference": "यसले कसैले पनि ईराकमा यस बिन्दुमा कुनै पनि कार्यवाहीले साम्प्रदायिक युद्ध, बढ्दो हिंसा वा अराजकतातिरको स्लाईड रोक्नेछ भनेर ग्यारेण्टी दिन सक्दैन भन्दै चेतावनी दिन्छ।",
+   "heard": "यसले कसैले पनि इराकमा यस बिन्दुमा कुनै पनि कार्यवाहीले साम्प्रदायिक युद्ध बढ्दो हिंसा र आराजकतातिरको स्लाइड रोकेछन् भन्ने र ग्यारेन्टी दिन सक्दैन भन्ने चेतावनी दिन्छ",
+   "wer": 0.375,
+   "confidence": 0.957,
+   "english": "It warns that no one can and does not guarantee that any action at this point in Iraq will stop the communal war escalating violence and the slide towards dictatorship.",
+   "english_reference": "It warns No one can guarantee that any course of action in Iraq at this point will stop sectarian warfare, growing violence, or a slide toward chaos."
+  },
+  {
+   "file": "1868362974287720590.wav",
+   "reference": "यसका साथै, विश्वव्यापी उष्णताले प्रभाव पारेका देशहरूलाई यसका असरहरूसँग सामना गर्न सहयोग गर्न संयुक्त राष्ट्रसङ्घले यससम्बन्धी कोशलाई अन्तिम रूप दिने आशा राखेको छ।",
+   "heard": "यसका साथै विश्वव्यापी उषणताले प्रभाव पारेका देशहरूलाई यसका असरहरूसँग सामना गर्न सहयोग गर्न संयुक्त राष्ट्रियसङ्घले यस सम्बन्धी कोषलाई अन्तिम रूप दिने आशा राखेको छ",
+   "wer": 0.217,
+   "confidence": 0.969,
+   "english": "In addition, the United Nations hopes to finalize funding to help countries affected by global warming cope with its effects.",
+   "english_reference": "The U.N. also hopes to finalize a fund to help countries affected by global warming to cope with the impacts."
+  },
+  {
+   "file": "3013950306876819718.wav",
+   "reference": "कुनै सङ्गठनमा नयाँ परिवर्तन हुन सक्नुअघि, नेतृत्वले नवीनताका साथै साझा ज्ञान र सङ्गठनात्मक शिक्षाको संस्कृति सिर्जना गर्नुपर्दछ।",
+   "heard": "कुनै सङ्गठनमा नयाँ परिवर्तन हुन सक्नुअघि नेतृत्वले नवीनताका साथै साझा ज्ञान र सङ्गठनात्मक शिक्षाको संस्कृत सिर्जना गर्नुपर्दछ",
+   "wer": 0.059,
+   "confidence": 0.956,
+   "english": "Leadership must create a culture of innovation as well as shared knowledge and organizational learning before new changes can take place in an organization.",
+   "english_reference": "Before an organization can be innovative, leadership must create a culture of innovation as well as shared knowledge and organizational learning."
+  },
+  {
+   "file": "3184677605209226640.wav",
+   "reference": "अधिकांश जिल्लाहरूमा साना जापानी कोस्टर बसहरूद्वारा सेवा पुर्‍याइन्छन्, जुन आरामदायी र कडा हुन्छन्।",
+   "heard": "अधिकांश जिल्लाहरूमा साना जापानी कोस्टर बसहरूद्वारा सेवा पुर्याइन्छन् जुन आरामदायी र खडा हुन्छन्",
+   "wer": 0.154,
+   "confidence": 0.955,
+   "english": "Most districts are served by small Japanese coaster buses that are comfortable and stand-alone.",
+   "english_reference": "Most districts are served by small Japanese Coaster Buses, which are comfortable and sturdy."
+  },
+  {
+   "file": "3950731403861020644.wav",
+   "reference": "अधिकांश जिल्लाहरूमा साना जापानी कोस्टर बसहरूद्वारा सेवा पुर्‍याइन्छन्, जुन आरामदायी र कडा हुन्छन्।",
+   "heard": "अधिकांश जिल्लाहरूमा साना जापानी कोस्टर बसहरूद्वारा सीमा पुर्याइन्छन् जुन आरामदायी र कडा हुन्छन्",
+   "wer": 0.154,
+   "confidence": 0.955,
+   "english": "Most districts are bordered by small Japanese coaster buses that are comfortable and sturdy.",
+   "english_reference": "Most districts are served by small Japanese Coaster Buses, which are comfortable and sturdy."
+  },
+  {
+   "file": "4190324370410789759.wav",
+   "reference": "धेरैजसो सामान्य ढाँचाहरू (उदाहरणका लागि APS ढाँचा परिवार) यस आकार अनुपातको बराबर वा लगभग निकट हुन्छन्।",
+   "heard": "धेरैजसो सामान्य ढाँचाहरू यस आकार अनुपातको बराबरमा लगभग विकट हुन्छन्",
+   "wer": 0.5,
+   "confidence": 0.91,
+   "english": "Most common patterns are about as rigid as this size ratio.",
+   "english_reference": "Many common formats (APS family of formats, for example) are equal to or closely approximate this aspect ratio."
+  },
+  {
+   "file": "4932196627251373575.wav",
+   "reference": "तिनीहरू दुर्घटना कति ठूलो थियो र पृथ्वी कसरी प्रभावित हुनेछ भन्ने निर्धारण गर्न अझै पनि कोसिस गर्दैछन्।",
+   "heard": "तिनीहरू दुर्घटना कति ठुलो थियो र पृथ्वी कसरी प्रभावित हुनेछ भन्ने निर्धारण गर्न अझै पनि कोसिस गर्दैछन्",
+   "wer": 0.059,
+   "confidence": 0.955,
+   "english": "They are still trying to determine how large the crash was and how the Earth will be affected.",
+   "english_reference": "They are still trying to determine just how large the crash was and how the Earth will be affected."
+  },
+  {
+   "file": "4963322074592112237.wav",
+   "reference": "NSA को रूपमा उनले Carter लाई कूटनीतिक रूपमा संसारको मामिला सम्हाल्न सहयोग गरे जस्तै क्याम्प डेभिड सामञ्जस्यता, 1978; 1970 को दशकको पछिल्लो समयमा युएस – चीन सम्बन्धकोलाई सामान्य बनाउने सोच; इरानी क्रान्ति, जसले इरान बन्धकको सङ्कट सिर्जना गर्‍यो, 1979; र अफगानिस्तानमा सोभियत आक्रमण, 1979।",
+   "heard": "यनएसएको रूपमा उनले कार्टरलाई कूटनीतिक रूपमा संसारको मामिला सम्हाल्न सहयोग गरे जस्तै क्याम्प डेभिड सामन््जस्यता उन्नाइस सय अठहत्तर उन्नाइस सय सत्तरको दशकको पछिल्लो समयमा युएस चीन सम्बन्धकोलाई सामान्य बनाउने सोच इरानी क्रान्ति जसले इरानबन्धको सङ्कट सिर्जना गर्यो उन्नाइस सय अस्सी उनासी उन्नाइस सय उनासी र अफगानिस्तानमा सोभियत आक्रमण उन्नाइस सय उनासी",
+   "wer": 0.558,
+   "confidence": 0.936,
+   "english": "As NSA, he helped Carter handle world affairs diplomatically, such as Camp David Consistency's idea of normalizing US-China relations in the late nineteen seventy-eighties, the Iranian Revolution that created the Iran-bond crisis of nineteen eighty-nine and the Soviet invasion of Afghanistan in nineteen-nine.",
+   "english_reference": "As NSA, he assisted Carter in diplomatically handling world affairs, such as the Camp David Accords, 1978; normalizing US–China relations thought the late 1970s; the Iranian Revolution, which led to the Iran hostage crisis, 1979; and the Soviet invasion in Afghanistan, 1979."
+  },
+  {
+   "file": "6414726112341161731.wav",
+   "reference": "धेरैजसो सामान्य ढाँचाहरू (उदाहरणका लागि APS ढाँचा परिवार) यस आकार अनुपातको बराबर वा लगभग निकट हुन्छन्।",
+   "heard": "धेरैजसो सामान्य ढाँचाहरू उदाहरणका लागि एपिएस ढाँचा परिवार यस आकार अनुपातको बराबर वा लगभग निकट हुन्छ",
+   "wer": 0.125,
+   "confidence": 0.977,
+   "english": "Most common formats, for example the APS format family, are equal to or nearly equal to this size ratio.",
+   "english_reference": "Many common formats (APS family of formats, for example) are equal to or closely approximate this aspect ratio."
+  },
+  {
+   "file": "6848921091179400322.wav",
+   "reference": "यसका साथै, विश्वव्यापी उष्णताले प्रभाव पारेका देशहरूलाई यसका असरहरूसँग सामना गर्न सहयोग गर्न संयुक्त राष्ट्रसङ्घले यससम्बन्धी कोशलाई अन्तिम रूप दिने आशा राखेको छ।",
+   "heard": "यसका साथै विश्वव्यापी उष्णताले प्रभाव पारेका देशहरूलाई यसका असरहरूसँग सामना गर्न सहयोग गर्न संयुक्त राष्ट्रसङ्घले यस सम्बन्धी कोषलाई अन्तिम रूप दिने आशा राखेको छ",
+   "wer": 0.13,
+   "confidence": 0.966,
+   "english": "In addition, the United Nations hopes to finalize funding to help countries affected by global warming cope with its effects.",
+   "english_reference": "The U.N. also hopes to finalize a fund to help countries affected by global warming to cope with the impacts."
+  },
+  {
+   "file": "8003303582811946675.wav",
+   "reference": "पोल्याण्डका पुरुषतर्फको दृष्टिविहीन स्कीयर Maciej Krezel र मार्गदर्शक Anna Ogarzynska ले सुपर-जीमा तेह्रौं स्थानमा खेल पूरा गरे। पुरुषतर्फको सुपर-जीमा दक्षिण कोरियाका Jong Seork Park ले चौबीसौं स्थानमा खेल पूरा गरे‌।",
+   "heard": "पोल्यान्डका पुरुषतर्फको दृष्टिविन स्कियर मिसिज केजिल र मार्गदर्शक एना अब्ाजिन्स्काले सुपरजीमा तेह्रौँ स्थानमा खेल पुरा गरे पुरुषतर्फको सुपरजीमा दक्षिण कोरियाका जोङ सियर्क पार्टले चौबिसौँ स्थानमा खेल पुरा गरे",
+   "wer": 0.656,
+   "confidence": 0.879,
+   "english": "Poland's men's eyeball skier Mrs Kejil and mentor Ana Abzynska finished the match in thirteenth place in the SuperG while South Korea's Jong Sierk Part finished in twenty-fourth place in the men's SuperG.",
+   "english_reference": "Poland's men's visually impaired skier Maciej Krezel and guide Anna Ogarzynska finished thirteenth in the Super-G. South Korea's Jong Seork Park finished twenty-fourth in the men's sitting Super-G."
+  },
+  {
+   "file": "964589760021002250.wav",
+   "reference": "तिनीहरू दुर्घटना कति ठूलो थियो र पृथ्वी कसरी प्रभावित हुनेछ भन्ने निर्धारण गर्न अझै पनि कोसिस गर्दैछन्।",
+   "heard": "तिनीहरू दुर्घटनामा कति ठुलो थिए र पृथ्वी कसरी प्रभावित हुनेछ निर्धारण गर्न अझै पनि कोसिस गर्दैछन्",
+   "wer": 0.235,
+   "confidence": 0.968,
+   "english": "They are still trying to determine how large the crash was and how the Earth will be affected.",
+   "english_reference": "They are still trying to determine just how large the crash was and how the Earth will be affected."
+  },
+  {
+   "file": "9708484338760920188.wav",
+   "reference": "उनको पहिलो स्लालोम थियो, जहाँ उनले आफ्नो पहिलो दौडमा डिड नट फिनिस कमाइन्। त्यो दौडमा 116 मध्ये 36 जनाको उस्तै नतिजा थियो।",
+   "heard": "उनको पहिलो श्लोकमा थियो जहाँ उनले आफ्नो पहिलो दौड हिड नट फिनिस कमाइन्ड त्यो दौडमा एक सय सोह्र मध्ये छत्तिसजनाको उस्तै नतिजा थियो",
+   "wer": 0.409,
+   "confidence": 0.952,
+   "english": "His first was in verse where he finished his first race with the same result as thirty-six of the one hundred and sixteen in that race.",
+   "english_reference": "Her first was the Slalom, where she earned a Did Not Finish in her first run. 36 of the 116 competitors had the same result in that race."
+  },
+  {
+   "file": "9833376970318278432.wav",
+   "reference": "स्पेनीहरूले औपनिवेशीकरण सुरु गरे जुन तीन शताब्दीसम्म रह्यो।",
+   "heard": "स्पेनीहरूले औपनिवेशीकरण सुरु गरे जुन तीन शताब्दीसम्म रह्यो",
+   "wer": 0.0,
+   "confidence": 0.908,
+   "english": "The Spanish began colonization which lasted for three centuries.",
+   "english_reference": "The Spaniards started the colonization period which lasted for three centuries."
+  }
+ ]
+}

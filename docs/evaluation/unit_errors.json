@@ -1,0 +1,46 @@
+{
+ "reports": 500,
+ "seed": 5151,
+ "clean_rows": 8740,
+ "clean_rows_marked": 0,
+ "by_break": {
+  "wrong unit": {
+   "n": 8140,
+   "caught": 7968,
+   "harmless": 61,
+   "row dropped": 111,
+   "caught_pct": 97.9,
+   "silent_pct": 0.0
+  },
+  "unit lost": {
+   "n": 8140,
+   "harmless": 6572,
+   "caught": 1568,
+   "caught_pct": 19.3,
+   "silent_pct": 0.0
+  },
+  "SI value, conventional unit": {
+   "n": 3728,
+   "caught": 3671,
+   "silent": 57,
+   "caught_pct": 98.5,
+   "silent_pct": 1.5
+  },
+  "conventional value, SI unit": {
+   "n": 82,
+   "caught": 80,
+   "silent": 2,
+   "caught_pct": 97.6,
+   "silent_pct": 2.4
+  }
+ },
+ "all": {
+  "n": 20090,
+  "caught": 13287,
+  "harmless": 6633,
+  "row dropped": 111,
+  "silent": 59,
+  "caught_pct": 66.1,
+  "silent_pct": 0.3
+ }
+}

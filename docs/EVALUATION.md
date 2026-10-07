@@ -83,6 +83,40 @@ asking the health worker to check with the patient; the rules still read them, s
   checks. Unmeasured languages use 0.92.
 - **Limit:** 25 read-speech clips per language. Thresholds should be re-set on recorded clinic speech.
 
+## Speech and translation — every FLEURS language (8 Oct)
+
+The same 8-bit CTC engine on the first 25 FLEURS dev clips of each of the 14 Indian languages FLEURS covers. The
+translation is IndicTrans2 indic-en 200M (offline) run on the speech transcript, so its score includes speech errors;
+the FLEURS English sentence is the reference.
+
+| Language | WER | CER | Processing time per second of speech | Translation chrF++ | BLEU |
+|---|---|---|---|---|---|
+| Assamese | 23.1 % | 5.6 % | 0.29 s | 53.0 | 27.1 |
+| Bengali | 11.5 % | 3.6 % | 0.27 s | 58.1 | 32.2 |
+| Gujarati | 15.9 % | 4.5 % | 0.27 s | 62.2 | 37.5 |
+| Hindi | 10.7 % | 4.6 % | 0.27 s | 62.1 | 32.8 |
+| Kannada | 20.6 % | 8.0 % | 0.28 s | 63.8 | 39.3 |
+| Malayalam | 20.7 % | 3.6 % | 0.23 s | 62.0 | 37.4 |
+| Marathi | 21.3 % | 9.1 % | 0.21 s | 60.0 | 31.4 |
+| Nepali | 29.1 % | 12.6 % | 0.25 s | 60.1 | 35.0 |
+| Odia | 21.6 % | 5.6 % | 0.22 s | 58.4 | 31.7 |
+| Punjabi | 14.2 % | 7.5 % | 0.26 s | 61.8 | 36.6 |
+| Sindhi | not comparable (script) | — | 0.22 s | 45.3 | 15.5 |
+| Tamil | 38.1 % | 16.9 % | 0.25 s | 58.0 | 21.5 |
+| Telugu | 31.5 % | 13.6 % | 0.27 s | 57.2 | 29.9 |
+| Urdu | 25.2 % | 12.0 % | 0.25 s | 61.3 | 35.3 |
+
+- **Sindhi:** the model writes Sindhi in Devanagari; FLEURS writes it in Arabic script, so the word error rate
+  (101.7 %) measures the script, not the recognition. The translation score, which does not depend on script, is
+  given instead. The app shows Sindhi as "speech not yet measured".
+- **Tamil and Telugu** are the weakest (agglutinative words: one wrong suffix is a whole wrong word; CER is the
+  fairer view). Read-back to the patient matters most there.
+- **Speed:** every language runs at 0.21–0.29 s per second of speech on the laptop CPU.
+- **RNNT decoding (Odia, same clips):** 19.3 % WER, 5.2 % CER, but 0.64 s per second of speech, so CTC stays the
+  default (`JEEVIA_ASR_DECODING=rnnt` switches; per clip: `docs/evaluation/asr_or_fleurs_dev25_rnnt_int8.json`).
+- **Reproduce:** `python backend/scripts/eval_fleurs_all.py`; per language
+  `docs/evaluation/asr_<lang>_fleurs_dev25_ctc_int8_conf.json`.
+
 ## Errors by language, sex and age band (G7, 7 Oct)
 
 Reproduce: `python backend/scripts/eval_bias.py` → `docs/evaluation/bias.json`.
@@ -127,6 +161,116 @@ mispronounced. Licence CC-BY-NC 4.0.
   ≥ 100 with headache, visual change, chest pain, breathlessness or one-sided weakness → YELLOW, doctor review.
 - **Meningism:** kept as the WHO IITT card states it (any two of altered mental status, stiff neck, fever or
   hypothermia, headache → RED). Fever with headache is over-triaged on purpose; the doctor can override with a reason.
+
+## Rule correctness: every rule tested four ways (8 Oct)
+
+`backend/tests/test_rule_coverage.py` builds the cases from each rule's own YAML condition, so a rule added to the
+pack is tested without anyone writing a case for it, and CI (`pytest`) fails if any rule lacks one.
+
+| Case | What it checks | Rules covered |
+|---|---|---|
+| Firing | an input made from the condition fires the rule | **162 / 162** |
+| Non-firing | the nearest input with ordinary values elsewhere gives a definite no | **162 / 162** |
+| Boundary | each threshold on the firing path: fires exactly at the published value (≥, ≤) or one step inside it (>, <), not one step past | 52 rules with a numeric threshold, 68 thresholds |
+| Unknown input | the measurement or danger sign the rule relied on is removed: the rule says "unknown", never "no" | 76 rules, 84 leaves |
+
+- The other 110 rules have no numeric threshold (findings only). The other 86 rules rely only on items whose absence
+  means "not reported" by design: lab values from an uploaded report, workplace answers, symptoms the patient did not
+  mention, and blood glucose (`vital_if_measured`, not part of routine triage). They have no unknown-input case.
+- **The test catches real slips:** with ≥ / ≤ deliberately changed to > / < in the engine, 21 rules fail the boundary case.
+- These cases check that the engine applies the YAML as written. They do not check that the YAML matches the
+  protocol; that is the protocol-derived cases in `test_rules.py` and a clinician's reading.
+
+## Missing information on incomplete cases (8 Oct)
+
+The 50 synthetic cases (`tests/data/llm_eval_cases.yaml`), each first completed (ordinary vital signs for the age,
+AVPU alert, danger-sign check recorded, an onset, a severity, gestation for pregnancies), then one item removed at a
+time: 493 incomplete cases. Whether an item **matters** is decided without asking the engine: the item is filled
+with a low and a high value (pulse 40 / 150, onset "last few hours" / "more than a month", severity 1 / 10, …) and it
+matters if the triage colour differs.
+
+| | Result |
+|---|---|
+| Items that matter, named as missing when removed | **141 / 144 (97.9 %)** |
+| Required items (core vital signs, AVPU, danger-sign check) named every time | **344 / 344** |
+| Items named although neither value changed the colour (extra questions) | 49 of 349 |
+| Came out GREEN with an item that matters missing | **1** |
+
+The three not named:
+- **Two onsets were not really missing.** "Weakness … since one hour" and "breathless … worse over the last week"
+  state the onset in the patient's own words, and the engine used them.
+- **One is a real gap: diastolic BP at age 12–13.** A 12-year-old with a scraped knee and systolic 120 is GREEN without
+  a diastolic reading; a diastolic of 125 would make it YELLOW (`LOCAL-SEVERE-HTN`). ATP's diastolic rule starts at
+  14, and the local rule treats an unmeasured BP as not tested. A 120/125 reading is implausible, so the rule is
+  unchanged until a clinician decides; recorded here instead.
+
+Reproduce: `python backend/scripts/eval_missing.py` → `docs/evaluation/missing_info.json`.
+
+## The 300-patient set: same complaint, any language, sex or age (8 Oct)
+
+50 vignettes written by the team (18 RED, 17 YELLOW, 15 GREEN expected, set before the engine was run), each told in
+English, Hindi and Odia by a man and a woman (maternal: two women), ages spread over the vignette's range: 300
+patients, 30 of them returning with earlier visits, plus 30 incomplete copies (no vital signs, no danger-sign check).
+The engine reads the patient's own words through the offline lexicon (no translation model) with recorded vitals.
+
+| | First run | After the fixes below |
+|---|---|---|
+| Vignettes with one colour across language and sex | 42 / 50 | **50 / 50** (48 across ages too; the other 2 change only at the child-protocol age gates, 5 and 12) |
+| Agreement with the expected colour | 74.7 % | 78.0 % |
+| Expected RED that came out GREEN | 4 (Hindi stroke ×2, Hindi burns ×2) | **0** |
+| Incomplete copies that came out GREEN | 0 / 30 | 0 / 30 |
+
+| Split | Agreement | Under-triage | Over-triage |
+|---|---|---|---|
+| English / Hindi / Odia | 78 % / 79 % / 77 % | 16 / 16 / 17 | 6 / 5 / 6 |
+| Women / men | 80.0 % / 75.6 % | 25 / 24 | 8 / 9 |
+| Under 5 / 5–11 / 12–17 / 18–39 / 40–59 / 60+ | 58 / 67 / 75 / 82 / 79 / 80 % | 8 / 4 / 2 / 13 / 14 / 8 | 0 / 1 / 0 / 7 / 6 / 3 |
+
+**Found and fixed by the set** (lexicon, `findings.py`; each has a test in `tests/test_patients300.py`):
+Hindi "बोली लड़खड़ा", "हाथ और पैर कमजोर" (stroke) and Odia "କଥା ଅସ୍ପଷ୍ଟ"; Hindi "जल गए" (burns); Hindi and Odia "worst / sudden
+headache" phrasings; Odia "ନିଶ୍ୱାସ ଫୁଲୁଛି" (breathless); Hindi and Odia "cut"; "cannot keep water down". False findings
+removed: "kerosene stove" read as poisoning, "burning in the chest" (heartburn) read as a burn, "bleeding stopped" read
+as bleeding.
+
+**Where the expected colour and the protocols differ** (the same in all three languages, so not bias; the rulepack
+follows its published sources and was not changed): GREEN for presumptive TB (3-week cough, weight loss, night
+sweats), BP 172/104 without symptoms, asthma worse with SpO2 93 %, jaundice, child fever with rash, blood in urine;
+YELLOW for extensive burns (IITT raises burns to RED only under 2 or over 70) and a child with fever and fast
+breathing (IMNCI: pneumonia); RED for fever with headache (IITT: any two of fever, headache, confusion, stiff neck)
+and a painful swollen wrist at severity 7. Under 5 has the lowest agreement for the same reasons. These are listed for
+a clinician to decide; `docs/evaluation/patients300.json` has every patient.
+
+- **Reproduce:** `python backend/scripts/make_patients300.py` then `python backend/scripts/eval_patients300.py`.
+
+### Where my expected colour and the protocol differed (8 Oct)
+
+We could not keep two answers, so each gap was settled by a published source, not by the software guessing:
+
+| Case | Decision | Source |
+|---|---|---|
+| Suspected TB (cough 2+ weeks, weight loss, night sweats) | New rule NTEP-PRESUMPTIVE-TB → YELLOW | NTEP |
+| Asthma with SpO₂ below 94 % | New rule GINA-ASTHMA-LOW-SPO2 → YELLOW | GINA 2024 |
+| Burns of the face, neck, both arms or legs (>15 % of the body) | New rules IITT-A/P-MAJOR-BURN → RED | IITT reference card |
+| BP 160/100+ with no symptoms, jaundice, blood in urine | Colour stays; a **follow-up flag** shows on the note (FU-HTN-STAGE2, FU-JAUNDICE, FU-HAEMATURIA) | IHCI; jaundice and haematuria marked as local practice |
+| Child fast breathing (IMNCI pneumonia), meningism, pain 7/10, small cut | Protocol kept; the expected colour was ours, not the protocol's | IMNCI, IITT, ATP |
+
+Follow-up flags live in `rules/followup.yaml` and cannot change the colour. After the change, agreement on the 300 set rose from 78.0 % to **84.0 %** (under-triage 49 → 31, over-triage 17). No expected-red case is green. The incomplete copies are still never green. 1,108 backend tests pass.
+
+## Medicine-strip pictures (8 Oct)
+
+40 synthetic blister-strip pictures (generic names from the PMBJP list, no real brand drawn): 8 each clean, phone
+photo, photo with glare, blurred, and torn (only half the strip).
+
+| Variant | Labelled a medicine strip | Medicine found | Strength right | Other medicines reported |
+|---|---|---|---|---|
+| clean / photo / glare / blurred / torn | 8 / 8 / 8 / 8 / 8 | 8 / 8 / 8 / 8 / 8 | 8 / 8 / 8 / 8 / 8 | 0 |
+
+- **Fixed on the way:** on blurred and torn pictures OCR wrote "5oo mg", "IPS0mg"; the strength was read as "0 mg"
+  (3 of 40). Letters read for digits right before a unit are now put back, and a strength is never taken from the
+  tail of a broken number (`images.py`, tests in `test_images.py`).
+- **Limit:** printed generic names in a clear font; real strips have brand names, embossing and curved foil. The live
+  test on a real strip (5 Oct) is in the image-understanding section.
+- **Reproduce:** `python backend/scripts/eval_strips.py models/eval/strips` → `docs/evaluation/strips.json`.
 
 ## Kiosk accessibility (F3, 7 Oct)
 
@@ -524,6 +668,29 @@ have (an MCHC outside 22–40). The `b2` generator fixed that, and the false ala
 Reproduce: `python backend/scripts/make_ocr_set.py models/eval/ocr_b2_heldout 40 779 b2`, then
 `python backend/scripts/eval_ocr.py models/eval/ocr_b2_heldout docs/evaluation/ocr_b2_heldout_two_engines.json all second`
 (development set: `models/eval/ocr_b2 40 20261007 b2`).
+### Unit errors (8 Oct)
+
+The digit and decimal slips above leave the unit alone. `backend/scripts/eval_units.py` breaks the unit instead, one
+printed row at a time, on 500 synthetic B2 reports (seed 5151), and parses the report again. *Caught* means the row
+is now marked for checking; *silent* means the value the rules see moved by more than 5 % and nothing marked it.
+
+| Break | Rows | Caught | Silent |
+|---|---|---|---|
+| Wrong unit read (another test's unit: g/dL for mg/dL, U/L for %, …) | 8,140 | **97.9 %** | 0 % |
+| Value printed in SI (mmol/L, µmol/L), unit read as mg/dL | 3,728 | **98.5 %** | 1.5 % (57) |
+| Value in mg/dL, unit read as SI | 82 | **97.6 %** | 2.4 % (2) |
+| Unit lost | 8,140 | 19.3 % | 0 % |
+
+- **No false alarm:** none of the 8,740 correct rows was marked.
+- **Unit lost:** in the other 80.7 % the unit assumed was the right one, so the value is unchanged; a note still says
+  "No unit read — mg/dL assumed". Counts without a unit (a 100-fold question) are always marked.
+- **Wrong unit, not caught:** 61 rows kept the right value (a unit the test also uses) and 111 were read as the
+  absolute count instead of the percentage (a count unit beside a differential); the differential sum then fails.
+- **Silent:** the 59 are SI values whose number happens to sit inside the mg/dL range and whose printed range was not
+  read as SI. The bounds and the range check cannot see these; the reviewer still sees the image crop.
+
+Reproduce: `python backend/scripts/eval_units.py 500 5151 docs/evaluation/unit_errors.json`.
+
 ## Handwritten prescriptions (B1, B10)
 
 The patient photographs a doctor's prescription. The app names the medicines on it, each matched to the Jan Aushadhi

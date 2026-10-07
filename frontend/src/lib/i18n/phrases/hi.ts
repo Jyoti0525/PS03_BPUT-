@@ -738,6 +738,8 @@ const hi: Record<string, string> = {
   "Today's tokens": "आज के टोकन",
   "Toggle as staff arrive or leave — takes effect immediately for new referrals": "स्टाफ़ के आने-जाने पर बदलें — नए रेफ़रल पर तुरंत लागू",
   "Tokens appear here the moment someone checks in.": "कोई चेक-इन करते ही टोकन यहाँ दिखते हैं।",
+  "Machine translated": "मशीन अनुवाद",
+  " — check against the patient's own words": " — मरीज़ के अपने शब्दों से मिलाएँ",
   "Translated:": "अनुवाद:",
   "Transport": "परिवहन",
   "Trauma, burns and occupational pathways.": "आघात, जलने की चोट और व्यावसायिक मार्ग।",

@@ -1,0 +1,462 @@
+# 50 clinical vignettes for the 300-patient synthetic set (I1, §9 fairness). Written by the team, 8 Oct 2026; no patient
+# data. Each vignette is told the way a patient would say it, in English, Hindi and Odia, and becomes six patients
+# (three languages × two sexes; maternal vignettes: two women), ages spread over `ages`. `expect` is the colour the
+# team expects, set before the engine was run on the set. `vitals` override ordinary values for the age.
+# Built into backend/tests/data/patients300.yaml by backend/scripts/make_patients300.py.
+vignettes:
+  # ── RED ──
+  - id: R01
+    expect: red
+    ages: [45, 72]
+    text:
+      en: "Chest pain since morning spreading to the left arm, sweating a lot"
+      hi: "सुबह से सीने में दर्द है, बाएं हाथ में जा रहा है, बहुत पसीना आ रहा है"
+      or: "ସକାଳୁ ଛାତି ଦରଦ ହେଉଛି, ବାମ ହାତକୁ ଯାଉଛି, ବହୁତ ଝାଳ ବାହାରୁଛି"
+    duration: "In the last few hours"
+  - id: R02
+    expect: red
+    ages: [50, 80]
+    text:
+      en: "Suddenly the right arm and leg became weak and speech is slurred, one hour ago"
+      hi: "एक घंटे पहले अचानक दायां हाथ और पैर कमजोर हो गया, बोली लड़खड़ा रही है"
+      or: "ଘଣ୍ଟାଏ ଆଗରୁ ହଠାତ ଡାହାଣ ହାତ ଗୋଡ଼ ଦୁର୍ବଳ ହୋଇଗଲା, କଥା ଅସ୍ପଷ୍ଟ ହେଉଛି"
+    duration: "In the last few hours"
+  - id: R03
+    expect: red
+    ages: [18, 60]
+    text:
+      en: "Snake bite on the left foot two hours ago while working in the field"
+      hi: "दो घंटे पहले खेत में काम करते समय बाएं पैर में सांप ने काटा"
+      or: "ଦୁଇ ଘଣ୍ଟା ଆଗରୁ ବିଲରେ କାମ କଲାବେଳେ ବାମ ଗୋଡ଼ରେ ସାପ କାମୁଡ଼ିଲା"
+    duration: "In the last few hours"
+  - id: R04
+    expect: red
+    ages: [30, 65]
+    text:
+      en: "Vomited blood twice this morning"
+      hi: "आज सुबह दो बार खून की उल्टी हुई"
+      or: "ଆଜି ସକାଳେ ଦୁଇଥର ରକ୍ତ ବାନ୍ତି ହେଲା"
+    duration: "Today"
+  - id: R05
+    expect: red
+    ages: [1, 4]
+    text:
+      en: "Fever and breathing very fast since last night"
+      hi: "कल रात से बुखार है और बहुत तेज़ सांस चल रही है"
+      or: "କାଲି ରାତିରୁ ଜ୍ୱର ଓ ବହୁତ ଜୋରରେ ନିଶ୍ୱାସ ନେଉଛି"
+    vitals: {temp_f: 102.4, resp_rate: 56}
+  - id: R06
+    expect: red
+    ages: [20, 60]
+    text:
+      en: "Had a fit at home and is still not waking up properly"
+      hi: "घर पर दौरा पड़ा और अभी तक ठीक से होश नहीं आया"
+      or: "ଘରେ ମିର୍ଗୀ ଭଳି ଝାଟକା ଆସିଲା, ଏବେ ବି ଠିକ୍ ଚେତା ଆସିନି"
+    vitals: {avpu: V}
+    duration: "In the last few hours"
+  - id: R07
+    expect: red
+    ages: [20, 34]
+    category: maternal
+    text:
+      en: "Bleeding from the vagina with pain in the lower belly"
+      hi: "योनि से खून आ रहा है और पेट के नीचे दर्द है"
+      or: "ଯୋନିରୁ ରକ୍ତ ଯାଉଛି ଓ ତଳ ପେଟ ବିନ୍ଧୁଛି"
+    maternal: {gestation_weeks: 30}
+  - id: R08
+    expect: red
+    ages: [20, 36]
+    category: maternal
+    text:
+      en: "Severe headache and blurred vision"
+      hi: "बहुत तेज़ सिर दर्द और धुंधला दिख रहा है"
+      or: "ବହୁତ ମୁଣ୍ଡ ବିନ୍ଧୁଛି ଓ ଆଖିକୁ ଝାପସା ଦେଖାଯାଉଛି"
+    maternal: {gestation_weeks: 33}
+    vitals: {bp_systolic: 162, bp_diastolic: 112}
+  - id: R09
+    expect: red
+    ages: [40, 75]
+    text:
+      en: "Very breathless since morning, cannot finish a sentence"
+      hi: "सुबह से बहुत सांस फूल रही है, पूरा वाक्य नहीं बोल पा रहे"
+      or: "ସକାଳୁ ବହୁତ ନିଶ୍ୱାସ ଫୁଲୁଛି, ପୂରା କଥା କହିପାରୁନି"
+    vitals: {spo2: 87, resp_rate: 32}
+  - id: R10
+    expect: red
+    ages: [18, 55]
+    text:
+      en: "Burns on the chest and both arms from the kerosene stove"
+      hi: "मिट्टी के तेल के स्टोव से छाती और दोनों हाथ जल गए"
+      or: "କିରାସିନି ଷ୍ଟୋଭରୁ ଛାତି ଓ ଦୁଇ ହାତ ପୋଡ଼ିଗଲା"
+    duration: "Today"
+  - id: R11
+    expect: red
+    ages: [18, 50]
+    text:
+      en: "Drank pesticide one hour ago"
+      hi: "एक घंटे पहले कीटनाशक पी लिया"
+      or: "ଘଣ୍ଟାଏ ଆଗରୁ କୀଟନାଶକ ପିଇଦେଲା"
+    duration: "In the last few hours"
+  - id: R12
+    expect: red
+    ages: [20, 70]
+    text:
+      en: "Fell from the roof, hit the head, vomited twice and is drowsy"
+      hi: "छत से गिरे, सिर में चोट लगी, दो बार उल्टी हुई और नींद जैसी हालत है"
+      or: "ଛାତରୁ ପଡ଼ିଗଲେ, ମୁଣ୍ଡରେ ଆଘାତ, ଦୁଇଥର ବାନ୍ତି ହେଲା ଓ ନିଦୁଆ ଲାଗୁଛି"
+    vitals: {avpu: V}
+    duration: "Today"
+  - id: R13
+    expect: red
+    ages: [15, 60]
+    text:
+      en: "High fever with stiff neck and confusion since yesterday"
+      hi: "कल से तेज़ बुखार, गर्दन अकड़ी हुई और उलझन में हैं"
+      or: "କାଲିଠୁ ପ୍ରବଳ ଜ୍ୱର, ବେକ ଶକ୍ତ ହୋଇଯାଇଛି ଓ ମନ ଦ୍ୱନ୍ଦ ହେଉଛି"
+    vitals: {temp_f: 103.2}
+  - id: R14
+    expect: red
+    ages: [40, 70]
+    text:
+      en: "Black stools for two days and fainted this morning"
+      hi: "दो दिन से काला मल आ रहा है और आज सुबह बेहोश हो गए"
+      or: "ଦୁଇ ଦିନ ହେଲା କଳା ଝାଡ଼ା ହେଉଛି ଓ ଆଜି ସକାଳେ ବେହୋସ ହୋଇଗଲେ"
+    vitals: {pulse: 118, bp_systolic: 92}
+  - id: R15
+    expect: red
+    ages: [1, 5]
+    text:
+      en: "Loose stools many times, not drinking and very sleepy"
+      hi: "कई बार पतले दस्त, पानी नहीं पी रहा और बहुत सुस्त है"
+      or: "ଅନେକ ଥର ପତଳା ଝାଡ଼ା, ପାଣି ପିଉନି ଓ ବହୁତ ନିସ୍ତେଜ"
+    vitals: {avpu: V}
+    duration: "1-2 days"
+  - id: R16
+    expect: red
+    ages: [20, 35]
+    category: maternal
+    text:
+      en: "Delivered at home yesterday, bleeding heavily since"
+      hi: "कल घर पर डिलीवरी हुई, तब से बहुत खून बह रहा है"
+      or: "କାଲି ଘରେ ପ୍ରସବ ହେଲା, ସେବେଠୁ ବହୁତ ରକ୍ତସ୍ରାବ ହେଉଛି"
+    maternal: {gestation_weeks: 39}
+  - id: R17
+    expect: red
+    ages: [25, 65]
+    text:
+      en: "Sudden worst headache of life with vomiting"
+      hi: "अचानक ज़िंदगी का सबसे तेज़ सिर दर्द और उल्टी"
+      or: "ହଠାତ ଜୀବନର ସବୁଠୁ ଭୟଙ୍କର ମୁଣ୍ଡ ବିନ୍ଧା ଓ ବାନ୍ତି"
+    duration: "In the last few hours"
+  - id: R18
+    expect: red
+    ages: [18, 60]
+    text:
+      en: "Swelling of the face and lips and difficulty breathing after an injection"
+      hi: "इंजेक्शन के बाद चेहरा और होंठ सूज गए और सांस लेने में तकलीफ"
+      or: "ଇଞ୍ଜେକସନ ପରେ ମୁହଁ ଓ ଓଠ ଫୁଲିଗଲା ଓ ନିଶ୍ୱାସ ନେବାରେ କଷ୍ଟ"
+    duration: "In the last few hours"
+
+  # ── YELLOW ──
+  - id: Y01
+    expect: yellow
+    ages: [18, 60]
+    text:
+      en: "Fever for four days with headache"
+      hi: "चार दिन से बुखार और सिर दर्द"
+      or: "ଚାରି ଦିନ ହେଲା ଜ୍ୱର ଓ ମୁଣ୍ଡ ବିନ୍ଧା"
+    vitals: {temp_f: 101.4}
+    duration: "3-7 days"
+  - id: Y02
+    expect: yellow
+    ages: [20, 65]
+    text:
+      en: "Cough for three weeks with weight loss and sweating at night"
+      hi: "तीन हफ्ते से खांसी, वजन कम हो रहा है और रात को पसीना आता है"
+      or: "ତିନି ସପ୍ତାହ ହେଲା କାଶ, ଓଜନ କମୁଛି ଓ ରାତିରେ ଝାଳ ବାହାରୁଛି"
+    duration: "1-4 weeks"
+  - id: Y03
+    expect: yellow
+    ages: [8, 60]
+    text:
+      en: "Dog bite on the right leg this morning"
+      hi: "आज सुबह दाएं पैर में कुत्ते ने काटा"
+      or: "ଆଜି ସକାଳେ ଡାହାଣ ଗୋଡ଼ରେ କୁକୁର କାମୁଡ଼ିଲା"
+    duration: "Today"
+  - id: Y04
+    expect: yellow
+    ages: [18, 55]
+    text:
+      en: "Burning while passing urine with fever and back pain"
+      hi: "पेशाब में जलन, बुखार और कमर में दर्द"
+      or: "ପରିସ୍ରା ବେଳେ ଜଳାପୋଡ଼ା, ଜ୍ୱର ଓ ପିଠି ବିନ୍ଧା"
+    vitals: {temp_f: 101.0}
+    duration: "1-2 days"
+  - id: Y05
+    expect: yellow
+    ages: [15, 60]
+    text:
+      en: "Fever with chills every evening for five days, body ache"
+      hi: "पांच दिन से हर शाम ठंड लगकर बुखार, बदन दर्द"
+      or: "ପାଞ୍ଚ ଦିନ ହେଲା ପ୍ରତି ସନ୍ଧ୍ୟାରେ ଥରି ଥରି ଜ୍ୱର, ଦେହ ବିନ୍ଧା"
+    vitals: {temp_f: 102.0}
+    duration: "3-7 days"
+  - id: Y06
+    expect: yellow
+    ages: [45, 75]
+    category: chronic
+    chronic: {condition: hypertension, current_medicines: amlodipine, feeling_vs_last: same}
+    text:
+      en: "Blood pressure check, no complaints"
+      hi: "बीपी चेक करवाना है, कोई तकलीफ नहीं"
+      or: "ବିପି ଯାଞ୍ଚ ପାଇଁ ଆସିଛି, କିଛି ଅସୁବିଧା ନାହିଁ"
+    vitals: {bp_systolic: 172, bp_diastolic: 104}
+    returning: true
+  - id: Y07
+    expect: yellow
+    ages: [40, 75]
+    category: chronic
+    chronic: {condition: diabetes, current_medicines: metformin, feeling_vs_last: worse}
+    text:
+      en: "Diabetes follow-up, more tired than usual"
+      hi: "शुगर की जांच, पहले से ज्यादा थकान"
+      or: "ସୁଗର ଯାଞ୍ଚ, ଆଗଠୁ ଅଧିକ କ୍ଳାନ୍ତ ଲାଗୁଛି"
+    vitals: {glucose: 312}
+    returning: true
+  - id: Y08
+    expect: yellow
+    ages: [20, 36]
+    category: maternal
+    text:
+      en: "Swelling of the feet for a week"
+      hi: "एक हफ्ते से पैरों में सूजन"
+      or: "ସପ୍ତାହେ ହେଲା ପାଦ ଫୁଲିଛି"
+    maternal: {gestation_weeks: 34}
+    vitals: {bp_systolic: 146, bp_diastolic: 94}
+    duration: "3-7 days"
+  - id: Y09
+    expect: yellow
+    ages: [10, 65]
+    text:
+      en: "Fell on the hand, wrist is swollen and painful, cannot move it"
+      hi: "हाथ के बल गिरे, कलाई सूजी है और दर्द है, हिला नहीं पा रहे"
+      or: "ହାତ ଭରାରେ ପଡ଼ିଗଲେ, କଣ୍ଟି ଫୁଲିଛି ଓ ବିନ୍ଧୁଛି, ହଲାଇ ପାରୁନାହାନ୍ତି"
+    duration: "Today"
+    severity: 7
+  - id: Y10
+    expect: yellow
+    ages: [3, 12]
+    text:
+      en: "Ear pain and pus from the ear for three days"
+      hi: "तीन दिन से कान में दर्द और कान से पीप"
+      or: "ତିନି ଦିନ ହେଲା କାନ ବିନ୍ଧା ଓ କାନରୁ ପୂଜ ବାହାରୁଛି"
+    duration: "3-7 days"
+  - id: Y11
+    expect: yellow
+    ages: [30, 70]
+    category: chronic
+    chronic: {condition: asthma, current_medicines: salbutamol inhaler, feeling_vs_last: worse}
+    text:
+      en: "Asthma, using the inhaler more often at night"
+      hi: "दमा है, रात को इनहेलर ज्यादा लेना पड़ रहा है"
+      or: "ଶ୍ୱାସ ରୋଗ ଅଛି, ରାତିରେ ଇନହେଲର ଅଧିକ ନେବାକୁ ପଡ଼ୁଛି"
+    vitals: {spo2: 93}
+    returning: true
+  - id: Y12
+    expect: yellow
+    ages: [18, 55]
+    text:
+      en: "Burn on the right forearm from hot oil"
+      hi: "गरम तेल से दाहिनी बांह जल गई"
+      or: "ଗରମ ତେଲରେ ଡାହାଣ ହାତ ପୋଡ଼ିଗଲା"
+    duration: "Today"
+    severity: 7
+  - id: Y13
+    expect: yellow
+    ages: [15, 60]
+    text:
+      en: "Yellow eyes and dark urine for a week"
+      hi: "एक हफ्ते से आंखें पीली और पेशाब गहरा पीला"
+      or: "ସପ୍ତାହେ ହେଲା ଆଖି ହଳଦିଆ ଓ ପରିସ୍ରା ଗାଢ଼ ହଳଦିଆ"
+    duration: "3-7 days"
+  - id: Y14
+    expect: yellow
+    ages: [2, 12]
+    text:
+      en: "Fever and rash for two days"
+      hi: "दो दिन से बुखार और दाने"
+      or: "ଦୁଇ ଦିନ ହେଲା ଜ୍ୱର ଓ ଦେହରେ ଫୋଟକା"
+    vitals: {temp_f: 101.2}
+    duration: "1-2 days"
+  - id: Y15
+    expect: yellow
+    ages: [18, 60]
+    text:
+      en: "Blood in the urine since yesterday"
+      hi: "कल से पेशाब में खून"
+      or: "କାଲିଠୁ ପରିସ୍ରାରେ ରକ୍ତ"
+    duration: "1-2 days"
+  - id: Y16
+    expect: yellow
+    ages: [35, 60]
+    text:
+      en: "Breathless when walking, worse this week, works in a stone-crushing unit"
+      hi: "चलने पर सांस फूलती है, इस हफ्ते ज्यादा, पत्थर तोड़ने के कारखाने में काम करते हैं"
+      or: "ଚାଲିଲେ ନିଶ୍ୱାସ ଫୁଲୁଛି, ଏ ସପ୍ତାହ ଅଧିକ, ପଥର ଭଙ୍ଗା କାରଖାନାରେ କାମ କରନ୍ତି"
+    duration: "3-7 days"
+  - id: Y17
+    expect: yellow
+    ages: [18, 60]
+    text:
+      en: "Vomiting since last night, cannot keep water down"
+      hi: "कल रात से उल्टी, पानी भी नहीं टिक रहा"
+      or: "କାଲି ରାତିରୁ ବାନ୍ତି, ପାଣି ବି ରହୁନି"
+    duration: "1-2 days"
+    severity: 6
+
+  # ── GREEN ──
+  - id: G01
+    expect: green
+    ages: [15, 60]
+    text:
+      en: "Itchy rash on both hands for a week, no fever"
+      hi: "एक हफ्ते से दोनों हाथों पर खुजली वाले दाने, बुखार नहीं"
+      or: "ସପ୍ତାହେ ହେଲା ଦୁଇ ହାତରେ କୁଣ୍ଡେଇ ହେଉଥିବା ଫୋଟକା, ଜ୍ୱର ନାହିଁ"
+    duration: "3-7 days"
+    severity: 2
+  - id: G02
+    expect: green
+    ages: [25, 60]
+    text:
+      en: "Back pain after lifting a sack, no leg weakness"
+      hi: "बोरी उठाने के बाद कमर दर्द, पैरों में कमजोरी नहीं"
+      or: "ବସ୍ତା ଉଠାଇବା ପରେ ପିଠି ବିନ୍ଧା, ଗୋଡ଼ ଦୁର୍ବଳ ନାହିଁ"
+    duration: "1-2 days"
+    severity: 4
+  - id: G03
+    expect: green
+    ages: [20, 34]
+    category: maternal
+    text:
+      en: "Routine pregnancy check, feeling well"
+      hi: "गर्भावस्था की नियमित जांच, ठीक महसूस कर रही हूं"
+      or: "ଗର୍ଭାବସ୍ଥାର ନିୟମିତ ଯାଞ୍ଚ, ଭଲ ଲାଗୁଛି"
+    maternal: {gestation_weeks: 20}
+    severity: 1
+    duration: "More than a month"
+  - id: G04
+    expect: green
+    ages: [45, 75]
+    category: chronic
+    chronic: {condition: hypertension, current_medicines: telmisartan, feeling_vs_last: same}
+    text:
+      en: "BP follow-up, feeling fine"
+      hi: "बीपी की नियमित जांच, ठीक हूं"
+      or: "ବିପି ନିୟମିତ ଯାଞ୍ଚ, ଭଲ ଅଛି"
+    vitals: {bp_systolic: 132, bp_diastolic: 84}
+    returning: true
+    severity: 1
+    duration: "More than a month"
+  - id: G05
+    expect: green
+    ages: [5, 60]
+    text:
+      en: "Cold and runny nose for two days, no fever"
+      hi: "दो दिन से जुकाम और नाक बह रही है, बुखार नहीं"
+      or: "ଦୁଇ ଦିନ ହେଲା ଥଣ୍ଡା ଓ ନାକରୁ ପାଣି ବୋହୁଛି, ଜ୍ୱର ନାହିଁ"
+    duration: "1-2 days"
+    severity: 2
+  - id: G06
+    expect: green
+    ages: [18, 50]
+    text:
+      en: "Mild headache since morning after poor sleep"
+      hi: "रात को नींद ठीक नहीं हुई, सुबह से हल्का सिर दर्द"
+      or: "ରାତିରେ ଠିକ୍ ଶୋଇ ପାରିନି, ସକାଳୁ ଅଳ୍ପ ମୁଣ୍ଡ ବିନ୍ଧା"
+    duration: "Today"
+    severity: 2
+  - id: G07
+    expect: green
+    ages: [10, 60]
+    text:
+      en: "Eyes red and itchy for three days, no pain"
+      hi: "तीन दिन से आंखें लाल और खुजली, दर्द नहीं"
+      or: "ତିନି ଦିନ ହେଲା ଆଖି ନାଲି ଓ କୁଣ୍ଡେଇ ହେଉଛି, ବିନ୍ଧା ନାହିଁ"
+    duration: "3-7 days"
+    severity: 2
+  - id: G08
+    expect: green
+    ages: [20, 60]
+    text:
+      en: "Burning in the chest after meals for two weeks"
+      hi: "दो हफ्ते से खाने के बाद सीने में जलन"
+      or: "ଦୁଇ ସପ୍ତାହ ହେଲା ଖାଇବା ପରେ ଛାତି ଜଳୁଛି"
+    duration: "1-4 weeks"
+    severity: 3
+  - id: G09
+    expect: green
+    ages: [40, 75]
+    category: chronic
+    chronic: {condition: diabetes, current_medicines: metformin, feeling_vs_last: same}
+    text:
+      en: "Sugar check, feeling the same as last time"
+      hi: "शुगर की जांच, पिछली बार जैसा ही महसूस हो रहा है"
+      or: "ସୁଗର ଯାଞ୍ଚ, ଗଲା ଥର ପରି ଲାଗୁଛି"
+    vitals: {glucose: 132}
+    returning: true
+    severity: 1
+    duration: "More than a month"
+  - id: G10
+    expect: green
+    ages: [10, 60]
+    text:
+      en: "Small cut on the finger while cooking, bleeding stopped"
+      hi: "खाना बनाते समय उंगली में छोटा कट, खून रुक गया"
+      or: "ରୋଷେଇ କଲାବେଳେ ଆଙ୍ଗୁଠି ଟିକେ କଟିଗଲା, ରକ୍ତ ବନ୍ଦ ହୋଇଗଲା"
+    duration: "Today"
+    severity: 2
+  - id: G11
+    expect: green
+    ages: [45, 75]
+    text:
+      en: "Knee pain for months, can walk"
+      hi: "कई महीनों से घुटने में दर्द, चल पाते हैं"
+      or: "ଅନେକ ମାସ ହେଲା ଆଣ୍ଠୁ ବିନ୍ଧା, ଚାଲିପାରୁଛନ୍ତି"
+    duration: "More than a month"
+    severity: 3
+  - id: G12
+    expect: green
+    ages: [18, 70]
+    text:
+      en: "Constipation for a week, eating normally"
+      hi: "एक हफ्ते से कब्ज, खाना ठीक खा रहे हैं"
+      or: "ସପ୍ତାହେ ହେଲା କୋଷ୍ଠକାଠିନ୍ୟ, ଠିକ୍ ଖାଉଛନ୍ତି"
+    duration: "3-7 days"
+    severity: 2
+  - id: G13
+    expect: green
+    ages: [8, 50]
+    text:
+      en: "Sore throat for two days, eating fine, no fever"
+      hi: "दो दिन से गले में खराश, खाना ठीक, बुखार नहीं"
+      or: "ଦୁଇ ଦିନ ହେଲା ଗଳା ଖସଖସ, ଠିକ୍ ଖାଉଛି, ଜ୍ୱର ନାହିଁ"
+    duration: "1-2 days"
+    severity: 2
+  - id: G14
+    expect: green
+    ages: [1, 5]
+    text:
+      en: "Came for the vaccine, child is well"
+      hi: "टीका लगवाने आए हैं, बच्चा ठीक है"
+      or: "ଟିକା ନେବାକୁ ଆସିଛୁ, ପିଲା ଭଲ ଅଛି"
+    severity: 1
+    duration: "Today"
+  - id: G15
+    expect: green
+    ages: [18, 55]
+    text:
+      en: "Mild dry cough for three days, no fever, no breathlessness"
+      hi: "तीन दिन से हल्की सूखी खांसी, बुखार नहीं, सांस नहीं फूलती"
+      or: "ତିନି ଦିନ ହେଲା ଅଳ୍ପ ଶୁଖିଲା କାଶ, ଜ୍ୱର ନାହିଁ, ନିଶ୍ୱାସ ଫୁଲୁନି"
+    duration: "3-7 days"
+    severity: 2

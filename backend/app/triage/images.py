@@ -175,7 +175,17 @@ def _brand(words: list[str], i: int) -> tuple[str, float, int] | None:
 
 
 # "2m9", "10rng": OCR misreads of "mg" on foil (seen on a real strip photo, 5 Oct).
-_STRENGTH = re.compile(r"(\d+(?:\.\d+)?)\s*(mg|m9|rng|mcg|µg|g|ml|iu|%)(?![a-z])", re.I)
+# Never the tail of a number OCR broke ("5o0mg" must not become "0 mg"): no digit-like character just before it.
+_STRENGTH = re.compile(r"(?<![0-9.,OoSs])(\d+(?:\.\d+)?)\s*(mg|m9|rng|mcg|µg|g|ml|iu|%)(?![a-z])", re.I)
+_UNIT_AHEAD = r"(?=\s*(?:mg|m9|rng|mcg|µg|ml|iu)(?![a-z]))"
+_DIGITISH = re.compile(r"(?<![A-Za-z])[0-9OoSsIl]*\d[0-9OoSsIl]*" + _UNIT_AHEAD + r"|(?<![A-Za-z])[0-9OoSs]{2,4}" + _UNIT_AHEAD)
+_PHARMACOPOEIA = re.compile(r"(?i)(ip|bp|usp)(?=[0-9OoSs]{1,4}\s*(?:mg|mcg|ml)(?![a-z]))")
+
+
+def _digits(text: str) -> str:
+    """Letters OCR reads for digits in a strength ("IP5oo mg", "IPS0mg") put back: o→0, S→5, l/I→1, only right before a unit."""
+    text = _PHARMACOPOEIA.sub(r"\1 ", text)
+    return _DIGITISH.sub(lambda m: m.group(0).translate(str.maketrans("OoSsIl", "005511")), text)
 _BARE_NUMBER = re.compile(r"^\s*(\d{1,4}(?:\.\d+)?)\s*$")
 
 
@@ -190,7 +200,7 @@ def _strength(lines: list[dict], i: int, word: str) -> str | None:
     (strips set the strength in a column: "Paracetamol IP ........ 500 mg", which OCR reads as two boxes)."""
     text = lines[i]["text"]
     at = text.lower().find(word.lower())
-    if s := _STRENGTH.search(text[at:] if at >= 0 else text):
+    if s := _STRENGTH.search(_digits(text[at + len(word):] if at >= 0 else text)):
         return f"{s.group(1)} {'mg' if s.group(2).lower() in ('m9', 'rng') else s.group(2).lower()}"
     box = lines[i].get("bbox")
     if not box:
@@ -199,7 +209,7 @@ def _strength(lines: list[dict], i: int, word: str) -> str | None:
     row = [ln for j, ln in enumerate(lines) if j != i and ln.get("bbox") and ln["bbox"][0] >= x + w * 0.5
            and abs((ln["bbox"][1] + ln["bbox"][3] / 2) - (y + h / 2)) < max(h, ln["bbox"][3]) * 0.6]
     for ln in sorted(row, key=lambda ln: ln["bbox"][0]):
-        if s := _STRENGTH.search(ln["text"]):
+        if s := _STRENGTH.search(_digits(ln["text"])):
             return f"{s.group(1)} {'mg' if s.group(2).lower() in ('m9', 'rng') else s.group(2).lower()}"
         if b := _BARE_NUMBER.match(ln["text"]):
             return f"{b.group(1)} (unit not read)"

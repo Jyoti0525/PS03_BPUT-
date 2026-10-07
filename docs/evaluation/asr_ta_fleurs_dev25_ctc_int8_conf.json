@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "ta",
+  "clips": 25,
+  "audio_seconds": 393.8,
+  "wer": 0.381,
+  "cer": 0.169,
+  "real_time_factor": 0.245,
+  "process_private_gb": 4.16,
+  "process_peak_working_set_gb": 2.54,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 58.0,
+   "bleu": 21.5
+  }
+ },
+ "clips": [
+  {
+   "file": "1136908823578381036.wav",
+   "reference": "இந்த பருவத்தின் முதல் நோய் பற்றிய தகவல் ஜூலை இறுதியில் பதிவு செய்யப்பட்டது.",
+   "heard": "இந்த பருவத்தின் முதல் நோய் பற்றிய தகவல் ஜூலை இறுதியில் பதிவு செய்யப்பட்டது",
+   "wer": 0.0,
+   "confidence": 0.978,
+   "english": "The first case of the disease of this season was reported at the end of July.",
+   "english_reference": "The first cases of the disease this season were reported in late July."
+  },
+  {
+   "file": "1280309695090590342.wav",
+   "reference": "சில திருவிழாக்களில் சிறிய குழந்தைகள் கொண்ட குடும்பத்தினருக்கு விசேஷ கேம்பிங் இடம் இருக்கும்.",
+   "heard": "சில திருவிழாக்களில் சிறிய குழந்தைகள் கொண்ட குடும்பத்தினருக்கு விசேஷ கேம்பிங் இடம் இருக்கும்",
+   "wer": 0.0,
+   "confidence": 0.964,
+   "english": "Some festivals have a special camping area for families with small children.",
+   "english_reference": "Some festivals have special camping areas for families with young children."
+  },
+  {
+   "file": "12937138404817402023.wav",
+   "reference": "\"முக்கிய உள்ளூர் பீர் 'நம்பர் ஒன்', இது ஒரு சிக்கலான பீர் அல்ல, ஆனால் இனிமையான மற்றும் புத்துணர்ச்சியூட்டும். மற்ற உள்ளூர் பீர் \"\"மந்தா\"\" என்று அழைக்கப்படுகிறது.\"",
+   "heard": "முக்கிய உள்ளூர்்பீர் நம்பர் ஒன் இது ஒரு சிக்கலான பீர் அல்ல ஆனால் இனிமையான மற்றும் புத்துணர்ச்சியூட்டும் மற்ற உள்ளூர்்பீர் மந்தா என்று அழைக்கப்படுகிறது",
+   "wer": 0.2,
+   "confidence": 0.957,
+   "english": "The main local beer number one is not a complex beer but a sweet and refreshing other called local beer manta.",
+   "english_reference": "The main local beer is 'Number One', it is not a complex beer, but pleasant and refreshing. The other local beer is called \"Manta\"."
+  },
+  {
+   "file": "13833483275561812787.wav",
+   "reference": "\"முக்கிய உள்ளூர் பீர் 'நம்பர் ஒன்', இது ஒரு சிக்கலான பீர் அல்ல, ஆனால் இனிமையான மற்றும் புத்துணர்ச்சியூட்டும். மற்ற உள்ளூர் பீர் \"\"மந்தா\"\" என்று அழைக்கப்படுகிறது.\"",
+   "heard": "முக்கிய உள்ளூர்்பீர் நம்பர் ஒன் இது ஒரு சிக்கலான பீர் அல்ல ஆனால் இனிமையான மற்றும் புத்துணர்ச்சியூற்றும் மற்ற உள்ளூர்பீர் மந்தா மந்தா என்று அழைக்கப்படுகிறது",
+   "wer": 0.25,
+   "confidence": 0.915,
+   "english": "The main local beer number one is not a complex beer but a sweet and refreshing other local beer called Manta Manta.",
+   "english_reference": "The main local beer is 'Number One', it is not a complex beer, but pleasant and refreshing. The other local beer is called \"Manta\"."
+  },
+  {
+   "file": "15008167279255964149.wav",
+   "reference": "ஐக்கிய அமெரிக்க நாடுகள் முழுவதிலும் உள்ள தோராயமாக 400,000 தெரிந்த மல்டிபுள் ஸ்களிரோஸிஸ் (MS) வழக்குகள், அதை இளைய மற்றும் நடுத்தர வயதினரிடையே உள்ள முன்னணி நரம்பு நோயாக ஆக்குகிறது.",
+   "heard": "ஐக்கிய அமெரிக்க நாடுகள் முழுவதிலுும்ள்ள தோராயமாக நான்கு இலட்ச தெரிந்த மல்டிபிள் ஸ்கலிரோசிஸ் எம்எஸ் வழக்குகள் அதை இளைய மற்றும் நடுத்தர வயதினரிடையே உள்ள முன்னணி நரம்பு நோயாக ஆக்குகிறது",
+   "wer": 0.304,
+   "confidence": 0.958,
+   "english": "Approximately 400,000 known cases of multiple sclerosis MS across the United States make it the leading neurodegenerative disease among young and middle-aged people.",
+   "english_reference": "Across the United States of America, there are approximately 400,000 known cases of Multiple Sclerosis (MS), leaving it as the leading neurological disease in younger and middle aged adults."
+  },
+  {
+   "file": "15709221279419163278.wav",
+   "reference": "\"புஷ்ஷின் பிரதிநிதி பேச்சாளர் கார்டன் ஜான்ட்ரோ வட கொரியாவின் உறுதிமொழியை \"\" கொரியத் தீவு அணு ஆயுத நீக்கம் பரிசீலனை செய்யப்படும் இலக்கை அடைவதற்கான முக்கிய நடவடிக்கை\"\" என அழைத்தார்.\"",
+   "heard": "புஷ்ஷின் பிரதிநிதி பேச்சாளர் கார்டன் ஜான்்ரோ வடகொரியாவின் உறுதிமொழியை கொரிய தீவு அணு ஆயுத நீக்கம் பரிசீலனை செய்யப்படும் இலக்கை அடைவதற்கான முக்கிய நடவடிக்கை என அழைத்தார்",
+   "wer": 0.19,
+   "confidence": 0.944,
+   "english": "Bush's representative spokesman, Gordon Jonro, called North Korea's pledge a major step towards achieving the goal of denuclearization of the Korean peninsula being considered.",
+   "english_reference": "Bush spokesman Gordon Johndroe called North Korea's pledge \"a major step towards the goal of achieving the verifiable denuclearization of the Korean peninsula.\""
+  },
+  {
+   "file": "16206839048843919787.wav",
+   "reference": "மெட்ரிக் முறையின் உபயோகம், சர்வாதிகாரத்திலிருந்து குடியரசிற்கு மாற்றம், தேசியவாதம் மற்றும் நாடு தனி ஒருவரை மட்டும் சார்ந்ததல்ல, மக்களைச் சார்ந்தது என்ற நம்பிக்கை போன்ற மக்கபல சமூக மற்றும் அரசியல் விளைவுகள் உள்ளன.",
+   "heard": "மெட்ரிக் முறையின் உபயோகம் சர்வாதிகாரத்தில் இருந்து குடியரசிற்கு மாற்றம் தேசியவாதம் மற்றும் நாடு தனிவரை மட்டும் சான்றதல்ல மக்களைச் சார்ந்தது என்று நம்பிக்கை போன்ற மக்க பல சமூக மற்றும் அரசியல் விளைவுகள் உள்ளன",
+   "wer": 0.333,
+   "confidence": 0.95,
+   "english": "The use of the metric system has many social and political consequences for the population, such as the transition from dictatorship to republican nationalism and the belief that the country depends on the people, not on the individual.",
+   "english_reference": "There are a lot of social and political effects such as the use of metric system, a shift from absolutism to republicanism, nationalism and the belief the country belongs to the people not to one sole ruler."
+  },
+  {
+   "file": "17054064258094128842.wav",
+   "reference": "ஐக்கிய அமெரிக்க நாடுகள் முழுவதிலும் உள்ள தோராயமாக 400,000 தெரிந்த மல்டிபுள் ஸ்களிரோஸிஸ் (MS) வழக்குகள், அதை இளைய மற்றும் நடுத்தர வயதினரிடையே உள்ள முன்னணி நரம்பு நோயாக ஆக்குகிறது.",
+   "heard": "ஐக்கிய அமெரிக்க நாடுகள் முழதிலும் உள்ள தோராயமாக நான்கு லட்சம் தெரிந்த மல்டிபிள்சிஸ் எஸ் வழக்குகள் மற்றும் வயதிடைய உள்ள முிரு ஐக்கிய அமெரிக்க நாடுகள் முழுவதிலும் உள்ள தோராயமாக நான்கு லட்சம் தெரிந்த மல்டிபிள் ஸ்கலிரோசிஸ் எம்எஸ் வழக்குகள் அதை இளைய மற்றும் நடுத்தர வயதினரிடையே உள்ள முன்னணி நரம்பு நோயாக ஆக்குகிறது",
+   "wer": 0.913,
+   "confidence": 0.888,
+   "english": "Approximately four hundred thousand known multiple sclerosis S cases across the United States and approximately four hundred thousand known multiple sclerosis MS cases across the United States of age make it the leading neurodegenerative disease among young and middle-aged people.",
+   "english_reference": "Across the United States of America, there are approximately 400,000 known cases of Multiple Sclerosis (MS), leaving it as the leading neurological disease in younger and middle aged adults."
+  },
+  {
+   "file": "18316006411456302439.wav",
+   "reference": "ஒரு பாடநெறி, பொதுவாக நடைமுறை அனுபவத்துடன், இங்கே விவாதிக்கப்பட்ட அனைத்து பிரச்சனைகளையும் மிகவும் விரிவாகக் கொண்டிருக்கும்.",
+   "heard": "ஒரு பாடநெறி பொதுவாக நடைமுறை அனுபவத்துடன் இங்கே விவாதிக்கப்பட்ட அனைத்துப் பிரச்சினைகளையும் மிகவும் விரிவாகக் கொண்டிருக்கும்",
+   "wer": 0.167,
+   "confidence": 0.936,
+   "english": "A course will typically cover all of the issues discussed here in more detail, along with practical experience.",
+   "english_reference": "A course will normally cover all the issues discussed here in far greater detail, usually with practical experience."
+  },
+  {
+   "file": "1907741328592672024.wav",
+   "reference": "உண்மைக்கு நிகரான களப் பயணங்களின் மூலம் தொழில்நுட்பமானது  தீர்வு வழங்குகிறது. மாணவர்கள் அருங்காட்சியக கலைப்பொருட்களைப் பார்க்கலாம், ஒரு மீன் காட்சியகத்தைப் பார்வையிடலாம் அல்லது தங்கள் வகுப்பில் உட்கார்ந்துக்கொண்டே அழகான கலையைப் பாராட்டலாம்.",
+   "heard": "உண்மைக்கு நிகரான கலப்பயணிகள் மூலம் தொழில்நுட்பமானது தீர்வு வழங்குகிறது மாணவர்கள் அருங்காட்சிய கலைப்பொருட்களைப் பார்க்கலாம் ஒரு மீன்காட்சியகத்தை பார்வையிடலாம் அல்லது தங்கள் வகுப்பில் உட்கார்ந்து கொண்டே அழகான கலையைப் பாராட்டலாம்",
+   "wer": 0.304,
+   "confidence": 0.943,
+   "english": "Technology provides the solution through true-to-life visitors where students can view museum artefacts, visit a fish museum, or just sit in their class and admire the beautiful art.",
+   "english_reference": "Technology offers the solution with virtual field trips. Students can look at museum artifacts, visit an aquarium, or admire beautiful art while sitting with their class."
+  },
+  {
+   "file": "2206461015650681139.wav",
+   "reference": "உண்மைக்கு நிகரான களப் பயணங்களின் மூலம் தொழில்நுட்பமானது  தீர்வு வழங்குகிறது. மாணவர்கள் அருங்காட்சியக கலைப்பொருட்களைப் பார்க்கலாம், ஒரு மீன் காட்சியகத்தைப் பார்வையிடலாம் அல்லது தங்கள் வகுப்பில் உட்கார்ந்துக்கொண்டே அழகான கலையைப் பாராட்டலாம்.",
+   "heard": "உண்மைக்கு நிகரான கலப்பயணங்களின் மூலம் தொழில்நுட்பமானது தீர்வு வழங்குகிறது மாணவர்கள் அருங்காட்சியாக கலைப்பொருட்களைப் பார்க்கலாம் ஒரு மீன்்காட்சியகத்தை பார்வையிடலாம் அல்லது தங்கள் வகுப்பில் உட்கார்ந்து கொண்டே அழகான கலையை பாராட்டலாம்",
+   "wer": 0.348,
+   "confidence": 0.943,
+   "english": "Technology provides the solution through real-time tours where students can view artifacts as a museum, visit an aquarium, or just sit in their class and admire the beautiful art.",
+   "english_reference": "Technology offers the solution with virtual field trips. Students can look at museum artifacts, visit an aquarium, or admire beautiful art while sitting with their class."
+  },
+  {
+   "file": "262589605644659320.wav",
+   "reference": "இந்த பருவத்தின் முதல் நோய் பற்றிய தகவல் ஜூலை இறுதியில் பதிவு செய்யப்பட்டது.",
+   "heard": "இந்த பருவத்தின் முதல் நோய் பற்றிய தகவல் ஜூலை இறுதியில் பதிவு செய்யப்பட்டது",
+   "wer": 0.0,
+   "confidence": 0.968,
+   "english": "The first case of the disease of this season was reported at the end of July.",
+   "english_reference": "The first cases of the disease this season were reported in late July."
+  },
+  {
+   "file": "3612726185408671933.wav",
+   "reference": "ஒரு பாடநெறி, பொதுவாக நடைமுறை அனுபவத்துடன், இங்கே விவாதிக்கப்பட்ட அனைத்து பிரச்சனைகளையும் மிகவும் விரிவாகக் கொண்டிருக்கும்.",
+   "heard": "ஒரு பாடநறி பொதுவாக நடைமுறை அனுபவத்துடன் இங்கே விவாதிக்கப்பட்ட அனைத்துப் பிரச்சினைகளையும் மிகவும் விரிவாகக் கொண்டிருக்கும்",
+   "wer": 0.25,
+   "confidence": 0.919,
+   "english": "A course will typically cover all of the issues discussed here in more detail, along with practical experience.",
+   "english_reference": "A course will normally cover all the issues discussed here in far greater detail, usually with practical experience."
+  },
+  {
+   "file": "379294024678694606.wav",
+   "reference": "\"புஷ்ஷின் பிரதிநிதி பேச்சாளர் கார்டன் ஜான்ட்ரோ வட கொரியாவின் உறுதிமொழியை \"\" கொரியத் தீவு அணு ஆயுத நீக்கம் பரிசீலனை செய்யப்படும் இலக்கை அடைவதற்கான முக்கிய நடவடிக்கை\"\" என அழைத்தார்.\"",
+   "heard": "புஷின் பிரதிநிதி பேச்சாளர் கார்டன் ஜான்ரோ வடகொரியாவின் உறுதிமொழியை கொரிய தீவு அணு ஆயுத நீக்க பரிசீலனை செய்யப்படும் இலக்கை அடைவதற்கான முக்கிய நடவடிக்கை என அழைத்தார்",
+   "wer": 0.286,
+   "confidence": 0.938,
+   "english": "Bush's representative, Gordon Janro, called North Korea's pledge a major step towards achieving the goal of denuclearization of the Korean Peninsula.",
+   "english_reference": "Bush spokesman Gordon Johndroe called North Korea's pledge \"a major step towards the goal of achieving the verifiable denuclearization of the Korean peninsula.\""
+  },
+  {
+   "file": "3900527910925513472.wav",
+   "reference": "மெக்ஸிகோவின் ஆர்லி வேலஸ்கெஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜி போட்டியில் பதினைந்தாவதாக முடித்தார். நியுஜிலாந்தின் ஆடம் ஹில் ஆண்களுக்கான நிற்கும் சூப்பர் ஜி போட்டியில் ஒன்பதாவதாக முடித்தார்.",
+   "heard": "மெக்சிகோவின் ஆர்லி வேலஸ்கெஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜீ போட்டியில் பதினைந்தாவதாக முடித்தார் நியூசிலாந்தின் ஆடம் ஹில் ஆண்களுக்கான நிற்கும் சூப்பர் ஜீ போட்டியில் ஒன்பதாவதாக முடித்தார்",
+   "wer": 0.2,
+   "confidence": 0.96,
+   "english": "Mexico's Arlie Velasquez finished fifteenth in the men's sitting Super G competition and New Zealand's Adam Hill finished ninth in the men's standing Super G tournament.",
+   "english_reference": "Arly Velasquez of Mexico finished fifteenth in the men's sitting Super-G. New Zealand's Adam Hall finished ninth in the men's standing Super-G."
+  },
+  {
+   "file": "4166981283743399408.wav",
+   "reference": "மெக்ஸிகோவின் ஆர்லி வேலஸ்கெஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜி போட்டியில் பதினைந்தாவதாக முடித்தார். நியுஜிலாந்தின் ஆடம் ஹில் ஆண்களுக்கான நிற்கும் சூப்பர் ஜி போட்டியில் ஒன்பதாவதாக முடித்தார்.",
+   "heard": "மெக்சிகோவின் ஆர்லி வெல்ஸ்கஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜீ போட்டியில் பிணைந்துவராக முடித்தார் நியூசிலாந்தின் ஆடம்ஹல் அணிக்காலகளுக்காக நிற்கும் சூப்பர் ஜீ போட்டியில் ஒபதுக்காக முடிந்தார்",
+   "wer": 0.55,
+   "confidence": 0.888,
+   "english": "Early Velskus of Mexico finished tied in the Men's Seating Super G Tournament Adamhal of New Zealand finished tied for ninth in the Men's Seating Super G Tournament",
+   "english_reference": "Arly Velasquez of Mexico finished fifteenth in the men's sitting Super-G. New Zealand's Adam Hall finished ninth in the men's standing Super-G."
+  },
+  {
+   "file": "4761534086102036867.wav",
+   "reference": "மெக்ஸிகோவின் ஆர்லி வேலஸ்கெஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜி போட்டியில் பதினைந்தாவதாக முடித்தார். நியுஜிலாந்தின் ஆடம் ஹில் ஆண்களுக்கான நிற்கும் சூப்பர் ஜி போட்டியில் ஒன்பதாவதாக முடித்தார்.",
+   "heard": "மெக்சிகோவின் ஆர்லி வேலஸ்கெஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜீ போட்டியில் பதினைந்தாவதாக முடித்தார் நியூிலாந்தின் ஆட்கில் ஆண்களுக்கான நிற்கும் சூப்பர் ஜீ போட்டியில் ஒன்பதாவதாக முடித்தார் மெக்சிகோவின் ஆர்லி வேலஸ்கஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜீ போட்டியில் பதிதாக முடித்தார் நியூிலாந்தின் ஆடளு்கும் சூப்பர் ஜன்படிார் மெக்சிகோவின் ஆர்லி வேலஸ்கெஸ் ஆண்களுக்கான உட்காரும் சூப்பர் ஜீ போட்டியில் பதினைந்தாவதாக முடித்தார் நியூசிலாந்தின் ஆடம் கிில் ஆண்களுக்கான நிற்கும் சூப்பர் ஜீ போட்டியில் ஒன்பதாவதாக முடித்தார்",
+   "wer": 1.9,
+   "confidence": 0.822,
+   "english": "Early Velasquez of Mexico finished 15th in Men's Seating Super G Competition Atkil of New Zealand finished 9th in Men's Standing Super G Competition Early Velasquez of Mexico finished 10th in Men's Sitting Super G Competition Early Velasquez of New Zealand finished 15th in Men's Sitting Super G Competition Adam Gill of New Zealand finished 9th in Men's Standing Super G Competition",
+   "english_reference": "Arly Velasquez of Mexico finished fifteenth in the men's sitting Super-G. New Zealand's Adam Hall finished ninth in the men's standing Super-G."
+  },
+  {
+   "file": "5192052332409670314.wav",
+   "reference": "என்பிடபிள்யூஎஸ் மற்றும் ஸ்போர்டிங் ஷூட்டர்ஸ் அசோசியேஷன் ஆஸ்ட்ரேலியா (என்எஸ்டபிள்யூ) இங்க், ஆகியவைகளின் கூட்டுறவில், ஸ்போர்டிங் ஷூட்டர்ஸ் அசோசியேஷனின் ஹண்டிங் திட்டத்தின் கீழ், தகுதி பெற்ற தன்னார்வலர்கள் பணிக்கு அமர்த்தப்பட்டனர்.",
+   "heard": "என் பிடப்பில் யுஎஸ் மற்றும் ஸ்போர்ட்டிங் ஸ்கூட்டர்ஸ் அசோசியேஷன் ஆஸ்திரேலியா என் எஸ் டபுள்ஸ் இங்க் ஆகியவைகளின் கூட்டுறவில் ஸ்போர்ட்டிங் ஸ்கூட்டர்ஸ் அசோசியேஷனின் ஹண்டிங் திட்டத்தின் கீழ் தகுதி பெெற்ற தன்னாளவர்கள் பணிக்கு அமர்த்தப்பட்டனர்",
+   "wer": 0.619,
+   "confidence": 0.928,
+   "english": "Qualified volunteers were hired under the Hunting Program of the Sporting Scooters Association in collaboration with the US and Sporting Scooters Association Australia NS Doubles Inc.",
+   "english_reference": "In a partnership of NPWS and the Sporting Shooters Association of Australia (NSW) Inc, qualified volunteers were recruited, under the Sporting Shooters Association's hunting program."
+  },
+  {
+   "file": "645860764391770470.wav",
+   "reference": "என்பிடபிள்யூஎஸ் மற்றும் ஸ்போர்டிங் ஷூட்டர்ஸ் அசோசியேஷன் ஆஸ்ட்ரேலியா (என்எஸ்டபிள்யூ) இங்க், ஆகியவைகளின் கூட்டுறவில், ஸ்போர்டிங் ஷூட்டர்ஸ் அசோசியேஷனின் ஹண்டிங் திட்டத்தின் கீழ், தகுதி பெற்ற தன்னார்வலர்கள் பணிக்கு அமர்த்தப்பட்டனர்.",
+   "heard": "என் பிிடபிள்யூஎஸ் மற்றும் ஸ்போர்டிங் ஷூட்டர்ஸ் அசோசியேஷன் ஆஸ்திரேலியா என்எஸ்டபிள்யூஇங் ஆகியவைகளின் கூட்டுறவில் ஸ்போர்ட்டிங் ஷூட்டர்ஸ் அசோசியேஷனின் ஹன்ண்டிங் திட்டத்தின் கீழ் தகுதி பெற்ற தன்னார்வலர்கள் பணிக்கு அமர்த்தப்பட்டனர்",
+   "wer": 0.333,
+   "confidence": 0.92,
+   "english": "Qualified volunteers were recruited under the Hunting Program of the Sporting Shooters Association in partnership with NBWS and Sporting Shooters Association Australia NSWing.",
+   "english_reference": "In a partnership of NPWS and the Sporting Shooters Association of Australia (NSW) Inc, qualified volunteers were recruited, under the Sporting Shooters Association's hunting program."
+  },
+  {
+   "file": "7716665252290123552.wav",
+   "reference": "சில திருவிழாக்களில் சிறிய குழந்தைகள் கொண்ட குடும்பத்தினருக்கு விசேஷ கேம்பிங் இடம் இருக்கும்.",
+   "heard": "சில திருவிழாக்களில் சிறிய குழந்தைகளைக் கொண்ட குடும்பத்தினருக்கு விசேஷ கேம்பிங் இடம் இருக்கும்",
+   "wer": 0.1,
+   "confidence": 0.956,
+   "english": "Some festivals have a special camping area for families with small children.",
+   "english_reference": "Some festivals have special camping areas for families with young children."
+  },
+  {
+   "file": "7749003704635334718.wav",
+   "reference": "உண்மைக்கு நிகரான களப் பயணங்களின் மூலம் தொழில்நுட்பமானது  தீர்வு வழங்குகிறது. மாணவர்கள் அருங்காட்சியக கலைப்பொருட்களைப் பார்க்கலாம், ஒரு மீன் காட்சியகத்தைப் பார்வையிடலாம் அல்லது தங்கள் வகுப்பில் உட்கார்ந்துக்கொண்டே அழகான கலையைப் பாராட்டலாம்.",
+   "heard": "உண்மைக்கு நிகரான களப்பணியர்களின் மூலம் தொழில்நுட்பமானது தீர்வு வழங்குகிறது மாணவர்கள் அருங்காட்சேகக் கலைப்பட்களைப் பார்க்கலாம் ஒருது மீன்்கட்சியகத்தைப் பார்வடலாம் அல்லது தங்கள் வகுப்பில் உட்கார்ந்து கொண்டே அல்லகான கலையைப் பாராட்டலாம்",
+   "wer": 0.478,
+   "confidence": 0.898,
+   "english": "Technology provides solutions through real-time fieldwork students can view museum artworks, visit an aquarium, or appreciate the art of Allah while sitting in their class.",
+   "english_reference": "Technology offers the solution with virtual field trips. Students can look at museum artifacts, visit an aquarium, or admire beautiful art while sitting with their class."
+  },
+  {
+   "file": "8187753299335308408.wav",
+   "reference": "புராதன ரோமானியர்களின் உணவுகளில் , ஐரோப்பாவிற்கு ஆசியாவிலிருந்தோ அமெரிக்காவிலிருந்தோ பல நூற்றாண்டுகள் பின்னர் வந்த உணவுகள் இடம் பெற்றிருக்க முடியாது.",
+   "heard": "புராதான ரோமானியர்களின் உணவுகளில் ஐரோப்பியாவிற்கு ஆசியாவிலிருந்தோ அமெரிக்காவிலிருந்தோ பல நூற்றாண்டுகள் பின்னர் வந்த உணவுகள் இடம்பெற்றிருக்க முடியாது",
+   "wer": 0.286,
+   "confidence": 0.954,
+   "english": "The cuisine of the ancient Romans may not have included foods that came to Europe centuries later from Asia or the Americas.",
+   "english_reference": "Ancient Roman meals couldn't have included foods that came to Europe from America or from Asia in later centuries."
+  },
+  {
+   "file": "8349889116003348353.wav",
+   "reference": "சில திருவிழாக்களில் சிறிய குழந்தைகள் கொண்ட குடும்பத்தினருக்கு விசேஷ கேம்பிங் இடம் இருக்கும்.",
+   "heard": "சில திருவிழாக்களில் சிறிய குழந்தைகள் கொண்ட குடும்பத்தினருக்கு விசேஷ கேம்பிங் இடம் இருக்கும்",
+   "wer": 0.0,
+   "confidence": 0.949,
+   "english": "Some festivals have a special camping area for families with small children.",
+   "english_reference": "Some festivals have special camping areas for families with young children."
+  },
+  {
+   "file": "9524504335725750172.wav",
+   "reference": "ஒரு பாடநெறி, பொதுவாக நடைமுறை அனுபவத்துடன், இங்கே விவாதிக்கப்பட்ட அனைத்து பிரச்சனைகளையும் மிகவும் விரிவாகக் கொண்டிருக்கும்.",
+   "heard": "ஒரு பாடநெறி பொதுவாக நடைமுறை அனுபவத்துடன் இங்கே விவாதிக்கப்பட்ட அனைத்து பிரச்சினைகளையும் மிகவும் விரிவாகக் கொண்டிருக்கும்",
+   "wer": 0.083,
+   "confidence": 0.944,
+   "english": "A course will typically cover all of the issues discussed here in more detail, along with practical experience.",
+   "english_reference": "A course will normally cover all the issues discussed here in far greater detail, usually with practical experience."
+  },
+  {
+   "file": "9763503986265847391.wav",
+   "reference": "இந்த பருவத்தின் முதல் நோய் பற்றிய தகவல் ஜூலை இறுதியில் பதிவு செய்யப்பட்டது.",
+   "heard": "இந்த பருவத்தின் முதல் நோய் பற்றிய தகவல் ஜூலை இறுதியில் பதிவு செய்யப்பட்டது",
+   "wer": 0.0,
+   "confidence": 0.97,
+   "english": "The first case of the disease of this season was reported at the end of July.",
+   "english_reference": "The first cases of the disease this season were reported in late July."
+  }
+ ]
+}

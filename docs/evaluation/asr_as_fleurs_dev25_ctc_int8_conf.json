@@ -1,0 +1,248 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "as",
+  "clips": 25,
+  "audio_seconds": 301.5,
+  "wer": 0.231,
+  "cer": 0.056,
+  "real_time_factor": 0.293,
+  "process_private_gb": 2.07,
+  "process_peak_working_set_gb": 1.43,
+  "model": "indic-conformer-600m-int8",
+  "translation": {
+   "engine": "IndicTrans2 indic-en 200M (offline), on the speech transcript",
+   "sentences": 25,
+   "chrf++": 53.0,
+   "bleu": 27.1
+  }
+ },
+ "clips": [
+  {
+   "file": "10245120727300027807.wav",
+   "reference": "নতুন পৰিবেশত বিভিন্নধৰণৰ উপায় আৰু বিভিন্ন প্ৰতিযোগী আছে, গতিকে নতুন মানুহক বেলেগ বেলেগ বিশেষত্বৰ প্ৰয়োজন হ'ব আৰু তেওঁলোকে আগতে পোৱাতকৈ শক্তিশালী প্ৰতিযোগী গ্ৰহণ কৰিব লাগিব।",
+   "heard": "নতুন পৰিৱেশত বিভিন্ন ধৰণৰ উপায় আৰু বিভিন্ন প্ৰতিযোগী আছে গতিকে নতুন মানুহক বেলেগ বেলেগ বিশেষত্বৰ প্ৰয়োজন হ'ব আৰু তেওঁলোকে আগতে পোৱাতকৈ শক্তিশালী প্ৰতিযোগী গ্ৰহণ কৰিব লাগিব",
+   "wer": 0.115,
+   "confidence": 0.969,
+   "english": "The new environment has a variety of ways and different competitors so new people will need different specialties and they will have to adopt stronger competitors than before.",
+   "english_reference": "This new environment has different resources and different competitors, so the new population will need different features or adaptations to be a strong competitor than what they had needed before."
+  },
+  {
+   "file": "10723622924977001780.wav",
+   "reference": "অ'কলেণ্ডৰ 2 টা পোতাশ্ৰয়ৰ ষ্ট্ৰেডলিংৰ কাৰণে হোৱা বহুতো বীচ আছে৷ আটাইতকৈ জনপ্ৰিয়টো 3 টা অঞ্চলত আছে৷",
+   "heard": "অকলেণ্ডৰ দুটা ভোটাশ্ৰয়ৰ ষ্ট্ৰেকলিঙৰ কাৰণে হোৱা বহুতো বীচ আছে আটাইতকৈ জনপ্ৰিয়ত তিনিটা অঞ্চলত আছে",
+   "wer": 0.647,
+   "confidence": 0.918,
+   "english": "Auckland has many beaches due to the streaking of its two boroughs, the most popular being in three regions.",
+   "english_reference": "There are many beaches, due to Auckland's straddling of two harbours. The most popular ones are in three areas."
+  },
+  {
+   "file": "11573540061946396636.wav",
+   "reference": "অ'কলেণ্ডৰ 2 টা পোতাশ্ৰয়ৰ ষ্ট্ৰেডলিংৰ কাৰণে হোৱা বহুতো বীচ আছে৷ আটাইতকৈ জনপ্ৰিয়টো 3 টা অঞ্চলত আছে৷",
+   "heard": "অকলেণ্ডৰ দুটা পোটাচৰ ষ্ট্ৰেডলিঙৰ কাৰণে হোৱা বহুতো বীচ আছে আটাইতকৈ জনপ্ৰিয়ত তিনিটা অঞ্চলত আছে",
+   "wer": 0.647,
+   "confidence": 0.925,
+   "english": "Auckland has many beaches for straddling two potas, the most popular being in three areas.",
+   "english_reference": "There are many beaches, due to Auckland's straddling of two harbours. The most popular ones are in three areas."
+  },
+  {
+   "file": "1246035088267239172.wav",
+   "reference": "আৰম্ভণিতে পোছাকবোৰ পূৰ্বৰ ব্যঞ্জণ্টিন সংস্কৃতিৰ পৰা যথেষ্ট প্ৰভাৱিত হৈছিল।",
+   "heard": "আৰম্ভণিতে পোছাকবোৰ পূৰ্বৰ বেঞ্জটিন সংস্কৃতিৰ পৰা যথেষ্ট প্ৰভাৱিত হৈছিল",
+   "wer": 0.111,
+   "confidence": 0.935,
+   "english": "Initially, the costumes were heavily influenced by the earlier Benjamin culture.",
+   "english_reference": "At the beginning dress was heavily influenced by the Byzantine culture in the east."
+  },
+  {
+   "file": "13051379286208765561.wav",
+   "reference": "অ'কলেণ্ডৰ 2 টা পোতাশ্ৰয়ৰ ষ্ট্ৰেডলিংৰ কাৰণে হোৱা বহুতো বীচ আছে৷ আটাইতকৈ জনপ্ৰিয়টো 3 টা অঞ্চলত আছে৷",
+   "heard": "অকলেণ্ডৰ দুটা পদশ্ৰয়ৰ ষ্ট্ৰেডলিঙৰ কাৰণে হোৱা বহুতো বীজ আছে আটাইতকৈ জনপ্ৰিয়ত তিনিটা অঞ্চলত আছে",
+   "wer": 0.706,
+   "confidence": 0.939,
+   "english": "Auckland has many seeds for two-legged straddling, the most popular being in three regions.",
+   "english_reference": "There are many beaches, due to Auckland's straddling of two harbours. The most popular ones are in three areas."
+  },
+  {
+   "file": "13761224186907477609.wav",
+   "reference": "চাৰি বছৰত এইটো মাৰ্টেলীৰ পঞ্চম CEP.",
+   "heard": "চাৰি বছৰত এইটো' মাৰ্টেলিৰ পঞ্চম চি ই পি",
+   "wer": 0.667,
+   "confidence": 0.883,
+   "english": "This is Martelly's fifth CEP in four years.",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "13848659620750372242.wav",
+   "reference": "অন-চাইট কাৰ্য্যকলাপসমূহৰ উদাহৰণসমূহত চিকাৰ, মাছ মৰা, ফটোগ্ৰাফী, পক্ষী নিৰীক্ষণ আৰু উদ্যানসমূহলৈ যোৱা আৰু পৰিস্থিতিতন্ত্ৰৰ বিষয়ে তথ্য অধ্যয়ন কৰাটো সন্নিৱিষ্ট হৈ থাকে৷",
+   "heard": "অনচাইট কাৰ্যকলাপসমূহৰ উদাহৰণসমূহত চিকাৰ মাছমৰা ফটোগ্ৰাফী পক্ষী নিৰীক্ষণ আৰু উদ্যানসমূহলৈ যোৱা আৰু পৰিস্থিতিযন্ত্ৰৰ বিষয়ে তথ্য অধ্যয়ন কৰাটো সন্নিৱদিষ্ট হৈ থাকে",
+   "wer": 0.364,
+   "confidence": 0.909,
+   "english": "Examples of onsite activities include hunting, fishing, photography, bird watching, and visiting parks and studying information about ecosystems.",
+   "english_reference": "Examples of on-site activities include hunting, fishing, photography, bird watching, and visiting parks and studying information about the ecosystem."
+  },
+  {
+   "file": "14976502870559836460.wav",
+   "reference": "অন-চাইট কাৰ্য্যকলাপসমূহৰ উদাহৰণসমূহত চিকাৰ, মাছ মৰা, ফটোগ্ৰাফী, পক্ষী নিৰীক্ষণ আৰু উদ্যানসমূহলৈ যোৱা আৰু পৰিস্থিতিতন্ত্ৰৰ বিষয়ে তথ্য অধ্যয়ন কৰাটো সন্নিৱিষ্ট হৈ থাকে৷",
+   "heard": "পঞ্চাইত কাৰ্যকলাপসমূহৰ উদাহৰণসমূহত চিকাৰ মাছ মৰা ফটোগ্ৰাফী পক্ষী নিৰীক্ষণ আৰু উদ্যানসমূহলৈ যোৱা আৰু পৰিস্থিতি তন্তৰ বিষয়ে তথ্য অধ্যয়ন কৰাটো সন্নিৱিষ্ট হৈ থাকে",
+   "wer": 0.273,
+   "confidence": 0.936,
+   "english": "Examples of activities in the panchayat include hunting, fishing, photography, bird watching, and visiting parks and studying information about the environment.",
+   "english_reference": "Examples of on-site activities include hunting, fishing, photography, bird watching, and visiting parks and studying information about the ecosystem."
+  },
+  {
+   "file": "15682491079732329232.wav",
+   "reference": "ফিলিপাইনৰ ওপৰত বিজয় সাব্যস্ত কৰিবৰ বাবে আমেৰিকা যুক্তৰাষ্ট্ৰ প্ৰশাসনৰ হোৱা যুদ্ধৰ খৰচ ফিলিপাইনৰ লোকসকলে বহন কৰিছিল।",
+   "heard": "ফিলিপাইনৰ ওপৰত বিজয় সাব্যস্ত কৰিবৰ বাবে আমেৰিকা যুক্তৰাষ্ট্ৰ প্ৰশাসনৰ হোৱা যুদ্ধৰ খৰচ ফিলিপাইনৰ লোকসকলে বহন কৰিছিল",
+   "wer": 0.0,
+   "confidence": 0.96,
+   "english": "The cost of the US-administered war to conquer the Philippines was borne by the Filipino people.",
+   "english_reference": "The war expenditures of U.S. imperialism in the conquest of the Philippines were paid for by the Filipino people themselves."
+  },
+  {
+   "file": "16022508665190610905.wav",
+   "reference": "তেওঁৰ 1,000তম ডাক টিকটটো আছিল ডেভিড ক্লকাৰৰ 2000 চনৰ অতি সুন্দৰ 'চুইডেনৰ ৰজাবোৰৰ মহান কৰ্মসমূহ' যিটো গিনিছ বিশ্ব ৰেকৰ্ডত অন্তৰ্ভুক্ত হৈছে।",
+   "heard": "তেওঁৰ এহাজাৰতম ডাক টিকটটো আছিল ডেভিড ক্ল'কাৰৰ দুহেজাৰ চনৰ অতি সুন্দৰ ছুইডেনৰ ৰজাবোৰৰ মহান কৰ্মসমূহ যিটো গ্ৰীণছ বিশ্ব ৰেকৰ্ডত অন্তৰ্ভুক্ত হৈছে",
+   "wer": 0.318,
+   "confidence": 0.932,
+   "english": "His thousandth postage stamp was David Cloaker's Great Works of the Most Beautiful Swedish King of the Two Thousand Years which is included in the Green's World Record.",
+   "english_reference": "His 1,000th stamp was the magnificent \"Great Deeds by Swedish Kings\" by David Klöcker Ehrenstrahl in 2000, which is listed in the Guinness Book of World Records."
+  },
+  {
+   "file": "17061770219530940179.wav",
+   "reference": "পোক-পতংগবিলাক বতাহত যাব পৰা প্ৰথম জীৱ আছিল। সিহঁতৰ উৰিব পৰা ক্ষমতাই সিহঁতক সহজে শত্ৰুৰ পৰা পলাই যাবলৈ সহায় কৰিছিল আৰু খাদ্য আৰু সংগী সহজে বিচাৰিবলৈ সহায় কৰিছিল।",
+   "heard": "পোক পতংগবিলাক বতাহত যাব পৰা প্ৰথম জীৱ আছিল সিহঁতৰ উৰিব পৰা ক্ষমতাই সিহঁতক সহজে শত্ৰুৰ পৰা পলাই যাবলৈ সহায় কৰিছিল আৰু খাদ্য আৰু সংগী সহজে বিচাৰিবলৈ সহায় কৰিছিল",
+   "wer": 0.0,
+   "confidence": 0.978,
+   "english": "Insects were the first organisms to be airborne; their ability to fly allowed them to easily escape from their enemies and helped them to find food and companions easily.",
+   "english_reference": "Insects were the first animals to take to the air. Their ability to fly helped them evade enemies more easily and find food and mates more efficiently."
+  },
+  {
+   "file": "17599179750158976727.wav",
+   "reference": "পোক-পতংগবিলাক বতাহত যাব পৰা প্ৰথম জীৱ আছিল। সিহঁতৰ উৰিব পৰা ক্ষমতাই সিহঁতক সহজে শত্ৰুৰ পৰা পলাই যাবলৈ সহায় কৰিছিল আৰু খাদ্য আৰু সংগী সহজে বিচাৰিবলৈ সহায় কৰিছিল।",
+   "heard": "পোক পতংগবিলাক বতাহত যাব পৰা প্ৰথম জীৱ আছিল সিহঁতৰ উৰিব পৰা ক্ষমতাই সিহঁতক সহজে শত্ৰুৰ পৰা পলাই যাবলৈ সহায় কৰিছিল আৰু খাদ্য আৰু সংগী সহজে বিচাৰিবলৈ সহায় কৰিছিল",
+   "wer": 0.0,
+   "confidence": 0.977,
+   "english": "Insects were the first organisms to be airborne; their ability to fly allowed them to easily escape from their enemies and helped them to find food and companions easily.",
+   "english_reference": "Insects were the first animals to take to the air. Their ability to fly helped them evade enemies more easily and find food and mates more efficiently."
+  },
+  {
+   "file": "2534409551699942125.wav",
+   "reference": "পোক-পতংগবিলাক বতাহত যাব পৰা প্ৰথম জীৱ আছিল। সিহঁতৰ উৰিব পৰা ক্ষমতাই সিহঁতক সহজে শত্ৰুৰ পৰা পলাই যাবলৈ সহায় কৰিছিল আৰু খাদ্য আৰু সংগী সহজে বিচাৰিবলৈ সহায় কৰিছিল।",
+   "heard": "পোক পতংগবিলাক বতাহত যাব পৰা প্ৰথম জীৱ আছিল সিহঁতৰ উৰিব পৰা ক্ষমতাই সিহঁতক সহজে শত্ৰুৰ পৰা পলাই যাবলৈ সহায় কৰিছিল আৰু খাদ্য আৰু সংগী সহজে বিচাৰিবলৈ সহায় কৰিছিল",
+   "wer": 0.0,
+   "confidence": 0.979,
+   "english": "Insects were the first organisms to be airborne; their ability to fly allowed them to easily escape from their enemies and helped them to find food and companions easily.",
+   "english_reference": "Insects were the first animals to take to the air. Their ability to fly helped them evade enemies more easily and find food and mates more efficiently."
+  },
+  {
+   "file": "3041635130220702519.wav",
+   "reference": "সিহঁতৰ কথাৰ বৰ বিশেষ অৰ্থ মই বিচাৰি পোৱা নাছিলোঁ, এইটো নিশ্চিতভাৱে যুক্তিসংগত নাছিল।",
+   "heard": "সিহঁতৰ কথাৰ বৰ বিশেষ অৰ্থ মই বিচাৰি পোৱা নাছিলোঁ এইটো নিশ্চিতভাৱে যুক্তিসংগত নাছিল",
+   "wer": 0.0,
+   "confidence": 0.967,
+   "english": "I didn't find the very specific meaning of what they were saying. It certainly wasn't reasonable.",
+   "english_reference": "That didn't seem to make sense to me; it certainly wasn't fair."
+  },
+  {
+   "file": "3915857475030669064.wav",
+   "reference": "আৰম্ভণিতে পোছাকবোৰ পূৰ্বৰ ব্যঞ্জণ্টিন সংস্কৃতিৰ পৰা যথেষ্ট প্ৰভাৱিত হৈছিল।",
+   "heard": "আৰম্ভণিতে পোছাকবোৰ পূৰ্বৰ ব্যঞ্জনন্তন সংস্কৃতিৰ পৰা যথেষ্ট প্ৰভাৱিত হৈছিল",
+   "wer": 0.111,
+   "confidence": 0.929,
+   "english": "Initially, costumes were heavily influenced by earlier culinary cultures.",
+   "english_reference": "At the beginning dress was heavily influenced by the Byzantine culture in the east."
+  },
+  {
+   "file": "434977861076721149.wav",
+   "reference": "সিহঁতৰ কথাৰ বৰ বিশেষ অৰ্থ মই বিচাৰি পোৱা নাছিলোঁ, এইটো নিশ্চিতভাৱে যুক্তিসংগত নাছিল।",
+   "heard": "সিহঁতৰ কথাৰ বৰ বিশেষ অৰ্থ মই বিচাৰি পোৱা নাছিলোঁ এইটো নিশ্চিতভাৱে যুক্তিসংগঠন আছিল",
+   "wer": 0.154,
+   "confidence": 0.94,
+   "english": "I didn't find much meaning in what they said. It was certainly logical.",
+   "english_reference": "That didn't seem to make sense to me; it certainly wasn't fair."
+  },
+  {
+   "file": "4446186773269690706.wav",
+   "reference": "চাৰি বছৰত এইটো মাৰ্টেলীৰ পঞ্চম CEP.",
+   "heard": "চাৰি বছৰত এইটো মাৰ্টেলিৰ পঞ্চম চি ই পি",
+   "wer": 0.667,
+   "confidence": 0.912,
+   "english": "This is Martelly's fifth CEP in four years.",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "5101866596632079534.wav",
+   "reference": "সিহঁতৰ কথাৰ বৰ বিশেষ অৰ্থ মই বিচাৰি পোৱা নাছিলোঁ, এইটো নিশ্চিতভাৱে যুক্তিসংগত নাছিল।",
+   "heard": "সিহঁতৰ কথাৰ বৰ বিশেষ অৰ্থ মই বিচাৰি পোৱা নাছিলোঁ এইটো নিশ্চিতভাৱে যুক্তিসংগত নাছিল",
+   "wer": 0.0,
+   "confidence": 0.957,
+   "english": "I didn't find the very specific meaning of what they were saying. It certainly wasn't reasonable.",
+   "english_reference": "That didn't seem to make sense to me; it certainly wasn't fair."
+  },
+  {
+   "file": "5827717833999401811.wav",
+   "reference": "চাৰি বছৰত এইটো মাৰ্টেলীৰ পঞ্চম CEP.",
+   "heard": "চাৰি বছৰত এইটো' মাৰ্টেলিৰ পঞ্চম চি ই পি",
+   "wer": 0.667,
+   "confidence": 0.874,
+   "english": "This is Martelly's fifth CEP in four years.",
+   "english_reference": "It is Martelly's fifth CEP in four years."
+  },
+  {
+   "file": "7402556124675362294.wav",
+   "reference": "তেওঁৰ 1,000তম ডাক টিকটটো আছিল ডেভিড ক্লকাৰৰ 2000 চনৰ অতি সুন্দৰ 'চুইডেনৰ ৰজাবোৰৰ মহান কৰ্মসমূহ' যিটো গিনিছ বিশ্ব ৰেকৰ্ডত অন্তৰ্ভুক্ত হৈছে।",
+   "heard": "তেওঁৰ এ হাজাৰতম ডাক টিকট আছিল ডেভিড ক্ল'কাৰৰ দুই হাজাৰ চনৰ অতি সুন্দৰ ছুইডেনৰ ৰজাবোৰৰ মহান কৰ্ম হূল যিটো গিনিজ বিশ্ব ৰেকৰ্ডত অন্তৰ্ভুক্ত হৈছে",
+   "wer": 0.5,
+   "confidence": 0.901,
+   "english": "His one thousandth postage stamp was David Cloaker's Two Thousand Years of the Great Works of the Most Beautiful Swedish King, which is included in the Guinness World Records.",
+   "english_reference": "His 1,000th stamp was the magnificent \"Great Deeds by Swedish Kings\" by David Klöcker Ehrenstrahl in 2000, which is listed in the Guinness Book of World Records."
+  },
+  {
+   "file": "7849778741938372911.wav",
+   "reference": "আৰম্ভণিতে পোছাকবোৰ পূৰ্বৰ ব্যঞ্জণ্টিন সংস্কৃতিৰ পৰা যথেষ্ট প্ৰভাৱিত হৈছিল।",
+   "heard": "আৰম্ভণিতে পোচাকবোৰ পূৰ্বৰ ব্যঞ্জনটীন সংস্কৃতিৰ পৰা যথেষ্ট প্ৰভাৱিত হৈছিল",
+   "wer": 0.222,
+   "confidence": 0.949,
+   "english": "Initially, costumes were heavily influenced by the earlier Byzantine culture.",
+   "english_reference": "At the beginning dress was heavily influenced by the Byzantine culture in the east."
+  },
+  {
+   "file": "8219738028890499216.wav",
+   "reference": "নতুন পৰিবেশত বিভিন্নধৰণৰ উপায় আৰু বিভিন্ন প্ৰতিযোগী আছে, গতিকে নতুন মানুহক বেলেগ বেলেগ বিশেষত্বৰ প্ৰয়োজন হ'ব আৰু তেওঁলোকে আগতে পোৱাতকৈ শক্তিশালী প্ৰতিযোগী গ্ৰহণ কৰিব লাগিব।",
+   "heard": "নতুন পৰিৱেশত বিভিন্ন ধৰণৰ উপায় আৰু বিভিন্ন প্ৰতিযোগী আছে গতিকে নতুন মানুহক বেলেগ বেলেগ বিশেষত্বৰ প্ৰয়োজন হ'ব আৰু তেওঁলোকে আগতে পোৱাতকৈ শক্তিশালী প্ৰতিযোগী গ্ৰহণ কৰিব লাগিব",
+   "wer": 0.115,
+   "confidence": 0.967,
+   "english": "The new environment has a variety of ways and different competitors so new people will need different specialties and they will have to adopt stronger competitors than before.",
+   "english_reference": "This new environment has different resources and different competitors, so the new population will need different features or adaptations to be a strong competitor than what they had needed before."
+  },
+  {
+   "file": "8426203969173590183.wav",
+   "reference": "অন-চাইট কাৰ্য্যকলাপসমূহৰ উদাহৰণসমূহত চিকাৰ, মাছ মৰা, ফটোগ্ৰাফী, পক্ষী নিৰীক্ষণ আৰু উদ্যানসমূহলৈ যোৱা আৰু পৰিস্থিতিতন্ত্ৰৰ বিষয়ে তথ্য অধ্যয়ন কৰাটো সন্নিৱিষ্ট হৈ থাকে৷",
+   "heard": "অনচাইট কাৰ্যকলাপসমূহৰ উদাহৰণসমূহত চিকাৰ মাছমৰা ফটোগ্ৰাফী পক্ষী নিৰীক্ষণ আৰু উদ্যানসমূহলৈ যোৱা আৰু পৰিস্থিতি তন্ত্ৰৰ বিষয়ে তথ্য অধ্যয়ন কৰাতো সন্নিৱিষ্ট হৈ থাকে",
+   "wer": 0.409,
+   "confidence": 0.904,
+   "english": "Examples of onsite activities include hunting, fishing, photography, bird watching, and visiting parks and studying information about ecosystems.",
+   "english_reference": "Examples of on-site activities include hunting, fishing, photography, bird watching, and visiting parks and studying information about the ecosystem."
+  },
+  {
+   "file": "9299933467293663327.wav",
+   "reference": "ফিলিপাইনৰ ওপৰত বিজয় সাব্যস্ত কৰিবৰ বাবে আমেৰিকা যুক্তৰাষ্ট্ৰ প্ৰশাসনৰ হোৱা যুদ্ধৰ খৰচ ফিলিপাইনৰ লোকসকলে বহন কৰিছিল।",
+   "heard": "ফিলিপাইনৰ ওপৰত বিজয় সাব্যস্ত কৰিবৰ বাবে আমেৰিকা যুক্তৰাষ্ট্ৰ প্ৰশাসনৰ হোৱা যুদ্ধৰ খৰচ ফিলিপাইনৰ লোকসকলে বহন কৰিছিল",
+   "wer": 0.0,
+   "confidence": 0.971,
+   "english": "The cost of the US-administered war to conquer the Philippines was borne by the Filipino people.",
+   "english_reference": "The war expenditures of U.S. imperialism in the conquest of the Philippines were paid for by the Filipino people themselves."
+  },
+  {
+   "file": "9774880437167562750.wav",
+   "reference": "ফিলিপাইনৰ ওপৰত বিজয় সাব্যস্ত কৰিবৰ বাবে আমেৰিকা যুক্তৰাষ্ট্ৰ প্ৰশাসনৰ হোৱা যুদ্ধৰ খৰচ ফিলিপাইনৰ লোকসকলে বহন কৰিছিল।",
+   "heard": "ফিলিপাইনৰ ওপৰত বিজয় সাব্যস্ত কৰিবৰ বাবে আমেৰিকা যুক্তৰাষ্ট্ৰ প্ৰশাসনৰ হোৱা যুদ্ধৰ খৰচ ফিলিপাইনৰ লোকসকলে বহন কৰিছিল",
+   "wer": 0.0,
+   "confidence": 0.969,
+   "english": "The cost of the US-administered war to conquer the Philippines was borne by the Filipino people.",
+   "english_reference": "The war expenditures of U.S. imperialism in the conquest of the Philippines were paid for by the Filipino people themselves."
+  }
+ ]
+}

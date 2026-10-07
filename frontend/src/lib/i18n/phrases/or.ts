@@ -738,6 +738,8 @@ const or: Record<string, string> = {
   "Today's tokens": "ଆଜିର ଟୋକେନ୍",
   "Toggle as staff arrive or leave — takes effect immediately for new referrals": "କର୍ମଚାରୀ ଆସିବା-ଯିବା ଅନୁସାରେ ବଦଳାନ୍ତୁ — ନୂଆ ରେଫରାଲରେ ତୁରନ୍ତ ଲାଗୁ",
   "Tokens appear here the moment someone checks in.": "କେହି ଚେକ୍-ଇନ୍ କଲା ମାତ୍ରେ ଟୋକେନ୍ ଏଠାରେ ଦେଖାଯାଏ।",
+  "Machine translated": "ମେସିନ୍ ଅନୁବାଦ",
+  " — check against the patient's own words": " — ରୋଗୀଙ୍କ ନିଜ କଥା ସହ ମିଳାନ୍ତୁ",
   "Translated:": "ଅନୁବାଦ:",
   "Transport": "ପରିବହନ",
   "Trauma, burns and occupational pathways.": "ଆଘାତ, ପୋଡ଼ା ଓ ବୃତ୍ତିଗତ ପଥ।",
