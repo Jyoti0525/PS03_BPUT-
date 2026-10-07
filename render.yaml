@@ -20,6 +20,8 @@ services:
         sync: false
       - key: JEEVIA_JWT_SECRET
         generateValue: true
+      - key: JEEVIA_DATA_KEY  # encrypts patient identifiers and files; keep it, or stored records become unreadable
+        generateValue: true
       - key: JEEVIA_ENV
         value: production
       - key: JEEVIA_PROFILE  # H3: the free cloud instance runs rules only; models run on the facility laptop

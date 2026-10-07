@@ -92,7 +92,7 @@ export default function PublicKiosk() {
           if (live) signIn(r.tokens, r.user);
         }
         // Fetch the intake wizard and the Hindi/Odia screens now, so they are cached for offline use too.
-        if (reachable) Promise.allSettled([loadIntake(), loadPhrases("hi"), loadPhrases("or")]).then(() => precacheCurrentPage());
+        if (reachable) Promise.allSettled([loadIntake(), loadPhrases("hi"), loadPhrases("or"), loadPhrases("kn")]).then(() => precacheCurrentPage());
       } catch (e) {
         if (live) setError(e instanceof Error ? e.message : tr("This kiosk link could not be opened."));
       }
@@ -149,7 +149,7 @@ export default function PublicKiosk() {
           </div>
         ) : !started ? (
           <div className="fade-up mx-auto max-w-2xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-coral-200 bg-white px-4 py-1.5 text-xs font-bold tracking-wider text-coral-500 uppercase">
+            <span className="inline-flex items-center gap-2 rounded-full border border-coral-200 bg-white px-4 py-1.5 text-xs font-bold tracking-wider text-coral-700 uppercase">
               <Building2 className="size-3.5" /> {info.facility_name}
             </span>
             <h1 className="mt-6 text-4xl leading-tight font-extrabold tracking-tight text-ink sm:text-5xl">
@@ -201,7 +201,7 @@ export default function PublicKiosk() {
         )}
         {ready && started && (
           <div className="no-print mx-auto mt-6 max-w-3xl text-center">
-            <Button variant="ghost" size="sm" onClick={() => { setRound((n) => n + 1); setStarted(false); }}>
+            <Button variant="ghost" className="min-h-12" onClick={() => { setRound((n) => n + 1); setStarted(false); }}>
               {tr("Cancel and start over")}
             </Button>
           </div>

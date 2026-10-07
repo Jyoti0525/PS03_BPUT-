@@ -196,7 +196,9 @@ export const liveApi: JeeviaApi = {
   endCall: (cid, outcome) => post(`/calls/${cid}/end`, { outcome }),
   getCall: (cid) => json(`/calls/${cid}`),
   callAudio: async (cid, i) => (await raw(`/calls/${cid}/turns/${i}/audio`)).blob(),
-  speakOnline: async (text, language) => (await raw("/language/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, language }) })).blob(),
+  translateText: (text, source, target) => post("/translate", { text, source, target }),
+  speakOnline: async (text, language, allowOnline = true) =>
+    (await raw("/language/speak", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, language, allow_online: allowOnline }) })).blob(),
   listCalls: (id) => json(`/followups/${id}/calls`),
 
   createReferral: (encounterId, input) => post(`/encounters/${encounterId}/referrals`, input),

@@ -24,7 +24,7 @@ import base64
 import hashlib
 import hmac
 import logging
-from xml.sax.saxutils import escape
+from xml.sax.saxutils import escape  # nosec B406: escapes text we write into TwiML, parses nothing
 
 import httpx
 

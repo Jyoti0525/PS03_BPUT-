@@ -18,6 +18,8 @@ from sqlalchemy import func, select
 
 from .. import audit
 from ..config import get_settings
+from ..crypto import blind
+from ..ratelimit import limit, per_phone
 from ..models import Encounter, Facility, KioskLink, Organisation, Patient, User
 from ..schemas import ADMIN_ROLES, STAFF_ROLES, AuthResult, KioskIdentifyIn, KioskInfo, KioskLinkIn, KioskLinkOut, KioskSessionIn, PatientOut, TokenBoardItem
 from ..security import DB, CurrentUser, issue_tokens, require
@@ -88,7 +90,7 @@ def revoke_link(lid: str, user: Supervisor, db: DB):
 
 
 # ── Public kiosk ──────────────────────────────────────
-@router.get("/kiosk/{code}", response_model=KioskInfo)
+@router.get("/kiosk/{code}", response_model=KioskInfo, dependencies=[Depends(limit("public"))])
 def kiosk_info(code: str, db: DB):
     k = _active(db, code)
     f = db.get(Facility, k.facility_id)
@@ -97,7 +99,7 @@ def kiosk_info(code: str, db: DB):
                      for_home=bool(k.for_home))
 
 
-@router.post("/kiosk/{code}/session", response_model=AuthResult)
+@router.post("/kiosk/{code}/session", response_model=AuthResult, dependencies=[Depends(limit("public"))])
 def kiosk_session(code: str, body: KioskSessionIn, db: DB):
     k = _active(db, code)
     ku = db.get(User, k.user_id)
@@ -109,10 +111,11 @@ def kiosk_session(code: str, body: KioskSessionIn, db: DB):
     return AuthResult(tokens=issue_tokens(ku, body.device_id), user=user_out(db, ku))
 
 
-@router.post("/kiosk/identify", response_model=PatientOut)
+@router.post("/kiosk/identify", response_model=PatientOut, dependencies=[Depends(limit("public"))])
 def identify(body: KioskIdentifyIn, user: Kiosk, db: DB):
     """Returning patient: both the ID on their old token and their phone must match. No search, no lists."""
-    p = db.scalar(select(Patient).where(Patient.code.ilike(body.patient_code.strip()), Patient.phone == body.phone))
+    per_phone(body.phone, "kiosk-identify")
+    p = db.scalar(select(Patient).where(Patient.code.ilike(body.patient_code.strip()), Patient.phone_hash == blind(body.phone)))
     if not p:
         raise HTTPException(404, "No match — check the ID and phone, or register as new")
     audit.record(db, user, "VIEW", "patient", p.id, "Returning patient identified at kiosk (ID + phone)", p.code)

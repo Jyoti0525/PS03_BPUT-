@@ -17,8 +17,13 @@ class Settings(BaseSettings):
     ocr_enabled: bool = True
     # G8: where this deployment's records come from. Only SYNTHETIC or PUBLIC_SAMPLE; real patient data is out of scope.
     data_origin: Literal["SYNTHETIC", "PUBLIC_SAMPLE"] = "SYNTHETIC"
+    # DPDP Act s. 13: who a patient complains to about their data. Printed on the patient slip; set per deployment.
+    grievance_contact: str = "Grievance officer at this facility's front desk, or call 104"
     database_url: str = "sqlite:///./data/jeevia.db"
     jwt_secret: str = "change-me-in-production-please-32b+"
+    # Encryption at rest for patient identifiers and stored files (app/crypto.py). 32+ characters; production requires
+    # its own. Unset in development: derived from the JWT secret. Changing it makes earlier records unreadable.
+    data_key: str | None = None
     jwt_alg: str = "HS256"
     access_ttl_min: int = 60
     refresh_ttl_days: int = 7
@@ -90,6 +95,10 @@ class Settings(BaseSettings):
     # 8-bit copy made by scripts/quantize_asr.py: same accuracy, ~half the RAM (docs/EVALUATION.md).
     # "indic-conformer-600m-multilingual" = the original fp32 download.
     asr_model: str = "indic-conformer-600m-int8"
+    # Per language: a transcript heard with lower confidence does not enter the record; it becomes a question for the
+    # health worker. Calibrated on FLEURS dev clips (docs/EVALUATION.md); "default" covers unmeasured languages.
+    # Odia 0.92 flags exactly the three clips with 40–67 % WER; Hindi and Kannada confidence separates less well.
+    asr_min_confidence: dict[str, float] = {"or": 0.92, "hi": 0.85, "kn": 0.92, "default": 0.92}
     asr_decoding: str = "ctc"  # "ctc" (2x faster) or "rnnt" (slightly more accurate) — see docs/EVALUATION.md
     # B9 offline second speech engine (app/whisper_asr.py): hears the recording when Sarvam (online) cannot.
     asr_second_offline: bool = True
@@ -105,6 +114,9 @@ class Settings(BaseSettings):
     sarvam_api_key: str | None = Field(None, validation_alias=AliasChoices("JEEVIA_SARVAM_API_KEY", "SARVAM_API_KEY"))
     sarvam_tts_speaker: str = "priya"  # a woman's voice: the Hindi lines speak as a woman ("समझ नहीं पाई")
     sarvam_timeout_s: float = 20
+    # Bhashini (MeitY ULCA): online translation when the offline model cannot run. Unset = not used.
+    bhashini_user_id: str | None = Field(None, validation_alias=AliasChoices("JEEVIA_BHASHINI_USER_ID", "BHASHINI_USER_ID"))
+    bhashini_api_key: str | None = Field(None, validation_alias=AliasChoices("JEEVIA_BHASHINI_API_KEY", "BHASHINI_API_KEY"))
 
     escalate_red_min: int = 15
     escalate_yellow_min: int = 60
@@ -125,19 +137,49 @@ class Settings(BaseSettings):
     seed_demo: bool = True
     seed_scenarios: bool = True  # demo scenarios for campus fevers, missed visits, capacity, workplace screening (app/scenarios.py)
     log_level: str = "INFO"
+    # Rate limits (app/ratelimit.py): requests per minute from one device or address, and per phone number.
+    # 0 switches them off (the test session shares one address; test_security.py switches them on).
+    rate_limit: bool = True
+    rate_per_min_public: int = 30  # QR summary links, kiosk patient lookup
+    rate_per_min_ai: int = 20  # speech, voice and translation: each call can cost online credit
+    rate_per_min_upload: int = 20
+    rate_per_min_auth: int = 10  # PIN and code checks, on top of the per-account lockouts
+    rate_per_phone_10min: int = 5  # kiosk lookups for one phone number
 
 
     @model_validator(mode="after")
     def _profile(self):
         given = self.model_fields_set
         preset = {"stub": {"language_models": False, "ocr_enabled": False, "asr_second_offline": False, "llm_url": None,
-                           "llm_urgency_opinion": False, "preload_language_models": False, "sarvam_api_key": None},
+                           "llm_urgency_opinion": False, "preload_language_models": False, "sarvam_api_key": None,
+                           "bhashini_user_id": None, "bhashini_api_key": None},
                   "demo": {},
                   "full": {"preload_language_models": True}}[self.profile]
         for k, v in preset.items():
             if k not in given:
                 object.__setattr__(self, k, v)
+        if self.llm_url and not self.llm_url.startswith(("http://", "https://")):
+            raise ValueError("JEEVIA_LLM_URL must be an http(s) address")
+        if self.env == "production":
+            self.check_production()
         return self
+
+    def check_production(self) -> None:
+        """Refuse to start a production server with development settings."""
+        bad = []
+        if len(self.jwt_secret) < 32 or "change-me" in self.jwt_secret or "dev-only" in self.jwt_secret:
+            bad.append("JEEVIA_JWT_SECRET must be a random secret of 32+ characters")
+        if not self.data_key or len(self.data_key) < 32:
+            bad.append("JEEVIA_DATA_KEY (32+ characters) is required to encrypt patient data")
+        if self.otp_provider == "mock" or self.email_provider == "mock":
+            bad.append("mock sign-in codes are for local development only")
+        origins = [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        if "*" in origins or any(o.startswith("http://") and "localhost" not in o and "127.0.0.1" not in o for o in origins):
+            bad.append("JEEVIA_CORS_ORIGINS must list https sites, never *")
+        if not self.rate_limit:
+            bad.append("rate limits cannot be switched off in production")
+        if bad:
+            raise ValueError("Production settings refused: " + "; ".join(bad))
 
 
 @lru_cache

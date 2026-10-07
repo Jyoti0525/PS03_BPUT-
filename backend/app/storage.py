@@ -10,6 +10,9 @@ Backends (JEEVIA_STORAGE_BACKEND):
 `put` returns the storage key to save on the FileObject; `get`/`delete` accept that key, so files
 written under an older backend stay readable after switching.
 
+Every object is encrypted before it leaves the API (app/crypto.py: Fernet, AES-128 + HMAC), so the disk, the bucket
+or Cloudinary only ever hold ciphertext; files stored before this are read as they are.
+
 Every object gets an expiry timestamp at upload (minimal retention). `purge_expired` deletes
 expired bytes, keeps metadata and writes a PURGE audit event.
 """
@@ -25,7 +28,7 @@ import httpx
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import audit
+from . import audit, crypto
 from .config import get_settings
 from .models import FileObject
 
@@ -144,17 +147,24 @@ def folder_for(facility_id: str | None, kind: str, when: datetime | None = None)
 
 
 def put(file_id: str, data: bytes, content_type: str = "application/octet-stream", folder: str = "jeevia/misc") -> str:
+    """Encrypt and store; the content type stays on the FileObject, the store sees opaque bytes."""
     backend = get_settings().storage_backend
+    data = crypto.seal(data)
     if backend == "cloudinary":
-        return _cld_put(file_id, data, content_type, folder)
+        return _cld_put(file_id, data, "application/octet-stream", folder)
     if backend == "s3":
         key = f"{folder}/{file_id}"
-        _client().put_object(Bucket=get_settings().s3_bucket, Key=key, Body=data, ContentType=content_type)
+        _client().put_object(Bucket=get_settings().s3_bucket, Key=key, Body=data, ContentType="application/octet-stream")
         return f"s3:{key}"
     return _local_put(file_id, data)
 
 
 def get(key: str) -> bytes | None:
+    data = _get_raw(key)
+    return None if data is None else crypto.open_sealed(data)
+
+
+def _get_raw(key: str) -> bytes | None:
     if key.startswith("cld:"):
         return _cld_get(key)
     if key.startswith("s3:"):

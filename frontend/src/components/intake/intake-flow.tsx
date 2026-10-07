@@ -38,7 +38,12 @@ export interface IntakeResult {
   offline: boolean;
   /** Filled in from home (C3): "show_at_desk", or "emergency" when a danger sign was reported. Never a tier. */
   homeAdvice?: "emergency" | "show_at_desk" | null;
+  /** Who to complain to about data handling (DPDP s. 13), from the server; printed on the slip. */
+  grievanceContact?: string | null;
 }
+
+/** DPDP Act s. 9: under 18, consent comes from a parent or lawful guardian. Same list as the server. */
+const GUARDIANS = ["Mother", "Father", "Guardian"];
 
 function BigChoice({ selected, onClick, icon, title, body, className }: { selected: boolean; onClick: () => void; icon: React.ReactNode; title: string; body?: string; className?: string }) {
   return (
@@ -158,7 +163,7 @@ export function IntakeFlow({
   const [recording, setRecording] = useState(false);
   const [partial, setPartial] = useState("");
   // second: the other speech engine's hearing of the same recording (B9); `differences` non-empty = they disagree
-  const [pending, setPending] = useState<{ original: string; text: string; engine: string; audio: Blob | null; mt?: string; second?: Hearing } | null>(null);
+  const [pending, setPending] = useState<{ original: string; text: string; engine: string; audio: Blob | null; mt?: string; second?: Hearing; confidence?: number | null; low?: boolean } | null>(null);
   const [transcribing, setTranscribing] = useState(false);
   const recRef = useRef<Recorder | null>(null);
   // B9 offline check still running: its result goes to the read-back, or to the entry if already confirmed
@@ -208,12 +213,14 @@ export function IntakeFlow({
   const [vitals, setVitals] = useState<Record<NumericVital, string>>({ bp_systolic: "", bp_diastolic: "", pulse: "", temp_f: "", spo2: "", resp_rate: "", glucose: "" });
 
   const age = patient?.age ?? (Number(newP.age) || 30);
+  const [lowHeard, setLowHeard] = useState<Set<string>>(new Set());
   const chief = useMemo(() => {
-    const first = entries[0]?.text || typed.trim();
+    // Words heard with low confidence are not the complaint: the health worker asks about them.
+    const first = entries.find((e) => !lowHeard.has(e.original_text))?.text || typed.trim();
     if (first) return first.length > 90 ? first.slice(0, 87) + "…" : first;
     if (selected.length) return selected.join(", ");
     return category === "maternal" ? "Antenatal check-up" : category === "chronic" ? `${chronic.condition || "Chronic"} follow-up` : "";
-  }, [entries, typed, selected, category, chronic.condition]);
+  }, [entries, typed, selected, category, chronic.condition, lowHeard]);
 
   const questions = useMemo(
     () => (category ? contextQuestions({ chief_complaint: chief, selected_symptoms: selected, category, symptoms: entries, duration }, age, patientLoad) : []),
@@ -240,10 +247,19 @@ export function IntakeFlow({
   }, [result, onReset, mode]);
 
   useEffect(() => {
-    if (readAloud && step !== "vitals") speak(step === "consent" ? `${t("kiosk.welcome")} ${t("kiosk.consent.body")}` : t(STEP_TITLE[step]), lang);
+    // F3: a patient who cannot read hears the consent and the disclaimer, then each question with its choices.
+    if (readAloud && step !== "vitals" && step !== "followup") speak(step === "consent" ? `${t("kiosk.welcome")} ${t("kiosk.consent.body")} ${t("disclaimer.short")}` : t(STEP_TITLE[step]), lang);
     return () => stopSpeaking();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, readAloud, lang]);
+
+  useEffect(() => {
+    if (!readAloud || step !== "followup") return;
+    const q = questions.find((x) => !answers[x.qid]);
+    const first = Object.keys(answers).length === 0 ? `${t(STEP_TITLE[step])} ` : "";
+    speak(q ? `${first}${tr(q.question)} ${q.options.map((o) => tr(o)).join(", ")}` : tr("No more questions. Thank you!"), lang);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, readAloud, lang, answers]);
 
   const go = (d: 1 | -1) => {
     setErr(null);
@@ -257,6 +273,7 @@ export function IntakeFlow({
     switch (step) {
       case "consent":
         if (consentMode === "proxy" && (proxyName.trim().length < 2 || !proxyRel)) return "Enter the helper's name and relationship";
+        if ((patient?.age ?? 99) < 18 && !(consentMode === "proxy" && GUARDIANS.includes(proxyRel))) return "Patients under 18 need consent from a parent or guardian. Choose Mother, Father or Guardian.";
         if (!agreed) return "Consent is needed to continue";
         return null;
       case "identity":
@@ -287,6 +304,14 @@ export function IntakeFlow({
   const next = () => {
     const e = validate();
     if (e) return setErr(tr(e));
+    const age = patient?.age ?? Number(newP.age);
+    if (step === "identity" && age < 18 && !(consentMode === "proxy" && GUARDIANS.includes(proxyRel))) {
+      // Back to consent with "helping" chosen: a parent or guardian gives it, then the intake goes on.
+      setConsentMode("proxy");
+      if (!GUARDIANS.includes(proxyRel)) setProxyRel("");
+      setStep("consent");
+      return setErr(tr("Patients under 18 need consent from a parent or guardian. Choose Mother, Father or Guardian."));
+    }
     go(1);
   };
 
@@ -344,6 +369,8 @@ export function IntakeFlow({
           audio,
           mt: res.translation?.engine,
           second: so?.text ? { engine: so.engine, text: so.text, translation: so.translation ?? null, differences: so.disagree ? (so.differences ?? []) : [] } : undefined,
+          confidence: res.confidence,
+          low: res.low_confidence,
         };
       } catch (e) {
         if (e instanceof ApiError && e.status === 422) {
@@ -388,7 +415,8 @@ export function IntakeFlow({
       return;
     }
     const second_hearing = pending.second ? { engine: pending.second.engine, text: pending.second.text, translation: pending.second.translation ?? null } : null;
-    setEntries((e) => [...e, { text: pending.text, original_text: pending.original, language: lang, source: "voice", confirmed_by_readback: true, engine: pending.engine, second_hearing }]);
+    setEntries((e) => [...e, { text: pending.text, original_text: pending.original, language: lang, source: "voice", confirmed_by_readback: true, engine: pending.engine, second_hearing, confidence: pending.confidence ?? null }]);
+    if (pending.low) setLowHeard((s) => new Set(s).add(pending.original));
     if (pending.audio && !offline) {
       try {
         const f = await api.uploadFile(new File([pending.audio], `voice_${Date.now()}.webm`, { type: pending.audio.type }), "audio");
@@ -508,7 +536,7 @@ export function IntakeFlow({
       const p = patient ?? (await api.createPatient(newPatient!));
       const c = await api.captureConsent({ ...consent, patient_id: p.id });
       const enc = await api.submitIntake({ ...intake, patient_id: p.id, consent_id: c.id });
-      const r = { token: enc.token ?? `A-${enc.id.slice(-3).toUpperCase()}`, patientCode: p.code, offline: false, homeAdvice: enc.home_advice ?? null };
+      const r = { token: enc.token ?? `A-${enc.id.slice(-3).toUpperCase()}`, patientCode: p.code, offline: false, homeAdvice: enc.home_advice ?? null, grievanceContact: c.grievance_contact ?? null };
       setResult(r);
       onFinished?.(r);
     } catch (e) {
@@ -548,10 +576,13 @@ export function IntakeFlow({
         <p className="text-6xl font-extrabold tracking-tight text-ink tabular-nums">{result.token}</p>
         {result.patientCode && (
           <div className="mt-6 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
-            <QRCodeSVG value={`jeevia:${result.patientCode}`} size={132} />
+            <QRCodeSVG value={`jeevia:${result.patientCode}`} size={132} title={`${tr("QR code with your patient ID")} ${result.patientCode}`} />
             <p className="mt-2 font-mono text-sm text-muted">{result.patientCode}</p>
           </div>
         )}
+        <p className="mt-5 text-sm text-muted">
+          {t("kiosk.done.grievance")} {result.grievanceContact ?? t("kiosk.done.grievance.default")}
+        </p>
         {home && <p className="mt-5 rounded-xl border border-crit-line bg-crit-bg px-4 py-2.5 text-sm font-medium text-crit">{t("kiosk.home.danger")}</p>}
         {result.offline && (
           <p className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-semi-bg px-4 py-2 text-sm font-medium text-semi">
@@ -566,7 +597,7 @@ export function IntakeFlow({
   }
 
   const listen = (text: string) => (
-    <button type="button" onClick={() => speak(text, lang)} className="inline-flex items-center gap-1 rounded-full bg-canvas px-2.5 py-1 text-xs font-semibold text-ink-2 hover:bg-line" aria-label={t("common.listen")}>
+    <button type="button" onClick={() => speak(text, lang)} className="inline-flex min-h-12 items-center gap-1 rounded-full bg-canvas px-3.5 text-xs font-semibold text-ink-2 hover:bg-line" aria-label={t("common.listen")}>
       <Volume2 className="size-3.5" /> {t("common.listen")}
     </button>
   );
@@ -580,7 +611,7 @@ export function IntakeFlow({
         </p>
       )}
       {/* progress */}
-      <div className="mb-5 flex items-center gap-1.5" aria-label={tr("Step {n} of {m}", { n: idx + 1, m: steps.length })}>
+      <div className="mb-5 flex items-center gap-1.5" role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={idx + 1} aria-label={tr("Step {n} of {m}", { n: idx + 1, m: steps.length })}>
         {steps.map((s, i) => (
           <span key={s} className={cx("h-2 flex-1 rounded-full transition-colors", i < idx ? "bg-teal-600" : i === idx ? "bg-coral-500" : "bg-line")} />
         ))}
@@ -609,7 +640,7 @@ export function IntakeFlow({
                   <Label htmlFor="px-rel">{tr("Relationship")}</Label>
                   <Select id="px-rel" value={proxyRel} onChange={(e) => setProxyRel(e.target.value)} className="h-12 text-lg">
                     <option value="">{tr("Choose")}</option>
-                    {["Mother", "Father", "Husband", "Wife", "Son", "Daughter", "Mother-in-law", "Other family", communityWorker, "Caregiver"].map((r) => (
+                    {["Mother", "Father", "Guardian", "Husband", "Wife", "Son", "Daughter", "Mother-in-law", "Other family", communityWorker, "Caregiver"].map((r) => (
                       <option key={r}>{r}</option>
                     ))}
                   </Select>
@@ -688,7 +719,7 @@ export function IntakeFlow({
                     <Input id="np-emp" value={newP.employee_code} onChange={(e) => setNewP({ ...newP, employee_code: e.target.value.toUpperCase().slice(0, 40) })} className="h-13 text-lg" placeholder={tr("e.g. KSW-1041")} />
                   </div>
                 )}
-                <Button variant="ghost" className="sm:col-span-2" onClick={() => { setIsNew(false); setCandidates(null); }} icon={<Search className="size-4" />} disabled={offline}>
+                <Button variant="ghost" className="min-h-12 sm:col-span-2" onClick={() => { setIsNew(false); setCandidates(null); }} icon={<Search className="size-4" />} disabled={offline}>
                   {mode === "link" ? tr("I have visited before") : tr("Search existing patients instead")}
                 </Button>
               </div>
@@ -796,6 +827,9 @@ export function IntakeFlow({
                 <p className="mt-1 text-xl font-medium text-ink">“{pending.original}”</p>
                 {pending.text !== pending.original && <p className="mt-1 text-sm text-muted" lang="en">→ {pending.text}</p>}
                 <p className="mt-1 text-xs text-subtle">{pending.engine}</p>
+                {pending.low && (
+                  <p className="mt-3 flex items-start gap-2 rounded-xl border border-semi/40 bg-white p-3 text-sm text-ink" role="alert"><AlertTriangle className="mt-0.5 size-4 shrink-0 text-semi" />{tr("We are not sure we heard this correctly. A health worker will ask you about it. You can also say it again or tap the pictures.")}</p>
+                )}
                 {checking?.original === pending.original && !pending.second && (
                   <p className="mt-2 text-xs text-muted" role="status">{tr("A second engine is still checking what it heard…")}</p>
                 )}
@@ -1084,7 +1118,7 @@ export function IntakeFlow({
               <p className="mb-2 text-sm font-semibold text-ink-2">{t("kiosk.upload.sample")} <span className="font-normal text-muted">{tr("(synthetic, for the demo — OCR values are traced to the image)")}</span></p>
               <div className="flex flex-wrap gap-2">
                 {SAMPLE_REPORTS.map((s) => (
-                  <Button key={s.key} variant="secondary" size="sm" onClick={() => addSample(s.key)} disabled={busy || offline} icon={<FileText className="size-4" />}>
+                  <Button key={s.key} variant="secondary" size="sm" className="min-h-12" onClick={() => addSample(s.key)} disabled={busy || offline} icon={<FileText className="size-4" />}>
                     {tr(s.title)}
                   </Button>
                 ))}

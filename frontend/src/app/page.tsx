@@ -1,5 +1,6 @@
 "use client";
 
+import { usePrefs } from "@/components/providers";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -222,6 +223,7 @@ function Scenarios({ c }: { c: SiteCopy }) {
 
 export default function Landing() {
   const c = useSite();
+  const { tr } = usePrefs();
 
   return (
     <div className="min-h-screen bg-[#fbfbfe]">
@@ -368,6 +370,9 @@ export default function Landing() {
               );
             })}
           </div>
+          <p className="mt-10 text-center">
+            <Link href="/about/models" className="font-semibold text-teal-700 underline-offset-4 hover:underline">{tr("About the models: what each one does, and what it never decides")} →</Link>
+          </p>
         </div>
       </section>
 

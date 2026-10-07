@@ -7,12 +7,13 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
-from .. import asr_check, language, sarvam, whisper_asr
+from .. import asr_check, bhashini, filetypes, language, sarvam, tts, whisper_asr
 from ..config import get_settings
+from ..ratelimit import limit
 from ..schemas import ADMIN_ROLES
 from ..security import CurrentUser
 
@@ -34,13 +35,14 @@ def _clinical(user) -> None:
 @router.get("/language/engines")
 def engines(user: CurrentUser):
     langs = sorted(lang for lang in whisper_asr.LANGS if whisper_asr.model_dir(lang))
-    return {**language.status(), "asr_second": {
+    return {**language.status(), "mt_online": {"engine": bhashini.ENGINE, "configured": bhashini.enabled()},
+            "tts_offline": {"engine": tts.ENGINE, "languages": tts.languages()}, "asr_second": {
         "online": {"engine": sarvam.STT_ENGINE, "configured": sarvam.enabled(), "languages": sorted(sarvam.STT_LANGS)},
         "offline": {"engine": whisper_asr.ENGINE, "enabled": get_settings().asr_second_offline,
                     "installed": bool(langs) and whisper_asr.available(langs[0]), "languages": langs}}}
 
 
-@router.post("/speech/transcribe")
+@router.post("/speech/transcribe", dependencies=[Depends(limit("ai"))])
 async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], language_code: Annotated[str, Form(alias="language")], translate: Annotated[bool, Form()] = True,
                      second_opinion: Annotated[bool, Form()] = False):
     """Recorded audio → transcript in the speaker's language, plus an English translation. Audio is not stored here.
@@ -56,6 +58,8 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
     data = await audio.read(s.max_upload_mb * 1024 * 1024 + 1)
     if len(data) > s.max_upload_mb * 1024 * 1024:
         raise HTTPException(413, f"Recording too large (max {s.max_upload_mb} MB)")
+    if filetypes.family(filetypes.sniff(data) or "none") != "audio":
+        raise HTTPException(422, "That does not look like a recording — please speak again, or type instead")
     online = None
     if second_opinion and sarvam.enabled() and language_code in sarvam.STT_LANGS:
         online = asyncio.create_task(_sarvam(data, language_code, audio.filename or "speech.webm"))
@@ -75,6 +79,9 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
             raise HTTPException(503, str(e)) from e
         result = {**second, "seconds_audio": None, "seconds_taken": None, "offline_unavailable": str(e)}
         second_opinion = False
+    if result.get("confidence") is not None:
+        result["confidence_threshold"] = language.min_confidence(language_code)
+        result["low_confidence"] = result["confidence"] < result["confidence_threshold"]
     if second_opinion:
         second = await online if online else None
         if _heard(second):
@@ -104,7 +111,11 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
 def _english(text: str, lang: str) -> dict | None:
     if lang == "en":
         return None
-    return language.translate_patient(text, lang)
+    try:
+        return language.translate_patient(text, lang)
+    except language.LanguageUnavailable:
+        out = language.translate_any([text], lang, "en")  # Bhashini when the offline model cannot run; raises if neither
+        return {"text": out["texts"][0], "engine": out["engine"], "rewrites": [], "unsure": []}
 
 
 async def _sarvam(data: bytes, lang: str, filename: str) -> dict | Exception:
@@ -174,11 +185,11 @@ def second_check(job: str, user: CurrentUser):
     return c["result"] or {"engine": whisper_asr.ENGINE, "pending": job}
 
 
-@router.post("/translate")
+@router.post("/translate", dependencies=[Depends(limit("ai"))])
 async def translate(body: TranslateIn, user: CurrentUser):
     _clinical(user)
     try:
-        tr = await run_in_threadpool(language.translate, [body.text], body.source, body.target)
+        tr = await run_in_threadpool(language.translate_any, [body.text], body.source, body.target)
     except language.LanguageUnavailable as e:
         raise HTTPException(503, str(e)) from e
     return {"text": tr["texts"][0], "source": body.source, "target": body.target, "engine": tr["engine"]}
@@ -187,13 +198,23 @@ async def translate(body: TranslateIn, user: CurrentUser):
 class SpeakIn(BaseModel):
     text: str = Field(min_length=1, max_length=1500)
     language: str = Field(min_length=2, max_length=4)
+    allow_online: bool = True  # False for the patient's own words without AI-helper consent: offline voice only
 
 
-@router.post("/language/speak")
+@router.post("/language/speak", dependencies=[Depends(limit("ai"))])
 async def speak(body: SpeakIn, user: CurrentUser):
     """A7: read a kiosk line aloud when the device has no voice for the language (Windows has no Odia voice).
     Sarvam Bulbul, online, in India. The kiosk sends the patient's own words only when they chose AI helpers.
-    Audio is kept in memory only; nothing is stored."""
+    Audio is kept in memory only; nothing is stored.
+    The offline voice on this server (MMS-TTS: Odia, Hindi, Kannada) is tried first; Sarvam only if it has none."""
+    if tts.available(body.language):
+        try:
+            wav = await run_in_threadpool(tts.speak, body.text.strip(), body.language)
+            return Response(wav, media_type="audio/wav", headers={"Cache-Control": "no-store", "X-Voice-Engine": tts.ENGINE})
+        except Exception:  # noqa: BLE001 — a broken offline voice falls through to the online one
+            pass
+    if not body.allow_online:
+        raise HTTPException(422, "No offline voice for this language, and online was not allowed")
     if not sarvam.enabled():
         raise HTTPException(503, "No online voice configured on this server")
     if body.language not in sarvam.TTS_LANGS:

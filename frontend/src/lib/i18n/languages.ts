@@ -33,3 +33,13 @@ export const LANGUAGES: Language[] = [
 ];
 
 export const langByCode = (code: string) => LANGUAGES.find((l) => l.code === code) ?? LANGUAGES[0];
+
+/**
+ * Speech recognition measured on public read speech (FLEURS dev clips, human transcripts; docs/EVALUATION.md).
+ * Any language not listed is unmeasured: the kiosk says so, and the health worker checks the transcript.
+ */
+export const ASR_MEASURED: Record<string, { wer: number; clips: number }> = {
+  or: { wer: 21.6, clips: 25 },
+  hi: { wer: 10.7, clips: 25 },
+  kn: { wer: 20.6, clips: 25 },
+};

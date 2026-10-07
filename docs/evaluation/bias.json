@@ -1,0 +1,84 @@
+{
+ "speech_wer_by_sex": {
+  "or": {
+   "female": {
+    "clips": 25,
+    "words": 475,
+    "wer": 21.6
+   }
+  },
+  "hi": {
+   "female": {
+    "clips": 14,
+    "words": 285,
+    "wer": 13.9
+   },
+   "male": {
+    "clips": 11,
+    "words": 252,
+    "wer": 7.0
+   }
+  },
+  "kn": {
+   "female": {
+    "clips": 14,
+    "words": 180,
+    "wer": 17.3
+   },
+   "male": {
+    "clips": 11,
+    "words": 143,
+    "wer": 24.2
+   }
+  }
+ },
+ "rules_counterfactual": {
+  "cases": 50,
+  "sex_flips": 45,
+  "sex_changes": [],
+  "age_moves": 86,
+  "age_changes": [
+   {
+    "case": 40,
+    "chief": "Chest tightness while climbing stairs, settles with rest",
+    "age": "44→70",
+    "from": "yellow",
+    "to": "red",
+    "rules": [
+     "HRC-CHEST-PAIN",
+     "IITT-A-PAIN-OVER-50"
+    ]
+   }
+  ]
+ },
+ "opinion_agreement": {
+  "age 12–17": {
+   "agree": 0,
+   "of": 1
+  },
+  "age 18–39": {
+   "agree": 9,
+   "of": 21
+  },
+  "age 40–59": {
+   "agree": 11,
+   "of": 14
+  },
+  "age 60+": {
+   "agree": 6,
+   "of": 8
+  },
+  "age under 12": {
+   "agree": 3,
+   "of": 6
+  },
+  "sex F": {
+   "agree": 12,
+   "of": 24
+  },
+  "sex M": {
+   "agree": 17,
+   "of": 26
+  }
+ }
+}

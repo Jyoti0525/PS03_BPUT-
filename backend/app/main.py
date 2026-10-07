@@ -51,6 +51,11 @@ def _housekeeping_loop(stop: threading.Event) -> None:
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
+    from . import crypto
+
+    with SessionLocal() as db:
+        if n := crypto.encrypt_existing(db):  # rows stored before encryption at rest
+            log.info("encrypted stored identifiers", extra={"path": f"{n} rows"})
     if settings.seed_demo:
         from .seed import seed
 
@@ -82,9 +87,33 @@ app = FastAPI(
     version="1.0.0",
     description="Human-in-the-loop triage support. Educational prototype — not a diagnostic tool. Synthetic data only.",
     lifespan=lifespan,
+    docs_url=None if settings.env == "production" else "/docs",
+    redoc_url=None if settings.env == "production" else "/redoc",
+    openapi_url=None if settings.env == "production" else "/openapi.json",
 )
 
 app.add_middleware(RequestContextMiddleware)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    """Browser protections on every API response. The API serves JSON and files, never pages, so its policy allows
+    nothing; the interactive docs (/docs) need their own scripts and are off in production."""
+    response = await call_next(request)
+    h = response.headers
+    h.setdefault("X-Content-Type-Options", "nosniff")
+    h.setdefault("X-Frame-Options", "DENY")
+    h.setdefault("Referrer-Policy", "no-referrer")
+    h.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+    h.setdefault("Cross-Origin-Resource-Policy", "same-site" if settings.env == "production" else "cross-origin")
+    h.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    if not request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
+        h.setdefault("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
+    if request.url.path.startswith("/api/") and "cache-control" not in h:
+        h["Cache-Control"] = "no-store"  # patient data never sits in a browser or proxy cache
+    if settings.env == "production" or request.headers.get("x-forwarded-proto") == "https" or request.url.scheme == "https":
+        h.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return response
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],

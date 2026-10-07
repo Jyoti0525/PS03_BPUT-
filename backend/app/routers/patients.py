@@ -7,9 +7,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import or_, select
 
 from .. import audit
+from ..config import get_settings
+from ..crypto import blind
 from ..models import Consent, Encounter, Facility, Patient, User
 from ..schemas import ADMIN_ROLES, STAFF_ROLES, ConsentIn, ConsentOut, EncounterOut, PatientCandidate, PatientIn, PatientOut, PatientPatch
 from ..security import DB, CurrentUser, require
+
+GUARDIANS = ("Mother", "Father", "Guardian")
 from ..services import aware, encounter_out, next_patient_code
 
 router = APIRouter(tags=["patients"])
@@ -29,8 +33,16 @@ def search(q: str, user: Staff, db: DB):
     s = q.strip().lower().replace(" ", "").replace("+91", "")
     if not s:
         return []
-    like = f"%{s}%"
-    rows = list(db.scalars(select(Patient).where(or_(Patient.code.ilike(like), Patient.phone.like(like), Patient.name.ilike(f"%{q.strip()}%"))).limit(20)))
+    # Names and phones are encrypted at rest (app/crypto.py): the ID and a full phone number are matched in the
+    # database (the phone by its keyed hash); a part of a name or number is matched after decrypting.
+    rows = list(db.scalars(select(Patient).where(or_(Patient.code.ilike(f"%{s}%"), Patient.phone_hash == blind(s[-10:]))).limit(20)))
+    if len(rows) < 20:
+        seen, name = {p.id for p in rows}, q.strip().lower()
+        for p in db.scalars(select(Patient).order_by(Patient.created_at.desc())):
+            if p.id not in seen and (name in p.name.lower() or (len(s) >= 4 and p.phone and s in p.phone)):
+                rows.append(p)
+                if len(rows) == 20:
+                    break
     audit.record(db, user, "VIEW", "patient_search", None, f'Searched patients: "{q}" ({len(rows)} candidates)')
     out = []
     for p in rows:
@@ -134,9 +146,12 @@ def capture_consent(body: ConsentIn, user: CurrentUser, db: DB):
     _check_patient_access(db, user, p, kiosk_ok=True)
     if body.mode == "proxy" and not (body.proxy_name and body.proxy_relation):
         raise HTTPException(422, "Proxy name and relationship are required")
+    if p.age is not None and p.age < 18 and not (body.mode == "proxy" and body.proxy_relation in GUARDIANS):
+        # DPDP Act s. 9: a child's data needs the verifiable consent of a parent or lawful guardian.
+        raise HTTPException(422, "Patients under 18 need consent from a parent or guardian")
     c = Consent(**body.model_dump(), captured_by=user.name)
     db.add(c)
     db.flush()
     who = f"Proxy consent by {body.proxy_name} ({body.proxy_relation})" if body.mode == "proxy" else "Self consent"
     audit.record(db, user, "CONSENT", "consent", c.id, f"{who}; privacy: {body.privacy_context}; scopes: {', '.join(body.scopes)}", p.code)
-    return c
+    return ConsentOut.model_validate(c).model_copy(update={"grievance_contact": get_settings().grievance_contact})

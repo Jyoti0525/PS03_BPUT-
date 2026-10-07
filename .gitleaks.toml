@@ -1,0 +1,8 @@
+# Secret scanning (gitleaks), run in CI on every push. Real keys live only in backend/.env, which is never committed.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Prototype image-crop identifiers (cropKey: 'crop_…') are names, not keys"
+regexTarget = "line"
+regexes = ['''cropKey:\s*'crop_[a-z0-9_]+''']

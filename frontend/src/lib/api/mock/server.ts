@@ -1051,9 +1051,11 @@ export const mockApi: JeeviaApi = {
     withDb(async (d) => {
       const me = await current(d);
       if (input.mode === "proxy" && (!input.proxy_name || !input.proxy_relation)) throw new ApiError(422, "Proxy name and relationship are required");
-      const c: Consent = { ...input, id: uid("con"), captured_by: me.name, captured_at: new Date().toISOString() };
-      d.consents.push(c);
       const p = d.patients.find((x) => x.id === input.patient_id);
+      if (p && p.age < 18 && !(input.mode === "proxy" && ["Mother", "Father", "Guardian"].includes(input.proxy_relation ?? "")))
+        throw new ApiError(422, "Patients under 18 need consent from a parent or guardian");
+      const c: Consent = { ...input, id: uid("con"), captured_by: me.name, captured_at: new Date().toISOString(), grievance_contact: "Grievance officer at this facility's front desk, or call 104" };
+      d.consents.push(c);
       await audit(d, me, "CONSENT", "consent", c.id, `${input.mode === "proxy" ? `Proxy consent by ${input.proxy_name} (${input.proxy_relation})` : "Self consent"}; privacy: ${input.privacy_context}; scopes: ${input.scopes.join(", ")}`, p?.code ?? null);
       return c;
     }),
@@ -1402,6 +1404,7 @@ export const mockApi: JeeviaApi = {
     }),
 
   // The regional calendar (F5) lives on the server with its sources; the browser-only demo does not copy it.
+  translateText: async (text) => ({ text, engine: null }), // the demo has no translator: the English stays
   speakOnline: async () => {
     throw new ApiError(501, "The online voice needs the live API");
   },

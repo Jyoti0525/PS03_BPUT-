@@ -25,8 +25,9 @@ import io
 import re
 import threading
 import unicodedata
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+
+from defusedxml import ElementTree as SafeET  # uploads are untrusted: no entity expansion, no external entities
 from datetime import date, datetime, timezone
 from ..config import get_settings
 
@@ -267,7 +268,7 @@ def read_pdf(data: bytes, second: bool = False) -> OcrResult:
 
 
 def read_svg(data: bytes) -> OcrResult:
-    root = ET.fromstring(data)
+    root = SafeET.fromstring(data)
     ns = "{http://www.w3.org/2000/svg}"
     w = float(root.get("width", 640))
     h = float(root.get("height", 480))

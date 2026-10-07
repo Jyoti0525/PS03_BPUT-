@@ -44,7 +44,6 @@ import type {
   Referral,
   RegisterInput,
   Role,
-  Reminder,
   RetentionStatus,
   Tokens,
   SecondOpinion,
@@ -209,7 +208,10 @@ export interface JeeviaApi {
   /** One agent line spoken by Sarvam's voice (MP3). Rejects with 503 when Sarvam is not set up. */
   callAudio(callId: string, turnIndex: number): Promise<Blob>;
   /** A7: a line read aloud by the online voice when the device has none for the language. */
-  speakOnline(text: string, lang: string): Promise<Blob>;
+  /** The server's voice: offline MMS-TTS (Odia, Hindi, Kannada) first, Sarvam online only when allowOnline. */
+  speakOnline(text: string, lang: string, allowOnline?: boolean): Promise<Blob>;
+  /** English → the patient's language (offline IndicTrans2; Bhashini online when the offline model cannot run). */
+  translateText(text: string, source: string, target: string): Promise<{ text: string; engine: string | null }>;
 
   // Referrals
   createReferral(

@@ -115,7 +115,6 @@ export default function SharedSummaryPage() {
                   </div>
                   <p className="mt-1 text-sm text-muted">
                     {data.patient.age} y · {data.patient.sex} · <span className="font-mono">{data.patient.code}</span> {tr("· language")} {data.patient.language}
-                    {data.patient.phone && ` · +91 ${data.patient.phone}`}
                   </p>
                   <p className="mt-2 font-medium text-ink">{tr(e?.chief_complaint)}</p>
                   <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
@@ -124,7 +123,7 @@ export default function SharedSummaryPage() {
                     </span>
                     <span>{tr("Seen")} {e && fmtDateTime(e.created_at)}</span>
                     {e?.reviewed_by && <span>{tr("Reviewed by")} {e.reviewed_by}</span>}
-                    {e?.consent?.mode === "proxy" && <span>{tr("History from")} {e.consent.proxy_name} ({e.consent.proxy_relation})</span>}
+                    {e?.consent?.mode === "proxy" && <span>{tr("History from")} {e.consent.proxy_relation}</span>}
                   </p>
                 </div>
               </div>

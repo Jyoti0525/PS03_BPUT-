@@ -4,7 +4,9 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, event, true as sa_true
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+
+from .crypto import EncryptedStr, blind
 
 from .db import Base, JSONType, UTCDateTime
 
@@ -168,13 +170,15 @@ class Patient(Base):
     __table_args__ = (UniqueConstraint("organisation_id", "employee_code", name="uq_patient_employee_code"),)
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("pat"))
     code: Mapped[str] = mapped_column(String(20), unique=True, index=True)
-    name: Mapped[str] = mapped_column(String(200))
+    # Identifiers are encrypted at rest (app/crypto.py); the phone is found through its keyed hash.
+    name: Mapped[str] = mapped_column(EncryptedStr())
     age: Mapped[int] = mapped_column(Integer)
     sex: Mapped[str] = mapped_column(String(1))
-    phone: Mapped[str | None] = mapped_column(String(15), index=True, nullable=True)
+    phone: Mapped[str | None] = mapped_column(EncryptedStr(), nullable=True)
+    phone_hash: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
     language: Mapped[str] = mapped_column(String(8), default="en")
     category: Mapped[str] = mapped_column(String(16), default="normal")
-    village: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    village: Mapped[str | None] = mapped_column(EncryptedStr(), nullable=True)
     data_origin: Mapped[str] = mapped_column(String(16), default=_data_origin, server_default="SYNTHETIC")  # G8
     employer_id: Mapped[str | None] = mapped_column(String(64), nullable=True)  # legacy, superseded by organisation_id
     # Workers: linked to their employer's roster
@@ -182,6 +186,11 @@ class Patient(Base):
     employee_code: Mapped[str | None] = mapped_column(String(40), nullable=True)
     department: Mapped[str | None] = mapped_column(String(120), nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+    @validates("phone")
+    def _hash_phone(self, _, value):
+        self.phone_hash = blind(value)
+        return value
 
 
 class FitnessAssessment(Base):
@@ -205,7 +214,7 @@ class Consent(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("con"))
     patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"), index=True)
     mode: Mapped[str] = mapped_column(String(8))
-    proxy_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    proxy_name: Mapped[str | None] = mapped_column(EncryptedStr(), nullable=True)
     proxy_relation: Mapped[str | None] = mapped_column(String(64), nullable=True)
     privacy_context: Mapped[str] = mapped_column(String(20))
     language: Mapped[str] = mapped_column(String(8))

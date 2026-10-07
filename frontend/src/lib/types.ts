@@ -319,6 +319,8 @@ export interface Consent extends ConsentInput {
   id: string;
   captured_by: string;
   captured_at: string;
+  /** DPDP s. 13 grievance contact for the patient slip. */
+  grievance_contact?: string | null;
 }
 
 /* ── Intake ───────────────────────────────────────────── */
@@ -334,6 +336,8 @@ export interface SymptomEntry {
   engine?: string | null; // speech/translation engine that produced `text`
   /** B9, voice only: what the second speech engine heard in the same recording. The server compares the two again. */
   second_hearing?: { engine: string; text: string; translation?: string | null } | null;
+  /** Voice only: the speech engine's confidence (0–1). Below the language's threshold the server keeps it out of the history. */
+  confidence?: number | null;
 }
 
 /** Server speech recognition result (offline IndicConformer, then IndicTrans2 into English). */
@@ -345,6 +349,10 @@ export interface Transcription {
   seconds_taken: number | null;
   translation: { text: string; language: "en"; engine: string } | null;
   translation_error?: string;
+  /** The engine's own confidence (0–1) and the language's threshold; below it the words become a question for staff. */
+  confidence?: number | null;
+  confidence_threshold?: number;
+  low_confidence?: boolean;
   /** B9: a second engine on the same audio, when the patient allowed AI help. `error` when it could not run. */
   second_opinion?: SecondOpinion;
   /** The offline engine is not installed here (the hosted link): Sarvam alone transcribed. */
@@ -697,7 +705,7 @@ export interface ShareLink {
 
 export interface SharedSummary {
   facility: { name?: string; district?: string; state?: string; type?: string };
-  patient: { name: string; code: string; age: number; sex: string; language: string; phone: string | null };
+  patient: { name: string; code: string; age: number; sex: string; language: string };
   encounter: {
     token: string | null;
     created_at: string;
@@ -711,7 +719,7 @@ export interface SharedSummary {
     reviewed_at: string | null;
     maternal: MaternalIntake | null;
     chronic: ChronicIntake | null;
-    consent: { mode: ConsentMode; proxy_name: string | null; proxy_relation: string | null } | null;
+    consent: { mode: ConsentMode; proxy_relation: string | null } | null;
   };
   note: Pick<TriageNote, "summary" | "flags" | "vitals" | "labs" | "timeline" | "missing_info" | "disagreements" | "rules_fired"> | null;
   referral: { destination: string; specialty: string; reason: string; transport: string; created_by: string; created_at: string; note_text: string; status?: string; received_by?: string | null; received_at?: string | null } | null;

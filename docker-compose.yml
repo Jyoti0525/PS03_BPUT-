@@ -22,6 +22,7 @@ services:
     environment:
       JEEVIA_DATABASE_URL: postgresql+psycopg://jeevia:jeevia@db:5432/jeevia
       JEEVIA_JWT_SECRET: ${JEEVIA_JWT_SECRET:-dev-only-secret-change-me-0123456789abcdef}
+      JEEVIA_DATA_KEY: ${JEEVIA_DATA_KEY:-dev-only-data-key-change-me-0123456789abcdef}
       JEEVIA_CORS_ORIGINS: http://localhost:3000
       JEEVIA_SEED_DEMO: "true"
     volumes:

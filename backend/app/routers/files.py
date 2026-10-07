@@ -2,11 +2,12 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from starlette.concurrency import run_in_threadpool
 
-from .. import audit, sarvam, storage
+from .. import audit, filetypes, sarvam, storage
 from ..config import get_settings
+from ..ratelimit import limit
 from ..models import Encounter, FileObject, User
 from ..schemas import ADMIN_ROLES, REVIEWER_ROLES, FileKind, FileOut
 from ..security import DB, CurrentUser, decode, file_token
@@ -27,7 +28,7 @@ def file_out(f: FileObject, request: Request | None = None, user: User | None = 
     return FileOut(id=f.id, filename=f.filename, content_type=f.content_type, size=f.size, kind=f.kind, encounter_id=f.encounter_id, uploaded_at=f.uploaded_at, expires_at=f.expires_at, purged_at=f.purged_at, url=url, read_quality=rq)
 
 
-@router.post("/files", response_model=FileOut)
+@router.post("/files", response_model=FileOut, dependencies=[Depends(limit("upload"))])
 async def upload(
     request: Request,
     user: CurrentUser,
@@ -48,10 +49,14 @@ async def upload(
     data = await file.read(s.max_upload_mb * 1024 * 1024 + 1)
     if len(data) > s.max_upload_mb * 1024 * 1024:
         raise HTTPException(413, f"File too large (max {s.max_upload_mb} MB)")
+    if sample_key and sample_key not in SAMPLE_REPORTS:
+        raise HTTPException(422, "Unknown sample report")
+    try:  # the contents decide the type, not the name or the browser's label
+        ctype = filetypes.check(data, ctype, storage.ALLOWED_TYPES[kind], sample=bool(sample_key))
+    except ValueError as e:
+        raise HTTPException(415, str(e)) from e
     boxes = None
     if sample_key:
-        if sample_key not in SAMPLE_REPORTS:
-            raise HTTPException(422, "Unknown sample report")
         boxes = render(sample_key, "")[1]
     extraction = None
     if kind == "report" and read:
@@ -120,4 +125,7 @@ def file_content(fid: str, sig: str, db: DB):
     data = storage.get(f.storage_key)
     if data is None:
         raise HTTPException(410, "File no longer stored")
-    return Response(data, media_type=f.content_type, headers={"Cache-Control": "private, max-age=300", "X-Content-Type-Options": "nosniff"})
+    # sandbox: even an SVG sample report opened directly can run no script and reach nothing
+    return Response(data, media_type=f.content_type, headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff",
+                                                               "Content-Security-Policy": "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox",
+                                                               "Content-Disposition": "inline"})

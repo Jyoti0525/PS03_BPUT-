@@ -21,6 +21,33 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: pytest -q
 
+  # The deployed database is PostgreSQL: the same tests, with the schema built by the Alembic migrations.
+  backend-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: jeevia
+          POSTGRES_PASSWORD: jeevia
+          POSTGRES_DB: jeevia_test
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      JEEVIA_DATABASE_URL: postgresql+psycopg://jeevia:jeevia@localhost:5432/jeevia_test
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -38,3 +65,29 @@ jobs:
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run build
+
+  # SECURITY.md: every push is scanned. A finding fails the build.
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # gitleaks reads the whole history
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install pip-audit bandit
+      - name: Python dependencies (pip-audit)
+        run: pip-audit -r backend/requirements.txt
+      - name: Code scan (bandit, medium and high)
+        run: bandit -r backend/app -ll -q
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Frontend dependencies shipped to browsers (npm audit)
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=high
+      - name: Secrets in the history (gitleaks)
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz | tar xz gitleaks
+          ./gitleaks git . --redact --no-banner -c .gitleaks.toml

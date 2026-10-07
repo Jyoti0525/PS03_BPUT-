@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Accessibility, Check, ChevronDown, Globe, Plus, Search, ShieldAlert, Type, Volume2, Shapes } from "lucide-react";
 import { usePrefs } from "@/components/providers";
-import { LANGUAGES, langByCode } from "@/lib/i18n/languages";
-import { FULLY_TRANSLATED } from "@/lib/i18n/dict";
+import { ASR_MEASURED, LANGUAGES, langByCode } from "@/lib/i18n/languages";
+import { FULLY_TRANSLATED, PATIENT_TRANSLATED } from "@/lib/i18n/dict";
 import { Modal, Toggle, cx } from "@/components/ui";
 
 export function Logo({ className, light }: { className?: string; light?: boolean }) {
@@ -61,13 +61,18 @@ export function LanguageButton({ compact, className, align = "right", offered }:
     };
   }, [open]);
 
-  const { here, full, voice } = useMemo(() => {
+  const { here, full, patient, voice } = useMemo(() => {
     const s = q.trim().toLowerCase();
     const list = LANGUAGES.filter((l) => !s || l.name.toLowerCase().includes(s) || l.native.includes(q.trim()));
     // F2: the languages this facility offers come first, under their own heading.
     const own = offered?.length ? list.filter((l) => offered.includes(l.code)) : [];
     const rest = list.filter((l) => !own.includes(l));
-    return { here: own, full: rest.filter((l) => FULLY_TRANSLATED.includes(l.code)), voice: rest.filter((l) => !FULLY_TRANSLATED.includes(l.code)) };
+    return {
+      here: own,
+      full: rest.filter((l) => FULLY_TRANSLATED.includes(l.code)),
+      patient: rest.filter((l) => PATIENT_TRANSLATED.includes(l.code)),
+      voice: rest.filter((l) => !FULLY_TRANSLATED.includes(l.code) && !PATIENT_TRANSLATED.includes(l.code)),
+    };
   }, [q, offered]);
 
   const pick = (code: string) => {
@@ -79,6 +84,7 @@ export function LanguageButton({ compact, className, align = "right", offered }:
   const renderItem = (code: string) => {
     const l = langByCode(code);
     const on = l.code === lang;
+    const m = ASR_MEASURED[l.code];
     return (
       <li key={code}>
         <button
@@ -90,7 +96,10 @@ export function LanguageButton({ compact, className, align = "right", offered }:
         >
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-semibold text-ink">{l.native}</span>
-            <span className="block text-xs text-muted">{l.name}</span>
+            <span className="block text-xs text-muted">
+              {l.name}
+              {l.code !== "en" && <> · {m ? tr("speech measured: {w}% word errors", { w: m.wer }) : tr("speech not yet measured")}</>}
+            </span>
           </span>
           {on && <Check className="size-4 shrink-0 text-coral-500" />}
         </button>
@@ -107,7 +116,7 @@ export function LanguageButton({ compact, className, align = "right", offered }:
         aria-expanded={open}
         aria-label={`Language: ${cur.name}`}
         className={cx(
-          "inline-flex h-10 items-center gap-1.5 rounded-full border bg-white/80 px-3.5 text-sm font-medium whitespace-nowrap text-ink-2 backdrop-blur transition-colors hover:border-coral-200 hover:bg-white",
+          "inline-flex h-12 items-center gap-1.5 rounded-full border bg-white/80 px-3.5 text-sm font-medium whitespace-nowrap text-ink-2 backdrop-blur transition-colors hover:border-coral-200 hover:bg-white",
           open ? "border-coral-300" : "border-line",
         )}
       >
@@ -118,7 +127,7 @@ export function LanguageButton({ compact, className, align = "right", offered }:
       {open && (
         <div
           className={cx(
-            "fade-up absolute top-12 z-50 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-line bg-white shadow-[var(--shadow-pop)]",
+            "fade-up absolute top-14 z-50 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-line bg-white shadow-[var(--shadow-pop)]",
             align === "right" ? "right-0" : "left-0",
           )}
         >
@@ -152,6 +161,15 @@ export function LanguageButton({ compact, className, align = "right", offered }:
                 </ul>
               </>
             )}
+            {patient.length > 0 && (
+              <>
+                <p className="mt-1 border-t border-line px-2.5 pt-2.5 pb-1 text-[11px] font-semibold tracking-wider text-coral-500 uppercase">{tr("Patient screens")}</p>
+                <p className="px-2.5 pb-1.5 text-[11px] text-muted">{tr("Kiosk and intake translated; staff screens show English.")}</p>
+                <ul>
+                  {patient.map((l) => renderItem(l.code))}
+                </ul>
+              </>
+            )}
             {voice.length > 0 && (
               <>
                 <p className="mt-1 border-t border-line px-2.5 pt-2.5 pb-1 text-[11px] font-semibold tracking-wider text-teal-700 uppercase">{tr("Voice & text input")}</p>
@@ -161,7 +179,7 @@ export function LanguageButton({ compact, className, align = "right", offered }:
                 </ul>
               </>
             )}
-            {!here.length && !full.length && !voice.length && <p className="px-3 py-6 text-center text-sm text-muted">{tr("No language matches “")}{q}”</p>}
+            {!here.length && !full.length && !patient.length && !voice.length && <p className="px-3 py-6 text-center text-sm text-muted">{tr("No language matches “")}{q}”</p>}
           </div>
         </div>
       )}
@@ -175,7 +193,7 @@ export function A11yButton({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button onClick={() => setOpen(true)} className={cx("inline-flex size-10 items-center justify-center rounded-full border border-line bg-white/80 text-ink-2 hover:border-coral-200 hover:bg-white", className)} aria-label={tr("Accessibility settings")}>
+      <button onClick={() => setOpen(true)} className={cx("inline-flex size-12 items-center justify-center rounded-full border border-line bg-white/80 text-ink-2 hover:border-coral-200 hover:bg-white", className)} aria-label={tr("Accessibility settings")}>
         <Accessibility className="size-4.5" />
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title={tr("Accessibility")} subtitle={tr("Settings are remembered on this device.")} size="sm">

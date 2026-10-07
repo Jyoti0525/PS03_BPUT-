@@ -140,7 +140,10 @@ def transcribe(data: bytes, lang: str) -> dict:
 
     t = time.perf_counter()
     with torch.inference_mode():
-        text = model(torch.from_numpy(wav).unsqueeze(0), lang, get_settings().asr_decoding)
+        enc, lens = model.encode(torch.from_numpy(wav).unsqueeze(0))
+        text, confidence = _ctc(model, enc, lang)
+        if get_settings().asr_decoding == "rnnt":
+            text = model._rnnt_decode(enc, lens, lang)  # the CTC pass above still gives the confidence
     text = " ".join(str(text).split())
     if not text:
         raise AudioRejected("No words were recognised — please speak again, or type instead")
@@ -148,9 +151,31 @@ def transcribe(data: bytes, lang: str) -> dict:
         "text": text,
         "language": lang,
         "engine": asr_engine_name(),
+        "confidence": confidence,
         "seconds_audio": round(len(wav) / SAMPLE_RATE, 1),
         "seconds_taken": round(time.perf_counter() - t, 2),
     }
+
+
+def _ctc(model, enc, lang: str) -> tuple[str, float | None]:
+    """Greedy CTC decoding, as the model repo's own, plus a confidence: the mean probability of the chosen symbol over
+    the frames that emit a letter (blank frames say nothing about the words). 0–1; None when nothing was emitted."""
+    import torch
+
+    logits = model.models["ctc_decoder"].run(["logprobs"], {"encoder_output": enc})[0]
+    lp = torch.from_numpy(logits[:, :, model.language_masks[lang]]).log_softmax(dim=-1)[0]
+    best, idx = lp.max(dim=-1)
+    blank = model.config.BLANK_ID
+    keep = idx != blank
+    text = "".join(model.vocab[lang][int(x)] for x in torch.unique_consecutive(idx) if int(x) != blank).replace("▁", " ").strip()
+    confidence = round(float(best[keep].exp().mean()), 3) if bool(keep.any()) else None
+    return text, confidence
+
+
+def min_confidence(lang: str) -> float:
+    """C: the per-language confidence below which a transcript is not taken into the record (calibrated on FLEURS)."""
+    s = get_settings()
+    return s.asr_min_confidence.get(lang, s.asr_min_confidence.get("default", 0.0))
 
 
 # ---------------------------------------------------------------- translation
@@ -180,8 +205,8 @@ def _indictrans(direction: str):
                 raise LanguageUnavailable(f"Translation engine dependencies missing: {e.name}") from e
             t = time.perf_counter()
             device = "cuda" if torch.cuda.is_available() else "cpu"
-            tok = AutoTokenizer.from_pretrained(str(root), trust_remote_code=True)
-            model = AutoModelForSeq2SeqLM.from_pretrained(
+            tok = AutoTokenizer.from_pretrained(str(root), trust_remote_code=True)  # nosec B615: a local folder, never the Hub
+            model = AutoModelForSeq2SeqLM.from_pretrained(  # nosec B615: local folder
                 str(root), trust_remote_code=True, dtype=torch.float16 if device == "cuda" else torch.float32
             ).to(device).eval()
             _mt[direction] = (tok, model, IndicProcessor(inference=True), device)
@@ -190,6 +215,21 @@ def _indictrans(direction: str):
 
 
 BEAMS = 5
+
+
+def translate_any(texts: list[str], src: str, tgt: str) -> dict:
+    """Offline IndicTrans2 first; Bhashini (online) when the offline model cannot run here. Engine named either way."""
+    try:
+        return translate(texts, src, tgt)
+    except LanguageUnavailable as e:
+        from . import bhashini
+
+        if not bhashini.enabled():
+            raise
+        try:
+            return bhashini.translate(texts, src, tgt)
+        except bhashini.BhashiniUnavailable as b:
+            raise LanguageUnavailable(f"{e}; {b}") from b
 
 
 def translate(texts: list[str], src: str, tgt: str, alternatives: bool = False) -> dict:

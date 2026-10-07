@@ -71,6 +71,8 @@ Everything anyone views or changes is written to a tamper-evident audit log.
 | Consent first | An intake cannot be submitted without a consent record (self or proxy, with privacy context). |
 | Tamper-evident audit | Every view, edit, override, export and share opening is hash-chained; the database rejects updates and deletes on the audit table. |
 | Minimal retention | Voice recordings 24 h, photos 3 days, reports 30 days; files are private and served only through the API. |
+| Encrypted at rest | Patient names, phones, villages and proxy names, and every stored file, are encrypted (`JEEVIA_DATA_KEY`). Threats, controls, scan results and a DPDP checklist: [SECURITY.md](SECURITY.md). |
+| Rate limits and upload checks | Public links, kiosk lookups, AI calls, uploads and sign-in are limited per device and per phone; uploads are typed by their contents. |
 
 ## 3. Who uses it, and where
 
@@ -261,6 +263,7 @@ then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEAT
 | `PUBLIC_BASE_URL` | Where Twilio's or Vonage's webhooks reach the API | the API's public URL |
 | `PRELOAD_LANGUAGE_MODELS` | Load speech and translation at start-up instead of on first use | unset (laptop: `true`) |
 | `ASR_MODEL`, `ASR_DECODING` | Speech model folder under `models/` and `ctc` or `rnnt` decoding | defaults |
+| (no setting) | Offline voice: put `facebook/mms-tts-{ory,hin,kan}` in `models/mms-tts-{ory,hin,kan}/`; used for read-aloud before any online voice | — |
 | `ASR_SECOND_OFFLINE`, `ASR_SECOND_INT8` | IndicWhisper (models under `models/indicwhisper/`) as the second speech engine when Sarvam cannot be used; 8-bit at load time | `true` / `true` |
 
 ### Web app (`frontend`)

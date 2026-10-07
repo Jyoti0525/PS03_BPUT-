@@ -158,7 +158,7 @@ def _chat(system: str, user: str, max_tokens: int) -> str:
     }
     req = urllib.request.Request(s.llm_url.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(req, timeout=s.llm_timeout_s) as r:
+        with urllib.request.urlopen(req, timeout=s.llm_timeout_s) as r:  # nosec B310: http(s) URL checked in config
             out = json.loads(r.read())
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         raise LlmUnavailable(f"Language model server not reachable: {e}") from e

@@ -303,11 +303,12 @@ def test_assigned_worker_must_be_a_health_worker_here(client, nurse):
 def test_household_phone_reminder_says_nothing_reproductive(client):
     from sqlalchemy import select
 
+    from app.crypto import blind
     from app.db import SessionLocal
     from app.models import Patient, Reminder
 
     with SessionLocal() as db:  # reminders go to a phone the household shares (JVA-P001 and JVA-P003)
-        rems = list(db.scalars(select(Reminder).join(Patient, Reminder.patient_id == Patient.id).where(Patient.phone == "9876543210")))
+        rems = list(db.scalars(select(Reminder).join(Patient, Reminder.patient_id == Patient.id).where(Patient.phone_hash == blind("9876543210"))))
     assert rems
     for r in rems:
         assert "pregnan" not in r.message.lower() and "anc" not in r.message.lower()

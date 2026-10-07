@@ -121,6 +121,19 @@ def heard_differently(s: dict) -> dict | None:
             "action": f"Two speech engines heard different words ({'; '.join(chk['differences'])}) — ask the patient which is right"}
 
 
+def heard_unsure(s: dict) -> float | None:
+    """The per-language threshold: a voice entry heard with less confidence is not taken into the history; the health
+    worker asks the patient instead. Checked here against the server's threshold, not the browser's word. Returns
+    the threshold it fell below, or None."""
+    from .. import language
+
+    c = s.get("confidence")
+    if s.get("source") != "voice" or c is None:
+        return None
+    floor = language.min_confidence(s.get("language") or "en")
+    return floor if c < floor else None
+
+
 def build_note(*, intake: dict, patient, triage: dict, files: list, history: list, proxy: bool, calendar=None, on=None) -> dict:
     """`calendar` is the facility's regional calendar (F5) and `on` the visit date: a festival or season onset then
     shows the date or window it points to."""
@@ -232,6 +245,12 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     for s in intake.get("symptoms", []):
         if d := heard_differently(s):
             disagreements.append(d)
+        if (floor := heard_unsure(s)) is not None:
+            english = f' (machine English: "{s["text"]}")' if s.get("text") and s["text"] != s.get("original_text") else ""
+            flags.append({"code": "ASR-LOW-CONF", "label": "Voice heard with low confidence — ask the patient", "severity": "warning",
+                          "reason": f'Speech engine confidence {round(s["confidence"] * 100)} % is below the {round(floor * 100)} % set for '
+                                    f'{(s.get("language") or "en").upper()}; not used in the history. The patient said: "{s.get("original_text")}"{english}. '
+                                    "The rules still read it, so a possible danger sign is not lost."})
     for d in disagreements:
         flags.append({"code": "DISAGREE", "label": f"{d['field']}: sources disagree", "severity": "warning", "reason": d["action"]})
     if voice and not voice.get("confirmed_by_readback"):
@@ -325,6 +344,8 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     # "headache for a long time" are two onsets, and the time from one must not be shown against the other.
     onsets = []
     for s in intake.get("symptoms") or []:
+        if heard_unsure(s) is not None:
+            continue
         o = onset({"symptoms": [s]}, calendar, on)
         if o["certainty"] != "UNKNOWN":
             onsets.append((o, s.get("text") or s.get("original_text")))

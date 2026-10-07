@@ -59,7 +59,7 @@ def issue_tokens(user: User, device_id: str | None = None) -> dict:
     return {
         "access_token": _encode({**claims, "typ": "access"}, timedelta(minutes=s.access_ttl_min)),
         "refresh_token": _encode({**claims, "typ": "refresh"}, timedelta(days=s.refresh_ttl_days)),
-        "token_type": "bearer",
+        "token_type": "bearer",  # nosec B105: the OAuth token type, not a password
         "expires_in": s.access_ttl_min * 60,
     }
 

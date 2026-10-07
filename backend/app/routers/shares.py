@@ -3,7 +3,8 @@
 A reviewer creates a link for one encounter. The QR encodes only the link (a random token);
 opening it also requires the 6-digit access code printed next to the QR, so a photographed QR
 alone is not enough. Links expire, can be revoked, lock after repeated wrong codes, and every
-opening is written to the audit log. Documents are served through short-lived signed URLs.
+opening is written to the audit log, with the opener's address. The summary leaves out the phone number, the
+proxy's name, the village and anything occupational. Documents are served through short-lived signed URLs.
 """
 
 import secrets
@@ -15,6 +16,7 @@ from sqlalchemy import select
 
 from .. import audit
 from ..config import get_settings
+from ..ratelimit import limit
 from ..exports import DISCLAIMER
 from ..models import Facility, FileObject, Referral, ShareLink, User
 from ..schemas import DOCTOR_ROLES, REVIEWER_ROLES, SharedDocument, SharedSummary, ShareIn, ShareOpenIn, ShareOut, ShareReceivedIn
@@ -71,7 +73,7 @@ def _active(db, token: str) -> ShareLink:
     return s
 
 
-@router.get("/share/{token}")
+@router.get("/share/{token}", dependencies=[Depends(limit("public"))])
 def share_meta(token: str, db: DB):
     """Public: enough to show the code prompt, nothing clinical."""
     s = _active(db, token)
@@ -79,7 +81,7 @@ def share_meta(token: str, db: DB):
     return {"facility_name": f.name if f else "", "purpose": s.purpose, "expires_at": s.expires_at}
 
 
-@router.post("/share/{token}/received")
+@router.post("/share/{token}/received", dependencies=[Depends(limit("public"))])
 def share_received(token: str, body: ShareReceivedIn, db: DB):
     """E4: the receiving clinician, with the access code, confirms the patient reached care. Closes the referral."""
     from .encounters import mark_received
@@ -96,7 +98,7 @@ def share_received(token: str, body: ShareReceivedIn, db: DB):
     return {"status": "received", "received_by": ref.received_by, "received_at": ref.received_at}
 
 
-@router.post("/share/{token}/open", response_model=SharedSummary)
+@router.post("/share/{token}/open", response_model=SharedSummary, dependencies=[Depends(limit("public"))])
 def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
     s = _active(db, token)
     if not verify_secret(body.access_code, s.token, s.code_hash):
@@ -123,12 +125,13 @@ def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
     p = e.patient
     return SharedSummary(
         facility={"name": f.name, "district": f.district, "state": f.state, "type": f.type} if f else {},
-        patient={"name": p.name, "code": p.code, "age": p.age, "sex": p.sex, "language": p.language, "phone": p.phone},
+        # The minimum the receiving clinician needs to match the patient: no phone number, village or employer.
+        patient={"name": p.name, "code": p.code, "age": p.age, "sex": p.sex, "language": p.language},
         encounter={
             "token": e.token, "created_at": e.created_at, "category": e.category, "chief_complaint": e.chief_complaint, "status": e.status,
             "urgency": e.urgency, "urgency_source": e.urgency_source, "override": e.override, "reviewed_by": e.reviewed_by, "reviewed_at": e.reviewed_at,
             "maternal": (e.intake or {}).get("maternal"), "chronic": (e.intake or {}).get("chronic"),
-            "consent": {"mode": e.consent.mode, "proxy_name": e.consent.proxy_name, "proxy_relation": e.consent.proxy_relation} if e.consent else None,
+            "consent": {"mode": e.consent.mode, "proxy_relation": e.consent.proxy_relation} if e.consent else None,
         },
         note=note,
         referral={"destination": ref.destination, "specialty": ref.specialty, "reason": ref.reason, "transport": ref.transport, "created_by": ref.created_by, "created_at": ref.created_at, "note_text": ref.note_text,

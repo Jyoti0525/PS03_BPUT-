@@ -170,6 +170,9 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - **Left:** measuring the other languages; a confidence threshold. (Second engine: Sarvam, see B9.)
 
 **A3 Translation** · Partial
+- **Patient slip:** an optional advice box; the advice prints in English and machine-translated (offline IndicTrans2,
+  or Bhashini online when configured), marked "read it out to the patient". The slip's labels are in the patient's
+  language.
 - **What:**
   - Indian-language text is translated to English on submission, by the server, from the patient's own words (English
     sent by the browser is not trusted). The original words stay beside the translation, unchanged.
@@ -217,14 +220,16 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - **Code:** `backend/app/routers/kiosk.py` (`/kiosk/identify`), `backend/app/routers/patients.py`
   (`POST /patients/{id}/pick`), `backend/app/services.py` (`own_patient`).
 
-**A7 Spoken read-back and prompts** · Partial
+**A7 Spoken read-back and prompts** · Working
 - **What:** read-back in the patient's language using a voice installed on the device. If the device has no voice
   for that language, nothing is spoken, rather than an English voice mangling Odia.
 - **Online voice:** the demo laptop (Windows) has no Hindi or Odia voice. When the device has none and there is a
   connection, the kiosk plays Sarvam Bulbul audio from the server (`POST /language/speak`, kept in memory only). The
   patient's own words are sent only if they chose AI helpers; fixed prompts always may be.
-- **Uses:** browser `speechSynthesis` (`frontend/src/lib/speech.ts`), Sarvam Bulbul v3 (`backend/app/sarvam.py`).
-- **Left:** an offline Odia voice for camps with no network.
+- **Offline voice:** Meta MMS-TTS for Odia, Hindi and Kannada runs on the server and is tried first, so a camp
+  with no network still hears Odia. Sarvam is used only for other languages.
+- **Uses:** browser `speechSynthesis` (`frontend/src/lib/speech.ts`), MMS-TTS (`backend/app/tts.py`, CC-BY-NC 4.0),
+  Sarvam Bulbul v3 (`backend/app/sarvam.py`).
 
 **A8 Vitals entry** · Working
 - **What:** nurses record BP, pulse, temperature, SpO₂, breathing rate, glucose, AVPU and the danger-sign
@@ -731,9 +736,12 @@ call after two failed ASHA attempts; Kusum's last visit was RED, so only a perso
 - **Offline mode:** on, the kiosk queues intakes on the device with no network; off, it refuses and tells staff to
   use the paper form.
 
-**F3 Accessibility** · Partial
-- **What:** icon mode, large text, read-aloud, 56–64 px kiosk buttons, proxy consent for caregivers.
-- **Left:** a full voice path for blind users; low-end Android checks.
+**F3 Accessibility** · Working
+- **What:** icon mode, large text, read-aloud, 48 px or larger kiosk controls, proxy consent for caregivers. With
+  read-aloud on, the consent, the disclaimer and each follow-up question with its choices are spoken.
+- **Checked:** axe-core, WCAG 2.2 AA, every kiosk step to the token screen, on an emulated low-end Android phone
+  (360 px wide, CPU 6× slower, slow network): no findings apart from the logo, which WCAG exempts. Page load 2.4 s,
+  submit 3.2 s on that profile. Not yet tried on a physical phone.
 
 **F4 Long-term records** · Working
 - BP and glucose trends across visits.
@@ -845,13 +853,29 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 - On every screen and every printed page; in PDF, print, CSV, JSON and FHIR exports; on the QR slip and the
   referral text. The kiosk reads it aloud as part of the consent text.
 
-**G7 Responsible-AI dossier** · Partial
-- EVALUATION.md has the measured figures. **Left:** model cards, error rates by language, sex and age, and an "about
-  the models" page.
+**G7 Responsible-AI dossier** · Working
+- EVALUATION.md has the measured figures, including speech error rates for Hindi, Kannada and Odia.
+- **About the models** (`/about/models`): a card per engine with its job, where it runs, what is sent, licence,
+  measured results, known limits and what it never decides; in English, Hindi, Odia and Kannada.
+- **Bias table:** speech errors by speaker sex; the rules re-run with only sex or age changed; the second opinion's
+  agreement by sex and age band (`backend/scripts/eval_bias.py`).
 
 **G8 Data-origin tagging** · Working
 - `data_origin` (SYNTHETIC or PUBLIC_SAMPLE, set by `JEEVIA_DATA_ORIGIN`) on every patient and encounter
   (migration 0011), in `/health` and in every export. Every screen says "Synthetic demo data — no real patients".
+
+**G9 Security hardening** · Working
+- **Encryption at rest:** patient name, phone, village and proxy name are stored as Fernet ciphertext; the phone is
+  found by a keyed hash. Every uploaded file is encrypted before it reaches disk, S3 or Cloudinary.
+- **Rate limits:** per device or address, and per phone number, on public links, kiosk lookups, speech, voice and
+  translation, uploads and sign-in checks (429 with Retry-After).
+- **Headers:** a strict policy on every API response; a Content Security Policy and HSTS on the web app.
+- **Uploads:** typed by their bytes; scripted SVGs refused; files served sandboxed.
+- **Production guard:** the server will not start with a default secret, no data key, mock codes or an open CORS list.
+- **Scans in CI:** pip-audit, bandit, npm audit, gitleaks.
+- **Code:** `backend/app/crypto.py`, `ratelimit.py`, `filetypes.py`; 11 tests in `backend/tests/test_security.py`;
+  threats, scan results and DPDP checklist in `SECURITY.md`.
+- **DPDP:** under 18, consent must come from a mother, father or guardian (server refuses otherwise; the kiosk sends the helper back to the consent step). The patient slip shows the grievance contact (`JEEVIA_GRIEVANCE_CONTACT`).
 
 ### H. Platform
 

@@ -61,7 +61,7 @@ def main(folder: str, lang: str) -> None:
         ref, hyp = norm(refs[p.name]), norm(out["text"])
         we, ce = edits(ref.split(), hyp.split()), edits(list(ref.replace(" ", "")), list(hyp.replace(" ", "")))
         w_err, w_tot, c_err, c_tot = w_err + we, w_tot + len(ref.split()), c_err + ce, c_tot + len(ref.replace(" ", ""))
-        rows.append({"file": p.name, "reference": refs[p.name], "heard": out["text"], "wer": round(we / max(1, len(ref.split())), 3)})
+        rows.append({"file": p.name, "reference": refs[p.name], "heard": out["text"], "wer": round(we / max(1, len(ref.split())), 3), "confidence": out.get("confidence")})
     # Process memory with only the speech model loaded (translation below loads more).
     mem = proc.memory_info() if proc else None
     english = language.translate([r["heard"] for r in rows], lang, "en")["texts"] if rows else []

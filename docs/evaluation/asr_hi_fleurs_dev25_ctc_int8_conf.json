@@ -1,0 +1,217 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "hi",
+  "clips": 25,
+  "audio_seconds": 262.8,
+  "wer": 0.107,
+  "cer": 0.046,
+  "real_time_factor": 0.27,
+  "process_private_gb": 2.11,
+  "process_peak_working_set_gb": 1.4,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "10429326314841370948.wav",
+   "reference": "यदि आप सर्दियों में आर्कटिक या अंटार्कटिक क्षेत्रों में जाते हैं, तो आप ध्रुवीय रात का अनुभव करेंगे, जिसका अर्थ है कि सूरज क्षितिज से ऊपर नहीं उगता है।",
+   "heard": "यदि आप सर्दियों में आर्टिक या अंटार्क्टिक क्षेत्रों में जाते हैं तो आप ध्रुवीरात का अनुभव करेंगे जिसका अर्थ है कि सूरज स्थिति से ऊपर नहीं उगता है",
+   "wer": 0.172,
+   "confidence": 0.918,
+   "english": "If you go to the Arctic or Antarctic regions in winter you will experience a polar night which means the sun does not rise above the position."
+  },
+  {
+   "file": "10691214664103820058.wav",
+   "reference": "इतालवी भाषा में उच्चारण करना तुलनात्मक रूप से आसान है क्योंकि ज़्यादातर शब्दों का उच्चारण वैसे ही किया जाता है जैसे उन्हें लिखा जाता है",
+   "heard": "इतालवी भाषा में उच्चारण करना तुलनात्मक रूप से आसान है क्योंकि ज़्यादातर शब्दों का उच्चारण वैसे ही किया जाता है जैसे उन्हें लिखा जाता है",
+   "wer": 0.0,
+   "confidence": 0.971,
+   "english": "It is relatively easy to pronounce in Italian because most words are pronounced the way they are written."
+  },
+  {
+   "file": "11206833549725473331.wav",
+   "reference": "सैद्धांतिक रूप से तिब्बती बौद्ध धर्म बहुत सरल है। इसमें कुंडलिनी योग, ध्यान और सभी को प्रेम से गले लगाने वाला मार्ग शामिल है।",
+   "heard": "सैद्धांतिक रूप से तिब्बती बौद्ध धर्म बहुत सरल है इसमें कुंडलिनी योग ध्यान और सभी को प्रेम से गले लगाने वाला मार्ग शामिल है",
+   "wer": 0.0,
+   "confidence": 0.966,
+   "english": "Theoretically, Tibetan Buddhism is very simple, it involves Kundalini yoga meditation and a path that embraces all with love."
+  },
+  {
+   "file": "11270825464567189925.wav",
+   "reference": "यदि आप सर्दियों में आर्कटिक या अंटार्कटिक क्षेत्रों में जाते हैं, तो आप ध्रुवीय रात का अनुभव करेंगे, जिसका अर्थ है कि सूरज क्षितिज से ऊपर नहीं उगता है।",
+   "heard": "यदि आप सर्दियों में आर्कटिक या अंटार्कटिक क्षेत्रों में जाते हैं तो आप ध्रुवीय रात को अनुभव करेंगे जिसका अर्थ है कि सूरज क्षितत्र से ऊपर नहीं उगता है",
+   "wer": 0.069,
+   "confidence": 0.939,
+   "english": "If you go to the Arctic or Antarctic regions in winter you will experience a polar night which means the sun does not rise above the horizon."
+  },
+  {
+   "file": "12888270866141269240.wav",
+   "reference": "कनान देश में बड़े जंगलो के न होने के चलते वहाँ लकड़ियाँ बहुत महंगी थी।",
+   "heard": "कनान देश में बड़े जंगलों के न होने के चलते वहां लकड़ियां बहुत महगीी थीं",
+   "wer": 0.333,
+   "confidence": 0.924,
+   "english": "Because of the absence of large forests in the land of Canaan, wood was very expensive there."
+  },
+  {
+   "file": "13048108448713953932.wav",
+   "reference": "प्रकृतिवादियों और दार्शनिकों ने शास्त्रीय ग्रंथों पर और विशेष रूप से लैटिन में लिखे बाइबिल पर ध्यान दिया।",
+   "heard": "प्रकृतिवादियों और दार्शनिकों ने शास्त्रीय ग्रंथों पर और विशेष रूप से लैटिन में लिखे बाइबल पर ध्यान दिया",
+   "wer": 0.056,
+   "confidence": 0.951,
+   "english": "Naturalists and philosophers paid attention to classical texts, and especially to the Bible written in Latin."
+  },
+  {
+   "file": "13629914666057077485.wav",
+   "reference": "खारे पानी के मगरमच्छ समुद्र में आम तौर पर नहीं रहते हैं. ये अक्सर रॉकम्प्टन के उत्तर में नदी के मुहाने पर देखे जा सकते हैं.",
+   "heard": "खाड़े पानी के मगरमच्छ समुद्र में आमतौर पर नहीं रहते हैं ये अक्सर रॉकमपटन के उत्तर में नदी के मुहाने पर देखे जा सकते हैं",
+   "wer": 0.154,
+   "confidence": 0.918,
+   "english": "The deep-water crocodiles do not usually live in the sea; they can often be seen at the mouth of the river north of Rockampton."
+  },
+  {
+   "file": "14112322580063897119.wav",
+   "reference": "आप पिरामिड को शो शुरू होने से पहले अंधेरे में शांति से देख सकते हैं.",
+   "heard": "आप पििरामिड को शो शुरू होने से पहले अंधेरे में शांति से देख सकते हैं",
+   "wer": 0.067,
+   "confidence": 0.954,
+   "english": "You can watch the pyramids calmly in the dark before the show begins."
+  },
+  {
+   "file": "14584887621258891555.wav",
+   "reference": "इतालवी भाषा में उच्चारण करना तुलनात्मक रूप से आसान है क्योंकि ज़्यादातर शब्दों का उच्चारण वैसे ही किया जाता है जैसे उन्हें लिखा जाता है",
+   "heard": "इतालवी भाषा में उच्चारण करना तुलनात्मक रूप से आसान है क्योंकि ज़्यादातर शब्दों का उच्चारण वैसे ही किया जाता है जैसे उन्हें लिखा जाता है",
+   "wer": 0.0,
+   "confidence": 0.982,
+   "english": "It is relatively easy to pronounce in Italian because most words are pronounced the way they are written."
+  },
+  {
+   "file": "15158002206926634928.wav",
+   "reference": "स्थानीय अधिकारी संयंत्र के आस-पास के क्षेत्र में निवासियों को चेतावनी दे रहे हैं कि वे घर के अंदर रहें, एयर-कंडीशनर बंद कर दें और नल का पानी न पिएँ.",
+   "heard": "स्थानीय अधिकारी संयंत्र के आसपास के क्षेत्र में निवासियों को चेतावनी दे रहे हैं कि वे घर के अंदर रहे एयर कंडीशनर बंद कर दें और नल का पानी ना पिए",
+   "wer": 0.156,
+   "confidence": 0.94,
+   "english": "Local authorities are warning residents in the area around the plant to turn off indoor air conditioners and not to drink tap water."
+  },
+  {
+   "file": "15641140972526434928.wav",
+   "reference": "अमेरिकी राष्ट्रपति जॉर्ज डब्ल्यू बुश ने घोषणा का स्वागत किया.",
+   "heard": "अमरिकी राष्ट्रपति जॉर्ज डब्ल्यू बुश ने घोषणा का स्वागत किया",
+   "wer": 0.1,
+   "confidence": 0.935,
+   "english": "US President George W Bush welcomed the announcement."
+  },
+  {
+   "file": "16133974077879140534.wav",
+   "reference": "इस नई जगह में अलग-अलग संसाधन और प्रतियोगी हैं, इसलिए नई आबादी को पहले के मुकाबले एक मजबूत प्रतियोगी बनने के लिए अलग-अलग खासियत या बदलाव अपनाने की ज़रूरत होगी.",
+   "heard": "इस नई जगह में अलग अलग संसाधन और प्रतियोगी हैं इसलिए नई आबादी को पहले के मुकाबले एक मजबूत प्रतियोगी बनने के लिए अलग अलग खासियत या बदलाव अपनाने की जरूरत होगी",
+   "wer": 0.031,
+   "confidence": 0.969,
+   "english": "This new space has different resources and competitors, so the new population will need to adapt to different traits or changes in order to be a stronger competitor than before."
+  },
+  {
+   "file": "16291299019723832307.wav",
+   "reference": "2010 के संघीय चुनाव से पहले 1,400 लोगों ने मतदान किया, 2008 से जो लोग ऑस्ट्रेलिया के गणतंत्र बनने का विरोध करते हैं उनमें 8 प्रतिशत की वृद्धि हुई.",
+   "heard": "दो हज़ार दस के संघीय चुनाव से पहले चौदह सौ लोगों ने मतदान किया दो हज़ार आठ से जो लोग ऑस्ट्रेलिया के गणतंत्र बनने का विरोध करते हैं उनमें आठ प्रतिशत की वृद्धि हुई",
+   "wer": 0.3,
+   "confidence": 0.971,
+   "english": "Fourteen hundred people voted before the federal election of two thousand ten, an increase of eight percent among those who oppose Australia becoming a republic from two thousand eight."
+  },
+  {
+   "file": "16786363522141309668.wav",
+   "reference": "इसे मंगलवार को काटना तय किया गया था, लेकिन एक आपातकालीन अदालत के फ़ैसले के बाद इसे बचा लिया गया था.",
+   "heard": "इसे मंगलवार को काटना तय किया गया था लेकिन एक आपातकालीन अदालत के फ़ैसले के बाद इसे बचा लिया गया था",
+   "wer": 0.0,
+   "confidence": 0.969,
+   "english": "It was scheduled to be cut on Tuesday but was saved after an emergency court ruling."
+  },
+  {
+   "file": "17521463387957509552.wav",
+   "reference": "अमेरिकी राष्ट्रपति जॉर्ज डब्ल्यू बुश ने घोषणा का स्वागत किया.",
+   "heard": "अमेरिकी राष्ट्रपति जॉर्ज डब्ल्यू बुश ने घोषणा का स्वागत किया",
+   "wer": 0.0,
+   "confidence": 0.966,
+   "english": "US President George W Bush welcomed the announcement."
+  },
+  {
+   "file": "17564507380689458766.wav",
+   "reference": "जब आप पहले के समय में विदेश गए थे, तो लोग तब ये जानकर धैर्य और समझ रखते थे कि यात्रियों को नए देश में उसके हिसाब से ढलना पड़ता है.",
+   "heard": "जब आप पहले के समय में विदेश गए थे तो लोग तब ये जानकर धैर्य और समझ रखते थे कि यात्रियों को नए देश में उसके हिसाब से ढलना पड़ता है",
+   "wer": 0.0,
+   "confidence": 0.934,
+   "english": "When you went abroad in earlier times, people were patient and understanding, knowing that travelers had to adapt to the new country."
+  },
+  {
+   "file": "1826521854378082525.wav",
+   "reference": "इसे मंगलवार को काटना तय किया गया था, लेकिन एक आपातकालीन अदालत के फ़ैसले के बाद इसे बचा लिया गया था.",
+   "heard": "इसे मंगलवार को काटना तय किया गया था लेकिन एक आपातकालीन अदालत के फ़ैसले के बाद इसे बचा लिया गया था",
+   "wer": 0.0,
+   "confidence": 0.971,
+   "english": "It was scheduled to be cut on Tuesday but was saved after an emergency court ruling."
+  },
+  {
+   "file": "1863528153333761464.wav",
+   "reference": "उन्होंने (जेमी सिमिनॉफ़) कहा, कि उन्होंने एक वाईफ़ाई डोर बेल बनाई है.",
+   "heard": "उन्होंने जेमी सिविनोफ ने कहा कि उन्होंने एक वाईफाई डोरबेल बनाई है",
+   "wer": 0.417,
+   "confidence": 0.93,
+   "english": "He said Jamie Sivinoff made a WiFi doorbell."
+  },
+  {
+   "file": "2348691924521048047.wav",
+   "reference": "जब आप पहले के समय में विदेश गए थे, तो लोग तब ये जानकर धैर्य और समझ रखते थे कि यात्रियों को नए देश में उसके हिसाब से ढलना पड़ता है.",
+   "heard": "जब आप पहले के समय में विदेश गए थे तो लोग तब ये जानकर धैर् और समझ रते थे कि यात्रियों को नए देश में उसके हिसाब से करना करड़ते हैं",
+   "wer": 0.161,
+   "confidence": 0.845,
+   "english": "When you went abroad in earlier times, people were then patient and understanding, knowing that travelers have to do accordingly in the new country."
+  },
+  {
+   "file": "2639257374884274256.wav",
+   "reference": "मूल आबादी में किसी तरह का बदलाव नहीं हुआ है, अभी भी वह पहले की तरह ही अनुकूलता चाहते हैं.",
+   "heard": "मूल आबादी में किस तरह का बदलाव नहीं हुआ है अभी भी वह पहले की तरह ही अनुकूलता चाहते हैं",
+   "wer": 0.05,
+   "confidence": 0.97,
+   "english": "What has not changed in the original population is that they still want the same adaptability as before."
+  },
+  {
+   "file": "2790069619537345490.wav",
+   "reference": "इतालवी भाषा में उच्चारण करना तुलनात्मक रूप से आसान है क्योंकि ज़्यादातर शब्दों का उच्चारण वैसे ही किया जाता है जैसे उन्हें लिखा जाता है",
+   "heard": "इतालीी भाषा मेंचम करना तुलनात्मक रूप से आसान है क्योंकि ज्यादातर स परचार अवसण किया जाता है जैसे उन्हमें लिखा जाता है",
+   "wer": 0.4,
+   "confidence": 0.755,
+   "english": "It is relatively easy to pronounce in Italian because most of the communication is done as they are written."
+  },
+  {
+   "file": "5958463932227431376.wav",
+   "reference": "इसे मंगलवार को काटना तय किया गया था, लेकिन एक आपातकालीन अदालत के फ़ैसले के बाद इसे बचा लिया गया था.",
+   "heard": "इसे मंगलवार को काटना तय किया गया था लेकिन एक हफ़्ताकालीन अदालत के फ़ैसले के बाद इसे बचा लिया गया था",
+   "wer": 0.048,
+   "confidence": 0.962,
+   "english": "It was scheduled to be cut on Tuesday but was saved after a week-long court ruling."
+  },
+  {
+   "file": "5970385275581202904.wav",
+   "reference": "प्रकृतिवादियों और दार्शनिकों ने शास्त्रीय ग्रंथों पर और विशेष रूप से लैटिन में लिखे बाइबिल पर ध्यान दिया।",
+   "heard": "प्रकृतिवादियों और दार्शनिकों ने शास्त्रीय ग्रंथों पर और विशेष रूप से लैटिन में लिखे बाइबल पर ध्यान दिया",
+   "wer": 0.056,
+   "confidence": 0.974,
+   "english": "Naturalists and philosophers paid attention to classical texts, and especially to the Bible written in Latin."
+  },
+  {
+   "file": "9364337429469599182.wav",
+   "reference": "उन्होंने (जेमी सिमिनॉफ़) कहा, कि उन्होंने एक वाईफ़ाई डोर बेल बनाई है.",
+   "heard": "उन्होंने जेमी समिनोफ़ कहा कि उन्होंने एक वाईफ़ाई डोर बेल बनाई है",
+   "wer": 0.083,
+   "confidence": 0.897,
+   "english": "He said Jamie Saminoff made a wifi doorbell."
+  },
+  {
+   "file": "9606246439179103203.wav",
+   "reference": "अमेरिकी राष्ट्रपति जॉर्ज डब्ल्यू बुश ने घोषणा का स्वागत किया.",
+   "heard": "अमेरिकी राष्ट्रपति जॉर्ज डब्ल्यू बुश ने घोषणा का स्वागत किया",
+   "wer": 0.0,
+   "confidence": 0.949,
+   "english": "US President George W Bush welcomed the announcement."
+  }
+ ]
+}

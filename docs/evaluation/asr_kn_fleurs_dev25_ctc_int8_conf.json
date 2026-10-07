@@ -1,0 +1,217 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "kn",
+  "clips": 25,
+  "audio_seconds": 277.9,
+  "wer": 0.206,
+  "cer": 0.08,
+  "real_time_factor": 0.284,
+  "process_private_gb": 2.15,
+  "process_peak_working_set_gb": 1.41,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "10368113683384099024.wav",
+   "reference": "ಕಾಲಾನಂತರದಲ್ಲಿ, ಹೊಸ ತಲೆಮಾರಿನವರು ತಮ್ಮ ಹೊಸ ಪರಿಸರಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳಲು ಪ್ರಾರಂಭಿಸಿದಾಗ, ಅವರು ಇತರೆ ಸಮುದಾಯವರ ಕಡೆಗೆ ವಿಶ್ವಾಸದಿಂದ ನೋಡುವುದು ತೀರಾ ಕಡಿಮೆ.",
+   "heard": "ಕಾಲಾನಂತರದಲ್ಲಿ ಹೊಸ ತಲೆಮಾರಿನವರು ತಮ್ಮ ಹೊಸ ಪರಿಸರಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳಲು ಪ್ರಾರಂಭಿಸಿದಾಗ ಅವರು ಇತರೆ ಸಮುದಾಯದವರ ಕಡೆಗೆ ವಿಶ್ವಾಸದಿಂದ ನೋಡುವುದು ತೀರಾ ಕಡಿಮೆ",
+   "wer": 0.062,
+   "confidence": 0.989,
+   "english": "Over time, as the new generation begins to adapt to their new environment, they are less likely to look at other communities with confidence."
+  },
+  {
+   "file": "10544445870996741543.wav",
+   "reference": "ಆ ಪಾರ್ಕು 19,500 ಚದರ ಕಿಮೀ ಸುತ್ತಳತೆ ಹೊಂದಿದ್ದು 14 ಈಕೊಜೋನ್‌ಗಳಾಗಿ ವಿಭಾಗಿಸಲ್ಪಟ್ಟು, ಪ್ರತಿಯೊಂದು ಬೇರೆ ಬೇರೆ ವನ್ಯಜೀವಿಯನ್ನು ಸಲಹುತ್ತದೆ.",
+   "heard": "ಆ ಪಾರ್ಕು ಹತ್ತೊಂಬತ್ತು ಸಾವಿರದ ಐನೂರು ಚದರ ಕಿಲೋಮೀಟರ್ ಸುತ್ತಳತೆ ಹೊಂದಿದ್ದು ಹದಿನಾಲ್ಕು ಈಕೋಜಝೋನ್ಗಳಾಗಿ ವಿಭಾಗಿಸಲ್ಪಟ್ಟು ಪ್ರತಿಯೊಂದು ಬೇರೆ ಬೇರೆ ವನ್ಯಜೀವಿಯನ್ನು ಸಲಹುತ್ತದೆ",
+   "wer": 0.375,
+   "confidence": 0.936,
+   "english": "The park covers nineteen thousand five hundred square kilometres and is divided into fourteen ecozones, each hosting different wildlife species."
+  },
+  {
+   "file": "10643974895590795315.wav",
+   "reference": "ಮೊಲ್ಡೊವಾದಲ್ಲಿನ ಮುಖ್ಯ ಧರ್ಮ ಆರ್ಥೊಡಾಕ್ಸ್ ಕ್ರಿಶ್ಚಿಯನ್ ಆಗಿದೆ.",
+   "heard": "ಮಾಲ್ಡೋವಾದಲ್ಲಿನ ಮುಖ್ಯ ಧರ್ಮ ಆರ್ಥೊಡಾಕ್ಸ್ ಕ್ರಿಶ್ಚಿಯನ್ ಆಗಿದೆ",
+   "wer": 0.167,
+   "confidence": 0.96,
+   "english": "The main religion in Moldova is Orthodox Christianity."
+  },
+  {
+   "file": "11089659728655311217.wav",
+   "reference": "ಇಟಾಲಿಯನ್ ಭಾಷೆಯಲ್ಲಿ ಉಚ್ಚಾರಣೆಯು ತುಲನಾತ್ಮಕವಾಗಿ ಸುಲಭವಾಗಿದೆ ಏಕೆಂದರೆ ಹೆಚ್ಚಿನ ಪದಗಳನ್ನು ಅವುಗಳನ್ನು ಬರೆಯಲಾಗುವ ರೂಪದಲ್ಲೇ ಉಚ್ಚರಿಸಲಾಗುತ್ತದೆ.",
+   "heard": "ಇಟಾಲಿಯನ್ ಭಾಷೆಯಲ್ಲಿ ಉಚ್ಚಾರಣೆಯು ತುಲನಾತ್ಮಕವಾಗಿ ಸುಲಭವಾಗಿದೆ ಏಕೆಂದರೆ ಹೆಚ್ಚಿನ ಪದಗಳನ್ನು ಅವುಗಳನ್ನು ಬರೆಯಲಾಗುವ ರೂಪದಲ್ಲೇ ಉಚ್ಚರಿಸಲಾಗುತ್ತದೆ",
+   "wer": 0.0,
+   "confidence": 0.995,
+   "english": "Pronunciation in Italian is relatively easy because most words are pronounced the same way they are written."
+  },
+  {
+   "file": "11290778352358583917.wav",
+   "reference": "ಕಾಲಾನಂತರದಲ್ಲಿ, ಹೊಸ ತಲೆಮಾರಿನವರು ತಮ್ಮ ಹೊಸ ಪರಿಸರಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳಲು ಪ್ರಾರಂಭಿಸಿದಾಗ, ಅವರು ಇತರೆ ಸಮುದಾಯವರ ಕಡೆಗೆ ವಿಶ್ವಾಸದಿಂದ ನೋಡುವುದು ತೀರಾ ಕಡಿಮೆ.",
+   "heard": "ಕಾಲಾನಂತರದಲ್ಲಿ ಹೊಸ ತಲೆಮಾರಿನವರು ತಮ್ಮ ಹೊಸ ಪರಿಸರಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳಲು ಪ್ರಾರಂಭಿಸಿದಾಗ ಅವರು ಇತರೆ ಸಮುದಾಯದವರ ಕಡೆಗೆ ವಿಶ್ವಾಸದಿಂದ ನೋಡುವುದು ತೀರಾ ಕಡಿಮೆ",
+   "wer": 0.062,
+   "confidence": 0.99,
+   "english": "Over time, as the new generation begins to adapt to their new environment, they are less likely to look at other communities with confidence."
+  },
+  {
+   "file": "12193201075219427734.wav",
+   "reference": "ಮೊಲ್ಡೊವಾದಲ್ಲಿನ ಮುಖ್ಯ ಧರ್ಮ ಆರ್ಥೊಡಾಕ್ಸ್ ಕ್ರಿಶ್ಚಿಯನ್ ಆಗಿದೆ.",
+   "heard": "ಮೋಲ್ಡೋವಾದಲ್ಲಿನ ಮುಖ್ಯ ಧರ್ಮ ಆರ್ಥೊಡಾಕ್ಸ್ ಕ್ರಿಶ್ಚಿಯನ್ ಆಗಿದೆ",
+   "wer": 0.167,
+   "confidence": 0.918,
+   "english": "The main religion in Moldova is Orthodox Christianity."
+  },
+  {
+   "file": "13401180110408870139.wav",
+   "reference": "ಘರ್ಷಣೆಯಿಂದ ಉಂಟಾದ ಸ್ಫೋಟವು ಭಾರಿ ಪ್ರಮಾಣದಲ್ಲಿತ್ತು ಎಂಬುದಾಗಿ ವಿಜ್ಞಾನಿಗಳು ಹೇಳುತ್ತಾರೆ.",
+   "heard": "ಘರ್ಷಣೆಯಿಂದ ಉಂಟಾದ ಸ್ಫೋಟವು ಭಾರೀ ಪ್ರಮಾಣದಲ್ಲಿತ್ತು ಎಂಬುದಾಗಿ ವಿಜ್ಞಾನಿಗಳು ಹೇಳುತ್ತಾರೆ",
+   "wer": 0.125,
+   "confidence": 0.948,
+   "english": "Scientists say the explosion caused by the collision was massive."
+  },
+  {
+   "file": "13884289865264137790.wav",
+   "reference": "ಘರ್ಷಣೆಯಿಂದ ಉಂಟಾದ ಸ್ಫೋಟವು ಭಾರಿ ಪ್ರಮಾಣದಲ್ಲಿತ್ತು ಎಂಬುದಾಗಿ ವಿಜ್ಞಾನಿಗಳು ಹೇಳುತ್ತಾರೆ.",
+   "heard": "ಘರ್ಷಣೆಯಿಂದ ಉಂಟಾದ ಸ್ಫೋಟವು ಭಾರೀ ಪ್ರಮಾಣದಲ್ಲಿತ್ತು ಎಂಬುದಾಗಿ ವಿಜ್ಞಾನಿಗಳು ಹೇಳುತ್ತಾರೆ",
+   "wer": 0.125,
+   "confidence": 0.968,
+   "english": "Scientists say the explosion caused by the collision was massive."
+  },
+  {
+   "file": "14237503973356067500.wav",
+   "reference": "ಆ ಪಾರ್ಕು 19,500 ಚದರ ಕಿಮೀ ಸುತ್ತಳತೆ ಹೊಂದಿದ್ದು 14 ಈಕೊಜೋನ್‌ಗಳಾಗಿ ವಿಭಾಗಿಸಲ್ಪಟ್ಟು, ಪ್ರತಿಯೊಂದು ಬೇರೆ ಬೇರೆ ವನ್ಯಜೀವಿಯನ್ನು ಸಲಹುತ್ತದೆ.",
+   "heard": "ಆ ಪಾರ್ಕು ಹತ್ತೊಂಬತ್ತು ಸಾವಿರದ ಐನೂರು ಚದರ ಕಿಲೋಮೀಟರ್ ಸುತ್ತಳತೆ ಹೊಂದಿದ್ದು ಹದಿನಾಲ್ಕು ಈಕೋಝೋನ್ಗಳಾಗಿ ವಿಭಾಗಿಸಲ್ಪಟ್ಟು ಪ್ರತಿಯೊಂದುೂ ಬೇರೆ ಬೇರೆ ವನ್ಯಜೀವಿಯನ್ನು ಸಲಹುತ್ತದೆ",
+   "wer": 0.438,
+   "confidence": 0.943,
+   "english": "The park covers nineteen thousand five hundred square kilometres and is divided into fourteen ecozones, each hosting different wildlife species."
+  },
+  {
+   "file": "15181274163385228535.wav",
+   "reference": "ಒಲಂಪಿಕ್ ಚಿನ್ನದ ಪದಕ ವಿಜೇತ, ಕಾಮನ್ ವೆಲ್ತ್ ಆಟಗಳಲ್ಲಿ 100 ಮೀಟರ್ ಮತ್ತು 200 ಮೀಟರ್ ಫ್ರೀಸ್ಟೈಲ್ ಮತ್ತು ಮೂರು ರಿಲೇಗಳಲ್ಲಿ ಈಜಬೇಕಾಗಿತ್ತು, ಆದರೆ ಆತನ ಅರೋಗ್ಯದ  ಸಮಸ್ಯೆಗಳ  ಕಾರಣದಿಂದ ಆತನ   ಸ್ವಾಸ್ಥ್ಯದ    ಬಗ್ಗೆ ಅನುಮಾನವಿತ್ತು.",
+   "heard": "ಒಲಿಂಪಿಕ್ ಚಿನ್ನದ ಪದಕ ವಿಜೇತ ಕಾಮನ್ವೆಲ್ತ್ ಆಟಗಳಲ್ಲಿ ನೂರು ಮೀಟರ್ ಮತ್ತು ಎರಡು ನೂರು ಮೀಟರ್ ಫ್ರೀಸ್ಟೈಲ್ ಮತ್ತು ಮೂರು ರಿಲೇಗಳಲ್ಲಿ ಈಜೆ ಬೇಕಾಗಿತ್ತು ಆದರೆ ಆತನ ಆರೋಗ್ಯದ ಸಮಸ್ಯೆಗಳ ಕಾರಣದಿಂದ ಆತನ ಸ್ವಾಸ್ಥ್ಯದ ಬಗ್ಗೆ ಅನುಮಾನವಿತ್ತು",
+   "wer": 0.346,
+   "confidence": 0.967,
+   "english": "The Olympic gold medallist was required to swim in the 100m and 200m freestyle and three relays at the Commonwealth Games but his well-being was in doubt due to health issues"
+  },
+  {
+   "file": "15252297408870708038.wav",
+   "reference": "ಅದರ ಸರ್ವವ್ಯಾಪಿ ಶಕ್ತಿ ರಾಜನಿಂದ ಸಾಮಾನ್ಯ ಪ್ರಜೆಯವರೆಗೂ ಹರಡಿತ್ತು.",
+   "heard": "ಅದರ ಸರ್ವವ್ಯಾಪಿ ಶಕ್ತಿ ರಾಜನಿಂದ ಸಾಮಾನ್ಯ ಪ್ರಜೆಯವರೆಗೂ ಹರಡಿತ್ತು",
+   "wer": 0.0,
+   "confidence": 0.974,
+   "english": "Its omnipotent power extended from the king to the common citizen"
+  },
+  {
+   "file": "15650125077479634942.wav",
+   "reference": "ಅದರ ಸರ್ವವ್ಯಾಪಿ ಶಕ್ತಿ ರಾಜನಿಂದ ಸಾಮಾನ್ಯ ಪ್ರಜೆಯವರೆಗೂ ಹರಡಿತ್ತು.",
+   "heard": "ಅದರ ಸರ್ವಾವ್ಯಾಪಿಯ ಶಕ್ತಿ ರಾಜರಿಂದ ಸಾಮಾನ್ಯ ಪ್ರಜೆಯವರೆಗೂ ಹರಡಿತ್ತು",
+   "wer": 0.286,
+   "confidence": 0.937,
+   "english": "Its omnipotent power extended from the king to the common citizen"
+  },
+  {
+   "file": "18067569130123678705.wav",
+   "reference": "ಘರ್ಷಣೆಯಿಂದ ಉಂಟಾದ ಸ್ಫೋಟವು ಭಾರಿ ಪ್ರಮಾಣದಲ್ಲಿತ್ತು ಎಂಬುದಾಗಿ ವಿಜ್ಞಾನಿಗಳು ಹೇಳುತ್ತಾರೆ.",
+   "heard": "ಘರ್ಷಣೆಯಿಂದ ಉಂಟಾದ ಸ್ಫೋಟವು ಭಾರೀ ಪ್ರಮಾಣದಲ್ಲಿತ್ತು ಎಂಬುದಾಗಿ ವಿಜ್ಞಾನಿಗಳು ಹೇಳುತ್ತಾರೆ",
+   "wer": 0.125,
+   "confidence": 0.965,
+   "english": "Scientists say the explosion caused by the collision was massive."
+  },
+  {
+   "file": "18234039828515300403.wav",
+   "reference": "ಕೂಡಲೇ, ಗಲಭೆ ನಿಯಂತ್ರಣ ಸಾಧನಗಳನ್ನು ಧರಿಸಿರುವ ಅಧಿಕಾರಿಗಳು ಅಂಗಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ ಕೈದಿಗಳನ್ನು ಅಶ್ರುವಾಯು ಪ್ರಯೋಗಿಸುವ ಮೂಲಕ ಪರಿಸ್ಥಿತಿಯನ್ನು ತಹಬದಿಗೆ ತಂದರು.",
+   "heard": "ಕೂಡಲೇ ಗಲಭೆ ನಿಯಂತ್ರಣ ಸಾಧನೆಗಳನ್ನು ಧರಿಸುವ ಅಧಿಕಾರಿಗಳು ಅಂಗಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ ಕೈದಿಗಳನ್ನು ಅಷ್ಟುವಾಯು ಪ್ರಯೋಗಿಸುವ ಮೂಲಕ ಪರಿಸ್ಥಿತಿಯನ್ನು ತಹಬದಿಗೆ ತಂದರು",
+   "wer": 0.2,
+   "confidence": 0.931,
+   "english": "Immediately, riot officers wearing riot gear entered the court and brought the situation under control by using tear gas on the prisoners."
+  },
+  {
+   "file": "2408091591270785159.wav",
+   "reference": "ಇಟಾಲಿಯನ್ ಭಾಷೆಯಲ್ಲಿ ಉಚ್ಚಾರಣೆಯು ತುಲನಾತ್ಮಕವಾಗಿ ಸುಲಭವಾಗಿದೆ ಏಕೆಂದರೆ ಹೆಚ್ಚಿನ ಪದಗಳನ್ನು ಅವುಗಳನ್ನು ಬರೆಯಲಾಗುವ ರೂಪದಲ್ಲೇ ಉಚ್ಚರಿಸಲಾಗುತ್ತದೆ.",
+   "heard": "ಇಟಾಲಿಯನ್ ಭಾಷೆಯಲ್ಲಿ ಉಚ್ಚಾರಣೆಯು ತುಲನಾತ್ಮಕವಾಗಿ ಸುಲಭವಾಗಿದೆ ಏಕೆಂದರೆ ಹೆಚ್ಚಿನ ಪದಗಳನ್ನು ಅವುಗಳನ್ನು ಬರೆಯಲಾಗುವ ರೂಪದಲ್ಲೇ ಉಚ್ಚರಿಸಲಾಗುತ್ತದೆ",
+   "wer": 0.0,
+   "confidence": 0.99,
+   "english": "Pronunciation in Italian is relatively easy because most words are pronounced the same way they are written."
+  },
+  {
+   "file": "3386490360059751956.wav",
+   "reference": "ಒಲಂಪಿಕ್ ಚಿನ್ನದ ಪದಕ ವಿಜೇತ, ಕಾಮನ್ ವೆಲ್ತ್ ಆಟಗಳಲ್ಲಿ 100 ಮೀಟರ್ ಮತ್ತು 200 ಮೀಟರ್ ಫ್ರೀಸ್ಟೈಲ್ ಮತ್ತು ಮೂರು ರಿಲೇಗಳಲ್ಲಿ ಈಜಬೇಕಾಗಿತ್ತು, ಆದರೆ ಆತನ ಅರೋಗ್ಯದ  ಸಮಸ್ಯೆಗಳ  ಕಾರಣದಿಂದ ಆತನ   ಸ್ವಾಸ್ಥ್ಯದ    ಬಗ್ಗೆ ಅನುಮಾನವಿತ್ತು.",
+   "heard": "ಒಲಿಂಪಿಕ್ ಚಿನ್ನದ ಪದಕ ವಿಜೇತ ಕಾಮನ್ವೆಲ್ತ್ ಆಟಗಳಲ್ಲಿ ನೂರು ಮೀಟರ್ ಮತ್ತು ಇನ್ನೂರು ಮೀಟರ್ ಫ್ರೀಸ್ಟೈಲ್ ಮತ್ತು ಮೂರು ರಿಲೇಗಳಲ್ಲಿ ಈಏಜಬೇಕಾಗಿತ್ತು ಆದರೆ ಆತನ ಆರೋಗ್ಯದ ಸಮಸ್ಯೆಗಳ ಕಾರಣಗಳಿಂದ ಆತನ ಸ್ವಾಸ್ಥ್ಯದ ಬಗ್ಗೆ ಅನುಮಾನವಿತ್ತು",
+   "wer": 0.308,
+   "confidence": 0.959,
+   "english": "The Olympic gold medallist was supposed to swim in the 100m and 200m freestyle and three relays at the Commonwealth Games but his well-being was in doubt due to health issues"
+  },
+  {
+   "file": "5278343792838031370.wav",
+   "reference": "ಕಾಲಾನಂತರದಲ್ಲಿ, ಹೊಸ ತಲೆಮಾರಿನವರು ತಮ್ಮ ಹೊಸ ಪರಿಸರಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳಲು ಪ್ರಾರಂಭಿಸಿದಾಗ, ಅವರು ಇತರೆ ಸಮುದಾಯವರ ಕಡೆಗೆ ವಿಶ್ವಾಸದಿಂದ ನೋಡುವುದು ತೀರಾ ಕಡಿಮೆ.",
+   "heard": "ಕಾಲಾನಂತರದಲ್ಲಿ ಹೊಸ ತಲೆಮಾರಿನವರು ತಮ್ಮ ಹೊಸ ಪರಿಸರಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳಲು ಪ್ರಾರಂಭಿಸಿದಾಗ ಅವರು ಇತರೆ ಸಮುದಾಯದವರ ಕಡೆಗೆ ವಿಶ್ವಾಸದಿಂದ ನೋಡುವುದು ತೀರಾ ಕಡಿಮೆ",
+   "wer": 0.062,
+   "confidence": 0.981,
+   "english": "Over time, as the new generation begins to adapt to their new environment, they are less likely to look at other communities with confidence."
+  },
+  {
+   "file": "5396618623786453195.wav",
+   "reference": "ಈ ಸೀಸನ್‌ನಲ್ಲಿನ ರೋಗದ ಮೊದಲ ಪ್ರಕರಣವು ಜುಲೈ ಕೊನೆಯಲ್ಲಿ ವರದಿಯಾಯಿತು.",
+   "heard": "ಈ ಸೀಸನ್ನಲ್ಲಿನ ರೋಗದ ಮೊದಲ ಪ್ರಕರಣವು ಜುಲೈ ಕೊನೆಯಲ್ಲಿ ವರದಿಯಾಯಿತು",
+   "wer": 0.125,
+   "confidence": 0.96,
+   "english": "The first case of the disease this season was reported in late July."
+  },
+  {
+   "file": "5464748053147021256.wav",
+   "reference": "ಈ ಸೀಸನ್‌ನಲ್ಲಿನ ರೋಗದ ಮೊದಲ ಪ್ರಕರಣವು ಜುಲೈ ಕೊನೆಯಲ್ಲಿ ವರದಿಯಾಯಿತು.",
+   "heard": "ಈ ಸೀಸನ್ನ ನಲ್ಲಿರುವ ರೋಗದ ಮೊದಲ ಪ್ರಕರಣವು ಜುಲೈ ಕೊನೆಯಲ್ಲಿ ವರದಿಯಾಯಿತು",
+   "wer": 0.25,
+   "confidence": 0.973,
+   "english": "The first case of the disease this season was reported in late July."
+  },
+  {
+   "file": "5940705787336272555.wav",
+   "reference": "ಕೂಡಲೇ, ಗಲಭೆ ನಿಯಂತ್ರಣ ಸಾಧನಗಳನ್ನು ಧರಿಸಿರುವ ಅಧಿಕಾರಿಗಳು ಅಂಗಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ ಕೈದಿಗಳನ್ನು ಅಶ್ರುವಾಯು ಪ್ರಯೋಗಿಸುವ ಮೂಲಕ ಪರಿಸ್ಥಿತಿಯನ್ನು ತಹಬದಿಗೆ ತಂದರು.",
+   "heard": "ಕೂಡಲೇ ಗಲಭೆ ನಿಯಂತ್ರಣ ಸಾಧನಗಳನ್ನು ಧರಿಸಿರುವ ಅಧಿಕಾರಿಗಳು ಅಂಗಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ ಕಖೈದಿಗಳನ್ನು ಅಶ್ರುವಾಯು ಪ್ರಯೋಗಿಸುವ ಮೂಲಕ ಪರಿಸ್ಥಿತಿಯನ್ನು ತಹಬದಿಗೆ ತಂದರು",
+   "wer": 0.067,
+   "confidence": 0.962,
+   "english": "Immediately, officers in riot gear entered the courtyard and brought the situation under control by firing tear gas at the inmates."
+  },
+  {
+   "file": "6922245663813726520.wav",
+   "reference": "ಅದರ ಸರ್ವವ್ಯಾಪಿ ಶಕ್ತಿ ರಾಜನಿಂದ ಸಾಮಾನ್ಯ ಪ್ರಜೆಯವರೆಗೂ ಹರಡಿತ್ತು.",
+   "heard": "ಅದರ ಸರ್ವವ್ಯಾಪಿ ಶಕ್ತಿ ರಾಜನಿಂದ ಸಾಮಾನ್ಯ ಪ್ರಜೆಯವರೆಗೂ ಹರಡಿತ್ತು",
+   "wer": 0.0,
+   "confidence": 0.979,
+   "english": "Its omnipotent power extended from the king to the common citizen"
+  },
+  {
+   "file": "708631546718872997.wav",
+   "reference": "ಕೂಡಲೇ, ಗಲಭೆ ನಿಯಂತ್ರಣ ಸಾಧನಗಳನ್ನು ಧರಿಸಿರುವ ಅಧಿಕಾರಿಗಳು ಅಂಗಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ ಕೈದಿಗಳನ್ನು ಅಶ್ರುವಾಯು ಪ್ರಯೋಗಿಸುವ ಮೂಲಕ ಪರಿಸ್ಥಿತಿಯನ್ನು ತಹಬದಿಗೆ ತಂದರು.",
+   "heard": "ಕೂಡಲೇ ಗಲಭೆ ನಿಯಂತ್ರಣ ಸಾಧನಗಳನ್ನು ಧರಿಸಿರುವ ಅಧಿಕಾರಿಗಳು ಅಂಗಳಕ್ಕೆ ಪ್ರವೇಶಿಸಿ ಕೈದಿಗಳನ್ನು ಅಶ್್ರರುವಾಯು ಪ್ರಯೋಗಿಸುವ ಮೂಲಕ ಪರಿಸ್ಥಿತಿಯನ್ನು ತಹಾಬಂದಿಗೆ ತಂದರು",
+   "wer": 0.133,
+   "confidence": 0.959,
+   "english": "Immediately, officers in riot gear entered the courtyard and brought the situation under control by firing tear gas at the prisoners."
+  },
+  {
+   "file": "732118202968125969.wav",
+   "reference": "ಭಯಭೀತರಾದ ಕಿಂಗ್ ಲೂಯಿಸ್ XVI, ರಾಣಿ ಮೇರಿ ಆಂಟೊಯೊನೆಟ್ ಅವರ ಇಬ್ಬರು ಚಿಕ್ಕ ಮಕ್ಕಳು (11 ವರ್ಷದ ಮೇರಿ ಥೆರೆಸ್ ಮತ್ತು ನಾಲ್ಕು ವರ್ಷದ ಲೂಯಿಸ್-ಚಾರ್ಲ್ಸ್) ಮತ್ತು ರಾಜನ ಸಹೋದರಿ ಮೇಡಮ್ ಎಲಿಜಬೆತ್ ಅವರನ್ನು 1789 ರ ಅಕ್ಟೋಬರ್ 6 ರಂದು ಮಾರುಕಟ್ಟೆ ಮಹಿಳೆಯರ ಜನಸಮೂಹದಿಂದ ಪ್ಯಾರಿಸ್‌ಗೆ ವಾಪಸ್ಸು ಕಳುಹಿಸುವಂತೆ ಒತ್ತಾಯಿಸಲಾಯಿತು.",
+   "heard": "ಭಯಭೀತರಾದ ಕಿಂಗ್ ಲೂಯಿಸ್ ಹದಿನಾರು ರಾಣಿ ಮೇರಿ ಆಂಟೊಯನೆಟ್ ಅವರ ಇಬ್ಬರ ಚಿಕ್ಕುಮಕ್ಕಳು ಹನ್ನೊಂದು ವರ್ಷದ ಮೇರಿ ಥೆರೆಸ್ ಮತ್ತು ನಾಲ್ಕು ವರ್ಷದ ಲೂಯಿಸ್ ಚಾರ್ಲ್ಸ್ ಮತ್ತು ರಾಜನ ಸಹೋದರಿ ಮೇಡಂ್ ಎಲಿಜಬೆತ್ ಅವರನ್ನು ಸಾವಿರದ ಏಳುನೂರ ಎಂಬತ್ತೊಂಬತ್ತರ ಅಕ್ಟೋಬರ್ ಆರರಂದು ಮಾರುಕಟ್ಟೆಮಹಿಳೆಯರ ಜನಸಮೂಹದಿಂದ ಪ್ಯಾರಿಸ್ಗೆ ವಾಪಸ್ಸು ಕಳಿಸುವಂತೆ ಒತ್ತಾಯಿಸಲಾಯಿತು",
+   "wer": 0.421,
+   "confidence": 0.946,
+   "english": "The frightened King Louis XVI and Queen Marie Antoinette's two aunts, eleven-year-old Marie Thérèse and four-year-old Louis Charles, and the King's sister Madame Elizabeth, were forced to return to Paris by a crowd of market women on 6 October 1978."
+  },
+  {
+   "file": "8478168341288172179.wav",
+   "reference": "ಮೊಲ್ಡೊವಾದಲ್ಲಿನ ಮುಖ್ಯ ಧರ್ಮ ಆರ್ಥೊಡಾಕ್ಸ್ ಕ್ರಿಶ್ಚಿಯನ್ ಆಗಿದೆ.",
+   "heard": "ಮೋಲ್ಡೋವಾದಲ್ಲಿನ ಮುಖ್ಯ ಧರ್ಮ ಆರ್ಥೊಡಾಕ್ಸ್ ಕ್ರಿಶ್ಚಿಯನ್ ಆಗಿದೆ",
+   "wer": 0.167,
+   "confidence": 0.944,
+   "english": "The main religion in Moldova is Orthodox Christianity."
+  },
+  {
+   "file": "9936574210238066079.wav",
+   "reference": "ಈ ಸೀಸನ್‌ನಲ್ಲಿನ ರೋಗದ ಮೊದಲ ಪ್ರಕರಣವು ಜುಲೈ ಕೊನೆಯಲ್ಲಿ ವರದಿಯಾಯಿತು.",
+   "heard": "ಈ ಸೀಸನ್ನಲ್ಲಿನ ರೋಗದ ಮೊದಲ ಪ್ರಕರಣವು ಜುಲೈ ಕೊನೆಯಲ್ಲಿ ವರದಿಯಾಯಿತು",
+   "wer": 0.125,
+   "confidence": 0.985,
+   "english": "The first case of the disease this season was reported in late July."
+  }
+ ]
+}

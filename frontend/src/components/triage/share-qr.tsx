@@ -6,15 +6,15 @@ import { QRCodeSVG } from "qrcode.react";
 import { Copy, KeyRound, Printer, QrCode, ShieldOff, Clock } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, useNow, timeAgo, fmtDate, fmtDateTime } from "@/lib/hooks";
-import { Badge, Button, Label, Modal, Select } from "@/components/ui";
+import { Badge, Button, Label, Modal, Select, Textarea } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import type { Encounter, ShareLink } from "@/lib/types";
+import { PHRASE_LANGS, loadPhrases } from "@/lib/i18n/phrases";
 
 const VALIDITY = [
   { h: 24, label: "24 hours" },
   { h: 72, label: "3 days" },
   { h: 168, label: "7 days" },
-  { h: 720, label: "30 days" },
 ];
 
 /** E8: what the patient takes home. Next visit and referral, never an urgency tier. */
@@ -27,11 +27,30 @@ async function slipExtras(enc: Encounter): Promise<SlipExtras> {
   return { nextVisit: due ?? null, referral: ref ? { destination: ref.destination, specialty: ref.specialty } : null };
 }
 
-export async function printShareSlip(enc: Encounter, link: ShareLink, facilityName?: string) {
+/** E8 / A3: the slip's patient lines in the patient's own language beside the English; advice machine-translated. */
+async function patientLines(lang: string, advice: string) {
+  if (lang === "en" || !PHRASE_LANGS.includes(lang as (typeof PHRASE_LANGS)[number])) return { lang: "en", t: (s: string) => s, advice: null as null | { text: string; engine: string | null } };
+  const phrases = await loadPhrases(lang);
+  const t = (s: string) => phrases[s] ?? s;
+  let out = null;
+  if (advice.trim()) {
+    try {
+      out = await api.translateText(advice.trim(), "en", lang);
+      if (!out.engine || out.text === advice.trim()) out = null;
+    } catch {
+      out = null; // no translator here: the English advice is printed alone
+    }
+  }
+  return { lang, t, advice: out };
+}
+
+export async function printShareSlip(enc: Encounter, link: ShareLink, facilityName?: string, advice = "") {
   const svg = document.getElementById(`share-qr-${link.id}`)?.outerHTML ?? "";
   const w = window.open("", "_blank"); // opened inside the click, before any await, so it is not blocked
   if (!w) return;
   const extras = await slipExtras(enc);
+  const pl = await patientLines(enc.intake?.language || "en", advice);
+  const both = (en: string) => (pl.lang === "en" || pl.t(en) === en ? en : `${pl.t(en)} / ${en}`);
   const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
   w.document.write(`<html><head><title>Referral summary ${esc(enc.patient.code)}</title>
 <style>body{font-family:system-ui,sans-serif;max-width:520px;margin:32px auto;color:#111;text-align:center}
@@ -41,8 +60,9 @@ export async function printShareSlip(enc: Encounter, link: ShareLink, facilityNa
 <p class="muted">${esc(facilityName ?? "")}</p>
 <p><b>${esc(enc.patient.name)}</b> · ${enc.patient.age}/${enc.patient.sex} · ${esc(enc.patient.code)}${enc.token ? ` · Token ${esc(enc.token)}` : ""}</p>
 ${svg.replace(/width="\d+"/, 'width="260"').replace(/height="\d+"/, 'height="260"')}
-${extras.referral ? `<p style="margin-top:12px"><b>Referred to:</b> ${esc(extras.referral.destination)}${extras.referral.specialty ? ` (${esc(extras.referral.specialty)})` : ""}</p>` : ""}
-${extras.nextVisit ? `<p><b>Next visit:</b> ${new Date(extras.nextVisit).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
+${extras.referral ? `<p style="margin-top:12px"><b>${esc(both("Referred to"))}:</b> ${esc(extras.referral.destination)}${extras.referral.specialty ? ` (${esc(extras.referral.specialty)})` : ""}</p>` : ""}
+${extras.nextVisit ? `<p><b>${esc(both("Next visit"))}:</b> ${new Date(extras.nextVisit).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
+${advice.trim() ? `<div style="margin-top:12px;text-align:left"><p><b>${esc(both("Advice"))}:</b> ${esc(advice.trim())}</p>${pl.advice ? `<p lang="${pl.lang}" style="font-size:18px">${esc(pl.advice.text)}</p><p class="muted">${esc(both("Machine translated — please read it out to the patient."))} (${esc(pl.advice.engine ?? "")})</p>` : ""}</div>` : ""}
 <p class="muted">Access code</p><p class="code">${esc(link.access_code ?? "••••••")}</p>
 <p class="muted">Valid until ${new Date(link.expires_at).toLocaleString("en-IN")}</p>
 <p class="muted" style="word-break:break-all">${esc(link.url)}</p>
@@ -57,6 +77,7 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
   const [hours, setHours] = useState(72);
   const [created, setCreated] = useState<ShareLink | null>(initial ?? null);
   const [busy, setBusy] = useState(false);
+  const [advice, setAdvice] = useState("");
   const { data: links, reload } = useAsync(() => api.listShares(enc.id), [enc.id]);
   const now = useNow(60_000);
 
@@ -83,7 +104,7 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
       {created ? (
         <div className="grid items-center gap-6 sm:grid-cols-[auto_1fr]">
           <div className="mx-auto rounded-2xl border border-line bg-white p-3">
-            <QRCodeSVG id={`share-qr-${created.id}`} value={created.url} size={200} />
+            <QRCodeSVG id={`share-qr-${created.id}`} value={created.url} size={200} title={tr("QR code for the shared record")} />
           </div>
           <div>
             <p className="flex items-center gap-1.5 text-sm text-muted">
@@ -94,8 +115,13 @@ export function ShareQrModal({ enc, facilityName, onClose, initial }: { enc: Enc
               <Clock className="size-4" /> {tr("Valid until")} {fmtDateTime(created.expires_at)}
             </p>
             <p className="mt-2 font-mono text-xs break-all text-subtle">{created.url}</p>
+            <div className="mt-3">
+              <Label htmlFor="slip-advice">{tr("Advice for the patient (English, optional)")}</Label>
+              <Textarea id="slip-advice" rows={2} maxLength={500} value={advice} onChange={(e) => setAdvice(e.target.value)} placeholder={tr("e.g. Drink plenty of water; come back at once if the fever rises")} />
+              <p className="mt-1 text-xs text-muted">{tr("Printed in English and machine-translated into the patient's language.")}</p>
+            </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button icon={<Printer className="size-4" />} onClick={() => void printShareSlip(enc, created, facilityName)}>
+              <Button icon={<Printer className="size-4" />} onClick={() => void printShareSlip(enc, created, facilityName, advice)}>
                 {tr("Print slip")}
               </Button>
               <Button

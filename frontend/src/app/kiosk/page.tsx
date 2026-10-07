@@ -39,7 +39,7 @@ export default function KioskPage() {
 
   useEffect(() => subscribeOutbox(setOutbox), []);
   useEffect(() => {
-    Promise.allSettled([loadPhrases("hi"), loadPhrases("or")]).then(() => precacheCurrentPage());
+    Promise.allSettled([loadPhrases("hi"), loadPhrases("or"), loadPhrases("kn")]).then(() => precacheCurrentPage());
   }, []);
 
   useEffect(() => {

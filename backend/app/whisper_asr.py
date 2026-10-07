@@ -66,8 +66,8 @@ def _model(lang: str):
             raise LanguageUnavailable(f"Speech engine dependencies missing: {e.name}") from e
         _loaded = None  # one language at a time: free the previous model first
         t = time.perf_counter()
-        processor = WhisperProcessor.from_pretrained(path)
-        model = WhisperForConditionalGeneration.from_pretrained(path, low_cpu_mem_usage=True).eval()
+        processor = WhisperProcessor.from_pretrained(path)  # nosec B615: a local folder, never the Hub
+        model = WhisperForConditionalGeneration.from_pretrained(path, low_cpu_mem_usage=True).eval()  # nosec B615
         if get_settings().asr_second_int8:
             model = torch.ao.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8, inplace=True)
             gc.collect()  # the fp32 weights the 8-bit layers replaced

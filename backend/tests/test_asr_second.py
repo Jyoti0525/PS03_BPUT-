@@ -75,11 +75,15 @@ def test_a_different_number_or_symptom_is_always_a_disagreement():
 
 
 # ── the speech endpoint ────────────────────────────────
+WEBM = bytes.fromhex("1a45dfa3")  # a WebM header: recordings are checked by their contents
+
+
 @pytest.fixture
 def engines(monkeypatch):
     calls = {"sarvam": 0}
 
     def offline(data, lang):
+        data = data.removeprefix(WEBM)
         if data == b"silence":
             raise language.AudioRejected("No speech was heard")
         if lang == "en" or data == b"no-model":
@@ -99,7 +103,7 @@ def engines(monkeypatch):
 
 def _post(client, headers, data=b"audio", lang="hi", second=True):
     form = {"language": lang, **({"second_opinion": "true"} if second else {})}
-    return client.post(f"{API}/speech/transcribe", headers=headers, files={"audio": ("speech.webm", data, "audio/webm")}, data=form)
+    return client.post(f"{API}/speech/transcribe", headers=headers, files={"audio": ("speech.webm", WEBM + data, "audio/webm")}, data=form)
 
 
 def test_second_engine_hears_the_same_recording_and_both_are_returned(client, nurse, engines):

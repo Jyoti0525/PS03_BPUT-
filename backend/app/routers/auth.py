@@ -10,6 +10,7 @@ from sqlalchemy import func, or_, select
 
 from .. import audit
 from ..config import get_settings
+from ..ratelimit import limit
 from ..models import Facility, Organisation, OtpChallenge, RevokedToken, User
 from ..schemas import ORG_FACILITY_TYPES, AuthResult, OtpChallengeOut, OtpRequest, OtpVerify, OtpVerifyOut, PinChangeIn, PinForgotIn, PinStepIn, AuthOptions, EmailConfirmIn, EmailStartIn, MePatch, RefreshIn, RegisterIn, UserOut
 from .. import directory, mailer, otp
@@ -126,7 +127,7 @@ def _check_challenge(db, challenge_id: str, code: str) -> OtpChallenge:
     return ch
 
 
-@router.post("/otp/verify", response_model=OtpVerifyOut, response_model_exclude_none=True)
+@router.post("/otp/verify", response_model=OtpVerifyOut, response_model_exclude_none=True, dependencies=[Depends(limit("auth"))])
 def verify_otp(body: OtpVerify, db: DB):
     ch = _check_challenge(db, body.challenge_id, body.code)
     if ch.user_id:
@@ -166,7 +167,7 @@ def _set_pin(user: User, pin: str) -> None:
     user.pin_hash, user.pin_set_at, user.pin_failed_attempts, user.pin_locked_until = hash_pin(pin, user.id), now(), 0, None
 
 
-@router.post("/pin/verify", response_model=AuthResult)
+@router.post("/pin/verify", response_model=AuthResult, dependencies=[Depends(limit("auth"))])
 def pin_verify(body: PinStepIn, db: DB):
     """Step 2 of sign-in for staff and employers."""
     s = get_settings()
@@ -202,7 +203,7 @@ def pin_setup(body: PinStepIn, db: DB):
     return AuthResult(tokens=issue_tokens(user), user=user_out(db, user))
 
 
-@router.post("/pin/forgot", response_model=OtpVerifyOut, response_model_exclude_none=True)
+@router.post("/pin/forgot", response_model=OtpVerifyOut, response_model_exclude_none=True, dependencies=[Depends(limit("auth"))])
 def pin_forgot(body: PinForgotIn, db: DB):
     """Supervisors and employers can reset their own PIN after OTP; other staff ask their supervisor."""
     user = _pin_user(db, body.pin_token)
@@ -213,7 +214,7 @@ def pin_forgot(body: PinForgotIn, db: DB):
     return OtpVerifyOut(status="pin_setup_required", pin_token=pin_step_token(user), name=user.name, can_reset_pin=True)
 
 
-@router.post("/pin/change", status_code=204)
+@router.post("/pin/change", status_code=204, dependencies=[Depends(limit("auth"))])
 def pin_change(body: PinChangeIn, user: CurrentUser, db: DB):
     if user.role not in PIN_ROLES:
         raise HTTPException(403, "This account does not use a PIN")
@@ -225,7 +226,7 @@ def pin_change(body: PinChangeIn, user: CurrentUser, db: DB):
     audit.record(db, user, "UPDATE", "user", user.id, "PIN changed from the dashboard")
 
 
-@router.post("/register", response_model=AuthResult)
+@router.post("/register", response_model=AuthResult, dependencies=[Depends(limit("auth"))])
 def register(body: RegisterIn, db: DB):
     claims = decode(body.registration_token, "register")
     email = claims.get("email")
@@ -303,7 +304,7 @@ def register(body: RegisterIn, db: DB):
     return AuthResult(tokens=issue_tokens(user, body.device_id), user=user_out(db, user))
 
 
-@router.post("/refresh")
+@router.post("/refresh", dependencies=[Depends(limit("auth"))])
 def refresh(body: RefreshIn, db: DB):
     data = decode(body.refresh_token, "refresh")
     if db.get(RevokedToken, data["jti"]):
@@ -335,7 +336,7 @@ def email_start(body: EmailStartIn, request: Request, user: CurrentUser, db: DB)
     return _request_email_code(db, request, email, "add", user_id=user.id, lang=body.language or user.language)
 
 
-@router.post("/email/confirm", response_model=UserOut)
+@router.post("/email/confirm", response_model=UserOut, dependencies=[Depends(limit("auth"))])
 def email_confirm(body: EmailConfirmIn, user: CurrentUser, db: DB):
     ch = _check_challenge(db, body.challenge_id, body.code)
     if ch.user_id != user.id or not ch.email:

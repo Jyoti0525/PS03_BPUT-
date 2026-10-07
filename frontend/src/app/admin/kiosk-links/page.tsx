@@ -82,7 +82,7 @@ export default function KioskLinksPage() {
               <Card key={k.id} className={k.revoked ? "opacity-60" : ""}>
                 <div className="flex flex-wrap items-center gap-4 p-4">
                   <button onClick={() => !k.revoked && setQr(k)} className="rounded-xl border border-line bg-white p-1.5" aria-label={`Show QR for ${k.label}`}>
-                    <QRCodeSVG value={k.url} size={64} />
+                    <QRCodeSVG value={k.url} size={64} title={`QR code: ${k.url}`} />
                   </button>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -165,7 +165,7 @@ export default function KioskLinksPage() {
       >
         {qr && (
           <div className="flex flex-col items-center gap-3 py-2">
-            <QRCodeSVG id="kiosk-qr" value={qr.url} size={220} />
+            <QRCodeSVG id="kiosk-qr" value={qr.url} size={220} title={`QR code: ${qr.url}`} />
             <p className="font-mono text-lg font-bold tracking-[0.3em] text-ink">{qr.code}</p>
             <p className="font-mono text-xs break-all text-muted">{qr.url}</p>
           </div>

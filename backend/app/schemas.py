@@ -429,6 +429,7 @@ class ConsentOut(ORM):
     scopes: list[str]
     captured_by: str
     captured_at: datetime
+    grievance_contact: str | None = None  # where to complain about data handling; shown on the patient slip
 
 
 # ── Intake ─────────────────────────────────────────────
@@ -448,6 +449,7 @@ class SymptomEntry(BaseModel):
     confirmed_by_readback: bool = False
     engine: str | None = Field(default=None, max_length=160)  # speech/translation engine that produced `text`
     second_hearing: SecondHearing | None = None  # voice only: the other speech engine's transcript (B9)
+    confidence: float | None = Field(default=None, ge=0, le=1)  # voice only: the speech engine's own confidence
 
 
 class IntakeAnswer(BaseModel):
@@ -848,7 +850,7 @@ class KioskIdentifyIn(BaseModel):
 
 
 class ShareIn(BaseModel):
-    hours: int = Field(default=72, ge=1, le=24 * 30)
+    hours: int = Field(default=72, ge=1, le=24 * 7)  # a referral hand-off needs days, not weeks
     purpose: Literal["referral", "handoff"] = "referral"
 
 

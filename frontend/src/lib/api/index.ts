@@ -24,7 +24,7 @@ function lazyMock(): JeeviaApi {
 export const api: JeeviaApi = API_MODE === "live" ? liveApi : lazyMock();
 
 // A7: kiosk lines in a language the device has no voice for are read by the server's online voice (live API only).
-if (API_MODE === "live") setOnlineVoice((text, lang) => liveApi.speakOnline(text, lang));
+if (API_MODE === "live") setOnlineVoice((text, lang, allowOnline) => liveApi.speakOnline(text, lang, allowOnline));
 
 export { ApiError } from "./contract";
 export { getDeviceId } from "./tokens";

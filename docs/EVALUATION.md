@@ -54,6 +54,87 @@ of the MatMul weights, per channel; activations stay float). Same 25 clips, CTC 
 - Reproduce: `JEEVIA_ASR_MODEL=indic-conformer-600m-int8 python backend/scripts/eval_asr.py models/eval/fleurs_or or`.
   Per-clip results: `docs/evaluation/asr_or_fleurs_dev25_ctc_int8.json`.
 
+## Speech recognition — Hindi, Kannada and Odia, with a confidence threshold (7 Oct)
+
+| Language | Clips (speech) | WER | CER | Processing time per second of speech |
+|---|---|---|---|---|
+| Hindi (`hi_in`) | 25 (262.8 s) | **10.7 %** | 4.6 % | 0.27 s |
+| Kannada (`kn_in`) | 25 (277.9 s) | **20.6 %** | 8.0 % | 0.28 s |
+| Odia (`or_in`) | 25 (306.6 s) | **21.6 %** | 5.6 % | 0.22 s |
+
+- **Engine:** IndicConformer-600M int8, CTC decoding, the model the app ships. Same scoring as above.
+- **Data:** the first 25 rows of each language's FLEURS dev split (`backend/scripts/fetch_fleurs.py`).
+- **Reproduce:** `python backend/scripts/eval_asr.py models/eval/fleurs_<hi|kn|or> <hi|kn|or>`. Per clip, with
+  confidence: `docs/evaluation/asr_<lang>_fleurs_dev25_ctc_int8_conf.json`.
+
+**Confidence threshold.** The engine's confidence is the mean probability of the chosen letter over the frames that
+emit one. Below the language's threshold, the words are kept out of the history and become an `ASR-LOW-CONF` flag
+asking the health worker to check with the patient; the rules still read them, so a danger sign is not lost.
+
+| Language | Threshold | Clips flagged | WER of flagged clips | Bad clips (WER ≥ 30 %) missed |
+|---|---|---|---|---|
+| Odia | 0.92 | 3 of 25 | 40 %, 44 %, 67 % | 4 (38 %, 46 %, 54 %, 30 %) |
+| Hindi | 0.85 | 1 of 25 | 40 % | 3 (33 %, 42 %, 30 %) |
+| Kannada | 0.92 | 0 of 25 | — | 5 |
+
+- **What it means:** in Odia the threshold catches the worst clips and flags no good one. In Hindi it catches one. In
+  Kannada, confidence does not separate good from bad transcripts on this set: the worst clips (42–44 %) score 0.94.
+  The threshold is a first filter, not a guarantee. Read-back to the patient and the second engine (B9) stay the main
+  checks. Unmeasured languages use 0.92.
+- **Limit:** 25 read-speech clips per language. Thresholds should be re-set on recorded clinic speech.
+
+## Errors by language, sex and age band (G7, 7 Oct)
+
+Reproduce: `python backend/scripts/eval_bias.py` → `docs/evaluation/bias.json`.
+
+**Speech, by speaker sex** (the FLEURS clips above; FLEURS has no speaker age):
+
+| Language | Women: clips, WER | Men: clips, WER |
+|---|---|---|
+| Hindi | 14, 13.9 % | 11, 7.0 % |
+| Kannada | 14, 17.3 % | 11, 24.2 % |
+| Odia | 25, 21.6 % | none in this set |
+
+The gaps go in opposite directions in Hindi and Kannada, and 11–14 clips per group from a handful of speakers
+cannot separate speaker sex from speaker identity. Odia has women only. This needs recorded clinic speech with
+enough speakers of each sex and age before any claim is made.
+
+**Rules, counterfactual check** (the 50 synthetic cases). Only the sex, or only the age, is changed; the urgency
+should not move unless a rule is meant to depend on it.
+
+| Change | Runs | Urgency changed |
+|---|---|---|
+| Sex flipped (non-maternal cases) | 45 | 0 |
+| Adult age moved into each other band (18–39, 40–59, 60+) | 86 | 1 |
+
+The one change is by design: "chest tightness on stairs" at 44 → 70 becomes RED through IITT's "pain over 50" rule.
+
+**Second opinion (C8) agreeing with the rules**, by group: women 12 of 24, men 17 of 26; under 12: 3 of 6; 12–17:
+0 of 1; 18–39: 9 of 21; 40–59: 11 of 14; 60+: 6 of 8. Agreement is lower for women and for 18–39, but the groups
+differ in case mix and are small, so this is a pointer for the next test set, not a finding. The opinion never
+changes urgency.
+
+## Offline voice (A7, 7 Oct)
+
+Meta MMS-TTS (VITS) for Odia, Hindi and Kannada, CPU: about 140 MB per language; a 3.5 s Odia sentence took 1.7 s
+including the first load. Not scored; listened to by us. Flat, slightly robotic; numbers and English words can be
+mispronounced. Licence CC-BY-NC 4.0.
+
+## Clinical rule decisions (7 Oct)
+
+- **Severe hypertension:** IITT's BP line is for pregnancy only and ATP RED needs > 220 / > 110, so 166/102 with a
+  headache was GREEN. Added `LOCAL-SEVERE-HTN` (a local facility rule, labelled as such): ≥ 180 / ≥ 110, or ≥ 160 /
+  ≥ 100 with headache, visual change, chest pain, breathlessness or one-sided weakness → YELLOW, doctor review.
+- **Meningism:** kept as the WHO IITT card states it (any two of altered mental status, stiff neck, fever or
+  hypothermia, headache → RED). Fever with headache is over-triaged on purpose; the doctor can override with a reason.
+
+## Kiosk accessibility (F3, 7 Oct)
+
+axe-core 4.10, WCAG 2.2 AA, every kiosk step from start to the token screen, on an emulated low-end Android phone
+(360 × 640, CPU 6× slower, 400 kbit/s, 400 ms latency). Findings fixed: the facility badge's contrast (3.1:1 → about
+6.4:1), unnamed QR codes, two controls under 48 px. Left: the "via" of the logo (2.3:1; WCAG exempts logos). Page
+load 2.4 s, submit 3.2 s. Not tried on a physical phone.
+
 ## Second speech engine (B9)
 
 Sarvam Saaras v3 (online, India-hosted) hears the same recording as the offline IndicConformer. The two transcripts

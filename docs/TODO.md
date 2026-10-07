@@ -48,10 +48,10 @@ No speech recogniser is 100 % accurate. The goal is that **no recognition error 
 - [ ] For the languages FLEURS does not cover (brx, doi, kok, ks, mai, mni, sa, sat), find an openly licensed public test set and check its licence first. Until one is measured, label that language "unmeasured" in the app.
 - [ ] Measure translation on the same clips (reference English is in FLEURS); report the score per language.
 - [ ] Team-recorded symptom sentences (synthetic scripts, written consent from each speaker) in Odia, Hindi, English, Kannada and code-mixed speech. Measure WER on medical words.
-- [ ] Per-language confidence threshold. A low-confidence answer does not enter the record; it becomes a question for the health worker.
+- [x] Per-language confidence threshold. A low-confidence answer does not enter the record; it becomes a question for the health worker. **Done 7 Oct (uncommitted):** CTC confidence from IndicConformer; thresholds calibrated on FLEURS (Odia 0.92, Hindi 0.85, Kannada 0.92, others 0.92); below it the kiosk tells the patient a health worker will ask, the history leaves it out and an `ASR-LOW-CONF` flag carries the words; the rules still read them. Confidence separates well in Odia only (EVALUATION.md).
 - [x] Online engine as a second opinion: Sarvam AI (Bhashini access unlikely, 6 Oct), plus IndicWhisper offline so the check works with no network. Any disagreement between the two engines is flagged for review (B9). **Done 6–7 Oct (commit 25a75a0):** see B9.
-- [ ] The kiosk shows which languages are measured and which are "unmeasured".
-- [ ] Screen languages: only English, Hindi and Odia today. Add **Kannada** (needed for the campus demo instance), then the other scheduled languages.
+- [x] The kiosk shows which languages are measured and which are "unmeasured". **Done 7 Oct (uncommitted):** the language menu shows "speech measured: N % word errors" (Hindi 10.7, Kannada 20.6, Odia 21.6, FLEURS) or "speech not yet measured".
+- [ ] Screen languages: only English, Hindi and Odia today. Add **Kannada** (needed for the campus demo instance), then the other scheduled languages. **Kannada done 7 Oct (uncommitted)** for the patient screens (kiosk, pre-arrival, intake: 342 phrases plus the dictionary); staff screens stay English. **Native review sheet ready 7 Oct (uncommitted):** `docs/translation_review_kn.csv`, 392 lines with the machine read-back into English; the 58 whose read-back shares little with the English come first. **Left:** a Kannada speaker fills it in (we apply the corrections); the other languages.
 - [x] Read-back of the transcript plus patient confirmation or re-record (browser speech synthesis).
 - [x] Rules also read the patient's original words, so a mistranslation cannot hide a finding (ଝାଡ଼ା test, `bafbe44`).
 - [x] Every note with translated history carries an MT-CHECK flag naming the engine (`bafbe44`).
@@ -66,12 +66,12 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 
 ### A. Getting information in
 - [x] **A1 Guided text intake** (PS: collect symptoms through text; Multimodal). Kiosk and nurse intake, consent, tokens. *Note:* the question flow lives in code, not YAML (YAML is in the roadmap).
-- [ ] **A2 Voice intake** (PS: voice; speech-to-text). *Partial:* offline IndicConformer is done. **Left:** everything in §2, plus Bhashini online.
-- [ ] **A3 Translation English / Hindi / regional** (PS: translation). *Partial:* offline IndicTrans2, original words kept, MT-CHECK flag. **Left:** Bhashini online; check that the note shows the original beside the translation, marked "machine translated"; English → Indic for advice and slips.
+- [ ] **A2 Voice intake** (PS: voice; speech-to-text). *Partial:* offline IndicConformer is done. **Left:** everything in §2. Bhashini adapter added 7 Oct (uncommitted), used for translation when the offline model cannot run; not tested live (no key).
+- [ ] **A3 Translation English / Hindi / regional** (PS: translation). *Partial:* offline IndicTrans2, original words kept, MT-CHECK flag. **Done 7 Oct (uncommitted):** Bhashini online as the fallback translator (`app/bhashini.py`, keys `BHASHINI_USER_ID` / `BHASHINI_API_KEY`; untested live, no key); English → Indic on the patient slip: an optional advice box, printed in English with the machine translation marked "read it out to the patient", and the slip's labels in the patient's language. **Left:** check that the note shows the original beside the translation, marked "machine translated"; a live Bhashini test.
 - [x] **A4 Report upload**: PDF and images, multiple files.
 - [x] **A5 Basic visual inputs** (5 Oct, `ca889e7`). Report photos and "photo of the problem" are both accepted. Each is redacted before storage and routed to B10, which labels it; a photo of the problem is never interpreted.
 - [x] **A6 Patient identity and matching.** Done 7 Oct (uncommitted): candidates show why they matched (exact ID, shared household phone, name); a person picks one; the pick is logged with the match reason and the number of candidates (`POST /patients/{id}/pick`); records are never merged.
-- [ ] **A7 Spoken read-back and prompts.** *Partial:* browser speech synthesis. **Checked 7 Oct on the demo laptop:** Windows has English voices only (UK, US, India English), no Hindi or Odia, so Chrome speaks nothing in Odia. **Added 7 Oct (uncommitted):** when the device has no voice for the language and there is a connection, the kiosk plays Sarvam Bulbul audio (`POST /language/speak`, kept in memory only); the patient's own words go online only if they chose AI helpers. **Left:** an offline Odia voice (Indic Parler-TTS, §9) for no-network camps; listen to the Bulbul Odia lines.
+- [x] **A7 Spoken read-back and prompts.** *Partial:* browser speech synthesis. **Checked 7 Oct on the demo laptop:** Windows has English voices only (UK, US, India English), no Hindi or Odia, so Chrome speaks nothing in Odia. **Added 7 Oct (uncommitted):** when the device has no voice for the language and there is a connection, the kiosk plays Sarvam Bulbul audio (`POST /language/speak`, kept in memory only); the patient's own words go online only if they chose AI helpers. **Offline voice done 7 Oct (uncommitted):** Meta MMS-TTS for Odia, Hindi and Kannada on the server (`app/tts.py`, `models/mms-tts-{ory,hin,kan}`, about 140 MB each, CPU, about 0.5 s per second of speech). `/language/speak` tries it first; Sarvam only for other languages, and the patient's own words never go online without AI consent (`allow_online`). Checked in the browser: Odia Listen is served by the offline voice. Licence CC-BY-NC 4.0: fine for this POC, a commercial deployment needs another voice. **Left:** listen to the Bulbul Odia lines.
 - [x] **A8 Vitals entry.** Done 7 Oct (uncommitted): one fixed unit per vital (°F, mmHg …); the kiosk and the nurse form share the plausible ranges; a Celsius temperature is refused, never converted; systolic must exceed diastolic (also checked by the API); a blank box is "Not measured" and never gets a default.
 
 ### B. Reading and understanding
@@ -149,7 +149,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 ### F. India context and configuration
 - [x] **F1 Facility configuration**: PHC, CHC, sub-centre, district hospital, hospital, clinic, camp, company clinic, industrial unit, campus. **Check:** a live facility switch in under 30 s.
 - [x] **F2 Four variance axes in config**: patient load, languages, specialists, digital maturity. Done 7 Oct (uncommitted): **load** (low / normal / high, migration 0013) sets the kiosk's question budget, and high asks only the safety questions, never dropping one that can make a case RED; **languages** offered by the facility head the kiosk's language list; **specialists** set the referral destinations (E4); **offline mode** off means the kiosk refuses to queue intakes with no network and tells staff to use the paper form.
-- [ ] **F3 Accessibility.** **Check:** low-literacy icons, a complete voice path for blind users (spoken consent and disclaimer), a complete tap path for non-speaking users, caregiver proxy, large type and contrast, 48 px touch targets, low-end Android.
+- [x] **F3 Accessibility.** **Done 7 Oct (uncommitted):** axe-core (WCAG 2.2 AA) on the public kiosk's start, consent and patient-details steps: one finding fixed (step indicator role); controls under 48 px enlarged (language and accessibility buttons, Listen, Cancel); with read-aloud on, the disclaimer and each follow-up question with its choices are now spoken. **Closed 7 Oct (uncommitted):** the facility badge text is now coral-700 (about 6.4:1); every kiosk step to the token screen audited with axe on an emulated low-end Android phone (360 × 640, CPU 6× slower, 400 kbit/s, 400 ms): no findings except the "via" of the logo, which WCAG exempts; QR codes given names; "I have visited before" and the sample-report buttons enlarged to 48 px; no sideways scrolling; page loads in 2.4 s and submit takes 3.2 s on that profile. Not tried on a physical phone. **Check:** low-literacy icons, a complete voice path for blind users (spoken consent and disclaimer), a complete tap path for non-speaking users, caregiver proxy, large type and contrast, 48 px touch targets, low-end Android.
 - [x] **F4 Longitudinal records**: BP and glucose trends.
 - [x] **F5 Regional calendar and cadres**: festival and season table per region (feeds B4); local cadre names. Done 5 Oct (`8a7c3ee`).
   - [x] `backend/app/regions.yaml` is facility configuration, not code. It covers every state and UT in the facility directory (36 entries).
@@ -179,8 +179,23 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **G4 Auditability**: hash-chained audit log. **Check:** VIEW events are logged.
 - [x] **G5 Role-based access**: OTP and PIN, device binding, employer limits.
 - [x] **G6 Disclaimer.** Done 7 Oct (uncommitted): bar on every screen and on every printed page; in PDF, print, CSV, JSON and FHIR exports, on the QR slip and the referral text; spoken at the kiosk as part of the consent text.
-- [ ] **G7 Responsible-AI dossier.** *Partial:* `docs/EVALUATION.md`. **Left:** model cards (known limits per language), a bias table (errors by language, sex and age band), override statistics, and an in-app "about the models" page.
+- [x] **G7 Responsible-AI dossier.** *Partial:* `docs/EVALUATION.md`. **Done 7 Oct (uncommitted):** model cards and an in-app "About the models" page (`/about/models`, public, linked from the home page and admin): job, where it runs, what is sent, licence, measured, known limits and what it never decides, for all eight engines; error rates by language (above); override statistics (E9). **Bias table done 7 Oct (uncommitted):** `backend/scripts/eval_bias.py` → `docs/evaluation/bias.json`; speech errors by speaker sex, the rules re-run with only sex or only age changed, and the second opinion's agreement by sex and age band (EVALUATION.md). Every card's text is translated into Hindi, Odia and Kannada; an MMS-TTS card was added.
 - [x] **G8 Data-origin tagging.** Done 7 Oct (uncommitted): `data_origin` on every patient and encounter (migration 0011, set by `JEEVIA_DATA_ORIGIN`), in `/health` and every export; "Synthetic demo data — no real patients" on every screen.
+
+- [x] **G9 Security hardening.** Done 8 Oct (uncommitted), see `SECURITY.md`:
+  - [x] Encryption at rest: patient name, phone, village and proxy name (Fernet, `JEEVIA_DATA_KEY`); phone found by keyed hash; every stored file encrypted; old rows encrypted at start-up (migration 0014).
+  - [x] Rate limits per device/address and per phone (`app/ratelimit.py`) on public links, kiosk lookup, speech/voice/translation, uploads and sign-in checks.
+  - [x] Security headers: API (`default-src 'none'`, no-store, HSTS on HTTPS; docs off in production); web app CSP and HSTS. Production refuses to start with dev settings.
+  - [x] Uploads typed by their bytes (`app/filetypes.py`); scripted SVGs refused; SVG parsed with defusedxml; files served sandboxed.
+  - [x] Share links: a week at most; summary leaves out phone, village and proxy's name.
+  - [x] CI `security` job: pip-audit, bandit, npm audit (shipped code), gitleaks. All clean on 8 Oct.
+  - [x] Require proxy (guardian) consent for patients under 18, server and kiosk (DPDP s. 9). 8 Oct (uncommitted)
+  - [x] Grievance contact on the patient slip (DPDP s. 13). 8 Oct (uncommitted)
+  - [x] CI runs the backend tests on PostgreSQL 16 too (schema built by the migrations); upgrade of a database holding unencrypted rows checked by hand. 8 Oct (uncommitted)
+  - [x] Real SMS sign-in codes: Twilio Verify service created, server switched from mock. 8 Oct (uncommitted)
+  - [x] Real SMS code received on a verified Indian number (Twilio trial). 8 Oct (uncommitted)
+  - [~] Live reminder calls: built and tested, but the Vonage trial rejects calls to the demo number ("restricted") and Twilio has no calling number. Left as is by decision, 8 Oct; demo shows the call flow on screen only.
+  - [ ] Verify any other live-demo phone in the Twilio console (trial texts verified numbers only); optional Brevo for email codes.
 
 ### H. Platform
 - [x] **H1 Database schema**
@@ -251,7 +266,7 @@ Targets are the bar we set for ourselves, not results. Report each actual figure
 - [ ] Missing-information recall on deliberately incomplete cases
 - [ ] Latency for each H7 target
 - [ ] Review time per case (target under 4 minutes)
-- [ ] Fairness split by language, sex and age band (§9: the 300-patient set)
+- [ ] Fairness split by language, sex and age band (§9: the 300-patient set). **First version 7 Oct (uncommitted)** on public speech and the 50 synthetic cases (G7); the 300-patient set still to build.
 - No "0 missed REDs" claim: we have no clinician mentor, so we claim protocol-derived tests only.
 
 ---
@@ -304,8 +319,8 @@ Draft of 6 Oct: 22 slides in the [Slides artifact](https://claude.ai/artifact/Fs
 - [x] LLM-triage meta-analysis (BMC Emerg Med 2026): re-read 6 Oct on PubMed (PMID 42298434, Cui et al.): 11 studies, 3,088 cases, sensitivity 61 % (48–73 %), specificity 97 %
 - [x] AIIMS 2025 presenting-complaints study: re-read 6 Oct on PubMed (PMID 40666389, Rauniyar et al., J Emerg Trauma Shock 2025;18(2):62–68): 1,225 adults, 6 of 34 complaints high risk; ORs in `sources.yaml`
 - [x] Occupational sources: re-read 6 Oct on PubMed: ATS 2014 workplace spirometry (PMID 24735032, 15 % FEV1 decline plus ageing), ERS 2020 chronic cough > 8 weeks (PMID 31515408)
-- [ ] Non-pregnant adult with BP 166/102 and headache comes out GREEN (ATP RED needs > 220 / > 110; IITT's BP line is pregnancy only). Check whether IITT or another Indian source gives a YELLOW for severe hypertension with symptoms (found 6 Oct while building the E6 demo)
-- [ ] IITT adult "any two of fever, headache, altered mental status, stiff neck" → RED (IITT-A-MENINGISM): makes every febrile headache RED. Check against the full WHO tool (found 6 Oct while building the campus fever demo)
+- [x] **Closed 7 Oct (uncommitted):** new local rule `LOCAL-SEVERE-HTN` (labelled "Local facility rule", not a guideline): ≥ 180 / ≥ 110 mmHg, or ≥ 160 / ≥ 100 with headache, visual change, chest pain, breathlessness or one-sided weakness → YELLOW with a doctor's review. 166/102 with headache is now YELLOW (`tests/test_clinical_decisions.py`). Was: non-pregnant adult with BP 166/102 and headache comes out GREEN (ATP RED needs > 220 / > 110; IITT's BP line is pregnancy only). Check whether IITT or another Indian source gives a YELLOW for severe hypertension with symptoms (found 6 Oct while building the E6 demo)
+- [x] **Closed 7 Oct, kept as published:** the WHO IITT age ≥ 12 card says exactly this ("any two of altered mental status, stiff neck, hypothermia or fever, headache" → RED), so loosening it would weaken a published RED criterion. Over-triage of febrile headache is accepted; the doctor can override with a reason (E9). Test pins it. Was: IITT adult "any two of fever, headache, altered mental status, stiff neck" → RED (IITT-A-MENINGISM): makes every febrile headache RED. Check against the full WHO tool (found 6 Oct while building the campus fever demo)
 - [ ] Indian clinical ASR paper (arXiv 2512.10967)
 - [ ] CDSCO medical-device software guidance, current status
 - [ ] ATP adoption sites named in the 16 Sep plan

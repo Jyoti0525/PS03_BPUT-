@@ -3,6 +3,7 @@ uvicorn[standard]>=0.30
 sqlalchemy>=2.0.30
 psycopg[binary]>=3.2
 pydantic>=2.7
+defusedxml>=0.7  # uploaded SVG sample reports are parsed without entity expansion
 pydantic-settings>=2.3
 pyjwt>=2.8
 cryptography>=42  # RS256 for Vonage call tokens (app/vonage.py)

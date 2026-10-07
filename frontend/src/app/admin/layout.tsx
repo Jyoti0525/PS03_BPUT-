@@ -25,6 +25,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         { href: "/admin/overrides", label: tr("Urgency overrides"), icon: <ShieldAlert /> },
         { href: "/admin/ai-opinions", label: tr("AI second opinions"), icon: <Bot /> },
         { href: "/admin/guard-test", label: tr("Output guard test"), icon: <FlaskConical /> },
+        { href: "/about/models", label: tr("About the models"), icon: <Bot /> },
         { href: "/kiosk", label: tr("Staff kiosk"), icon: <Tablet /> },
       ]}
     >

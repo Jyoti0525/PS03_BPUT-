@@ -31,7 +31,7 @@ export function voiceFor(lang: string): SpeechSynthesisVoice | null {
 
 /** Whether this device can read text aloud in the language (English always falls back to the default voice). */
 export function hasVoice(lang: string): boolean {
-  if (lang !== "en" && !voiceFor(lang) && onlineVoice && typeof navigator !== "undefined" && navigator.onLine) return true; // A7: online voice
+  if (lang !== "en" && !voiceFor(lang) && onlineVoice) return true; // A7: the server's voice (offline first)
   return canSpeak() && (lang === "en" || !!voiceFor(lang));
 }
 
@@ -42,9 +42,10 @@ export function hasVoice(lang: string): boolean {
 export function speak(text: string, lang: string, onEnd?: () => void, opts: { online?: boolean } = {}): boolean {
   const voice = canSpeak() ? voiceFor(lang) : null;
   if (!voice && lang !== "en") {
-    // A7: no device voice (Windows has none for Odia). Online voice if allowed; the patient's own words only with consent.
-    if (opts.online !== false && onlineVoice && typeof navigator !== "undefined" && navigator.onLine) {
-      playOnline(text, lang, onEnd);
+    // A7: no device voice (Windows has none for Odia). The server's voice: offline MMS-TTS first; the online
+    // voice only if allowed — the patient's own words go online only with consent.
+    if (onlineVoice) {
+      playOnline(text, lang, onEnd, opts.online !== false);
       return true;
     }
     onEnd?.();
@@ -66,16 +67,16 @@ export function speak(text: string, lang: string, onEnd?: () => void, opts: { on
 }
 
 /** A7: the server's online voice (Sarvam Bulbul), registered by the API layer so this file has no API import. */
-let onlineVoice: ((text: string, lang: string) => Promise<Blob>) | null = null;
+let onlineVoice: ((text: string, lang: string, allowOnline: boolean) => Promise<Blob>) | null = null;
 let playing: HTMLAudioElement | null = null;
 
-export function setOnlineVoice(fn: ((text: string, lang: string) => Promise<Blob>) | null) {
+export function setOnlineVoice(fn: ((text: string, lang: string, allowOnline: boolean) => Promise<Blob>) | null) {
   onlineVoice = fn;
 }
 
-function playOnline(text: string, lang: string, onEnd?: () => void) {
+function playOnline(text: string, lang: string, onEnd?: () => void, allowOnline = true) {
   stopSpeaking();
-  onlineVoice!(text, lang)
+  onlineVoice!(text, lang, allowOnline)
     .then((blob) => {
       const url = URL.createObjectURL(blob);
       const a = new Audio(url);
