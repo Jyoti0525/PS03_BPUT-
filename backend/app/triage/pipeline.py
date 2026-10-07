@@ -9,7 +9,7 @@ import re
 import uuid
 from datetime import date, datetime, timezone
 
-from .. import regions
+from .. import asr_check, regions
 from .extraction import document_checks
 from .findings import FINDINGS, translation_check
 from .timeline import onset
@@ -98,6 +98,24 @@ def _fmt(n: float) -> str:
     return str(int(n)) if float(n).is_integer() else str(n)
 
 
+def heard_differently(s: dict) -> dict | None:
+    """B9: the two speech engines' transcripts of one recording, compared again here (not taken from the browser)."""
+    h = s.get("second_hearing")
+    if s.get("source") != "voice" or not isinstance(h, dict) or not h.get("text"):
+        return None
+    first = (s.get("engine") or "First speech engine").split(" + ")[0]
+    chk = asr_check.compare(s.get("original_text") or "", h["text"], s.get("language") or "en", first, h.get("engine") or "Second speech engine")
+    if not chk["disagree"]:
+        return None
+
+    def said(words: str, english: str | None) -> str:
+        return f'"{words}"' + (f' (English: "{english}")' if english and english != words else "")
+
+    return {"field": "Voice transcript", "values": [{"engine": first, "value": said(s.get("original_text") or "", s.get("text"))},
+                                                   {"engine": chk["engine"], "value": said(h["text"], h.get("translation"))}],
+            "action": f"Two speech engines heard different words ({'; '.join(chk['differences'])}) — ask the patient which is right"}
+
+
 def build_note(*, intake: dict, patient, triage: dict, files: list, history: list, proxy: bool, calendar=None, on=None) -> dict:
     """`calendar` is the facility's regional calendar (F5) and `on` the visit date: a festival or season onset then
     shows the date or window it points to."""
@@ -149,6 +167,9 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         doc_warns = list(ex.get("warnings", [])) + ([] if strip else document_checks(ex.get("meta") or {}, patient.name))
         for w in dict.fromkeys(doc_warns):
             flags.append({"code": "DOC-CHECK", "label": f'"{f.filename}": {w}', "severity": "warning", "reason": f"Document check on {ex['engine']}"})
+        for c in (ex.get("consistency") or {}).get("failed", []):  # B2: the report's own numbers do not add up
+            flags.append({"code": "LAB-SUM", "label": f'"{f.filename}": {c["text"]}', "severity": "warning",
+                          "reason": "Arithmetic check on the values printed in the report — check each against the image crop"})
         for row in ex.get("rows", []):
             ev = {
                 "id": _vid(),
@@ -162,7 +183,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
                 "loinc": row.get("loinc"),
                 "source": {
                     "kind": "image_crop",
-                    "engine": ex["engine"],
+                    "engine": row.get("engine") or ex["engine"],
                     "file_id": f.id,
                     "bbox": row.get("bbox"),
                     "crop_text": row.get("crop_text"),
@@ -184,6 +205,12 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
                 ev["needs_check"] = True
                 disagreements.append({"field": "Blood glucose", "values": [{"engine": "Glucometer today", "value": f"{_fmt(v['glucose'])} mg/dL"}, {"engine": f"Read from {f.filename}", "value": f"{row['value']} mg/dL"}], "action": "Needs checking — confirm the date of the lab slip"})
             labs.append(ev)
+        sc = ex.get("second_check") or {}
+        for d in sc.get("disagreements", []):  # B9: two OCR engines read the report differently
+            disagreements.append({"field": f'{d["test"]}{" reference range" if d["what"] == "range" else ""} on "{f.filename}"',
+                                  "values": [{"engine": ex["engine"], "value": d["first"]}, {"engine": sc["engine"], "value": d["second"]}],
+                                  "action": "Two OCR engines read the report differently — check against the image crop"
+                                            + (". Until then the rules use the reading further from normal" if d["what"] == "value" else "")})
 
     for h in hits:
         if h["urgency"] == "green":
@@ -191,6 +218,9 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         why = "; ".join(h.get("evidence") or []) or "matched on intake data"
         flags.append({"code": h["rule_id"], "label": h["description"], "severity": "critical" if h["urgency"] == "red" else "warning",
                       "reason": f"{why} — {h.get('source', h['protocol'])}", "non_downgradable": h.get("non_downgradable", False)})
+    for s in intake.get("symptoms", []):
+        if d := heard_differently(s):
+            disagreements.append(d)
     for d in disagreements:
         flags.append({"code": "DISAGREE", "label": f"{d['field']}: sources disagree", "severity": "warning", "reason": d["action"]})
     if voice and not voice.get("confirmed_by_readback"):

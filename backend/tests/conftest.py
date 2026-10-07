@@ -15,6 +15,13 @@ os.environ["JEEVIA_OTP_PER_IP_HOUR"] = "100000"  # the whole test session shares
 os.environ["JEEVIA_MODELS_DIR"] = f"{_tmp}/no-models"  # API tests run without AI models; test_language.py loads the real ones
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.config import Settings  # noqa: E402
+
+# Never the developer's backend/.env: tests must not spend Sarvam credits, place Twilio calls or send SMS
+Settings.model_config["env_file"] = None
+for _k in [k for k in os.environ if k.startswith(("SARVAM_", "JEEVIA_SARVAM_", "JEEVIA_TWILIO_", "JEEVIA_VONAGE_", "JEEVIA_TELEPHONY_", "JEEVIA_PUBLIC_BASE_URL"))]:
+    del os.environ[_k]
+
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.main import app  # noqa: E402
@@ -54,11 +61,6 @@ def nurse(client):
 @pytest.fixture(scope="session")
 def supervisor(client):
     return login(client, "9000000004")
-
-
-@pytest.fixture(scope="session")
-def patient(client):
-    return login(client, "9876543210")
 
 
 @pytest.fixture(scope="session")

@@ -8,7 +8,7 @@ import { useAsync, useNow, fmtWait } from "@/lib/hooks";
 import { usePrefs, useSession } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Input, Segmented, Spinner, Stat, cx } from "@/components/ui";
-import { UrgencyBadge, urgencyBar } from "@/components/triage/note";
+import { UrgencyBadge, english, urgencyBar } from "@/components/triage/note";
 
 /** Nursing station: every waiting patient, with what still needs doing at the bedside (vitals, observations). */
 export default function NurseHome() {
@@ -95,10 +95,15 @@ export default function NurseHome() {
                     )}
                   </div>
                   <p className="mt-0.5 truncate text-sm text-ink-2">{tr(i.chief_complaint)}</p>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  <div className="mt-1.5 flex min-w-0 flex-wrap gap-1.5">
+                    {i.urgency === "red" && i.top_flags?.[0] && (
+                      <Badge tone="crit" className="max-w-full sm:max-w-[22rem]">
+                        <span className="truncate" title={english(tr, i.top_flags[0]) ? `${tr(i.top_flags[0])}\n${i.top_flags[0]}` : i.top_flags[0]}>{tr(i.top_flags[0])}</span>
+                      </Badge>
+                    )}
                     {i.vitals_recorded ? <Badge tone="rout">{tr("Vitals recorded")}</Badge> : <Badge tone="semi">{tr("Vitals needed")}</Badge>}
                     {!!i.observation_count && <Badge tone="teal">{tr("{n} observations", { n: i.observation_count })}</Badge>}
-                    <span className="text-xs text-subtle">{tr("waiting {w}", { w: fmtWait(Math.max(i.wait_minutes, Math.round((now - Date.parse(i.created_at)) / 60000))) })}</span>
+                    <span className="text-xs text-subtle">{tr("waiting {w}", { w: fmtWait(Math.max(i.wait_minutes, Math.round((now - Date.parse(i.arrived_at ?? i.created_at)) / 60000))) })}</span>
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end justify-between gap-2">

@@ -10,10 +10,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy import or_, select
 
 from .. import audit, output_guard, privacy, storage
-from ..models import AuditEvent, Encounter, FileObject, Reminder, User
-from ..schemas import ADMIN_ROLES, DOCTOR_ROLES, AuditOut, AuditVerify, MyRecord, PatientOut, ReminderOut, RetentionOut
+from ..models import AuditEvent, Encounter, FileObject, User
+from ..schemas import ADMIN_ROLES, DOCTOR_ROLES, AuditOut, AuditVerify, RetentionOut
 from ..security import DB, require
-from ..services import encounter_out, now, own_patient
+from ..services import now
 from .files import file_out
 
 router = APIRouter(tags=["governance"])
@@ -139,14 +139,3 @@ def retention(user: Supervisor, db: DB):
         purged_last_7d=sum(1 for f in files if f.purged_at and t - f.purged_at < timedelta(days=7)),
         files=[file_out(f) for f in files],  # metadata only: no URL for admins
     )
-
-
-@router.get("/me/record", response_model=MyRecord)
-def my_record(user: Annotated[User, Depends(require("patient"))], db: DB):
-    p = own_patient(db, user)
-    if not p:
-        raise HTTPException(404, "No patient record linked to this phone yet")
-    encs = list(db.scalars(select(Encounter).where(Encounter.patient_id == p.id).order_by(Encounter.created_at.desc())))
-    rems = list(db.scalars(select(Reminder).where(Reminder.patient_id == p.id).order_by(Reminder.due_at)))
-    audit.record(db, user, "VIEW", "patient", p.id, "Patient viewed own record", p.code)
-    return MyRecord(patient=PatientOut.model_validate(p), encounters=[encounter_out(e, user) for e in encs], reminders=[ReminderOut.model_validate(r) for r in rems])

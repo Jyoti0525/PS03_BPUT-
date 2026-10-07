@@ -1,10 +1,15 @@
 """Alerts that are not about one patient's note (C3, D3, D4), each decided by a fixed rule over stored data.
 
 * Capacity (C3): open RED cases outnumber the doctors and medical officers on duty → the medical officer is told.
+* Long wait (C3): GREEN has no escalation timer, so a GREEN patient waiting past green_long_wait_min since arrival is
+  reported to the medical officer, who decides (see them, refer, or a priority token for the next day). The queue order
+  is not changed: moving them above sicker patients would be unsafe.
 * Fever cluster (D3): 5 or more fevers from one hostel block (or village) in 72 hours, and more than 3 times that
   place's usual rate over the 14 days before → the medical officer is told, with counts only and no names.
-* Missed visit (D4): a maternal check-up passes its due date by a day → the assigned health worker is told, and after
-  two failed attempts a reminder call is due. On a phone that is not the woman's own, nothing about pregnancy is said.
+* Missed visit (D4, E5): a maternal or chronic check-up passes its due date by a day → the assigned health worker is
+  told, and after two failed attempts a reminder call is due (E6, calls.py). On a phone that is not the woman's own,
+  nothing about pregnancy is said.
+* Call escalation (E6): a danger sign, or no clear answer to a danger-sign question, on a reminder call.
 
 Checks run when data changes (an intake, new vitals) and lazily when a list is read, like the escalation timer.
 One open alert per (facility, kind, key); it is updated while the condition holds and resolved when it stops.
@@ -23,7 +28,8 @@ from . import audit
 from .models import Alert, Encounter, Facility, Patient, Reminder, User
 from .privacy import K_MIN
 from .schemas import DOCTOR_ROLES
-from .services import aware, local_day, now
+from .config import get_settings
+from .services import aware, local_day, now, wait_minutes
 
 OPEN = ("queued", "in_review", "escalated")
 _lock = threading.Lock()
@@ -63,27 +69,57 @@ def _ordinal(n: int) -> str:
 RANK = {"red": 0, "yellow": 1, "green": 2}
 
 
+def _mins(m: int) -> str:
+    return f"{m} min" if m < 60 else f"{m // 60} h {m % 60} min" if m % 60 else f"{m // 60} h"
+
+
 def order_reasons(items: list) -> dict[str, str]:
     """Why each queue row is where it is, in words: tier, the rule behind it, place within the tier, wait."""
     tiers = Counter(i["urgency"] for i in items)
     seen: Counter = Counter()
     out = {}
-    for i in sorted(items, key=lambda i: (RANK[i["urgency"]], -i["wait"])):
+    for i in sorted(items, key=lambda i: (RANK[i["urgency"]], not i.get("escalated"), -i["wait"])):
         seen[i["urgency"]] += 1
         u = i["urgency"].upper()
         head = f"{u} ({i['why']})" if i.get("why") else u
-        out[i["id"]] = f"{head} · {_ordinal(seen[i['urgency']])} of {tiers[i['urgency']]} {u} · waiting {i['wait']} min, longest first"
+        place = "escalated, ahead of unescalated " + u if i.get("escalated") else "longest first"
+        line = f"{head} · {_ordinal(seen[i['urgency']])} of {tiers[i['urgency']]} {u} · waiting {_mins(i['wait'])} since arrival, {place}"
+        if i.get("long_wait"):
+            line += " · over the GREEN wait limit, medical officer told"
+        if i.get("from_home"):
+            line += " · filled in from home"
+        out[i["id"]] = line
     return out
+
+
+def check_long_wait(db: Session, facility_id: str) -> set[str]:
+    """GREEN patients waiting past the limit since arrival. One open alert per facility, listing their tokens."""
+    limit = get_settings().green_long_wait_min
+    with _lock:
+        rows = [e for e in db.scalars(select(Encounter).where(Encounter.facility_id == facility_id, Encounter.status.in_(("queued", "in_review")),
+                                                               Encounter.urgency == "green"))]
+        t = now()
+        over = sorted((e for e in rows if wait_minutes(e, t) >= limit), key=lambda e: -wait_minutes(e, t))
+        if over:
+            n = len(over)
+            title = f"{n} GREEN patient{'s' if n != 1 else ''} waiting over {limit // 60} h {limit % 60:02d} min" if limit % 60 else                 f"{n} GREEN patient{'s' if n != 1 else ''} waiting over {limit // 60} h"
+            _raise(db, facility_id, "long_wait", "green", "medical_officer", title,
+                   {"tokens": [e.token for e in over], "longest_wait_min": wait_minutes(over[0], t), "limit_min": limit,
+                    "action": "See them, refer them to another clinic, or give a priority token for tomorrow — the queue order stays by urgency"})
+        else:
+            _resolve(db, facility_id, "long_wait", "green", "no GREEN patient over the wait limit")
+        db.commit()
+        return {e.id for e in over}
 
 
 def why_tier(e: Encounter) -> str:
     if e.urgency_source == "override":
         return "doctor's override"
     n = e.note or {}
-    if (n.get("triage") or {}).get("provisional") and e.urgency == "yellow":
-        return "provisional until measured"
-    hit = next((h for h in n.get("rules_fired") or [] if h.get("urgency") == e.urgency), None)
-    return hit["rule_id"] if hit else ""
+    hit = next((h for h in n.get("rules_fired") or [] if h.get("urgency") == e.urgency and h.get("rule_id") != "SAFE-PROVISIONAL"), None)
+    if hit:  # a rule that fired at this tier explains it better than the provisional hold
+        return hit["rule_id"]
+    return "provisional until measured" if (n.get("triage") or {}).get("provisional") and e.urgency == "yellow" else ""
 
 
 def doctors_on_duty(db: Session, facility_id: str) -> int:
@@ -97,7 +133,7 @@ def check_capacity(db: Session, facility_id: str) -> dict:
                                .order_by(Encounter.created_at)))
         docs = doctors_on_duty(db, facility_id)
         t = now()
-        rows = [{"token": e.token, "wait_minutes": max(0, round((t - aware(e.created_at)).total_seconds() / 60)), "status": e.status} for e in reds]
+        rows = [{"token": e.token, "wait_minutes": wait_minutes(e, t), "status": e.status} for e in reds]
         over = len(reds) > docs
         alert = None
         if over:
@@ -182,17 +218,20 @@ def syndromic_csv(db: Session, facility_id: str, days: int = 14) -> str:
 # ── D4: maternal missed visits ────────────────────────
 GRACE = timedelta(days=1)
 CALL_AFTER = 2  # failed home-visit or phone attempts before a reminder call is due
-ACTIVE = ("scheduled", "missed", "contacted", "call_due")
+ACTIVE = ("scheduled", "missed", "contacted", "call_due", "flagged")
 
 
 def first_name(p: Patient) -> str:
     return (p.name or "").split()[0] if p.name else "the patient"
 
 
-def reminder_message(p: Patient, facility: str, due: datetime, phone_belongs_to: str | None) -> str:
+def reminder_message(p: Patient, facility: str, due: datetime, phone_belongs_to: str | None, kind: str = "anc_checkup") -> str:
     """What the SMS or call says. Only on the woman's own phone does it mention a pregnancy check-up; on a husband's,
-    family or unknown phone it asks for her by first name and says nothing reproductive."""
+    family or unknown phone it asks for her by first name and says nothing reproductive. A chronic check-in never
+    names the condition."""
     when = aware(due).strftime("%d %b")
+    if kind == "chronic_checkin":
+        return f"Namaste {first_name(p)}. Your check-up at {facility} is due on {when}. Please bring your medicines and your last report."
     if phone_belongs_to == "self":
         return f"Namaste {first_name(p)}. Your pregnancy check-up at {facility} is due on {when}. Please bring your MCP card."
     return f"Namaste. This is {facility}. Please ask {first_name(p)} to visit {facility} on {when}."
@@ -201,6 +240,9 @@ def reminder_message(p: Patient, facility: str, due: datetime, phone_belongs_to:
 def call_script(r: Reminder, p: Patient, facility: str) -> str | None:
     if r.phone_belongs_to == "none" or not p.phone:
         return None
+    if r.kind == "chronic_checkin":
+        return (f"Namaste {first_name(p)}. This is {facility}. Your check-up was due on {aware(r.due_at).strftime('%d %b')}. "
+                f"Please come this week and bring your medicines.")
     if r.phone_belongs_to == "self":
         return (f"Namaste {first_name(p)}. This is {facility}. Your pregnancy check-up was due on {aware(r.due_at).strftime('%d %b')}. "
                 f"Please come this week and bring your MCP card. If you cannot come, your ASHA will visit you.")
@@ -208,7 +250,7 @@ def call_script(r: Reminder, p: Patient, facility: str) -> str | None:
 
 
 def check_missed_visits(db: Session, facility_id: str) -> int:
-    """Scheduled check-ups more than a day overdue become missed, and the assigned health worker is alerted."""
+    """Scheduled check-ups (maternal or chronic) more than a day overdue become missed; the assigned health worker is alerted."""
     t = now()
     n = 0
     for r in db.scalars(select(Reminder).where(Reminder.facility_id == facility_id, Reminder.status == "scheduled")):
@@ -218,7 +260,8 @@ def check_missed_visits(db: Session, facility_id: str) -> int:
         p = db.get(Patient, r.patient_id)
         _raise(db, facility_id, "missed_visit", r.id, "health_worker", f"Missed check-up: {p.name} ({p.village or 'village not recorded'})",
                {"reminder_id": r.id, "patient_code": p.code, "due": aware(r.due_at).date().isoformat(), "kind": r.kind,
-                "action": "Visit or phone her; record each attempt. After 2 failed attempts a reminder call is due."}, assigned_to=r.assigned_to)
+                "action": f"Visit or phone {'her' if r.kind == 'anc_checkup' else 'them'}; record each attempt. After 2 failed attempts a reminder call is due."},
+               assigned_to=r.assigned_to)
         audit.record(db, None, "ALERT", "reminder", r.id, f"Check-up due {aware(r.due_at).date().isoformat()} missed", p.code, facility_id)
         n += 1
     if n:
@@ -233,7 +276,8 @@ def record_attempt(db: Session, r: Reminder, user: User, outcome: str, note: str
     a = _open_alert(db, r.facility_id, "missed_visit", r.id)
     if outcome == "came":
         r.status, r.resolved_at = "done", now()
-        _resolve(db, r.facility_id, "missed_visit", r.id, "she came for the check-up")
+        _resolve(db, r.facility_id, "missed_visit", r.id, "came for the check-up")
+        _resolve(db, r.facility_id, "call_escalation", r.id, "came for the check-up")
     elif outcome == "reached":
         r.status = "contacted"
         if a and a.status == "open":
@@ -246,15 +290,17 @@ def record_attempt(db: Session, r: Reminder, user: User, outcome: str, note: str
             a.updated_at = now()
 
 
-def close_on_visit(db: Session, patient_id: str, user: User | None) -> int:
-    """A new pregnancy visit closes her open check-up reminders and their alerts."""
+def close_on_visit(db: Session, patient_id: str, user: User | None, kind: str = "anc_checkup") -> int:
+    """A new pregnancy (or chronic) visit closes the patient's open check-up reminders of that kind and their alerts."""
     n = 0
-    for r in db.scalars(select(Reminder).where(Reminder.patient_id == patient_id, Reminder.kind == "anc_checkup", Reminder.status.in_(ACTIVE))):
+    for r in db.scalars(select(Reminder).where(Reminder.patient_id == patient_id, Reminder.kind == kind, Reminder.status.in_(ACTIVE))):
         attempts = list(r.attempts or [])
-        attempts.append({"at": now().isoformat(), "by": f"{user.name} ({user.role})" if user else "intake", "outcome": "came", "note": "pregnancy visit recorded"})
+        what = "pregnancy visit recorded" if kind == "anc_checkup" else "check-up visit recorded"
+        attempts.append({"at": now().isoformat(), "by": f"{user.name} ({user.role})" if user else "intake", "outcome": "came", "note": what})
         r.attempts, r.status, r.resolved_at = attempts, "done", now()
         if r.facility_id:
-            _resolve(db, r.facility_id, "missed_visit", r.id, "she came for a visit")
+            _resolve(db, r.facility_id, "missed_visit", r.id, "came for a visit")
+            _resolve(db, r.facility_id, "call_escalation", r.id, "came for a visit")
         n += 1
     return n
 

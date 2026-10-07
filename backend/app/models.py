@@ -230,7 +230,10 @@ class Encounter(Base):
     # Queue token printed for the patient, e.g. T-014; restarts daily per facility.
     token: Mapped[str | None] = mapped_column(String(12), nullable=True)
     token_date: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
-    channel: Mapped[str] = mapped_column(String(16), default="staff_kiosk")  # staff_kiosk | kiosk_link | patient_app
+    channel: Mapped[str] = mapped_column(String(16), default="staff_kiosk")  # staff_kiosk | kiosk_link | home_link | patient_app (old rows)
+    # When the patient reached the facility. Waiting time and escalation timers count from here, so filling the form
+    # at home never moves anyone ahead of people already waiting. An intake from home has none until the desk checks it in.
+    arrived_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     patient: Mapped[Patient] = relationship(lazy="joined")
     consent: Mapped[Consent | None] = relationship(lazy="joined")
 
@@ -250,6 +253,9 @@ class KioskLink(Base):
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
     last_used_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     sessions: Mapped[int] = mapped_column(Integer, default=0)
+    # A link the facility shares for filling in before coming (SMS, poster, website), not a waiting-room tablet. Its
+    # intakes wait as "expected" and join the queue when the desk checks the patient in.
+    for_home: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
 
 
 class ShareLink(Base):
@@ -353,7 +359,7 @@ class Reminder(Base):
     kind: Mapped[str] = mapped_column(String(20))
     due_at: Mapped[datetime] = mapped_column(UTCDateTime)
     channel: Mapped[str] = mapped_column(String(8))
-    status: Mapped[str] = mapped_column(String(12), default="scheduled")  # scheduled | missed | call_due | done | cancelled
+    status: Mapped[str] = mapped_column(String(12), default="scheduled")  # scheduled | missed | call_due | contacted | flagged | done | cancelled
     message: Mapped[str] = mapped_column(Text)
     # D4 maternal follow-up: who chases a missed visit, and whose phone it is (a shared phone gets a neutral message)
     facility_id: Mapped[str | None] = mapped_column(ForeignKey("facilities.id"), nullable=True, index=True)
@@ -365,6 +371,33 @@ class Reminder(Base):
     resolved_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
 
 
+class Call(Base):
+    """E6: one reminder call for a follow-up, simulated in the browser. Every line the agent said and every answer it
+    heard is kept, with what the rules read in each answer. A danger sign ends the call and raises an alert."""
+
+    __tablename__ = "calls"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("call"))
+    reminder_id: Mapped[str] = mapped_column(ForeignKey("reminders.id"), index=True)
+    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"), index=True)
+    facility_id: Mapped[str] = mapped_column(ForeignKey("facilities.id"), index=True)
+    started_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    operator: Mapped[str] = mapped_column(String(8))  # agent | human (a person reads the same script)
+    programme: Mapped[str] = mapped_column(String(12))  # maternal | chronic
+    language: Mapped[str] = mapped_column(String(8))
+    audience: Mapped[str] = mapped_column(String(8))  # patient | other (neutral wording, nothing about health)
+    plan: Mapped[list] = mapped_column(JSONType, default=list)  # question keys in order
+    step: Mapped[int] = mapped_column(Integer, default=0)
+    reprompts: Mapped[int] = mapped_column(Integer, default=0)
+    turns: Mapped[list] = mapped_column(JSONType, default=list)  # [{who, key, text, text_en, heard, findings, at}]
+    status: Mapped[str] = mapped_column(String(8), default="active")  # active | ended
+    outcome: Mapped[str | None] = mapped_column(String(16), nullable=True)  # completed | danger_sign | unclear | message_left | no_answer | hung_up
+    red_flags: Mapped[list | None] = mapped_column(JSONType, nullable=True)  # [{finding, label, evidence}]
+    notes: Mapped[dict | None] = mapped_column(JSONType, nullable=True)  # can_come, medicines, anything else said
+    alert_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+    ended_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+
+
 class Alert(Base):
     """Something a person must act on that is not one patient's note: too many REDs for the doctors on duty (C3),
     a fever cluster (D3) or a missed maternal visit (D4). Raised by a rule over stored data, never by a model; one open
@@ -374,7 +407,7 @@ class Alert(Base):
     __table_args__ = (Index("ix_alerts_open", "facility_id", "kind", "key", "status"),)
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("alr"))
     facility_id: Mapped[str] = mapped_column(ForeignKey("facilities.id"), index=True)
-    kind: Mapped[str] = mapped_column(String(16))  # capacity | fever_cluster | missed_visit
+    kind: Mapped[str] = mapped_column(String(16))  # capacity | fever_cluster | missed_visit | call_escalation
     key: Mapped[str] = mapped_column(String(120))  # what makes it the same alert: cluster name, reminder id, "red"
     to_role: Mapped[str] = mapped_column(String(20))  # medical_officer | health_worker
     assigned_to: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)

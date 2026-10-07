@@ -175,7 +175,11 @@ def anonymise_intake(intake: dict, names: list[str]) -> tuple[dict, dict[str, in
     for x in out.get("symptoms") or []:
         original = s(x.get("original_text"))
         same = x.get("text") == x.get("original_text")  # not yet translated: one string, counted once
-        symptoms.append({**x, "original_text": original, "text": original if same else s(x.get("text"))})
+        y = {**x, "original_text": original, "text": original if same else s(x.get("text"))}
+        if isinstance(x.get("second_hearing"), dict):  # the same words heard by the second engine: scrubbed, not counted again
+            h = x["second_hearing"]
+            y["second_hearing"] = {**h, **{k: scrub(h[k], names)[0] for k in ("text", "translation") if isinstance(h.get(k), str)}}
+        symptoms.append(y)
     out["symptoms"] = symptoms
     out["answers"] = [{**a, "answer": s(a.get("answer"))} for a in out.get("answers") or []]
     out["selected_symptoms"] = [s(x) for x in out.get("selected_symptoms") or []]

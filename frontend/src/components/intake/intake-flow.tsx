@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Mic, Square, Volume2, Check, RotateCcw, Camera, FileText, UserRound, Users, Lock, Eye, HandHeart, Stethoscope, Baby, HeartPulse, ArrowLeft, ArrowRight,
-  Search, UserPlus, WifiOff, Trash2, Keyboard, CheckCircle2, Activity, Sparkles, HardHat, Building2,
+  Search, UserPlus, WifiOff, Trash2, Keyboard, CheckCircle2, Activity, Sparkles, HardHat, Building2, AlertTriangle,
+  PhoneCall,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { usePrefs } from "@/components/providers";
@@ -21,6 +22,9 @@ import { cadreName, isNational } from "@/lib/cadres";
 import { EXPOSURE_LABEL, type Exposure, type FacilityRegion, type ConsentMode, type FileObject, type IntakeAnswer, type OccupationalIntake, type Patient, type PatientCandidate, type PatientCategory, type PhoneOwner, type PrivacyContext, type SymptomEntry, type NumericVital, type VitalsInput } from "@/lib/types";
 import { DURATIONS, SEVERITIES, SYMPTOMS, contextQuestions } from "./catalog";
 
+/** One speech engine's hearing of a recording (B9); `differences` non-empty = the two engines disagree. */
+type Hearing = { engine: string; text: string; translation?: string | null; differences: string[] };
+
 type Step = "consent" | "identity" | "visit" | "symptoms" | "details" | "uploads" | "followup" | "vitals" | "review";
 
 /** Engine label for transcripts produced by the browser's own speech recognition (fallback only). */
@@ -30,6 +34,8 @@ export interface IntakeResult {
   token: string;
   patientCode: string | null;
   offline: boolean;
+  /** Filled in from home (C3): "show_at_desk", or "emergency" when a danger sign was reported. Never a tier. */
+  homeAdvice?: "emergency" | "show_at_desk" | null;
 }
 
 function BigChoice({ selected, onClick, icon, title, body, className }: { selected: boolean; onClick: () => void; icon: React.ReactNode; title: string; body?: string; className?: string }) {
@@ -143,9 +149,41 @@ export function IntakeFlow({
   const [typed, setTyped] = useState("");
   const [recording, setRecording] = useState(false);
   const [partial, setPartial] = useState("");
-  const [pending, setPending] = useState<{ original: string; text: string; engine: string; audio: Blob | null } | null>(null);
+  // second: the other speech engine's hearing of the same recording (B9); `differences` non-empty = they disagree
+  const [pending, setPending] = useState<{ original: string; text: string; engine: string; audio: Blob | null; mt?: string; second?: Hearing } | null>(null);
   const [transcribing, setTranscribing] = useState(false);
   const recRef = useRef<Recorder | null>(null);
+  // B9 offline check still running: its result goes to the read-back, or to the entry if already confirmed
+  const [checking, setChecking] = useState<{ id: string; original: string } | null>(null);
+  useEffect(() => {
+    if (!checking) return;
+    let stop = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const started = Date.now();
+    const tick = async () => {
+      try {
+        const so = await api.secondCheck(checking.id);
+        if (stop) return;
+        if (so.pending && Date.now() - started < 180_000) {
+          timer = setTimeout(tick, 3000);
+          return;
+        }
+        if (so.text) {
+          const h: Hearing = { engine: so.engine, text: so.text, translation: so.translation ?? null, differences: so.disagree ? (so.differences ?? []) : [] };
+          setPending((p) => (p && p.original === checking.original && !p.second ? { ...p, second: h } : p));
+          setEntries((es) => es.map((e) => (e.original_text === checking.original && !e.second_hearing ? { ...e, second_hearing: { engine: h.engine, text: h.text, translation: h.translation ?? null } } : e)));
+        }
+      } catch {
+        /* the check is optional — the patient already confirmed what they said */
+      }
+      if (!stop) setChecking(null);
+    };
+    timer = setTimeout(tick, 3000);
+    return () => {
+      stop = true;
+      clearTimeout(timer);
+    };
+  }, [checking]);
 
   // details
   const [duration, setDuration] = useState<string | null>(null);
@@ -188,7 +226,7 @@ export function IntakeFlow({
 
   // Shared tablets: return to the start screen a minute after the token is shown.
   useEffect(() => {
-    if (!result || !onReset || mode === "patient") return;
+    if (!result || !onReset || result.homeAdvice) return; // from home: the number stays on the patient's own phone
     const id = setTimeout(onReset, 60_000);
     return () => clearTimeout(id);
   }, [result, onReset, mode]);
@@ -285,12 +323,17 @@ export function IntakeFlow({
       // Server first: offline IndicConformer transcript + IndicTrans2 English, both engines named.
       setTranscribing(true);
       try {
-        const res = await api.transcribe(audio, lang);
+        const res = await api.transcribe(audio, lang, { secondOpinion: aiAssist });
+        const so = res.second_opinion;
+        // IndicWhisper (offline) answers after the read-back has started; picked up below when ready
+        setChecking(so?.pending ? { id: so.pending, original: res.text } : null);
         next = {
           original: res.text,
           text: res.translation?.text ?? res.text,
           engine: res.translation ? `${res.engine} + ${res.translation.engine}` : res.engine,
           audio,
+          mt: res.translation?.engine,
+          second: so?.text ? { engine: so.engine, text: so.text, translation: so.translation ?? null, differences: so.disagree ? (so.differences ?? []) : [] } : undefined,
         };
       } catch (e) {
         if (e instanceof ApiError && e.status === 422) {
@@ -312,6 +355,21 @@ export function IntakeFlow({
     speak(`${t("kiosk.symptoms.readback")} ${next.original}`, lang);
   };
 
+  // B9: the patient says the second engine heard them right; the first engine's words are kept beside it
+  const useOtherHearing = () => {
+    if (!pending?.second) return;
+    const s = pending.second;
+    const first = pending.engine.split(" + ")[0];
+    setPending({
+      ...pending,
+      original: s.text,
+      text: s.translation ?? s.text,
+      engine: s.translation && pending.mt ? `${s.engine} + ${pending.mt}` : s.engine,
+      second: { engine: first, text: pending.original, translation: pending.text !== pending.original ? pending.text : null, differences: s.differences },
+    });
+    speak(`${t("kiosk.symptoms.readback")} ${s.text}`, lang);
+  };
+
   const confirmVoice = async (ok: boolean) => {
     if (!pending) return;
     stopSpeaking();
@@ -319,7 +377,8 @@ export function IntakeFlow({
       setPending(null);
       return;
     }
-    setEntries((e) => [...e, { text: pending.text, original_text: pending.original, language: lang, source: "voice", confirmed_by_readback: true, engine: pending.engine }]);
+    const second_hearing = pending.second ? { engine: pending.second.engine, text: pending.second.text, translation: pending.second.translation ?? null } : null;
+    setEntries((e) => [...e, { text: pending.text, original_text: pending.original, language: lang, source: "voice", confirmed_by_readback: true, engine: pending.engine, second_hearing }]);
     if (pending.audio && !offline) {
       try {
         const f = await api.uploadFile(new File([pending.audio], `voice_${Date.now()}.webm`, { type: pending.audio.type }), "audio");
@@ -339,7 +398,7 @@ export function IntakeFlow({
     try {
       for (const f of Array.from(list)) {
         if (f.size > 20 * 1024 * 1024) throw new Error("File too large (max 20 MB before compression)");
-        const up = await api.uploadFile(await compressImage(f), kind, null, null, aiAssist);
+        const up = await api.uploadFile(await compressImage(f), kind, null, null, aiAssist, aiAssist);
         setFiles((cur) => [...cur, up]);
       }
       toast(tr("Uploaded"));
@@ -435,7 +494,7 @@ export function IntakeFlow({
       const p = patient ?? (await api.createPatient(newPatient!));
       const c = await api.captureConsent({ ...consent, patient_id: p.id });
       const enc = await api.submitIntake({ ...intake, patient_id: p.id, consent_id: c.id });
-      const r = { token: enc.token ?? `A-${enc.id.slice(-3).toUpperCase()}`, patientCode: p.code, offline: false };
+      const r = { token: enc.token ?? `A-${enc.id.slice(-3).toUpperCase()}`, patientCode: p.code, offline: false, homeAdvice: enc.home_advice ?? null };
       setResult(r);
       onFinished?.(r);
     } catch (e) {
@@ -446,13 +505,32 @@ export function IntakeFlow({
   };
 
   /* ── Result (token) — never shows urgency ── */
+  if (result?.homeAdvice === "emergency") {
+    return (
+      <Card className="fade-up mx-auto max-w-xl border-crit-line p-8 text-center" role="alert">
+        <PhoneCall className="mx-auto size-14 text-crit" />
+        <h2 className="mt-3 text-3xl font-bold text-crit">{t("kiosk.home.emergency.title")}</h2>
+        <p className="mt-3 text-lg text-ink-2">{t("kiosk.home.emergency.body")}</p>
+        <a href="tel:108" className="mt-6 block">
+          <Button size="xl" variant="danger" className="w-full" icon={<PhoneCall className="size-5" />}>
+            108
+          </Button>
+        </a>
+        <p className="mt-6 text-sm text-muted">
+          {t("kiosk.home.token")}: <span className="font-mono font-bold text-ink">{result.token}</span>
+        </p>
+      </Card>
+    );
+  }
+
   if (result) {
+    const home = result.homeAdvice === "show_at_desk";
     return (
       <Card className="fade-up mx-auto max-w-xl p-8 text-center">
         <CheckCircle2 className="mx-auto size-14 text-teal-600" />
         <h2 className="mt-3 text-3xl font-bold text-ink">{t("kiosk.done.title")}</h2>
-        <p className="mt-2 text-lg text-muted">{t("kiosk.done.body")}</p>
-        <p className="mt-6 text-sm font-semibold tracking-wider text-muted uppercase">{t("kiosk.done.token")}</p>
+        <p className="mt-2 text-lg text-muted">{home ? t("kiosk.home.body") : t("kiosk.done.body")}</p>
+        <p className="mt-6 text-sm font-semibold tracking-wider text-muted uppercase">{home ? t("kiosk.home.token") : t("kiosk.done.token")}</p>
         <p className="text-6xl font-extrabold tracking-tight text-ink tabular-nums">{result.token}</p>
         {result.patientCode && (
           <div className="mt-6 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
@@ -460,6 +538,7 @@ export function IntakeFlow({
             <p className="mt-2 font-mono text-sm text-muted">{result.patientCode}</p>
           </div>
         )}
+        {home && <p className="mt-5 rounded-xl border border-crit-line bg-crit-bg px-4 py-2.5 text-sm font-medium text-crit">{t("kiosk.home.danger")}</p>}
         {result.offline && (
           <p className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-semi-bg px-4 py-2 text-sm font-medium text-semi">
             <WifiOff className="size-4" /> {t("kiosk.offline")}
@@ -543,7 +622,7 @@ export function IntakeFlow({
             <div>
               <p className="mb-2 text-sm font-semibold text-ink-2">{tr("Computer helpers")}</p>
               <div className="grid gap-3 sm:grid-cols-2">
-                <BigChoice selected={aiAssist} onClick={() => setAiAssist(true)} icon={<Sparkles />} title={tr("Use AI helpers")} body={tr("Speech to text, translation and reading reports, all on this facility's computer")} />
+                <BigChoice selected={aiAssist} onClick={() => setAiAssist(true)} icon={<Sparkles />} title={tr("Use AI helpers")} body={tr("Speech to text, translation and reading reports on this facility's computer. Your recorded words, and photos of handwritten papers, may also be read by a second engine online, in India (Sarvam AI).")} />
                 <BigChoice selected={!aiAssist} onClick={() => setAiAssist(false)} icon={<Keyboard />} title={tr("Continue without AI")} body={tr("Type or tap only. Staff read your reports themselves. Your care is the same.")} />
               </div>
             </div>
@@ -703,6 +782,25 @@ export function IntakeFlow({
                 <p className="mt-1 text-xl font-medium text-ink">“{pending.original}”</p>
                 {pending.text !== pending.original && <p className="mt-1 text-sm text-muted" lang="en">→ {pending.text}</p>}
                 <p className="mt-1 text-xs text-subtle">{pending.engine}</p>
+                {checking?.original === pending.original && !pending.second && (
+                  <p className="mt-2 text-xs text-muted" role="status">{tr("A second engine is still checking what it heard…")}</p>
+                )}
+                {pending.second && pending.second.differences.length > 0 && (
+                  <div className="mt-3 rounded-xl border border-semi/40 bg-white p-3" role="alert">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-semi"><AlertTriangle className="size-4" />{tr("A second engine heard something different")}</p>
+                    <p className="mt-1 text-lg text-ink">“{pending.second.text}”</p>
+                    {pending.second.translation && <p className="mt-1 text-sm text-muted" lang="en">→ {pending.second.translation}</p>}
+                    <p className="mt-1 text-xs text-subtle">{pending.second.engine}</p>
+                    <ul className="mt-2 list-disc pl-5 text-xs text-ink-2" lang="en">
+                      {pending.second.differences.map((d) => <li key={d}>{d}</li>)}
+                    </ul>
+                    <p className="mt-2 text-sm text-ink-2">{tr("Ask the patient which is right.")}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button size="sm" variant="secondary" onClick={useOtherHearing}>{tr("Use this one instead")}</Button>
+                      <Button size="sm" variant="ghost" onClick={() => speak(pending.second!.text, lang)} icon={<Volume2 className="size-4" />}>{t("common.listen")}</Button>
+                    </div>
+                  </div>
+                )}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button size="lg" variant="teal" onClick={() => confirmVoice(true)} icon={<Check className="size-5" />}>{t("kiosk.symptoms.correct")}</Button>
                   <Button size="lg" variant="secondary" onClick={() => confirmVoice(false)} icon={<RotateCcw className="size-5" />}>{t("kiosk.symptoms.again")}</Button>
@@ -1058,12 +1156,12 @@ export function IntakeFlow({
 
         {step === "review" && (
           <div className="space-y-3 text-base">
-            <Row k="Patient" v={patient ? `${patient.name} · ${patient.age} y · ${patient.code}` : `${newP.name} · ${newP.age} y (new)`} />
-            <Row k="Consent" v={consentMode === "proxy" ? `Given by ${proxyName} (${proxyRel})` : "Given by patient"} />
+            <Row k="Patient" v={patient ? `${patient.name} · ${tr("{n} y", { n: patient.age })} · ${patient.code}` : `${newP.name} · ${tr("{n} y", { n: newP.age })} · ${tr("new")}`} />
+            <Row k="Consent" v={consentMode === "proxy" ? tr("Given by {name} ({rel})", { name: proxyName, rel: tr(proxyRel) }) : "Given by patient"} />
             <Row k="Computer helpers" v={aiAssist ? "Use AI helpers" : "Continue without AI"} />
             <Row k="Visit" v={category ?? "—"} />
             <Row k="Problem" v={chief || "—"} />
-            {selected.length > 0 && <Row k="Also" v={selected.join(", ")} />}
+            {selected.some((x) => !chief.toLowerCase().includes(x.toLowerCase())) && <Row k="Also" v={selected.filter((x) => !chief.toLowerCase().includes(x.toLowerCase())).map((x) => tr(x)).join(", ")} />}
             <Row k="Since" v={duration ?? answers.dur?.answer ?? "—"} />
             <Row k="Files" v={tr("{n} report / photo", { n: files.filter((f) => f.kind !== "audio").length })} />
             {Object.values(answers).length > 0 && <Row k="Answers" v={Object.values(answers).map((a) => a.answer).join(" · ")} />}

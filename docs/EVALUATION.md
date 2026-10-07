@@ -54,6 +54,95 @@ of the MatMul weights, per channel; activations stay float). Same 25 clips, CTC 
 - Reproduce: `JEEVIA_ASR_MODEL=indic-conformer-600m-int8 python backend/scripts/eval_asr.py models/eval/fleurs_or or`.
   Per-clip results: `docs/evaluation/asr_or_fleurs_dev25_ctc_int8.json`.
 
+## Second speech engine (B9)
+
+Sarvam Saaras v3 (online, India-hosted) hears the same recording as the offline IndicConformer. The two transcripts
+are compared after bringing them to one written form (`backend/app/asr_check.py`): one spelling (the lexicon's loose
+form), punctuation dropped, native digits and Hindi/Odia number words turned into digits ("ଶହେ ଆଠ" = 108,
+"ଉଣେଇଶ ହଜାର ପାଞ୍ଚଶହ" = 19500, "ଅଠରଟି" = 18, "ଚାରିଦିନ" = 4 days). A different number, a symptom only one engine
+heard, or under 80 % of characters matching is a disagreement.
+
+**FLEURS Odia, the same 25 clips as above (6 Oct)**
+
+| Engine | WER | CER |
+|---|---|---|
+| IndicConformer-600M int8, CTC (offline) | 21.6 % | 5.6 % |
+| Sarvam Saaras v3 (online) | 19.1 % | 4.3 % |
+
+- Agreement between the two engines: median 98.6 %, lowest 85.4 %. None of the 25 clean clips is flagged.
+- The first run flagged 4 of 25. All four were the same words written differently (number words vs digits, a counting
+  suffix, a thousands separator), so the number reading was extended; none was a real mishearing.
+- Reproduce: `python backend/scripts/eval_asr_second.py models/eval/fleurs_or or docs/evaluation/asr_or_fleurs_dev25_ctc_int8.json`
+  (needs `SARVAM_API_KEY`; one request per clip). Per clip: `docs/evaluation/asr_or_fleurs_dev25_sarvam.json`.
+
+**Live check through the API (6 Oct):** Sarvam's voice reading four clinical sentences, sent to `/speech/transcribe`
+with both engines.
+
+| Said | Result |
+|---|---|
+| मुझे तीन दिन से बुखार है और सीने में दर्द हो रहा है। | Both engines word for word; no flag |
+| मेरा बीपी एक सौ साठ बटा सौ आया था और सिर में बहुत दर्द है। | **Caught:** the offline engine heard सौ as सो, losing the diastolic 100, and its translation said "one hundred and sixty-two". Sarvam heard 160/100. Flagged: "numbers: 160 vs 100, 160" |
+| ମୋର ଚାରି ଦିନ ହେଲା ଜ୍ୱର ଓ ଝାଡ଼ା ହେଉଛି। | Flagged at first, wrongly (see below); after the fixes, no flag |
+| ପିଲା ଆଜି କମ୍ ହଲୁଛି ଏବଂ ମୁଣ୍ଡ ବିନ୍ଧୁଛି। | Both engines word for word; no flag |
+
+The Odia false flag exposed three faults in the rules and translator, now fixed with regression tests:
+- the offline engine writes fever ଜ୍ଵର, with ଵ (U+0B35) for the silent ୱ, and the lexicon did not find fever in it;
+- both engines wrote ଝାଡ଼ା (loose stools) as ଝାଡ଼, which the lexicon missed and the translator turned into "cough".
+  ଝାଡ଼ before an affirmative "happening" verb is now read as ଝାଡ଼ା; ଝାଡ଼ on its own (a bush) and "ଝାଡ଼ ହେଉନି" are not;
+- "ଚାରିଦିନ" (number joined to its unit) was compared as a different number.
+
+**Limits**
+- Synthetic voice and read speech. Patients speak spontaneously, with noise; disagreement will be more common, which
+  is the point, but how often it flags a correct transcript at a kiosk is not yet measured.
+- Number words are read for Hindi and Odia only. In the other languages, number words and digits compare as different
+  words and count against agreement only.
+- Online: used only when the patient allowed AI help, and the consent screen says the recording may be checked online
+  in India. Without the offline model (the hosted link) Sarvam alone transcribes and is named as the engine.
+
+### Offline second engine: IndicWhisper (B9)
+
+When Sarvam cannot be used (no key, no network, a language it does not take, or nothing heard), IndicWhisper hears the
+recording instead, so the check still works on a facility machine with no connection.
+
+- **Engine:** AI4Bharat Vistaar IndicWhisper, whisper-medium fine-tuned for Odia (MIT), on CPU with Hugging Face
+  Transformers. The linear layers are made 8-bit at load time (PyTorch dynamic quantisation).
+- **Data:** the same 25 FLEURS Odia clips (306.6 s of speech), compared with the same IndicConformer transcripts.
+
+| 7 Oct, 25 clips | First run: fp32 | First run: 8-bit | Final: 8-bit (default) |
+|---|---|---|---|
+| Word error rate | 31.7 % | 35.9 % | **31.7 %** |
+| Character error rate | 15.1 % | 15.4 % | **10.3 %** |
+| Clips flagged as disagreeing with IndicConformer | 4 | 6 | **3** |
+| Seconds per clip (average clip 12.3 s) | 65.9 | 40.8 | **46.9** |
+
+- **What changed after the first run:**
+  - *Long clips were cut short.* Whisper has no merges for Odia script, so each letter costs three byte-level tokens,
+    about 37 tokens a second of speech. A 30-second window can need more than Whisper's 448-token output, and 5 of 25
+    transcripts stopped mid-sentence. Recordings are now cut at the quietest point between 6 and 10 seconds.
+  - *Language token.* Whisper has no Odia token. The model's own detection picked Pashto's (`<|ps|>`) on these clips,
+    so that token is now given, rather than detected each time, where noise could pick another.
+  - *Odia number words with a vowel sign slipped.* Two flags were the checker's fault: IndicWhisper wrote 41 as
+    ଏକଚାଳଶ and 70 as ସତୋରୀ, where the number table has ଏକଚାଳିସି and ସତୁରି. A long word whose consonants match a
+    number word and which differs by one vowel sign is now read as that number. Checked on all 594 distinct words in
+    these transcripts: the three real numbers match, no other word does (two vowel signs, as in ବିସ୍ତାର "expanse"
+    against ବାସ୍ତରି 72, is not accepted). The first-run figures above are re-scored with this fix.
+- **The 3 flags that remain** are the three clips IndicConformer itself got most wrong (its word error 67 %, 44 % and
+  40 %). On one of them, IndicWhisper was nearer the human transcript. No flag is a number or symptom misread by the
+  checker.
+- **Speed and memory.** About 3.8 seconds per second of speech: too slow to keep the patient waiting, so the check
+  runs after the reply and the kiosk adds it when ready. 8-bit is faster than fp32 but saves little memory here:
+  peak 4.9 GB while loading; at rest Windows trims it to about 1–2.5 GB.
+- **Not used:** CTranslate2 (the faster-whisper engine) ran 3x faster, but the converted Odia model gave out after
+  about 220 tokens (6 s of Odia speech), with a word error rate of 58 %.
+- Per clip: `docs/evaluation/asr_or_fleurs_dev25_indicwhisper_int8.json` (first runs: `…_int8_first_run.json`,
+  `…_fp32_first_run.json`). Reproduce: `python backend/scripts/eval_asr_second.py models/eval/fleurs_or or
+  docs/evaluation/asr_or_fleurs_dev25_ctc_int8.json indicwhisper` (`JEEVIA_ASR_SECOND_INT8=false` for fp32).
+
+**Limits**
+- Odia only so far; each other language is a separate 1.4–4.3 GB download.
+- Its word error rate is higher than both other engines'. It is a check that asks the patient, not a replacement: the
+  transcript the patient confirms is still IndicConformer's unless they choose the other.
+
 ## Translation — Indic → English
 
 - **Engine:** IndicTrans2 distilled 200M (AI4Bharat, MIT), on CPU. A sentence takes about 1–2 s once the model is warm.
@@ -209,3 +298,201 @@ passed the checks.
   there is no second opinion.
 - Per-case answers: `docs/evaluation/llm_opinion_all.json`. Reproduce:
   `JEEVIA_LLM_URL=http://127.0.0.1:8031 python backend/scripts/eval_llm.py opinion all`.
+
+## Reading lab reports (B1, B9)
+
+A photographed or scanned lab report is read by OCR, then parsed into rows (test, value, unit, reference range,
+high/low). The rules use those rows, so a misread value can change urgency. The measure that matters most is the
+**silent error**: a wrong value that the reviewer is *not* told to check.
+
+- **Engines (offline):**
+  - RapidOCR (PaddleOCR PP-OCR models on ONNX Runtime) reads every page.
+  - docTR (db_mobilenet_v3_large + crnn_mobilenet_v3_large, via OnnxTR, Apache-2.0) reads the same page in parallel.
+    The two readings are compared test by test. Where they differ, the reviewer is asked to check, and the rules use
+    the reading further from normal.
+- **Quality gate:** before reading, sharpness (variance of the Laplacian) and contrast are measured. After reading, a
+  mean OCR confidence under 0.75 adds "Text hard to read", and no text from either engine asks for a retake.
+- **Data:** synthetic Indian lab reports (`backend/scripts/make_ocr_set.py`). No real person's report is used.
+  - Each report is a printed table in the usual layout, with a header (lab, patient, age/sex, dates), saved five ways:
+    flat scan; phone photo (tilt, perspective, uneven light, blur, noise, JPEG); poor photo (all of that, worse);
+    photocopy (black and white, speckle); thermal slip (narrow, monospaced, faded).
+  - Development set: 40 reports per capture type, seed 20261006. Used to find and fix faults.
+  - Held-out set: 40 reports per capture type, 303 tests each, seed 777. Generated once and never looked at while
+    tuning. **The figures below are from this set.**
+
+**Held-out set, 6 Oct: one engine against two**
+
+| Capture | Values exactly right | Wrong and not flagged | Correct values flagged for checking | Retake asked | Seconds per page |
+|---|---|---|---|---|---|
+| | 1 engine → 2 | 1 engine → 2 | 1 engine → 2 | | 1 engine → 2 |
+| Scan | 99.3 % → 99.3 % | 2 → **1** | 0.3 % → 4.3 % | 0 % | 8.7 → 13.0 |
+| Phone photo | 99.3 % → 99.3 % | 2 → **1** | 0.0 % → 11.6 % | 0 % | 8.5 → 11.2 |
+| Poor photo | 77.9 % → **85.5 %** | 3 → **1** | 11.9 % → 34.4 % | 72.5 % | 7.7 → 10.5 |
+| Photocopy | 95.4 % → **98.7 %** | 2 → **0** | 2.8 % → 10.0 % | 0 % | 7.2 → 10.5 |
+| Thermal slip | 98.7 % → 99.3 % | 1 → **0** | 0.7 % → 1.3 % | 0 % | 5.4 → 8.6 |
+
+- **Silent errors fall from 10 to 3** of 1,515 printed tests. The second engine also finds tests the first missed:
+  on poor photos, 84.8 % → 95.7 % of tests found, which is why more values are right.
+- **The cost** is more correct values flagged: 11.6 % on phone photos and 34.4 % on poor photos. Each flag is a
+  "check this value" for the reviewer; none changes a value on its own.
+- No test was invented on any page (a row for a test not on the report) with one engine or two.
+- Report date read: 100 % except poor photos (90 %) and thermal (97.5 %). Patient name: 87.5–100 %.
+- The retake request comes on 72.5 % of poor photos and on none of the readable captures.
+- The B2 checks were added on 7 Oct and this set was run again; see "Checking the numbers on a report (B2)" below.
+  `ocr_heldout_two_engines.json` now holds that rerun.
+- Per page: `docs/evaluation/ocr_heldout_rapidocr.json` and `ocr_heldout_two_engines.json`. Reproduce:
+  `python backend/scripts/make_ocr_set.py models/eval/ocr_heldout 40 777`, then
+  `python backend/scripts/eval_ocr.py models/eval/ocr_heldout docs/evaluation/ocr_heldout_two_engines.json all second`.
+
+**Development set.** The first run, before any fix, read 96.7 % of values exactly on scans but 70.5 % on phone photos and
+28.6 % on poor photos, and asked for a retake on a quarter of clean scans. It is kept as
+`docs/evaluation/ocr_synth_rapidocr_first_run.json`. With the final code and one engine (7 Oct): scans 99.7 %, phone
+photos 99.4 %, poor photos 84.6 %, photocopies 96.0 %, thermal slips 98.8 %; 10 wrong values not flagged; no retake
+asked on any readable capture (`docs/evaluation/ocr_synth_rapidocr.json`). The held-out figures are close to these
+(within 7 points on poor photos, 1 point elsewhere), so the fixes were not fitted to the development pages alone.
+
+**Limits**
+- Synthetic print in Windows fonts, with simulated capture faults. Real reports vary more in layout, logos, stamps,
+  handwriting on the page and folds. Real-world error will be higher.
+- Printed reports only. Handwriting is measured separately below.
+- Every value read from a photo is shown as read from a photo, beside the image, for the reviewer to confirm.
+
+## Checking the numbers on a report (B2)
+
+A value read from a report reaches the rules only after three checks. None of them changes a value; a value that
+fails is marked **needs checking** with the reason, and the flag shows on the case.
+
+- **Bounds:** every test has a possible range (haemoglobin 2–25 g/dL, platelets 1,000–2,000,000 /µL, …). A value
+  outside it is a misread, not a result.
+- **Units:** the printed unit is matched to the test and converted (g/L → g/dL, mmol/L → mg/dL, lakhs/cumm → /µL).
+  A unit that is not used for that test is flagged. Where no unit is read, the usual one is assumed and said so; for
+  counts (platelets, WBC, RBC), where per µL, thousands and lakhs differ 100-fold, a missing unit always flags.
+- **Sums:** values that must agree on a correct report are checked against each other: WBC differential = 100 %,
+  absolute count = % × total WBC, the absolute counts add up to the total, globulin = total protein − albumin, A/G
+  ratio, indirect bilirubin = total − direct, MCHC = Hb ÷ PCV, MCV = PCV ÷ RBC, MCH = Hb ÷ RBC, VLDL = TG ÷ 5, the
+  cholesterol fractions, non-HDL, the TC/HDL and LDL/HDL ratios, and urea = BUN × 2.14. The tolerance is what
+  rounding of each printed digit can explain. A sum cannot say which value is wrong, so every value in a failed sum
+  is flagged; where the second OCR engine's reading of one of them makes it add up, the flag says so.
+
+**How much the sums can catch (simulation).** 2,000 synthetic reports (seed 4242), each value slipped the ways OCR
+slips: a decimal point lost, a digit dropped, a look-alike digit (1/7, 3/8, 5/6, 6/8, 0/8, 4/9, 2/7, 1/4) in the first, middle or last
+place. 110,801 slips; 15,454 relations on the correct reports, with **no false alarm**.
+
+| Slip | Caught by bounds alone | Caught by bounds or sums |
+|---|---|---|
+| Decimal point lost | 81.2 % | **100 %** |
+| Look-alike, first digit | 22.3 % | **99.9 %** |
+| Look-alike, middle digit | 0.1 % | 84.8 % |
+| Digit dropped | 23.9 % | 78.5 % |
+| Look-alike, last digit | 0 % | 44.1 % |
+| **All** | 22.6 % | **79.5 %** |
+
+By size: a slip that moves the value by 10 % or more is caught 98.6 % of the time; 5–10 %, 81.7 %; under 5 %,
+17.7 %. The slips the sums miss are mostly last-digit changes that rounding can explain, which rarely change a
+high/low call. `docs/evaluation/b2_sums_simulation.json`; reproduce with
+`python backend/scripts/eval_sums.py 2000 4242 docs/evaluation/b2_sums_simulation.json`.
+
+**On read reports.** A second generator mode (`b2`) prints full panels where the sums apply: CBC with differential
+and absolute counts, liver function with bilirubin fractions and proteins, lipid profile with ratios, kidney function
+with BUN; and units the way Indian labs print them (lakhs/cumm, thousand/µL, mmol/L). Both engines, five capture types.
+
+*Held-out set (seed 779, 40 reports and 685 tests per capture, never looked at while tuning):*
+
+| Capture | Values exactly right | Units right | Wrong values | Wrong and not flagged | … without the sums | Sum false alarms | Correct values flagged | Retake asked |
+|---|---|---|---|---|---|---|---|---|
+| Scan | 100 % | 99.9 % | 0 | **0** | 0 | 0 | 3.1 % | 0 % |
+| Phone photo | 99.6 % | 99.1 % | 3 | **0** | 0 | 0 | 15.0 % | 0 % |
+| Poor photo | 82.0 % | 84.8 % | 97 | **0** | 4 | 0 | 53.4 % | 47.5 % |
+| Photocopy | 98.5 % | 97.7 % | 9 | **0** | 0 | 0 | 12.3 % | 0 % |
+| Thermal slip | 97.7 % | 96.1 % | 16 | **0** | 1 | 0 | 12.4 % | 0 % |
+
+- **No silent error in 3,425 printed tests.** Without the sums there would have been five; the sums caught them.
+- No sum failed on a correctly read report (0 false alarms in 1,445 relations checked).
+- The cost is on poor photos: half of the correct values there carry a "check" (47.0 % without the sums). Those are
+  the photos where a retake is asked for anyway.
+
+*Development set (seed 20261007, same sizes):* values exactly right 99.8 / 99.1 / 84.1 / 98.5 / 97.5 % (scan, photo,
+poor photo, photocopy, thermal); 0 silent errors on every capture (6 without the sums); 0 sum false alarms; no
+invented rows. `docs/evaluation/ocr_b2_dev_two_engines.json`.
+
+**Faults found and fixed on these sets**
+- *Units misread in ways that have only one reading* ("X10~3/µL" for x10^3/µL, "mmo1/L" for mmol/L): mended before
+  the unit is matched. Units right on the development set: scan 97.5 → 100 %, photo 97.4 → 99.7 %, poor photo
+  87.0 → 88.1 %, photocopy 98.3 → 98.8 %, thermal 90.7 → 95.5 %. Values unchanged.
+- *A unit printed in the range column:* "Platelets | 4.87 | lakhs/cumm 1.50 – 4.50". The unit was not seen with the
+  value, so 4.87 was taken as thousands: 4,870 /µL, critically low, against a true 487,000, which is high, and
+  it was not flagged. Found on the old held-out set (scan r003). Now the unit is taken from the range cell when it
+  leads it, and a count with no unit read always flags. Both are covered by tests (`test_lab_checks.py`).
+- *Tried and reverted:* straightening tilted photos before reading. It lowered exact values on phone photos from
+  99.1 % to 97.4 %, so it was taken out.
+
+**Old held-out set, rerun with the B2 checks (7 Oct).** Values exactly right: scan 99.7 %, photo 99.7 %, poor
+photo 85.8 %, photocopy 98.7 %, thermal 99.3 %. One silent error remains, on a poor photo: an LDL of 73 read as 130
+by **both** engines, in a lipid panel without VLDL or ratios, so no sum covers it. The sums report 4–5 failures per
+capture on this set that are not misreads: the older generator printed haemoglobin and PCV pairs that no blood can
+have (an MCHC outside 22–40). The `b2` generator fixed that, and the false alarms go to 0 there.
+`docs/evaluation/ocr_heldout_two_engines.json`.
+
+**Limits**
+- Synthetic reports and simulated capture faults; real reports have more layouts, stamps and handwriting.
+- The sums only cover panels that print related values. A single glucose or a lone LDL is checked only by bounds,
+  the unit, the lab's own High/Low mark and the second engine.
+- A misread both engines agree on, inside the possible range and outside any sum, is not caught (the LDL above). The
+  value is still shown beside the image crop it came from, for the reviewer to confirm.
+
+Reproduce: `python backend/scripts/make_ocr_set.py models/eval/ocr_b2_heldout 40 779 b2`, then
+`python backend/scripts/eval_ocr.py models/eval/ocr_b2_heldout docs/evaluation/ocr_b2_heldout_two_engines.json all second`
+(development set: `models/eval/ocr_b2 40 20261007 b2`).
+## Handwritten prescriptions (B1, B10)
+
+The patient photographs a doctor's prescription. The app names the medicines on it, each matched to the Jan Aushadhi
+generic list or the A-Z Medicine Dataset of India (186,094 brands, CC BY-SA 4.0). Every name is shown for the nurse to
+confirm against the paper.
+
+- **Data:** "100 handwritten medical records" (chaithanyakota, Hugging Face, CC BY-ND 4.0): photographed Indian
+  outpatient prescriptions, each listing the medicines written on it. 85 pages list medicines.
+  - Development: rx000–rx049 (40 pages, 169 medicines). Used to tune the matcher.
+  - Test: rx050–rx099 (45 pages, 160 medicines). Not looked at while tuning. **Headline figures are from these.**
+  - Used for measurement only. The images are not copied into the repo or changed.
+- **Measures, per prescribed medicine:**
+  - *read:* its name is in the engine's text, allowing small slips;
+  - *named:* the app's medicine list for the page contains it.
+- **Measures, per name the app gives:**
+  - *right:* it was prescribed, or it is a generic that a prescribed brand contains;
+  - *precision:* right names as a share of all names given.
+
+**Test pages, 6 Oct**
+
+| Engine | Medicines read | Medicines named | Names given | Wrong | Precision | Seconds per page |
+|---|---|---|---|---|---|---|
+| RapidOCR (offline) | 17.5 % | 0.6 % | 4 | 3 | 25 % | 12.7 |
+| docTR (offline) | 25.6 % | 4.4 % | 11 | 4 | 64 % | 2.9 |
+| Sarvam Vision (online) | **60.0 %** | **28.8 %** | 80 | 33 | 59 % | 6.7 |
+
+Development pages: RapidOCR named 5.9 % (precision 70 %), docTR 11.8 % (65 %), Sarvam 34.3 % (63 %).
+
+- **The offline engines cannot read handwriting** well enough to rely on: docTR finds about a quarter of the names.
+  Online reading (Sarvam Vision) is offered only when the patient allowed AI help. It read every page (0 failures,
+  about ₹0.50 a page).
+- **Matcher changes made on the development pages:** brands are taken only where a medicine's name goes on an order
+  line; a brand must be confirmed by a strength, a dose pattern or a form word; between equally close names, the brand
+  with more products wins; and generics printed under a brand are folded into it.
+  - Scored the old way (no credit for a generic inside a prescribed brand), docTR on the test pages went from 18 names
+    given (11 wrong, precision 39 %) to 11 (4 wrong, 64 %). So the gain is from the matcher, not the scoring.
+- **Why a name is missed:**
+  - the engine did not read it, which is most misses;
+  - the brand is not in the A-Z list. Common supplements are absent: Shelcal, Zincovit, Pegura, Enterogermina,
+    Supracal, Bevon, Threptin, Fefol.
+- **Why a wrong name is given:**
+  - a real generic printed on the page but not in the record's medicine list (terbutaline, menthol, budesonide);
+  - a close but wrong brand (Montana, Protocid, Telinam).
+  - One is a safety example: "Lorazep" (most likely Lonazep, clonazepam) was matched to Lorazepam. This is why every
+    list is labelled "Read from a photo and matched to the Jan Aushadhi generic list or a list of Indian brands —
+    confirm each one against the strip or prescription".
+- Per page: `docs/evaluation/handwriting_rx100.json`. Reproduce:
+  `python backend/scripts/eval_handwriting.py models/eval/rx_hand rapidocr,doctr,sarvam` (Sarvam readings are cached in
+  the set folder, so a re-run costs nothing).
+
+**Limits**
+- 85 pages from one public set, from a limited number of clinics. Precision near 60 % means about 4 in 10 names
+  given are wrong. The names are suggestions for the nurse to check against the paper.

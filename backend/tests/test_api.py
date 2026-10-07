@@ -147,17 +147,14 @@ def test_admin_cannot_read_clinical_notes(client, supervisor, doctor):
     assert client.get(f"{API}/facilities/fac_phc_manikpur/stats", headers=supervisor).status_code == 200
 
 
-def test_patient_never_sees_urgency_or_note(client, patient):
-    rec = client.get(f"{API}/me/record", headers=patient).json()
-    assert rec["patient"]["name"] == "Priya Sharma"
-    assert rec["encounters"], "seeded encounters expected"
-    for e in rec["encounters"]:
-        assert e["urgency"] is None and e["note"] is None
-
-
-def test_patient_cannot_read_household_members_records(client, patient, doctor):
-    radha = client.get(f"{API}/patients/by-code/JVA-P001", headers=doctor).json()
-    assert client.get(f"{API}/patients/{radha['id']}/encounters", headers=patient).status_code == 403
+def test_no_patient_portal(client):
+    """Staff-only surfaces (plan): nobody can sign up as a patient, and there is no patient record endpoint."""
+    phone = "7" + uuid.uuid4().int.__str__()[:9]
+    ch = client.post(f"{API}/auth/otp/request", json={"phone": phone}).json()
+    v = client.post(f"{API}/auth/otp/verify", json={"challenge_id": ch["challenge_id"], "code": ch["dev_code"]}).json()
+    reg = {"registration_token": v["registration_token"], "name": "Priya Test", "role": "patient", "language": "hi", "accepted_terms": True}
+    assert client.post(f"{API}/auth/register", json=reg).status_code == 422
+    assert client.get(f"{API}/me/record").status_code == 404
 
 
 def test_employer_sees_cohorts_only(client, employer, doctor):

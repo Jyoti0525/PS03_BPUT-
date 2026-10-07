@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,12 +20,29 @@ class Settings(BaseSettings):
     otp_provider: str = "mock"
     demo_otp: str | None = "123456"
     # Sample accounts that may use demo_otp even when a real SMS provider is configured.
-    demo_phones: str = "9000000001,9000000002,9000000003,9000000004,9000000005,9000000006,9000000007,9000000008,9000000009,9000000010,9876543210"
+    demo_phones: str = "9000000001,9000000002,9000000003,9000000004,9000000005,9000000006,9000000007,9000000008,9000000009,9000000010"
     twilio_account_sid: str | None = None
     twilio_api_key_sid: str | None = None
     twilio_api_key_secret: str | None = None
     twilio_verify_service_sid: str | None = None
     sms_country_code: str = "+91"
+    # Reminder calls over a real phone line and reminder SMS (app/telephony.py). The auth token checks that webhooks
+    # really come from Twilio; the from-number is a Twilio number with voice and SMS.
+    twilio_auth_token: str | None = None
+    twilio_from_number: str | None = None  # E.164, e.g. +1415…
+    # Vonage, the other provider (its free trial calls and texts the number the account was registered with). Used
+    # instead of Twilio when its application is set. The private key file belongs to the Vonage application.
+    vonage_api_key: str | None = None
+    vonage_api_secret: str | None = None
+    vonage_application_id: str | None = None
+    vonage_private_key_path: str | None = None  # relative to backend/
+    vonage_from_number: str = "123456789"  # Vonage's caller ID for trial accounts; a rented number once upgraded
+    vonage_sms_from: str = "Jeevia"
+    # Where Twilio or Vonage can reach this server (a tunnel in development): https://….trycloudflare.com
+    public_base_url: str | None = None
+    # Every call and SMS goes to this one number (E.164) and never to a patient's stored number: demo patients are
+    # synthetic and their numbers may belong to real people. Unset = no calls or SMS are placed at all.
+    telephony_demo_to: str | None = None
     # Optional email codes: "none" (off), "mock" (local dev), "brevo" (Brevo transactional email API).
     email_provider: str = "none"
     brevo_api_key: str | None = None
@@ -64,15 +82,28 @@ class Settings(BaseSettings):
     # "indic-conformer-600m-multilingual" = the original fp32 download.
     asr_model: str = "indic-conformer-600m-int8"
     asr_decoding: str = "ctc"  # "ctc" (2x faster) or "rnnt" (slightly more accurate) — see docs/EVALUATION.md
+    # B9 offline second speech engine (app/whisper_asr.py): hears the recording when Sarvam (online) cannot.
+    asr_second_offline: bool = True
+    asr_second_int8: bool = True  # 8-bit IndicWhisper made at load time — see docs/EVALUATION.md
     # Note summary model (B5): llama.cpp llama-server, OpenAI-compatible. Unset = template summary only.
     llm_url: str | None = None
     llm_model_name: str = "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)"
     llm_timeout_s: float = 30
     llm_urgency_opinion: bool = True  # C8: the model's own urgency tier, shown beside the rules' result (never replaces it)
     preload_language_models: bool = False  # load at start-up instead of on the first request
+    # Sarvam AI (online, India-hosted): Bulbul voice for reminder-call lines, Saaras speech-to-text as a second engine.
+    # Unset = calls fall back to the device's own voice. JEEVIA_SARVAM_API_KEY or SARVAM_API_KEY.
+    sarvam_api_key: str | None = Field(None, validation_alias=AliasChoices("JEEVIA_SARVAM_API_KEY", "SARVAM_API_KEY"))
+    sarvam_tts_speaker: str = "priya"  # a woman's voice: the Hindi lines speak as a woman ("समझ नहीं पाई")
+    sarvam_timeout_s: float = 20
 
     escalate_red_min: int = 15
     escalate_yellow_min: int = 60
+    # GREEN has no escalation: past this wait the medical officer is told, who decides (see them, refer, or a priority
+    # token for the next day). The queue order itself never changes for it.
+    green_long_wait_min: int = 120
+    # An intake sent from home that nobody checked in leaves the expected list after this long.
+    home_intake_valid_h: int = 36
 
     # Kiosk submissions by staff must come from a device bound to their facility.
     require_bound_device: bool = True

@@ -112,7 +112,7 @@ export default function PublicKiosk() {
           <Logo />
           {info && (
             <span className="hidden min-w-0 items-center gap-1.5 truncate text-sm text-muted md:flex">
-              <Building2 className="size-4 shrink-0" /> <span className="truncate font-semibold text-ink">{info.facility_name}</span> · {tr(info.label)}
+              <Building2 className="size-4 shrink-0" /> <span className="truncate font-semibold text-ink">{info.facility_name}</span> {!info.for_home && <> · {tr(info.label)}</>}
             </span>
           )}
           <div className="ml-auto flex items-center gap-2">
@@ -153,9 +153,20 @@ export default function PublicKiosk() {
               <Building2 className="size-3.5" /> {info.facility_name}
             </span>
             <h1 className="mt-6 text-4xl leading-tight font-extrabold tracking-tight text-ink sm:text-5xl">
-              {tr("Get your")} <span className="text-gradient">{tr("token")}</span>
+              {info.for_home ? (
+                <>
+                  {tr("Fill in")} <span className="text-gradient">{tr("before you come")}</span>
+                </>
+              ) : (
+                <>
+                  {tr("Get your")} <span className="text-gradient">{tr("token")}</span>
+                </>
+              )}
             </h1>
-            <p className="mx-auto mt-4 max-w-lg text-lg text-muted">{t("kiosk.welcome")}</p>
+            <p className="mx-auto mt-4 max-w-lg text-lg text-muted">
+              {info.for_home ? tr("You get a reference number. Show it at the desk when you arrive; your place in the queue starts then.") : t("kiosk.welcome")}
+            </p>
+            {info.for_home && <p className="mx-auto mt-4 max-w-lg rounded-xl border border-crit-line bg-crit-bg px-4 py-2.5 text-sm font-medium text-crit">{t("kiosk.home.danger")}</p>}
             <button
               onClick={() => setStarted(true)}
               className="bg-brand-gradient mx-auto mt-10 flex h-20 w-full max-w-sm items-center justify-center gap-3 rounded-full text-2xl font-bold text-white shadow-[0_18px_40px_-12px_rgb(242_145_145/0.9)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"

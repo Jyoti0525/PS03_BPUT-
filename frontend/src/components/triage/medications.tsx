@@ -32,15 +32,17 @@ export function MedicationsPanel({ enc, canReview, onDone }: { enc: Encounter; c
 
   return (
     <Card className="mt-4">
-      <CardHeader title={tr("Current medicines")} subtitle={tr("Read from a photo by OCR and matched to the Jan Aushadhi generic list — confirm each one against the strip")} icon={<Pill className="size-4" />} />
+      <CardHeader title={tr("Current medicines")} subtitle={tr("Read from a photo and matched to the Jan Aushadhi generic list or a list of Indian brands — confirm each one against the strip or prescription")} icon={<Pill className="size-4" />} />
       <ul className="divide-y divide-line">
         {pending.map((m) => (
           <li key={m.name} className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm">
             <span className="min-w-0 flex-1">
               <span className="font-semibold capitalize text-ink">{m.name}</span>
               {m.strength && <span className="ml-1.5 text-ink-2">{m.strength}</span>}
+              {m.contains && <span className="block text-xs text-ink-2">{tr("Contains")}: {m.contains}</span>}
               <span className="block text-xs text-muted">
                 {tr("Seen as")} “{m.seen}” · {m.filename} · {tr("match")} {Math.round(m.confidence * 100)}%
+                {m.read_by === "both" ? ` · ${tr("Read by both offline and online engines")}` : m.read_by?.startsWith("Sarvam") ? ` · ${tr("Read online from handwriting by Sarvam Vision")}` : ""}
               </span>
             </span>
             <Badge tone="semi">{tr("Awaiting confirmation")}</Badge>

@@ -189,6 +189,8 @@ def test_queue_rows_say_why_and_capacity_alert_goes_to_the_mo(client, nurse, doc
     q = client.get(f"{API}/queue?facility_id=fac_phc_manikpur", headers=doctor).json()
     reds = [i for i in q if i["urgency"] == "red"]
     assert reds[0]["order_reason"].startswith("RED") and f"1st of {len(reds)} RED" in reds[0]["order_reason"] and "waiting" in reds[0]["order_reason"]
+    assert reds[0]["top_flags"] and len(reds[0]["top_flags"]) <= 2 and reds[0]["flag_count"] >= len(reds[0]["top_flags"])  # flags in words, not a count
+    assert "SAFE-PROVISIONAL" not in reds[0]["order_reason"]
     with SessionLocal() as db:  # only one doctor on duty
         db.get(User, "usr_mo1").on_duty = False
         db.commit()
@@ -255,8 +257,13 @@ def test_missed_visit_goes_to_the_assigned_asha_then_a_neutral_call(client, nurs
     for _ in range(2):
         f = client.post(f"{API}/followups/{f['id']}/attempt", json={"outcome": "not_reached", "note": "House locked"}, headers=hw).json()
     assert f["status"] == "call_due"
-    called = client.post(f"{API}/followups/{f['id']}/call", headers=hw).json()
-    assert called["attempts"][-1]["outcome"] == "call_placed" and "simulated" in called["attempts"][-1]["note"]
+    assert f["who_calls"]["who"] == "human"  # no vitals were taken at that visit, so a person calls (E6), with neutral wording
+    call = client.post(f"{API}/followups/{f['id']}/calls", json={"operator": "human"}, headers=hw).json()
+    assert call["audience"] == "other" and "pregnan" not in call["turns"][0]["text_en"].lower()
+    call = client.post(f"{API}/calls/{call['id']}/answer", json={"text": "Yes, I will tell her"}, headers=hw).json()
+    assert call["outcome"] == "message_left"
+    f = next(x for x in client.get(f"{API}/followups", headers=hw).json() if x["id"] == f["id"])
+    assert f["attempts"][-1]["outcome"] == "call" and f["attempts"][-1]["call_outcome"] == "message_left"
     # She comes back: a new pregnancy visit closes the follow-up and its alert
     body = {"patient_id": pat["id"], "facility_id": "fac_phc_manikpur", "category": "maternal", "language": "en", "chief_complaint": "ANC visit",
             "consent_id": e["consent"]["id"], "client_ref": f"w_{uuid.uuid4().hex}"}
@@ -275,13 +282,14 @@ def test_own_phone_mentions_the_checkup_and_no_phone_cannot_be_called(client, nu
                   maternal={"gestation_weeks": 22, "next_checkup": past, "assigned_worker_id": "usr_hw1"})
     f = next(x for x in client.get(f"{API}/followups", headers=hw).json() if x["patient_name"] == "Rani Kumari")
     assert f["call_script"] is None and f["phone_belongs_to"] == "none"
-    assert client.post(f"{API}/followups/{f['id']}/call", headers=hw).status_code == 422
+    assert f["who_calls"]["who"] == "home_visit"
+    assert client.post(f"{API}/followups/{f['id']}/calls", json={}, headers=hw).status_code == 422
 
 
-def test_health_worker_list_for_assignment(client, nurse, patient):
+def test_health_worker_list_for_assignment(client, nurse, employer):
     hws = client.get(f"{API}/health-workers", headers=nurse).json()
     assert {"id": "usr_hw1", "name": "Kamla Devi (ASHA)"} in hws
-    assert client.get(f"{API}/health-workers", headers=patient).status_code == 403
+    assert client.get(f"{API}/health-workers", headers=employer).status_code == 403
 
 
 def test_assigned_worker_must_be_a_health_worker_here(client, nurse):
@@ -292,9 +300,17 @@ def test_assigned_worker_must_be_a_health_worker_here(client, nurse):
     assert client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).status_code == 422
 
 
-def test_household_phone_reminder_in_my_record_says_nothing_reproductive(client, patient):
-    for r in client.get(f"{API}/me/record", headers=patient).json()["reminders"]:
-        assert "pregnan" not in r["message"].lower() and "anc" not in r["message"].lower()
+def test_household_phone_reminder_says_nothing_reproductive(client):
+    from sqlalchemy import select
+
+    from app.db import SessionLocal
+    from app.models import Patient, Reminder
+
+    with SessionLocal() as db:  # reminders go to a phone the household shares (JVA-P001 and JVA-P003)
+        rems = list(db.scalars(select(Reminder).join(Patient, Reminder.patient_id == Patient.id).where(Patient.phone == "9876543210")))
+    assert rems
+    for r in rems:
+        assert "pregnan" not in r.message.lower() and "anc" not in r.message.lower()
 
 
 # ── SQLite: columns added after the database was made ─

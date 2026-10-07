@@ -233,6 +233,7 @@ async function seed(): Promise<DB> {
 
   await audit(d, null, "DEVICE", "device", "dev_kiosk_manikpur_1", "Kiosk device 'OPD entrance tablet' bound by Meera Nair", null, new Date(Date.now() - 20 * 86400000).toISOString());
   makeKioskLink(d, "fac_phc_manikpur", "OPD waiting area", "Meera Nair", "MANIKPUR");
+  makeKioskLink(d, "fac_phc_manikpur", "Fill in before you come (SMS / poster)", "Meera Nair", "MKHOME", true);
   // Keep audit strictly chronological for the chain display
   return d;
 }
@@ -278,22 +279,27 @@ function dayKey(iso = new Date().toISOString()) {
   return new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 }
 
-/** Daily running token per facility: T-001, T-002 … */
-function assignToken(d: DB, enc: Encounter & { token_date?: string }, channel: IntakeChannel) {
+/** Daily running token per facility: T-001, T-002 … An intake from home gets an H- reference until it is checked in. */
+function assignToken(d: DB, enc: Encounter & { token_date?: string }, channel: IntakeChannel, prefix: "T" | "H" = "T") {
   const day = dayKey();
-  const n = d.encounters.filter((e) => e.facility_id === enc.facility_id && (e as Encounter & { token_date?: string }).token_date === day).length;
+  const n = d.encounters.filter((e) => e.facility_id === enc.facility_id && (e as Encounter & { token_date?: string }).token_date === day && e.token?.startsWith(`${prefix}-`)).length;
   enc.token_date = day;
-  enc.token = `T-${String(n + 1).padStart(3, "0")}`;
+  enc.token = `${prefix}-${String(n + 1).padStart(3, "0")}`;
   enc.channel = channel;
+}
+
+/** Waiting counts from arrival, not from when the form was sent (C3). */
+function waitMin(e: Encounter): number {
+  return Math.max(0, Math.round((Date.now() - Date.parse(e.arrived_at ?? e.created_at)) / 60000));
 }
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-function makeKioskLink(d: DB, facility_id: string, label: string, createdBy: string, code?: string): StoredKioskLink {
+function makeKioskLink(d: DB, facility_id: string, label: string, createdBy: string, code?: string, for_home = false): StoredKioskLink {
   const c = code ?? Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
   const user = { id: uid("usr"), phone: `kiosk-${c}`, name: `Kiosk · ${label}`, role: "kiosk" as const, facility_id, registration_no: null, language: "en", has_pin: false, created_at: new Date().toISOString(), active: true };
   d.users.push(user);
-  const link: StoredKioskLink = { id: uid("kl"), code: c, label, facility_id, user_id: user.id, created_by: createdBy, created_at: new Date().toISOString(), revoked: false, last_used_at: null, sessions: 0 };
+  const link: StoredKioskLink = { id: uid("kl"), code: c, label, facility_id, user_id: user.id, created_by: createdBy, created_at: new Date().toISOString(), revoked: false, last_used_at: null, sessions: 0, for_home };
   d.kioskLinks.push(link);
   return link;
 }
@@ -305,7 +311,7 @@ function linkOut(d: DB, k: StoredKioskLink): KioskLink {
   return {
     ...rest,
     url: `${window.location.origin}/k/${k.code}`,
-    intakes_today: d.encounters.filter((e) => e.facility_id === k.facility_id && e.channel === "kiosk_link" && (e as Encounter & { token_date?: string }).token_date === day).length,
+    intakes_today: d.encounters.filter((e) => e.facility_id === k.facility_id && (e.channel === "kiosk_link" || e.channel === "home_link") && (e as Encounter & { token_date?: string }).token_date === day).length,
   };
 }
 
@@ -351,10 +357,6 @@ async function current(d: DB): Promise<User> {
 }
 
 /** A patient account is linked to exactly one patient record (phone + name), even on a shared household phone. */
-function ownPatient(d: DB, me: User): Patient | undefined {
-  return d.patients.find((p) => p.phone === me.phone && p.name === me.name);
-}
-
 function requireRole(u: User, roles: Role[]) {
   if (!roles.includes(u.role)) throw new ApiError(403, `This action is not available to the ${u.role} role`);
 }
@@ -368,9 +370,10 @@ function canConfirm(role: Role, u: Urgency | null): boolean {
 }
 
 function forRole(e: Encounter, u: User): Encounter {
-  if (u.role === "patient" || u.role === "kiosk") {
+  if (u.role === "kiosk") {
     // Health outputs stay reviewer-facing: strip urgency, note and override.
-    return { ...clone(e), urgency: null, note: null, override: null, escalation_due_at: null, specialist_required: null, referral_needed: null };
+    const home_advice = e.channel === "home_link" ? (e.urgency === "red" ? "emergency" : "show_at_desk") : null;
+    return { ...clone(e), urgency: null, note: null, override: null, escalation_due_at: null, specialist_required: null, referral_needed: null, home_advice };
   }
   const out = clone(e);
   out.can_confirm = canConfirm(u.role, out.urgency);
@@ -539,9 +542,6 @@ export const mockApi: JeeviaApi = {
       }
       d.users.push({ ...user, pinHash: input.pin ? await sha256(input.pin + user.id) : undefined });
       delete d.registrations[input.registration_token];
-      if (input.role === "patient" && !d.patients.some((p) => p.phone === r.phone && p.name === input.name)) {
-        d.patients.push({ id: uid("pat"), code: `JVA-P${String(++d.seq).padStart(3, "0")}`, name: input.name, age: 30, sex: "O", phone: r.phone, language: input.language, category: "normal", created_at: user.created_at });
-      }
       await audit(d, user, "CREATE", "user", user.id, `Registered as ${input.role}; terms accepted`);
       const tokens = issueTokens(user);
       setTokens(tokens);
@@ -697,10 +697,27 @@ export const mockApi: JeeviaApi = {
       const me = await current(d);
       if (!STAFF_ROLES.includes(me.role) || me.facility_id !== id) throw new ApiError(403, "Not allowed");
       const day = dayKey();
+      for (const e of d.encounters) if (e.status === "expected" && Date.now() - Date.parse(e.created_at) > 36 * 3600_000) e.status = "lapsed";
       return d.encounters
-        .filter((e) => e.facility_id === id && (e as Encounter & { token_date?: string }).token_date === day)
+        .filter((e) => e.facility_id === id && ((e as Encounter & { token_date?: string }).token_date === day || e.status === "expected"))
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .map((e) => ({ encounter_id: e.id, token: e.token ?? null, patient_id: e.patient.id, patient_name: e.patient.name, patient_code: e.patient.code, status: e.status, channel: e.channel ?? "staff_kiosk", created_at: e.created_at, wait_minutes: Math.max(0, Math.round((Date.now() - Date.parse(e.created_at)) / 60000)) }));
+        .map((e) => ({ encounter_id: e.id, token: e.token ?? null, patient_id: e.patient.id, patient_name: e.patient.name, patient_code: e.patient.code, status: e.status, channel: e.channel ?? "staff_kiosk", created_at: e.created_at, arrived_at: e.arrived_at ?? null, wait_minutes: e.status === "expected" ? 0 : waitMin(e) }));
+    }),
+
+  checkIn: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (!STAFF_ROLES.includes(me.role)) throw new ApiError(403, "Not allowed");
+      const e = d.encounters.find((x) => x.id === id && x.facility_id === me.facility_id);
+      if (!e) throw new ApiError(404, "Not found");
+      if (e.status !== "expected") throw new ApiError(409, e.arrived_at ? "Already checked in" : `This intake is ${e.status}`);
+      e.arrived_at = new Date().toISOString();
+      e.status = "queued";
+      assignToken(d, e, e.channel ?? "home_link");
+      const mins = e.urgency === "red" ? 15 : e.urgency === "yellow" ? 60 : null;
+      e.escalation_due_at = mins ? new Date(Date.now() + mins * 60000).toISOString() : null;
+      await audit(d, me, "ARRIVE", "encounter", e.id, `Checked in at the desk (filled in from home); token ${e.token}`, e.patient.code);
+      return forRole(e, me);
     }),
 
   listKioskLinks: () =>
@@ -710,12 +727,12 @@ export const mockApi: JeeviaApi = {
       return d.kioskLinks.filter((k) => k.facility_id === me.facility_id).map((k) => linkOut(d, k)).reverse();
     }),
 
-  createKioskLink: (label) =>
+  createKioskLink: (label, forHome = false) =>
     withDb(async (d) => {
       const me = await current(d);
       requireRole(me, ADMIN_ROLES);
-      const k = makeKioskLink(d, me.facility_id!, label.trim(), me.name);
-      await audit(d, me, "DEVICE", "kiosk_link", k.id, `Kiosk link '${k.label}' created (${k.code})`);
+      const k = makeKioskLink(d, me.facility_id!, label.trim(), me.name, undefined, forHome);
+      await audit(d, me, "DEVICE", "kiosk_link", k.id, `Kiosk link '${k.label}' created (${k.code})${forHome ? " for filling in from home" : ""}`);
       return linkOut(d, k);
     }),
 
@@ -736,7 +753,7 @@ export const mockApi: JeeviaApi = {
       const k = d.kioskLinks.find((x) => x.code === code.toUpperCase() && !x.revoked);
       if (!k) throw new ApiError(404, "This kiosk link is not active. Ask the facility for a new one.");
       const f = d.facilities.find((x) => x.id === k.facility_id)!;
-      return { code: k.code, label: k.label, facility_id: f.id, facility_name: f.name, district: f.district, state: f.state, languages: f.languages };
+      return { code: k.code, label: k.label, facility_id: f.id, facility_name: f.name, district: f.district, state: f.state, languages: f.languages, for_home: !!k.for_home };
     }),
 
   kioskSession: (code, deviceId) =>
@@ -969,7 +986,6 @@ export const mockApi: JeeviaApi = {
       const me = await current(d);
       const p = d.patients.find((x) => x.id === id);
       if (!p) throw new ApiError(404, "Patient not found");
-      if (me.role === "patient" && ownPatient(d, me)?.id !== p.id) throw new ApiError(403, "Not your record");
       await audit(d, me, "VIEW", "patient", id, "Patient identity viewed", p.code);
       return clone(p);
     }),
@@ -999,7 +1015,6 @@ export const mockApi: JeeviaApi = {
       const me = await current(d);
       if (ADMIN_ROLES.includes(me.role)) throw new ApiError(403, "Facility admins cannot read clinical records");
       const p = d.patients.find((x) => x.id === patientId);
-      if (me.role === "patient" && ownPatient(d, me)?.id !== patientId) throw new ApiError(403, "Not your record");
       const list = d.encounters.filter((e) => e.patient.id === patientId).sort((a, b) => b.created_at.localeCompare(a.created_at));
       await audit(d, me, "VIEW", "patient", patientId, `Encounter history viewed (${list.length})`, p?.code ?? null);
       return list.map((e) => forRole(e, me));
@@ -1019,16 +1034,13 @@ export const mockApi: JeeviaApi = {
   submitIntake: (payload) =>
     withDb(async (d) => {
       const me = await current(d);
-      if (!["nurse", "doctor", "receptionist", "supervisor", "patient", "kiosk"].includes(me.role)) throw new ApiError(403, "Not allowed");
+      if (!["nurse", "doctor", "receptionist", "supervisor", "kiosk"].includes(me.role)) throw new ApiError(403, "Not allowed");
       const dup = d.encounters.find((e) => e.intake?.client_ref === payload.client_ref);
       if (dup) return forRole(dup, me); // idempotent offline replay
       const p = d.patients.find((x) => x.id === payload.patient_id);
       if (!p) throw new ApiError(404, "Patient not found");
-      if (me.role === "patient" && ownPatient(d, me)?.id !== p.id) throw new ApiError(403, "Patients can only submit their own intake");
-      if (me.role !== "patient") {
-        if (payload.facility_id !== me.facility_id) throw new ApiError(403, "Intakes can only be submitted for your own facility");
-      }
-      if (!["patient", "kiosk"].includes(me.role)) {
+      if (payload.facility_id !== me.facility_id) throw new ApiError(403, "Intakes can only be submitted for your own facility");
+      if (me.role !== "kiosk") {
         const dev = d.devices.find((x) => x.id === getDeviceId());
         if (!dev || dev.revoked || dev.facility_id !== me.facility_id) throw new ApiError(403, "This device is not bound to your facility — bind it from the kiosk screen");
         dev.last_seen_at = new Date().toISOString();
@@ -1036,7 +1048,16 @@ export const mockApi: JeeviaApi = {
       if (!payload.consent_id) throw new ApiError(422, "Consent must be captured before intake");
       const captured = payload.captured_at && Date.parse(payload.captured_at) < Date.now() ? payload.captured_at : undefined;
       const enc = buildEncounter(d, payload, p, captured);
-      assignToken(d, enc, me.role === "kiosk" ? "kiosk_link" : me.role === "patient" ? "patient_app" : "staff_kiosk");
+      const link = me.role === "kiosk" ? d.kioskLinks.find((k) => k.user_id === me.id) : undefined;
+      const channel: IntakeChannel = !link ? "staff_kiosk" : link.for_home ? "home_link" : "kiosk_link";
+      // From home: not in the queue until the desk checks the patient in; a RED goes to the doctors now (C3)
+      const expected = channel === "home_link" && enc.urgency !== "red";
+      assignToken(d, enc, channel, expected ? "H" : "T");
+      enc.arrived_at = channel === "home_link" ? null : enc.created_at;
+      if (expected) {
+        enc.status = "expected";
+        enc.escalation_due_at = null;
+      }
       d.encounters.push(enc);
       for (const id of payload.file_ids) {
         const f = d.files.find((x) => x.id === id);
@@ -1056,9 +1077,11 @@ export const mockApi: JeeviaApi = {
       requireRole(me, REVIEWER_ROLES);
       await autoEscalate(d);
       const rank: Record<Urgency, number> = { red: 0, yellow: 1, green: 2 };
-      return d.encounters
+      const rows = d.encounters
         .filter((e) => e.facility_id === facilityId && ["queued", "in_review", "escalated"].includes(e.status))
-        .map((e) => ({
+        .map((e) => {
+          const raised = (e.note?.flags ?? []).filter((f) => f.severity !== "info").sort((a, b) => Number(a.severity !== "critical") - Number(b.severity !== "critical"));
+          return {
           encounter_id: e.id,
           patient_code: e.patient.code,
           patient_name: e.patient.name,
@@ -1069,15 +1092,35 @@ export const mockApi: JeeviaApi = {
           urgency: e.urgency!,
           status: e.status,
           created_at: e.created_at,
-          wait_minutes: Math.max(0, Math.round((Date.now() - Date.parse(e.created_at)) / 60000)),
-          flag_count: e.note?.flags.filter((f) => f.severity !== "info").length ?? 0,
+          arrived_at: e.arrived_at ?? null,
+          wait_minutes: waitMin(e),
+          flag_count: raised.length,
+          top_flags: raised.slice(0, 2).map((f) => f.label),
           needs_check_count: [...(e.note?.vitals ?? []), ...(e.note?.labs ?? [])].filter((v) => v.needs_check).length,
           language: e.patient.language,
           escalation_due_at: e.escalation_due_at ?? null,
           token: e.token ?? null,
           channel: e.channel,
-        }))
-        .sort((a, b) => rank[a.urgency] - rank[b.urgency] || b.wait_minutes - a.wait_minutes);
+          vitals_recorded: !!e.note?.vitals.length,
+          observation_count: e.note?.observations?.length ?? 0,
+          why: e.note?.rules_fired.find((h) => h.urgency === e.urgency && h.rule_id !== "SAFE-PROVISIONAL")?.rule_id ?? (e.note?.triage?.provisional && e.urgency === "yellow" ? "provisional until measured" : ""),
+          };
+        })
+        .sort((a, b) => rank[a.urgency] - rank[b.urgency] || Number(b.status === "escalated") - Number(a.status === "escalated") || b.wait_minutes - a.wait_minutes);
+      // same words as the backend's alerts.order_reasons
+      const total: Record<string, number> = {};
+      rows.forEach((r) => (total[r.urgency] = (total[r.urgency] ?? 0) + 1));
+      const seen: Record<string, number> = {};
+      const mins = (m: number) => (m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
+      const nth = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+      return rows.map(({ why, ...r }) => {
+        seen[r.urgency] = (seen[r.urgency] ?? 0) + 1;
+        const u = r.urgency.toUpperCase();
+        const place = r.status === "escalated" ? `escalated, ahead of unescalated ${u}` : "longest first";
+        let line = `${why ? `${u} (${why})` : u} · ${nth(seen[r.urgency])} of ${total[r.urgency]} ${u} · waiting ${mins(r.wait_minutes)} since arrival, ${place}`;
+        if (r.channel === "home_link") line += " · filled in from home";
+        return { ...r, order_reason: line };
+      });
     }),
 
   getEncounter: (id) =>
@@ -1086,7 +1129,6 @@ export const mockApi: JeeviaApi = {
       if (ADMIN_ROLES.includes(me.role) || me.role === "employer" || me.role === "kiosk") throw new ApiError(403, "This role cannot read clinical notes");
       const e = d.encounters.find((x) => x.id === id);
       if (!e) throw new ApiError(404, "Encounter not found");
-      if (me.role === "patient" && ownPatient(d, me)?.id !== e.patient.id) throw new ApiError(403, "Not your record");
       if (e.status === "queued" && REVIEWER_ROLES.includes(me.role)) e.status = "in_review";
       await audit(d, me, "VIEW", "encounter", id, "Triage note viewed", e.patient.code);
       return forRole(e, me);
@@ -1262,6 +1304,9 @@ export const mockApi: JeeviaApi = {
   transcribe: async () => {
     throw new ApiError(503, "Server speech recognition runs only with the live API");
   },
+  secondCheck: async () => {
+    throw new ApiError(404, "No such check");
+  },
 
   listAudit: (filter) =>
     withDb(async (d) => {
@@ -1308,17 +1353,6 @@ export const mockApi: JeeviaApi = {
         purged_last_7d: d.files.filter((f) => f.purged_at && now - Date.parse(f.purged_at) < 7 * 86400000).length,
         files: d.files.map(sanitizeFile).map((f) => ({ ...f, url: null })).sort((a, b) => a.expires_at.localeCompare(b.expires_at)),
       };
-    }),
-
-  myRecord: () =>
-    withDb(async (d) => {
-      const me = await current(d);
-      requireRole(me, ["patient"]);
-      const patient = ownPatient(d, me);
-      if (!patient) throw new ApiError(404, "No patient record linked to this phone yet");
-      const encounters = d.encounters.filter((e) => e.patient.id === patient.id).sort((a, b) => b.created_at.localeCompare(a.created_at)).map((e) => forRole(e, me));
-      await audit(d, me, "VIEW", "patient", patient.id, "Patient viewed own record", patient.code);
-      return { patient: clone(patient), encounters, reminders: clone(d.reminders.filter((r) => r.patient_id === patient.id)) };
     }),
 
   // The regional calendar (F5) lives on the server with its sources; the browser-only demo does not copy it.
@@ -1413,7 +1447,14 @@ export const mockApi: JeeviaApi = {
       return d.users.filter((u) => u.facility_id === me.facility_id && u.role === "health_worker").map((u) => ({ id: u.id, name: u.name }));
     }),
   followupAttempt: () => Promise.reject(new ApiError(501, "Follow-ups need the Jeevia server (local demo mode)")),
-  followupCall: () => Promise.reject(new ApiError(501, "Follow-ups need the Jeevia server (local demo mode)")),
+  startCall: () => Promise.reject(new ApiError(501, "Reminder calls need the Jeevia server (local demo mode)")),
+  telephonyStatus: async () => ({ calls: false, sms: false, demo_to: null, missing: ["the Jeevia server"] }),
+  followupSms: () => Promise.reject(new ApiError(501, "SMS needs the Jeevia server (local demo mode)")),
+  callAnswer: () => Promise.reject(new ApiError(501, "Reminder calls need the Jeevia server (local demo mode)")),
+  endCall: () => Promise.reject(new ApiError(501, "Reminder calls need the Jeevia server (local demo mode)")),
+  getCall: () => Promise.reject(new ApiError(501, "Reminder calls need the Jeevia server (local demo mode)")),
+  listCalls: async () => [],
+  callAudio: () => Promise.reject(new ApiError(501, "Reminder calls need the Jeevia server (local demo mode)")),
 
   departmentRates: async (days = 365) => ({ days, k_min: 5, departments: [], note: "Department rates need the Jeevia server (local demo mode)." }),
 

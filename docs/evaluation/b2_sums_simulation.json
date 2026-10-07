@@ -1,0 +1,197 @@
+{
+ "reports": 2000,
+ "seed": 4242,
+ "relations_checked": 15454,
+ "false_alarms_on_correct_reports": 0,
+ "slips": 110801,
+ "caught_by_bounds_alone_pct": 22.6,
+ "caught_by_sums_pct": 56.8,
+ "caught_by_either_pct": 79.5,
+ "by_kind": {
+  "decimal point lost": {
+   "slips": 16336,
+   "bounds_pct": 81.2,
+   "sums_pct": 18.8,
+   "either_pct": 100.0
+  },
+  "digit dropped": {
+   "slips": 24212,
+   "bounds_pct": 23.9,
+   "sums_pct": 54.6,
+   "either_pct": 78.5
+  },
+  "look-alike, first digit": {
+   "slips": 26842,
+   "bounds_pct": 22.3,
+   "sums_pct": 77.6,
+   "either_pct": 99.9
+  },
+  "look-alike, last digit": {
+   "slips": 26842,
+   "bounds_pct": 0.0,
+   "sums_pct": 44.1,
+   "either_pct": 44.1
+  },
+  "look-alike, middle digit": {
+   "slips": 16569,
+   "bounds_pct": 0.1,
+   "sums_pct": 84.7,
+   "either_pct": 84.8
+  }
+ },
+ "by_size": {
+  "moved 5-10 %": {
+   "slips": 7665,
+   "bounds_pct": 0.0,
+   "either_pct": 81.7
+  },
+  "moved < 5 %": {
+   "slips": 24631,
+   "bounds_pct": 0.0,
+   "either_pct": 17.7
+  },
+  "moved >= 10 %": {
+   "slips": 78505,
+   "bounds_pct": 31.9,
+   "either_pct": 98.6
+  }
+ },
+ "by_test": {
+  "A/G ratio": {
+   "slips": 3769,
+   "caught_pct": 77.2
+  },
+  "Absolute basophil count": {
+   "slips": 927,
+   "caught_pct": 79.4
+  },
+  "Absolute eosinophil count": {
+   "slips": 3174,
+   "caught_pct": 69.7
+  },
+  "Absolute lymphocyte count": {
+   "slips": 3640,
+   "caught_pct": 62.2
+  },
+  "Absolute monocyte count": {
+   "slips": 3402,
+   "caught_pct": 68.8
+  },
+  "Absolute neutrophil count": {
+   "slips": 3644,
+   "caught_pct": 61.4
+  },
+  "Basophils": {
+   "slips": 2200,
+   "caught_pct": 92.5
+  },
+  "Blood urea": {
+   "slips": 2632,
+   "caught_pct": 93.8
+  },
+  "Blood urea nitrogen": {
+   "slips": 3890,
+   "caught_pct": 73.2
+  },
+  "Direct bilirubin": {
+   "slips": 3370,
+   "caught_pct": 86.9
+  },
+  "Eosinophils": {
+   "slips": 2453,
+   "caught_pct": 91.8
+  },
+  "Globulin": {
+   "slips": 3101,
+   "caught_pct": 89.2
+  },
+  "HDL cholesterol": {
+   "slips": 2400,
+   "caught_pct": 95.2
+  },
+  "Haemoglobin": {
+   "slips": 3825,
+   "caught_pct": 87.3
+  },
+  "Indirect bilirubin": {
+   "slips": 3449,
+   "caught_pct": 87.4
+  },
+  "LDL / HDL ratio": {
+   "slips": 3544,
+   "caught_pct": 80.6
+  },
+  "LDL cholesterol": {
+   "slips": 2956,
+   "caught_pct": 83.5
+  },
+  "Lymphocytes": {
+   "slips": 3155,
+   "caught_pct": 86.3
+  },
+  "MCH": {
+   "slips": 4126,
+   "caught_pct": 75.3
+  },
+  "MCHC": {
+   "slips": 4122,
+   "caught_pct": 74.7
+  },
+  "MCV": {
+   "slips": 4124,
+   "caught_pct": 69.6
+  },
+  "Monocytes": {
+   "slips": 2431,
+   "caught_pct": 92.9
+  },
+  "Neutrophils": {
+   "slips": 3131,
+   "caught_pct": 85.1
+  },
+  "Non-HDL cholesterol": {
+   "slips": 3154,
+   "caught_pct": 84.3
+  },
+  "PCV / haematocrit": {
+   "slips": 4121,
+   "caught_pct": 74.9
+  },
+  "RBC count": {
+   "slips": 3999,
+   "caught_pct": 71.4
+  },
+  "Serum albumin": {
+   "slips": 3111,
+   "caught_pct": 88.9
+  },
+  "Total WBC count": {
+   "slips": 3320,
+   "caught_pct": 60.8
+  },
+  "Total bilirubin": {
+   "slips": 3471,
+   "caught_pct": 88.1
+  },
+  "Total cholesterol": {
+   "slips": 3200,
+   "caught_pct": 84.7
+  },
+  "Total cholesterol / HDL ratio": {
+   "slips": 3551,
+   "caught_pct": 76.0
+  },
+  "Total protein": {
+   "slips": 3104,
+   "caught_pct": 86.8
+  },
+  "Triglycerides": {
+   "slips": 3105,
+   "caught_pct": 74.1
+  },
+  "VLDL cholesterol": {
+   "slips": 3200,
+   "caught_pct": 78.9
+  }
+ }
+}

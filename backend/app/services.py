@@ -32,6 +32,16 @@ def escalate_after(urgency: str) -> int | None:
     return {"red": s.escalate_red_min, "yellow": s.escalate_yellow_min}.get(urgency)
 
 
+def waiting_since(e: Encounter) -> datetime:
+    """Waiting counts from arrival at the facility, not from when the form was sent (C3): filling it in at home at 6 am
+    must not move anyone ahead of people already standing in the OPD."""
+    return aware(e.arrived_at or e.created_at)
+
+
+def wait_minutes(e: Encounter, t: datetime | None = None) -> int:
+    return max(0, round(((t or now()) - waiting_since(e)).total_seconds() / 60))
+
+
 def next_patient_code(db: Session) -> str:
     n = db.scalar(select(func.count(Patient.id))) or 0
     while True:
@@ -39,11 +49,6 @@ def next_patient_code(db: Session) -> str:
         code = f"JVA-P{n:03d}"
         if not db.scalar(select(Patient.id).where(Patient.code == code)):
             return code
-
-
-def own_patient(db: Session, user: User) -> Patient | None:
-    """A patient account links to exactly one record (phone + name) even on a shared household phone."""
-    return db.scalar(select(Patient).where(Patient.phone == user.phone, Patient.name == user.name))
 
 
 _token_lock = threading.Lock()
@@ -58,10 +63,12 @@ def calendar_context(facility: Facility | None, when: datetime) -> dict:
     return {"calendar": regions.for_facility(facility), "on": aware(when).astimezone(ZoneInfo(get_settings().timezone)).date()}
 
 
-def next_token(db: Session, facility_id: str, day: str) -> str:
-    """Daily running number per facility: T-001, T-002 … (resets at local midnight)."""
-    n = db.scalar(select(func.count(Encounter.id)).where(Encounter.facility_id == facility_id, Encounter.token_date == day)) or 0
-    return f"T-{n + 1:03d}"
+def next_token(db: Session, facility_id: str, day: str, prefix: str = "T") -> str:
+    """Daily running number per facility: T-001, T-002 … (resets at local midnight). An intake sent from home gets an
+    H- reference; its T- token is issued when the desk checks the patient in, so the token order is the arrival order."""
+    n = db.scalar(select(func.count(Encounter.id)).where(Encounter.facility_id == facility_id, Encounter.token_date == day,
+                                                         Encounter.token.like(f"{prefix}-%"))) or 0
+    return f"{prefix}-{n + 1:03d}"
 
 
 def with_fev1_baseline(intake: dict, history: list[Encounter]) -> dict:
@@ -110,14 +117,18 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
                       **calendar_context(facility, created))
     specialist = infer_specialist(intake, patient.age, triage)
     on_site = any(s["key"] == specialist and s["available"] for s in (facility.specialists if facility else []))
-    esc = escalate_after(urgency)
+    # From home: not in the queue until the desk checks the patient in. A RED is the exception: the patient is told to
+    # go to emergency or call 108, and the case is shown to the doctors now so someone can call back.
+    expected = channel == "home_link" and urgency != "red"
+    esc = None if expected else escalate_after(urgency)
     enc = Encounter(
         patient_id=patient.id,
         facility_id=intake["facility_id"],
         category=intake["category"],
-        status="queued",
+        status="expected" if expected else "queued",
         chief_complaint=intake["chief_complaint"],
         created_at=created,
+        arrived_at=None if channel == "home_link" else created,
         urgency=urgency,
         rules_urgency=urgency,
         urgency_source="rules",
@@ -132,7 +143,7 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
     )
     day = local_day(now())
     enc.token_date = day
-    enc.token = next_token(db, intake["facility_id"], day)
+    enc.token = next_token(db, intake["facility_id"], day, "H" if expected else "T")
     db.add(enc)
     db.flush()
     for f in files:
@@ -178,7 +189,42 @@ def record_observations(db: Session, e: Encounter, user: User, vitals: dict, not
     if e.urgency_source == "rules" and urgency != e.urgency:
         e.urgency = urgency
         esc = escalate_after(urgency)
-        e.escalation_due_at = aware(e.created_at) + timedelta(minutes=esc) if esc else None
+        e.escalation_due_at = (waiting_since(e) + timedelta(minutes=esc) if esc else None) if e.status != "expected" else None
+
+
+def check_in(db: Session, e: Encounter, user: User) -> None:
+    """The patient who filled in the form from home is at the desk: they join the queue now, with a token for today,
+    and their waiting time and escalation timer start from this moment."""
+    t = now()
+    e.arrived_at = t
+    e.status = "queued"
+    day = local_day(t)
+    if e.token_date != day or not (e.token or "").startswith("T-"):
+        with _token_lock:
+            e.token_date = day
+            e.token = next_token(db, e.facility_id, day)
+    esc = escalate_after(e.urgency)
+    e.escalation_due_at = t + timedelta(minutes=esc) if esc else None
+
+
+def lapse_expected(db: Session, facility_id: str) -> int:
+    """Intakes from home whose patient never came: after the validity window they leave the expected list."""
+    cutoff = now() - timedelta(hours=get_settings().home_intake_valid_h)
+    rows = [e for e in db.scalars(select(Encounter).where(Encounter.facility_id == facility_id, Encounter.status == "expected"))
+            if aware(e.created_at) < cutoff]
+    for e in rows:
+        e.status = "lapsed"
+    if rows:
+        db.commit()
+    return len(rows)
+
+
+def home_advice(e: Encounter) -> str | None:
+    """What the patient who filled in from home is told. Never a tier: either a danger sign was reported and they go to
+    emergency now, or they bring their reference to the desk."""
+    if e.channel != "home_link":
+        return None
+    return "emergency" if e.urgency == "red" else "show_at_desk"
 
 
 def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
@@ -202,14 +248,16 @@ def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
         escalation_due_at=aware(e.escalation_due_at),
         token=e.token,
         channel=e.channel,
-        worker=_worker_info(e) if viewer.role not in ("patient", "kiosk") else None,
+        arrived_at=aware(e.arrived_at),
+        home_advice=home_advice(e),
+        worker=_worker_info(e) if viewer.role != "kiosk" else None,
         consent=ConsentOut.model_validate(e.consent) if e.consent else None,
         can_confirm=can_confirm(viewer.role, e.urgency),
         sign_off=sign_off_role(e.urgency),
     )
-    if out.note and viewer.role not in ("patient", "kiosk"):
+    if out.note and viewer.role != "kiosk":
         out.note = note_for(out.note, viewer.role)
-    if viewer.role in ("patient", "kiosk"):
+    if viewer.role == "kiosk":
         # Health outputs stay reviewer-facing: no urgency, no AI note, no override.
         out.urgency = None
         out.note = None
@@ -260,11 +308,7 @@ def load_encounter(db: Session, eid: str, user: User, *, clinical: bool = True) 
     e = db.get(Encounter, eid)
     if not e:
         raise HTTPException(404, "Encounter not found")
-    if user.role == "patient":
-        mine = own_patient(db, user)
-        if not mine or mine.id != e.patient_id:
-            raise HTTPException(403, "Not your record")
-    elif user.facility_id and e.facility_id != user.facility_id:
+    if user.facility_id and e.facility_id != user.facility_id:
         raise HTTPException(403, "Encounter belongs to another facility")
     return e
 

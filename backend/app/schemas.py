@@ -180,7 +180,7 @@ class RegisterIn(BaseModel):
     # Required when the registration token came from an email code (the mobile number is still recorded).
     phone: str | None = Field(default=None, pattern=r"^\d{10}$")
     name: str = Field(min_length=2, max_length=200)
-    role: Literal["doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor", "patient", "employer"]
+    role: Literal["doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor", "employer"]
     facility_id: str | None = None
     registration_no: str | None = None
     language: str = "en"
@@ -399,6 +399,14 @@ class ConsentOut(ORM):
 
 
 # ── Intake ─────────────────────────────────────────────
+class SecondHearing(BaseModel):
+    """B9: what the second speech engine heard in the same recording. Only its words are taken from the browser;
+    the comparison is redone on the server (app/asr_check.py)."""
+    engine: str = Field(max_length=160)
+    text: str = Field(max_length=2000)  # in the speaker's language
+    translation: str | None = Field(default=None, max_length=2000)  # English, by the server's translator
+
+
 class SymptomEntry(BaseModel):
     text: str = Field(max_length=2000)
     original_text: str = Field(max_length=2000)
@@ -406,6 +414,7 @@ class SymptomEntry(BaseModel):
     source: Literal["voice", "text", "icon"]
     confirmed_by_readback: bool = False
     engine: str | None = Field(default=None, max_length=160)  # speech/translation engine that produced `text`
+    second_hearing: SecondHearing | None = None  # voice only: the other speech engine's transcript (B9)
 
 
 class IntakeAnswer(BaseModel):
@@ -458,6 +467,9 @@ class Chronic(BaseModel):
     last_checkup: str | None = None
     current_medicines: str | None = None
     feeling_vs_last: Literal["better", "same", "worse", "unsure"] = "unsure"
+    # E5/E6: the next check-in. A missed one goes to the assigned health worker, then a reminder call.
+    next_checkup: str | None = None
+    assigned_worker_id: str | None = None
 
 
 class IntakeIn(BaseModel):
@@ -506,6 +518,8 @@ class EncounterOut(BaseModel):
     escalation_due_at: datetime | None = None
     token: str | None = None
     channel: str = "staff_kiosk"
+    arrived_at: datetime | None = None  # None: filled in from home, not checked in yet
+    home_advice: str | None = None  # from home only: "emergency" (go now / call 108) or "show_at_desk"; never a tier
     worker: "WorkerInfo | None" = None
     consent: ConsentOut | None = None
     can_confirm: bool = False  # whether this viewer's role may sign off this urgency (E2)
@@ -525,8 +539,10 @@ class QueueItem(BaseModel):
     urgency: Urgency
     status: str
     created_at: datetime
-    wait_minutes: int
+    arrived_at: datetime | None = None
+    wait_minutes: int  # since arrival
     flag_count: int
+    top_flags: list[str] = []  # the first flags in words, critical first, so the row reads without opening the case
     needs_check_count: int
     language: str
     escalation_due_at: datetime | None
@@ -731,11 +747,13 @@ class TokenBoardItem(BaseModel):
     status: str
     channel: str
     created_at: datetime
-    wait_minutes: int
+    arrived_at: datetime | None = None
+    wait_minutes: int  # since arrival; 0 while an intake from home is still expected
 
 
 class KioskLinkIn(BaseModel):
     label: str = Field(min_length=2, max_length=120)
+    for_home: bool = False
 
 
 class KioskLinkOut(BaseModel):
@@ -750,6 +768,7 @@ class KioskLinkOut(BaseModel):
     last_used_at: datetime | None
     sessions: int
     intakes_today: int
+    for_home: bool = False
 
 
 class KioskInfo(BaseModel):
@@ -761,6 +780,7 @@ class KioskInfo(BaseModel):
     district: str
     state: str
     languages: list[str]
+    for_home: bool = False
 
 
 class KioskSessionIn(BaseModel):
@@ -915,6 +935,51 @@ class FollowupOut(BaseModel):
     gestation_weeks: int | None
     call_script: str | None  # what the call would say; None when there is no phone to call
     resolved_at: datetime | None
+    programme: str  # maternal | chronic
+    condition: str | None = None  # chronic: the long-term condition
+    who_calls: dict[str, str]  # {who: agent | human | home_visit, why}
+
+
+class CallStartIn(BaseModel):
+    operator: Literal["agent", "human"] = "agent"  # human: a person phones and reads the same script
+    # Defaults to the patient's language when it is one of these (the 11 languages Sarvam's Bulbul voice speaks)
+    language: Literal["en", "hi", "or", "bn", "ta", "te", "gu", "kn", "ml", "mr", "pa"] | None = None
+    # phone: Twilio rings the demo phone and the patient answers on the keypad (agent calls only)
+    channel: Literal["browser", "phone"] = "browser"
+
+
+class CallAnswerIn(BaseModel):
+    text: str = Field(min_length=1, max_length=500)  # what was said (in English when translated)
+    original_text: str | None = Field(default=None, max_length=500)  # in the patient's language, when transcribed
+
+    _scrub = field_validator("text", "original_text")(_no_id_numbers)
+
+
+class CallEndIn(BaseModel):
+    outcome: Literal["no_answer", "hung_up"]
+
+
+class CallOut(BaseModel):
+    id: str
+    reminder_id: str
+    patient_name: str
+    patient_code: str
+    programme: str
+    operator: str
+    language: str
+    audience: str
+    status: str
+    outcome: str | None
+    turns: list[dict[str, Any]]
+    red_flags: list[dict[str, Any]] | None
+    notes: dict[str, Any] | None
+    expects: str | None  # yes_no | free | None (ended)
+    alert_id: str | None
+    started_at: datetime
+    ended_at: datetime | None
+    sources: list[dict[str, str]]
+    voice: str = "device"  # sarvam: GET /calls/{id}/turns/{i}/audio speaks each agent line; device: the browser's own voice
+    channel: str = "browser"  # phone: a real call through Twilio; the page follows it
 
 
 class FollowupAttemptIn(BaseModel):
@@ -922,12 +987,6 @@ class FollowupAttemptIn(BaseModel):
     note: str = Field(default="", max_length=500)
 
     _scrub = field_validator("note")(_no_id_numbers)
-
-
-class MyRecord(BaseModel):
-    patient: PatientOut
-    encounters: list[EncounterOut]
-    reminders: list[ReminderOut]
 
 
 class CohortOut(ORM):

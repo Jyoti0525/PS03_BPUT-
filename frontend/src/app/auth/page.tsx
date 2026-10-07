@@ -33,7 +33,6 @@ const ROLE_CARDS: { role: RegRole; label: string; body: string; icon: React.Reac
   { role: "health_worker", label: "Health worker (ASHA / MPW)", body: "Short notes, confirm GREEN, maternal follow-ups", icon: <HeartPulse /> },
   { role: "receptionist", label: "Receptionist", body: "Register patients, manage kiosk devices", icon: <ClipboardList /> },
   { role: "supervisor", label: "Supervisor", body: "Facility setup, staff, audit", icon: <ShieldCheck /> },
-  { role: "patient", label: "Patient", body: "Add problems, upload reports, reminders", icon: <HeartPulse /> },
   { role: "employer", label: "Employer / Organisation", body: "Register your company, campus or camp", icon: <Briefcase /> },
 ];
 
@@ -287,8 +286,7 @@ function AuthInner() {
   const [confirmPin, setConfirmPin] = useState("");
 
   const steps = useMemo<StepKey[]>(() => {
-    const s: StepKey[] = ["role", "info"];
-    if (role && role !== "patient") s.push("workplace");
+    const s: StepKey[] = ["role", "info", "workplace"];
     s.push("phone", "otp");
     if (role && PIN_ROLES.includes(role)) s.push("pin");
     s.push("terms");
@@ -807,7 +805,7 @@ export default function AuthPage() {
           <p className="mt-3 max-w-md text-lg text-muted">{tr("Phone OTP plus a personal PIN for every staff and employer dashboard. Every session is logged.")}</p>
           <ul className="mt-8 space-y-3 text-sm text-ink-2">
             {[
-              [<UserRound key="a" className="size-4" />, "Patients never see triage status — only their own visits and reminders."],
+              [<UserRound key="a" className="size-4" />, "No patient login: patients get a clinician-issued slip and never see an urgency tier."],
               [<LockKeyhole key="b" className="size-4" />, "Two-factor sign-in: the OTP proves your phone, the PIN proves it’s you."],
               [<ShieldCheck key="c" className="size-4" />, "Patient documents open only for the doctors and nurses treating them."],
               [<Building2 key="d" className="size-4" />, "Every health facility in India, plus company and campus clinics registered by their organisation."],

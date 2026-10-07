@@ -173,7 +173,9 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "upper_abdominal_pain": {"en": [r"upper (abdominal|stomach|belly) pain", r"pain (in|at) (the )?upper (abdomen|stomach)", r"epigastric", r"right upper"], "hi": ["पेट के ऊपर दर्द", "ऊपरी पेट"], "or": ["ପେଟ ଉପରେ"]},
     "vomiting": {"en": [r"vomit\w*", r"throwing up", r"ulti"], "hi": ["उल्टी", "उलटी"], "or": ["ବାନ୍ତି"]},
     "vomits_everything": {"en": [r"vomits? everything", r"can'?t keep (anything|food|water) down", r"vomiting everything"], "hi": ["सब उल्टी", "कुछ नहीं पचता"], "or": ["ସବୁ ବାନ୍ତି"]},
-    "diarrhoea": {"en": [r"diarrh\w*", r"loose (motions?|stools?)", r"watery stools?", r"dast"], "hi": ["^दस्त$", "^दस्तों$", "लूज मोशन", "पतली टट्टी"], "or": ["ଝାଡ଼ା", "ପତଳା ଝାଡ଼ା"]},
+    "diarrhoea": {"en": [r"diarrh\w*", r"loose (motions?|stools?)", r"watery stools?", r"dast"], "hi": ["^दस्त$", "^दस्तों$", "लूज मोशन", "पतली टट्टी"], "or": ["ଝାଡ଼ା", "ପତଳା ଝାଡ଼ା",
+                  # spoken without the final ା, as both speech engines wrote it (6 Oct); only with a "happening" verb, as ଝାଡ଼ alone is "bush"
+                  "^ଝାଡ଼ ହେଉଛି", "^ଝାଡ଼ ହଉଛି", "^ଝାଡ଼ ଲାଗୁଛି", "^ଝାଡ଼ ହେଲାଣି"]},
     "unable_to_drink": {"en": [r"(unable|not able|can'?t|cannot|refus\w*) to (drink|breast ?feed|feed|suck)", r"not (drinking|feeding|breast ?feeding)", r"unable to drink"], "hi": ["दूध नहीं पी", "पानी नहीं पी"], "or": ["କ୍ଷୀର ପିଉନି", "ପାଣି ପିଉନି"]},
     "drinks_poorly": {"en": [r"drink\w* (poorly|very little|less)"], "hi": ["कम पी"], "or": []},
     "sunken_eyes": {"en": [r"sunken eyes?"], "hi": ["धंसी आंखें", "आंखें धंस"], "or": ["ଆଖି ପଶିଯାଇଛି"]},
@@ -311,7 +313,8 @@ _LOOSE = str.maketrans({
 
 
 def _loose(s: str) -> str:
-    return _norm(s).replace("୍ୱ", "").translate(_LOOSE)  # Odia ୍ୱ (wa-phala) is silent
+    # Odia ୍ୱ (wa-phala) is silent; speech recognition also writes it with ଵ (U+0B35): ଜ୍ଵର (B9 live test, 6 Oct)
+    return _norm(s).replace("୍ୱ", "").replace("୍ଵ", "").translate(_LOOSE)
 
 
 def _indic_regex(pattern: str) -> re.Pattern:
@@ -425,6 +428,18 @@ def extract(intake: dict, category: str | None = None) -> dict[str, Finding]:
         texts.append((f"{s.get('source', 'text')} intake", s.get("text", ""), unconfirmed))
         if s.get("original_text") and s.get("original_text") != s.get("text"):
             texts.append((f"{s.get('source', 'text')} intake (original {s.get('language', '')})", s["original_text"], set()))
+    # B9: a symptom only the second speech engine heard still counts, as with translation, labelled so; the note's
+    # DISAGREE flag shows both transcripts.
+    for s in intake.get("symptoms", []) or []:
+        h = s.get("second_hearing") if s.get("source") == "voice" else None
+        if not isinstance(h, dict):
+            continue
+        heard = {f for first in (s.get("original_text"), s.get("text")) for f, x in scan_text(first or "", "").items() if x.value is True}
+        src = f"voice intake (second speech engine only, {h.get('engine') or 'online'} — not in the confirmed transcript)"
+        for second in (h.get("text"), h.get("translation")):
+            for fid, f in scan_text(second or "", src).items():
+                if f.value is True and fid not in heard:
+                    _merge(out, fid, True, f.evidence[0])
     for src, t, unconfirmed in texts:
         # A finding only the translation produced still counts (missing a real symptom is worse than over-triage),
         # but its evidence says so, and the note's MT-CHECK flag names the sentence.

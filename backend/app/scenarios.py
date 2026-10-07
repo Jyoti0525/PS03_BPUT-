@@ -6,6 +6,9 @@
   Devi and her number is her husband's phone, so any reminder is worded without mentioning pregnancy.
 * Capacity (C3): PHC Manikpur has two RED cases and two doctors on duty. Marking one doctor off duty from the front
   desk raises the capacity alert to the medical officer.
+* Reminder calls (E6): at PHC Manikpur, Rina (pregnant, 31 weeks, her own phone, Odia) and Ramprasad (blood pressure
+  and diabetes, Hindi) each missed a check-up and ASHA Kamla Devi could not reach them twice, so a reminder call is due
+  and the agent may make it. Kusum's last visit was RED (diastolic 114), so for her a person must call, not the agent.
 * Occupational (D2): Kalinga Steel Works workers screened today in three departments (6 crusher, 6 furnace, 5
   stores); the crusher workers were also screened last year, so FEV1 is compared with their own earlier value.
 
@@ -147,12 +150,57 @@ def scenarios(db) -> bool:
     return True
 
 
+def call_scenarios(db) -> bool:
+    """E6 demo follow-ups (added separately so an existing demo database gets them too). Idempotent."""
+    from . import alerts as al
+
+    hw = db.get(User, "usr_hw1")
+    if db.scalar(select(Patient.id).where(Patient.code == "JVA-P203")) or not hw or not db.get(Facility, "fac_phc_manikpur"):
+        return False
+    now = datetime.now(timezone.utc)
+    d = timedelta(days=1)
+    fac = "fac_phc_manikpur"
+
+    def missed(p: Patient, e: Encounter, kind: str, due: datetime, tries: int) -> None:
+        r = Reminder(patient_id=p.id, kind=kind, due_at=due, channel="voice", status="scheduled", facility_id=fac, assigned_to=hw.id,
+                     phone_belongs_to="self", encounter_id=e.id, message=al.reminder_message(p, al.facility_name(db, fac), due, "self", kind=kind))
+        db.add(r)
+        db.flush()
+        al.check_missed_visits(db, fac)
+        for note in ("House locked", "Phone switched off")[:tries]:
+            al.record_attempt(db, r, hw, "not_reached", note)
+
+    rina = _patient(db, "JVA-P203", "Rina Majhi", 24, "F", phone="9811000003", language="or", category="maternal", village="Bhanpur")
+    e = _visit(db, rina, fac, now - 35 * d, "Routine antenatal visit", lang="or", vitals=NORMAL, closed=True, category="maternal",
+               maternal={"gestation_weeks": 26, "anc_visits": 3, "next_checkup": (now - 5 * d).date().isoformat(), "reminder_channel": "voice",
+                         "phone_belongs_to": "self", "assigned_worker_id": hw.id})
+    missed(rina, e, "anc_checkup", now - 5 * d, 2)
+
+    ram = _patient(db, "JVA-P204", "Ramprasad Sahu", 61, "M", phone="9811000004", language="hi", category="chronic", village="Kendupali")
+    chronic = {"condition": "Hypertension and type 2 diabetes", "current_medicines": "Amlodipine 5 mg once a day; metformin 500 mg twice a day",
+               "feeling_vs_last": "same", "next_checkup": (now - 4 * d).date().isoformat(), "assigned_worker_id": hw.id}
+    e = _visit(db, ram, fac, now - 40 * d, "Blood pressure and sugar check-up", lang="hi", category="chronic", closed=True,
+               vitals={**NORMAL, "bp_systolic": 136, "bp_diastolic": 86, "glucose": 142}, chronic=chronic)
+    missed(ram, e, "chronic_checkin", now - 4 * d, 2)
+
+    kusum = _patient(db, "JVA-P205", "Kusum Behera", 52, "F", phone="9811000005", language="or", category="chronic", village="Bhanpur")
+    e = _visit(db, kusum, fac, now - 20 * d, "Blood pressure check-up, headache on and off", lang="or", category="chronic", closed=True, severity=5, duration="3-7 days",
+               vitals={**NORMAL, "bp_systolic": 182, "bp_diastolic": 114}, chronic={**chronic, "condition": "Hypertension",
+               "current_medicines": "Amlodipine 5 mg once a day", "next_checkup": (now - 2 * d).date().isoformat()})
+    missed(kusum, e, "chronic_checkin", now - 2 * d, 0)
+
+    audit.record(db, None, "CONFIG", "system", None, "Demo scenarios added: reminder calls for two missed check-ups and one that needs a person (synthetic)")
+    db.commit()
+    return True
+
+
 def main() -> None:
     from .db import SessionLocal, init_db
 
     init_db()
     with SessionLocal() as db:
         print("Demo scenarios added." if scenarios(db) else "Demo scenarios already present (or base seed missing).")
+        print("Call scenarios added." if call_scenarios(db) else "Call scenarios already present (or base seed missing).")
 
 
 if __name__ == "__main__":

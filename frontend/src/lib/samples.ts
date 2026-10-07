@@ -6,6 +6,5 @@ export const DEMO_LOGINS = [
   { role: "health_worker", phone: "9000000006", name: "Kamla Devi (ASHA)" },
   { role: "receptionist", phone: "9000000003", name: "Rakesh Tiwari" },
   { role: "supervisor", phone: "9000000004", name: "Meera Nair" },
-  { role: "patient", phone: "9876543210", name: "Priya Sharma" },
   { role: "employer", phone: "9000000005", name: "Arjun Patnaik" },
 ] as const;

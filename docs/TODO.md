@@ -40,13 +40,16 @@ No speech recogniser is 100 % accurate. The goal is that **no recognition error 
 - [x] Translator gets standard words and digits (ଜର → ଜ୍ୱର, ଝାଡ଼ା → ଅତିସାର, ଛପନ ବର୍ଷ → 56 ବର୍ଷ); the record keeps the patient's words; rewrites listed on the note (5 Oct, 0dc032a).
 - [x] Near-equal translation candidates compared for numbers and symptoms, all languages, no word list ("number unclear: 66 or 56") (5 Oct, 0dc032a).
 - [ ] A native Odia speaker checks the Odia number list (1–100) and spoken-spelling list in `backend/app/mt_checks.py` and `findings.py`.
+- [x] Flags, rule descriptions and lab-check sentences translated into Hindi and Odia, numbers kept as printed; English original on hover; lists of any length translate — 7 Oct (uncommitted).
+- [x] Back-translation check (offline IndicTrans2) of every Hindi and Odia line added this week; 21 Odia lines corrected — 7 Oct (uncommitted).
+- [ ] A native Odia speaker (and a Hindi-speaking clinician) reads the flag and rule wording; the list to read is everything added to `or.ts` / `hi.ts` since commit ebe00c4.
 - [ ] Measure the 8-bit model with RNNT decoding. Figures to beat: 19.7 % WER for fp32 RNNT, 21.6 % for int8 CTC. Make RNNT the default if it is accurate enough and fast enough.
 - [ ] **Measure every Indian language in FLEURS** (25 clips each, same script): as, bn, gu, hi, kn, ml, mr, ne, or ✅, pa, sd, ta, te, ur. Add per-language WER and CER to `docs/EVALUATION.md`.
 - [ ] For the languages FLEURS does not cover (brx, doi, kok, ks, mai, mni, sa, sat), find an openly licensed public test set and check its licence first. Until one is measured, label that language "unmeasured" in the app.
 - [ ] Measure translation on the same clips (reference English is in FLEURS); report the score per language.
 - [ ] Team-recorded symptom sentences (synthetic scripts, written consent from each speaker) in Odia, Hindi, English, Kannada and code-mixed speech. Measure WER on medical words.
 - [ ] Per-language confidence threshold. A low-confidence answer does not enter the record; it becomes a question for the health worker.
-- [ ] Bhashini (or Sarvam) online engine as a second opinion. Any disagreement between the two engines is flagged for review (B9).
+- [x] Online engine as a second opinion: Sarvam AI (Bhashini access unlikely, 6 Oct), plus IndicWhisper offline so the check works with no network. Any disagreement between the two engines is flagged for review (B9). **Done 6–7 Oct (uncommitted):** see B9.
 - [ ] The kiosk shows which languages are measured and which are "unmeasured".
 - [ ] Screen languages: only English, Hindi and Odia today. Add **Kannada** (needed for the campus demo instance), then the other scheduled languages.
 - [x] Read-back of the transcript plus patient confirmation or re-record (browser speech synthesis).
@@ -68,13 +71,13 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **A4 Report upload**: PDF and images, multiple files.
 - [x] **A5 Basic visual inputs** (5 Oct, `ca889e7`). Report photos and "photo of the problem" are both accepted. Each is redacted before storage and routed to B10, which labels it; a photo of the problem is never interpreted.
 - [ ] **A6 Patient identity and matching.** *Partial:* lookup by number. **Check:** match candidates are confirmed by a human, never auto-merged, and every pick is logged.
-- [ ] **A7 Spoken read-back and prompts.** *Partial:* browser speech synthesis. Indic Parler-TTS moves after 10 Oct. **Check:** Odia voice quality on the demo laptop.
+- [ ] **A7 Spoken read-back and prompts.** *Partial:* browser speech synthesis. Indic Parler-TTS: §9, before 10 Oct. **Check:** Odia voice quality on the demo laptop.
 - [ ] **A8 Vitals entry.** *Partial:* the nurse UI has vitals and AVPU. **Check:** unit lock, plausibility bounds, and a "not measured" option.
 
 ### B. Reading and understanding
 - [x] **H0 Text-layer check before OCR** (pypdfium2, `bbf5411`).
-- [x] **B1 OCR for lab reports** (PS: OCR). RapidOCR with PaddleOCR models, offline (`bbf5411`).
-- [ ] **B2 Numeric validation.** *Partial:* lab parser, stale-date and name-mismatch checks. **Left:** flag-versus-range consistency, unit plausibility, physiological bounds, arithmetic checks (WBC differential near 100 %, absolute count = % × total, globulin = total protein − albumin).
+- [x] **B1 OCR for lab reports** (PS: OCR). RapidOCR with PaddleOCR models, offline (`bbf5411`). **6–7 Oct (uncommitted):** measured on synthetic reports (5 capture types; development seed 20261006, held-out seed 777 never tuned on); quality gate reworked (one scale, blur after a median filter, ink-vs-paper contrast, "Text hard to read", retake when nothing is read); handwriting read online by Sarvam Vision with the patient's AI consent, measured on 85 real prescriptions (CC BY-ND set). Held-out: values exactly right 99.3 % scans and phone photos, 98.7 % photocopies, 99.3 % thermal, 85.5 % poor photos (72.5 % asked to retake), 3 of 1,515 wrong and not flagged. Handwriting (45 test pages): Sarvam reads 60 % of medicine names, docTR 26 %, RapidOCR 18 %.
+- [x] **B2 Numeric validation.** — 7 Oct (uncommitted). Physiological bounds, the lab's H/L mark against the value and range, unit plausibility and SI conversion, range sanity, and the report's numbers against each other (differential, absolute counts, proteins, bilirubin, red-cell indices, lipids, urea/BUN). Measured on a simulation (2,000 reports) and on OCR of new full-panel reports, development and held-out, five capture types, two engines: 0 silent errors on the held-out set, 0 sum false alarms. Found and fixed on the way: OCR-mangled units, and a lakh unit printed in the range cell that turned a high platelet count into a critically low one. EVALUATION.md "Checking the numbers on a report (B2)".
 - [x] **B3 Key-detail extraction**: test, value, unit, range, traced to the image.
 - [x] **B4 Timeline summary with certainty labels** (5 Oct, `ca889e7`).
   - `app/triage/timeline.py` labels each onset STATED, INFERRED, VAGUE or UNKNOWN (plus RECORDED for dated records), with the patient's raw words. Works in English, Hindi (both scripts) and Odia.
@@ -93,19 +96,21 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **B6 Missing information** (PS: identify missing information). The note lists what blocks GREEN (`bbf5411`).
 - [x] **B7 Follow-up questions by role** (PS: for health worker, nurse, doctor, medical officer): **done 6 Oct** (`8a7c3ee`). Medical-officer questions (transfer for RED, obstetrician at the FRU, worker exposure and Factories Act s.89 notification); up to 3 per role; the server sends each role only its own (health worker → own; nurse → health worker + nurse; doctor and MO → all).
 - [x] **B8 Test-name normalisation (LOINC)**: a LOINC code on parsed tests.
-- [ ] **B9 Cross-engine disagreement flag.** Speech: local model vs Bhashini. OCR: second engine (docTR moves after 10 Oct).
+- [x] **B9 Cross-engine disagreement flag.** *Speech done 6 Oct (uncommitted):* Sarvam Saaras v3 (online, only with the patient's AI consent) hears the same recording as IndicConformer; `asr_check.py` compares numbers, symptoms and overall agreement; kiosk shows both with *Use this one instead*; note flag *Voice transcript: sources disagree*, recomputed on the server; a second-engine-only symptom counts, labelled. FLEURS Odia: Sarvam 19.1 % WER vs 21.6 %, 0/25 flagged. Live check caught BP 160/100 heard as "160 बटा सो", and found three Odia faults (ଵ for ୱ, ଝାଡ଼ without ା read as "cough", ଚାରିଦିନ), fixed. 18 tests. **7 Oct (uncommitted):** OCR second engine (docTR via OnnxTR, in parallel; values compared test by test, the rules use the reading further from normal): silent errors 10 → 3 of 1,515 held-out tests. IndicWhisper (Vistaar, Odia) as the offline second speech engine when Sarvam cannot be used, run after the reply and picked up by the kiosk (`GET /speech/second/{id}`): 31.7 % WER, 3 of 25 FLEURS clips flagged (all three the clips IndicConformer got most wrong); Odia number words with a slipped vowel sign now read as numbers. 24 tests in `test_asr_second.py`, 19 in `test_ocr_checks.py`. **Left:** IndicWhisper downloads for languages other than Odia.
 - [ ] **B10 Image understanding without diagnosis** (PS: basic visual inputs; Multimodal 15 %). *Nearly done (5 Oct, `ca889e7`):*
   - [x] Document-type label: lab report, prescription, medicine strip, discharge summary, MCP card, other, or non-document. Deterministic, with the deciding words shown.
   - [x] Medicine names matched to the **PMBJP list of 2,110 generic medicines** (PIB, Govt of India, free to reproduce with acknowledgement; 1,087 names, `scripts/build_medicine_list.py`). Strength is read too. Each name awaits confirmation; nurse/doctor Confirm or "Not this", audited. Checked live in the browser.
   - [x] Faces pixelated (YuNet, MIT, vendored; checked on a public-domain portrait) and phone/Aadhaar/ABHA lines blacked out **before storage**. Photos are always re-encoded, which drops EXIF/GPS.
   - [x] A photo of the problem gets zero interpretation. 11 tests (`tests/test_images.py`).
   - [x] Live test with a phone photo of a real medicine strip (5 Oct, Jyoti): labelled correctly, all three medicines found. Fixed the same evening (0dc032a): a torn fragment matched a different medicine (pheniramine); strengths in a column on the same row are now read.
-  - [ ] Live test with a real printed prescription (blank out the patient's name first). Handwritten prescriptions will mostly fail OCR; say so.
+  - [x] Brand names (7 Oct, uncommitted): the A-Z Medicine Dataset of India (186,094 brands, CC BY-SA 4.0, attributed in FEATURES.md), taken only where a medicine's name goes on an order line; generics printed under a brand folded into it. Handwritten test pages, docTR: wrong names 11 → 4.
+  - [ ] Live test with a real printed prescription (blank out the patient's name first). Handwriting is measured (EVALUATION.md): offline mostly misses it, Sarvam names 29 % of prescribed medicines; say so.
 
 ### C. Triage intelligence
 - [x] **C1 Risk-category tagging** (PS: risk-category tagging; rules-based flags). About 150 cited rules: ATP, IITT adult and paediatric, IMCI, maternal, labs, local (`bbf5411`).
 - [x] **C2 Urgency signal highlighting**: each tier shows its rule, the value and the source.
 - [x] **C3 Queue prioritisation** (PS: queue prioritisation; patient load varies): **done 6 Oct** (`8a7c3ee`). Each row prints why it is there; open REDs above the doctors and MOs on duty raise a capacity alert to the MO and a banner on clinical screens, closed automatically when resolved. Demo: mark Dr. Sharma off duty at the desk.
+  - [x] **C3 follow-ups — 7 Oct (uncommitted):** filling in from home (H- reference, joins the queue at desk check-in, lapses after 36 h; danger signs go straight to the queue with a "go to emergency / call 108" screen), GREEN long-wait alert to the MO, no patient portal. UX pass: flags in words and a "Why here" line on queue rows, out-of-range values first with word labels, desk token-board layout fix, desk stats refresh on check-in, untranslated review-step labels fixed. Checked in the browser end to end (Hindi).
 - [x] **C4 Non-diagnostic output guard** (PS: explicitly non-diagnostic). Done 5 Oct (`ca889e7`, demo page 5 Oct, `8a7c3ee`):
   - [x] Pattern list (`app/output_guard.yaml`): condition names, diagnostic phrasing, medicine/dose/treatment advice in English, Hindi (Devanagari + romanised), Odia. A phrase passes only if the source data already says it.
   - [x] Red-team set: 101 of 101 blocked, 40 of 40 safe sentences passed (`tests/data/redteam_outputs.yaml`; written in `docs/EVALUATION.md` with its limits).
@@ -135,9 +140,9 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **E2 Four reviewer roles** (PS: health worker, nurse, doctor, medical officer): **done 6 Oct** (`8a7c3ee`). Health worker and medical officer roles; sign-off limits (health worker GREEN, nurse up to YELLOW, doctor and MO any), enforced by the server; short note for the health worker; the MO can do all a doctor can and receives alerts. Sample accounts 9000000006 (ASHA) and 9000000007 (MO).
 - [x] **E3 Escalation and handoff**: auto-escalation timers. **Check:** escalation climbs to the next role and the timer restarts.
 - [ ] **E4 Referral preparation** (PS: referral preparation). *Partial:* referral packet and exports. **Left:** close a referral only when care is received (status today is `sent`); surface open referrals past their due date; use the facility's specialist list.
-- [ ] **E5 Scheduling and reminders.** *Partial:* reminders table; due dates and missed-visit detection done with D4 (6 Oct). **Left:** visit calendar from facility config; chronic check-in reminders.
-- [ ] **E6 Calling agent (simulated in the browser).** Logistics and bounded questions only; a red flag ends the call and pages a human.
-- [x] **E7 Note export**: PDF, print, JSON, CSV, FHIR. HL7 CDA moves after 10 Oct.
+- [ ] **E5 Scheduling and reminders.** *Partial:* reminders table; due dates and missed-visit detection done with D4 (6 Oct); chronic check-in reminders done with E6 (6 Oct, uncommitted): a chronic visit can set the next check-in and assign a health worker, a missed one follows the D4 path, and the next chronic visit closes it. **Left:** visit calendar from facility config.
+- [x] **E6 Calling agent (simulated in the browser)**: **done 6 Oct** (uncommitted). Maternal and chronic follow-ups (the plan's scope). Fixed lines in 11 languages (`backend/app/calls.yaml`; English, Hindi and Odia first, the other eight added later the same day and checked by back-translation; all but Hindi need a native check); answers read by rules: the intake lexicon finds danger signs anywhere in an answer, a word list reads yes / no / not sure. A danger sign, or "not sure" / two unreadable answers on a danger question, ends the call and raises a `call_escalation` alert to the MO and the assigned ASHA; acknowledging it needs a note. Never advice (Telemedicine Practice Guidelines 2020). Inverted escalation: the agent may call only after a routine, fully assessed visit; a RED, YELLOW or UNDETERMINED last visit, or no-AI consent, means a person calls with the same script. Someone else on the line, or a phone that is not hers, hears nothing about health. An all-"no" call is weak evidence and keeps the follow-up open. Call screen `/nurse/followups/<id>/call`: browser voice reads the lines where the device has one; answers by tap, typing or speech (server ASR + translation). Table `calls` (migration 0009). Demo: Rina (Odia, 31 weeks) and Ramprasad (chronic, Hindi) are due a call; Kusum's last visit was RED, so only a person may call. 51 tests in `test_calls.py`. **Later on 6 Oct (uncommitted):** Sarvam Bulbul voice for the lines; a hedge ("କମ୍ ହଲୁଛି", moving less) is always "not sure" (it had read as yes); typed answers in languages without a lexicon are translated or only read as plain yes / no; real phone calls and SMS through Twilio or Vonage (see §9: live telephony); real SMS reached the demo phone through Vonage's trial.
+- [x] **E7 Note export**: PDF, print, JSON, CSV, FHIR. HL7 CDA: §9, before 10 Oct.
 - [ ] **E8 Patient slip.** **Check:** printed slip with follow-up date, referral and QR, and never an urgency tier. The patient screens already hide urgency.
 - [ ] **E9 Override path with reasons.** **Check:** upgrades are free; a downgrade needs the right role and a reason; locked flags stay on record; override rate per rule is tracked.
 
@@ -239,14 +244,14 @@ Targets are the bar we set for ourselves, not results. Report each actual figure
 - [ ] ASR for every other language (§2)
 - [ ] Translation quality per language
 - [ ] Rule correctness: each rule has a firing, a non-firing, a boundary and an unknown-input test. Report the count; CI fails on a gap.
-- [ ] OCR field accuracy on synthetic slips (test, value, unit, range exact match), per capture type
+- [x] OCR field accuracy on synthetic slips (test, value, unit, range exact match), per capture type: held-out 99.3 / 99.3 / 85.5 / 98.7 / 99.3 % values exact (scan / photo / poor photo / photocopy / thermal, two engines), 3 silent errors in 1,515 (7 Oct, `docs/EVALUATION.md`)
 - [ ] Validation catch rate: injected digit swaps, unit errors and decimal shifts
 - [x] Output guard: 101 red-team outputs, 100 % blocked; 40 safe, 0 false blocks (5 Oct)
 - [x] Note faithfulness: held-out 18/20 used, 2 fell back; tuning 30/30; median 0.8 s (5 Oct)
 - [ ] Missing-information recall on deliberately incomplete cases
 - [ ] Latency for each H7 target
 - [ ] Review time per case (target under 4 minutes)
-- [ ] Fairness split by language, sex and age band, or say plainly that it moves after 10 Oct
+- [ ] Fairness split by language, sex and age band (§9: the 300-patient set)
 - No "0 missed REDs" claim: we have no clinician mentor, so we claim protocol-derived tests only.
 
 ---
@@ -261,7 +266,7 @@ Targets are the bar we set for ourselves, not results. Report each actual figure
 - [ ] 6. Referral: district hospital packet, FHIR export, patient slip without a tier
 - [ ] 7. Facility switch to an industrial unit in under 30 s
 - [ ] 8. Occupational: spirometry decline flagged; the employer sees fitness and department rates only
-- [ ] 9. Maternal: missed visit goes to the ASHA, then the simulated call; "headache" on the call pages a human
+- [ ] 9. Maternal: missed visit goes to the ASHA, then the simulated call; "headache" on the call pages a human. *Built 6 Oct* (Rina Majhi at PHC Manikpur, checked live in Odia); rehearse
 - [ ] 10. Camp offline: Wi-Fi off, three patients queued, sync on reconnect
 - [ ] 11. Proof: audit trail, purge log, evaluation numbers
 - [ ] Demo laptop: quit Docker Desktop; preload models; check free RAM
@@ -299,6 +304,7 @@ Draft of 6 Oct: 22 slides in the [Slides artifact](https://claude.ai/artifact/Fs
 - [x] LLM-triage meta-analysis (BMC Emerg Med 2026): re-read 6 Oct on PubMed (PMID 42298434, Cui et al.): 11 studies, 3,088 cases, sensitivity 61 % (48–73 %), specificity 97 %
 - [x] AIIMS 2025 presenting-complaints study: re-read 6 Oct on PubMed (PMID 40666389, Rauniyar et al., J Emerg Trauma Shock 2025;18(2):62–68): 1,225 adults, 6 of 34 complaints high risk; ORs in `sources.yaml`
 - [x] Occupational sources: re-read 6 Oct on PubMed: ATS 2014 workplace spirometry (PMID 24735032, 15 % FEV1 decline plus ageing), ERS 2020 chronic cough > 8 weeks (PMID 31515408)
+- [ ] Non-pregnant adult with BP 166/102 and headache comes out GREEN (ATP RED needs > 220 / > 110; IITT's BP line is pregnancy only). Check whether IITT or another Indian source gives a YELLOW for severe hypertension with symptoms (found 6 Oct while building the E6 demo)
 - [ ] IITT adult "any two of fever, headache, altered mental status, stiff neck" → RED (IITT-A-MENINGISM): makes every febrile headache RED. Check against the full WHO tool (found 6 Oct while building the campus fever demo)
 - [ ] Indian clinical ASR paper (arXiv 2512.10967)
 - [ ] CDSCO medical-device software guidance, current status
@@ -314,21 +320,24 @@ Draft of 6 Oct: 22 slides in the [Slides artifact](https://claude.ai/artifact/Fs
 
 **For us**
 - [x] Drug-name list: PMBJP 2,110 generics via PIB (copyright policy allows reproduction with acknowledgement), 5 Oct
-- [ ] Bhashini API key (applied 3 Oct); Sarvam as the interim online engine
+- [x] Bhashini API key (applied 3 Oct): access looks unlikely (6 Oct). Instead: Sarvam AI as the online engine (key in `backend/.env` since 6 Oct; Bulbul voice for E6 in use, Saaras speech-to-text for B9 next), and AI4Bharat IndicWhisper (Vistaar, MIT, offline) as the second speech engine for B9
+- [ ] Twilio for real calls and SMS: `JEEVIA_TWILIO_ACCOUNT_SID`, `JEEVIA_TWILIO_AUTH_TOKEN`, `JEEVIA_TWILIO_FROM_NUMBER` (a Twilio number with voice and SMS), `JEEVIA_TELEPHONY_DEMO_TO` (a phone verified in the Twilio console), India on in the voice and SMS geo permissions
 
 ---
 
-## 9. After 10 Oct (roadmap to the finale; not named in the PS)
+## 9. Moved before 10 Oct (was "after 10 Oct")
 
-- [ ] docTR second OCR engine and OCR disagreement flag
+The user's rule (6 Oct): nothing waits until after the mid-evaluation; every item here is built before 10 Oct.
+
+- [x] docTR second OCR engine and OCR disagreement flag (7 Oct, uncommitted; see B9)
 - [ ] PP-StructureV3 table extraction
 - [ ] HL7 CDA export
 - [ ] Synthea longitudinal histories with Indian demographics
 - [ ] Santali (Ol Chiki) end to end
-- [ ] Live telephony for the calling agent
+- [ ] Live telephony for the calling agent. *Built 6 Oct (uncommitted)*: Twilio calls with Sarvam's voice and keypad answers, the free answer recorded, transcribed and deleted, reminder SMS and staff SMS on a danger sign; only the demo phone is ever dialled; 6 tests against a fake Twilio. Vonage added the same day (Voice API with NCCO, SMS API; 2 more tests); `cloudflared` installed for the tunnel. Tried live: Vonage SMS works (staff alert and reminders, one segment each); Vonage's trial rejects voice calls to India ("restricted"); a Twilio trial cannot buy a number. **Left:** a live call needs a paid Vonage or Twilio account; a phone-simulator page for the demo was proposed and set aside by the user (6 Oct), to revisit later
 - [ ] Qwen3-VL-4B document-type label
 - [ ] 300-patient synthetic set and full fairness split
-- [ ] Indic Parler-TTS pre-generated prompt audio
+- [ ] Indic Parler-TTS pre-generated prompt audio. *Instead, 6 Oct:* Sarvam Bulbul v3 speaks the call lines (online, 11 languages)
 - [ ] Question flow moved to versioned YAML with a shared field dictionary; CI fails on undefined fields
 - [ ] Finale rubric pass: innovation, technical complexity, real-world impact, UI/UX, presentation
 

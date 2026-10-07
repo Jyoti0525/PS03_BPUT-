@@ -118,7 +118,8 @@ export const liveApi: JeeviaApi = {
   facilityTokens: (id) => json(`/facilities/${id}/tokens`),
 
   listKioskLinks: () => json("/kiosk-links"),
-  createKioskLink: (label) => post("/kiosk-links", { label }),
+  createKioskLink: (label, forHome = false) => post("/kiosk-links", { label, for_home: forHome }),
+  checkIn: (id) => post(`/encounters/${id}/arrive`, {}),
   revokeKioskLink: (id) => json(`/kiosk-links/${id}`, { method: "DELETE" }),
   kioskInfo: (code) => json(`/kiosk/${encodeURIComponent(code)}`),
   kioskSession: async (code, device_id) => {
@@ -182,17 +183,25 @@ export const liveApi: JeeviaApi = {
   acknowledgeAlert: (id, note) => post(`/alerts/${id}/acknowledge`, { note }),
   capacity: () => json("/capacity"),
   syndromicCsv: (days = 14) => download(`/surveillance/syndromic.csv?days=${days}`, `syndromic_${days}d.csv`),
-  listFollowups: (scope = "active") => json(`/followups?scope=${scope}`),
+  listFollowups: (scope = "active", programme = "all") => json(`/followups?scope=${scope}&programme=${programme}`),
   listHealthWorkers: () => json("/health-workers"),
   followupAttempt: (id, outcome, note = "") => post(`/followups/${id}/attempt`, { outcome, note }),
-  followupCall: (id) => post(`/followups/${id}/call`, {}),
+  startCall: (id, opts = {}) => post(`/followups/${id}/calls`, opts),
+  telephonyStatus: () => json("/telephony/status"),
+  followupSms: (id) => post(`/followups/${id}/sms`),
+  callAnswer: (cid, text, originalText) => post(`/calls/${cid}/answer`, { text, original_text: originalText ?? null }),
+  endCall: (cid, outcome) => post(`/calls/${cid}/end`, { outcome }),
+  getCall: (cid) => json(`/calls/${cid}`),
+  callAudio: async (cid, i) => (await raw(`/calls/${cid}/turns/${i}/audio`)).blob(),
+  listCalls: (id) => json(`/followups/${id}/calls`),
 
   createReferral: (encounterId, input) => post(`/encounters/${encounterId}/referrals`, input),
   listReferrals: () => json("/referrals"),
 
-  uploadFile: (file, kind, encounterId, sampleKey, read = true) => {
+  uploadFile: (file, kind, encounterId, sampleKey, read = true, online = false) => {
     const fd = new FormData();
     if (!read) fd.append("read", "false");
+    if (online) fd.append("online", "true");
     fd.append("file", file);
     fd.append("kind", kind);
     if (encounterId) fd.append("encounter_id", encounterId);
@@ -201,12 +210,14 @@ export const liveApi: JeeviaApi = {
   },
   getFile: (id) => json(`/files/${id}`),
 
-  transcribe: (audio, language) => {
+  transcribe: (audio, language, opts) => {
     const fd = new FormData();
     fd.append("audio", new File([audio], "speech.webm", { type: audio.type || "audio/webm" }));
     fd.append("language", language);
+    if (opts?.secondOpinion) fd.append("second_opinion", "true");
     return json("/speech/transcribe", { method: "POST", body: fd });
   },
+  secondCheck: (id) => json(`/speech/second/${encodeURIComponent(id)}`),
 
   listAudit: (f) => {
     const qs = new URLSearchParams();
@@ -223,7 +234,6 @@ export const liveApi: JeeviaApi = {
   guardTestSamples: () => json("/guard-test/samples"),
   guardTest: (text, source = "") => post("/guard-test", { text, source }),
 
-  myRecord: () => json("/me/record"),
 
   listCohorts: () => json("/employer/cohorts"),
   departmentRates: (days = 365) => json(`/employer/department-rates?days=${days}`),

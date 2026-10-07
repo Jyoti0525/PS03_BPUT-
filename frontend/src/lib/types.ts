@@ -13,7 +13,6 @@ export type Role =
   | "health_worker"
   | "receptionist"
   | "supervisor"
-  | "patient"
   | "employer"
   | "kiosk";
 
@@ -31,7 +30,6 @@ export const ROLE_LABEL: Record<Role, string> = {
   health_worker: "Health worker (ASHA / ANM / MPW)",
   receptionist: "Front desk",
   supervisor: "Supervisor",
-  patient: "Patient",
   employer: "Employer",
   kiosk: "Kiosk",
 };
@@ -46,7 +44,11 @@ export type EncounterStatus =
   | "confirmed"
   | "escalated"
   | "referred"
-  | "closed";
+  | "closed"
+  /** Filled in from home; joins the queue when the desk checks the patient in (C3). */
+  | "expected"
+  /** Filled in from home, never checked in within 36 h. */
+  | "lapsed";
 
 export type FacilityType =
   | "phc"
@@ -326,6 +328,8 @@ export interface SymptomEntry {
   source: InputSource;
   confirmed_by_readback: boolean;
   engine?: string | null; // speech/translation engine that produced `text`
+  /** B9, voice only: what the second speech engine heard in the same recording. The server compares the two again. */
+  second_hearing?: { engine: string; text: string; translation?: string | null } | null;
 }
 
 /** Server speech recognition result (offline IndicConformer, then IndicTrans2 into English). */
@@ -333,10 +337,27 @@ export interface Transcription {
   text: string; // in the speaker's language
   language: string;
   engine: string;
-  seconds_audio: number;
-  seconds_taken: number;
+  seconds_audio: number | null;
+  seconds_taken: number | null;
   translation: { text: string; language: "en"; engine: string } | null;
   translation_error?: string;
+  /** B9: a second engine on the same audio, when the patient allowed AI help. `error` when it could not run. */
+  second_opinion?: SecondOpinion;
+  /** The offline engine is not installed here (the hosted link): Sarvam alone transcribed. */
+  offline_unavailable?: string;
+}
+
+/** Sarvam (online) answers with the transcript; IndicWhisper (offline) answers later: `pending` is the id to ask
+ *  `secondCheck` with until the comparison is ready. */
+export interface SecondOpinion {
+  engine: string;
+  text?: string;
+  agreement?: number;
+  differences?: string[];
+  disagree?: boolean;
+  translation?: string | null;
+  error?: string;
+  pending?: string;
 }
 
 export interface IntakeAnswer {
@@ -547,7 +568,8 @@ export interface TriageNote {
   /** Uploads: what kind of document each is (B10) and what was hidden before storage (G3). */
   documents?: { file_id: string; filename: string; kind: string; read: boolean; doc_type: { type: string; label: string; why: string } | null; redaction: { faces: number; id_numbers: number; engine?: string; skipped?: string } | null }[];
   /** Medicine names read from a strip or prescription — not part of the record until confirmed. */
-  medications_pending?: { name: string; strength: string | null; seen: string; confidence: number; file_id: string; filename: string }[];
+  medications_pending?: { name: string; strength: string | null; seen: string; confidence: number; file_id: string; filename: string;
+    kind?: "generic" | "brand"; contains?: string; read_by?: string }[];
   medications?: { name: string; strength: string | null; source: string; by: string; at: string }[];
   summary_template?: string;
   llm?: { status: "PASS" | "FAIL_FELL_BACK" | "UNAVAILABLE"; model: string; ms?: number; reason?: string; rejected_text?: string; faithfulness?: string[]; guard?: string[] };
@@ -592,6 +614,10 @@ export interface Encounter {
   /** Daily queue token shown to the patient, e.g. T-014. */
   token?: string | null;
   channel?: IntakeChannel;
+  /** When the patient reached the facility; null while an intake from home is still expected. */
+  arrived_at?: string | null;
+  /** From home only: what the patient is told. Never a tier. */
+  home_advice?: "emergency" | "show_at_desk" | null;
   /** Present when the patient is on an employer's roster (never sent to patient/kiosk sessions). */
   worker?: WorkerInfo | null;
   consent?: Consent | null;
@@ -601,7 +627,7 @@ export interface Encounter {
   sign_off?: "health_worker" | "nurse" | "doctor" | null;
 }
 
-export type IntakeChannel = "staff_kiosk" | "kiosk_link" | "patient_app";
+export type IntakeChannel = "staff_kiosk" | "kiosk_link" | "home_link" | "patient_app";
 
 /** Front-desk view of today's tokens — no clinical content. */
 export interface TokenBoardItem {
@@ -613,6 +639,9 @@ export interface TokenBoardItem {
   status: EncounterStatus;
   channel: IntakeChannel;
   created_at: string;
+  /** null: filled in from home, not checked in yet. */
+  arrived_at?: string | null;
+  /** Since arrival. */
   wait_minutes: number;
 }
 
@@ -628,6 +657,8 @@ export interface KioskLink {
   last_used_at: string | null;
   sessions: number;
   intakes_today: number;
+  /** Shared for filling in before coming (SMS, poster); its intakes wait until the desk checks the patient in. */
+  for_home?: boolean;
 }
 
 export interface ShareLink {
@@ -678,12 +709,15 @@ export interface KioskInfo {
   district: string;
   state: string;
   languages: string[];
+  for_home?: boolean;
 }
 
 export interface QueueItem {
   encounter_id: string;
   token?: string | null;
   channel?: IntakeChannel;
+  /** When the patient reached the facility; waiting time counts from here. */
+  arrived_at?: string | null;
   patient_code: string;
   patient_name: string;
   age: number;
@@ -695,6 +729,8 @@ export interface QueueItem {
   created_at: string;
   wait_minutes: number;
   flag_count: number;
+  /** The first flags in words, critical first. */
+  top_flags?: string[];
   needs_check_count: number;
   language: string;
   escalation_due_at: string | null;
@@ -705,7 +741,7 @@ export interface QueueItem {
   sign_off?: "health_worker" | "nurse" | "doctor" | null;
 }
 
-export type AlertKind = "capacity" | "fever_cluster" | "missed_visit";
+export type AlertKind = "capacity" | "fever_cluster" | "missed_visit" | "call_escalation";
 
 export interface Alert {
   id: string;
@@ -736,10 +772,85 @@ export interface Capacity {
 export interface FollowupAttempt {
   at: string;
   by: string;
-  outcome: "reached" | "not_reached" | "came" | "call_placed";
+  outcome: "reached" | "not_reached" | "came" | "call" | "sms";
   note: string | null;
-  script?: string;
-  to?: string;
+  call_outcome?: CallOutcome;
+  call_id?: string;
+}
+
+/** E6: who may phone this patient. The more serious the case, the less AI on the call. */
+export interface WhoCalls {
+  who: "agent" | "human" | "home_visit";
+  why: string;
+}
+
+/** The 11 languages Sarvam's Bulbul voice speaks: a reminder call can be in any of them. */
+export type CallLanguage = "en" | "hi" | "or" | "bn" | "ta" | "te" | "gu" | "kn" | "ml" | "mr" | "pa";
+
+export type CallOutcome = "completed" | "danger_sign" | "unclear" | "message_left" | "no_answer" | "hung_up";
+
+export interface CallTurn {
+  who: "agent" | "patient";
+  key: string;
+  /** In the call's language. */
+  text: string;
+  /** Agent: the English line. Patient: the English translation, when it differs. */
+  text_en: string | null;
+  heard?: "yes" | "no" | "unsure" | null;
+  findings?: string[];
+  /** Typed in a language the danger-sign word lists do not cover, and no translation was available. */
+  unread?: string;
+  at: string;
+}
+
+export interface RedFlag {
+  finding: string | null;
+  label: string;
+  evidence: string;
+}
+
+/** E6: one reminder call, simulated in the browser. */
+export interface Call {
+  id: string;
+  reminder_id: string;
+  patient_name: string;
+  patient_code: string;
+  programme: "maternal" | "chronic";
+  operator: "agent" | "human";
+  language: CallLanguage;
+  audience: "patient" | "other";
+  status: "active" | "ended";
+  outcome: CallOutcome | null;
+  turns: CallTurn[];
+  red_flags: RedFlag[] | null;
+  notes: {
+    can_come?: boolean | null;
+    flags?: string[];
+    said?: string;
+    message_passed_on?: string | null;
+    /** A real phone call: the demo phone (last four digits) and whether it was picked up. */
+    phone?: { to: string; answered?: boolean; status?: string; error?: string };
+    /** A danger sign or unclear answer also texted the demo phone (standing in for the MO and the ASHA). */
+    staff_sms?: { sent: boolean; to?: string; error?: string };
+  } | null;
+  expects: "yes_no" | "free" | null;
+  alert_id: string | null;
+  started_at: string;
+  ended_at: string | null;
+  sources: { id: string; short: string }[];
+  /** sarvam: each agent line is spoken by Sarvam's Bulbul voice (callAudio); device: the browser's own voice. */
+  voice: "sarvam" | "device";
+  /** phone: a real call through Twilio to the demo phone; the page follows it. */
+  channel: "browser" | "phone";
+}
+
+/** Whether real phone calls and SMS (Twilio) are set up. Everything goes to one demo phone, never a patient's number. */
+export interface TelephonyStatus {
+  calls: boolean;
+  sms: boolean;
+  demo_to: string | null;
+  provider?: "twilio" | "vonage";
+  missing: string[];
 }
 
 export interface Followup {
@@ -751,8 +862,12 @@ export interface Followup {
   phone: string | null;
   phone_belongs_to: PhoneOwner | null;
   kind: string;
+  programme: "maternal" | "chronic";
+  /** Chronic: the long-term condition. */
+  condition: string | null;
+  who_calls: WhoCalls;
   due_at: string;
-  status: "scheduled" | "missed" | "contacted" | "call_due" | "done" | "cancelled";
+  status: "scheduled" | "missed" | "contacted" | "call_due" | "flagged" | "done" | "cancelled";
   missed_at: string | null;
   attempts: FollowupAttempt[];
   assigned_to: string | null;
@@ -810,6 +925,7 @@ export interface Referral {
 }
 
 export type AuditAction =
+  | "ARRIVE"
   | "VIEW"
   | "CREATE"
   | "UPDATE"

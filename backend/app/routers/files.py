@@ -5,13 +5,13 @@ from typing import Annotated
 from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
 from starlette.concurrency import run_in_threadpool
 
-from .. import audit, storage
+from .. import audit, sarvam, storage
 from ..config import get_settings
 from ..models import Encounter, FileObject, User
 from ..schemas import ADMIN_ROLES, REVIEWER_ROLES, FileKind, FileOut
 from ..security import DB, CurrentUser, decode, file_token
-from ..services import now, own_patient
-from ..triage.extraction import extract_document
+from ..services import now
+from ..triage.extraction import add_online_reading, extract_document, wants_online_reading
 from ..triage.images import redact
 from ..triage.reports import SAMPLE_REPORTS, render
 
@@ -37,6 +37,7 @@ async def upload(
     encounter_id: Annotated[str | None, Form()] = None,
     sample_key: Annotated[str | None, Form()] = None,
     read: Annotated[bool, Form()] = True,  # False: the patient chose to continue without AI — no OCR runs
+    online: Annotated[bool, Form()] = False,  # the patient's AI consent covers the online reader (consent text)
 ):
     if user.role in ADMIN_ROLES or user.role == "employer":
         raise HTTPException(403, "This role cannot upload clinical files")
@@ -55,7 +56,11 @@ async def upload(
     extraction = None
     if kind == "report" and read:
         # Read the document now (offline OCR / text layer) so the reviewer sees values with their source crops.
-        extraction = await run_in_threadpool(extract_document, data, ctype)
+        # Two offline OCR engines read it at once and are compared test by test (B9).
+        extraction = await run_in_threadpool(lambda: extract_document(data, ctype, second=True))
+        # Handwriting the offline engines cannot read: Sarvam Vision (online, India), only with the patient's consent.
+        if online and ctype.startswith("image/") and ctype != "image/svg+xml" and sarvam.enabled() and wants_online_reading(extraction):
+            extraction = await run_in_threadpool(add_online_reading, extraction, data, file.filename or "page.jpg")
     elif kind == "image" and read and ctype.startswith("image/"):
         # A photo of the problem is never interpreted; it is only scanned for ID numbers to black out.
         ex = await run_in_threadpool(extract_document, data, ctype)
@@ -79,6 +84,7 @@ async def upload(
         raise HTTPException(502, "File storage is unavailable — please try again")
     audit.record(db, user, "UPLOAD", "file", f.id, f"{kind} uploaded ({f.filename}, {max(1, len(data) // 1024)} KB); expires {f.expires_at:%Y-%m-%d %H:%M} UTC"
                  + (f"; read by {f.extraction['engine']}, {len(f.extraction['rows'])} lab value(s)" if f.extraction else "")
+                 + (f"; also read online by {f.extraction['online_reading']['engine']} (patient's AI consent)" if f.extraction and f.extraction.get("online_reading") else "")
                  + ("; not read (patient continued without AI)" if kind == "report" and not read else "")
                  + (f"; redacted before storage: {redaction['faces']} face(s), {redaction['id_numbers']} ID-number line(s)" if redaction.get("faces") or redaction.get("id_numbers") else ""))
     return file_out(f, request, user)
@@ -93,16 +99,12 @@ def get_file(fid: str, request: Request, user: CurrentUser, db: DB):
         raise HTTPException(404, "File not found")
     enc = db.get(Encounter, f.encounter_id) if f.encounter_id else None
     # Patient documents are for the treating team only: doctors and nurses at the facility where
-    # the patient was seen, the patient themself, and whoever uploaded the file before submission.
+    # the patient was seen, and whoever uploaded the file before submission.
     # Front desk, supervisors, employers and kiosks never open them. (QR summaries use their own links.)
     if f.uploaded_by != user.id:
-        if user.role == "patient":
-            mine = own_patient(db, user)
-            if not enc or not mine or enc.patient_id != mine.id:
-                raise HTTPException(403, "Not your file")
-        elif user.role not in REVIEWER_ROLES or not enc or enc.facility_id != user.facility_id:
+        if user.role not in REVIEWER_ROLES or not enc or enc.facility_id != user.facility_id:
             raise HTTPException(403, "Only the doctors and nurses treating this patient can open their documents")
-    if enc and (user.role in REVIEWER_ROLES or user.role == "patient"):
+    if enc and user.role in REVIEWER_ROLES:
         audit.record(db, user, "VIEW", "file", f.id, f"Document opened: {f.kind} {f.filename}", enc.patient.code, enc.facility_id)
     return file_out(f, request, user)
 

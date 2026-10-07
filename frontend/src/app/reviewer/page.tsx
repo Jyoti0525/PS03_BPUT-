@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { RefreshCw, Search, Baby, HeartPulse, Timer, AlertTriangle, WifiOff, Inbox } from "lucide-react";
+import { RefreshCw, Search, Baby, HeartPulse, Timer, AlertTriangle, WifiOff, Inbox, House } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, useNow, fmtWait } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Input, Segmented, Spinner, Stat, cx } from "@/components/ui";
-import { UrgencyBadge, urgencyBar } from "@/components/triage/note";
+import { UrgencyBadge, english, urgencyBar } from "@/components/triage/note";
 import type { QueueItem, Urgency } from "@/lib/types";
 import { langByCode } from "@/lib/i18n/languages";
 
@@ -47,7 +47,7 @@ export default function QueuePage() {
     <>
       <PageHeader
         title={tr("Triage queue")}
-        subtitle={tr("Ordered by rules-engine urgency, then waiting time; each row says why it is where it is. Critical cases auto-escalate after 15 minutes.")}
+        subtitle={tr("Ordered by rules-engine urgency, then escalated cases, then time waiting since arrival; each row says why it is where it is. Critical cases auto-escalate after 15 minutes.")}
         actions={
           <Button variant="secondary" onClick={() => reload()} icon={<RefreshCw className="size-4" />}>
             {tr("Refresh")}
@@ -97,6 +97,7 @@ export default function QueuePage() {
                   <span className="hidden w-14 shrink-0 pt-0.5 sm:block">
                     <span className="block rounded-md bg-coral-50 py-0.5 text-center font-mono text-xs font-bold text-coral-700">{i.token ?? idx + 1}</span>
                     {i.channel === "kiosk_link" && <span className="mt-1 block text-center text-[10px] text-subtle">{tr("kiosk link")}</span>}
+                    {i.channel === "home_link" && <span className="mt-1 flex items-center justify-center gap-0.5 text-[10px] text-subtle"><House className="size-3" />{tr("from home")}</span>}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -111,16 +112,27 @@ export default function QueuePage() {
                       {i.status === "in_review" && <Badge tone="info">{tr("In review")}</Badge>}
                     </div>
                     <p className="mt-0.5 truncate text-sm text-ink-2">{tr(i.chief_complaint)}</p>
-                    {i.order_reason && <p className="mt-0.5 truncate text-xs text-muted" title={tr("Why this place in the queue")}>{i.order_reason}</p>}
-                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      {i.flag_count > 0 && <Badge tone={i.urgency === "red" ? "crit" : "semi"}>{i.flag_count} {tr("flag")}{i.flag_count > 1 && "s"}</Badge>}
+                    <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
+                      {(i.top_flags ?? []).map((f) => (
+                        <Badge key={f} tone={i.urgency === "red" ? "crit" : "semi"} className="max-w-full sm:max-w-[22rem]">
+                          <span className="truncate" title={english(tr, f) ? `${tr(f)}\n${f}` : f}>{tr(f)}</span>
+                        </Badge>
+                      ))}
+                      {i.flag_count > (i.top_flags?.length ?? 0) && (
+                        <Badge tone={i.urgency === "red" ? "crit" : "semi"}>{(i.top_flags?.length ?? 0) ? tr("+{n} more", { n: i.flag_count - (i.top_flags?.length ?? 0) }) : tr("{n} flags", { n: i.flag_count })}</Badge>
+                      )}
                       {i.needs_check_count > 0 && <Badge tone="semi">{i.needs_check_count} {tr("needs checking")}</Badge>}
                       <Badge>{tr(langByCode(i.language).name)}</Badge>
                     </div>
+                    {i.order_reason && (
+                      <p className="mt-1 text-xs text-muted">
+                        <span className="font-semibold text-ink-2">{tr("Why here:")}</span> {i.order_reason}
+                      </p>
+                    )}
                   </div>
                   <div className="flex shrink-0 flex-col items-end justify-between gap-1.5">
                     <UrgencyBadge u={i.urgency} size="sm" />
-                    <span className="text-sm font-semibold text-ink tabular-nums">{fmtWait(Math.max(i.wait_minutes, Math.round((now - Date.parse(i.created_at)) / 60000)))}</span>
+                    <span className="text-sm font-semibold text-ink tabular-nums">{fmtWait(Math.max(i.wait_minutes, Math.round((now - Date.parse(i.arrived_at ?? i.created_at)) / 60000)))}</span>
                     {i.status !== "escalated" ? <Countdown due={i.escalation_due_at} now={now} /> : <Badge tone="crit">{tr("Escalated")}</Badge>}
                   </div>
                 </Link>

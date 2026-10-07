@@ -2,6 +2,8 @@ import type {
   Alert,
   Capacity,
   DepartmentRates,
+  Call,
+  TelephonyStatus,
   Followup,
   FollowupAttempt,
   AuditAction,
@@ -44,6 +46,7 @@ import type {
   Reminder,
   RetentionStatus,
   Tokens,
+  SecondOpinion,
   Transcription,
   TriageNote,
   Urgency,
@@ -105,7 +108,9 @@ export interface JeeviaApi {
 
   // Public kiosk links
   listKioskLinks(): Promise<KioskLink[]>;
-  createKioskLink(label: string): Promise<KioskLink>;
+  createKioskLink(label: string, forHome?: boolean): Promise<KioskLink>;
+  /** C3: the desk checks in a patient who filled in from home; they join the queue from now. */
+  checkIn(encounterId: string): Promise<Encounter>;
   revokeKioskLink(id: string): Promise<void>;
   kioskInfo(code: string): Promise<KioskInfo>;
   /** Starts a kiosk session for this browser tab (role = kiosk, intake-only). */
@@ -171,18 +176,29 @@ export interface JeeviaApi {
   listEscalations(status?: Escalation["status"]): Promise<Escalation[]>;
   acknowledgeEscalation(id: string, note: string): Promise<Escalation>;
 
-  // Alerts (C3 capacity, D3 fever cluster, D4 missed visit) and maternal follow-ups
+  // Alerts (C3 capacity, D3 fever cluster, D4 missed visit, E6 call escalation), follow-ups and reminder calls
   listAlerts(status?: Alert["status"] | "active"): Promise<Alert[]>;
   acknowledgeAlert(id: string, note: string): Promise<Alert>;
   capacity(): Promise<Capacity>;
   /** Doctor / medical officer: daily counts per place and syndrome, small counts written as "<5". */
   syndromicCsv(days?: number): Promise<ExportResult>;
-  listFollowups(scope?: "active" | "all"): Promise<Followup[]>;
+  listFollowups(scope?: "active" | "all", programme?: "all" | "maternal" | "chronic"): Promise<Followup[]>;
   /** Active health workers at the caller's facility (names only), to assign a maternal follow-up. */
   listHealthWorkers(): Promise<{ id: string; name: string }[]>;
-  followupAttempt(id: string, outcome: Exclude<FollowupAttempt["outcome"], "call_placed">, note?: string): Promise<Followup>;
-  /** Simulated in this build: the script is recorded, no call is made. */
-  followupCall(id: string): Promise<Followup>;
+  followupAttempt(id: string, outcome: Exclude<FollowupAttempt["outcome"], "call">, note?: string): Promise<Followup>;
+  /** E6 reminder call, simulated in the browser: no phone call is made in this build. */
+  startCall(followupId: string, opts?: { operator?: Call["operator"]; language?: Call["language"]; channel?: Call["channel"] }): Promise<Call>;
+  /** Real phone calls and SMS through Twilio: set up or not, and the demo phone they go to. */
+  telephonyStatus(): Promise<TelephonyStatus>;
+  /** A reminder SMS in the patient's language, to the demo phone. Never names a pregnancy or a condition. */
+  followupSms(followupId: string): Promise<Followup>;
+  /** One answer: what was said (English) and, when transcribed, the patient's own words. Rules read it on the server. */
+  callAnswer(callId: string, text: string, originalText?: string): Promise<Call>;
+  endCall(callId: string, outcome: "no_answer" | "hung_up"): Promise<Call>;
+  getCall(callId: string): Promise<Call>;
+  listCalls(followupId: string): Promise<Call[]>;
+  /** One agent line spoken by Sarvam's voice (MP3). Rejects with 503 when Sarvam is not set up. */
+  callAudio(callId: string, turnIndex: number): Promise<Blob>;
 
   // Referrals
   createReferral(
@@ -193,12 +209,16 @@ export interface JeeviaApi {
 
   // Files
   /** `sampleKey` marks one of the bundled synthetic reports so OCR crops can be generated. */
-  /** `read: false` — the patient chose to continue without AI, so the server does not OCR the report. */
-  uploadFile(file: File, kind: FileObject["kind"], encounterId?: string | null, sampleKey?: string | null, read?: boolean): Promise<FileObject>;
+  /** `read: false` — the patient chose to continue without AI, so the server does not OCR the report.
+   * `online: true` — their AI consent also lets handwriting be read online (Sarvam Vision, India). */
+  uploadFile(file: File, kind: FileObject["kind"], encounterId?: string | null, sampleKey?: string | null, read?: boolean, online?: boolean): Promise<FileObject>;
   getFile(id: string): Promise<FileObject>;
 
   // Speech — offline models on the facility server; the audio itself is not stored by this call
-  transcribe(audio: Blob, language: string): Promise<Transcription>;
+  /** secondOpinion: a second engine also hears the audio (B9); only when the patient allowed AI help. Sarvam (online)
+   *  answers at once; IndicWhisper (offline, when Sarvam cannot) answers through `secondCheck`. */
+  transcribe(audio: Blob, language: string, opts?: { secondOpinion?: boolean }): Promise<Transcription>;
+  secondCheck(id: string): Promise<SecondOpinion>;
 
   // Audit
   listAudit(filter?: { action?: AuditAction | ""; q?: string }): Promise<AuditEvent[]>;
@@ -216,7 +236,6 @@ export interface JeeviaApi {
   guardTest(text: string, source?: string): Promise<GuardTestResult>;
 
   // Patient self-service (triage status is stripped server-side for this role)
-  myRecord(): Promise<{ patient: Patient; encounters: Encounter[]; reminders: Reminder[] }>;
 
   // Employer — fitness status and cohort only, never records
   listCohorts(): Promise<Cohort[]>;

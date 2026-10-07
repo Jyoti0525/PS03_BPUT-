@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePrefs } from "@/components/providers";
 import { fmtDateTime } from "@/lib/hooks";
 import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays } from "lucide-react";
@@ -32,6 +33,9 @@ function FlagIcon({ s }: { s: Flag["severity"] }) {
   return <Info className="size-4 shrink-0 text-blue-600" />;
 }
 
+/** The English original as a hover title when the screen shows a translation, so a clinician can always check the source wording. */
+export const english = (tr: (s: string) => string, s: string) => (s && tr(s) !== s ? s : undefined);
+
 /** Flags, not confidence percentages. */
 export function FlagList({ flags, limit }: { flags: Flag[]; limit?: number }) {
   const { tr } = usePrefs();
@@ -44,8 +48,8 @@ export function FlagList({ flags, limit }: { flags: Flag[]; limit?: number }) {
         <li key={i} className={cx("flex items-start gap-2 rounded-lg border px-2.5 py-2 text-sm", f.severity === "critical" ? "border-crit-line bg-crit-bg" : f.severity === "warning" ? "border-semi-line bg-semi-bg" : "border-blue-100 bg-blue-50/60")}>
           <FlagIcon s={f.severity} />
           <span className="min-w-0 flex-1">
-            <span className="font-medium text-ink">{tr(f.label)}</span>
-            <span className="block text-xs text-muted">{tr(f.reason)}</span>
+            <span className="font-medium text-ink" title={english(tr, f.label)}>{tr(f.label)}</span>
+            <span className="block text-xs text-muted" title={english(tr, f.reason)}>{tr(f.reason)}</span>
           </span>
           <code className="hidden shrink-0 text-[10px] text-subtle sm:block">{f.code}</code>
         </li>
@@ -58,13 +62,21 @@ function statusTone(v: ExtractedValue) {
   return v.status === "abnormal" ? "text-crit" : v.status === "borderline" ? "text-semi" : "text-ink";
 }
 
-/** Each value sits beside the evidence that produced it. */
+const attention = (v: ExtractedValue) => (v.status === "abnormal" ? 0 : v.needs_check ? 1 : v.status === "borderline" ? 2 : 3);
+
+/** Each value sits beside the evidence that produced it. Out-of-range and to-check values come first, with a word label;
+ * in a long list the within-range values fold away so the reviewer reads what matters first (4-minute budget). */
 export function ValueTable({ values, compact }: { values: ExtractedValue[]; compact?: boolean }) {
   const { tr } = usePrefs();
+  const [open, setOpen] = useState(false);
   if (!values.length) return <p className="px-4 py-3 text-sm text-muted">{tr("Nothing recorded.")}</p>;
+  const sorted = [...values].sort((a, b) => attention(a) - attention(b));
+  const ok = sorted.filter((v) => attention(v) === 3);
+  const fold = !compact && values.length >= 6 && ok.length >= 3 && ok.length < values.length;
+  const shown = fold && !open ? sorted.filter((v) => attention(v) < 3) : sorted;
   return (
     <div className="divide-y divide-line">
-      {values.map((v) => (
+      {shown.map((v) => (
         <div key={v.id} className={cx("grid items-center gap-3 px-4 py-2.5", compact ? "grid-cols-[1fr_auto]" : "grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.2fr)]")}>
           <div className="min-w-0">
             <p className="truncate text-sm text-muted">{tr(v.label)}</p>
@@ -74,6 +86,8 @@ export function ValueTable({ values, compact }: { values: ExtractedValue[]; comp
             </p>
           </div>
           <div className={cx("flex flex-col items-start gap-1", compact ? "items-end" : "sm:items-start")}>
+            {v.status === "abnormal" && <Badge tone="crit">{tr("Out of range")}</Badge>}
+            {v.status === "borderline" && <Badge tone="semi">{tr("Borderline")}</Badge>}
             {v.needs_check && <Badge tone="semi">{tr("Needs checking")}</Badge>}
             {v.reference && !compact && <span className="text-[11px] text-subtle">{tr("ref")} {v.reference}</span>}
             {!compact && v.checks?.map((c) => (
@@ -87,8 +101,21 @@ export function ValueTable({ values, compact }: { values: ExtractedValue[]; comp
           )}
         </div>
       ))}
+      {fold && (
+        <button type="button" onClick={() => setOpen((o) => !o)} className="w-full px-4 py-2.5 text-left text-sm font-medium text-teal-700 hover:bg-canvas">
+          {open ? tr("Hide the values within range") : tr("Show {n} values within range", { n: ok.length })}
+        </button>
+      )}
     </div>
   );
+}
+
+/** "2 out of range · 1 to check" for a card header, or null when everything is within range. */
+export function valueSummary(values: ExtractedValue[], tr: (s: string, v?: Record<string, string | number>) => string): string | null {
+  const out = values.filter((v) => v.status === "abnormal").length;
+  const check = values.filter((v) => v.needs_check).length;
+  const parts = [out && tr("{n} out of range", { n: out }), check && tr("{n} to check", { n: check })].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
 }
 
 export function Sparkline({ row }: { row: TrendRow }) {
@@ -310,7 +337,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
               <li key={r.rule_id} className="flex items-start gap-3 px-4 py-2.5">
                 <span className={cx("mt-0.5 h-6 w-1 shrink-0 rounded-full", urgencyBar(r.urgency))} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-ink">
+                  <p className="text-sm text-ink" title={english(tr, r.description)}>
                     {tr(r.description)}
                     {r.non_downgradable && r.urgency === "red" && (
                       <span title={tr("Non-downgradable: only a doctor can lower it, with a written reason that is audited")} className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-crit-bg px-1.5 text-[10px] font-semibold uppercase text-crit">
@@ -343,7 +370,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
                   .filter((u) => u.urgency === "red")
                   .map((u) => (
                     <li key={u.rule_id} className="text-xs text-ink-2">
-                      <span className="font-mono text-subtle">{u.rule_id}</span> {tr(u.description)} — {tr("needs")}: {u.needs.join(", ")}
+                      <span className="font-mono text-subtle">{u.rule_id}</span> <span title={english(tr, u.description)}>{tr(u.description)}</span> — {tr("needs")}: {u.needs.map((x) => tr(x)).join(", ")}
                     </li>
                   ))}
               </ul>
@@ -386,13 +413,13 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
       )}
 
       <Card>
-        <CardHeader title={tr("Vitals")} subtitle={tr("Each value with the source that produced it")} icon={<Activity className="size-4" />} />
+        <CardHeader title={tr("Vitals")} subtitle={valueSummary(n.vitals, tr) ?? tr("Each value with the source that produced it")} icon={<Activity className="size-4" />} />
         <ValueTable values={n.vitals} />
       </Card>
 
       {n.labs.length > 0 && (
         <Card>
-          <CardHeader title={tr("Report values")} subtitle={tr("Read from uploaded reports — cropped region shown beside each value")} icon={<FlaskConical className="size-4" />} />
+          <CardHeader title={tr("Report values")} subtitle={valueSummary(n.labs, tr) ?? tr("Read from uploaded reports — cropped region shown beside each value")} icon={<FlaskConical className="size-4" />} />
           <ValueTable values={n.labs} />
         </Card>
       )}

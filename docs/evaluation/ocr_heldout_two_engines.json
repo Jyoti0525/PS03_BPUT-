@@ -1,0 +1,5926 @@
+{
+ "engine": "RapidOCR (PaddleOCR PP-OCR models, ONNX Runtime, offline)",
+ "second_engine": true,
+ "by_type": {
+  "scan": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 100.0,
+   "value_exact_pct": 99.7,
+   "unit_pct": 100.0,
+   "range_pct": 100.0,
+   "high_low_pct": 99.7,
+   "wrong_values": 1,
+   "wrong_flagged_pct": 100.0,
+   "silent_errors": 0,
+   "correct_flagged_pct": 7.0,
+   "engines_differ_on_wrong": 1,
+   "engines_differ_on_correct": 5,
+   "silent_error_pct": 0.0,
+   "correct_flagged_without_sums_pct": 3.6,
+   "silent_errors_without_sums": 0,
+   "wrong_in_failed_sum": 0,
+   "sum_relations_checked": 22,
+   "sum_relations_failed": 5,
+   "sum_false_alarms": 5,
+   "marks_printed": 0,
+   "marks_read_pct": null,
+   "marks_misread": 0,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 100.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 14.11
+  },
+  "photo": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 100.0,
+   "value_exact_pct": 99.7,
+   "unit_pct": 100.0,
+   "range_pct": 95.5,
+   "high_low_pct": 99.7,
+   "wrong_values": 1,
+   "wrong_flagged_pct": 100.0,
+   "silent_errors": 0,
+   "correct_flagged_pct": 12.6,
+   "engines_differ_on_wrong": 0,
+   "engines_differ_on_correct": 19,
+   "silent_error_pct": 0.0,
+   "correct_flagged_without_sums_pct": 9.9,
+   "silent_errors_without_sums": 0,
+   "wrong_in_failed_sum": 1,
+   "sum_relations_checked": 22,
+   "sum_relations_failed": 5,
+   "sum_false_alarms": 4,
+   "marks_printed": 0,
+   "marks_read_pct": null,
+   "marks_misread": 0,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 100.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 12.22
+  },
+  "poor_photo": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 95.7,
+   "value_exact_pct": 85.8,
+   "unit_pct": 90.3,
+   "range_pct": 62.2,
+   "high_low_pct": 92.1,
+   "wrong_values": 30,
+   "wrong_flagged_pct": 96.7,
+   "silent_errors": 1,
+   "correct_flagged_pct": 39.6,
+   "engines_differ_on_wrong": 10,
+   "engines_differ_on_correct": 24,
+   "silent_error_pct": 0.3,
+   "correct_flagged_without_sums_pct": 37.7,
+   "silent_errors_without_sums": 1,
+   "wrong_in_failed_sum": 2,
+   "sum_relations_checked": 16,
+   "sum_relations_failed": 4,
+   "sum_false_alarms": 2,
+   "marks_printed": 0,
+   "marks_read_pct": null,
+   "marks_misread": 0,
+   "invented_rows": 0,
+   "date_pct": 90.0,
+   "name_pct": 87.5,
+   "retake_asked_pct": 72.5,
+   "seconds_per_page": 10.84
+  },
+  "photocopy": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 100.0,
+   "value_exact_pct": 98.7,
+   "unit_pct": 99.6,
+   "range_pct": 91.0,
+   "high_low_pct": 97.7,
+   "wrong_values": 4,
+   "wrong_flagged_pct": 100.0,
+   "silent_errors": 0,
+   "correct_flagged_pct": 12.4,
+   "engines_differ_on_wrong": 4,
+   "engines_differ_on_correct": 4,
+   "silent_error_pct": 0.0,
+   "correct_flagged_without_sums_pct": 9.0,
+   "silent_errors_without_sums": 0,
+   "wrong_in_failed_sum": 0,
+   "sum_relations_checked": 22,
+   "sum_relations_failed": 5,
+   "sum_false_alarms": 5,
+   "marks_printed": 0,
+   "marks_read_pct": null,
+   "marks_misread": 0,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 95.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 11.65
+  },
+  "thermal": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 100.0,
+   "value_exact_pct": 99.3,
+   "unit_pct": 97.4,
+   "range_pct": 98.1,
+   "high_low_pct": 100.0,
+   "wrong_values": 2,
+   "wrong_flagged_pct": 100.0,
+   "silent_errors": 0,
+   "correct_flagged_pct": 6.3,
+   "engines_differ_on_wrong": 2,
+   "engines_differ_on_correct": 0,
+   "silent_error_pct": 0.0,
+   "correct_flagged_without_sums_pct": 3.0,
+   "silent_errors_without_sums": 0,
+   "wrong_in_failed_sum": 1,
+   "sum_relations_checked": 22,
+   "sum_relations_failed": 5,
+   "sum_false_alarms": 4,
+   "marks_printed": 0,
+   "marks_read_pct": null,
+   "marks_misread": 0,
+   "invented_rows": 0,
+   "date_pct": 97.5,
+   "name_pct": 100.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 8.93
+  }
+ },
+ "detail": {
+  "scan": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [
+     {
+      "test": "alt",
+      "truth": "67",
+      "read": "49",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "photo": [
+   {
+    "id": "r000",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "317000",
+      "read": "317000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "317",
+      "read": "317",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [
+     {
+      "test": "alt",
+      "truth": "67",
+      "read": "67",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "250",
+      "read": "250",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "378",
+      "read": "378",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "471",
+      "read": "471",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "313000",
+      "read": "313000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "3,65,000",
+      "read": "3,65,000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "286000",
+      "read": "286000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "264",
+      "read": "264",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "15.3",
+      "read": "15",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": true
+     },
+     {
+      "test": "cholesterol",
+      "truth": "313",
+      "read": "313",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 1,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "44000",
+      "read": "44000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "poor_photo": [
+   {
+    "id": "r000",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "12.9",
+      "read": "129",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "pcv",
+      "truth": "48.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "wbc",
+      "truth": "3,900",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "platelets",
+      "truth": "317000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "402",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hdl",
+      "truth": "57",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "6.18",
+      "read": "618",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r001",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "0.63",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "5.8",
+      "read": "58",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "alt",
+      "truth": "205",
+      "read": "205",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ast",
+      "truth": "68",
+      "read": "68",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r002",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "134",
+      "read": "134",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.45",
+      "read": "3.45",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "9.8",
+      "read": "86",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r004",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "5.2",
+      "read": "52",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.48",
+      "read": "448",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "7.94",
+      "read": "7.94",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r005",
+    "errors": [
+     {
+      "test": "pcv",
+      "truth": "31.7",
+      "read": "3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "wbc",
+      "truth": "19,800",
+      "read": "19,800",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "platelets",
+      "truth": "2.31",
+      "read": "2.31",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "5.1",
+      "read": "5.1",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.22",
+      "read": "3.22",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "234",
+      "read": "234",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "4.0",
+      "read": "4.0",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ast",
+      "truth": "47",
+      "read": "47",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": false,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r010",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "3+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r011",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "378",
+      "read": "378",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ldl",
+      "truth": "52",
+      "read": "52",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "164",
+      "read": "164",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "5.3",
+      "read": "53",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.52",
+      "read": "152",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": false,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r012",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "297000",
+      "read": "297000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": "nil",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r013",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "5.80",
+      "read": "5.80",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "212",
+      "read": "212",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "471",
+      "read": "471",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ldl",
+      "truth": "64",
+      "read": "64",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r015",
+    "errors": [
+     {
+      "test": "glucose_random",
+      "truth": "227",
+      "read": "227",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.4",
+      "read": "5.4",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r016",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "128",
+      "read": "128",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [
+     {
+      "test": "glucose_random",
+      "truth": "320",
+      "read": "320",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "potassium",
+      "truth": "6.3",
+      "read": "63",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "sodium",
+      "truth": "136",
+      "read": "136",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.70",
+      "read": "0.70",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "11.89",
+      "read": "1189",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r019",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "3.0",
+      "read": "3.0",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "2.10",
+      "read": "2.10",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "4.2",
+      "read": "4.2",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "3.3",
+      "read": "33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.81",
+      "read": "181",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "urea",
+      "truth": "96",
+      "read": "17",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "11.84",
+      "read": "11.84",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": false,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r021",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "169",
+      "read": "691",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "243",
+      "read": "243",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hdl",
+      "truth": "62",
+      "read": "2",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ldl",
+      "truth": "73",
+      "read": "130",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": true,
+      "in_failed_sum": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "194",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "295",
+      "read": "295",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "4.8",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "2.79",
+      "read": "2.79",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "urea",
+      "truth": "135",
+      "read": "135",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "8.5",
+      "read": "2",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": true
+     },
+     {
+      "test": "pcv",
+      "truth": "30.0",
+      "read": "30.0",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": true
+     },
+     {
+      "test": "wbc",
+      "truth": "17600",
+      "read": "17600",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "platelets",
+      "truth": "275000",
+      "read": "275000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r022",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "142",
+      "read": "70",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.52",
+      "read": "0.52",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r023",
+    "errors": [
+     {
+      "test": "hba1c",
+      "truth": "7.2",
+      "read": "7.2",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "164",
+      "read": "164",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "6.9",
+      "read": "6.9",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.42",
+      "read": "442",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "13.25",
+      "read": "0.35",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r025",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "4.5",
+      "read": "45",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "alt",
+      "truth": "85",
+      "read": "85",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ast",
+      "truth": "20",
+      "read": "20",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "14.3",
+      "read": "143",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "wbc",
+      "truth": "16500",
+      "read": "16500",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "platelets",
+      "truth": "313000",
+      "read": "313000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "111",
+      "read": "111",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "144",
+      "read": "144",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "8.6",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.52",
+      "read": "452",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "7.87",
+      "read": "284",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r027",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "232",
+      "read": "232",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ldl",
+      "truth": "157",
+      "read": "157",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": true
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "229",
+      "read": "229",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "11.7",
+      "read": "11.7",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.68",
+      "read": "3.68",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r028",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "3.27",
+      "read": "3.27",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": false,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r029",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "0.91",
+      "read": "0.91",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.2",
+      "read": "5.2",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "2.56",
+      "read": "2.56",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "urea",
+      "truth": "122",
+      "read": "122",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "1.94",
+      "read": "194",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "185",
+      "read": "185",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "4.8",
+      "read": "4.8",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "platelets",
+      "truth": "286000",
+      "read": "286000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "alt",
+      "truth": "55",
+      "read": "55",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ast",
+      "truth": "104",
+      "read": "104",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r032",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "3.29",
+      "read": "329",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "264",
+      "read": "264",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ldl",
+      "truth": "136",
+      "read": "136",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.0",
+      "read": "5.0",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.27",
+      "read": "4.27",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r034",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "147",
+      "read": "147",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.11",
+      "read": "1.11",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "pcv",
+      "truth": "32.3",
+      "read": "32.3",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "wbc",
+      "truth": "10,900",
+      "read": "10,900",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "166",
+      "read": "166",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "124",
+      "read": "124",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r036",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "15.3",
+      "read": "153",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "platelets",
+      "truth": "2,43,000",
+      "read": "243.000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "195",
+      "read": "195",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r038",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "6.2",
+      "read": "6.2",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "alt",
+      "truth": "229",
+      "read": "229",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ast",
+      "truth": "124",
+      "read": "124",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "14.1",
+      "read": "14.1",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": true
+     },
+     {
+      "test": "pcv",
+      "truth": "29.3",
+      "read": "6",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": true
+     },
+     {
+      "test": "platelets",
+      "truth": "44000",
+      "read": "44000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r039",
+    "errors": [
+     {
+      "test": "hba1c",
+      "truth": "6.4",
+      "read": "6.4",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.99",
+      "read": "0.99",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "photocopy": [
+   {
+    "id": "r000",
+    "errors": [
+     {
+      "test": "wbc",
+      "truth": "3,900",
+      "read": "006",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [
+     {
+      "test": "alt",
+      "truth": "205",
+      "read": "205",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "317",
+      "read": "317",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "7.94",
+      "read": "7.94",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "5.1",
+      "read": "5.1",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "ldl",
+      "truth": "66",
+      "read": "66",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "217",
+      "read": "217",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "297000",
+      "read": "297000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": "nil",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "212",
+      "read": "212",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "ldl",
+      "truth": "64",
+      "read": "64",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "6.3",
+      "read": "6.3",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "sodium",
+      "truth": "136",
+      "read": "136",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "3.0",
+      "read": "3.0",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [
+     {
+      "test": "hba1c",
+      "truth": "4.8",
+      "read": "4.8",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "142",
+      "read": "142",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "urea",
+      "truth": "39",
+      "read": "39",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "0.67",
+      "read": "0.67",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "potassium",
+      "truth": "3.5",
+      "read": "3.5",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "urea",
+      "truth": "69",
+      "read": "69",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "3,65,000",
+      "read": "3.65",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [
+     {
+      "test": "alt",
+      "truth": "55",
+      "read": "55",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "ldl",
+      "truth": "136",
+      "read": "136",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "glucose_random",
+      "truth": "84",
+      "read": "8",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.0",
+      "read": "5.0",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "sodium",
+      "truth": "135",
+      "read": "135",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "only",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [
+     {
+      "test": "glucose_random",
+      "truth": "192",
+      "read": "192",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "313",
+      "read": "313",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "82",
+      "read": "82",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "thermal": [
+   {
+    "id": "r000",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "6.18",
+      "read": "6.18",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "5.1",
+      "read": "5.1",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [
+     {
+      "test": "wbc",
+      "truth": "17,700",
+      "read": "17,700",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": false,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "1.81",
+      "read": "1.81",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "tsh",
+      "truth": "11.84",
+      "read": "11.84",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": null,
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "13.25",
+      "read": "13.25",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [
+     {
+      "test": "pcv",
+      "truth": "24.5",
+      "read": "24.58",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": true
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "111",
+      "read": "140",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "differs",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "5.2",
+      "read": "5.2",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "147",
+      "read": "147",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [
+     {
+      "test": "wbc",
+      "truth": "12,000",
+      "read": "12,000",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "flagged_without_sums": false,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "5.0",
+      "read": "5.0",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     },
+     {
+      "test": "sodium",
+      "truth": "135",
+      "read": "135",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "147",
+      "read": "147",
+      "found": true,
+      "value_ok": true,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "flagged_without_sums": true,
+      "mark": null,
+      "mark_read": null,
+      "second": "agrees",
+      "silent_error": false,
+      "in_failed_sum": false
+     }
+    ],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 2,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 1,
+     "failed": 1,
+     "false_alarms": 1
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "sums": {
+     "checked": 0,
+     "failed": 0,
+     "false_alarms": 0
+    },
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ]
+ }
+}

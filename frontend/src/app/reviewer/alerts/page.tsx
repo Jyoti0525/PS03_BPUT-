@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BellRing, CheckCircle2, Download, Thermometer, Users, Baby } from "lucide-react";
+import { BellRing, CheckCircle2, Download, Thermometer, Users, Baby, PhoneCall } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, timeAgo } from "@/lib/hooks";
 import { usePrefs } from "@/components/providers";
@@ -15,6 +15,7 @@ const KIND: Record<AlertKind, { label: string; icon: React.ReactNode }> = {
   capacity: { label: "Capacity", icon: <Users className="size-5" /> },
   fever_cluster: { label: "Fever cluster", icon: <Thermometer className="size-5" /> },
   missed_visit: { label: "Missed check-up", icon: <Baby className="size-5" /> },
+  call_escalation: { label: "Reminder call", icon: <PhoneCall className="size-5" /> },
 };
 
 /** What the alert's numbers mean, in words. Cluster alerts carry counts only — never names. */
@@ -36,6 +37,15 @@ function Detail({ a }: { a: Alert }) {
         {tr("Tokens")}: {(d.tokens as string[] | undefined)?.join(", ") || "—"} · {tr("longest wait {m} min", { m: String(d.longest_wait_min ?? 0) })}
       </p>
     );
+  if (a.kind === "call_escalation") {
+    const found = (d.findings as unknown as { label: string; evidence: string }[] | undefined) ?? [];
+    return (
+      <div className="mt-1 text-sm text-ink-2">
+        {found.map((f, i) => <p key={i}><span className="font-semibold">{tr(f.label)}</span> — <span className="text-muted">{f.evidence}</span></p>)}
+        <p>{String(d.patient_code)} · {tr("Phone")} {String(d.phone ?? "—")} · {tr(String(d.action ?? ""))}</p>
+      </div>
+    );
+  }
   return <p className="mt-1 text-sm text-ink-2">{tr("Due")} {String(d.due)} · {String(d.patient_code)}</p>;
 }
 
@@ -52,7 +62,7 @@ export default function AlertsPage() {
     <div className="mx-auto max-w-5xl">
       <PageHeader
         title={tr("Alerts")}
-        subtitle={tr("Raised by fixed rules, not by a model: too many RED cases for the doctors on duty, a fever cluster from one place, or a missed maternal check-up.")}
+        subtitle={tr("Raised by fixed rules, not by a model: too many RED cases for the doctors on duty, a fever cluster from one place, a missed check-up, or a danger sign on a reminder call.")}
         actions={
           <Button
             variant="secondary"
@@ -92,7 +102,7 @@ export default function AlertsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-ink">{a.title}</span>
-                    <Badge tone={a.kind === "capacity" ? "crit" : a.kind === "fever_cluster" ? "semi" : "coral"}>{tr(KIND[a.kind].label)}</Badge>
+                    <Badge tone={a.kind === "capacity" || a.kind === "call_escalation" ? "crit" : a.kind === "fever_cluster" ? "semi" : "coral"}>{tr(KIND[a.kind].label)}</Badge>
                     <Badge>→ {a.to_role === "medical_officer" ? tr("Medical officer") : tr("Health worker")}</Badge>
                   </div>
                   <Detail a={a} />
@@ -128,6 +138,7 @@ export default function AlertsPage() {
             <Button
               variant="teal"
               loading={busy}
+              disabled={ack?.kind === "call_escalation" && !note.trim()}
               onClick={async () => {
                 if (!ack) return;
                 setBusy(true);
@@ -148,8 +159,9 @@ export default function AlertsPage() {
           </>
         }
       >
-        <Label htmlFor="alert-note">{tr("What you are doing (optional)")}</Label>
-        <Textarea id="alert-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={tr("e.g. Called in Dr. Gupta; hostel water tank being checked")} />
+        <Label htmlFor="alert-note">{ack?.kind === "call_escalation" ? tr("What was done (required)") : tr("What you are doing (optional)")}</Label>
+        <Textarea id="alert-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)}
+          placeholder={ack?.kind === "call_escalation" ? tr("e.g. Phoned her back; coming in today with her husband") : tr("e.g. Called in Dr. Gupta; hostel water tank being checked")} />
       </Modal>
     </div>
   );

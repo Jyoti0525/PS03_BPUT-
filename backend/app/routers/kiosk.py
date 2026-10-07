@@ -4,6 +4,10 @@ A supervisor issues a link per facility (e.g. /k/7QX4MPA2). Anyone opening it �
 tablet, a health worker's phone, a patient's own phone — gets a kiosk session that can only:
 register a patient, capture consent, upload files and submit an intake. Each submission gets the
 facility's next daily token, which appears immediately in the reviewer queue and the token board.
+
+A link marked for_home is the one the facility shares for filling in before coming (SMS, poster, website). Its
+intakes get an H- reference and wait on the token board as "expected"; they join the queue, with a T- token, when the
+desk checks the patient in, so filling in early never moves anyone ahead of people already waiting (C3).
 """
 
 import secrets
@@ -17,7 +21,7 @@ from ..config import get_settings
 from ..models import Encounter, Facility, KioskLink, Organisation, Patient, User
 from ..schemas import ADMIN_ROLES, STAFF_ROLES, AuthResult, KioskIdentifyIn, KioskInfo, KioskLinkIn, KioskLinkOut, KioskSessionIn, PatientOut, TokenBoardItem
 from ..security import DB, CurrentUser, issue_tokens, require
-from ..services import local_day, now
+from ..services import lapse_expected, local_day, now, wait_minutes
 from .auth import user_out
 
 router = APIRouter(tags=["kiosk"])
@@ -29,10 +33,12 @@ ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O/1/I — easy to read alo
 
 def _link_out(db, k: KioskLink) -> KioskLinkOut:
     day = local_day(now())
-    intakes = db.scalar(select(func.count(Encounter.id)).where(Encounter.facility_id == k.facility_id, Encounter.token_date == day, Encounter.channel == "kiosk_link")) or 0
+    intakes = db.scalar(select(func.count(Encounter.id)).where(Encounter.facility_id == k.facility_id, Encounter.token_date == day,
+                                                         Encounter.channel.in_(("kiosk_link", "home_link")))) or 0
     return KioskLinkOut(
         id=k.id, code=k.code, label=k.label, facility_id=k.facility_id, url=f"{get_settings().web_base_url.rstrip('/')}/k/{k.code}",
         created_by=k.created_by, created_at=k.created_at, revoked=k.revoked, last_used_at=k.last_used_at, sessions=k.sessions, intakes_today=intakes,
+        for_home=bool(k.for_home),
     )
 
 
@@ -43,12 +49,13 @@ def _active(db, code: str) -> KioskLink:
     return k
 
 
-def create_link(db, facility_id: str, label: str, created_by: User | None, code: str | None = None) -> KioskLink:
+def create_link(db, facility_id: str, label: str, created_by: User | None, code: str | None = None, for_home: bool = False) -> KioskLink:
     code = code or "".join(secrets.choice(ALPHABET) for _ in range(8))
     kiosk_user = User(phone=f"kiosk-{code}", name=f"Kiosk · {label}", role="kiosk", facility_id=facility_id, language="en")
     db.add(kiosk_user)
     db.flush()
-    k = KioskLink(code=code, label=label, facility_id=facility_id, user_id=kiosk_user.id, created_by=created_by.name if created_by else "System")
+    k = KioskLink(code=code, label=label, facility_id=facility_id, user_id=kiosk_user.id, created_by=created_by.name if created_by else "System",
+                   for_home=for_home)
     db.add(k)
     db.flush()
     return k
@@ -63,8 +70,8 @@ def list_links(user: Supervisor, db: DB):
 
 @router.post("/kiosk-links", response_model=KioskLinkOut)
 def new_link(body: KioskLinkIn, user: Supervisor, db: DB):
-    k = create_link(db, user.facility_id, body.label.strip(), user)
-    audit.record(db, user, "DEVICE", "kiosk_link", k.id, f"Kiosk link '{k.label}' created ({k.code})")
+    k = create_link(db, user.facility_id, body.label.strip(), user, for_home=body.for_home)
+    audit.record(db, user, "DEVICE", "kiosk_link", k.id, f"Kiosk link '{k.label}' created ({k.code}){' for filling in from home' if k.for_home else ''}")
     return _link_out(db, k)
 
 
@@ -86,7 +93,8 @@ def kiosk_info(code: str, db: DB):
     k = _active(db, code)
     f = db.get(Facility, k.facility_id)
     org = db.get(Organisation, f.organisation_id) if f.organisation_id else None
-    return KioskInfo(code=k.code, label=k.label, facility_id=f.id, facility_name=f.name, organisation_name=org.name if org else None, district=f.district, state=f.state, languages=f.languages)
+    return KioskInfo(code=k.code, label=k.label, facility_id=f.id, facility_name=f.name, organisation_name=org.name if org else None, district=f.district, state=f.state, languages=f.languages,
+                     for_home=bool(k.for_home))
 
 
 @router.post("/kiosk/{code}/session", response_model=AuthResult)
@@ -116,13 +124,16 @@ def identify(body: KioskIdentifyIn, user: Kiosk, db: DB):
 def token_board(fid: str, user: CurrentUser, db: DB):
     if user.role not in STAFF_ROLES or user.facility_id != fid:
         raise HTTPException(403, "Not allowed")
+    lapse_expected(db, fid)
     day = local_day(now())
     t = now()
-    rows = db.scalars(select(Encounter).where(Encounter.facility_id == fid, Encounter.token_date == day).order_by(Encounter.created_at.desc()))
+    # today's tokens, plus intakes sent from home (since yesterday) whose patient has not been checked in yet
+    rows = db.scalars(select(Encounter).where(Encounter.facility_id == fid, (Encounter.token_date == day) | (Encounter.status == "expected"))
+                      .order_by(Encounter.created_at.desc()))
     return [
         TokenBoardItem(
             encounter_id=e.id, token=e.token, patient_id=e.patient_id, patient_name=e.patient.name, patient_code=e.patient.code, status=e.status, channel=e.channel,
-            created_at=e.created_at, wait_minutes=max(0, round((t - e.created_at).total_seconds() / 60)),
+            created_at=e.created_at, arrived_at=e.arrived_at, wait_minutes=0 if e.status == "expected" else wait_minutes(e, t),
         )
         for e in rows
     ]

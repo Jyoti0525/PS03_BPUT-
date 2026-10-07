@@ -27,7 +27,7 @@ type Pattern = { re: RegExp; names: string[]; to: string; multi: boolean };
 function compile(phrases: Phrases): Pattern[] {
   return Object.keys(phrases)
     // Only templates with a real word in them (or the comma list) are safe to match against free text.
-    .filter((k) => /\{\w+\}/.test(k) && (/[A-Za-z]{2,}/.test(k.replace(/\{\w+\}/g, "")) || k === "{a}, {b}"))
+    .filter((k) => /\{\w+\}/.test(k) && (/[A-Za-z]{2,}/.test(k.replace(/\{\w+\}/g, "")) || k === "{a}, {b}" || k === '"{f}": {w}'))
     .sort((a, b) => b.replace(/\{\w+\}/g, "").length - a.replace(/\{\w+\}/g, "").length) // most specific first
     .map((k) => {
       const names: string[] = [];
@@ -50,9 +50,16 @@ function compile(phrases: Phrases): Pattern[] {
  */
 export function makeTr(phrases: Phrases) {
   const patterns = compile(phrases);
+  const sep = /^\{a\}(.*)\{b\}$/.exec(phrases["{a}, {b}"] ?? "")?.[1];
   const translate = (s: string, depth: number): string => {
     const hit = phrases[s];
     if (hit !== undefined) return hit;
+    if (depth > 0 && sep !== undefined && s.includes(", ")) {
+      // A captured list ("…until measured: systolic BP, pulse, SpO₂, AVPU…") can be any length: item by item.
+      const parts = s.split(", ");
+      const out = parts.map((x) => translate(x, depth));
+      if (out.some((x, i) => x !== parts[i])) return out.join(sep);
+    }
     if (depth > 2 || !patterns.length || !/[A-Za-z]/.test(s)) return s;
     if (depth === 0 && /[.?!] \S/.test(s)) {
       for (const p of patterns) {

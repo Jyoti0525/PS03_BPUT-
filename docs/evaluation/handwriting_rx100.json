@@ -1,0 +1,4336 @@
+{
+ "rapidocr": {
+  "dev": {
+   "pages": 40,
+   "medicines": 169,
+   "read_pct": 20.7,
+   "named_pct": 5.9,
+   "names_given": 27,
+   "names_wrong": 8,
+   "precision_pct": 70.4
+  },
+  "test": {
+   "pages": 45,
+   "medicines": 160,
+   "read_pct": 17.5,
+   "named_pct": 0.6,
+   "names_given": 4,
+   "names_wrong": 3,
+   "precision_pct": 25.0
+  },
+  "all": {
+   "pages": 85,
+   "medicines": 329,
+   "read_pct": 19.1,
+   "named_pct": 3.3,
+   "names_given": 31,
+   "names_wrong": 11,
+   "precision_pct": 64.5
+  },
+  "seconds_per_page": 12.7,
+  "failed_pages": 0,
+  "per_page": {
+   "rx000": {
+    "want": [
+     "niveoli",
+     "levolin",
+     "montair"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx001": {
+    "want": [
+     "nexito",
+     "rejunex"
+    ],
+    "read": [
+     "rejunex"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx002": {
+    "want": [
+     "cepodem",
+     "dolo",
+     "montair",
+     "betadine"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx003": {
+    "want": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "looz",
+     "pegura",
+     "zincovit",
+     "orofer",
+     "montair",
+     "levosalbutamol"
+    ],
+    "read": [
+     "allegra",
+     "azithral",
+     "pegura",
+     "zincovit",
+     "orofer"
+    ],
+    "named_right": [
+     "allegra",
+     "azithral",
+     "orofer",
+     "levosalbutamol"
+    ],
+    "named": [
+     "guaiphenesin",
+     "menthol",
+     "lactulose",
+     "levosalbutamol",
+     "budesonide",
+     "Allegra",
+     "Azithral",
+     "Orofer"
+    ],
+    "named_wrong": [
+     "menthol",
+     "budesonide"
+    ]
+   },
+   "rx004": {
+    "want": [
+     "glimy",
+     "telma",
+     "volix",
+     "janumet",
+     "lantus"
+    ],
+    "read": [
+     "glimy"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx006": {
+    "want": [
+     "depura",
+     "montek"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx008": {
+    "want": [
+     "hcqs",
+     "folitrax",
+     "folvite",
+     "rablet",
+     "wysolone"
+    ],
+    "read": [
+     "rablet"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx009": {
+    "want": [
+     "azithral",
+     "sinarest",
+     "corex",
+     "neurobion"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx010": {
+    "want": [
+     "crocin",
+     "meftal",
+     "allegra",
+     "ambrolite",
+     "nasivion"
+    ],
+    "read": [
+     "crocin",
+     "meftal",
+     "allegra",
+     "ambrolite",
+     "nasivion"
+    ],
+    "named_right": [],
+    "named": [
+     "paracetamol",
+     "fexofenadine",
+     "guaiphenesin",
+     "terbutaline",
+     "menthol",
+     "oxymetazoline",
+     "Sulphate"
+    ],
+    "named_wrong": [
+     "terbutaline",
+     "menthol",
+     "sulphate"
+    ]
+   },
+   "rx011": {
+    "want": [
+     "allegra",
+     "candid",
+     "montair",
+     "nasoclear",
+     "meftal",
+     "zinconia",
+     "enterogermina"
+    ],
+    "read": [
+     "allegra",
+     "montair",
+     "meftal",
+     "zinconia",
+     "enterogermina"
+    ],
+    "named_right": [
+     "allegra",
+     "montair",
+     "meftal"
+    ],
+    "named": [
+     "Meftal",
+     "Allegra",
+     "Montair"
+    ],
+    "named_wrong": []
+   },
+   "rx013": {
+    "want": [
+     "ascoril",
+     "augmentin",
+     "dynapar"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx014": {
+    "want": [
+     "arachitol",
+     "nerviday",
+     "supracal",
+     "hadjod",
+     "cartigen",
+     "uprise"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx015": {
+    "want": [
+     "laxopeg",
+     "budecort",
+     "montair",
+     "bevon"
+    ],
+    "read": [
+     "budecort"
+    ],
+    "named_right": [],
+    "named": [
+     "polyethylene glycol",
+     "montelukast",
+     "vitamins"
+    ],
+    "named_wrong": [
+     "polyethylene",
+     "vitamins"
+    ]
+   },
+   "rx018": {
+    "want": [
+     "betadine",
+     "montair",
+     "augmentin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx019": {
+    "want": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "imdur",
+     "gemer",
+     "rivotril"
+    ],
+    "read": [
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "gemer"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx021": {
+    "want": [
+     "nervmax",
+     "supracal",
+     "uprise",
+     "pantocid",
+     "flexon"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx022": {
+    "want": [
+     "cordarone",
+     "atarax",
+     "oflox",
+     "vsl",
+     "zedott",
+     "bio",
+     "drotin"
+    ],
+    "read": [
+     "zedott"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx023": {
+    "want": [
+     "linid",
+     "vizylac",
+     "zerodol"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx024": {
+    "want": [
+     "saaz",
+     "folitrax",
+     "folvite"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx025": {
+    "want": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "pegura"
+    ],
+    "read": [
+     "allegra"
+    ],
+    "named_right": [
+     "allegra"
+    ],
+    "named": [
+     "guaiphenesin",
+     "menthol",
+     "azithromycin",
+     "Allegra"
+    ],
+    "named_wrong": [
+     "menthol"
+    ]
+   },
+   "rx026": {
+    "want": [
+     "pan",
+     "emeset",
+     "pan",
+     "emeset",
+     "ziten",
+     "glycomet",
+     "coversyl",
+     "ecosprin",
+     "lonazep",
+     "aten"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx027": {
+    "want": [
+     "calpol",
+     "piriton"
+    ],
+    "read": [
+     "calpol"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx028": {
+    "want": [
+     "vertin",
+     "atorvas",
+     "evion",
+     "siligreen",
+     "corus",
+     "dilzem",
+     "adcumin",
+     "coenzyme",
+     "stomulate",
+     "uvilax",
+     "calbrit"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx029": {
+    "want": [
+     "nexito",
+     "lonazep",
+     "becosules",
+     "famocid",
+     "naxdom"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx030": {
+    "want": [
+     "rekool",
+     "zincovit"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx031": {
+    "want": [
+     "citralka",
+     "urispas"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx032": {
+    "want": [
+     "folitrax",
+     "folvite",
+     "depomedrol"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx035": {
+    "want": [
+     "sompraz",
+     "gaviscon",
+     "uprise"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx036": {
+    "want": [
+     "preva",
+     "olvance",
+     "tonact",
+     "mega",
+     "pantocid"
+    ],
+    "read": [
+     "preva",
+     "olvance",
+     "tonact"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx037": {
+    "want": [
+     "augmentin",
+     "zedex",
+     "wikoryl"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx038": {
+    "want": [
+     "maxgalin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx039": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx041": {
+    "want": [
+     "azee",
+     "montair",
+     "dolo"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx043": {
+    "want": [
+     "fefol",
+     "argiprime",
+     "clexane",
+     "thyrox",
+     "uprise",
+     "nutrix",
+     "astymin",
+     "evion",
+     "shelcal",
+     "threptin",
+     "betnesol"
+    ],
+    "read": [
+     "argiprime",
+     "clexane",
+     "evion",
+     "threptin"
+    ],
+    "named_right": [
+     "clexane",
+     "evion"
+    ],
+    "named": [
+     "Clexane",
+     "Evion"
+    ],
+    "named_wrong": []
+   },
+   "rx044": {
+    "want": [
+     "folvite",
+     "voricort",
+     "nutrolin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx045": {
+    "want": [
+     "montair",
+     "amnzole",
+     "ascoril",
+     "mucinac"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx046": {
+    "want": [
+     "pantocid"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx047": {
+    "want": [
+     "red",
+     "zinase"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx048": {
+    "want": [
+     "telma",
+     "lasix"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx049": {
+    "want": [
+     "esotab",
+     "esotab",
+     "rantac",
+     "mucaine"
+    ],
+    "read": [
+     "rantac"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx050": {
+    "want": [
+     "depomedrol",
+     "folitrax",
+     "folvite",
+     "altraday"
+    ],
+    "read": [
+     "folitrax"
+    ],
+    "named_right": [],
+    "named": [
+     "Foliton"
+    ],
+    "named_wrong": [
+     "foliton"
+    ]
+   },
+   "rx051": {
+    "want": [
+     "dynapress",
+     "montair",
+     "amtas",
+     "pansec",
+     "zoryl",
+     "foracort",
+     "meganeuron"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx052": {
+    "want": [
+     "secnil"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx053": {
+    "want": [
+     "endurox",
+     "rabesag",
+     "lidocam",
+     "betadine",
+     "montair",
+     "zincovit"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "Rabenda"
+    ],
+    "named_wrong": [
+     "rabenda"
+    ]
+   },
+   "rx054": {
+    "want": [
+     "tryptomer",
+     "dulane",
+     "picozy",
+     "safelax",
+     "anobliss",
+     "rivotril"
+    ],
+    "read": [
+     "anobliss"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx056": {
+    "want": [
+     "ace",
+     "volitra"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx057": {
+    "want": [
+     "augmentin",
+     "preimmune",
+     "citralka"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx058": {
+    "want": [
+     "crocin",
+     "celin",
+     "bifilac",
+     "ondem"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx059": {
+    "want": [
+     "buscopan"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx061": {
+    "want": [
+     "ecosprin",
+     "uprise",
+     "mama",
+     "doxinate",
+     "cansoft",
+     "novacef",
+     "meftal",
+     "pantop",
+     "aqsusten"
+    ],
+    "read": [
+     "ecosprin",
+     "uprise",
+     "cansoft"
+    ],
+    "named_right": [
+     "uprise"
+    ],
+    "named": [
+     "Uprise"
+    ],
+    "named_wrong": []
+   },
+   "rx062": {
+    "want": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "thyrox",
+     "gluconorm"
+    ],
+    "read": [
+     "clopitab",
+     "tonact"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx063": {
+    "want": [
+     "oflox",
+     "rabium",
+     "drotin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx064": {
+    "want": [
+     "piriton",
+     "ambrodil",
+     "toba"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx065": {
+    "want": [
+     "zincovit",
+     "pantocid",
+     "emeset"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx066": {
+    "want": [
+     "nexito",
+     "nexito",
+     "rejunex"
+    ],
+    "read": [
+     "nexito",
+     "nexito",
+     "rejunex"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx067": {
+    "want": [
+     "maxgalin",
+     "duloxetine",
+     "rejunex",
+     "volini"
+    ],
+    "read": [
+     "maxgalin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx068": {
+    "want": [
+     "mahacef",
+     "gutbilac",
+     "vomis",
+     "spasrine",
+     "enerzal",
+     "redotil"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx070": {
+    "want": [
+     "glyciphage"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx071": {
+    "want": [
+     "budamate",
+     "montair",
+     "levolin"
+    ],
+    "read": [
+     "budamate",
+     "levolin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx072": {
+    "want": [
+     "rifagut",
+     "rekool",
+     "enzispor",
+     "meva"
+    ],
+    "read": [
+     "rekool",
+     "enzispor",
+     "meva"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx073": {
+    "want": [
+     "glycomet",
+     "janumet",
+     "volix",
+     "prothiaden",
+     "sompraz",
+     "montek",
+     "alex",
+     "chymoral",
+     "moxikind"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx075": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx076": {
+    "want": [
+     "calcimax",
+     "lumia",
+     "altraday"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx077": {
+    "want": [
+     "cepodem",
+     "valcivir",
+     "allegra",
+     "crocin",
+     "pantocid",
+     "domstal"
+    ],
+    "read": [
+     "allegra"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx078": {
+    "want": [
+     "forglyn",
+     "duolin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx079": {
+    "want": [
+     "allegra"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx080": {
+    "want": [
+     "lactifiber",
+     "neopride",
+     "lox"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx081": {
+    "want": [
+     "benadon",
+     "pantocid"
+    ],
+    "read": [
+     "pantocid"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx082": {
+    "want": [
+     "lantus",
+     "trajenta",
+     "urimax",
+     "olvance",
+     "volix",
+     "nexito",
+     "maxgalin",
+     "donep",
+     "pan",
+     "trigabantin",
+     "gluconorm"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx083": {
+    "want": [
+     "evion",
+     "pyricontin",
+     "neurobion",
+     "uprise"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx084": {
+    "want": [
+     "rifagut",
+     "neopride",
+     "normaxin"
+    ],
+    "read": [
+     "normaxin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx085": {
+    "want": [
+     "alupectin",
+     "flucos",
+     "candiderma"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx086": {
+    "want": [
+     "novamox",
+     "hifenac"
+    ],
+    "read": [
+     "hifenac"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx087": {
+    "want": [
+     "augmentin",
+     "pan",
+     "signoflam"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx088": {
+    "want": [
+     "voveran",
+     "vertin",
+     "lumia",
+     "gemcal",
+     "gabapin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx089": {
+    "want": [
+     "depura"
+    ],
+    "read": [
+     "depura"
+    ],
+    "named_right": [],
+    "named": [
+     "vitamin"
+    ],
+    "named_wrong": [
+     "vitamin"
+    ]
+   },
+   "rx090": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx091": {
+    "want": [
+     "drotin",
+     "rabium",
+     "montair",
+     "dlozy"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx092": {
+    "want": [
+     "ecosprin",
+     "donep",
+     "vertin"
+    ],
+    "read": [
+     "ecosprin",
+     "donep",
+     "vertin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx093": {
+    "want": [
+     "etoshine",
+     "pantocid",
+     "rejunex"
+    ],
+    "read": [
+     "pantocid",
+     "rejunex"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx094": {
+    "want": [
+     "pen",
+     "ciplox"
+    ],
+    "read": [
+     "ciplox"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx095": {
+    "want": [
+     "cabergoline",
+     "thyronorm",
+     "shelcal",
+     "lupi"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx096": {
+    "want": [
+     "lycomerv"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx097": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx098": {
+    "want": [
+     "rantac",
+     "augmentin",
+     "ventorlin",
+     "levolin",
+     "crocin"
+    ],
+    "read": [
+     "rantac"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   }
+  }
+ },
+ "doctr": {
+  "dev": {
+   "pages": 40,
+   "medicines": 169,
+   "read_pct": 34.9,
+   "named_pct": 11.8,
+   "names_given": 43,
+   "names_wrong": 15,
+   "precision_pct": 65.1
+  },
+  "test": {
+   "pages": 45,
+   "medicines": 160,
+   "read_pct": 25.6,
+   "named_pct": 4.4,
+   "names_given": 11,
+   "names_wrong": 4,
+   "precision_pct": 63.6
+  },
+  "all": {
+   "pages": 85,
+   "medicines": 329,
+   "read_pct": 30.4,
+   "named_pct": 8.2,
+   "names_given": 54,
+   "names_wrong": 19,
+   "precision_pct": 64.8
+  },
+  "seconds_per_page": 2.9,
+  "failed_pages": 0,
+  "per_page": {
+   "rx000": {
+    "want": [
+     "niveoli",
+     "levolin",
+     "montair"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx001": {
+    "want": [
+     "nexito",
+     "rejunex"
+    ],
+    "read": [
+     "nexito"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx002": {
+    "want": [
+     "cepodem",
+     "dolo",
+     "montair",
+     "betadine"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx003": {
+    "want": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "looz",
+     "pegura",
+     "zincovit",
+     "orofer",
+     "montair",
+     "levosalbutamol"
+    ],
+    "read": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "looz",
+     "pegura",
+     "zincovit",
+     "orofer",
+     "levosalbutamol"
+    ],
+    "named_right": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "looz",
+     "orofer",
+     "levosalbutamol"
+    ],
+    "named": [
+     "guaiphenesin",
+     "terbutaline",
+     "menthol",
+     "polyethylene glycol",
+     "levosalbutamol",
+     "Allegra",
+     "Ambrolite",
+     "Azithral",
+     "Looz",
+     "Orofer"
+    ],
+    "named_wrong": [
+     "terbutaline",
+     "menthol",
+     "polyethylene"
+    ]
+   },
+   "rx004": {
+    "want": [
+     "glimy",
+     "telma",
+     "volix",
+     "janumet",
+     "lantus"
+    ],
+    "read": [
+     "janumet"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx006": {
+    "want": [
+     "depura",
+     "montek"
+    ],
+    "read": [
+     "montek"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx008": {
+    "want": [
+     "hcqs",
+     "folitrax",
+     "folvite",
+     "rablet",
+     "wysolone"
+    ],
+    "read": [
+     "rablet"
+    ],
+    "named_right": [],
+    "named": [
+     "Flucole"
+    ],
+    "named_wrong": [
+     "flucole"
+    ]
+   },
+   "rx009": {
+    "want": [
+     "azithral",
+     "sinarest",
+     "corex",
+     "neurobion"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx010": {
+    "want": [
+     "crocin",
+     "meftal",
+     "allegra",
+     "ambrolite",
+     "nasivion"
+    ],
+    "read": [
+     "crocin",
+     "meftal",
+     "allegra",
+     "ambrolite",
+     "nasivion"
+    ],
+    "named_right": [],
+    "named": [
+     "paracetamol",
+     "mefenamic acid",
+     "fexofenadine",
+     "ambroxol",
+     "guaiphenesin",
+     "terbutaline",
+     "menthol",
+     "oxymetazoline",
+     "Sulphate"
+    ],
+    "named_wrong": [
+     "terbutaline",
+     "menthol",
+     "sulphate"
+    ]
+   },
+   "rx011": {
+    "want": [
+     "allegra",
+     "candid",
+     "montair",
+     "nasoclear",
+     "meftal",
+     "zinconia",
+     "enterogermina"
+    ],
+    "read": [
+     "allegra",
+     "montair",
+     "meftal",
+     "zinconia",
+     "enterogermina"
+    ],
+    "named_right": [
+     "allegra",
+     "montair",
+     "meftal"
+    ],
+    "named": [
+     "bacillus clausii spores",
+     "Meftal",
+     "Allegra",
+     "Montair"
+    ],
+    "named_wrong": [
+     "bacillus"
+    ]
+   },
+   "rx013": {
+    "want": [
+     "ascoril",
+     "augmentin",
+     "dynapar"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx014": {
+    "want": [
+     "arachitol",
+     "nerviday",
+     "supracal",
+     "hadjod",
+     "cartigen",
+     "uprise"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx015": {
+    "want": [
+     "laxopeg",
+     "budecort",
+     "montair",
+     "bevon"
+    ],
+    "read": [
+     "laxopeg",
+     "budecort",
+     "montair",
+     "bevon"
+    ],
+    "named_right": [
+     "laxopeg",
+     "budecort",
+     "montair"
+    ],
+    "named": [
+     "polyethylene glycol",
+     "multivitamins",
+     "Laxopeg",
+     "Budecort",
+     "Montair"
+    ],
+    "named_wrong": [
+     "polyethylene",
+     "multivitamins"
+    ]
+   },
+   "rx018": {
+    "want": [
+     "betadine",
+     "montair",
+     "augmentin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx019": {
+    "want": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "imdur",
+     "gemer",
+     "rivotril"
+    ],
+    "read": [
+     "clopitab",
+     "gemer",
+     "rivotril"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx021": {
+    "want": [
+     "nervmax",
+     "supracal",
+     "uprise",
+     "pantocid",
+     "flexon"
+    ],
+    "read": [
+     "supracal",
+     "flexon"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx022": {
+    "want": [
+     "cordarone",
+     "atarax",
+     "oflox",
+     "vsl",
+     "zedott",
+     "bio",
+     "drotin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx023": {
+    "want": [
+     "linid",
+     "vizylac",
+     "zerodol"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx024": {
+    "want": [
+     "saaz",
+     "folitrax",
+     "folvite"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx025": {
+    "want": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "pegura"
+    ],
+    "read": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "pegura"
+    ],
+    "named_right": [
+     "allegra",
+     "ambrolite",
+     "azithral"
+    ],
+    "named": [
+     "guaiphenesin",
+     "terbutaline",
+     "menthol",
+     "polyethylene glycol",
+     "Allegra",
+     "Ambrolite",
+     "Azithral"
+    ],
+    "named_wrong": [
+     "terbutaline",
+     "menthol",
+     "polyethylene"
+    ]
+   },
+   "rx026": {
+    "want": [
+     "pan",
+     "emeset",
+     "pan",
+     "emeset",
+     "ziten",
+     "glycomet",
+     "coversyl",
+     "ecosprin",
+     "lonazep",
+     "aten"
+    ],
+    "read": [
+     "pan",
+     "emeset",
+     "pan",
+     "emeset"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx027": {
+    "want": [
+     "calpol",
+     "piriton"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx028": {
+    "want": [
+     "vertin",
+     "atorvas",
+     "evion",
+     "siligreen",
+     "corus",
+     "dilzem",
+     "adcumin",
+     "coenzyme",
+     "stomulate",
+     "uvilax",
+     "calbrit"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx029": {
+    "want": [
+     "nexito",
+     "lonazep",
+     "becosules",
+     "famocid",
+     "naxdom"
+    ],
+    "read": [
+     "nexito",
+     "naxdom"
+    ],
+    "named_right": [],
+    "named": [
+     "Nadon"
+    ],
+    "named_wrong": [
+     "nadon"
+    ]
+   },
+   "rx030": {
+    "want": [
+     "rekool",
+     "zincovit"
+    ],
+    "read": [
+     "rekool"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx031": {
+    "want": [
+     "citralka",
+     "urispas"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx032": {
+    "want": [
+     "folitrax",
+     "folvite",
+     "depomedrol"
+    ],
+    "read": [
+     "folvite"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx035": {
+    "want": [
+     "sompraz",
+     "gaviscon",
+     "uprise"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx036": {
+    "want": [
+     "preva",
+     "olvance",
+     "tonact",
+     "mega",
+     "pantocid"
+    ],
+    "read": [
+     "preva",
+     "olvance",
+     "tonact"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx037": {
+    "want": [
+     "augmentin",
+     "zedex",
+     "wikoryl"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx038": {
+    "want": [
+     "maxgalin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx039": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx041": {
+    "want": [
+     "azee",
+     "montair",
+     "dolo"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx043": {
+    "want": [
+     "fefol",
+     "argiprime",
+     "clexane",
+     "thyrox",
+     "uprise",
+     "nutrix",
+     "astymin",
+     "evion",
+     "shelcal",
+     "threptin",
+     "betnesol"
+    ],
+    "read": [
+     "fefol",
+     "argiprime",
+     "clexane",
+     "thyrox",
+     "uprise",
+     "nutrix",
+     "astymin",
+     "evion",
+     "shelcal",
+     "threptin",
+     "betnesol"
+    ],
+    "named_right": [
+     "clexane",
+     "thyrox",
+     "uprise",
+     "astymin",
+     "evion"
+    ],
+    "named": [
+     "Clexane",
+     "Thyrox",
+     "Uprise",
+     "Evion",
+     "Astymin"
+    ],
+    "named_wrong": []
+   },
+   "rx044": {
+    "want": [
+     "folvite",
+     "voricort",
+     "nutrolin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx045": {
+    "want": [
+     "montair",
+     "amnzole",
+     "ascoril",
+     "mucinac"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx046": {
+    "want": [
+     "pantocid"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx047": {
+    "want": [
+     "red",
+     "zinase"
+    ],
+    "read": [
+     "zinase"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx048": {
+    "want": [
+     "telma",
+     "lasix"
+    ],
+    "read": [
+     "telma"
+    ],
+    "named_right": [],
+    "named": [
+     "Talin"
+    ],
+    "named_wrong": [
+     "talin"
+    ]
+   },
+   "rx049": {
+    "want": [
+     "esotab",
+     "esotab",
+     "rantac",
+     "mucaine"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx050": {
+    "want": [
+     "depomedrol",
+     "folitrax",
+     "folvite",
+     "altraday"
+    ],
+    "read": [
+     "folitrax"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx051": {
+    "want": [
+     "dynapress",
+     "montair",
+     "amtas",
+     "pansec",
+     "zoryl",
+     "foracort",
+     "meganeuron"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "Dynapar"
+    ],
+    "named_wrong": [
+     "dynapar"
+    ]
+   },
+   "rx052": {
+    "want": [
+     "secnil"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx053": {
+    "want": [
+     "endurox",
+     "rabesag",
+     "lidocam",
+     "betadine",
+     "montair",
+     "zincovit"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx054": {
+    "want": [
+     "tryptomer",
+     "dulane",
+     "picozy",
+     "safelax",
+     "anobliss",
+     "rivotril"
+    ],
+    "read": [
+     "tryptomer",
+     "dulane",
+     "picozy",
+     "safelax",
+     "anobliss"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx056": {
+    "want": [
+     "ace",
+     "volitra"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx057": {
+    "want": [
+     "augmentin",
+     "preimmune",
+     "citralka"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx058": {
+    "want": [
+     "crocin",
+     "celin",
+     "bifilac",
+     "ondem"
+    ],
+    "read": [
+     "celin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx059": {
+    "want": [
+     "buscopan"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx061": {
+    "want": [
+     "ecosprin",
+     "uprise",
+     "mama",
+     "doxinate",
+     "cansoft",
+     "novacef",
+     "meftal",
+     "pantop",
+     "aqsusten"
+    ],
+    "read": [
+     "ecosprin",
+     "uprise",
+     "mama",
+     "doxinate",
+     "cansoft",
+     "novacef",
+     "meftal",
+     "pantop",
+     "aqsusten"
+    ],
+    "named_right": [
+     "ecosprin",
+     "uprise",
+     "doxinate",
+     "novacef",
+     "meftal",
+     "pantop",
+     "aqsusten"
+    ],
+    "named": [
+     "Ecosprin",
+     "Uprise",
+     "Doxinate",
+     "Novacef",
+     "Meftal Spas",
+     "Pantop",
+     "Aqsusten"
+    ],
+    "named_wrong": []
+   },
+   "rx062": {
+    "want": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "thyrox",
+     "gluconorm"
+    ],
+    "read": [
+     "clopitab",
+     "tonact",
+     "starpress",
+     "thyrox"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx063": {
+    "want": [
+     "oflox",
+     "rabium",
+     "drotin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx064": {
+    "want": [
+     "piriton",
+     "ambrodil",
+     "toba"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx065": {
+    "want": [
+     "zincovit",
+     "pantocid",
+     "emeset"
+    ],
+    "read": [
+     "zincovit"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx066": {
+    "want": [
+     "nexito",
+     "nexito",
+     "rejunex"
+    ],
+    "read": [
+     "rejunex"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx067": {
+    "want": [
+     "maxgalin",
+     "duloxetine",
+     "rejunex",
+     "volini"
+    ],
+    "read": [
+     "maxgalin",
+     "rejunex"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx068": {
+    "want": [
+     "mahacef",
+     "gutbilac",
+     "vomis",
+     "spasrine",
+     "enerzal",
+     "redotil"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "aloe vera"
+    ],
+    "named_wrong": [
+     "aloe"
+    ]
+   },
+   "rx070": {
+    "want": [
+     "glyciphage"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx071": {
+    "want": [
+     "budamate",
+     "montair",
+     "levolin"
+    ],
+    "read": [
+     "budamate",
+     "levolin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx072": {
+    "want": [
+     "rifagut",
+     "rekool",
+     "enzispor",
+     "meva"
+    ],
+    "read": [
+     "rekool",
+     "enzispor"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx073": {
+    "want": [
+     "glycomet",
+     "janumet",
+     "volix",
+     "prothiaden",
+     "sompraz",
+     "montek",
+     "alex",
+     "chymoral",
+     "moxikind"
+    ],
+    "read": [
+     "glycomet",
+     "janumet"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx075": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx076": {
+    "want": [
+     "calcimax",
+     "lumia",
+     "altraday"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "vitamin"
+    ],
+    "named_wrong": [
+     "vitamin"
+    ]
+   },
+   "rx077": {
+    "want": [
+     "cepodem",
+     "valcivir",
+     "allegra",
+     "crocin",
+     "pantocid",
+     "domstal"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx078": {
+    "want": [
+     "forglyn",
+     "duolin"
+    ],
+    "read": [
+     "forglyn",
+     "duolin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx079": {
+    "want": [
+     "allegra"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx080": {
+    "want": [
+     "lactifiber",
+     "neopride",
+     "lox"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx081": {
+    "want": [
+     "benadon",
+     "pantocid"
+    ],
+    "read": [
+     "benadon",
+     "pantocid"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx082": {
+    "want": [
+     "lantus",
+     "trajenta",
+     "urimax",
+     "olvance",
+     "volix",
+     "nexito",
+     "maxgalin",
+     "donep",
+     "pan",
+     "trigabantin",
+     "gluconorm"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx083": {
+    "want": [
+     "evion",
+     "pyricontin",
+     "neurobion",
+     "uprise"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx084": {
+    "want": [
+     "rifagut",
+     "neopride",
+     "normaxin"
+    ],
+    "read": [
+     "neopride",
+     "normaxin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx085": {
+    "want": [
+     "alupectin",
+     "flucos",
+     "candiderma"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx086": {
+    "want": [
+     "novamox",
+     "hifenac"
+    ],
+    "read": [
+     "novamox"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx087": {
+    "want": [
+     "augmentin",
+     "pan",
+     "signoflam"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx088": {
+    "want": [
+     "voveran",
+     "vertin",
+     "lumia",
+     "gemcal",
+     "gabapin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx089": {
+    "want": [
+     "depura"
+    ],
+    "read": [
+     "depura"
+    ],
+    "named_right": [],
+    "named": [
+     "vitamin"
+    ],
+    "named_wrong": [
+     "vitamin"
+    ]
+   },
+   "rx090": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx091": {
+    "want": [
+     "drotin",
+     "rabium",
+     "montair",
+     "dlozy"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx092": {
+    "want": [
+     "ecosprin",
+     "donep",
+     "vertin"
+    ],
+    "read": [
+     "ecosprin",
+     "vertin"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx093": {
+    "want": [
+     "etoshine",
+     "pantocid",
+     "rejunex"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx094": {
+    "want": [
+     "pen",
+     "ciplox"
+    ],
+    "read": [
+     "ciplox"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx095": {
+    "want": [
+     "cabergoline",
+     "thyronorm",
+     "shelcal",
+     "lupi"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx096": {
+    "want": [
+     "lycomerv"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx097": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx098": {
+    "want": [
+     "rantac",
+     "augmentin",
+     "ventorlin",
+     "levolin",
+     "crocin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   }
+  }
+ },
+ "sarvam": {
+  "dev": {
+   "pages": 40,
+   "medicines": 169,
+   "read_pct": 64.5,
+   "named_pct": 34.3,
+   "names_given": 98,
+   "names_wrong": 36,
+   "precision_pct": 63.3
+  },
+  "test": {
+   "pages": 45,
+   "medicines": 160,
+   "read_pct": 60.0,
+   "named_pct": 28.8,
+   "names_given": 80,
+   "names_wrong": 33,
+   "precision_pct": 58.8
+  },
+  "all": {
+   "pages": 85,
+   "medicines": 329,
+   "read_pct": 62.3,
+   "named_pct": 31.6,
+   "names_given": 178,
+   "names_wrong": 69,
+   "precision_pct": 61.2
+  },
+  "seconds_per_page": 6.7,
+  "failed_pages": 0,
+  "per_page": {
+   "rx000": {
+    "want": [
+     "niveoli",
+     "levolin",
+     "montair"
+    ],
+    "read": [
+     "niveoli",
+     "levolin",
+     "montair"
+    ],
+    "named_right": [
+     "niveoli"
+    ],
+    "named": [
+     "Niveoli"
+    ],
+    "named_wrong": []
+   },
+   "rx001": {
+    "want": [
+     "nexito",
+     "rejunex"
+    ],
+    "read": [
+     "nexito"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx002": {
+    "want": [
+     "cepodem",
+     "dolo",
+     "montair",
+     "betadine"
+    ],
+    "read": [
+     "dolo",
+     "montair",
+     "betadine"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx003": {
+    "want": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "looz",
+     "pegura",
+     "zincovit",
+     "orofer",
+     "montair",
+     "levosalbutamol"
+    ],
+    "read": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "looz",
+     "pegura",
+     "zincovit",
+     "orofer",
+     "montair",
+     "levosalbutamol"
+    ],
+    "named_right": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "looz",
+     "orofer",
+     "levosalbutamol"
+    ],
+    "named": [
+     "guaiphenesin",
+     "terbutaline",
+     "menthol",
+     "polyethylene glycol",
+     "folic acid",
+     "levosalbutamol",
+     "budesonide",
+     "Allegra",
+     "Ambrolite",
+     "Azithral",
+     "Looz",
+     "Orofer"
+    ],
+    "named_wrong": [
+     "terbutaline",
+     "menthol",
+     "polyethylene",
+     "folic",
+     "budesonide"
+    ]
+   },
+   "rx004": {
+    "want": [
+     "glimy",
+     "telma",
+     "volix",
+     "janumet",
+     "lantus"
+    ],
+    "read": [
+     "telma",
+     "volix"
+    ],
+    "named_right": [
+     "telma",
+     "volix"
+    ],
+    "named": [
+     "Volix",
+     "Telma"
+    ],
+    "named_wrong": []
+   },
+   "rx006": {
+    "want": [
+     "depura",
+     "montek"
+    ],
+    "read": [
+     "depura",
+     "montek"
+    ],
+    "named_right": [
+     "montek"
+    ],
+    "named": [
+     "Montek"
+    ],
+    "named_wrong": []
+   },
+   "rx008": {
+    "want": [
+     "hcqs",
+     "folitrax",
+     "folvite",
+     "rablet",
+     "wysolone"
+    ],
+    "read": [
+     "folitrax",
+     "folvite",
+     "rablet",
+     "wysolone"
+    ],
+    "named_right": [
+     "folitrax",
+     "folvite",
+     "wysolone"
+    ],
+    "named": [
+     "Folitrax",
+     "Folvite",
+     "Logy",
+     "Wysolone"
+    ],
+    "named_wrong": [
+     "logy"
+    ]
+   },
+   "rx009": {
+    "want": [
+     "azithral",
+     "sinarest",
+     "corex",
+     "neurobion"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "Typho",
+     "Cough"
+    ],
+    "named_wrong": [
+     "typho",
+     "cough"
+    ]
+   },
+   "rx010": {
+    "want": [
+     "crocin",
+     "meftal",
+     "allegra",
+     "ambrolite",
+     "nasivion"
+    ],
+    "read": [
+     "crocin",
+     "meftal",
+     "allegra",
+     "ambrolite",
+     "nasivion"
+    ],
+    "named_right": [
+     "crocin",
+     "meftal",
+     "allegra",
+     "ambrolite",
+     "nasivion"
+    ],
+    "named": [
+     "guaiphenesin",
+     "terbutaline",
+     "menthol",
+     "Crocin",
+     "Meftal",
+     "Allegra",
+     "Ambrolite",
+     "Nasivion"
+    ],
+    "named_wrong": [
+     "terbutaline",
+     "menthol"
+    ]
+   },
+   "rx011": {
+    "want": [
+     "allegra",
+     "candid",
+     "montair",
+     "nasoclear",
+     "meftal",
+     "zinconia",
+     "enterogermina"
+    ],
+    "read": [
+     "allegra",
+     "candid",
+     "montair",
+     "nasoclear",
+     "meftal",
+     "zinconia",
+     "enterogermina"
+    ],
+    "named_right": [
+     "allegra",
+     "montair",
+     "meftal"
+    ],
+    "named": [
+     "bacillus clausii spores",
+     "Meftal",
+     "Montair",
+     "Allegra"
+    ],
+    "named_wrong": [
+     "bacillus"
+    ]
+   },
+   "rx013": {
+    "want": [
+     "ascoril",
+     "augmentin",
+     "dynapar"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx014": {
+    "want": [
+     "arachitol",
+     "nerviday",
+     "supracal",
+     "hadjod",
+     "cartigen",
+     "uprise"
+    ],
+    "read": [
+     "supracal"
+    ],
+    "named_right": [],
+    "named": [
+     "Change"
+    ],
+    "named_wrong": [
+     "change"
+    ]
+   },
+   "rx015": {
+    "want": [
+     "laxopeg",
+     "budecort",
+     "montair",
+     "bevon"
+    ],
+    "read": [
+     "laxopeg",
+     "budecort",
+     "montair",
+     "bevon"
+    ],
+    "named_right": [
+     "laxopeg",
+     "budecort",
+     "montair"
+    ],
+    "named": [
+     "polyethylene glycol",
+     "multivitamins",
+     "Laxopeg",
+     "Budecort",
+     "Montair"
+    ],
+    "named_wrong": [
+     "polyethylene",
+     "multivitamins"
+    ]
+   },
+   "rx018": {
+    "want": [
+     "betadine",
+     "montair",
+     "augmentin"
+    ],
+    "read": [
+     "montair"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx019": {
+    "want": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "imdur",
+     "gemer",
+     "rivotril"
+    ],
+    "read": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "gemer",
+     "rivotril"
+    ],
+    "named_right": [
+     "ecosprin",
+     "ivabrad",
+     "gemer",
+     "rivotril"
+    ],
+    "named": [
+     "Ecosprin",
+     "Ivabrad",
+     "Gemer",
+     "Rivotril"
+    ],
+    "named_wrong": []
+   },
+   "rx021": {
+    "want": [
+     "nervmax",
+     "supracal",
+     "uprise",
+     "pantocid",
+     "flexon"
+    ],
+    "read": [
+     "supracal",
+     "uprise",
+     "flexon"
+    ],
+    "named_right": [
+     "uprise",
+     "flexon"
+    ],
+    "named": [
+     "Uprise",
+     "Flexon",
+     "Protocid"
+    ],
+    "named_wrong": [
+     "protocid"
+    ]
+   },
+   "rx022": {
+    "want": [
+     "cordarone",
+     "atarax",
+     "oflox",
+     "vsl",
+     "zedott",
+     "bio",
+     "drotin"
+    ],
+    "read": [
+     "atarax",
+     "vsl"
+    ],
+    "named_right": [
+     "atarax"
+    ],
+    "named": [
+     "probiotic microbes",
+     "Medicaine",
+     "Atarax"
+    ],
+    "named_wrong": [
+     "probiotic",
+     "medicaine"
+    ]
+   },
+   "rx023": {
+    "want": [
+     "linid",
+     "vizylac",
+     "zerodol"
+    ],
+    "read": [
+     "zerodol"
+    ],
+    "named_right": [
+     "zerodol"
+    ],
+    "named": [
+     "Zerodol",
+     "Physito"
+    ],
+    "named_wrong": [
+     "physito"
+    ]
+   },
+   "rx024": {
+    "want": [
+     "saaz",
+     "folitrax",
+     "folvite"
+    ],
+    "read": [
+     "folitrax",
+     "folvite"
+    ],
+    "named_right": [
+     "folitrax",
+     "folvite"
+    ],
+    "named": [
+     "rituximab",
+     "Folitrax",
+     "Folvite"
+    ],
+    "named_wrong": [
+     "rituximab"
+    ]
+   },
+   "rx025": {
+    "want": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "pegura"
+    ],
+    "read": [
+     "allegra",
+     "ambrolite",
+     "azithral",
+     "pegura"
+    ],
+    "named_right": [
+     "allegra",
+     "ambrolite",
+     "azithral"
+    ],
+    "named": [
+     "guaiphenesin",
+     "terbutaline",
+     "menthol",
+     "polyethylene glycol",
+     "Allegra",
+     "Ambrolite",
+     "Azithral"
+    ],
+    "named_wrong": [
+     "terbutaline",
+     "menthol",
+     "polyethylene"
+    ]
+   },
+   "rx026": {
+    "want": [
+     "pan",
+     "emeset",
+     "pan",
+     "emeset",
+     "ziten",
+     "glycomet",
+     "coversyl",
+     "ecosprin",
+     "lonazep",
+     "aten"
+    ],
+    "read": [
+     "pan",
+     "emeset",
+     "pan",
+     "emeset",
+     "ziten",
+     "glycomet",
+     "coversyl",
+     "ecosprin",
+     "lonazep",
+     "aten"
+    ],
+    "named_right": [
+     "glycomet",
+     "coversyl",
+     "ecosprin",
+     "aten"
+    ],
+    "named": [
+     "insulin",
+     "lorazepam",
+     "Glycomet GP",
+     "Coversyl",
+     "Ecosprin AV",
+     "Aten"
+    ],
+    "named_wrong": [
+     "insulin",
+     "lorazepam"
+    ]
+   },
+   "rx027": {
+    "want": [
+     "calpol",
+     "piriton"
+    ],
+    "read": [
+     "calpol",
+     "piriton"
+    ],
+    "named_right": [
+     "piriton"
+    ],
+    "named": [
+     "phenytoin",
+     "Apronin",
+     "Piriton CS"
+    ],
+    "named_wrong": [
+     "phenytoin",
+     "apronin"
+    ]
+   },
+   "rx028": {
+    "want": [
+     "vertin",
+     "atorvas",
+     "evion",
+     "siligreen",
+     "corus",
+     "dilzem",
+     "adcumin",
+     "coenzyme",
+     "stomulate",
+     "uvilax",
+     "calbrit"
+    ],
+    "read": [
+     "corus"
+    ],
+    "named_right": [],
+    "named": [
+     "calcitriol"
+    ],
+    "named_wrong": [
+     "calcitriol"
+    ]
+   },
+   "rx029": {
+    "want": [
+     "nexito",
+     "lonazep",
+     "becosules",
+     "famocid",
+     "naxdom"
+    ],
+    "read": [
+     "nexito",
+     "lonazep",
+     "famocid"
+    ],
+    "named_right": [
+     "lonazep"
+    ],
+    "named": [
+     "Lonazep",
+     "Famotin"
+    ],
+    "named_wrong": [
+     "famotin"
+    ]
+   },
+   "rx030": {
+    "want": [
+     "rekool",
+     "zincovit"
+    ],
+    "read": [
+     "rekool",
+     "zincovit"
+    ],
+    "named_right": [],
+    "named": [
+     "Recool"
+    ],
+    "named_wrong": [
+     "recool"
+    ]
+   },
+   "rx031": {
+    "want": [
+     "citralka",
+     "urispas"
+    ],
+    "read": [
+     "urispas"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx032": {
+    "want": [
+     "folitrax",
+     "folvite",
+     "depomedrol"
+    ],
+    "read": [
+     "folitrax",
+     "folvite",
+     "depomedrol"
+    ],
+    "named_right": [
+     "folitrax",
+     "folvite"
+    ],
+    "named": [
+     "Folitrax",
+     "Folvite"
+    ],
+    "named_wrong": []
+   },
+   "rx035": {
+    "want": [
+     "sompraz",
+     "gaviscon",
+     "uprise"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx036": {
+    "want": [
+     "preva",
+     "olvance",
+     "tonact",
+     "mega",
+     "pantocid"
+    ],
+    "read": [
+     "preva",
+     "olvance",
+     "tonact",
+     "mega",
+     "pantocid"
+    ],
+    "named_right": [
+     "preva",
+     "olvance",
+     "pantocid"
+    ],
+    "named": [
+     "Preva AS",
+     "Olvance AM",
+     "Pantocid"
+    ],
+    "named_wrong": []
+   },
+   "rx037": {
+    "want": [
+     "augmentin",
+     "zedex",
+     "wikoryl"
+    ],
+    "read": [
+     "augmentin"
+    ],
+    "named_right": [
+     "augmentin"
+    ],
+    "named": [
+     "Stream",
+     "Crocin",
+     "Augmentin"
+    ],
+    "named_wrong": [
+     "stream",
+     "crocin"
+    ]
+   },
+   "rx038": {
+    "want": [
+     "maxgalin"
+    ],
+    "read": [
+     "maxgalin"
+    ],
+    "named_right": [
+     "maxgalin"
+    ],
+    "named": [
+     "Maxgalin"
+    ],
+    "named_wrong": []
+   },
+   "rx039": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "Neurobion"
+    ],
+    "named_wrong": [
+     "neurobion"
+    ]
+   },
+   "rx041": {
+    "want": [
+     "azee",
+     "montair",
+     "dolo"
+    ],
+    "read": [
+     "azee",
+     "dolo"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx043": {
+    "want": [
+     "fefol",
+     "argiprime",
+     "clexane",
+     "thyrox",
+     "uprise",
+     "nutrix",
+     "astymin",
+     "evion",
+     "shelcal",
+     "threptin",
+     "betnesol"
+    ],
+    "read": [
+     "fefol",
+     "argiprime",
+     "clexane",
+     "thyrox",
+     "uprise",
+     "nutrix",
+     "astymin",
+     "evion",
+     "shelcal",
+     "threptin",
+     "betnesol"
+    ],
+    "named_right": [
+     "clexane",
+     "thyrox",
+     "uprise",
+     "astymin",
+     "evion",
+     "betnesol"
+    ],
+    "named": [
+     "Clexane",
+     "Thyrox",
+     "Uprise",
+     "Evion",
+     "Astymin",
+     "Betnesol"
+    ],
+    "named_wrong": []
+   },
+   "rx044": {
+    "want": [
+     "folvite",
+     "voricort",
+     "nutrolin"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx045": {
+    "want": [
+     "montair",
+     "amnzole",
+     "ascoril",
+     "mucinac"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx046": {
+    "want": [
+     "pantocid"
+    ],
+    "read": [
+     "pantocid"
+    ],
+    "named_right": [],
+    "named": [
+     "pantoprazole"
+    ],
+    "named_wrong": []
+   },
+   "rx047": {
+    "want": [
+     "red",
+     "zinase"
+    ],
+    "read": [
+     "zinase"
+    ],
+    "named_right": [],
+    "named": [
+     "Calcirol"
+    ],
+    "named_wrong": [
+     "calcirol"
+    ]
+   },
+   "rx048": {
+    "want": [
+     "telma",
+     "lasix"
+    ],
+    "read": [
+     "telma",
+     "lasix"
+    ],
+    "named_right": [
+     "telma",
+     "lasix"
+    ],
+    "named": [
+     "Telinam",
+     "Telma AM",
+     "Laxi",
+     "Sunday",
+     "Lasix"
+    ],
+    "named_wrong": [
+     "telinam",
+     "laxi",
+     "sunday"
+    ]
+   },
+   "rx049": {
+    "want": [
+     "esotab",
+     "esotab",
+     "rantac",
+     "mucaine"
+    ],
+    "read": [
+     "esotab",
+     "esotab"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx050": {
+    "want": [
+     "depomedrol",
+     "folitrax",
+     "folvite",
+     "altraday"
+    ],
+    "read": [
+     "depomedrol",
+     "folitrax",
+     "folvite",
+     "altraday"
+    ],
+    "named_right": [
+     "folitrax",
+     "folvite",
+     "altraday"
+    ],
+    "named": [
+     "Folitrax",
+     "Folvite",
+     "Sunday",
+     "Altraday"
+    ],
+    "named_wrong": [
+     "sunday"
+    ]
+   },
+   "rx051": {
+    "want": [
+     "dynapress",
+     "montair",
+     "amtas",
+     "pansec",
+     "zoryl",
+     "foracort",
+     "meganeuron"
+    ],
+    "read": [
+     "montair"
+    ],
+    "named_right": [],
+    "named": [
+     "Synarose"
+    ],
+    "named_wrong": [
+     "synarose"
+    ]
+   },
+   "rx052": {
+    "want": [
+     "secnil"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx053": {
+    "want": [
+     "endurox",
+     "rabesag",
+     "lidocam",
+     "betadine",
+     "montair",
+     "zincovit"
+    ],
+    "read": [
+     "endurox",
+     "rabesag",
+     "lidocam",
+     "betadine"
+    ],
+    "named_right": [
+     "endurox",
+     "lidocam",
+     "betadine"
+    ],
+    "named": [
+     "Endurox",
+     "Lidocam",
+     "Betadine"
+    ],
+    "named_wrong": []
+   },
+   "rx054": {
+    "want": [
+     "tryptomer",
+     "dulane",
+     "picozy",
+     "safelax",
+     "anobliss",
+     "rivotril"
+    ],
+    "read": [
+     "tryptomer",
+     "dulane",
+     "picozy",
+     "safelax",
+     "anobliss",
+     "rivotril"
+    ],
+    "named_right": [
+     "tryptomer",
+     "dulane",
+     "picozy",
+     "anobliss",
+     "rivotril"
+    ],
+    "named": [
+     "somatotropin",
+     "Tryptomer",
+     "Dulane",
+     "Rivotril",
+     "Picozy",
+     "Anobliss"
+    ],
+    "named_wrong": [
+     "somatotropin"
+    ]
+   },
+   "rx056": {
+    "want": [
+     "ace",
+     "volitra"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx057": {
+    "want": [
+     "augmentin",
+     "preimmune",
+     "citralka"
+    ],
+    "read": [
+     "augmentin",
+     "preimmune",
+     "citralka"
+    ],
+    "named_right": [
+     "augmentin"
+    ],
+    "named": [
+     "Augmentin"
+    ],
+    "named_wrong": []
+   },
+   "rx058": {
+    "want": [
+     "crocin",
+     "celin",
+     "bifilac",
+     "ondem"
+    ],
+    "read": [
+     "crocin",
+     "celin",
+     "ondem"
+    ],
+    "named_right": [
+     "ondem"
+    ],
+    "named": [
+     "Rest",
+     "Cocain",
+     "Ondem"
+    ],
+    "named_wrong": [
+     "rest",
+     "cocain"
+    ]
+   },
+   "rx059": {
+    "want": [
+     "buscopan"
+    ],
+    "read": [
+     "buscopan"
+    ],
+    "named_right": [],
+    "named": [
+     "thyroxine sodium"
+    ],
+    "named_wrong": [
+     "thyroxine"
+    ]
+   },
+   "rx061": {
+    "want": [
+     "ecosprin",
+     "uprise",
+     "mama",
+     "doxinate",
+     "cansoft",
+     "novacef",
+     "meftal",
+     "pantop",
+     "aqsusten"
+    ],
+    "read": [
+     "ecosprin",
+     "uprise",
+     "mama",
+     "doxinate",
+     "cansoft",
+     "novacef",
+     "meftal",
+     "pantop",
+     "aqsusten"
+    ],
+    "named_right": [
+     "ecosprin",
+     "uprise",
+     "doxinate",
+     "novacef",
+     "meftal",
+     "pantop",
+     "aqsusten"
+    ],
+    "named": [
+     "protamine sulphate",
+     "Ecosprin",
+     "Uprise",
+     "Doxinate",
+     "Novacef",
+     "Meftal Spas",
+     "Pantop",
+     "Aqsusten"
+    ],
+    "named_wrong": [
+     "protamine"
+    ]
+   },
+   "rx062": {
+    "want": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "thyrox",
+     "gluconorm"
+    ],
+    "read": [
+     "ecosprin",
+     "clopitab",
+     "tonact",
+     "starpress",
+     "ivabrad",
+     "thyrox"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx063": {
+    "want": [
+     "oflox",
+     "rabium",
+     "drotin"
+    ],
+    "read": [
+     "rabium"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx064": {
+    "want": [
+     "piriton",
+     "ambrodil",
+     "toba"
+    ],
+    "read": [
+     "ambrodil"
+    ],
+    "named_right": [],
+    "named": [
+     "Nevanac"
+    ],
+    "named_wrong": [
+     "nevanac"
+    ]
+   },
+   "rx065": {
+    "want": [
+     "zincovit",
+     "pantocid",
+     "emeset"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx066": {
+    "want": [
+     "nexito",
+     "nexito",
+     "rejunex"
+    ],
+    "read": [
+     "nexito",
+     "nexito",
+     "rejunex"
+    ],
+    "named_right": [],
+    "named": [
+     "aloe vera"
+    ],
+    "named_wrong": [
+     "aloe"
+    ]
+   },
+   "rx067": {
+    "want": [
+     "maxgalin",
+     "duloxetine",
+     "rejunex",
+     "volini"
+    ],
+    "read": [
+     "maxgalin",
+     "duloxetine",
+     "rejunex",
+     "volini"
+    ],
+    "named_right": [
+     "maxgalin",
+     "rejunex"
+    ],
+    "named": [
+     "Maxgalin",
+     "Duzela",
+     "Rejunex"
+    ],
+    "named_wrong": [
+     "duzela"
+    ]
+   },
+   "rx068": {
+    "want": [
+     "mahacef",
+     "gutbilac",
+     "vomis",
+     "spasrine",
+     "enerzal",
+     "redotil"
+    ],
+    "read": [
+     "mahacef"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx070": {
+    "want": [
+     "glyciphage"
+    ],
+    "read": [
+     "glyciphage"
+    ],
+    "named_right": [],
+    "named": [
+     "insulin"
+    ],
+    "named_wrong": [
+     "insulin"
+    ]
+   },
+   "rx071": {
+    "want": [
+     "budamate",
+     "montair",
+     "levolin"
+    ],
+    "read": [
+     "budamate",
+     "montair",
+     "levolin"
+    ],
+    "named_right": [
+     "budamate"
+    ],
+    "named": [
+     "Budamate"
+    ],
+    "named_wrong": []
+   },
+   "rx072": {
+    "want": [
+     "rifagut",
+     "rekool",
+     "enzispor",
+     "meva"
+    ],
+    "read": [
+     "rifagut",
+     "rekool",
+     "enzispor"
+    ],
+    "named_right": [
+     "rifagut"
+    ],
+    "named": [
+     "aloe vera",
+     "Rifagut",
+     "Follow"
+    ],
+    "named_wrong": [
+     "aloe",
+     "follow"
+    ]
+   },
+   "rx073": {
+    "want": [
+     "glycomet",
+     "janumet",
+     "volix",
+     "prothiaden",
+     "sompraz",
+     "montek",
+     "alex",
+     "chymoral",
+     "moxikind"
+    ],
+    "read": [
+     "glycomet",
+     "janumet",
+     "volix",
+     "alex"
+    ],
+    "named_right": [
+     "glycomet",
+     "janumet",
+     "alex"
+    ],
+    "named": [
+     "Glycomet GP",
+     "Janumet",
+     "Volrin",
+     "Alex",
+     "Moxiled"
+    ],
+    "named_wrong": [
+     "volrin",
+     "moxiled"
+    ]
+   },
+   "rx075": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx076": {
+    "want": [
+     "calcimax",
+     "lumia",
+     "altraday"
+    ],
+    "read": [
+     "calcimax",
+     "altraday"
+    ],
+    "named_right": [
+     "calcimax"
+    ],
+    "named": [
+     "vitamin",
+     "Calcimax"
+    ],
+    "named_wrong": [
+     "vitamin"
+    ]
+   },
+   "rx077": {
+    "want": [
+     "cepodem",
+     "valcivir",
+     "allegra",
+     "crocin",
+     "pantocid",
+     "domstal"
+    ],
+    "read": [
+     "cepodem",
+     "allegra"
+    ],
+    "named_right": [
+     "allegra"
+    ],
+    "named": [
+     "enzyme mixed fruit",
+     "Allegra"
+    ],
+    "named_wrong": [
+     "enzyme"
+    ]
+   },
+   "rx078": {
+    "want": [
+     "forglyn",
+     "duolin"
+    ],
+    "read": [
+     "forglyn",
+     "duolin"
+    ],
+    "named_right": [],
+    "named": [
+     "Aminophylin"
+    ],
+    "named_wrong": [
+     "aminophylin"
+    ]
+   },
+   "rx079": {
+    "want": [
+     "allegra"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx080": {
+    "want": [
+     "lactifiber",
+     "neopride",
+     "lox"
+    ],
+    "read": [
+     "neopride"
+    ],
+    "named_right": [
+     "neopride"
+    ],
+    "named": [
+     "Neopride"
+    ],
+    "named_wrong": []
+   },
+   "rx081": {
+    "want": [
+     "benadon",
+     "pantocid"
+    ],
+    "read": [
+     "benadon",
+     "pantocid"
+    ],
+    "named_right": [
+     "benadon"
+    ],
+    "named": [
+     "Banadon"
+    ],
+    "named_wrong": []
+   },
+   "rx082": {
+    "want": [
+     "lantus",
+     "trajenta",
+     "urimax",
+     "olvance",
+     "volix",
+     "nexito",
+     "maxgalin",
+     "donep",
+     "pan",
+     "trigabantin",
+     "gluconorm"
+    ],
+    "read": [
+     "nexito",
+     "maxgalin",
+     "donep"
+    ],
+    "named_right": [],
+    "named": [
+     "Orimax"
+    ],
+    "named_wrong": [
+     "orimax"
+    ]
+   },
+   "rx083": {
+    "want": [
+     "evion",
+     "pyricontin",
+     "neurobion",
+     "uprise"
+    ],
+    "read": [
+     "neurobion",
+     "uprise"
+    ],
+    "named_right": [
+     "neurobion"
+    ],
+    "named": [
+     "piroxicam",
+     "Emlone",
+     "Neurobion"
+    ],
+    "named_wrong": [
+     "piroxicam",
+     "emlone"
+    ]
+   },
+   "rx084": {
+    "want": [
+     "rifagut",
+     "neopride",
+     "normaxin"
+    ],
+    "read": [
+     "rifagut",
+     "neopride",
+     "normaxin"
+    ],
+    "named_right": [
+     "rifagut",
+     "neopride",
+     "normaxin"
+    ],
+    "named": [
+     "Rifagut",
+     "Neopride",
+     "Normaxin"
+    ],
+    "named_wrong": []
+   },
+   "rx085": {
+    "want": [
+     "alupectin",
+     "flucos",
+     "candiderma"
+    ],
+    "read": [
+     "flucos",
+     "candiderma"
+    ],
+    "named_right": [
+     "flucos"
+    ],
+    "named": [
+     "Flucos",
+     "Flucon",
+     "Candidac"
+    ],
+    "named_wrong": [
+     "flucon",
+     "candidac"
+    ]
+   },
+   "rx086": {
+    "want": [
+     "novamox",
+     "hifenac"
+    ],
+    "read": [
+     "novamox",
+     "hifenac"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx087": {
+    "want": [
+     "augmentin",
+     "pan",
+     "signoflam"
+    ],
+    "read": [
+     "pan"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx088": {
+    "want": [
+     "voveran",
+     "vertin",
+     "lumia",
+     "gemcal",
+     "gabapin"
+    ],
+    "read": [
+     "vertin"
+    ],
+    "named_right": [],
+    "named": [
+     "Limit",
+     "Genera"
+    ],
+    "named_wrong": [
+     "limit",
+     "genera"
+    ]
+   },
+   "rx089": {
+    "want": [
+     "depura"
+    ],
+    "read": [
+     "depura"
+    ],
+    "named_right": [],
+    "named": [
+     "vitamin"
+    ],
+    "named_wrong": [
+     "vitamin"
+    ]
+   },
+   "rx090": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "biotin",
+     "Allergifex",
+     "Propysalic"
+    ],
+    "named_wrong": [
+     "biotin",
+     "allergifex",
+     "propysalic"
+    ]
+   },
+   "rx091": {
+    "want": [
+     "drotin",
+     "rabium",
+     "montair",
+     "dlozy"
+    ],
+    "read": [
+     "montair"
+    ],
+    "named_right": [],
+    "named": [],
+    "named_wrong": []
+   },
+   "rx092": {
+    "want": [
+     "ecosprin",
+     "donep",
+     "vertin"
+    ],
+    "read": [
+     "ecosprin",
+     "donep",
+     "vertin"
+    ],
+    "named_right": [
+     "ecosprin",
+     "donep",
+     "vertin"
+    ],
+    "named": [
+     "Ecosprin AV",
+     "Donep",
+     "Vertin"
+    ],
+    "named_wrong": []
+   },
+   "rx093": {
+    "want": [
+     "etoshine",
+     "pantocid",
+     "rejunex"
+    ],
+    "read": [
+     "etoshine",
+     "pantocid",
+     "rejunex"
+    ],
+    "named_right": [
+     "etoshine",
+     "pantocid",
+     "rejunex"
+    ],
+    "named": [
+     "folic acid",
+     "Etoshine",
+     "Pantocid",
+     "Rejunex"
+    ],
+    "named_wrong": [
+     "folic"
+    ]
+   },
+   "rx094": {
+    "want": [
+     "pen",
+     "ciplox"
+    ],
+    "read": [
+     "ciplox"
+    ],
+    "named_right": [
+     "ciplox"
+    ],
+    "named": [
+     "Ciplox",
+     "Mighty"
+    ],
+    "named_wrong": [
+     "mighty"
+    ]
+   },
+   "rx095": {
+    "want": [
+     "cabergoline",
+     "thyronorm",
+     "shelcal",
+     "lupi"
+    ],
+    "read": [
+     "cabergoline",
+     "lupi"
+    ],
+    "named_right": [
+     "cabergoline"
+    ],
+    "named": [
+     "cabergoline",
+     "thyroxine sodium"
+    ],
+    "named_wrong": []
+   },
+   "rx096": {
+    "want": [
+     "lycomerv"
+    ],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "Imaget"
+    ],
+    "named_wrong": [
+     "imaget"
+    ]
+   },
+   "rx097": {
+    "want": [],
+    "read": [],
+    "named_right": [],
+    "named": [
+     "acetaminophen"
+    ],
+    "named_wrong": [
+     "acetaminophen"
+    ]
+   },
+   "rx098": {
+    "want": [
+     "rantac",
+     "augmentin",
+     "ventorlin",
+     "levolin",
+     "crocin"
+    ],
+    "read": [
+     "augmentin",
+     "ventorlin",
+     "levolin",
+     "crocin"
+    ],
+    "named_right": [
+     "augmentin",
+     "ventorlin"
+    ],
+    "named": [
+     "Augmentin",
+     "Ventorlin"
+    ],
+    "named_wrong": []
+   }
+  }
+ }
+}

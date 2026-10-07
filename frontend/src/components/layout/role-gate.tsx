@@ -13,7 +13,6 @@ export const HOME_FOR_ROLE: Record<Role, string> = {
   health_worker: "/nurse",
   receptionist: "/desk",
   supervisor: "/admin",
-  patient: "/patient",
   employer: "/employer",
   kiosk: "/kiosk",
 };

@@ -216,7 +216,7 @@ def test_pin_setup_forgot_and_supervisor_reset(client):
     assert client.post(f"{API}/auth/pin/setup", json={"pin_token": f["pin_token"], "pin": "6093"}).status_code == 200
 
 
-def test_documents_only_for_treating_clinicians(client, doctor, nurse, supervisor, patient):
+def test_documents_only_for_treating_clinicians(client, doctor, nurse, supervisor, employer):
     q = client.get(f"{API}/queue?facility_id=fac_phc_manikpur", headers=doctor).json()
     eid = next(i["encounter_id"] for i in q if i["patient_name"] == "Radha Kumari")
     fid = client.get(f"{API}/encounters/{eid}", headers=doctor).json()["intake"]["file_ids"][0]
@@ -225,7 +225,7 @@ def test_documents_only_for_treating_clinicians(client, doctor, nurse, superviso
     rec = login(client, "9000000003")  # receptionist, same facility
     assert client.get(f"{API}/files/{fid}", headers=rec).status_code == 403
     assert client.get(f"{API}/files/{fid}", headers=supervisor).status_code == 403
-    assert client.get(f"{API}/files/{fid}", headers=patient).status_code == 403  # Radha's file, not Priya's
+    assert client.get(f"{API}/files/{fid}", headers=employer).status_code == 403
     r, _ = register(client, "doctor", "Dr Elsewhere", registration_no="ODMC-8888", new_facility=None, facility_id="fac_kalinganagar")
     assert client.get(f"{API}/files/{fid}", headers=auth(r)).status_code == 403  # another facility
     views = client.get(f"{API}/audit", params={"action": "VIEW", "q": "Document opened"}, headers=doctor).json()

@@ -9,7 +9,7 @@ from .. import audit
 from ..models import Consent, Encounter, Facility, Patient, User
 from ..schemas import ADMIN_ROLES, STAFF_ROLES, ConsentIn, ConsentOut, EncounterOut, PatientCandidate, PatientIn, PatientOut, PatientPatch
 from ..security import DB, CurrentUser, require
-from ..services import aware, encounter_out, next_patient_code, own_patient
+from ..services import aware, encounter_out, next_patient_code
 
 router = APIRouter(tags=["patients"])
 Staff = Annotated[User, Depends(require(*STAFF_ROLES))]
@@ -19,11 +19,7 @@ Registrar = Annotated[User, Depends(require(*STAFF_ROLES, "kiosk"))]
 def _check_patient_access(db, user: User, p: Patient, *, kiosk_ok: bool = False):
     if user.role == "kiosk" and kiosk_ok:
         return
-    if user.role == "patient":
-        mine = own_patient(db, user)
-        if not mine or mine.id != p.id:
-            raise HTTPException(403, "Not your record")
-    elif user.role not in STAFF_ROLES:
+    if user.role not in STAFF_ROLES:
         raise HTTPException(403, "Not allowed")
 
 

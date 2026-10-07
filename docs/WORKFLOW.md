@@ -10,15 +10,15 @@ Written for the Jeevia team and for facility staff learning the system.
  Kiosk link /k/CODE  ─┐                                                  Doctor / Nurse
  (tablet or own phone)│   consent → symptoms → reports →   ┌──────────►  /reviewer  queue ordered by
  Staff kiosk /kiosk  ─┼─► follow-up questions → submit ────┤             urgency → case → confirm /
- Patient app /patient ┘            │                       │             override / escalate / refer
+ From home /k/MKHOME ┘             │                       │             override / escalate / refer
                                    ▼                       │
                      Rules engine sets urgency (red /      │             Receptionist / Supervisor
                      yellow / green) from fixed AIIMS      ├──────────►  /admin  tokens board, kiosk
                      ATP + IMCI rules; note is built;      │             links, facility setup, audit
                      daily token T-001… is issued          │
-                                   │                       │             Patient
-                                   └─► every action is ────┴──────────►  /patient  own visits and
-                                       written to the audit log          reminders (no urgency shown)
+                                   │                       │
+                                   └─► every action is written to the audit log
+                     From home: an H- reference; joins the queue only when the desk checks the patient in
 ```
 
 One idea runs through everything: **the system organises and prioritises; a qualified person decides.**
@@ -31,7 +31,6 @@ One idea runs through everything: **the system organises and prioritises; a qual
 | **Receptionist** | `/auth` | `/desk` *(Front desk)* | Today's patients and waiting times, finds and registers patients, corrects registration mistakes, marks doctors and nurses on/off duty, runs the check-in kiosk | Symptoms, urgency, notes, documents; facility setup, kiosk links, devices, audit, staff accounts |
 | **Nurse / ANM** | `/auth` | `/nurse` *(Nursing station)* and `/kiosk` | Patients to attend, **records vitals and bedside observations**, works the "Do now" checklist and questions, alerts the doctor, runs assisted intake | Referrals, QR summaries, exports, overrides, sign-off, fitness |
 | **Doctor / MO** | `/auth` | `/reviewer` *(Medical officer)* | Works the queue top-down, reviews the note with its sources and the nurses' observations, confirms or edits, overrides urgency with a written reason, acknowledges escalations, sends referrals, exports, shares QR summaries | — |
-| **Patient** | `/auth` | `/patient` | Adds a new problem before arriving, sees own visits, tokens and check-up reminders | Urgency, triage notes, other family members' records |
 | **Employer / organisation** | `/auth` | `/employer` | Registers the organisation and its workplaces (company clinic, industrial unit, campus, health camp), keeps the worker roster, sees each worker's fitness outcome (fit / restricted / unfit / pending) | Symptoms, notes, documents — any clinical record |
 | **Kiosk link** (no login) | opens `/k/CODE` | intake only | Registers a patient, records consent, takes symptoms and reports, issues a token | Everything else — it cannot read any data |
 
@@ -62,7 +61,7 @@ These are **not** in the public list. They appear only after their organisation 
 |---|---|---|---|
 | **Kiosk link** | `/k/CODE` on a waiting-room tablet, or scanned QR on the patient's own phone | The patient (or family member) | No login. Works in any tab or device. |
 | **Staff kiosk** | `/kiosk` on a bound tablet | Nurse / ANM sitting with the patient | Can search existing patients and add vitals. The tablet must be bound to the facility once. |
-| **Patient app** | `/patient/new` | The patient, from home | For registered patients; they choose the facility they will visit. |
+| **From-home link** | `/k/CODE` of a link marked *for filling in from home* (SMS, poster, website); sample `/k/MKHOME` | The patient, before coming | No login, no patient account (the plan has no patient portal). The intake gets an **H-** reference and waits on the desk's token board as *Expected*. When the patient arrives the desk presses **Checked in**: a T- token is issued and waiting time and escalation timers start then, so filling in early never puts anyone ahead of people already waiting. If a danger sign was reported, the patient is told to go to emergency or call 108 (never a tier), and the case goes straight to the doctors' queue. |
 
 ### 4.2 Intake (all channels)
 1. **Consent** — "I am the patient" or "I am helping" (proxy name + relationship), and where it is being filled (private / shared space / assisted). Nothing is saved without consent.
@@ -125,7 +124,7 @@ Reports, prescriptions and photos a patient uploads open only for:
 Receptionists, supervisors, employers and staff at other facilities get *"Only the doctors and nurses treating this patient can open their documents"*. Every opening is written to the audit log.
 
 ### 4.9 After the visit
-- The patient sees the visit as *Reviewed by a doctor* or *Referred* in `/patient`, plus any check-up reminders (SMS or voice).
+- The patient gets the clinician-issued slip (follow-up date, referral, QR for staff; never an urgency tier) and any check-up reminders (SMS or voice). There is no patient portal.
 - Raw voice recordings are deleted after 24 hours, photos after 3 days and reports after 30 days (`/admin/retention`); the structured note stays.
 - Every view, edit, override, referral and export is in the hash-chained audit log (`/admin/audit` → *Verify chain*).
 
@@ -144,7 +143,7 @@ The landing page shows live status (checked every 20 seconds) for the website, A
 - **Change PIN:** the key icon in the dashboard header (needs the current PIN).
 - **Forgot PIN:** supervisors and employers reset it themselves after the OTP (*Forgot PIN?*). Doctors, nurses and receptionists ask their supervisor (**Admin → Staff → Reset PIN**); they then create a new PIN after their next OTP.
 - **Rate limits:** 3 codes per phone per 10 minutes, 10 per day, 30 per network address per hour; the message says how long to wait. Sample numbers are exempt (they never send an SMS).
-- **Sample walkthrough accounts** (code `123456`, staff PIN `4826`): doctor 9000000001, nurse 9000000002, receptionist 9000000003, supervisor 9000000004, employer 9000000005, patient 9876543210. They belong to the sample facility *PHC Manikpur* (kiosk link `/k/MANIKPUR`) and the sample organisation *Kalinga Steel Works*.
+- **Sample walkthrough accounts** (code `123456`, staff PIN `4826`): doctor 9000000001, nurse 9000000002, receptionist 9000000003, supervisor 9000000004, employer 9000000005. Patients have no login; the from-home kiosk link is `/k/MKHOME`. They belong to the sample facility *PHC Manikpur* (kiosk link `/k/MANIKPUR`) and the sample organisation *Kalinga Steel Works*.
 - **New accounts start empty:** a number that already has an account cannot be used to register again (sign in instead), the sample numbers are reserved, and the sample facility cannot be joined — so a newly registered doctor, nurse or employer always gets their own fresh dashboard.
 
 ## 7. Language

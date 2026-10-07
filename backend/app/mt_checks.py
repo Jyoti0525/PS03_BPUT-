@@ -68,6 +68,10 @@ _NEG = r"(?:ହୋଇନି|ହେଉନି|ହେଉ ନାହିଁ|ହୋଇ 
 REWRITES = {
     "or": [
         (re.compile(r"(?<!\S)ଜର(?=\s|$|[,.?!।])"), "ଜ୍ୱର", "spoken spelling of fever"),
+        (re.compile(r"୍ଵ"), "୍ୱ", "speech recognition's ଵ for the silent ୱ"),
+        # ଝାଡ଼ without its ା before a "happening" verb (both speech engines, 6 Oct): restored, so the rules below apply.
+        # The translator read the short form as "cough".
+        (re.compile(r"(?<!\S)ଝାଡ଼?(?=\s+(?:ହେଉଛି|ହଉଛି|ଲାଗୁଛି|ହେଲାଣି|ହେଉଥିଲା))"), "ଝାଡ଼ା", "spoken spelling of ଝାଡ଼ା"),
         (re.compile(rf"{_JHADA}ବାନ୍ତି"), "ଅତିସାର ଓ ବାନ୍ତି", "loose stools and vomiting"),
         (re.compile(rf"{_JHADA}ରେ"), "ମଳରେ", "in the stool"),
         (re.compile(rf"{_JHADA}(\s+(?:ବି\s+)?){_NEG}"), r"ମଳ\1ବାହାରୁ ନାହିଁ", "no stool passed"),

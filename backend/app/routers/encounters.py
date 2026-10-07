@@ -10,11 +10,12 @@ from sqlalchemy.exc import IntegrityError
 
 from .. import alerts, audit, exports, language, privacy
 from ..config import get_settings
-from ..models import Consent, Device, Encounter, FileObject, Escalation, Facility, FitnessAssessment, Patient, Referral, Reminder, User
+from ..models import Consent, Device, Encounter, FileObject, Escalation, Facility, FitnessAssessment, KioskLink, Patient, Referral, Reminder, User
 from ..schemas import (
     DOCTOR_ROLES,
     NO_AI_SCOPE,
     REVIEWER_ROLES,
+    STAFF_ROLES,
     AckIn,
     EncounterOut,
     EncounterPatch,
@@ -34,19 +35,21 @@ from ..schemas import (
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
 from ..triage.findings import FINDINGS
-from ..services import auto_escalate, can_confirm, create_encounter, encounter_out, escalate_after, load_encounter, now, own_patient, record_observations, sign_off_role, summarise_later
+from ..services import (auto_escalate, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, record_observations, sign_off_role,
+                        summarise_later, wait_minutes)
 from .facilities import get_facility
 
 router = APIRouter(tags=["encounters"])
 Reviewer = Annotated[User, Depends(require(*REVIEWER_ROLES))]
 Doctor = Annotated[User, Depends(require(*DOCTOR_ROLES))]  # doctor or medical officer
 Clinician = Annotated[User, Depends(require("nurse", *DOCTOR_ROLES))]
+Staff = Annotated[User, Depends(require(*STAFF_ROLES))]
 RANK = {"red": 0, "yellow": 1, "green": 2}
 
 
 @router.post("/encounters", response_model=EncounterOut)
 def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHeader = None):
-    if user.role not in ("nurse", "doctor", "medical_officer", "health_worker", "receptionist", "supervisor", "patient", "kiosk"):
+    if user.role not in ("nurse", "doctor", "medical_officer", "health_worker", "receptionist", "supervisor", "kiosk"):
         raise HTTPException(403, "Not allowed")
     dup = db.scalar(select(Encounter).where(Encounter.client_ref == body.client_ref))
     if dup:
@@ -56,22 +59,17 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
         raise HTTPException(404, "Patient not found")
     if not db.get(Facility, body.facility_id):
         raise HTTPException(422, "Unknown facility")
-    if body.maternal and body.maternal.assigned_worker_id:
-        w = db.get(User, body.maternal.assigned_worker_id)
-        if not w or w.role != "health_worker" or w.facility_id != body.facility_id or not w.is_active:
+    for prog in (body.maternal, body.chronic):
+        w = db.get(User, prog.assigned_worker_id) if prog and prog.assigned_worker_id else None
+        if prog and prog.assigned_worker_id and (not w or w.role != "health_worker" or w.facility_id != body.facility_id or not w.is_active):
             raise HTTPException(422, "The assigned worker must be an active health worker (ASHA / ANM) at this facility")
-    if user.role == "patient":
-        mine = own_patient(db, user)
-        if not mine or mine.id != p.id:
-            raise HTTPException(403, "Patients can only submit their own intake")
-    else:
-        if body.facility_id != user.facility_id:
-            raise HTTPException(403, "Intakes can only be submitted for your own facility")
-        if user.role != "kiosk" and get_settings().require_bound_device:
-            dev = db.get(Device, device_id) if device_id else None
-            if not dev or dev.revoked or dev.facility_id != user.facility_id:
-                raise HTTPException(403, "This device is not bound to your facility — bind it from the kiosk screen")
-            dev.last_seen_at = now()
+    if body.facility_id != user.facility_id:
+        raise HTTPException(403, "Intakes can only be submitted for your own facility")
+    if user.role != "kiosk" and get_settings().require_bound_device:
+        dev = db.get(Device, device_id) if device_id else None
+        if not dev or dev.revoked or dev.facility_id != user.facility_id:
+            raise HTTPException(403, "This device is not bound to your facility — bind it from the kiosk screen")
+        dev.last_seen_at = now()
     if not body.consent_id:
         raise HTTPException(422, "Consent must be captured before intake")
     # Identifiers are scrubbed from free text before anything is stored or sent to a model (G3); the placeholders
@@ -100,7 +98,8 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
         intake["redactions"] = removed
     captured = body.captured_at if body.captured_at and body.captured_at < now() else None
     try:
-        channel = {"kiosk": "kiosk_link", "patient": "patient_app"}.get(user.role, "staff_kiosk")
+        link = db.scalar(select(KioskLink).where(KioskLink.user_id == user.id)) if user.role == "kiosk" else None
+        channel = "staff_kiosk" if not link else "home_link" if link.for_home else "kiosk_link"
         enc = create_encounter(db, intake, p, captured, channel)
     except IntegrityError:
         db.rollback()
@@ -109,13 +108,10 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
     m = body.maternal
     if body.category == "maternal" or m:
         alerts.close_on_visit(db, p.id, user)  # she came: earlier check-up reminders are done
+    if body.category == "chronic" or body.chronic:
+        alerts.close_on_visit(db, p.id, user, kind="chronic_checkin")
     if m and m.next_checkup:
-        from datetime import datetime, timezone
-
-        try:
-            due = datetime.fromisoformat(m.next_checkup).replace(tzinfo=timezone.utc)
-        except ValueError:
-            due = None
+        due = _date(m.next_checkup)
         if due:
             # D4: the reminder always exists so a missed visit is noticed; the channel only decides whether a message goes
             # out, and a phone that is not hers gets wording that says nothing about pregnancy.
@@ -123,6 +119,13 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
             db.add(Reminder(patient_id=p.id, kind="anc_checkup", due_at=due, channel=m.reminder_channel or "sms", facility_id=enc.facility_id,
                             assigned_to=m.assigned_worker_id, phone_belongs_to=owner, encounter_id=enc.id,
                             message=alerts.reminder_message(p, alerts.facility_name(db, enc.facility_id), due, owner)))
+    c = body.chronic
+    if c and c.next_checkup and (due := _date(c.next_checkup)):
+        # E5: the next check-in for a long-term condition. Missed → the assigned health worker, then a reminder call.
+        owner = "self" if p.phone else "none"
+        db.add(Reminder(patient_id=p.id, kind="chronic_checkin", due_at=due, channel="voice" if p.phone else "none", facility_id=enc.facility_id,
+                        assigned_to=c.assigned_worker_id, phone_belongs_to=owner, encounter_id=enc.id,
+                        message=alerts.reminder_message(p, alerts.facility_name(db, enc.facility_id), due, owner, kind="chronic_checkin")))
     audit.record(db, user, "CREATE", "encounter", enc.id, f"Intake submitted{' (offline, synced)' if body.captured_offline else ''}; rules engine: {enc.urgency}", p.code, enc.facility_id)
     if removed:
         audit.record(db, user, "REDACT", "encounter", enc.id, f"Removed from free text before storage: {privacy.describe(removed)}", p.code, enc.facility_id)
@@ -139,6 +142,15 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
     return encounter_out(enc, user)
 
 
+def _date(s: str):
+    from datetime import datetime, timezone
+
+    try:
+        return datetime.fromisoformat(s).replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
 @router.get("/queue", response_model=list[QueueItem])
 def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
     if facility_id != user.facility_id:
@@ -146,12 +158,15 @@ def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
     auto_escalate(db)
     rows = list(db.scalars(select(Encounter).where(Encounter.facility_id == facility_id, Encounter.status.in_(("queued", "in_review", "escalated")))))
     alerts.check_capacity(db, facility_id)
+    long_wait = alerts.check_long_wait(db, facility_id)
     t = now()
-    wait = {e.id: max(0, round((t - e.created_at).total_seconds() / 60)) for e in rows}
-    why = alerts.order_reasons([{"id": e.id, "urgency": e.urgency, "wait": wait[e.id], "why": alerts.why_tier(e)} for e in rows])
+    wait = {e.id: wait_minutes(e, t) for e in rows}
+    why = alerts.order_reasons([{"id": e.id, "urgency": e.urgency, "wait": wait[e.id], "why": alerts.why_tier(e), "escalated": e.status == "escalated",
+                                 "long_wait": e.id in long_wait, "from_home": e.channel == "home_link"} for e in rows])
     items = []
     for e in rows:
         n = e.note or {}
+        raised = sorted((f for f in n.get("flags", []) if f["severity"] != "info"), key=lambda f: f["severity"] != "critical")
         items.append(
             QueueItem(
                 encounter_id=e.id,
@@ -166,8 +181,10 @@ def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
                 urgency=e.urgency,
                 status=e.status,
                 created_at=e.created_at,
+                arrived_at=e.arrived_at,
                 wait_minutes=wait[e.id],
-                flag_count=sum(1 for f in n.get("flags", []) if f["severity"] != "info"),
+                flag_count=len(raised),
+                top_flags=[f["label"] for f in raised[:2]],
                 needs_check_count=sum(1 for v in [*n.get("vitals", []), *n.get("labs", [])] if v.get("needs_check")),
                 language=e.patient.language,
                 escalation_due_at=e.escalation_due_at,
@@ -177,7 +194,24 @@ def queue(user: Reviewer, db: DB, facility_id: str = Query(...)):
                 sign_off=sign_off_role(e.urgency),
             )
         )
-    return sorted(items, key=lambda i: (RANK[i.urgency], -i.wait_minutes))
+    # C3: tier, then escalation state, then minutes waiting since arrival (plan, "Queue ordering")
+    return sorted(items, key=lambda i: (RANK[i.urgency], i.status != "escalated", -i.wait_minutes))
+
+
+@router.post("/encounters/{eid}/arrive", response_model=EncounterOut)
+def arrive(eid: str, user: Staff, db: DB):
+    """The desk checks in a patient who filled in the form from home: they join the queue from now."""
+    e = db.get(Encounter, eid)
+    if not e or e.facility_id != user.facility_id:
+        raise HTTPException(404, "Not found")
+    if e.status != "expected":
+        raise HTTPException(409, "Already checked in" if e.arrived_at else f"This intake is {e.status}")
+    check_in(db, e, user)
+    audit.record(db, user, "ARRIVE", "encounter", e.id, f"Checked in at the desk (filled in from home); token {e.token}", e.patient.code, e.facility_id)
+    db.commit()
+    if e.urgency == "red":
+        alerts.check_capacity(db, e.facility_id)
+    return encounter_out(e, user)
 
 
 @router.get("/encounters/{eid}", response_model=EncounterOut)

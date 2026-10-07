@@ -1,0 +1,2928 @@
+{
+ "engine": "RapidOCR (PaddleOCR PP-OCR models, ONNX Runtime, offline)",
+ "second_engine": false,
+ "by_type": {
+  "scan": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 100.0,
+   "value_exact_pct": 99.3,
+   "unit_pct": 99.6,
+   "range_pct": 100.0,
+   "high_low_pct": 99.7,
+   "wrong_values": 2,
+   "wrong_flagged_pct": 0.0,
+   "silent_errors": 2,
+   "correct_flagged_pct": 0.3,
+   "engines_differ_on_wrong": 0,
+   "engines_differ_on_correct": 0,
+   "silent_error_pct": 0.7,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 100.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 8.73
+  },
+  "photo": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 100.0,
+   "value_exact_pct": 99.3,
+   "unit_pct": 99.6,
+   "range_pct": 95.5,
+   "high_low_pct": 99.7,
+   "wrong_values": 2,
+   "wrong_flagged_pct": 0.0,
+   "silent_errors": 2,
+   "correct_flagged_pct": 0.0,
+   "engines_differ_on_wrong": 0,
+   "engines_differ_on_correct": 0,
+   "silent_error_pct": 0.7,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 100.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 8.46
+  },
+  "poor_photo": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 84.8,
+   "value_exact_pct": 77.9,
+   "unit_pct": 80.9,
+   "range_pct": 59.9,
+   "high_low_pct": 76.9,
+   "wrong_values": 21,
+   "wrong_flagged_pct": 85.7,
+   "silent_errors": 3,
+   "correct_flagged_pct": 11.9,
+   "engines_differ_on_wrong": 0,
+   "engines_differ_on_correct": 0,
+   "silent_error_pct": 1.0,
+   "invented_rows": 0,
+   "date_pct": 90.0,
+   "name_pct": 87.5,
+   "retake_asked_pct": 72.5,
+   "seconds_per_page": 7.68
+  },
+  "photocopy": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 96.7,
+   "value_exact_pct": 95.4,
+   "unit_pct": 96.3,
+   "range_pct": 88.8,
+   "high_low_pct": 94.4,
+   "wrong_values": 4,
+   "wrong_flagged_pct": 50.0,
+   "silent_errors": 2,
+   "correct_flagged_pct": 2.8,
+   "engines_differ_on_wrong": 0,
+   "engines_differ_on_correct": 0,
+   "silent_error_pct": 0.7,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 95.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 7.24
+  },
+  "thermal": {
+   "reports": 40,
+   "tests": 303,
+   "found_pct": 99.3,
+   "value_exact_pct": 98.7,
+   "unit_pct": 96.6,
+   "range_pct": 97.4,
+   "high_low_pct": 99.3,
+   "wrong_values": 2,
+   "wrong_flagged_pct": 50.0,
+   "silent_errors": 1,
+   "correct_flagged_pct": 0.7,
+   "engines_differ_on_wrong": 0,
+   "engines_differ_on_correct": 0,
+   "silent_error_pct": 0.3,
+   "invented_rows": 0,
+   "date_pct": 97.5,
+   "name_pct": 100.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 5.42
+  }
+ },
+ "detail": {
+  "scan": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "4.87",
+      "read": "4.87",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [
+     {
+      "test": "alt",
+      "truth": "67",
+      "read": "49",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "photo": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "4.87",
+      "read": "4.87",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "15.3",
+      "read": "15",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "poor_photo": [
+   {
+    "id": "r000",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "12.9",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "48.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "3,900",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "317000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "402",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "57",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "6.18",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r001",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "0.63",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "5.8",
+      "read": "58",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "205",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r002",
+    "errors": [
+     {
+      "test": "hba1c",
+      "truth": "9.8",
+      "read": "86",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "4.87",
+      "read": "4.87",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r004",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "5.2",
+      "read": "52",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.48",
+      "read": "448",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r005",
+    "errors": [
+     {
+      "test": "pcv",
+      "truth": "31.7",
+      "read": "3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "234",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [
+     {
+      "test": "ast",
+      "truth": "47",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r009",
+    "errors": [
+     {
+      "test": "malaria",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r010",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "6.61",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "3+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r011",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "378",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "166",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "164",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "5.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.52",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r012",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "471",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r015",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [
+     {
+      "test": "glucose_random",
+      "truth": "320",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "6.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "11.89",
+      "read": "1189",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "3.3",
+      "read": "33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.81",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "96",
+      "read": "17",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "Trace",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r021",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "169",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "243",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "62",
+      "read": "2",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "73",
+      "read": "130",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "194",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "295",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "4.8",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "8.5",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "17600",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r022",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "142",
+      "read": "70",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "4.42",
+      "read": "442",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "13.25",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r025",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "4.5",
+      "read": "45",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "14.3",
+      "read": "143",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "111",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "8.6",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.52",
+      "read": "452",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "7.87",
+      "read": "284",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r028",
+    "errors": [
+     {
+      "test": "malaria",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": true
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "1.94",
+      "read": "194",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "12.0",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r032",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "3.29",
+      "read": "329",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r034",
+    "errors": [
+     {
+      "test": "wbc",
+      "truth": "10,900",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "124",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r036",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "15.3",
+      "read": "153",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r038",
+    "errors": [
+     {
+      "test": "alt",
+      "truth": "229",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "29.3",
+      "read": "6",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "photocopy": [
+   {
+    "id": "r000",
+    "errors": [
+     {
+      "test": "wbc",
+      "truth": "3,900",
+      "read": "006",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "7.94",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "217",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": "nil",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "ldl",
+      "truth": "64",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "136",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "147",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "3.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.81",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "114",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "111",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "3,65,000",
+      "read": "3.65",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "glucose_random",
+      "truth": "84",
+      "read": "8",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "135",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "thermal": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "164",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [
+     {
+      "test": "pcv",
+      "truth": "24.5",
+      "read": "24.58",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "second": null,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "111",
+      "read": "140",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "second": null,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "144",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "second": null,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ]
+ }
+}

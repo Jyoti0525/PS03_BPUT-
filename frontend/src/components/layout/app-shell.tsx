@@ -29,7 +29,6 @@ const ROLE_LABEL: Record<string, string> = {
   health_worker: "Health worker / ASHA",
   receptionist: "Receptionist",
   supervisor: "Facility Supervisor",
-  patient: "Patient",
   employer: "Employer",
 };
 

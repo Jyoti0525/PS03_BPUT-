@@ -5,6 +5,7 @@ psycopg[binary]>=3.2
 pydantic>=2.7
 pydantic-settings>=2.3
 pyjwt>=2.8
+cryptography>=42  # RS256 for Vonage call tokens (app/vonage.py)
 python-multipart>=0.0.9
 pyyaml>=6.0
 fpdf2>=2.7

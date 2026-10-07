@@ -12,7 +12,7 @@ from sqlalchemy import select
 
 from . import audit, storage
 from .db import Base, SessionLocal, engine, init_db
-from .models import Consent, Device, Facility, FileObject, FitnessAssessment, Organisation, Patient, Reminder, User
+from .models import Consent, Device, Facility, FileObject, FitnessAssessment, KioskLink, Organisation, Patient, Reminder, User
 from .config import get_settings
 from .security import PIN_ROLES, hash_pin
 from .services import create_encounter, local_day
@@ -46,7 +46,6 @@ USERS = [
     ("usr_recep1", "9000000003", "Rakesh Tiwari", "receptionist", "fac_phc_manikpur", None, "hi"),
     ("usr_sup1", "9000000004", "Meera Nair", "supervisor", "fac_phc_manikpur", None, "en"),
     ("usr_emp1", "9000000005", "Arjun Patnaik (HR — Safety)", "employer", "fac_kalinganagar", None, "en"),
-    ("usr_pat1", "9876543210", "Priya Sharma", "patient", None, None, "hi"),
     ("usr_hw1", "9000000006", "Kamla Devi (ASHA)", "health_worker", "fac_phc_manikpur", None, "hi"),
     ("usr_mo1", "9000000007", "Dr. Anil Verma (Medical Officer i/c)", "medical_officer", "fac_phc_manikpur", "UPMC-51207", "en"),
 ]
@@ -89,8 +88,18 @@ SAMPLE_WORKERS = [  # employee code, department, fitness status (None = not yet 
 ]
 
 
+HOME_LINK = "MKHOME"
+
+
 def seed(db) -> None:
     if db.scalar(select(Facility.id).limit(1)):
+        for u in db.scalars(select(User).where(User.role == "patient", User.is_active.is_(True))):
+            u.is_active = False  # no patient portal, staff-only surfaces (plan); older demo databases had a patient login
+        if db.get(Facility, "fac_phc_manikpur") and not db.scalar(select(KioskLink.id).where(KioskLink.code == HOME_LINK)):
+            from .routers.kiosk import create_link
+
+            create_link(db, "fac_phc_manikpur", "Fill in before you come (SMS / poster)", None, code=HOME_LINK, for_home=True)
+            db.commit()
         return
     audit.record(db, None, "CONFIG", "system", None, "Demo database seeded with synthetic data", ts=NOW - DAY)
     db.add(Organisation(**SAMPLE_ORG))
@@ -155,6 +164,8 @@ def seed(db) -> None:
     from .routers.kiosk import create_link
 
     create_link(db, "fac_phc_manikpur", "OPD waiting area", None, code="MANIKPUR")
+    # Shared by SMS or on a poster: filled in before coming, joins the queue when the desk checks the patient in (C3)
+    create_link(db, "fac_phc_manikpur", "Fill in before you come (SMS / poster)", None, code=HOME_LINK, for_home=True)
     db.commit()
 
 

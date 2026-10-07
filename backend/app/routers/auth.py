@@ -10,11 +10,11 @@ from sqlalchemy import func, or_, select
 
 from .. import audit
 from ..config import get_settings
-from ..models import Facility, Organisation, OtpChallenge, Patient, RevokedToken, User
+from ..models import Facility, Organisation, OtpChallenge, RevokedToken, User
 from ..schemas import ORG_FACILITY_TYPES, AuthResult, OtpChallengeOut, OtpRequest, OtpVerify, OtpVerifyOut, PinChangeIn, PinForgotIn, PinStepIn, AuthOptions, EmailConfirmIn, EmailStartIn, MePatch, RefreshIn, RegisterIn, UserOut
 from .. import directory, mailer, otp
 from ..security import PIN_ROLES, DB, CurrentUser, bearer, decode, hash_pin, hash_secret, issue_tokens, pin_problem, pin_step_token, registration_token, verify_secret
-from ..services import aware, next_patient_code, now
+from ..services import aware, now
 from .organisations import create_org_facility
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -252,7 +252,7 @@ def register(body: RegisterIn, db: DB):
         db.flush()
         fac = create_org_facility(db, org, no.facility, created_by=phone)
         body.facility_id, org_id = fac.id, org.id
-    elif body.role != "patient":
+    else:
         chosen = sum(x is not None for x in (body.facility_id, body.directory_ref, body.new_facility))
         if chosen != 1:
             raise HTTPException(422, "Choose your workplace")
@@ -292,15 +292,13 @@ def register(body: RegisterIn, db: DB):
             raise HTTPException(422, problem)
     if body.role in ("doctor", "medical_officer", "nurse") and not (body.registration_no and len(body.registration_no.strip()) >= 4):
         raise HTTPException(422, "Registration number is required for clinical staff")
-    user = User(phone=phone, name=body.name.strip(), role=body.role, facility_id=body.facility_id if body.role != "patient" else None, registration_no=body.registration_no, language=body.language, organisation_id=org_id)
+    user = User(phone=phone, name=body.name.strip(), role=body.role, facility_id=body.facility_id, registration_no=body.registration_no, language=body.language, organisation_id=org_id)
     if email:  # verified by an email code; the mobile number was typed, not verified
         user.email, user.email_verified_at, user.phone_verified = email, now(), False
     db.add(user)
     db.flush()
     if body.role in PIN_ROLES:
         _set_pin(user, body.pin)
-    if body.role == "patient" and not db.scalar(select(Patient).where(Patient.phone == phone, Patient.name == user.name)):
-        db.add(Patient(code=next_patient_code(db), name=user.name, age=30, sex="O", phone=phone, language=body.language, category="normal"))
     audit.record(db, user, "CREATE", "user", user.id, f"Registered as {body.role}; terms accepted")
     return AuthResult(tokens=issue_tokens(user, body.device_id), user=user_out(db, user))
 

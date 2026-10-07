@@ -5,6 +5,7 @@
 
 # Document reading (app/triage/extraction.py)
 rapidocr-onnxruntime>=1.4
+onnxtr[cpu]>=0.9  # second OCR engine (docTR models, Apache-2.0), compared with RapidOCR test by test
 pypdfium2>=4.30
 opencv-python-headless>=4.9
 

@@ -230,8 +230,9 @@ def translate_patient(text: str, lang: str) -> dict:
 
 def translate_symptoms(intake: dict) -> dict:
     """English for every free-text symptom entered in another language, translated here from the patient's own
-    words (`original_text`, kept unchanged) — English sent by the browser is not trusted. If translation cannot
-    run, whatever English came with the entry stays and no engine is claimed for it."""
+    words (`original_text`, kept unchanged) — English sent by the browser is not trusted; the same for the second
+    speech engine's words (B9). If translation cannot run, whatever English came with the entry stays and no engine
+    is claimed for it."""
     out = []
     for s in intake.get("symptoms") or []:
         s = dict(s)
@@ -244,6 +245,8 @@ def translate_symptoms(intake: dict) -> dict:
                 s["text"] = tr["text"]
                 s["engine"] = f"{heard_by} + {MT_ENGINE}" if heard_by else MT_ENGINE
                 s["mt_rewrites"], s["mt_unsure"] = tr["rewrites"], tr["unsure"]
+                if isinstance(s.get("second_hearing"), dict) and s["second_hearing"].get("text"):  # B9: English of both
+                    s["second_hearing"] = {**s["second_hearing"], "translation": translate_patient(s["second_hearing"]["text"], lang)["text"]}
             except LanguageUnavailable as e:
                 log.warning("symptom left untranslated: %s", e)
             except Exception:

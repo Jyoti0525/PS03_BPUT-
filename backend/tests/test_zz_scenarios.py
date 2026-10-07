@@ -8,11 +8,13 @@ from conftest import API, login
 def test_scenarios_load_once_and_each_demo_moment_works(client, employer):
     from app.db import SessionLocal
     from app.models import User
-    from app.scenarios import scenarios
+    from app.scenarios import call_scenarios, scenarios
 
     with SessionLocal() as db:
         assert scenarios(db) is True
         assert scenarios(db) is False
+        assert call_scenarios(db) is True
+        assert call_scenarios(db) is False
 
     # D3: one more fever from Hostel Block C at the campus raises the alert to the campus MO
     mo, nurse = login(client, "9000000008"), login(client, "9000000009")
@@ -26,9 +28,26 @@ def test_scenarios_load_once_and_each_demo_moment_works(client, employer):
     assert a["key"] == "Hostel Block C" and a["detail"]["cases_72h"] == 5 and a["detail"]["baseline_14d"] == 1
 
     # D4: Sunita's missed check-up is on ASHA Kamla Devi's list with a neutral call script
-    hw = login(client, "9000000006")
+    hw, mo = login(client, "9000000006"), login(client, "9000000007")
     f = next(x for x in client.get(f"{API}/followups", headers=hw).json() if x["patient_name"] == "Sunita Kewat")
     assert f["status"] == "missed" and f["phone_belongs_to"] == "husband" and "pregnan" not in f["call_script"].lower()
+
+    # E6: Rina's reminder call is due and the agent may make it; "headache" ends the call and pages a person.
+    # Kusum's last visit was RED, so the agent may not call her.
+    rows = {x["patient_name"]: x for x in client.get(f"{API}/followups", headers=hw).json()}
+    rina, ram, kusum = rows["Rina Majhi"], rows["Ramprasad Sahu"], rows["Kusum Behera"]
+    assert rina["status"] == ram["status"] == "call_due" and rina["who_calls"]["who"] == ram["who_calls"]["who"] == "agent"
+    assert ram["programme"] == "chronic" and kusum["who_calls"]["who"] == "human" and "RED" in kusum["who_calls"]["why"]
+    assert client.post(f"{API}/followups/{kusum['id']}/calls", json={}, headers=hw).status_code == 409
+    call = client.post(f"{API}/followups/{rina['id']}/calls", json={}, headers=hw).json()
+    assert call["language"] == "or" and "ନମସ୍କାର" in call["turns"][0]["text"]
+    for said in ("ହଁ", "ହଁ", "ନା"):  # it's me; I can come; no bleeding
+        call = client.post(f"{API}/calls/{call['id']}/answer", json={"text": said}, headers=hw).json()
+    assert call["turns"][-1]["key"] == "headache"
+    call = client.post(f"{API}/calls/{call['id']}/answer", json={"text": "Yes, I have a headache since yesterday", "original_text": "ହଁ, କାଲିଠୁ ମୁଣ୍ଡବିନ୍ଧା"}, headers=hw).json()
+    assert call["outcome"] == "danger_sign" and call["turns"][-1]["key"] == "end_danger"
+    a = next(a for a in client.get(f"{API}/alerts", headers=mo).json() if a["kind"] == "call_escalation" and a["key"] == rina["id"])
+    assert a["status"] == "open" and "headache" in a["title"].lower()
 
     # C3: marking one of the two doctors off duty tips PHC Manikpur over capacity
     doc = login(client, "9000000001")

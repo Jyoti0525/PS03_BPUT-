@@ -10,7 +10,7 @@ from .. import audit, regions
 from ..models import Device, Encounter, Escalation, Facility, Referral, User
 from ..schemas import ADMIN_ROLES, STAFF_ROLES, DeviceIn, DutyIn, DeviceOut, FacilityOut, FacilityPatch, FacilityStats, UserOut, UserPatch
 from ..security import DB, CurrentUser, require
-from ..services import auto_escalate, aware, calendar_context, now
+from ..services import auto_escalate, aware, calendar_context, now, wait_minutes
 from ..triage.timeline import onset
 from .auth import user_out
 
@@ -91,7 +91,7 @@ def facility_stats(fid: str, user: CurrentUser, db: DB):
         facility_id=fid,
         today_total=len(today),
         by_urgency={u: sum(1 for e in today if e.urgency == u) for u in ("red", "yellow", "green")},
-        avg_wait_minutes=round(sum((now() - aware(e.created_at)).total_seconds() / 60 for e in waiting) / len(waiting)) if waiting else 0,
+        avg_wait_minutes=round(sum(wait_minutes(e) for e in waiting) / len(waiting)) if waiting else 0,
         open_escalations=sum(1 for x in db.scalars(select(Escalation).where(Escalation.status == "open")) if x.encounter_id in ids),
         referrals_today=sum(1 for r in db.scalars(select(Referral)) if r.encounter_id in ids),
         offline_synced_today=sum(1 for e in today if (e.intake or {}).get("captured_offline")),

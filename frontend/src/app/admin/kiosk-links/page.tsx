@@ -3,11 +3,11 @@
 import { usePrefs } from "@/components/providers";
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Copy, ExternalLink, Link2, Plus, Printer, ShieldOff, QrCode } from "lucide-react";
+import { Copy, ExternalLink, House, Link2, Plus, Printer, ShieldOff, QrCode } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, timeAgo } from "@/lib/hooks";
 import { PageHeader } from "@/components/layout/app-shell";
-import { Badge, Button, Card, Empty, ErrorNote, Input, Label, Modal, Spinner } from "@/components/ui";
+import { Badge, Button, Card, Empty, ErrorNote, Input, Label, Modal, Spinner, Toggle } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import type { KioskLink } from "@/lib/types";
 
@@ -15,6 +15,7 @@ export default function KioskLinksPage() {
   const { tr } = usePrefs();
   const { data, error, loading, reload } = useAsync(() => api.listKioskLinks(), [], { pollMs: 30_000 });
   const [label, setLabel] = useState("");
+  const [forHome, setForHome] = useState(false);
   const [busy, setBusy] = useState(false);
   const [qr, setQr] = useState<KioskLink | null>(null);
 
@@ -22,8 +23,9 @@ export default function KioskLinksPage() {
     if (label.trim().length < 2) return toast(tr("Give the link a name, e.g. 'OPD waiting area'"), "error");
     setBusy(true);
     try {
-      const k = await api.createKioskLink(label);
+      const k = await api.createKioskLink(label, forHome);
       setLabel("");
+      setForHome(false);
       reload();
       setQr(k);
       toast(tr("Kiosk link created"));
@@ -54,6 +56,14 @@ export default function KioskLinksPage() {
             {tr("Create link")}
           </Button>
         </div>
+        <div className="mt-3">
+          <Toggle
+            checked={forHome}
+            onChange={setForHome}
+            label={tr("For filling in from home")}
+            description={tr("Share it by SMS or on a poster. Patients fill in before coming and get an H- number; they join the queue only when the desk checks them in, so nobody is moved ahead of people already waiting.")}
+          />
+        </div>
         <p className="mt-2 text-xs text-muted">{tr("A kiosk link can only register patients, record consent, upload reports and submit intakes. It can never read the queue or any notes. Revoke it any time.")}</p>
       </Card>
 
@@ -79,6 +89,11 @@ export default function KioskLinksPage() {
                       <p className="font-semibold text-ink">{tr(k.label)}</p>
                       <span className="rounded-md bg-canvas px-2 py-0.5 font-mono text-sm font-bold tracking-widest text-ink-2">{k.code}</span>
                       {k.revoked ? <Badge tone="crit">{tr("Revoked")}</Badge> : <Badge tone="rout">{tr("Active")}</Badge>}
+                      {k.for_home && (
+                        <Badge tone="info">
+                          <House className="size-3" /> {tr("From home")}
+                        </Badge>
+                      )}
                     </div>
                     <p className="mt-0.5 truncate font-mono text-xs text-muted">{k.url}</p>
                     <p className="mt-1 text-xs text-subtle">
@@ -138,7 +153,7 @@ export default function KioskLinksPage() {
                 const w = window.open("", "_blank");
                 if (!w || !qr) return;
                 w.document.write(
-                  `<html><head><title>${qr.label}</title></head><body style="font-family:system-ui;text-align:center;padding:48px"><h1 style="margin:0 0 8px">Scan to get your token</h1><p style="color:#555;margin:0 0 24px">${qr.label}</p>${svg.replace(/width="\d+"/, 'width="360"').replace(/height="\d+"/, 'height="360"')}<p style="font:600 22px monospace;letter-spacing:4px">${qr.code}</p><p style="color:#555">${qr.url}</p><p style="color:#a33;font-size:12px;margin-top:32px">Triage support only — not a diagnosis. A health worker reviews every entry.</p><script>window.onload=()=>window.print()</script></body></html>`,
+                  `<html><head><title>${qr.label}</title></head><body style="font-family:system-ui;text-align:center;padding:48px"><h1 style="margin:0 0 8px">${qr.for_home ? "Fill in before you come" : "Scan to get your token"}</h1>${qr.for_home ? '<p style="margin:0 0 8px">Show your H- number at the desk when you arrive. Your place in the queue starts when you arrive.</p><p style="margin:0 0 16px;font-weight:600">Chest pain, trouble breathing, heavy bleeding or fits: do not wait — go to emergency or call 108.</p>' : ""}<p style="color:#555;margin:0 0 24px">${qr.label}</p>${svg.replace(/width="\d+"/, 'width="360"').replace(/height="\d+"/, 'height="360"')}<p style="font:600 22px monospace;letter-spacing:4px">${qr.code}</p><p style="color:#555">${qr.url}</p><p style="color:#a33;font-size:12px;margin-top:32px">Triage support only — not a diagnosis. A health worker reviews every entry.</p><script>window.onload=()=>window.print()</script></body></html>`,
                 );
                 w.document.close();
               }}

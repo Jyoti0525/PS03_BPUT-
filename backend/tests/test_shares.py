@@ -54,10 +54,10 @@ def test_expired_share(client, doctor):
     assert client.get(f"{API}/share/{s['url'].rsplit('/', 1)[1]}").status_code == 410
 
 
-def test_only_reviewers_create_shares(client, doctor, supervisor, patient):
+def test_only_reviewers_create_shares(client, doctor, supervisor, employer):
     eid = _radha_encounter(client, doctor)
     assert client.post(f"{API}/encounters/{eid}/shares", json={"hours": 24}, headers=supervisor).status_code == 403
-    assert client.post(f"{API}/encounters/{eid}/shares", json={"hours": 24}, headers=patient).status_code == 403
+    assert client.post(f"{API}/encounters/{eid}/shares", json={"hours": 24}, headers=employer).status_code == 403
 
 
 def test_health_reports_components(client):

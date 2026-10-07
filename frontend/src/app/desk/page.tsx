@@ -22,7 +22,8 @@ export default function DeskHome() {
   const { data: facility } = useAsync(() => api.getFacility(fid), [fid]);
 
   const waiting = tokens?.filter((t) => t.status === "queued" || t.status === "escalated") ?? [];
-  const withDoctor = tokens?.filter((t) => t.status === "in_review").length ?? 0;
+  const expected = tokens?.filter((t) => t.status === "expected").length ?? 0;
+  const withDoctor =tokens?.filter((t) => t.status === "in_review").length ?? 0;
   const seen = tokens?.filter((t) => ["confirmed", "referred", "closed"].includes(t.status)).length ?? 0;
   const avg = waiting.length ? Math.round(waiting.reduce((s, t) => s + t.wait_minutes, 0) / waiting.length) : 0;
   const longest = waiting.reduce((m, t) => Math.max(m, t.wait_minutes), 0);
@@ -48,7 +49,12 @@ export default function DeskHome() {
         }
       />
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Stat label={tr("Waiting now")} value={waiting.length} tone={waiting.length > 10 ? "semi" : undefined} />
+        <Stat
+          label={tr("Waiting now")}
+          value={waiting.length}
+          tone={waiting.length > 10 ? "semi" : undefined}
+          hint={expected ? tr("{n} expected from home", { n: expected }) : undefined}
+        />
         <Stat label={tr("With doctor")} value={withDoctor} />
         <Stat label={tr("Seen today")} value={seen} tone="rout" />
         <Stat label={tr("Average wait")} value={fmtWait(avg)} hint={tr("Longest: {w}", { w: fmtWait(longest) })} tone={avg > 45 ? "crit" : undefined} />
@@ -58,7 +64,7 @@ export default function DeskHome() {
         <div className="mb-4 rounded-xl border border-crit/30 bg-crit-bg px-4 py-3 text-sm font-medium text-crit">{tr("No doctor is marked on duty. Update the duty list so patients are not kept waiting.")}</div>
       )}
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-        <TokenBoard facilityId={fid} />
+        <TokenBoard facilityId={fid} onChange={reloadTokens} />
         <div className="space-y-4">
           <DutyList staff={staff ?? null} onChange={reloadStaff} compact />
           <Card className="p-4">

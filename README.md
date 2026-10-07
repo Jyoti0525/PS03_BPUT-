@@ -80,9 +80,8 @@ Everything anyone views or changes is written to a tamper-evident audit log.
 | **Receptionist** | `/desk` | Today's patients and waiting times, finds/registers patients, corrects registration details, marks doctors and nurses on/off duty, runs the check-in kiosk | Symptoms, urgency, notes, documents; supervisor tools |
 | **Nurse / ANM** | `/nurse`, `/kiosk` | Patients to attend, records vitals and bedside observations, nursing checklist, alerts the doctor, assisted intake | Referrals, exports, QR summaries, overrides, sign-off |
 | **Doctor / Medical Officer** | `/reviewer` | Reviews the queue with nurses' observations, confirms/edits notes, overrides with a reason, acknowledges escalations, refers, exports, shares QR summaries | — |
-| **Patient** | `/patient` | Adds a problem before visiting, sees own visits and reminders | Urgency, notes, family members' records |
 | **Employer / organisation** | `/employer` | Registers the organisation and its workplaces (company clinic, industrial unit, campus, health camp), keeps the worker roster, sees fitness outcomes | Any clinical record |
-| **Kiosk link** (no login) | `/k/<code>` | Registers a patient, captures consent and symptoms, uploads reports, issues a token | Everything else |
+| **Kiosk link** (no login) | `/k/<code>` | Registers a patient, captures consent and symptoms, uploads reports, issues a token. A *from-home* link (shared by SMS or poster) gives an H- reference instead; the patient joins the queue when the desk checks them in | Everything else; never sees an urgency tier |
 | **Receiving clinician** (no login) | `/s/<token>` | Opens a referral summary by QR + 6-digit access code | Anything outside that one visit |
 
 The full step-by-step journey for each role is in **[docs/WORKFLOW.md](docs/WORKFLOW.md)**.
@@ -94,7 +93,7 @@ flowchart LR
   subgraph Checkin["Check-in"]
     K["Kiosk link /k/CODE<br/>tablet or patient phone"]
     S["Staff kiosk /kiosk<br/>nurse-assisted"]
-    P["Patient app /patient"]
+    P["From-home link /k/CODE<br/>joins the queue on arrival"]
   end
   subgraph API["Jeevia API · FastAPI on Render"]
     C["Consent + intake"]
@@ -147,7 +146,8 @@ real capture time so waiting time is never understated.
 | Exports | fpdf2 and built-in writers | Triage note as PDF, print, JSON, CSV and FHIR R4. |
 | Speech to text | **IndicConformer-600M** (AI4Bharat, MIT), 8-bit ONNX on ONNX Runtime, offline | Voice intake in the 22 scheduled languages. Read-back uses the browser's speechSynthesis. |
 | Translation | **IndicTrans2** distilled 200M (AI4Bharat, MIT), offline | Indian language ↔ English; the original words stay beside the translation. |
-| Report reading | **RapidOCR** (PaddleOCR models on ONNX Runtime), pypdfium2, OpenCV | Lab reports, prescriptions and medicine strips; photo quality check; face and ID-number redaction (YuNet). |
+| Second speech engine | **Sarvam Saaras v3** (online, India) or, offline, **IndicWhisper** (AI4Bharat Vistaar, MIT) | Hears the same recording when the patient allowed AI help; a different number or symptom is flagged for the patient to settle (B9). |
+| Report reading | **RapidOCR** (PaddleOCR models on ONNX Runtime) and **docTR** (OnnxTR) compared value by value, pypdfium2, OpenCV; **Sarvam Vision** (online) for handwriting | Lab reports, prescriptions and medicine strips; photo quality check; face and ID-number redaction (YuNet). Medicine names matched to the PMBJP generic list and the A-Z Medicine Dataset of India (CC BY-SA 4.0). |
 | Note summary | **Qwen3-4B-Instruct-2507** (Apache-2.0), 4-bit GGUF on llama.cpp, laptop GPU | A short summary paragraph, used only if it passes the faithfulness check and the non-diagnostic output guard. |
 | CI and uptime | **GitHub Actions** | `ci.yml` runs backend tests and frontend lint, type-check and build on every push; `keepalive.yml` pings the API every 10 minutes so the free Render instance stays awake. |
 
@@ -189,7 +189,7 @@ real capture time so waiting time is never understated.
 ```
 Jeevia/
 ├── frontend/                 Next.js app (all user interfaces)
-│   ├── src/app/              Routes: /, /auth, /k/[code], /kiosk, /reviewer/*, /nurse/*, /desk/*, /admin/*, /patient/*, /employer/*, /s/[token], /api/ops/restart
+│   ├── src/app/              Routes: /, /auth, /k/[code], /kiosk, /reviewer/*, /nurse/*, /desk/*, /admin/*, /employer/*, /s/[token], /api/ops/restart
 │   ├── src/components/       UI kit, site chrome, intake flow, triage note views, share QR, status panel
 │   ├── src/lib/              API contract + live/mock adapters, i18n, offline outbox, speech, status, exports
 │   └── public/sw.js          Service worker (offline kiosk)
@@ -198,7 +198,7 @@ Jeevia/
 │   ├── app/triage/           rules engine + YAML rules, findings, OCR, image labels, timeline, note pipeline
 │   ├── app/*.py              models, schemas, services, security, audit, storage, otp, exports, observability, seed,
 │   │                         language (speech + translation), privacy, llm, output_guard
-│   └── tests/                406 pytest tests
+│   └── tests/                483 pytest tests
 ├── docs/                     FEATURES.md · EVALUATION.md · TODO.md · WORKFLOW.md · ARCHITECTURE.md · OPERATIONS.md
 ├── prototype/                Original static HTML prototype (design reference)
 ├── docker-compose.yml        Postgres + API + web for local full-stack runs
@@ -254,8 +254,14 @@ then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEAT
 | `CORS_ORIGINS`, `WEB_BASE_URL` | Web app origin; used in kiosk and share links | `https://jeevia-triage.vercel.app` |
 | `SEED_DEMO` | Seed sample data into an empty database | `true` |
 | `LLM_URL` | llama.cpp server for the note summary (e.g. `http://127.0.0.1:8031`); unset = template summary only | unset |
+| `SARVAM_API_KEY` (no prefix needed) | Sarvam AI: Bulbul voice for reminder-call lines in 11 languages, the online second speech engine, handwriting reading; unset = the device's own voice, IndicWhisper as the second engine, no handwriting reading | set |
+| `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | Real reminder calls (keypad answers) and reminder SMS through Twilio; the token checks Twilio's webhooks | set |
+| `VONAGE_API_KEY`, `VONAGE_API_SECRET`, `VONAGE_APPLICATION_ID`, `VONAGE_PRIVATE_KEY_PATH` | Vonage instead of Twilio for calls and SMS (used when the key is set); the private key file belongs to the Vonage application and is never committed | set |
+| `TELEPHONY_DEMO_TO` | The one phone every call and SMS goes to (never a patient's stored number); unset = nothing is dialled or sent | the demo phone |
+| `PUBLIC_BASE_URL` | Where Twilio's or Vonage's webhooks reach the API | the API's public URL |
 | `PRELOAD_LANGUAGE_MODELS` | Load speech and translation at start-up instead of on first use | unset (laptop: `true`) |
 | `ASR_MODEL`, `ASR_DECODING` | Speech model folder under `models/` and `ctc` or `rnnt` decoding | defaults |
+| `ASR_SECOND_OFFLINE`, `ASR_SECOND_INT8` | IndicWhisper (models under `models/indicwhisper/`) as the second speech engine when Sarvam cannot be used; 8-bit at load time | `true` / `true` |
 
 ### Web app (`frontend`)
 
@@ -271,7 +277,7 @@ Secrets live only in the Render and Vercel dashboards — never in the repositor
 ## 10. Testing
 
 ```bash
-cd backend && .venv/bin/pytest -q                  # 406 tests
+cd backend && .venv/bin/pytest -q                  # 483 tests
 cd frontend && npm run lint && npx tsc --noEmit && npm run build
 ```
 Backend tests cover the rules engine, OTP (including lockout, rate limits and the Twilio path), the two-factor PIN
@@ -308,15 +314,17 @@ production (sign-in code `123456`, then staff PIN `4826`). Everything else is cr
 | Doctor | 9000000001 | `/reviewer` |
 | Medical officer (PHC Manikpur) | 9000000007 | `/reviewer`, alerts |
 | Nurse / ANM | 9000000002 | `/nurse`, `/kiosk` |
-| Health worker / ASHA | 9000000006 | `/nurse`, maternal follow-ups |
+| Health worker / ASHA | 9000000006 | `/nurse`, follow-ups and reminder calls |
 | Receptionist | 9000000003 | `/desk` |
 | Supervisor | 9000000004 | `/admin` |
 | Employer | 9000000005 | `/employer` |
-| Patient | 9876543210 | `/patient` |
+| From-home kiosk link (no login) | — | `/k/MKHOME` |
 
 The demo scenarios (`backend/app/scenarios.py`, loaded at start-up unless `JEEVIA_SEED_SCENARIOS=false`) add a campus
 health centre with a campus medical officer (9000000008), a campus nurse (9000000009) and kiosk link `CAMPUS01`, and an
-occupational health physician at the Kalinganagar unit (9000000010).
+occupational health physician at the Kalinganagar unit (9000000010). At PHC Manikpur, ASHA Kamla Devi's *Follow-ups*
+list has two reminder calls due (Rina, pregnant, Odia; Ramprasad, blood pressure and diabetes, Hindi): saying
+"headache" on Rina's call ends it and pages the medical officer.
 
 Real staff register at `/auth` with their own phone and pick their workplace from the national directory; employers
 register their organisation first so its clinics appear.
@@ -324,6 +332,7 @@ register their organisation first so its clinics appear.
 ## 13. Limits and next steps
 
 - **Twilio trial:** SMS codes reach only numbers verified in the Twilio console until the account is upgraded.
+- **Reminder calls on a real phone:** built for Twilio and Vonage, but neither free trial can call an Indian number (Twilio needs a bought number; Vonage's trial rejects voice to India). Reminder and staff SMS work through Vonage's trial, which adds "[FREE SMS DEMO, TEST MESSAGE]" to each text.
 - **Render free instance:** may sleep when idle; the keep-alive workflow and the **Wake server** button cover this. A paid instance removes it.
 - **AI engines on the hosted link:** the hosted API installs only `requirements.txt`, so speech, translation, OCR and the summary model run on the facility machine (the demo laptop) and show as unavailable on the public link. Bhashini as an online engine is pending.
 - **Facility directory coverage:** OpenStreetMap is thorough for hospitals and PHCs but uneven for village sub-centres; supervisors can add missing public facilities. The official NHM/HFR registry can be loaded into the same table when access is available.

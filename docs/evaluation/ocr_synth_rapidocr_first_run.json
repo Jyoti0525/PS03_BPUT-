@@ -1,0 +1,6628 @@
+{
+ "engine": "RapidOCR (PaddleOCR PP-OCR models, ONNX Runtime, offline)",
+ "by_type": {
+  "scan": {
+   "reports": 40,
+   "tests": 332,
+   "found_pct": 99.7,
+   "value_exact_pct": 96.7,
+   "unit_pct": 95.6,
+   "range_pct": 98.0,
+   "high_low_pct": 95.8,
+   "wrong_values": 10,
+   "wrong_flagged_pct": 10.0,
+   "silent_errors": 9,
+   "silent_error_pct": 2.7,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 100.0,
+   "retake_asked_pct": 25.0,
+   "seconds_per_page": 8.36
+  },
+  "photo": {
+   "reports": 40,
+   "tests": 332,
+   "found_pct": 90.7,
+   "value_exact_pct": 70.5,
+   "unit_pct": 80.1,
+   "range_pct": 64.6,
+   "high_low_pct": 83.1,
+   "wrong_values": 67,
+   "wrong_flagged_pct": 56.7,
+   "silent_errors": 29,
+   "silent_error_pct": 8.7,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 97.5,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 8.78
+  },
+  "poor_photo": {
+   "reports": 40,
+   "tests": 332,
+   "found_pct": 69.3,
+   "value_exact_pct": 28.6,
+   "unit_pct": 52.9,
+   "range_pct": 20.2,
+   "high_low_pct": 55.7,
+   "wrong_values": 135,
+   "wrong_flagged_pct": 75.6,
+   "silent_errors": 33,
+   "silent_error_pct": 9.9,
+   "invented_rows": 0,
+   "date_pct": 85.0,
+   "name_pct": 57.5,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 7.48
+  },
+  "photocopy": {
+   "reports": 40,
+   "tests": 332,
+   "found_pct": 97.6,
+   "value_exact_pct": 92.8,
+   "unit_pct": 94.3,
+   "range_pct": 91.2,
+   "high_low_pct": 93.1,
+   "wrong_values": 16,
+   "wrong_flagged_pct": 37.5,
+   "silent_errors": 10,
+   "silent_error_pct": 3.0,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 85.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 8.05
+  },
+  "thermal": {
+   "reports": 40,
+   "tests": 332,
+   "found_pct": 96.1,
+   "value_exact_pct": 90.4,
+   "unit_pct": 92.9,
+   "range_pct": 15.5,
+   "high_low_pct": 85.8,
+   "wrong_values": 19,
+   "wrong_flagged_pct": 21.1,
+   "silent_errors": 15,
+   "silent_error_pct": 4.5,
+   "invented_rows": 0,
+   "date_pct": 100.0,
+   "name_pct": 95.0,
+   "retake_asked_pct": 0.0,
+   "seconds_per_page": 5.76
+  }
+ },
+ "detail": {
+  "scan": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "4.52",
+      "read": "1.91",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "108",
+      "read": "48",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "1.40",
+      "read": "0.64",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "66",
+      "read": "111",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r015",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "3.93",
+      "read": "0.68",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "121",
+      "read": "125",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "Nil",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r030",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "3.53",
+      "read": "1.33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "58",
+      "read": "100",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "90",
+      "read": "06",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "90",
+      "read": "06",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": true
+   }
+  ],
+  "photo": [
+   {
+    "id": "r000",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "245",
+      "read": "159",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "triglycerides",
+      "truth": "159",
+      "read": "55",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "55",
+      "read": "65",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "ldl",
+      "truth": "65",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "1.0",
+      "read": "176",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "176",
+      "read": "229",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "ast",
+      "truth": "229",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "11.8",
+      "read": "23.7",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "pcv",
+      "truth": "23.7",
+      "read": "15,500",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "15,500",
+      "read": "3.00",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "3.00",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "4.52",
+      "read": "1.91",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "108",
+      "read": "48",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "1.40",
+      "read": "0.64",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "66",
+      "read": "111",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "152",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.93",
+      "read": "0.68",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "121",
+      "read": "125",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "Nil",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_random",
+      "truth": "191",
+      "read": "4.3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "4.3",
+      "read": "135",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "135",
+      "read": "2.55",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "2.55",
+      "read": "136",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "136",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "malaria",
+      "truth": "Negative",
+      "read": "positive",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "142",
+      "read": "177",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "triglycerides",
+      "truth": "177",
+      "read": "35",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "35",
+      "read": "168",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "168",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "10.8",
+      "read": "39.2",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "39.2",
+      "read": "12000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "12000",
+      "read": "2.94",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "platelets",
+      "truth": "2.94",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "0.9",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "212",
+      "read": "0.9",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "232",
+      "read": "212",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "292",
+      "read": "6",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "7.0",
+      "read": "292",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.42",
+      "read": "7.0",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "108",
+      "read": "1.42",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "Nil",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "205",
+      "read": "399",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "triglycerides",
+      "truth": "399",
+      "read": "50",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "50",
+      "read": "141",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "ldl",
+      "truth": "141",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "16.0",
+      "read": "38.9",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "38.9",
+      "read": "2,600",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "2,600",
+      "read": "113000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "platelets",
+      "truth": "113000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "134",
+      "read": "35",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "198",
+      "read": "149",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "149",
+      "read": "7.8",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "7.8",
+      "read": "4.16",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.16",
+      "read": "72",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "72",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "272",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "52",
+      "read": "272",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "145",
+      "read": "52",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "9.7",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "28.1",
+      "read": "9.7",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "wbc",
+      "truth": "3700",
+      "read": "28.1",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "platelets",
+      "truth": "1,14,000",
+      "read": "3700",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "74",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "185",
+      "read": "74",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "6.50",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_random",
+      "truth": "252",
+      "read": "5.5",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.5",
+      "read": "143",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "143",
+      "read": "0.98",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.98",
+      "read": "40",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "40",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "9.77",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "137",
+      "read": "291",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "291",
+      "read": "10.8",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hba1c",
+      "truth": "10.8",
+      "read": "0.65",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.65",
+      "read": "119",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "119",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [
+     {
+      "test": "pcv",
+      "truth": "43.3",
+      "read": "3,300",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "3,300",
+      "read": "75,000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "platelets",
+      "truth": "75,000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_random",
+      "truth": "299",
+      "read": "5.4",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.4",
+      "read": "131",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "131",
+      "read": "3.71",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.71",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [
+     {
+      "test": "urea",
+      "truth": "100",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "3.47",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_random",
+      "truth": "245",
+      "read": "6.1",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "6.1",
+      "read": "127",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "127",
+      "read": "3.53",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.53",
+      "read": "1.33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "58",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "90",
+      "read": "06",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "90",
+      "read": "06",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "poor_photo": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "2.24",
+      "read": "224",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "0.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "47",
+      "read": "0.3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "175",
+      "read": "47",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [
+     {
+      "test": "malaria",
+      "truth": "Positive",
+      "read": "negative",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "13.8",
+      "read": "49.8",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "49.8",
+      "read": "6,300",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "6,300",
+      "read": "112000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "platelets",
+      "truth": "112000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [
+     {
+      "test": "pcv",
+      "truth": "22.4",
+      "read": "224",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "3.5",
+      "read": "35",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.16",
+      "read": "416",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "173",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "404",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [
+     {
+      "test": "glucose_random",
+      "truth": "194",
+      "read": "4.6",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "4.6",
+      "read": "128",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "128",
+      "read": "3.92",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.92",
+      "read": "93",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "93",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "261000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "7.17",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "11.8",
+      "read": "118",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "23.7",
+      "read": "237",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "3.00",
+      "read": "300",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "6.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "125",
+      "read": "6.3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.91",
+      "read": "125",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "48",
+      "read": "1.91",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "169",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "9.8",
+      "read": "169",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.52",
+      "read": "125",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "108",
+      "read": "1.91",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "294",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "206",
+      "read": "294",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "76",
+      "read": "206",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "130",
+      "read": "76",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [
+     {
+      "test": "malaria",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "8.7",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.64",
+      "read": "8.7",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "111",
+      "read": "0.64",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.40",
+      "read": "8.7",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "66",
+      "read": "0.64",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "171",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "373",
+      "read": "171",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "26",
+      "read": "373",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "176",
+      "read": "26",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "3.9",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "234",
+      "read": "39",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "ast",
+      "truth": "229",
+      "read": "234",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "Nil",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "8.9",
+      "read": "50.3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "50.3",
+      "read": "11,700",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "11,700",
+      "read": "497000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "497000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "210",
+      "read": "267",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "267",
+      "read": "6.0",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "6.0",
+      "read": "125",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.25",
+      "read": "42",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "42",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "183",
+      "read": "68",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "68",
+      "read": "56",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "56",
+      "read": "186",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "186",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "14.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "44.0",
+      "read": "14.3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "wbc",
+      "truth": "12,400",
+      "read": "44.0",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "51000",
+      "read": "12,400",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "7.77",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "266",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "469",
+      "read": "266",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "71",
+      "read": "469",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "211",
+      "read": "71",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "4.87",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "197",
+      "read": "94",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "94",
+      "read": "0.68",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "7.5",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.68",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "125",
+      "read": "140",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_random",
+      "truth": "182",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.9",
+      "read": "152",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "152",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.93",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "121",
+      "read": "140",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "130",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "265",
+      "read": "130",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "4.4",
+      "read": "265",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.34",
+      "read": "44",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "12",
+      "read": "134",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "triglycerides",
+      "truth": "408",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "67",
+      "read": "408",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "141",
+      "read": "67",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "Nil",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "4.3",
+      "read": "43",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "2.55",
+      "read": "136",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "136",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "malaria",
+      "truth": "Negative",
+      "read": "positive",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "142",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "177",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "35",
+      "read": "142",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "ldl",
+      "truth": "168",
+      "read": "35",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "10.8",
+      "read": "130",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "39.2",
+      "read": "10.8",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "wbc",
+      "truth": "12000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "2.94",
+      "read": "39.2",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "malaria",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "0.9",
+      "read": "212",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "212",
+      "read": "232",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "232",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "237",
+      "read": "292",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "292",
+      "read": "7.0",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "7.0",
+      "read": "1.42",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.42",
+      "read": "108",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "108",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "Nil",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "205",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "399",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "50",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "141",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "16.0",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "38.9",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "2,600",
+      "read": "113000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "113000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "198",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "186",
+      "read": "981",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "7.8",
+      "read": "70.140",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.16",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "72",
+      "read": "4.16",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "3.90",
+      "read": "390",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "3+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "tsh",
+      "truth": "8.26",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "8.2",
+      "read": "38.5",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "38.5",
+      "read": "6,000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "6,000",
+      "read": "402000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "402000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "473",
+      "read": "31",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hdl",
+      "truth": "31",
+      "read": "08",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "80",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "129",
+      "read": "78",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "triglycerides",
+      "truth": "78",
+      "read": "30",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "30",
+      "read": "60",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "ldl",
+      "truth": "60",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "3.84",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "68",
+      "read": "3.84",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "2.8",
+      "read": "8",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "192",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "180",
+      "read": "192",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "malaria",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [
+     {
+      "test": "glucose_random",
+      "truth": "74",
+      "read": "146",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "potassium",
+      "truth": "6.1",
+      "read": "2.53",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "146",
+      "read": "5",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "2.53",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "15",
+      "read": "200",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "cholesterol",
+      "truth": "242",
+      "read": "272",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "triglycerides",
+      "truth": "272",
+      "read": "52",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "52",
+      "read": "145",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "ldl",
+      "truth": "145",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "7.7",
+      "read": "42.5",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "42.5",
+      "read": "6300",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "6300",
+      "read": "1,03,000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "1,03,000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "1+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "2+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "cholesterol",
+      "truth": "289",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "468",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "6.50",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.5",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "143",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.98",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "40",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "7.3",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "45.8",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "7400",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "4.33",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": false,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "6.63",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "urine_albumin",
+      "truth": "3+",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "15.6",
+      "read": "223",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "22.3",
+      "read": "5100",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "5100",
+      "read": "3,94,000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "3,94,000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "9.77",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "137",
+      "read": "291",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "291",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "10.8",
+      "read": "0.65",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "0.65",
+      "read": "119",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "119",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [
+     {
+      "test": "haemoglobin",
+      "truth": "11.5",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "34.8",
+      "read": "7700",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "7700",
+      "read": "3,74,000",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "3,74,000",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "3.1",
+      "read": "120",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "120",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "160",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_fasting",
+      "truth": "242",
+      "read": "182",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "182",
+      "read": "9.7",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "9.7",
+      "read": "3.34",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.34",
+      "read": "103",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "103",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [
+     {
+      "test": "cholesterol",
+      "truth": "236",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "267",
+      "read": "236",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hdl",
+      "truth": "72",
+      "read": "267",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ldl",
+      "truth": "91",
+      "read": "72",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "15.9",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "pcv",
+      "truth": "43.3",
+      "read": "15.9",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "wbc",
+      "truth": "3,300",
+      "read": "43.3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "platelets",
+      "truth": "75,000",
+      "read": "3,300",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "glucose_random",
+      "truth": "299",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "potassium",
+      "truth": "5.4",
+      "read": "66",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "131",
+      "read": "5.4",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.71",
+      "read": "131",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "41",
+      "read": "3.71",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "92",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "337",
+      "read": "92",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "hba1c",
+      "truth": "10.7",
+      "read": "337",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.33",
+      "read": "10.7",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "100",
+      "read": "1.33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.53",
+      "read": "10.7",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "58",
+      "read": "1.33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "4.0",
+      "read": "40",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "haemoglobin",
+      "truth": "11.1",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "89",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "glucose_pp",
+      "truth": "90",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "11.5",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.03",
+      "read": "11.5",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "urea",
+      "truth": "80",
+      "read": "3.03",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "bilirubin",
+      "truth": "5.6",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "alt",
+      "truth": "85",
+      "read": "56",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "ast",
+      "truth": "90",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "photocopy": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [
+     {
+      "test": "ast",
+      "truth": "175",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [
+     {
+      "test": "potassium",
+      "truth": "3.5",
+      "read": "3",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "sodium",
+      "truth": "135",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.16",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "4.52",
+      "read": "1.91",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "108",
+      "read": "48",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [
+     {
+      "test": "hba1c",
+      "truth": "8.7",
+      "read": "2",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.40",
+      "read": "0.64",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "66",
+      "read": "111",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "152",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "3.93",
+      "read": "0.68",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "121",
+      "read": "125",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "Nil",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "triglycerides",
+      "truth": "399",
+      "read": "669",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "198",
+      "read": "861",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "3+",
+      "read": "nil",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [
+     {
+      "test": "triglycerides",
+      "truth": "473",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "1,14,000",
+      "read": "1.14",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "143",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "3+",
+      "read": "nil",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "3.53",
+      "read": "1.33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "58",
+      "read": "100",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [
+     {
+      "test": "urine_albumin",
+      "truth": "3+",
+      "read": "nil",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   }
+  ],
+  "thermal": [
+   {
+    "id": "r000",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   },
+   {
+    "id": "r001",
+    "errors": [
+     {
+      "test": "hba1c",
+      "truth": "6.1",
+      "read": "6.18",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r002",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r003",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r004",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r005",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r006",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "7.17",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "platelets",
+      "truth": "3.00",
+      "read": "3.001",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r007",
+    "errors": [
+     {
+      "test": "sodium",
+      "truth": "125",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "creatinine",
+      "truth": "4.52",
+      "read": "1.91",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "108",
+      "read": "48",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r008",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "1.40",
+      "read": "0.64",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "66",
+      "read": "111",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r009",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r010",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r011",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r012",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r013",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r014",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "4.87",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r015",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "3.93",
+      "read": "0.68",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "121",
+      "read": "125",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r016",
+    "errors": [
+     {
+      "test": "glucose_fasting",
+      "truth": "130",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     },
+     {
+      "test": "hba1c",
+      "truth": "4.4",
+      "read": "4.48",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r017",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Positive",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r018",
+    "errors": [
+     {
+      "test": "wbc",
+      "truth": "12000",
+      "read": "2.941",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": true,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "platelets",
+      "truth": "2.94",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r019",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r020",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r021",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "4.16",
+      "read": "4.0",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "72",
+      "read": "4.16",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r022",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r023",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r024",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r025",
+    "errors": [
+     {
+      "test": "glucose_pp",
+      "truth": "254",
+      "read": "70",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "creatinine",
+      "truth": "1.53",
+      "read": "4.0",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "37",
+      "read": "1.53",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r026",
+    "errors": [
+     {
+      "test": "hba1c",
+      "truth": "9.7",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r027",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r028",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r029",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r030",
+    "errors": [
+     {
+      "test": "dengue_ns1",
+      "truth": "Negative",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": null,
+      "ref_ok": null,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r031",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r032",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "4.33",
+      "read": "4.331",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r033",
+    "errors": [
+     {
+      "test": "tsh",
+      "truth": "6.63",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r034",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r035",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r036",
+    "errors": [],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r037",
+    "errors": [
+     {
+      "test": "creatinine",
+      "truth": "3.53",
+      "read": "1.33",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     },
+     {
+      "test": "urea",
+      "truth": "58",
+      "read": "100",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": true,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": true,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r038",
+    "errors": [
+     {
+      "test": "platelets",
+      "truth": "1.29",
+      "read": "1.29",
+      "found": true,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": true,
+      "flagged": false,
+      "silent_error": true
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": true,
+    "retake": false
+   },
+   {
+    "id": "r039",
+    "errors": [
+     {
+      "test": "bilirubin",
+      "truth": "5.6",
+      "read": null,
+      "found": false,
+      "value_ok": false,
+      "unit_ok": false,
+      "ref_ok": false,
+      "status_ok": false,
+      "flagged": false,
+      "silent_error": false
+     }
+    ],
+    "invented": [],
+    "date_ok": true,
+    "name_ok": false,
+    "retake": false
+   }
+  ]
+ }
+}
