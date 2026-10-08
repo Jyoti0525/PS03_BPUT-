@@ -50,3 +50,17 @@ def test_possible_ectopic_and_long_cough():
     assert any(h["rule_id"] == "LOCAL-POSSIBLE-ECTOPIC" for h in t["hits"]) and t["urgency"] in ("yellow", "red")
     t, _ = _note({"chief_complaint": "cough", "category": "normal", "symptoms": [], "vitals": VITALS, "answers": [_a("cough_weeks", "Yes — 2 weeks or more")]})
     assert any(h["rule_id"] == "NTEP-PRESUMPTIVE-TB" for h in t["hits"])
+
+
+def test_hba1c_trend_across_visits():
+    from datetime import datetime
+
+    old = SimpleNamespace(created_at=datetime(2026, 4, 1), intake={"vitals": {}}, chief_complaint="Diabetes follow-up",
+                          note={"labs": [{"label": "HbA1c", "value": "7.1"}]})
+    today = SimpleNamespace(id="r", filename="a1c.pdf", kind="report", extraction={"engine": "pdf", "rows": [
+        {"test": "HbA1c", "test_key": "hba1c", "value": "8.4", "value_num": 8.4, "unit": "%", "reference": "4.0–5.6", "status": "abnormal", "needs_check": False}], "meta": {}, "warnings": []})
+    intake = {"chief_complaint": "Diabetes follow-up", "category": "chronic", "symptoms": [], "chronic": {"condition": "diabetes"}}
+    n = pipeline.build_note(intake=intake, patient=SimpleNamespace(name="T", age=55, sex="F"), triage=rules.evaluate_full(intake, 55, "F"),
+                            files=[today], history=[old], proxy=False)
+    t = next(x for x in n["trend"] if x["parameter"] == "HbA1c (%)")
+    assert [p["value"] for p in t["points"]] == [7.1, 8.4] and t["direction"] == "worse"

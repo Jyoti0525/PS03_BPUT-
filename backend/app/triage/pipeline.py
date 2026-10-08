@@ -403,6 +403,16 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         d = pts[-1]["value"] - pts[0]["value"]
         trend.append({"parameter": "Glucose (mg/dL)", "points": pts, "direction": "worse" if d > 20 else "better" if d < -20 else "stable"})
 
+    # D5: HbA1c from reports read at earlier visits (the note of each visit keeps the values it read), then today's report.
+    def a1c(rows):
+        return next((float(x["value"]) for x in rows or [] if str(x.get("label", "")).lower() == "hba1c" and re.fullmatch(r"\d+(\.\d+)?", str(x.get("value")))), None)
+
+    a_hist = [(e.created_at.strftime("%d/%m/%Y"), x) for e in ordered if (x := a1c((getattr(e, "note", None) or {}).get("labs")))]
+    if (today_a1c := a1c(labs)) is not None and a_hist:
+        pts = [{"label": d, "value": x} for d, x in a_hist] + [{"label": "Today", "value": today_a1c}]
+        d = pts[-1]["value"] - pts[0]["value"]
+        trend.append({"parameter": "HbA1c (%)", "points": pts, "direction": "worse" if d > 0.5 else "better" if d < -0.5 else "stable"})
+
     sex = {"F": "female", "M": "male"}.get(patient.sex, "patient")
     parts = [
         f"{patient.age}-year-old {sex}, {'general' if cat == 'normal' else cat} visit.",
@@ -427,6 +437,15 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         if occ.get("fev1_l"):
             base = f" (earliest recorded {occ['fev1_baseline_l']:g} L)" if occ.get("fev1_baseline_l") else ""
             parts.append(f"FEV1 {occ['fev1_l']:g} L{', FVC ' + format(occ['fvc_l'], 'g') + ' L' if occ.get('fvc_l') else ''}{base}.")
+    photos = [f for f in files if f.kind == "image"]
+    for f in photos:
+        d = (f.extraction or {}).get("description") or {}
+        if d.get("text"):
+            flags.append({"code": "PHOTO", "label": f'Photo "{f.filename}": {d["text"]}', "severity": "info",
+                          "reason": f"Described by {d['engine']} from the picture only (what is visible, no diagnosis); not read by the rules — look at the photo"})
+        else:
+            why = "the description was stopped by the non-diagnostic check" if d.get("blocked") else "no image model ran"
+            flags.append({"code": "PHOTO", "label": f'Photo "{f.filename}" attached — look at it in the case', "severity": "info", "reason": f"Not described: {why}"})
     hx = clinical_history(intake, triage)
     if hx["positives"]:
         parts.append("On questioning: " + "; ".join(hx["positives"]) + ".")
@@ -437,6 +456,8 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         parts.append("Regular medicines: " + "; ".join(hx["medicines"]) + ".")
     if hx["past"]:
         parts.append("Past history: " + "; ".join(hx["past"]) + ".")
+    if photos:
+        parts.append(f"{len(photos)} photo(s) of the problem attached" + (": " + "; ".join(d["text"].rstrip(".") for f in photos if (d := (f.extraction or {}).get("description") or {}).get("text")) if any(((f.extraction or {}).get("description") or {}).get("text") for f in photos) else "") + ".")
     off = [x for x in vitals if x["status"] == "abnormal"]
     if off:
         parts.append("Abnormal vitals: " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in off) + ".")
@@ -447,7 +468,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         parts.append("Uploaded report shows " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in abn) + " outside reference range.")
     parts.append("Summary organises patient-provided information only; it is not a diagnosis.")
 
-    rule_codes = {h["rule_id"] for h in hits} | {f["id"] for f in triage.get("followups", [])} | {"PPE-GAP"}
+    rule_codes = {h["rule_id"] for h in hits} | {f["id"] for f in triage.get("followups", [])} | {"PPE-GAP", "PHOTO"}
     for f in flags:  # the reviewer reads clinical warnings first; notices about how the data was captured come after
         f["group"] = "clinical" if f["code"] in rule_codes else "data"
 

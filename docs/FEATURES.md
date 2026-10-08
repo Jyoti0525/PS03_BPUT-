@@ -580,7 +580,7 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 | **D1** Outpatient queue | Working | Kiosk → rules → queue → review | — |
 | **D2** Occupational screening | Working | Employer portal, roster, fitness status; exposure and PPE questions at workplace clinics; 5 occupational rules; FEV1 against the worker's own earliest value; PPE-gap flag; department rates for the employer (no symptoms, departments under 5 hidden) | Rules need review by an occupational physician |
 | **D3** Campus fever | Working | Hostel block asked at campus clinics; cluster alert to the campus MO (5+ fevers in 72 h and more than 3× the 14 days before), counts only; syndromic CSV export with counts under 5 written as "<5" | Counts per day and block are small, so most cells are "<5" at demo scale |
-| **D4** Maternal follow-up | Working | Whose phone it is and the assigned ASHA asked at a pregnancy visit; missed check-up detected a day after its due date and sent to that ASHA; after 2 failed attempts a reminder call is due; nothing about pregnancy on a husband's or family phone | The call is simulated and in English only |
+| **D4** Maternal follow-up | Working | Whose phone it is and the assigned ASHA asked at a pregnancy visit; missed check-up detected a day after its due date and sent to that ASHA; after 2 failed attempts a reminder call is due; nothing about pregnancy on a husband's or family phone; the call is placed through Twilio or Vonage to the demo number only, spoken in any of 11 languages (Sarvam Bulbul) | — |
 
 **D2 Occupational screening, in detail**
 - **Questions** (workplace clinics and roster workers): exposures (silica, coal, cotton, asbestos, other dust,
@@ -618,7 +618,7 @@ link `CAMPUS01` raises the alert), Sunita's missed check-up on ASHA Kamla Devi's
 and 17 workers screened at Kalinga Steel Works, the crusher workers also a year earlier. For E6 (`call_scenarios`):
 Rina (pregnant, 31 weeks, Odia, her own phone) and Ramprasad (blood pressure and diabetes, Hindi) are due a reminder
 call after two failed ASHA attempts; Kusum's last visit was RED, so only a person may call her.
-| **D5** Chronic check-in | Working | BP and glucose trends against earlier visits | Check the HbA1c trend |
+| **D5** Chronic check-in | Working | BP, glucose and HbA1c trends against earlier visits (HbA1c from reports read at each visit) | — |
 | **D6** Health camp, offline | Working | Kiosk works with no network and syncs later | — |
 | **D7** Referral notes | Working | Referral letter with history, pertinent negatives, allergies, medicines, timed vitals, treatment given before transfer and the referring doctor; QR summary, PDF, print, JSON, CSV, FHIR R4, HL7 CDA R2 | — |
 
@@ -918,7 +918,7 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 | **H4** File storage with expiry | Working | `backend/app/storage.py` |
 | **H5** Visible fallback when an engine is down | Working | `GET /language/engines` lists what is installed and loaded; a missing engine answers 503 and never a fake result. Every note has `processing_status`: report reading, translation, speech and AI summary, each ok / failed / fallback / unsure. A failed stage raises `STAGE-DEGRADED`; a missing summary model raises `LLM-OFF` |
 | **H6** Offline kiosk | Working | `frontend/src/lib/offline/outbox.ts`, `precache.ts`, `public/sw.js`. Check-ins wait in IndexedDB and replay without duplicates (`client_ref`) |
-| **H7** Speed targets | Partial | Speech and summary measured. **Left:** the rest |
+| **H7** Speed targets | Measured | Text to note 0.08 s and queue 0.05 s (met); report photo 14.8 s median, 9 of 16 under 15 s; Odia voice 3.4 s for 13 s clips (target 2 s, missed). See EVALUATION, Speed |
 | **H8** Logging | Working | `backend/app/observability.py`: JSON logs with request IDs and no request bodies; `/metrics`; `/health` |
 | **H9** Deployment | Partial | `docker-compose.yml`, `render.yaml`, Vercel. **Left:** update the public link and recheck Compose |
 | **H10** CI | Working | `.github/workflows/ci.yml` |
@@ -926,6 +926,13 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 ---
 
 ## 5. Flags a reviewer can see on a note
+
+**Photos of the problem (basic visual input, 8 Oct).** A photo of a wound, rash or swelling is redacted (faces blurred,
+ID numbers blacked out) and then, when the local image model runs (`JEEVIA_VLM_URL`, Qwen3-VL-4B), described in one or
+two plain sentences: body part, what is visible, rough size and colour. The description is checked twice: by the
+note's non-diagnostic guard and by a stricter photo list (no "looks like", "likely", condition names, creams, tablets
+or "consult"). A blocked or missing description says so. It appears in the summary and as a `PHOTO` flag, is never read
+by the rules and never changes urgency. Without the model the note still says the photo is attached and to look at it.
 
 The list shows clinical flags (rules and follow-ups about the patient) first. Flags about how the data was captured
 (translation, OCR, voice, offline, redaction) follow under **About the data**, and the referral letter leaves them out.
@@ -993,7 +1000,7 @@ Memory is tight on a 16 GB laptop: quit Docker Desktop before a demo. With every
 ## 7. Tests
 
 ```bash
-cd backend && .venv/Scripts/python.exe -m pytest -q     # 1,143 tests (some skip where the speech and translation packages or the CDA schema are not installed)
+cd backend && .venv/Scripts/python.exe -m pytest -q     # 1,146 tests (some skip where the speech and translation packages or the CDA schema are not installed)
 cd frontend && npx tsc --noEmit && npm run lint
 ```
 

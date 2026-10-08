@@ -83,3 +83,52 @@ def compare(rule_label: dict, image: bytes, content_type: str) -> tuple[dict | N
     if not got or got["type"] == rule_label.get("type"):
         return got, None
     return got, f'The image model sees this as "{got["label"]}", the text reading as "{rule_label.get("label")}" — check the picture'
+
+
+# ---------------------------------------------------------------- photos of the problem
+
+DESCRIBE = (
+    "This photo was taken by a patient at an Indian clinic to show a health problem. In one or two short sentences, say "
+    "only what is visible: which body part, and what can be seen (for example a cut, a swelling, a red patch, spots, a "
+    "blister, a burn mark, a bandage), with its rough size compared with the body part and its colour. State plainly "
+    "what you see; do not use words like likely, probably, possibly, appears or seems. Do not name any disease or "
+    "condition, do not guess the cause, and do not suggest any treatment or medicine. If the photo is unclear "
+    "or shows no body part, answer: unclear photo."
+)
+
+
+# A description says what is visible, nothing more: no impression, cause, condition or care. Stricter than the note guard
+# because skin and wound words ("ringworm", "infected", "apply cream") are exactly what a vision model reaches for.
+PHOTO_GUARD = re.compile(
+    r"\b(looks? like|appear(s|ing)? to be|seems?|suggest\w*|consistent with|likely|probably|possibl\w*|may be|might be|could be|caused by|"
+    r"infect\w*|fung\w*|ringworm|eczema|psoriasis|scabies|cellulitis|abscess|ulcer|allerg\w*|dermatit\w*|tinea|herpes|"
+    r"chicken ?pox|measles|leprosy|cancer\w*|tumou?r|melanoma|fracture\w*|diagnos\w*|apply|cream|ointment|tablet|medicine|"
+    r"antibiotic\w*|treat\w*|should|consult|doctor)\b"
+)
+
+
+def describe(image: bytes, content_type: str = "image/jpeg") -> dict | None:
+    """What a photo of the problem shows, in plain words, for the reviewer: {'text', 'engine'}; or {'text': None,
+    'engine', 'blocked'} when the non-diagnostic guard stopped the reply. None when the server is off, unreachable or
+    the photo is unclear. Never read by the rules and never changes urgency."""
+    from app.output_guard import check
+
+    s = get_settings()
+    if not s.vlm_url or not content_type.startswith("image/") or (small := _small(image)) is None:
+        return None
+    url = f"data:{small[1]};base64,{base64.b64encode(small[0]).decode()}"
+    body = {"model": s.vlm_model_name, "temperature": 0, "max_tokens": 80,
+            "messages": [{"role": "user", "content": [{"type": "image_url", "image_url": {"url": url}}, {"type": "text", "text": DESCRIBE}]}]}
+    req = urllib.request.Request(s.vlm_url.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=s.vlm_timeout_s) as r:  # nosec B310: http(s) URL checked in config
+            reply = json.loads(r.read())["choices"][0]["message"]["content"]
+    except (urllib.error.URLError, TimeoutError, OSError, KeyError, ValueError):
+        return None
+    text = re.sub(r"<think>.*?</think>", "", reply or "", flags=re.S).strip().strip('"')[:400]
+    if not text or "unclear photo" in text.lower():
+        return None
+    blocked = [h.phrase for h in check(text).hits] + [m.group(0) for m in PHOTO_GUARD.finditer(text.lower())]
+    if blocked:
+        return {"text": None, "engine": s.vlm_model_name, "blocked": blocked}
+    return {"text": text, "engine": s.vlm_model_name}

@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "photos": 3,
+    "kept": 3,
+    "blocked": 0,
+    "median_seconds": 11.0
+  },
+  "rows": [
+    {
+      "photo": "cut.jpg",
+      "seconds": 11.7,
+      "text": "A horizontal reddish-brown line is visible against a beige background. The line is about the width of a finger and spans roughly the width of the image.",
+      "blocked": [],
+      "empty": false
+    },
+    {
+      "photo": "rash.jpg",
+      "seconds": 11.0,
+      "text": "A red, circular patch is visible on a light brown skin surface. The patch is roughly the size of a small coin and has a slightly raised, defined edge.",
+      "blocked": [],
+      "empty": false
+    },
+    {
+      "photo": "swelling.jpg",
+      "seconds": 10.6,
+      "text": "A circular red-rimmed yellow spot is centered on a flat, uniform tan surface. The spot is roughly the size of a small coin and contrasts with the surrounding area.",
+      "blocked": [],
+      "empty": false
+    }
+  ]
+}

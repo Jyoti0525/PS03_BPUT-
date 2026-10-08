@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { RefreshCw, Search, Baby, HeartPulse, Timer, AlertTriangle, WifiOff, Inbox, House } from "lucide-react";
+import { Search, Baby, HeartPulse, Timer, AlertTriangle, WifiOff, Inbox, House } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, useNow, fmtWait } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
-import { PageHeader } from "@/components/layout/app-shell";
-import { Badge, Button, Card, Empty, ErrorNote, Input, Segmented, Spinner, Stat, cx } from "@/components/ui";
+import { AutoUpdates, PageHeader } from "@/components/layout/app-shell";
+import { Badge, Card, Empty, ErrorNote, Input, Spinner, cx } from "@/components/ui";
 import { UrgencyBadge, english, urgencyBar } from "@/components/triage/note";
 import type { QueueItem, Urgency } from "@/lib/types";
 import { langByCode } from "@/lib/i18n/languages";
@@ -47,34 +47,36 @@ export default function QueuePage() {
     <>
       <PageHeader
         title={tr("Triage queue")}
-        subtitle={tr("Ordered by rules-engine urgency, then escalated cases, then time waiting since arrival; each row says why it is where it is. Critical cases auto-escalate after 15 minutes.")}
-        actions={
-          <Button variant="secondary" onClick={() => reload()} icon={<RefreshCw className="size-4" />}>
-            {tr("Refresh")}
-          </Button>
-        }
+        subtitle={tr("Most urgent first. Each row says why it is where it is; critical cases escalate after 15 minutes.")}
+        actions={<AutoUpdates />}
       />
 
-      <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label={tr("Critical")} value={count("red")} tone="crit" hint={tr("Immediate")} />
-        <Stat label={tr("Semi-urgent")} value={count("yellow")} tone="semi" hint={tr("Within 30–60 min")} />
-        <Stat label={tr("Routine")} value={count("green")} tone="rout" hint={tr("Standard OPD order")} />
-        <Stat label={tr("Avg. wait")} value={fmtWait(avgWait)} hint={tr("{n} waiting", { n: data?.length ?? 0 })} />
+      <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4" role="group" aria-label={tr("Show")}>
+        {(
+          [
+            ["all", tr("All waiting"), data?.length ?? 0, "text-ink", tr("Avg. wait") + " " + fmtWait(avgWait)],
+            ["red", tr("Critical"), count("red"), "text-crit", tr("Immediate")],
+            ["yellow", tr("Semi-urgent"), count("yellow"), "text-semi", tr("Within 30–60 min")],
+            ["green", tr("Routine"), count("green"), "text-rout", tr("Standard OPD order")],
+          ] as const
+        ).map(([v, label, n, color, hint]) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setFilter(v)}
+            aria-pressed={filter === v}
+            className={cx("rounded-[var(--radius-card)] border bg-surface px-4 py-3 text-left shadow-[var(--shadow-card)] transition-colors", filter === v ? "border-ink ring-1 ring-ink" : "border-line hover:border-subtle")}
+          >
+            <span className="block text-xs font-medium tracking-wide text-muted uppercase">{label}</span>
+            <span className={cx("mt-1 block text-2xl font-bold tabular-nums", color)}>{n}</span>
+            <span className="mt-0.5 block text-xs text-subtle">{hint}</span>
+          </button>
+        ))}
       </div>
 
       <Card>
         <div className="flex flex-wrap items-center gap-3 border-b border-line p-3">
-          <Segmented
-            value={filter}
-            onChange={setFilter}
-            options={[
-              { value: "all", label: "All", count: data?.length },
-              { value: "red", label: "Critical", count: count("red") },
-              { value: "yellow", label: "Semi-urgent", count: count("yellow") },
-              { value: "green", label: "Routine", count: count("green") },
-            ]}
-          />
-          <div className="relative ml-auto w-full sm:w-64">
+          <div className="relative w-full">
             <Search className="absolute top-3 left-3 size-4 text-subtle" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Name, ID or complaint")} className="h-10 pl-9" aria-label={tr("Filter queue")} />
           </div>

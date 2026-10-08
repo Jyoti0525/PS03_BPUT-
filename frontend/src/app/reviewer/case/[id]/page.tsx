@@ -131,9 +131,9 @@ export default function CasePage() {
       </div>
 
       {/* Patient card */}
-      <Card className="overflow-hidden">
+      <Card>
         <div className="flex">
-          <span className={cx("w-2 shrink-0", urgencyBar(enc.urgency))} />
+          <span className={cx("w-2 shrink-0 rounded-tl-[var(--radius-card)]", urgencyBar(enc.urgency))} />
           <div className="flex-1 p-4 sm:p-5">
             <div className="flex flex-wrap items-start gap-4">
               <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-coral-100 text-xl font-bold text-coral-700">{p.name.charAt(0)}</div>
@@ -200,7 +200,7 @@ export default function CasePage() {
         </div>
 
         {/* Action bar */}
-        <div className="no-print flex flex-wrap items-center gap-2 border-t border-line bg-canvas/60 px-4 py-3">
+        <div className="no-print flex flex-wrap items-center gap-2 rounded-b-[var(--radius-card)] border-t border-line bg-canvas/60 px-4 py-3">
           {isDoctor && (
             <Button variant="teal" disabled={done} loading={busy} onClick={() => act(() => api.confirmEncounter(enc.id), "Note confirmed and signed")} icon={<CheckCircle2 className="size-4" />}>
               {done ? `Reviewed by ${enc.reviewed_by}` : tr("Confirm note")}
@@ -221,15 +221,16 @@ export default function CasePage() {
               {tr("Referral note")}
             </Button>
           )}
-          <Button variant="secondary" onClick={() => { setFreshShare(null); setModal("share"); }} icon={<QrCode className="size-4" />}>
-            {tr("Share QR")}
-          </Button>
           <div className="relative">
-            <Button variant="secondary" onClick={() => setExportOpen((o) => !o)} icon={<Download className="size-4" />}>
-              {tr("Export")} <ChevronDown className="size-3.5" />
+            <Button variant="secondary" onClick={() => setExportOpen((o) => !o)} icon={<Download className="size-4" />} aria-haspopup="menu" aria-expanded={exportOpen}>
+              {tr("Share & export")} <ChevronDown className="size-3.5" />
             </Button>
             {exportOpen && (
-              <div className="absolute top-11 left-0 z-20 w-44 rounded-xl border border-line bg-white p-1 shadow-[var(--shadow-pop)]">
+              <div role="menu" className="absolute top-11 left-0 z-20 w-52 rounded-xl border border-line bg-white p-1 shadow-[var(--shadow-pop)]">
+                <button role="menuitem" onClick={() => { setExportOpen(false); setFreshShare(null); setModal("share"); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-canvas">
+                  <QrCode className="size-4" /> {tr("Share QR")}
+                </button>
+                <p className="mt-1 border-t border-line px-3 pt-2 pb-1 text-[11px] font-bold tracking-wide text-subtle uppercase">{tr("Download")}</p>
                 {(
                   [
                     ["pdf", "PDF", <FileText key="p" className="size-4" />],
@@ -240,23 +241,12 @@ export default function CasePage() {
                     ["cda", "HL7 CDA document", <FileJson key="cda" className="size-4" />],
                   ] as const
                 ).map(([f, label, icon]) => (
-                  <button key={f} onClick={() => doExport(f)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ink hover:bg-canvas">
-                    {icon} {label}
+                  <button role="menuitem" key={f} onClick={() => { setExportOpen(false); doExport(f); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ink hover:bg-canvas">
+                    {icon} {tr(label)}
                   </button>
                 ))}
               </div>
             )}
-          </div>
-          <div className="ml-auto">
-            <Segmented
-              value={density}
-              onChange={setDensity}
-              options={[
-                { value: "doctor", label: <span className="inline-flex items-center gap-1"><Stethoscope className="size-3.5" /> {tr("Doctor view")}</span> },
-                { value: "nurse", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Nurse view")}</span> },
-                { value: "health_worker", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Health-worker view")}</span> },
-              ]}
-            />
           </div>
         </div>
       </Card>
@@ -295,6 +285,19 @@ export default function CasePage() {
 
       <MedicationsPanel enc={enc} canReview onDone={setData} />
 
+          {isDoctor && (
+          <div className="no-print mt-4 flex justify-end">
+            <Segmented
+              value={density}
+              onChange={setDensity}
+              options={[
+                { value: "doctor", label: <span className="inline-flex items-center gap-1"><Stethoscope className="size-3.5" /> {tr("Doctor view")}</span> },
+                { value: "nurse", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Nurse view")}</span> },
+                { value: "health_worker", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Health-worker view")}</span> },
+              ]}
+            />
+          </div>
+          )}
       <div className="mt-4">{n ? <NoteView enc={enc} density={density} /> : <p className="text-sm text-muted">{tr("No note generated.")}</p>}</div>
 
       {!!enc.intake?.file_ids.length && (

@@ -71,19 +71,19 @@ export function SiteHeader() {
                 <a
                   href={href(l.id)}
                   className={cx(
-                    "relative rounded-full px-4 py-2 text-[15px] font-medium transition-colors",
+                    "relative rounded-full px-3 py-2 text-[15px] font-medium whitespace-nowrap transition-colors",
                     active === l.id ? "text-ink" : "text-muted hover:text-ink",
                   )}
                 >
                   {l.label}
-                  <span className={cx("absolute inset-x-4 -bottom-0.5 h-0.5 origin-center rounded-full bg-coral-300 transition-transform duration-300", active === l.id ? "scale-x-100" : "scale-x-0")} />
+                  <span className={cx("absolute inset-x-3 -bottom-0.5 h-0.5 origin-center rounded-full bg-coral-300 transition-transform duration-300", active === l.id ? "scale-x-100" : "scale-x-0")} />
                 </a>
               </li>
             ))}
           </ul>
         </nav>
         <div className="flex items-center justify-end gap-2">
-          <StatusPill className="hidden md:inline-flex" />
+          <StatusPill className="hidden xl:inline-flex" />
           <LanguageButton className="hidden sm:block" />
           <LanguageButton compact className="sm:hidden" />
           <A11yButton className="hidden md:inline-flex" />

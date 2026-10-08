@@ -66,7 +66,7 @@ ${advice.trim() ? `<div style="margin-top:12px;text-align:left"><p><b>${esc(both
 <p class="muted">Access code</p><p class="code">${esc(link.access_code ?? "••••••")}</p>
 <p class="muted">Valid until ${new Date(link.expires_at).toLocaleString("en-IN")}</p>
 <p class="muted" style="word-break:break-all">${esc(link.url)}</p>
-<p class="muted" style="color:#a33;margin-top:16px">Triage support only — not a diagnosis. For the receiving clinician.</p></div>
+<p class="muted" style="color:#a33;margin-top:16px">Educational prototype for triage support only — not a diagnosis. For the receiving clinician.</p></div>
 <script>window.onload=()=>window.print()</script></body></html>`);
   w.document.close();
 }

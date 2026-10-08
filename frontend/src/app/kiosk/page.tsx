@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, TabletSmartphone, Wifi, WifiOff, CloudUpload, ShieldCheck, LogIn } from "lucide-react";
+import { Lock, TabletSmartphone, WifiOff, CloudUpload, ShieldCheck, LogIn, Settings2 } from "lucide-react";
 import { api, getDeviceId } from "@/lib/api";
 import { useSession, usePrefs } from "@/components/providers";
 import { useAsync, useOnline } from "@/lib/hooks";
 import { A11yButton, LanguageButton, Logo } from "@/components/layout/chrome";
-import { Badge, Button, Card, Input, Label, Spinner, Toggle } from "@/components/ui";
+import { Badge, Button, Card, Input, Label, Modal, Spinner, Toggle } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { IntakeFlow } from "@/components/intake/intake-flow";
 import { flushOutbox, isSimulatedOffline, setSimulatedOffline, subscribeOutbox, type OutboxItem } from "@/lib/offline/outbox";
@@ -30,6 +30,7 @@ export default function KioskPage() {
   const [outbox, setOutbox] = useState<OutboxItem[]>([]);
   const [label, setLabel] = useState("OPD entrance tablet");
   const [binding, setBinding] = useState(false);
+  const [staffOpen, setStaffOpen] = useState(false);
   const isStaff = !!user && STAFF_ROLES.includes(user.role);
   const deviceId = typeof window === "undefined" ? "" : getDeviceId();
   const { data: devices, reload } = useAsync(() => (isStaff ? api.listDevices() : Promise.resolve([])), [isStaff]);
@@ -123,10 +124,19 @@ export default function KioskPage() {
           <Logo />
           <span className="hidden text-sm text-muted md:inline">{facility?.name} · {tr(bound?.label)}</span>
           <div className="ml-auto flex items-center gap-2">
-            {offline ? <Badge tone="semi"><WifiOff className="size-3" /> {tr("Offline")}</Badge> : <Badge tone="rout"><Wifi className="size-3" /> {tr("Online")}</Badge>}
+            {offline && <Badge tone="semi"><WifiOff className="size-3" /> {tr("Offline")}</Badge>}
             {outbox.length > 0 && <Badge tone="info"><CloudUpload className="size-3" /> {outbox.length} {tr("queued")}</Badge>}
             <LanguageButton offered={facility?.languages} />
             <A11yButton />
+            <button
+              type="button"
+              onClick={() => setStaffOpen(true)}
+              className="inline-flex size-10 items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink"
+              aria-label={tr("Staff settings")}
+              title={tr("Staff settings")}
+            >
+              <Settings2 className="size-5" />
+            </button>
             <Button
               variant="ghost"
               size="sm"
@@ -143,20 +153,19 @@ export default function KioskPage() {
       </header>
       <main className="px-4 py-6">
         {user?.facility_id && <IntakeFlow key={session} mode="kiosk" facilityId={user.facility_id} organisationName={facility?.organisation_id ? facility.name : null} offline={offline} offlineQueue={facility?.offline_mode ?? true} patientLoad={facility?.patient_load ?? "normal"} onReset={() => setSession((n) => n + 1)} />}
-        <div className="no-print mx-auto mt-8 max-w-3xl rounded-2xl border border-dashed border-line bg-white/70 p-4">
-          {facility?.offline_mode === false ? (
-            <p className="text-sm text-muted">{tr("This facility is set to online only: with no network, the kiosk asks staff to use the paper form. A supervisor can turn on offline-first kiosks in Facility setup.")}</p>
-          ) : (
-            <Toggle
-              checked={simOffline}
-              onChange={setSimOffline}
-              label={tr("Simulate offline (rural camp)")}
-              description={tr("Intakes are queued in IndexedDB on this device and synced automatically when you switch back online.")}
-            />
-          )}
-          <p className="mt-2 text-xs text-muted">{tr("Staff on duty:")} {user?.name}</p>
-        </div>
       </main>
+      <Modal open={staffOpen} onClose={() => setStaffOpen(false)} title={tr("Staff settings")} subtitle={`${tr("Staff on duty:")} ${user?.name ?? ""} · ${tr(bound?.label)}`}>
+        {facility?.offline_mode === false ? (
+          <p className="text-sm text-muted">{tr("This facility is set to online only: with no network, the kiosk asks staff to use the paper form. A supervisor can turn on offline-first kiosks in Facility setup.")}</p>
+        ) : (
+          <Toggle
+            checked={simOffline}
+            onChange={setSimOffline}
+            label={tr("Simulate offline (rural camp)")}
+            description={tr("Intakes are queued in IndexedDB on this device and synced automatically when you switch back online.")}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

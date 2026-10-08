@@ -3,7 +3,7 @@ import type { Encounter, ExportFormat, Facility } from "@/lib/types";
 export const URGENCY_LABEL = { red: "Critical", yellow: "Semi-urgent", green: "Routine" } as const;
 
 export const DISCLAIMER =
-  "Triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional before any clinical decision.";
+  "Educational prototype for triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional before any clinical decision.";
 
 /** G8: every export says where its data came from. */
 export const originLine = (e: Encounter) =>
@@ -215,7 +215,7 @@ function toCdaMock(e: Encounter) {
   const n = e.note;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <ClinicalDocument xmlns="urn:hl7-org:v3"><realmCode code="IN"/><typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/><id root="2.25.276318398723961874165418342187521543" extension="${xmlEsc(e.id)}"/><code code="54094-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Emergency department Triage note"/><title>Jeevia triage note (non-diagnostic, synthetic data)</title><effectiveTime value="${new Date(e.created_at).toISOString().replace(/[-:T]/g, "").slice(0, 14)}"/><confidentialityCode code="R" codeSystem="2.16.840.1.113883.5.25"/><languageCode code="en-IN"/><recordTarget><patientRole><id root="2.25.276318398723961874165418342187521543.1" extension="${xmlEsc(e.patient.code)}"/><patient><name><given>${xmlEsc(e.patient.name)}</given></name><administrativeGenderCode code="${e.patient.sex === "F" || e.patient.sex === "M" ? e.patient.sex : "UN"}" codeSystem="2.16.840.1.113883.5.1"/></patient></patientRole></recordTarget><author><time value="${new Date(e.created_at).toISOString().replace(/[-:T]/g, "").slice(0, 14)}"/><assignedAuthor><id root="2.25.276318398723961874165418342187521543.2" extension="rules-engine"/><assignedAuthoringDevice><softwareName>Jeevia triage assistant (mock mode)</softwareName></assignedAuthoringDevice></assignedAuthor></author><custodian><assignedCustodian><representedCustodianOrganization><id root="2.25.276318398723961874165418342187521543.3" extension="demo"/><name>Demo facility</name></representedCustodianOrganization></assignedCustodian></custodian><component><structuredBody>${[
-    sec("Disclaimer", ["Triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional before any clinical decision."]),
+    sec("Disclaimer", ["Educational prototype for triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional before any clinical decision."]),
     sec("Chief complaint", [e.chief_complaint]),
     sec("Triage urgency", [`Rules-engine urgency: ${e.urgency ?? "not set"}`]),
     sec("Summary", n?.summary ? [n.summary] : []),

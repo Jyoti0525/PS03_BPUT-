@@ -3,11 +3,11 @@
 import { CLINICIAN_ROLES, DOCTOR_ROLES } from "@/lib/types";
 
 import Link from "next/link";
-import { EyeOff, RefreshCw, Tablet, UserPlus } from "lucide-react";
+import { EyeOff, Tablet, UserPlus } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, fmtWait } from "@/lib/hooks";
 import { usePrefs, useSession } from "@/components/providers";
-import { PageHeader } from "@/components/layout/app-shell";
+import { AutoUpdates, PageHeader } from "@/components/layout/app-shell";
 import { Button, Card, Stat } from "@/components/ui";
 import { TokenBoard } from "@/components/triage/token-board";
 import { DutyList } from "@/components/staff/duty";
@@ -18,7 +18,7 @@ export default function DeskHome() {
   const { tr } = usePrefs();
   const fid = user!.facility_id!;
   const { data: tokens, reload: reloadTokens } = useAsync(() => api.facilityTokens(fid), [fid], { pollMs: 15_000 });
-  const { data: staff, reload: reloadStaff } = useAsync(() => api.listUsers(), [fid]);
+  const { data: staff, reload: reloadStaff } = useAsync(() => api.listUsers(), [fid], { pollMs: 60_000 });
   const { data: facility } = useAsync(() => api.getFacility(fid), [fid]);
 
   const waiting = tokens?.filter((t) => t.status === "queued" || t.status === "escalated") ?? [];
@@ -35,18 +35,7 @@ export default function DeskHome() {
       <PageHeader
         title={tr("Front desk")}
         subtitle={facility ? tr("{name} · check-ins, waiting times and staff on duty", { name: facility.name }) : undefined}
-        actions={
-          <Button
-            variant="secondary"
-            icon={<RefreshCw className="size-4" />}
-            onClick={() => {
-              reloadTokens();
-              reloadStaff();
-            }}
-          >
-            {tr("Refresh")}
-          </Button>
-        }
+        actions={<AutoUpdates />}
       />
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
         <Stat
@@ -66,7 +55,6 @@ export default function DeskHome() {
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
         <TokenBoard facilityId={fid} onChange={reloadTokens} />
         <div className="space-y-4">
-          <DutyList staff={staff ?? null} onChange={reloadStaff} compact />
           <Card className="p-4">
             <p className="font-semibold text-ink">{tr("Check in a patient")}</p>
             <p className="mt-1 text-sm text-muted">{tr("Find a returning patient or register a new one, then take them through the check-in kiosk for a token.")}</p>
@@ -79,6 +67,7 @@ export default function DeskHome() {
               </Link>
             </div>
           </Card>
+          <DutyList staff={staff ?? null} onChange={reloadStaff} compact />
           <Card className="p-4">
             <div className="flex items-start gap-3">
               <EyeOff className="mt-0.5 size-5 text-coral-600" />

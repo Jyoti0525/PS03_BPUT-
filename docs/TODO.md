@@ -204,7 +204,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **H4 File storage with retention clock**
 - [x] **H5 Visible degradation.** Done 7 Oct (0a36c36): `processing_status` on every note lists report reading, translation, speech and AI summary with ok / failed / fallback / unsure; a failed stage raises STAGE-DEGRADED, a missing model raises LLM-OFF.
 - [x] **H6 Offline intake PWA and sync**
-- [ ] **H7 Performance targets**: text to note under 3 s, voice to transcript under 2 s, report to findings under 15 s, queue under 1 s. *Partial:* speech measured at 2.0 s for 8.9 s of audio.
+- [x] **H7 Performance targets**: text to note under 3 s, voice to transcript under 2 s, report to findings under 15 s, queue under 1 s. All four measured 8 Oct (uncommitted): text and queue met, reports borderline, voice missed for 13 s clips (EVALUATION, Speed).
 - [x] **H8 Observability** (`observability.py`)
 - [ ] **H9 Deployment.** *Partial:* `docker-compose.yml` and `render.yaml` exist. **Left:** a public link that works (Vercel + Render, rules and OCR only), the demo profile on the laptop, and a check that Compose still builds.
 - [x] **H10 CI** (`.github/workflows/ci.yml`): passing on `bafbe44` (5 Oct).
@@ -264,7 +264,7 @@ Targets are the bar we set for ourselves, not results. Report each actual figure
 - [x] Output guard: 101 red-team outputs, 100 % blocked; 40 safe, 0 false blocks (5 Oct)
 - [x] Note faithfulness: held-out 18/20 used, 2 fell back; tuning 30/30; median 0.8 s (5 Oct)
 - [x] Missing-information recall on deliberately incomplete cases. **Done 8 Oct (2da0140):** `scripts/eval_missing.py`, 493 one-item-removed versions of the 50 cases; 141/144 items that change the colour are named (97.9 %), required items 344/344; one real gap (diastolic BP at age 12–13) recorded, not changed without a clinician
-- [ ] Latency for each H7 target
+- [x] Latency for each H7 target, 8 Oct (uncommitted)
 - [ ] Review time per case (target under 4 minutes)
 - [x] Fairness split by language, sex and age band (§9: the 300-patient set). **First version 7 Oct (0a36c36)** on public speech and the 50 synthetic cases (G7). **Done 8 Oct (2da0140):** 300 patients (50 vignettes × en/hi/or × M/F); first run split 8 vignettes by language (Hindi stroke and burns came out GREEN), lexicon fixed, now 50/50 consistent across language and sex, agreement en 78 / hi 79 / or 77 %, no expected-RED GREEN; protocol-versus-expectation gaps listed for a clinician (EVALUATION.md).
 - No "0 missed REDs" claim: we have no clinician mentor, so we claim protocol-derived tests only.
@@ -362,6 +362,12 @@ The user's rule (6 Oct): nothing waits until after the mid-evaluation; every ite
 - [x] Better kiosk questions. **Done 8 Oct (a917f49):** question flow version 2 (29 questions): allergy, daily
   medicines, long-term illness, adherence, child vaccines, possible pregnancy, NTEP cough screen, blood in stool,
   vomiting, chills, burning urine; hi/or/kn text; rule `LOCAL-POSSIBLE-ECTOPIC`; "Not sure" no longer read as "No".
+- [x] Strict pass against the official PS03 document (8 Oct, uncommitted): visible disclaimer now says "Educational
+  prototype" (exports, case screen, QR slips, hi/or/kn); photos of the problem are described for the reviewer (basic
+  visual input; tested live 8 Oct: 3 of 3 described plainly after a prompt fix, median 11 s); HbA1c trend across visits (D5); D4 row corrected (real calls to the demo number, 11 languages).
+- [x] UI clean-up for first-time users (8 Oct, uncommitted): one account menu instead of three header icons; supervisor
+  menu grouped (Facility, Safety & records, Tools); queue count cards are the filter; Share QR and exports in one menu;
+  self-refreshing lists lose their Refresh buttons; kiosk's offline simulator moved behind a staff settings button.
 - [ ] Finale rubric pass: innovation, technical complexity, real-world impact, UI/UX, presentation
 
 ---

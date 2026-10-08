@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
-import { LogOut, Building2, KeyRound, Mail } from "lucide-react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
+import { LogOut, Building2, ChevronDown, KeyRound, Mail } from "lucide-react";
 import { usePrefs, useSession } from "@/components/providers";
 import { A11yButton, LanguageButton, Logo } from "./chrome";
 import { cx } from "@/components/ui";
@@ -20,6 +20,8 @@ export interface NavItem {
   icon: ReactNode;
   badge?: number | null;
   exact?: boolean;
+  /** Heading the item sits under in the side menu; items without one come first. */
+  group?: string;
 }
 
 const ROLE_LABEL: Record<string, string> = {
@@ -63,9 +65,10 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
         </div>
         <p className={cx("mx-4 mt-1 mb-2 rounded-lg px-3 py-1.5 text-xs font-bold tracking-wide uppercase", a.chip)}>{section}</p>
         <nav className="flex flex-1 flex-col gap-0.5 px-3">
-          {nav.map((n) => (
+          {nav.map((n, i) => (
+            <Fragment key={n.href}>
+            {n.group && n.group !== nav[i - 1]?.group && <p className="mt-4 mb-1 px-3 text-[11px] font-bold tracking-wide text-subtle uppercase">{n.group}</p>}
             <Link
-              key={n.href}
               href={n.href}
               className={cx(
                 "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
@@ -76,6 +79,7 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
               <span className="flex-1">{tr(n.label)}</span>
               {!!n.badge && <span className="rounded-full bg-crit px-1.5 text-[11px] font-bold text-white">{n.badge}</span>}
             </Link>
+            </Fragment>
           ))}
         </nav>
         {facility && (
@@ -107,45 +111,17 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
               <LanguageButton className="hidden sm:block" />
               <A11yButton />
               {user && (
-                <div className="hidden items-center gap-2 border-l border-line pl-3 sm:flex">
-                  <span className="grid size-8 place-items-center rounded-full bg-coral-100 text-sm font-bold text-coral-700">{user.name.replace(/^Dr\.\s*/, "").charAt(0)}</span>
-                  <div className="leading-tight">
-                    <p className="text-sm font-semibold text-ink">{user.name}</p>
-                    <p className="text-[11px] text-muted">{user.role === "nurse" ? nurseLabel(facility?.region, tr, lang) : user.role === "health_worker" ? healthWorkerLabel(facility?.region, tr, lang) : tr(ROLE_LABEL[user.role] ?? user.role)}</p>
-                  </div>
-                </div>
+                <AccountMenu
+                  name={user.name}
+                  role={user.role === "nurse" ? nurseLabel(facility?.region, tr, lang) : user.role === "health_worker" ? healthWorkerLabel(facility?.region, tr, lang) : tr(ROLE_LABEL[user.role] ?? user.role)}
+                  onEmail={authOpts?.email ? () => setEmailOpen(true) : undefined}
+                  onPin={PIN_ROLES.includes(user.role) ? () => setPinOpen(true) : undefined}
+                  onSignOut={async () => {
+                    await signOut();
+                    router.replace("/auth");
+                  }}
+                />
               )}
-              {user && authOpts?.email && (
-                <button
-                  onClick={() => setEmailOpen(true)}
-                  className="inline-flex size-9 items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink"
-                  aria-label={tr("Email for sign-in codes")}
-                  title={tr("Email for sign-in codes")}
-                >
-                  <Mail className="size-4.5" />
-                </button>
-              )}
-              {user && PIN_ROLES.includes(user.role) && (
-                <button
-                  onClick={() => setPinOpen(true)}
-                  className="inline-flex size-9 items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink"
-                  aria-label={tr("Change PIN")}
-                  title={tr("Change PIN")}
-                >
-                  <KeyRound className="size-4.5" />
-                </button>
-              )}
-              <button
-                onClick={async () => {
-                  await signOut();
-                  router.replace("/auth");
-                }}
-                className="inline-flex size-9 items-center justify-center rounded-lg text-muted hover:bg-canvas hover:text-ink"
-                aria-label={tr("Sign out")}
-                title={tr("Sign out")}
-              >
-                <LogOut className="size-4.5" />
-              </button>
             </div>
           </div>
           <nav className="flex gap-1 overflow-x-auto px-3 pb-2 lg:hidden" aria-label={section}>
@@ -170,6 +146,72 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
         <EmailModal open={emailOpen} onClose={() => setEmailOpen(false)} />
       </div>
     </div>
+  );
+}
+
+/** Name and role in the header; account settings and sign-out live in one menu behind it. */
+function AccountMenu({ name, role, onEmail, onPin, onSignOut }: { name: string; role: string; onEmail?: () => void; onPin?: () => void; onSignOut: () => void }) {
+  const { tr } = usePrefs();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+  const item = "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-ink-2 hover:bg-canvas";
+  const pick = (fn: () => void) => () => {
+    setOpen(false);
+    fn();
+  };
+  return (
+    <div ref={ref} className="relative sm:border-l sm:border-line sm:pl-3">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open} className="flex items-center gap-2 rounded-xl p-1 pr-2 hover:bg-canvas">
+        <span className="grid size-8 place-items-center rounded-full bg-coral-100 text-sm font-bold text-coral-700">{name.replace(/^Dr\.\s*/, "").charAt(0)}</span>
+        <span className="hidden text-left leading-tight sm:block">
+          <span className="block text-sm font-semibold text-ink">{name}</span>
+          <span className="block text-[11px] text-muted">{role}</span>
+        </span>
+        <ChevronDown className="size-4 text-muted" aria-hidden />
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-line bg-surface p-1.5 shadow-[var(--shadow-pop)]">
+          <p className="px-3 pt-1.5 pb-2 text-xs text-muted sm:hidden">
+            <span className="block font-semibold text-ink">{name}</span>
+            {role}
+          </p>
+          {onEmail && (
+            <button role="menuitem" className={item} onClick={pick(onEmail)}>
+              <Mail className="size-4 text-muted" /> {tr("Email for sign-in codes")}
+            </button>
+          )}
+          {onPin && (
+            <button role="menuitem" className={item} onClick={pick(onPin)}>
+              <KeyRound className="size-4 text-muted" /> {tr("Change PIN")}
+            </button>
+          )}
+          <button role="menuitem" className={cx(item, "text-crit")} onClick={pick(onSignOut)}>
+            <LogOut className="size-4" /> {tr("Sign out")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Shown where a list refreshes itself, instead of a Refresh button. */
+export function AutoUpdates() {
+  const { tr } = usePrefs();
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+      <span className="size-2 rounded-full bg-rout" aria-hidden /> {tr("Updates automatically")}
+    </span>
   );
 }
 

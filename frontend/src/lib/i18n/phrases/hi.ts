@@ -2026,5 +2026,15 @@ const hi: Record<string, string> = {
   "High blood pressure": "हाई ब्लड प्रेशर",
   "Heart disease": "दिल की बीमारी",
   "TB now or before": "टीबी अभी या पहले",
+  "Staff settings": "स्टाफ़ सेटिंग",
+  "Safety & records": "सुरक्षा और रिकॉर्ड",
+  "Tools": "टूल",
+  "Open the kiosk": "कियोस्क खोलें",
+  "Updates automatically": "अपने-आप अपडेट होता है",
+  "Share & export": "साझा और निर्यात करें",
+  "Download": "डाउनलोड",
+  "Show": "दिखाएँ",
+  "Most urgent first. Each row says why it is where it is; critical cases escalate after 15 minutes.": "सबसे ज़रूरी पहले। हर पंक्ति बताती है कि वह वहाँ क्यों है; गंभीर मामले 15 मिनट बाद आगे भेजे जाते हैं।",
+  "Sample accounts: one click signs in (OTP 123456 · staff PIN {pin})": "नमूना खाते: एक क्लिक में साइन इन (OTP 123456 · स्टाफ़ पिन {pin})",
 };
 export default hi;

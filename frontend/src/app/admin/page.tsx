@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { EyeOff, ArrowRight, RefreshCw } from "lucide-react";
+import { EyeOff, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, fmtDateTime } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
-import { PageHeader } from "@/components/layout/app-shell";
+import { AutoUpdates, PageHeader } from "@/components/layout/app-shell";
 import { Button, Card, CardHeader, ErrorNote, Spinner, Stat } from "@/components/ui";
 import { TokenBoard } from "@/components/triage/token-board";
 import { API_MODE } from "@/lib/api";
@@ -16,7 +16,7 @@ export default function AdminHome() {
   const { user, refresh } = useSession();
   const router = useRouter();
   const fid = user!.facility_id!;
-  const { data: stats, error, reload } = useAsync(() => api.facilityStats(fid), [fid], { pollMs: 30_000 });
+  const { data: stats, error } = useAsync(() => api.facilityStats(fid), [fid], { pollMs: 30_000 });
   const { data: facility } = useAsync(() => api.getFacility(fid), [fid]);
   const { data: audit } = useAsync(() => api.listAudit(), []);
 
@@ -25,7 +25,7 @@ export default function AdminHome() {
       <PageHeader
         title={facility?.name ?? tr("Facility")}
         subtitle={tr("Operational view. Counts only — facility admins cannot open clinical notes.")}
-        actions={<Button variant="secondary" onClick={() => reload()} icon={<RefreshCw className="size-4" />}>{tr("Refresh")}</Button>}
+        actions={<AutoUpdates />}
       />
       {error ? <ErrorNote error={error} /> : !stats ? <Spinner /> : (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

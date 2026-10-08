@@ -1,0 +1,157 @@
+{
+  "text_to_note_en": {
+    "n": 12,
+    "median_s": 0.08,
+    "p90_s": 0.11,
+    "max_s": 0.13,
+    "target_s": 3.0,
+    "under_target": 12
+  },
+  "text_to_note_or": {
+    "n": 12,
+    "median_s": 0.08,
+    "p90_s": 0.09,
+    "max_s": 0.09,
+    "target_s": 3.0,
+    "under_target": 12
+  },
+  "intake_to_ai_summary": {
+    "n": 8,
+    "median_s": 1.78,
+    "p90_s": 15.52,
+    "max_s": 15.52,
+    "target_s": 15.0,
+    "under_target": 7,
+    "status": [
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS",
+      "FAIL_FELL_BACK",
+      "PASS"
+    ],
+    "note": "background; the rules note and urgency are shown first"
+  },
+  "voice_to_transcript": {
+    "n": 10,
+    "median_s": 3.36,
+    "p90_s": 4.13,
+    "max_s": 4.13,
+    "target_s": 2.0,
+    "under_target": 0,
+    "audio_s_median": 13.3,
+    "per_clip": [
+      {
+        "audio_s": 13.3,
+        "s": 2.55
+      },
+      {
+        "audio_s": 14.6,
+        "s": 3.33
+      },
+      {
+        "audio_s": 13.4,
+        "s": 3.29
+      },
+      {
+        "audio_s": 12.7,
+        "s": 2.89
+      },
+      {
+        "audio_s": 12.6,
+        "s": 3.39
+      },
+      {
+        "audio_s": 15.3,
+        "s": 4.01
+      },
+      {
+        "audio_s": 15.8,
+        "s": 4.1
+      },
+      {
+        "audio_s": 9.6,
+        "s": 2.91
+      },
+      {
+        "audio_s": 13.2,
+        "s": 3.53
+      },
+      {
+        "audio_s": 18.3,
+        "s": 4.13
+      }
+    ]
+  },
+  "voice_to_transcript_and_english": {
+    "n": 10,
+    "median_s": 9.73,
+    "p90_s": 13.27,
+    "max_s": 13.27,
+    "target_s": 2.0,
+    "under_target": 0,
+    "audio_s_median": 13.3,
+    "per_clip": [
+      {
+        "audio_s": 13.3,
+        "s": 7.2
+      },
+      {
+        "audio_s": 14.6,
+        "s": 13.27
+      },
+      {
+        "audio_s": 13.4,
+        "s": 8.94
+      },
+      {
+        "audio_s": 12.7,
+        "s": 9.43
+      },
+      {
+        "audio_s": 12.6,
+        "s": 9.0
+      },
+      {
+        "audio_s": 15.3,
+        "s": 11.12
+      },
+      {
+        "audio_s": 15.8,
+        "s": 12.54
+      },
+      {
+        "audio_s": 9.6,
+        "s": 5.64
+      },
+      {
+        "audio_s": 13.2,
+        "s": 10.02
+      },
+      {
+        "audio_s": 18.3,
+        "s": 11.18
+      }
+    ]
+  },
+  "report_to_findings": {
+    "n": 16,
+    "median_s": 14.79,
+    "p90_s": 18.03,
+    "max_s": 19.94,
+    "target_s": 15.0,
+    "under_target": 9
+  },
+  "queue": {
+    "n": 10,
+    "median_s": 0.05,
+    "p90_s": 1.09,
+    "max_s": 1.09,
+    "target_s": 1.0,
+    "under_target": 9,
+    "entries": 37
+  },
+  "machine": "Dell G15, i5-12500H, 16 GB RAM; speech and report reading on the CPU, summary model on the laptop GPU"
+}

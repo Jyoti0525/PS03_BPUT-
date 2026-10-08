@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Activity, Baby, CheckCircle2, HeartPulse, Inbox, RefreshCw, Search } from "lucide-react";
+import { Activity, Baby, CheckCircle2, HeartPulse, Inbox, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAsync, useNow, fmtWait } from "@/lib/hooks";
 import { usePrefs, useSession } from "@/components/providers";
-import { PageHeader } from "@/components/layout/app-shell";
+import { AutoUpdates, PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Input, Segmented, Spinner, Stat, cx } from "@/components/ui";
 import { UrgencyBadge, english, urgencyBar } from "@/components/triage/note";
 
@@ -33,11 +33,7 @@ export default function NurseHome() {
       <PageHeader
         title={tr("Patients to attend")}
         subtitle={tr("Record vitals and bedside observations. The doctor sees them in the case straight away.")}
-        actions={
-          <Button variant="secondary" onClick={() => reload()} icon={<RefreshCw className="size-4" />}>
-            {tr("Refresh")}
-          </Button>
-        }
+        actions={<AutoUpdates />}
       />
       <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label={tr("Waiting")} value={data?.length ?? 0} />

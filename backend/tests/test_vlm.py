@@ -79,3 +79,29 @@ def test_unclear_or_unreachable_is_ignored(server, monkeypatch):
     monkeypatch.setattr(vlm.urllib.request, "urlopen", down)
     assert vlm.label(_jpeg()) is None and vlm.label(b"not an image") is None
     assert vlm.label(b"%PDF", "application/pdf") is None
+
+
+def test_photo_description_is_plain_and_guarded(server):
+    server("A red, round patch about the size of a coin on the inner forearm.")
+    got = vlm.describe(_jpeg(), "image/jpeg")
+    assert got["text"].startswith("A red, round patch") and got["engine"]
+    server("This looks like ringworm; apply clotrimazole cream.")
+    got = vlm.describe(_jpeg(), "image/jpeg")
+    assert got["text"] is None and got["blocked"]
+    for hedged in ("A red patch, likely from an insect bite.", "A line appearing to be a lesion on the skin.", "It seems swollen."):
+        server(hedged)
+        assert vlm.describe(_jpeg(), "image/jpeg")["text"] is None
+    server("unclear photo")
+    assert vlm.describe(_jpeg(), "image/jpeg") is None
+
+
+def test_photo_in_note():
+    from types import SimpleNamespace as N
+
+    from app.triage import pipeline, rules
+
+    intake = {"chief_complaint": "rash on arm", "category": "normal", "symptoms": []}
+    photo = N(id="f1", filename="arm.jpg", kind="image", extraction={"description": {"text": "A red patch on the forearm.", "engine": "Qwen3-VL"}})
+    n = pipeline.build_note(intake=intake, patient=N(name="T", age=30, sex="F"), triage=rules.evaluate_full(intake, 30, "F"), files=[photo], history=[], proxy=False)
+    assert "1 photo(s) of the problem attached: A red patch on the forearm." in n["summary"]
+    assert any(f["code"] == "PHOTO" and f["group"] == "clinical" for f in n["flags"])

@@ -2026,5 +2026,15 @@ const or: Record<string, string> = {
   "High blood pressure": "ଉଚ୍ଚ ରକ୍ତଚାପ",
   "Heart disease": "ହୃଦ୍‌ରୋଗ",
   "TB now or before": "ଯକ୍ଷ୍ମା ଏବେ କିମ୍ବା ପୂର୍ବରୁ",
+  "Staff settings": "କର୍ମଚାରୀ ସେଟିଂ",
+  "Safety & records": "ସୁରକ୍ଷା ଓ ରେକର୍ଡ",
+  "Tools": "ଟୁଲ୍",
+  "Open the kiosk": "କିଓସ୍କ ଖୋଲନ୍ତୁ",
+  "Updates automatically": "ନିଜେ ଅପଡେଟ୍ ହୁଏ",
+  "Share & export": "ସେୟାର ଓ ଏକ୍ସପୋର୍ଟ",
+  "Download": "ଡାଉନଲୋଡ୍",
+  "Show": "ଦେଖାନ୍ତୁ",
+  "Most urgent first. Each row says why it is where it is; critical cases escalate after 15 minutes.": "ସବୁଠୁ ଜରୁରୀ ପ୍ରଥମେ। ପ୍ରତ୍ୟେକ ଧାଡ଼ି କହେ ଏହା କାହିଁକି ସେଠାରେ ଅଛି; ଗମ୍ଭୀର ମାମଲା 15 ମିନିଟ ପରେ ଆଗକୁ ପଠାଯାଏ।",
+  "Sample accounts: one click signs in (OTP 123456 · staff PIN {pin})": "ନମୁନା ଖାତା: ଗୋଟିଏ କ୍ଲିକରେ ସାଇନ୍ ଇନ୍ (OTP 123456 · କର୍ମଚାରୀ ପିନ୍ {pin})",
 };
 export default or;

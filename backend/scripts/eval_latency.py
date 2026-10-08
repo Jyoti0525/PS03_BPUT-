@@ -16,11 +16,11 @@ import io
 import json
 import os
 import statistics
+import struct
 import sys
 import tempfile
 import time
 import uuid
-import wave
 from pathlib import Path
 
 _tmp = tempfile.mkdtemp(prefix="jeevia-latency-")
@@ -59,6 +59,19 @@ def login(c: TestClient, phone: str) -> dict:
     return {"Authorization": f"Bearer {r['tokens']['access_token']}"}
 
 
+def wav_seconds(p: Path) -> float:
+    """Clip length from the RIFF header; the wave module rejects the 32-bit float clips FLEURS ships."""
+    b, i, rate = p.read_bytes(), 12, 0
+    while i + 8 <= len(b):
+        tag, size = b[i:i + 4], struct.unpack("<I", b[i + 4:i + 8])[0]
+        if tag == b"fmt ":
+            rate = struct.unpack("<I", b[i + 16:i + 20])[0]  # byte rate
+        elif tag == b"data":
+            return size / rate
+        i += 8 + size + (size & 1)
+    raise ValueError(f"no data chunk in {p}")
+
+
 def timed(fn) -> tuple[float, object]:
     t = time.perf_counter()
     r = fn()
@@ -75,6 +88,9 @@ def main(clips: str, reports: str, out: str = "docs/evaluation/latency.json") ->
     res = {}
     with TestClient(app) as c:
         nurse = login(c, "9000000002")
+        dev = f"lat-{uuid.uuid4().hex[:12]}"  # intakes must come from a device bound to the facility
+        assert c.post(f"{API}/devices", json={"label": "Latency test", "device_id": dev}, headers=nurse).status_code == 200
+        nurse["X-Device-Id"] = dev
 
         def encounter(text: str, lang: str):
             pat = c.post(f"{API}/patients", json={"name": "Latency Test", "age": 40, "sex": "M", "language": lang}, headers=nurse).json()
@@ -85,18 +101,37 @@ def main(clips: str, reports: str, out: str = "docs/evaluation/latency.json") ->
                     "consent_id": con["id"], "client_ref": f"lat_{uuid.uuid4().hex}"}
             dt, r = timed(lambda: c.post(f"{API}/encounters", json=body, headers=nurse))
             assert r.status_code == 200, r.text[:300]
+            last["id"] = r.json()["id"]
             return dt
+
+        last: dict = {}
+
+        def summary_ready(text: str, lang: str):
+            """Seconds from submitting the intake until the language model's summary is saved on the note (it runs in the
+            background, so the rules note and urgency are already shown before this)."""
+            t = time.perf_counter()
+            encounter(text, lang)
+            while time.perf_counter() - t < 90:
+                note = c.get(f"{API}/encounters/{last['id']}", headers=nurse).json().get("note") or {}
+                if note.get("llm"):
+                    return time.perf_counter() - t, note["llm"].get("status")
+                time.sleep(0.25)
+            return time.perf_counter() - t, "timeout"
 
         encounter(TEXTS["en"][0], "en"), encounter(TEXTS["or"][0], "or")  # warm-up
         for lang in ("en", "or"):
             res[f"text_to_note_{lang}"] = stats([encounter(t, lang) for _ in range(3) for t in TEXTS[lang]], 3.0)
             print(lang, res[f"text_to_note_{lang}"], flush=True)
+        if os.environ.get("JEEVIA_LLM_URL"):
+            got = [summary_ready(t, lang) for lang in ("en", "or") for t in TEXTS[lang]]
+            res["intake_to_ai_summary"] = {**stats([g[0] for g in got], 15.0), "status": [g[1] for g in got],
+                                           "note": "background; the rules note and urgency are shown first"}
+            print("summary", res["intake_to_ai_summary"], flush=True)
 
         wavs = sorted(Path(clips).glob("*.wav"))
         secs = []
         for w in wavs:
-            with wave.open(str(w)) as f:
-                secs.append(f.getnframes() / f.getframerate())
+            secs.append(wav_seconds(w))
 
         def speech(w: Path, translate: bool):
             dt, r = timed(lambda: c.post(f"{API}/speech/transcribe", files={"audio": (w.name, w.read_bytes(), "audio/wav")},
@@ -131,7 +166,7 @@ def main(clips: str, reports: str, out: str = "docs/evaluation/latency.json") ->
             queue.append(dt)
         res["queue"] = {**stats(queue, 1.0), "entries": len(r.json())}
         print("queue", res["queue"], flush=True)
-    res["machine"] = "Dell G15, i5-12500H, 16 GB RAM, CPU only"
+    res["machine"] = "Dell G15, i5-12500H, 16 GB RAM; speech and report reading on the CPU, summary model on the laptop GPU" if os.environ.get("JEEVIA_LLM_URL") else "Dell G15, i5-12500H, 16 GB RAM, CPU only"
     Path(out).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
 
 

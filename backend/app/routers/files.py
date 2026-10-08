@@ -13,6 +13,7 @@ from ..schemas import ADMIN_ROLES, REVIEWER_ROLES, FileKind, FileOut
 from ..security import DB, CurrentUser, decode, file_token
 from ..services import now
 from ..triage.extraction import add_online_reading, extract_document, wants_online_reading
+from ..triage import vlm
 from ..triage.images import redact
 from ..triage.reports import SAMPLE_REPORTS, render
 
@@ -79,6 +80,9 @@ async def upload(
                       "doc_type": {"type": "non_document", "label": "Photo — not interpreted", "why": "photo of the problem"}, "medicines": []}
     if extraction is not None:
         extraction["redaction"] = redaction
+    if kind == "image" and read and ctype.startswith("image/") and vlm.enabled():
+        # Basic visual input: a plain description of what the redacted photo shows, for the reviewer only (never the rules).
+        extraction["description"] = await run_in_threadpool(vlm.describe, data, ctype)
     f = FileObject(filename=(file.filename or "upload")[:255], content_type=ctype, size=len(data), kind=kind, encounter_id=encounter_id, uploaded_by=user.id, expires_at=storage.expiry_for(kind), sample_key=sample_key, boxes=boxes, extraction=extraction)
     db.add(f)
     db.flush()

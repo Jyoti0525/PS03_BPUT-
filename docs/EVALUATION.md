@@ -744,3 +744,50 @@ Development pages: RapidOCR named 5.9 % (precision 70 %), docTR 11.8 % (65 %), S
 **Limits**
 - 85 pages from one public set, from a limited number of clinics. Precision near 60 % means about 4 in 10 names
   given are wrong. The names are suggestions for the nurse to check against the paper.
+
+## Speed (H7, 8 Oct)
+
+Measured through the app itself (FastAPI test client, every check and the database included) on the demo laptop: Dell
+G15, i5-12500H, 16 GB RAM. Speech and report reading run on the CPU; the summary model (Qwen3-4B) runs on the laptop GPU.
+Odia voice: 10 public FLEURS dev clips (CC-BY). Reports: 16 synthetic report images (scans and phone photos).
+
+| Step | Median | Slowest 10 % | Target | Under target |
+|---|---|---|---|---|
+| Typed complaint → triage note and urgency, English | 0.08 s | 0.11 s | 3 s | 12 of 12 |
+| Typed complaint → triage note and urgency, Odia | 0.08 s | 0.09 s | 3 s | 12 of 12 |
+| Intake → model-written summary on the note (background) | 1.8 s | 15.5 s | 15 s (ours) | 7 of 8 |
+| Odia voice → Odia text (clips of 10–18 s, median 13 s) | 3.4 s | 4.1 s | 2 s | 0 of 10 |
+| Odia voice → Odia text and English | 9.7 s | 13.3 s | 2 s | 0 of 10 |
+| Report photo → findings | 14.8 s | 18.0 s | 15 s | 9 of 16 |
+| Queue screen | 0.05 s | 1.09 s | 1 s | 9 of 10 |
+
+- **Met:**
+  - Text to note: the rules note and urgency are ready in well under a second.
+  - The queue: one load of 10 took 1.09 s, while the summary model was still busy.
+  - The model summary arrives later and replaces the template text only if it passes the checks. One of the 8 failed
+    the faithfulness check and kept the template note.
+- **Not met:**
+  - **Voice:** speech is about a quarter of real time. A typical kiosk answer of 5–8 s is transcribed in about 1.5–2 s,
+    but these 13 s clips take 3.4 s. Adding English roughly triples that, because translation runs after recognition.
+  - **Reports:** the median is just under 15 s, but phone photos (de-skewing and a second reading pass) run to 18–20 s.
+- Results: `docs/evaluation/latency.json`. Reproduce: `JEEVIA_LLM_URL=http://127.0.0.1:8031 python
+  backend/scripts/eval_latency.py <odia clips> models/eval/ocr_synth docs/evaluation/latency.json`. The script reads no
+  `.env`, so it never calls Sarvam, Twilio or Vonage.
+
+## Photo of the problem, described live (8 Oct)
+
+The local image model (Qwen3-VL-4B, CPU) describes a photo the patient adds (a rash, a cut, a swelling) for the
+reviewer. The description never reaches the rules and never changes urgency. Tested on 3 synthetic drawings.
+
+- **First run:** 2 of 3 were blocked by the guard, both for "likely" (the model guessing). The one kept said "appearing
+  to be … a lesion", a hedge the guard had missed.
+- **Fixes:**
+  - The prompt now tells the model to say plainly what it sees, without likely, probably, appears or seems.
+  - The guard also catches "appearing to be" and "seems". A test covers both.
+- **After the fixes:** 3 of 3 kept, 0 blocked, median 11 s. Example: "A red, circular patch is visible on a light brown
+  skin surface. The patch is roughly the size of a small coin and has a slightly raised, defined edge."
+- **One stall:** one request hung in the image server for 5 minutes and returned nothing. The app treats that as "no
+  description" and the intake is not held up. A rerun took 11 s.
+- **Limits:** these are drawings, not real photos, so they show that the wording is safe, not that the descriptions are
+  accurate.
+- Results: `docs/evaluation/vlm_photo.json`. Reproduce: `python backend/scripts/eval_vlm_photo.py <folder of photos>`.

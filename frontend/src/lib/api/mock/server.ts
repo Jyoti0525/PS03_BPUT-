@@ -845,7 +845,7 @@ export const mockApi: JeeviaApi = {
         documents: docs.map((x) => ({ id: x.id, filename: x.filename, kind: x.kind, content_type: x.content_type, uploaded_at: x.uploaded_at, url: x.purged_at ? null : x.data_url })),
         shared_by: s.created_by,
         expires_at: s.expires_at,
-        disclaimer: "Triage support only. Not a diagnosis.",
+        disclaimer: "Educational prototype for triage support only. Not a diagnosis.",
       };
     }),
 

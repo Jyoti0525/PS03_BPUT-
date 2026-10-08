@@ -10,7 +10,7 @@ from xml.etree import ElementTree as ET
 from fpdf import FPDF
 
 DISCLAIMER = (
-    "Triage support only. Not a diagnosis. All content must be reviewed by a qualified medical "
+    "Educational prototype for triage support only. Not a diagnosis. All content must be reviewed by a qualified medical "
     "professional before any clinical decision."
 )
 LABEL = {"red": "Critical", "yellow": "Semi-urgent", "green": "Routine"}

@@ -369,6 +369,34 @@ function AuthInner() {
     }
   }
 
+  /** Sample account: one click signs in when the server hands back its demo code; otherwise it just sends the OTP. */
+  async function sampleSignIn(samplePhone: string) {
+    setErr(null);
+    setPhone(samplePhone);
+    setChallenge(null);
+    setBusy(true);
+    try {
+      const c = await api.requestOtp(samplePhone, "signin");
+      if (!c.dev_code) {
+        setChallenge(c);
+        setOtp("");
+        setCountdown(30);
+        toast(tr("OTP sent to +91 {p}", { p: samplePhone }), "info");
+        return;
+      }
+      const r = await api.verifyOtp(c.challenge_id, c.dev_code, "signin");
+      if (r.status === "pin_required") {
+        const done = await api.verifyPin(r.pin_token, SAMPLE_PIN);
+        signIn(done.tokens, done.user);
+        toast(`Welcome, ${done.user.name}`);
+      } else routeExisting(r);
+    } catch (e) {
+      setErr(localiseServerMessage(errMsg(e), tr));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function routeExisting(r: OtpVerifyResult) {
     if (r.status === "authenticated") {
       signIn(r.tokens, r.user);
@@ -537,16 +565,14 @@ function AuthInner() {
           {SHOW_SAMPLES && (
             <div className="mt-6 rounded-xl border border-dashed border-teal-300 bg-teal-50/60 p-3">
               <p className="text-xs font-semibold text-teal-800">
-                {tr("Sample accounts — OTP 123456 · staff PIN")} {SAMPLE_PIN}
+                {tr("Sample accounts: one click signs in (OTP 123456 · staff PIN {pin})", { pin: SAMPLE_PIN })}
               </p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {DEMO_LOGINS.map((d) => (
                   <button
                     key={d.phone}
-                    onClick={() => {
-                      setPhone(d.phone);
-                      setChallenge(null);
-                    }}
+                    disabled={busy}
+                    onClick={() => void sampleSignIn(d.phone)}
                     className="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100"
                   >
                     {tr(ROLE_CARDS.find((c) => c.role === d.role)?.label ?? d.role)}
