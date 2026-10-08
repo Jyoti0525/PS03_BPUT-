@@ -365,7 +365,7 @@ The user's rule (6 Oct): nothing waits until after the mid-evaluation; every ite
 - [x] Strict pass against the official PS03 document (8 Oct, f832c9a): visible disclaimer now says "Educational
   prototype" (exports, case screen, QR slips, hi/or/kn); photos of the problem are described for the reviewer (basic
   visual input; tested live 8 Oct: 3 of 3 described plainly after a prompt fix, median 11 s); HbA1c trend across visits (D5); D4 row corrected (real calls to the demo number, 11 languages).
-- [x] Patient-to-referral walk-through in the browser (8 Oct, uncommitted): kiosk check-in gives token, patient ID and QR;
+- [x] Patient-to-referral walk-through in the browser (8 Oct, e0d7334): kiosk check-in gives token, patient ID and QR;
   doctor finds the patient by ID, sends a referral, QR slip opens for the receiving clinician with the access code. Fixed on the
   way: sample reports failed to attach (security policy blocked fetching data: URLs); referrals now carry a short ID
   (REF-XXXXXX) on the referrals list and the receiving summary; patient ID labelled under the token QR; 19 newer kiosk
