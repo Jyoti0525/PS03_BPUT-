@@ -121,8 +121,14 @@ export const liveApi: JeeviaApi = {
   listKioskLinks: () => json("/kiosk-links"),
   createKioskLink: (label, forHome = false) => post("/kiosk-links", { label, for_home: forHome }),
   checkIn: (id) => post(`/encounters/${id}/arrive`, {}),
+  claimForm: (reference) => post("/encounters/claim", { reference }),
   revokeKioskLink: (id) => json(`/kiosk-links/${id}`, { method: "DELETE" }),
   kioskInfo: (code) => json(`/kiosk/${encodeURIComponent(code)}`),
+  kioskFinder: (q, lat, lon) => {
+    const p = new URLSearchParams({ q });
+    if (lat != null && lon != null) p.set("lat", String(lat)), p.set("lon", String(lon));
+    return json(`/kiosk-finder?${p}`);
+  },
   kioskSession: async (code, device_id) => {
     const r = await post<{ tokens: Tokens; user: import("@/lib/types").User }>(`/kiosk/${encodeURIComponent(code)}/session`, { device_id });
     setTokens(r.tokens);

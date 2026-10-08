@@ -12,6 +12,7 @@ from app.models import Encounter
 from app.services import now
 
 HOME = "MKHOME"
+ANY = "fac_any_centre"
 Q = f"{API}/queue?facility_id=fac_phc_manikpur"
 BOARD = f"{API}/facilities/fac_phc_manikpur/tokens"
 
@@ -93,3 +94,36 @@ def test_supervisor_creates_a_from_home_link(client, supervisor):
 def test_long_waits_read_in_hours():
     from app.alerts import _mins
     assert (_mins(12), _mins(60), _mins(1653)) == ("12 min", "1 h", "27 h 33 min")
+
+
+def test_finder_lists_only_from_home_links(client):
+    """A patient without a code finds a facility: Jeevia ones with their from-home link, never a waiting-room link."""
+    hits = client.get(f"{API}/kiosk-finder", params={"q": "manikpur"}).json()
+    codes = [h["code"] for h in hits if h["code"]]
+    assert codes == [HOME] and "MANIKPUR" not in codes
+    assert client.get(f"{API}/kiosk-finder", params={"q": "nowhere-xyz-qq"}).json() == []
+    assert client.get(f"{API}/kiosk-finder").json() == []  # nothing to search by
+
+
+def test_any_centre_form_is_claimed_by_the_centre_the_patient_reaches(client, doctor):
+    """Fill in without choosing a centre, get a J- reference; the desk of whichever centre the patient reaches claims it."""
+    from conftest import login
+
+    receptionist = login(client, "9000000003")
+    _, enc = kiosk_intake(client, kiosk_session(client, "ANYCARE"), "Any Centre", "Fever for 4 days", ANY)
+    ref = enc["token"]
+    assert ref.startswith("J-") and enc["status"] == "expected" and enc["home_advice"] == "show_at_desk"
+    assert enc["id"] not in {i["encounter_id"] for i in client.get(Q, headers=doctor).json()}
+    assert "ANYCARE" not in {x["code"] for x in client.get(f"{API}/kiosk-finder", params={"q": "any"}).json()}
+    assert client.post(f"{API}/encounters/claim", json={"reference": "J-NOPE99"}, headers=receptionist).status_code == 404
+    r = client.post(f"{API}/encounters/claim", json={"reference": f"jeevia:{ref.lower()}"}, headers=receptionist)
+    assert r.status_code == 200, r.text
+    assert r.json()["status"] == "queued" and r.json()["token"].startswith("T-")
+    assert enc["id"] in {i["encounter_id"] for i in client.get(Q, headers=doctor).json()}
+    assert client.post(f"{API}/encounters/claim", json={"reference": ref}, headers=receptionist).status_code == 409
+
+
+def test_any_centre_red_waits_for_a_centre(client):
+    """No one can see an any-centre form until it is claimed, so even a RED waits (the patient is told to call 108)."""
+    _, enc = kiosk_intake(client, kiosk_session(client, "ANYCARE"), "Any Red", "Snake bite on the foot one hour ago, gums bleeding", ANY)
+    assert enc["status"] == "expected" and enc["token"].startswith("J-")

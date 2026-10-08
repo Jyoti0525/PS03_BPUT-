@@ -206,7 +206,7 @@ Codes match the plan. **PS** shows the problem-statement phrase each feature ans
 - [x] **H6 Offline intake PWA and sync**
 - [x] **H7 Performance targets**: text to note under 3 s, voice to transcript under 2 s, report to findings under 15 s, queue under 1 s. All four measured 8 Oct (f832c9a): text and queue met, reports borderline, voice missed for 13 s clips (EVALUATION, Speed).
 - [x] **H8 Observability** (`observability.py`)
-- [ ] **H9 Deployment.** *Partial:* `docker-compose.yml` and `render.yaml` exist. **Left:** a public link that works (Vercel + Render, rules and OCR only), the demo profile on the laptop, and a check that Compose still builds.
+- [x] **H9 Deployment.** **Live 8 Oct (uncommitted):** https://ps-03-bput.vercel.app (Vercel) + https://jeevia-api-5n8u.onrender.com (Render, stub profile, Neon PostgreSQL 18, Cloudinary files); health green, browser origin allowed, sample facilities seeded. Earlier: `docker-compose.yml` and `render.yaml` exist. **Left:** a public link that works (Vercel + Render, rules and OCR only), the demo profile on the laptop, and a check that Compose still builds.
 - [x] **H10 CI** (`.github/workflows/ci.yml`): passing on `bafbe44` (5 Oct).
 
 ### I. Data and proof
@@ -393,5 +393,7 @@ The user's rule (6 Oct): nothing waits until after the mid-evaluation; every ite
 - [x] Rules bug fixed (5 Oct): "stone-crushing unit" (an occupation) fired the crush-injury trauma rules; regression tests added.
 
 - [x] Update the old mock-mode rules in the frontend (`frontend/src/lib/api/mock/`) or label them; live mode is the demo path. **Labelled 8 Oct (a917f49):** the file says it is an unsynced subset, and every mock note carries a `MOCK-RULES` info flag ("Local demo mode: simplified rules").
+- [x] Landing page: patient entry under the hero (scan QR or type the health-centre code → /k/CODE, no login); the bottom "Open the kiosk" button, which led patients to the staff-locked /kiosk, now reads "I'm a patient" and scrolls to it. English, Hindi, Odia. Plus "Don't know the code? Find your nearest health centre" (`GET /kiosk-finder`: all 115k directory facilities nearby, Jeevia ones with their from-home link, others as walk-in with call and directions; nearest first with location, exact district/town first by name; test in `tests/test_arrival.py`). **9 Oct (uncommitted)**
+- [x] Any-centre form: `/k/ANYCARE` gives a J- reference and QR; desk or nurse claims it (`POST /encounters/claim`), it joins that centre's queue with the note ready. English, Hindi, Odia; 1,154 backend tests pass. **9 Oct (uncommitted)**
 - [ ] Revoke the Hugging Face read token after the hackathon
 - [ ] Keep `docs/EVALUATION.md`, `docs/FEATURES.md` and this file current at every commit

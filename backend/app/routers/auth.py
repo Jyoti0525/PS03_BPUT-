@@ -283,6 +283,8 @@ def register(body: RegisterIn, db: DB):
             fac = db.get(Facility, body.facility_id)
             if not fac:
                 raise HTTPException(422, "Unknown facility")
+            if fac.source == "system":
+                raise HTTPException(403, "Choose your real workplace")
             if fac.source == "sample":
                 raise HTTPException(403, "This is a sample facility for the walkthrough — choose your real workplace")
     if body.role in PIN_ROLES:

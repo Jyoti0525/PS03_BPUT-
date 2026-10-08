@@ -26,8 +26,10 @@ export function RoleGate({ roles, children }: { roles: Role[]; children: ReactNo
 
   useEffect(() => {
     if (loading) return;
-    if (!user) router.replace(`/auth?next=${encodeURIComponent(path)}`);
-    else if (!roles.includes(user.role)) router.replace(HOME_FOR_ROLE[user.role]);
+    const search = window.location.search; // e.g. ?claim=J-XXXXXX from a scanned QR survives sign-in and the role redirect
+    const keep = /[?&]claim=/.test(search) ? search : "";
+    if (!user) router.replace(`/auth?next=${encodeURIComponent(path + search)}`);
+    else if (!roles.includes(user.role)) router.replace(HOME_FOR_ROLE[user.role] + keep);
   }, [user, loading, roles, router, path]);
 
   if (loading || !user || !roles.includes(user.role)) return <Spinner label={tr("Checking access…")} />;

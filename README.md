@@ -10,10 +10,10 @@ triage note, so a qualified clinician can review each patient in under four minu
 
 | | |
 |---|---|
-| **Web app** | https://jeevia-triage.vercel.app |
-| **API (interactive docs)** | https://jeevia-api.onrender.com/docs |
-| **Sample kiosk link** | https://jeevia-triage.vercel.app/k/MANIKPUR |
-| **Live system status** | https://jeevia-triage.vercel.app/#status |
+| **Web app** | https://ps-03-bput.vercel.app |
+| **API (interactive docs)** | https://jeevia-api-5n8u.onrender.com/docs |
+| **Sample kiosk link** | https://ps-03-bput.vercel.app/k/MANIKPUR |
+| **Live system status** | https://ps-03-bput.vercel.app/#status |
 | **Every feature, what it uses, where it lives** | [docs/FEATURES.md](docs/FEATURES.md) |
 | **Measured results** | [docs/EVALUATION.md](docs/EVALUATION.md) |
 | **Role-by-role guide** | [docs/WORKFLOW.md](docs/WORKFLOW.md) |
@@ -253,7 +253,7 @@ then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEAT
 | `RETENTION_HOURS_AUDIO` / `_IMAGE` / `_REPORT` | Automatic expiry of uploads | 24 / 72 / 720 |
 | `ESCALATE_RED_MIN` / `ESCALATE_YELLOW_MIN` | Auto-escalation windows | 15 / 60 |
 | `REQUIRE_BOUND_DEVICE` | Staff kiosk must be a bound device | `true` |
-| `CORS_ORIGINS`, `WEB_BASE_URL` | Web app origin; used in kiosk and share links | `https://jeevia-triage.vercel.app` |
+| `CORS_ORIGINS`, `WEB_BASE_URL` | Web app origin; used in kiosk and share links | `https://ps-03-bput.vercel.app` |
 | `SEED_DEMO` | Seed sample data into an empty database | `true` |
 | `LLM_URL` | llama.cpp server for the note summary (e.g. `http://127.0.0.1:8031`); unset = template summary only | unset |
 | `VLM_URL` | llama.cpp server with Qwen3-VL-4B for a second document-type label (`backend/scripts/start_vlm.sh`, `http://127.0.0.1:8032`); unset = off | unset |
@@ -274,7 +274,7 @@ then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEAT
 | Variable | Purpose |
 |---|---|
 | `NEXT_PUBLIC_API_MODE` | `live` (production) or `mock` (built-in sample backend) |
-| `NEXT_PUBLIC_API_URL` | API origin, e.g. `https://jeevia-api.onrender.com` |
+| `NEXT_PUBLIC_API_URL` | API origin, e.g. `https://jeevia-api-5n8u.onrender.com` |
 | `NEXT_PUBLIC_HIDE_SAMPLES` | `1` hides the sample-accounts hint on the sign-in page |
 | `RENDER_API_KEY`, `RENDER_SERVICE_ID`, `JEEVIA_JWT_SECRET` | Server-only; enable the supervisor **Restart server** button |
 

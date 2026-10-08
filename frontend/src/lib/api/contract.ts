@@ -1,4 +1,5 @@
 import type {
+  KioskFinderHit,
   Alert,
   Capacity,
   DepartmentRates,
@@ -115,8 +116,12 @@ export interface JeeviaApi {
   createKioskLink(label: string, forHome?: boolean): Promise<KioskLink>;
   /** C3: the desk checks in a patient who filled in from home; they join the queue from now. */
   checkIn(encounterId: string): Promise<Encounter>;
+  /** A form filled in "for any centre" (J- reference): it moves to this facility and the patient is checked in. */
+  claimForm(reference: string): Promise<Encounter>;
   revokeKioskLink(id: string): Promise<void>;
   kioskInfo(code: string): Promise<KioskInfo>;
+  /** Facilities taking forms from home, for a patient without a code. */
+  kioskFinder(q: string, lat?: number, lon?: number): Promise<KioskFinderHit[]>;
   /** Starts a kiosk session for this browser tab (role = kiosk, intake-only). */
   kioskSession(code: string, deviceId: string): Promise<{ tokens: Tokens; user: User }>;
   kioskIdentify(patientCode: string, phone: string): Promise<Patient>;

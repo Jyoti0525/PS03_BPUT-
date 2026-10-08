@@ -492,6 +492,22 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
   can only be a provisional YELLOW (or RED) until a nurse measures them, so exaggerating at home buys nothing. If
   a danger sign is reported, the patient is told to go to emergency or call 108 (never a tier), and the case
   enters the doctors' queue at once so someone can call back. Intakes not checked in within 36 h lapse.
+- **Patient entry on the landing page (added 9 Oct):** under the hero, "Are you a patient? Start here": scan the
+  facility's QR poster or type its code to open `/k/CODE`. No app, no login. The bottom button "I'm a patient" scrolls
+  to it; `/kiosk` stays the staff-unlocked tablet. **No code?** "Find your nearest health centre": PIN code,
+  district or name, or the browser's location (nearest first, widening up to about 90 km for remote villages) lists
+  every nearby facility in the national directory (115,009, OpenStreetMap). Those on Jeevia with a *from-home* link
+  open its intake ("Fill in before you go"); the rest show "Walk in" with their phone if listed and map directions
+  (`GET /kiosk-finder`); the waiting-room link is never offered, so a form sent from anywhere still waits for desk
+  check-in. That centre's staff decide care and referral.
+- **Fill in now, take it to any centre (added 9 Oct):** `/k/ANYCARE` (landing: "Not sure where you will go?") takes
+  the whole intake without choosing a facility and gives a reference unique everywhere, `J-XXXXXX`, with a QR. At
+  whichever centre the patient reaches, the desk or nurse types the reference or scans the QR with a phone camera
+  (it opens `/desk?claim=J-…`, kept through sign-in). `POST /encounters/claim` moves the intake, note, rules result
+  and files to that facility and checks the patient in with today's T- token. Until claimed no facility can see it,
+  so a danger sign tells the patient to go to the nearest emergency or call 108 and show the reference there. The
+  holder facility is hidden from search and cannot be joined. Same 36 h validity; a second claim says where it was
+  already checked in. Tests in `tests/test_arrival.py`.
 - **GREEN long-wait alert (added 7 Oct):** GREEN has no escalation timer, so a GREEN patient waiting more than
   2 h since arrival is reported to the medical officer, who decides: see them, refer them, or give a priority
   token for the next day. The order itself never changes, because moving them above sicker patients would be

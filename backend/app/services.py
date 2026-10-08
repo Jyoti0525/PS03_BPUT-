@@ -63,6 +63,20 @@ def calendar_context(facility: Facility | None, when: datetime) -> dict:
     return {"calendar": regions.for_facility(facility), "on": aware(when).astimezone(ZoneInfo(get_settings().timezone)).date()}
 
 
+ANY_FACILITY = "fac_any_centre"  # "take it to any centre": an intake not yet tied to a facility (see app.routers.kiosk)
+ANY_LINK = "ANYCARE"
+
+
+def any_reference(db: Session) -> str:
+    """A reference that is unique everywhere (an any-centre intake can be claimed by any facility on any day): J-XXXXXX."""
+    import secrets
+
+    while True:
+        ref = "J-" + "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(6))
+        if not db.scalar(select(Encounter.id).where(Encounter.token == ref)):
+            return ref
+
+
 def next_token(db: Session, facility_id: str, day: str, prefix: str = "T") -> str:
     """Daily running number per facility: T-001, T-002 … (resets at local midnight). An intake sent from home gets an
     H- reference; its T- token is issued when the desk checks the patient in, so the token order is the arrival order."""
@@ -119,7 +133,9 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
     on_site = any(s["key"] == specialist and s["available"] for s in (facility.specialists if facility else []))
     # From home: not in the queue until the desk checks the patient in. A RED is the exception: the patient is told to
     # go to emergency or call 108, and the case is shown to the doctors now so someone can call back.
-    expected = channel == "home_link" and urgency != "red"
+    anywhere = intake["facility_id"] == ANY_FACILITY
+    # ...except an any-centre intake: no facility can see it yet, so a RED waits for the centre the patient reaches.
+    expected = channel == "home_link" and (urgency != "red" or anywhere)
     esc = None if expected else escalate_after(urgency)
     enc = Encounter(
         patient_id=patient.id,
@@ -143,7 +159,7 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
     )
     day = local_day(now())
     enc.token_date = day
-    enc.token = next_token(db, intake["facility_id"], day, "H" if expected else "T")
+    enc.token = any_reference(db) if anywhere else next_token(db, intake["facility_id"], day, "H" if expected else "T")
     db.add(enc)
     db.flush()
     for f in files:

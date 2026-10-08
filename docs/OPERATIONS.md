@@ -6,17 +6,17 @@ For whoever keeps Jeevia running: deploys, status, keys, database and data.
 
 | Service | Where | Identifier |
 |---|---|---|
-| Web app | Vercel | project `jeevia-triage` → https://jeevia-triage.vercel.app |
-| API | Render (Singapore, free plan) | web service `jeevia-api` (`srv-daruvjp7lnhs73euubf0`) → https://jeevia-api.onrender.com |
-| Database | Neon (`aws-ap-southeast-1`, PostgreSQL 18) | project `jeevia` (`empty-dream-42914552`), database `jeevia`, role `jeevia` |
+| Web app | Vercel | project `jeevia-triage` → https://ps-03-bput.vercel.app |
+| API | Render (Singapore, free plan) | web service `jeevia-api` (`srv-daruvjp7lnhs73euubf0`) → https://jeevia-api-5n8u.onrender.com |
+| Database | Neon (`aws-ap-southeast-1`, PostgreSQL 18) | database `neondb`, role `neondb_owner` (new project, 8 Oct 2026) |
 | SMS codes | Twilio Verify | service "Jeevia" (`VA074dc…`) |
 | Files | Cloudinary | folder `jeevia/<facility>/<yyyy-mm>/<kind>/`, authenticated delivery |
 | CI and keep-alive | GitHub Actions | `ci.yml`, `keepalive.yml` in both repositories |
 
 ## Is it up?
 
-- Open https://jeevia-triage.vercel.app/#status — API, database, SMS and storage, refreshed every 20 s.
-- Or `curl https://jeevia-api.onrender.com/health` — `status`, `db.latency_ms`, `storage.backend`, `otp.configured`, `uptime_s`.
+- Open https://ps-03-bput.vercel.app/#status — API, database, SMS and storage, refreshed every 20 s.
+- Or `curl https://jeevia-api-5n8u.onrender.com/health` — `status`, `db.latency_ms`, `storage.backend`, `otp.configured`, `uptime_s`.
 - `/metrics` exposes Prometheus counters and latency per route.
 
 **Server asleep.** Press **Wake server** on the status panel (any visitor can); it pings until the API answers,
@@ -55,7 +55,7 @@ Nothing secret is committed. Local development uses `backend/.env` (git-ignored)
 - **Connection**: the API uses Neon's direct endpoint with `sslmode=require`; connections are health-checked and recycled every 4 minutes because Neon suspends idle compute (first query after a pause takes well under a second).
 - **Schema**: managed by **Alembic** (`backend/migrations/`). On start-up the API runs `alembic upgrade head` under a Postgres advisory lock (only one instance migrates), then re-applies the trigger that makes `audit_events` append-only. A database created before Alembic is stamped at `0001` first. Migrations so far: `0001` baseline, `0002` organisations/directory/fitness, `0003` account PIN, `0004` staff duty status, `0005` email verification.
   - New migration: change `app/models.py`, then `cd backend && JEEVIA_DATABASE_URL=<local pg> .venv/bin/alembic revision --autogenerate -m "…"`, review it, and check with `alembic check`.
-  - Rehearse risky migrations on a Neon branch: `neonctl branches create --project-id empty-dream-42914552 --name mig-test`, run `alembic upgrade head` against the branch URL, inspect, then delete the branch.
+  - Rehearse risky migrations on a Neon branch: `neonctl branches create --project-id <neon project id> --name mig-test`, run `alembic upgrade head` against the branch URL, inspect, then delete the branch.
 - **Backups**: Neon keeps point-in-time history (restore window per plan). For an extra copy:
   ```bash
   pg_dump "$NEON_URL" --no-owner --no-privileges -f jeevia-$(date +%F).sql

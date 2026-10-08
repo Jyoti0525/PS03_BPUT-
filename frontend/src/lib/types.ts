@@ -744,6 +744,20 @@ export interface SharedSummary {
   disclaimer: string;
 }
 
+export interface KioskFinderHit {
+  /** null: in the national directory but not on Jeevia yet (walk in). */
+  code: string | null;
+  facility_name: string;
+  facility_type: string;
+  district: string;
+  state: string;
+  pincode?: string | null;
+  km?: number | null;
+  phone?: string | null;
+  lat?: number | null;
+  lon?: number | null;
+}
+
 export interface KioskInfo {
   code: string;
   label: string;

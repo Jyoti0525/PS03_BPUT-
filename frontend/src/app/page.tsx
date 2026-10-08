@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
 import { StatusPanel } from "@/components/site/system-status";
+import { PatientEntry } from "@/components/site/patient-entry";
 import { CountUp, Reveal, useInView } from "@/components/site/motion";
 import { useSite, type SiteCopy } from "@/lib/i18n/site";
 import { cx } from "@/components/ui";
@@ -319,6 +320,9 @@ export default function Landing() {
                   {c.hero.secondary}
                 </a>
               </Reveal>
+              <Reveal delay={280}>
+                <PatientEntry />
+              </Reveal>
               <Reveal delay={320} className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-line pt-7">
                 {[
                   { n: 22, s: "" },
@@ -463,7 +467,7 @@ export default function Landing() {
                 <Link href="/auth?mode=register" className="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-ink px-7 font-semibold text-white transition-transform hover:-translate-y-0.5">
                   {c.cta.primary} <ArrowRight className="size-4" />
                 </Link>
-                <Link href="/kiosk" className="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-white/80 px-7 font-semibold text-ink backdrop-blur transition-colors hover:bg-white">
+                <Link href="#patient" className="inline-flex h-13 items-center justify-center gap-2 rounded-full bg-white/80 px-7 font-semibold text-ink backdrop-blur transition-colors hover:bg-white">
                   <Tablet className="size-4" /> {c.cta.secondary}
                 </Link>
               </div>

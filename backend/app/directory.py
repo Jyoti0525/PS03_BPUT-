@@ -201,7 +201,7 @@ def search(db: Session, q: str, state: str | None = None, limit: int = 20) -> li
 
     out: list[dict] = []
     # 1) Workplaces already operating in Jeevia that did not come from the directory
-    fq = select(Facility, Organisation.name).outerjoin(Organisation, Facility.organisation_id == Organisation.id).where(Facility.directory_ref.is_(None), Facility.source != "sample")  # sample facilities are walkthrough-only
+    fq = select(Facility, Organisation.name).outerjoin(Organisation, Facility.organisation_id == Organisation.id).where(Facility.directory_ref.is_(None), Facility.source.notin_(("sample", "system")))  # sample facilities are walkthrough-only
     for t in tokens:
         like = f"%{t}%"
         fq = fq.where(or_(func.lower(Facility.name).like(like), func.lower(Facility.district).like(like), Facility.pincode == t, func.lower(func.coalesce(Organisation.name, "")).like(like)))

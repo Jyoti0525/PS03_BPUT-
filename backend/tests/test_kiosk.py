@@ -9,12 +9,12 @@ def kiosk_session(client, code):
     return {"Authorization": f"Bearer {r.json()['tokens']['access_token']}"}
 
 
-def kiosk_intake(client, h, name="Kiosk Walk-in", complaint="Fever for 4 days"):
+def kiosk_intake(client, h, name="Kiosk Walk-in", complaint="Fever for 4 days", facility="fac_phc_manikpur"):
     pat = client.post(f"{API}/patients", json={"name": name, "age": 30, "sex": "F", "phone": "9123456780", "language": "hi"}, headers=h)
     assert pat.status_code == 200, pat.text
     pat = pat.json()
     con = client.post(f"{API}/consents", json={"patient_id": pat["id"], "mode": "self", "privacy_context": "private", "language": "hi", "scopes": ["triage"]}, headers=h).json()
-    body = {"patient_id": pat["id"], "facility_id": "fac_phc_manikpur", "category": "normal", "language": "hi", "chief_complaint": complaint, "duration": "3-7 days", "consent_id": con["id"], "client_ref": f"k_{uuid.uuid4().hex}"}
+    body = {"patient_id": pat["id"], "facility_id": facility, "category": "normal", "language": "hi", "chief_complaint": complaint, "duration": "3-7 days", "consent_id": con["id"], "client_ref": f"k_{uuid.uuid4().hex}"}
     r = client.post(f"{API}/encounters", json=body, headers=h)
     assert r.status_code == 200, r.text
     return pat, r.json()

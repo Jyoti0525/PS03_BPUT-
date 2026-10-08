@@ -14,14 +14,14 @@ import secrets
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 
 from .. import audit
 from ..config import get_settings
 from ..crypto import blind
 from ..ratelimit import limit, per_phone
 from ..models import Encounter, Facility, KioskLink, Organisation, Patient, User
-from ..schemas import ADMIN_ROLES, STAFF_ROLES, AuthResult, KioskIdentifyIn, KioskInfo, KioskLinkIn, KioskLinkOut, KioskSessionIn, PatientOut, TokenBoardItem
+from ..schemas import ADMIN_ROLES, STAFF_ROLES, AuthResult, KioskFinderHit, KioskIdentifyIn, KioskInfo, KioskLinkIn, KioskLinkOut, KioskSessionIn, PatientOut, TokenBoardItem
 from ..security import DB, CurrentUser, issue_tokens, require
 from ..services import lapse_expected, local_day, now, wait_minutes
 from .auth import user_out
@@ -63,6 +63,20 @@ def create_link(db, facility_id: str, label: str, created_by: User | None, code:
     return k
 
 
+def ensure_any_centre(db) -> None:
+    """The "fill in now, take it to any centre" link (/k/ANYCARE). Its facility is a holder, never a workplace: it is
+    hidden from search, cannot be joined, and its intakes move to whichever facility claims the reference."""
+    from ..services import ANY_FACILITY, ANY_LINK
+
+    if not db.get(Facility, ANY_FACILITY):
+        db.add(Facility(id=ANY_FACILITY, name="Any health centre", type="any_centre", district="", state="India", languages=["or", "hi", "en"],
+                        specialists=[], source="system", offline_mode=False))
+        db.flush()
+    if not db.scalar(select(KioskLink).where(KioskLink.code == ANY_LINK)):
+        create_link(db, ANY_FACILITY, "Fill in now, take it to any centre", None, code=ANY_LINK, for_home=True)
+    db.commit()
+
+
 # ── Admin ─────────────────────────────────────────────
 @router.get("/kiosk-links", response_model=list[KioskLinkOut])
 def list_links(user: Supervisor, db: DB):
@@ -90,6 +104,77 @@ def revoke_link(lid: str, user: Supervisor, db: DB):
 
 
 # ── Public kiosk ──────────────────────────────────────
+@router.get("/kiosk-finder", response_model=list[KioskFinderHit], dependencies=[Depends(limit("public"))])
+def kiosk_finder(db: DB, q: str = "", lat: float | None = None, lon: float | None = None):
+    """For a patient who has no code: nearby health facilities, nearest first when the browser shares a location.
+
+    Facilities on Jeevia with a from-home link come with that link's code (fill in before going). Every other facility
+    from the national directory (115k, OpenStreetMap) is listed too, without a code, so the patient still sees the
+    nearest place to walk in. Only from-home links are offered, never a waiting-room link, so a form sent from
+    anywhere waits for desk check-in and never moves ahead of people already waiting."""
+    import math
+    import re
+
+    from ..directory import KIND_LABEL
+    from ..models import DirectoryFacility
+
+    def km(a, b):
+        if lat is None or lon is None or a is None or b is None:
+            return None
+        p1, p2, dl = math.radians(lat), math.radians(a), math.radians(b - lon)
+        return round(6371 * math.acos(max(-1.0, min(1.0, math.sin(p1) * math.sin(p2) + math.cos(p1) * math.cos(p2) * math.cos(dl)))), 1)
+
+    tokens = [t for t in re.split(r"[\s,]+", q.lower()) if t][:5]
+    pin = next((t for t in tokens if re.fullmatch(r"\d{6}", t)), None)
+    words = [t for t in tokens if t != pin]
+    if not tokens and (lat is None or lon is None):
+        return []
+
+    hits: dict[str, KioskFinderHit] = {}
+    for k, f in db.execute(select(KioskLink, Facility).join(Facility, Facility.id == KioskLink.facility_id)
+                           .where(KioskLink.for_home.is_(True), KioskLink.revoked.is_(False), Facility.source != "system")).all():
+        hay = " ".join(x or "" for x in (f.name, f.district, f.state, f.pincode, f.type)).lower()
+        if (pin and f.pincode != pin) or not all(w in hay for w in words):
+            continue
+        d = km(f.lat, f.lon)
+        if not tokens and (d is None or d > 50):
+            continue
+        hits.setdefault(f.directory_ref or f.id, KioskFinderHit(code=k.code, facility_name=f.name, facility_type=f.type, district=f.district,
+                                                                state=f.state, pincode=f.pincode, km=d))
+
+    dq = select(DirectoryFacility)
+    if pin:
+        dq = dq.where(DirectoryFacility.pincode == pin)
+    for w in words:
+        like = f"%{w}%"
+        dq = dq.where(func.lower(DirectoryFacility.name).like(like) | func.lower(func.coalesce(DirectoryFacility.district, "")).like(like)
+                      | func.lower(func.coalesce(DirectoryFacility.city, "")).like(like))
+    if lat is not None and lon is not None:
+        box = 0.25 if tokens else 0.15  # about 25 km / 15 km
+        for r in (0, 1, 2):  # widen until something is found (remote villages)
+            rows = db.scalars(dq.where(DirectoryFacility.lat.between(lat - box, lat + box), DirectoryFacility.lon.between(lon - box, lon + box)).limit(400)).all()
+            if rows or tokens:
+                break
+            box *= 2.5
+        if not rows and tokens:
+            rows = db.scalars(dq.limit(200)).all()
+    else:
+        exact = [w for w in words if len(w) > 2]
+        if exact:  # a place name typed: centres in that district or town first, then anything that merely contains it
+            place = or_(*[func.lower(func.coalesce(DirectoryFacility.district, "")) == w for w in exact],
+                        *[func.lower(func.coalesce(DirectoryFacility.city, "")) == w for w in exact])
+            rows = db.scalars(dq.where(place).limit(200)).all() or db.scalars(dq.limit(200)).all()
+        else:
+            rows = db.scalars(dq.limit(200)).all()
+    for r in rows:
+        if r.ref in hits:
+            continue
+        hits[r.ref] = KioskFinderHit(code=None, facility_name=r.name, facility_type=KIND_LABEL.get(r.kind, r.kind), district=r.district or "",
+                                     state=r.state, pincode=r.pincode, km=km(r.lat, r.lon), phone=r.phone, lat=r.lat, lon=r.lon)
+    out = sorted(hits.values(), key=lambda h: (h.km is None, h.km if h.km is not None else 0, h.code is None, h.facility_name))
+    return out[:25]
+
+
 @router.get("/kiosk/{code}", response_model=KioskInfo, dependencies=[Depends(limit("public"))])
 def kiosk_info(code: str, db: DB):
     k = _active(db, code)

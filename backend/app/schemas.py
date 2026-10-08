@@ -840,6 +840,19 @@ class KioskInfo(BaseModel):
     for_home: bool = False
 
 
+class KioskFinderHit(BaseModel):
+    code: str | None = None  # None: in the national directory but not on Jeevia yet (walk in)
+    facility_name: str
+    facility_type: str
+    district: str
+    state: str
+    pincode: str | None = None
+    km: float | None = None
+    phone: str | None = None
+    lat: float | None = None
+    lon: float | None = None
+
+
 class KioskSessionIn(BaseModel):
     device_id: str = Field(min_length=4, max_length=64)
 
@@ -1056,3 +1069,7 @@ class CohortOut(ORM):
 
 EncounterOut.model_rebuild()
 ObservationIn.model_rebuild()
+
+
+class ClaimIn(BaseModel):
+    reference: str = Field(min_length=4, max_length=40)

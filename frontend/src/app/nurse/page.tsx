@@ -9,6 +9,7 @@ import { usePrefs, useSession } from "@/components/providers";
 import { AutoUpdates, PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Input, Spinner, cx } from "@/components/ui";
 import { UrgencyBadge, english, urgencyBar } from "@/components/triage/note";
+import { ClaimForm } from "@/components/triage/claim-form";
 
 /** Nursing station: every waiting patient, with what still needs doing at the bedside (vitals, observations). */
 export default function NurseHome() {
@@ -37,6 +38,9 @@ export default function NurseHome() {
         subtitle={tr("Record vitals and bedside observations. The doctor sees them in the case straight away.")}
         actions={<AutoUpdates />}
       />
+      <div className="mb-5 max-w-xl">
+        <ClaimForm onClaimed={reload} />
+      </div>
       <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4" role="group" aria-label={tr("Show")}>
         {(
           [

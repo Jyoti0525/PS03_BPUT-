@@ -72,6 +72,10 @@ async def lifespan(_: FastAPI):
                 facility_kinds(db)
                 if settings.seed_synthea:
                     synthea_histories(db)
+    from .routers.kiosk import ensure_any_centre
+
+    with SessionLocal() as db:
+        ensure_any_centre(db)
     from . import directory
 
     if get_settings().directory_autoload:

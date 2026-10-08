@@ -11,6 +11,7 @@ import { AutoUpdates, PageHeader } from "@/components/layout/app-shell";
 import { Button, Card, Stat } from "@/components/ui";
 import { TokenBoard } from "@/components/triage/token-board";
 import { DutyList } from "@/components/staff/duty";
+import { ClaimForm } from "@/components/triage/claim-form";
 
 /** Receptionist home: who is waiting, for how long, and which doctors and nurses are on duty. Never urgency or symptoms. */
 export default function DeskHome() {
@@ -55,6 +56,7 @@ export default function DeskHome() {
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
         <TokenBoard facilityId={fid} onChange={reloadTokens} />
         <div className="space-y-4">
+          <ClaimForm onClaimed={reloadTokens} />
           <Card className="p-4">
             <p className="font-semibold text-ink">{tr("Check in a patient")}</p>
             <p className="mt-1 text-sm text-muted">{tr("Find a returning patient or register a new one, then take them through the check-in kiosk for a token.")}</p>

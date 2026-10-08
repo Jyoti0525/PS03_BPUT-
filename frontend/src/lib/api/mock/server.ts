@@ -709,6 +709,10 @@ export const mockApi: JeeviaApi = {
         .map((e) => ({ encounter_id: e.id, token: e.token ?? null, patient_id: e.patient.id, patient_name: e.patient.name, patient_code: e.patient.code, status: e.status, channel: e.channel ?? "staff_kiosk", created_at: e.created_at, arrived_at: e.arrived_at ?? null, wait_minutes: e.status === "expected" ? 0 : waitMin(e) }));
     }),
 
+  claimForm: async () => {
+    throw new ApiError(501, "Forms for any centre need the live server.");
+  },
+
   checkIn: (id) =>
     withDb(async (d) => {
       const me = await current(d);
@@ -759,6 +763,17 @@ export const mockApi: JeeviaApi = {
       if (!k) throw new ApiError(404, "This kiosk link is not active. Ask the facility for a new one.");
       const f = d.facilities.find((x) => x.id === k.facility_id)!;
       return { code: k.code, label: k.label, facility_id: f.id, facility_name: f.name, district: f.district, state: f.state, languages: f.languages, for_home: !!k.for_home };
+    }),
+
+  kioskFinder: (q) =>
+    withDb(async (d) => {
+      const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+      const seen = new Set<string>();
+      return d.kioskLinks
+        .filter((k) => k.for_home && !k.revoked)
+        .map((k) => ({ k, f: d.facilities.find((x) => x.id === k.facility_id)! }))
+        .filter(({ f }) => f && !seen.has(f.id) && seen.add(f.id) && words.every((w) => `${f.name} ${f.district} ${f.state} ${f.type}`.toLowerCase().includes(w)))
+        .map(({ k, f }) => ({ code: k.code, facility_name: f.name, facility_type: f.type, district: f.district, state: f.state }));
     }),
 
   kioskSession: (code, deviceId) =>

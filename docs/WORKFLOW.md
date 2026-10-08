@@ -51,7 +51,7 @@ These are **not** in the public list. They appear only after their organisation 
 
 ### 3.3 Then, for every facility
 2. **Facility setup** (`/admin/facility`): pick the facility type, answer the "what is available here" questions (lab, ECG, X-ray, oxygen…), switch specialists on/off as they arrive or leave, set the default referral hospital and kiosk languages. Referral notes use this automatically.
-3. **Kiosk links** (`/admin/kiosk-links`): create one link per place patients check in ("OPD waiting area", "Camp tablet 2"). Each link has a URL like `https://jeevia-triage.vercel.app/k/7QX4MPA2`, a short code and a printable QR poster. Revoking a link stops every device using it immediately.
+3. **Kiosk links** (`/admin/kiosk-links`): create one link per place patients check in ("OPD waiting area", "Camp tablet 2"). Each link has a URL like `https://ps-03-bput.vercel.app/k/7QX4MPA2`, a short code and a printable QR poster. Revoking a link stops every device using it immediately.
 4. **Staff join**: doctors, nurses and receptionists register themselves at `/auth`, searching for this facility (doctors and nurses give their council registration number) and creating their PIN. The supervisor sees them under **Staff**, where they can change a role, deactivate or reactivate an account, and reset a forgotten PIN.
 
 ## 4. A patient's journey, step by step
@@ -60,6 +60,7 @@ These are **not** in the public list. They appear only after their organisation 
 | Channel | Where | Who operates it | Notes |
 |---|---|---|---|
 | **Kiosk link** | `/k/CODE` on a waiting-room tablet, or scanned QR on the patient's own phone | The patient (or family member) | No login. Works in any tab or device. |
+| **Any-centre form** | `/k/ANYCARE` (landing: *Not sure where you will go?*) | The patient, before choosing a centre | No login. Gives a **J-** reference and QR. At any centre the desk or nurse types it or scans the QR (*Patient has a form reference?*): the intake moves there and the patient is checked in with a T- token. A danger sign: go to the nearest emergency or call 108 and show the reference. |
 | **Staff kiosk** | `/kiosk` on a bound tablet | Nurse / ANM sitting with the patient | Can search existing patients and add vitals. The tablet must be bound to the facility once. |
 | **From-home link** | `/k/CODE` of a link marked *for filling in from home* (SMS, poster, website); sample `/k/MKHOME` | The patient, before coming | No login, no patient account (the plan has no patient portal). The intake gets an **H-** reference and waits on the desk's token board as *Expected*. When the patient arrives the desk presses **Checked in**: a T- token is issued and waiting time and escalation timers start then, so filling in early never puts anyone ahead of people already waiting. If a danger sign was reported, the patient is told to go to emergency or call 108 (never a tier), and the case goes straight to the doctors' queue. |
 
@@ -162,7 +163,7 @@ Open a kiosk link once with internet and it keeps working without it: the page, 
 
 | Part | Where |
 |---|---|
-| Website, dashboards, kiosk | Vercel — `https://jeevia-triage.vercel.app` |
+| Website, dashboards, kiosk | Vercel — `https://ps-03-bput.vercel.app` |
 | API | Render web service `jeevia-api` |
 | Database | Neon serverless PostgreSQL, project `jeevia`, Singapore (locally: Homebrew Postgres 15, database `jeevia`) |
 | SMS one-time codes | Twilio Verify |

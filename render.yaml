@@ -1,5 +1,5 @@
 # Render blueprint — Jeevia API. Secrets marked sync:false are set in the Render dashboard.
-# Database: Neon serverless PostgreSQL (project "jeevia", aws-ap-southeast-1).
+# Database: Neon serverless PostgreSQL (aws-ap-southeast-1).
 # Its connection string is set as JEEVIA_DATABASE_URL in the Render dashboard.
 
 services:
@@ -27,9 +27,9 @@ services:
       - key: JEEVIA_PROFILE  # H3: the free cloud instance runs rules only; models run on the facility laptop
         value: stub
       - key: JEEVIA_CORS_ORIGINS
-        value: https://jeevia-triage.vercel.app
+        value: https://ps-03-bput.vercel.app
       - key: JEEVIA_WEB_BASE_URL
-        value: https://jeevia-triage.vercel.app
+        value: https://ps-03-bput.vercel.app
       - key: JEEVIA_OTP_PROVIDER
         value: twilio
       - key: JEEVIA_TWILIO_ACCOUNT_SID

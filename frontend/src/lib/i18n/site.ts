@@ -154,7 +154,7 @@ const en: SiteCopy = {
     noticeLead: "Jeevia supports triage — it does not replace a clinician.",
     notice: "It organises patient-provided information, highlights urgency signals and speeds up qualified review. It does not diagnose or prescribe. Every output is advisory and must be reviewed by licensed healthcare staff before any clinical decision.",
   },
-  cta: { title: "Ready to shorten your queue?", body: "Set up your facility, bind a kiosk tablet and start your first intake in minutes.", primary: "Create an account", secondary: "Open the kiosk" },
+  cta: { title: "Ready to shorten your queue?", body: "Set up your facility, bind a kiosk tablet and start your first intake in minutes.", primary: "Create an account", secondary: "I'm a patient" },
   status: {
     eyebrow: "Live system status",
     title: ["Is everything", "up and running?"],
@@ -277,7 +277,7 @@ const hi: SiteCopy = {
     noticeLead: "जीविया ट्रायेज में मदद करता है — डॉक्टर की जगह नहीं लेता।",
     notice: "यह मरीज़ की दी जानकारी को व्यवस्थित करता है और तात्कालिकता के संकेत दिखाता है। यह निदान या दवा नहीं देता। हर परिणाम सलाह मात्र है और किसी भी निर्णय से पहले लाइसेंस प्राप्त स्वास्थ्य कर्मी द्वारा देखा जाना चाहिए।",
   },
-  cta: { title: "अपनी कतार छोटी करें", body: "अपनी सुविधा सेट करें, कियोस्क टैबलेट जोड़ें और कुछ ही मिनटों में पहली जानकारी दर्ज करें।", primary: "खाता बनाएँ", secondary: "कियोस्क खोलें" },
+  cta: { title: "अपनी कतार छोटी करें", body: "अपनी सुविधा सेट करें, कियोस्क टैबलेट जोड़ें और कुछ ही मिनटों में पहली जानकारी दर्ज करें।", primary: "खाता बनाएँ", secondary: "मैं मरीज़ हूँ" },
   status: {
     eyebrow: "\u0938\u093f\u0938\u094d\u091f\u092e \u0915\u0940 \u0932\u093e\u0907\u0935 \u0938\u094d\u0925\u093f\u0924\u093f",
     title: ["क्या सब कुछ", "चल रहा है?"],
@@ -400,7 +400,7 @@ const or: SiteCopy = {
     noticeLead: "ଜୀବିଆ ଟ୍ରାଇଏଜରେ ସାହାଯ୍ୟ କରେ — ଡାକ୍ତରଙ୍କ ସ୍ଥାନ ନିଏ ନାହିଁ।",
     notice: "ଏହା ରୋଗୀଙ୍କ ଦିଆଯାଇଥିବା ତଥ୍ୟ ସଜାଏ ଓ ଜରୁରୀତା ସଙ୍କେତ ଦେଖାଏ। ଏହା ରୋଗ ନିର୍ଣ୍ଣୟ ବା ଔଷଧ ଦିଏ ନାହିଁ। ପ୍ରତ୍ୟେକ ଫଳାଫଳ କେବଳ ପରାମର୍ଶ ଏବଂ ଯେକୌଣସି ନିଷ୍ପତ୍ତି ପୂର୍ବରୁ ଅନୁମତିପ୍ରାପ୍ତ ସ୍ୱାସ୍ଥ୍ୟକର୍ମୀ ଦେଖିବା ଆବଶ୍ୟକ।",
   },
-  cta: { title: "ଆପଣଙ୍କ ଧାଡ଼ି ଛୋଟ କରନ୍ତୁ", body: "ଆପଣଙ୍କ କେନ୍ଦ୍ର ସେଟ୍ କରନ୍ତୁ, କିଓସ୍କ ଟାବଲେଟ୍ ଯୋଡନ୍ତୁ ଓ କିଛି ମିନିଟରେ ପ୍ରଥମ ତଥ୍ୟ ସଂଗ୍ରହ କରନ୍ତୁ।", primary: "ଆକାଉଣ୍ଟ ତିଆରି କରନ୍ତୁ", secondary: "କିଓସ୍କ ଖୋଲନ୍ତୁ" },
+  cta: { title: "ଆପଣଙ୍କ ଧାଡ଼ି ଛୋଟ କରନ୍ତୁ", body: "ଆପଣଙ୍କ କେନ୍ଦ୍ର ସେଟ୍ କରନ୍ତୁ, କିଓସ୍କ ଟାବଲେଟ୍ ଯୋଡନ୍ତୁ ଓ କିଛି ମିନିଟରେ ପ୍ରଥମ ତଥ୍ୟ ସଂଗ୍ରହ କରନ୍ତୁ।", primary: "ଆକାଉଣ୍ଟ ତିଆରି କରନ୍ତୁ", secondary: "ମୁଁ ରୋଗୀ" },
   status: {
     eyebrow: "\u0b38\u0b3f\u0b37\u0b4d\u0b1f\u0b2e\u0b30 \u0b32\u0b3e\u0b07\u0b2d\u0b4d \u0b38\u0b4d\u0b25\u0b3f\u0b24\u0b3f",
     title: ["ସବୁକିଛି", "ଚାଲୁଛି କି?"],

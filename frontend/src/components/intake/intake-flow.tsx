@@ -556,7 +556,7 @@ export function IntakeFlow({
       <Card className="fade-up mx-auto max-w-xl border-crit-line p-8 text-center" role="alert">
         <PhoneCall className="mx-auto size-14 text-crit" />
         <h2 className="mt-3 text-3xl font-bold text-crit">{t("kiosk.home.emergency.title")}</h2>
-        <p className="mt-3 text-lg text-ink-2">{t("kiosk.home.emergency.body")}</p>
+        <p className="mt-3 text-lg text-ink-2">{result.token.startsWith("J-") ? tr("Go to the nearest hospital emergency now, or call 108. Show this reference there.") : t("kiosk.home.emergency.body")}</p>
         <a href="tel:108" className="mt-6 block">
           <Button size="xl" variant="danger" className="w-full" icon={<PhoneCall className="size-5" />}>
             108
@@ -575,9 +575,17 @@ export function IntakeFlow({
       <Card className="fade-up mx-auto max-w-xl p-8 text-center">
         <CheckCircle2 className="mx-auto size-14 text-teal-600" />
         <h2 className="mt-3 text-3xl font-bold text-ink">{t("kiosk.done.title")}</h2>
-        <p className="mt-2 text-lg text-muted">{home ? t("kiosk.home.body") : t("kiosk.done.body")}</p>
+        <p className="mt-2 text-lg text-muted">
+          {result.token.startsWith("J-") ? tr("Take this reference to any health centre. Show it, or this QR code, at the desk; your details will be ready there.") : home ? t("kiosk.home.body") : t("kiosk.done.body")}
+        </p>
         <p className="mt-6 text-sm font-semibold tracking-wider text-muted uppercase">{home ? t("kiosk.home.token") : t("kiosk.done.token")}</p>
         <p className="text-6xl font-extrabold tracking-tight text-ink tabular-nums">{result.token}</p>
+        {result.token.startsWith("J-") && (
+          <div className="mt-4 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
+            <QRCodeSVG value={`${window.location.origin}/desk?claim=${result.token}`} size={160} title={`${tr("QR code with your reference")} ${result.token}`} />
+            <p className="mt-2 text-xs text-muted">{tr("Take a photo or screenshot of this screen")}</p>
+          </div>
+        )}
         <button type="button" onClick={() => speak(`${home ? t("kiosk.home.token") : t("kiosk.done.token")}: ${result.token.split("").join(" ")}`, lang)} className="mt-3 inline-flex min-h-12 items-center gap-1 rounded-full bg-canvas px-4 text-sm font-semibold text-ink-2 hover:bg-line" aria-label={t("common.listen")}>
           <Volume2 className="size-4" /> {t("common.listen")}
         </button>

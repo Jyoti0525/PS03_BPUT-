@@ -12,6 +12,7 @@ from .. import alerts, audit, exports, language, privacy
 from ..config import get_settings
 from ..models import Consent, Device, Encounter, FileObject, Escalation, Facility, FitnessAssessment, KioskLink, Patient, Referral, Reminder, User
 from ..schemas import (
+    ClaimIn,
     DOCTOR_ROLES,
     NO_AI_SCOPE,
     REVIEWER_ROLES,
@@ -220,6 +221,38 @@ def arrive(eid: str, user: Staff, db: DB):
         raise HTTPException(409, "Already checked in" if e.arrived_at else f"This intake is {e.status}")
     check_in(db, e, user)
     audit.record(db, user, "ARRIVE", "encounter", e.id, f"Checked in at the desk (filled in from home); token {e.token}", e.patient.code, e.facility_id)
+    db.commit()
+    if e.urgency == "red":
+        alerts.check_capacity(db, e.facility_id)
+    return encounter_out(e, user)
+
+
+@router.post("/encounters/claim", response_model=EncounterOut)
+def claim(body: ClaimIn, user: Staff, db: DB):
+    """A patient brings the reference (or QR) of a form filled in "for any centre": it moves to this facility and the
+    patient joins its queue now, with a token for today. The note, rules and files come with it."""
+    from ..services import ANY_FACILITY
+
+    ref = body.reference.strip().upper().removeprefix("JEEVIA:")
+    ref = ref if ref.startswith("J-") else f"J-{ref}"
+    e = db.scalar(select(Encounter).where(Encounter.token == ref, Encounter.facility_id == ANY_FACILITY))
+    if not e:
+        since = now() - timedelta(hours=get_settings().home_intake_valid_h * 2)
+        done = next((x for x in db.scalars(select(Encounter).where(Encounter.channel == "home_link", Encounter.created_at >= since))
+                     if (x.intake or {}).get("any_centre_ref") == ref), None)
+        if done:
+            raise HTTPException(409, "This form was already checked in" + (" here" if done.facility_id == user.facility_id else " at another centre"))
+        raise HTTPException(404, "No form found for this reference. Check the letters, or fill in a new one at the kiosk.")
+    if e.status != "expected":
+        raise HTTPException(409, f"This form is {e.status}")
+    if aware(e.created_at) < now() - timedelta(hours=get_settings().home_intake_valid_h):
+        e.status = "lapsed"
+        db.commit()
+        raise HTTPException(410, "This form is older than the validity window. Please fill in a new one at the kiosk.")
+    e.facility_id = user.facility_id
+    e.intake = {**(e.intake or {}), "facility_id": user.facility_id, "any_centre_ref": ref}
+    check_in(db, e, user)
+    audit.record(db, user, "ARRIVE", "encounter", e.id, f"Claimed any-centre form {ref} and checked in; token {e.token}", e.patient.code, e.facility_id)
     db.commit()
     if e.urgency == "red":
         alerts.check_capacity(db, e.facility_id)
