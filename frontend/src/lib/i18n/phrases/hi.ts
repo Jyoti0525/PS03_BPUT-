@@ -2132,5 +2132,10 @@ const hi: Record<string, string> = {
   "Check in": "चेक-इन करें",
   "You said today. Did it start in the last few hours?": "आपने आज बताया। क्या यह पिछले कुछ घंटों में शुरू हुआ?",
   "Earlier today": "आज ही, लेकिन उससे पहले",
+  "Forms filled in for any centre start with J-. Type it, scan the patient's QR with a phone camera, or enter the mobile number they gave if they lost it.": "किसी भी केंद्र के लिए भरे गए फ़ॉर्म J- से शुरू होते हैं। इसे लिखें, फ़ोन कैमरे से मरीज़ का QR स्कैन करें, या अगर नंबर खो गया हो तो उनका दिया मोबाइल नंबर डालें।",
+  "J-7QX4MP or mobile number": "J-7QX4MP या मोबाइल नंबर",
+  "Take a photo or screenshot of this screen. Lost it? Give your mobile number at the desk.": "इस स्क्रीन की फ़ोटो या स्क्रीनशॉट ले लें। खो गया? काउंटर पर अपना मोबाइल नंबर बताएँ।",
+  "Enter a mobile number: any centre finds your form with it": "मोबाइल नंबर डालें: कोई भी केंद्र इससे आपका फ़ॉर्म ढूँढ लेगा",
+  "Mobile number (needed: any centre finds your form with it)": "मोबाइल नंबर (ज़रूरी: कोई भी केंद्र इससे आपका फ़ॉर्म ढूँढ लेगा)",
 };
 export default hi;

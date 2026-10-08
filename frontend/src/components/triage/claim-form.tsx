@@ -39,7 +39,7 @@ export function ClaimForm({ onClaimed }: { onClaimed?: () => void }) {
       <p className="flex items-center gap-2 font-semibold text-ink">
         <QrCode className="size-4 text-teal-600" /> {tr("Patient has a form reference?")}
       </p>
-      <p className="mt-1 text-sm text-muted">{tr("Forms filled in for any centre start with J-. Type it, or scan the patient's QR with a phone camera.")}</p>
+      <p className="mt-1 text-sm text-muted">{tr("Forms filled in for any centre start with J-. Type it, scan the patient's QR with a phone camera, or enter the mobile number they gave if they lost it.")}</p>
       <form
         className="mt-3 flex gap-2"
         onSubmit={(e) => {
@@ -47,7 +47,7 @@ export function ClaimForm({ onClaimed }: { onClaimed?: () => void }) {
           if (ref.trim()) claim();
         }}
       >
-        <Input value={ref} onChange={(e) => setRef(e.target.value.toUpperCase())} placeholder="J-7QX4MP" aria-label={tr("Form reference")} className="font-mono" />
+        <Input value={ref} onChange={(e) => setRef(e.target.value.toUpperCase().slice(0, 40))} placeholder={tr("J-7QX4MP or mobile number")} aria-label={tr("Form reference")} className="font-mono" />
         <Button type="submit" variant="teal" loading={busy} disabled={!ref.trim()}>
           {tr("Check in")}
         </Button>

@@ -234,8 +234,21 @@ def claim(body: ClaimIn, user: Staff, db: DB):
     from ..services import ANY_FACILITY
 
     ref = body.reference.strip().upper().removeprefix("JEEVIA:")
-    ref = ref if ref.startswith("J-") else f"J-{ref}"
-    e = db.scalar(select(Encounter).where(Encounter.token == ref, Encounter.facility_id == ANY_FACILITY))
+    digits = "".join(c for c in ref if c.isdigit())
+    if len(digits) >= 10 and not any(c.isalpha() for c in ref):
+        # The patient lost the reference: their latest unclaimed form, found by the mobile number they gave.
+        from ..crypto import blind
+
+        since = now() - timedelta(hours=get_settings().home_intake_valid_h)
+        e = db.scalar(select(Encounter).join(Patient, Encounter.patient_id == Patient.id)
+                      .where(Patient.phone_hash == blind(digits[-10:]), Encounter.facility_id == ANY_FACILITY, Encounter.status == "expected", Encounter.created_at >= since)
+                      .order_by(Encounter.created_at.desc()).limit(1))
+        if not e:
+            raise HTTPException(404, "No open form for this mobile number. Check the number, or fill in a new one at the kiosk.")
+        ref = e.token
+    else:
+        ref = ref if ref.startswith("J-") else f"J-{ref}"
+        e = db.scalar(select(Encounter).where(Encounter.token == ref, Encounter.facility_id == ANY_FACILITY))
     if not e:
         since = now() - timedelta(hours=get_settings().home_intake_valid_h * 2)
         done = next((x for x in db.scalars(select(Encounter).where(Encounter.channel == "home_link", Encounter.created_at >= since))

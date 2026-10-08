@@ -16,6 +16,7 @@ def test_off_empties_the_queues_and_on_brings_fresh_samples_back(client, monkeyp
     assert r.status_code == 200 and r.json() == {"available": True, "on": False}
     doc = login(client, "9000000001")  # staff accounts stay
     assert client.get(f"{API}/queue?facility_id=fac_phc_manikpur", headers=doc).json() == []
+    assert client.post(f"{API}/kiosk/ANYCARE/session", json={"device_id": "tab-anycare"}).status_code == 200  # the any-centre link survives
 
     assert client.post(f"{API}/demo/samples", json={"on": True}).json()["on"] is True
     q = client.get(f"{API}/queue?facility_id=fac_phc_manikpur", headers=login(client, "9000000001")).json()

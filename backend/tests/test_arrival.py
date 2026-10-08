@@ -127,3 +127,24 @@ def test_any_centre_red_waits_for_a_centre(client):
     """No one can see an any-centre form until it is claimed, so even a RED waits (the patient is told to call 108)."""
     _, enc = kiosk_intake(client, kiosk_session(client, "ANYCARE"), "Any Red", "Snake bite on the foot one hour ago, gums bleeding", ANY)
     assert enc["status"] == "expected" and enc["token"].startswith("J-")
+
+
+def test_any_centre_form_is_found_by_mobile_when_the_reference_is_lost(client):
+    """The patient closed the page without noting the J- reference: the desk finds the form by the mobile number given."""
+    from conftest import login
+
+    receptionist = login(client, "9000000003")
+    _, enc = kiosk_intake(client, kiosk_session(client, "ANYCARE"), "Lost Reference", "Knee pain for two months", ANY)
+    assert client.post(f"{API}/encounters/claim", json={"reference": "9000011111"}, headers=receptionist).status_code == 404
+    r = client.post(f"{API}/encounters/claim", json={"reference": "+91 91234 56780"}, headers=receptionist)
+    assert r.status_code == 200, r.text
+    assert r.json()["id"] == enc["id"] and r.json()["token"].startswith("T-")
+
+
+def test_any_centre_form_needs_a_mobile_number(client):
+    """Without a number the form could not be found again if the reference is lost, so the server refuses it."""
+    h = kiosk_session(client, "ANYCARE")
+    pat = client.post(f"{API}/patients", json={"name": "No Phone", "age": 30, "sex": "F", "language": "or"}, headers=h).json()
+    con = client.post(f"{API}/consents", json={"patient_id": pat["id"], "mode": "self", "privacy_context": "private", "language": "or", "scopes": ["triage"]}, headers=h).json()
+    body = {"patient_id": pat["id"], "facility_id": ANY, "category": "normal", "language": "or", "chief_complaint": "Fever", "duration": "1-2 days", "consent_id": con["id"], "client_ref": "k_nophone"}
+    assert client.post(f"{API}/encounters", json=body, headers=h).status_code == 422

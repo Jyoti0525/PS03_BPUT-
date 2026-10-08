@@ -115,6 +115,9 @@ def create_encounter(db: Session, intake: dict, patient: Patient, created: datet
 
 
 def _create_encounter(db: Session, intake: dict, patient: Patient, created: datetime | None, channel: str) -> Encounter:
+    if intake["facility_id"] == ANY_FACILITY and not patient.phone:
+        # The desk finds an any-centre form by this number when the patient loses the reference.
+        raise HTTPException(422, "A mobile number is needed for a form taken to any centre")
     created = created or now()
     history = list(
         db.scalars(select(Encounter).where(Encounter.patient_id == patient.id).order_by(Encounter.created_at.desc()))

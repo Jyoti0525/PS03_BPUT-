@@ -285,6 +285,8 @@ export function IntakeFlow({
         if (newP.name.trim().length < 2) return "Enter the patient's name";
         if (!newP.age || Number(newP.age) < 0 || Number(newP.age) > 120) return "Enter a valid age";
         if (!newP.sex) return "Choose sex";
+        // A form for any centre is found by this number if the patient loses the reference.
+        if (!newP.phone && facilityId === "fac_any_centre") return "Enter a mobile number: any centre finds your form with it";
         if (newP.phone && !/^\d{10}$/.test(newP.phone)) return "Phone must be 10 digits";
         return null;
       case "visit":
@@ -568,7 +570,7 @@ export function IntakeFlow({
         {result.token.startsWith("J-") && (
           <div className="mt-4 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
             <QRCodeSVG value={`${window.location.origin}/desk?claim=${result.token}`} size={160} title={`${tr("QR code with your reference")} ${result.token}`} />
-            <p className="mt-2 text-xs text-muted">{tr("Take a photo or screenshot of this screen")}</p>
+            <p className="mt-2 text-xs text-muted">{tr("Take a photo or screenshot of this screen. Lost it? Give your mobile number at the desk.")}</p>
           </div>
         )}
       </Card>
@@ -589,7 +591,7 @@ export function IntakeFlow({
         {result.token.startsWith("J-") && (
           <div className="mt-4 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
             <QRCodeSVG value={`${window.location.origin}/desk?claim=${result.token}`} size={160} title={`${tr("QR code with your reference")} ${result.token}`} />
-            <p className="mt-2 text-xs text-muted">{tr("Take a photo or screenshot of this screen")}</p>
+            <p className="mt-2 text-xs text-muted">{tr("Take a photo or screenshot of this screen. Lost it? Give your mobile number at the desk.")}</p>
           </div>
         )}
         <button type="button" onClick={() => speak(`${home ? t("kiosk.home.token") : t("kiosk.done.token")}: ${result.token.split("").join(" ")}`, lang)} className="mt-3 inline-flex min-h-12 items-center gap-1 rounded-full bg-canvas px-4 text-sm font-semibold text-ink-2 hover:bg-line" aria-label={t("common.listen")}>
@@ -732,7 +734,7 @@ export function IntakeFlow({
                   </div>
                 </div>
                 <div className="sm:col-span-2">
-                  <Label htmlFor="np-phone">{t("kiosk.identity.phone")}</Label>
+                  <Label htmlFor="np-phone">{facilityId === "fac_any_centre" ? tr("Mobile number (needed: any centre finds your form with it)") : t("kiosk.identity.phone")}</Label>
                   <Input id="np-phone" inputMode="numeric" value={newP.phone} onChange={(e) => setNewP({ ...newP, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })} className="h-13 text-lg" />
                 </div>
                 {organisationName && (

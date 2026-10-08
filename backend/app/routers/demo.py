@@ -67,7 +67,10 @@ def rebuild(on: bool) -> None:
             for t in tables:
                 if t.name not in KEEP_WHEN_OFF:
                     conn.execute(t.delete())
+    from .kiosk import ensure_any_centre
+
     with SessionLocal() as db:
+        ensure_any_centre(db)  # the cleared tables held the "any centre" facility and its ANYCARE link
         audit.record(db, None, "CONFIG", "system", None, "Demo database rebuilt: " + ("sample patients loaded, timed from now" if on else "no sample patients"))
         db.commit()
 

@@ -2132,5 +2132,10 @@ const or: Record<string, string> = {
   "Check in": "ଚେକ୍-ଇନ୍ କରନ୍ତୁ",
   "You said today. Did it start in the last few hours?": "ଆପଣ ଆଜି କହିଲେ। ଏହା ଗତ କିଛି ଘଣ୍ଟା ଭିତରେ ଆରମ୍ଭ ହେଲା କି?",
   "Earlier today": "ଆଜି ଆଗରୁ",
+  "Forms filled in for any centre start with J-. Type it, scan the patient's QR with a phone camera, or enter the mobile number they gave if they lost it.": "ଯେକୌଣସି କେନ୍ଦ୍ର ପାଇଁ ଭରାଯାଇଥିବା ଫର୍ମ J- ରୁ ଆରମ୍ଭ ହୁଏ। ଏହାକୁ ଲେଖନ୍ତୁ, ଫୋନ୍ କ୍ୟାମେରାରେ ରୋଗୀଙ୍କ QR ସ୍କାନ୍ କରନ୍ତୁ, କିମ୍ବା ନମ୍ବର ହଜିଯାଇଥିଲେ ସେମାନେ ଦେଇଥିବା ମୋବାଇଲ୍ ନମ୍ବର ଲେଖନ୍ତୁ।",
+  "J-7QX4MP or mobile number": "J-7QX4MP କିମ୍ବା ମୋବାଇଲ୍ ନମ୍ବର",
+  "Take a photo or screenshot of this screen. Lost it? Give your mobile number at the desk.": "ଏହି ସ୍କ୍ରିନର ଫଟୋ କିମ୍ବା ସ୍କ୍ରିନସଟ୍ ନିଅନ୍ତୁ। ହଜିଗଲା? କାଉଣ୍ଟରରେ ଆପଣଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କୁହନ୍ତୁ।",
+  "Enter a mobile number: any centre finds your form with it": "ମୋବାଇଲ୍ ନମ୍ବର ଦିଅନ୍ତୁ: ଯେକୌଣସି କେନ୍ଦ୍ର ଏଥିରୁ ଆପଣଙ୍କ ଫର୍ମ ଖୋଜିବ",
+  "Mobile number (needed: any centre finds your form with it)": "ମୋବାଇଲ୍ ନମ୍ବର (ଆବଶ୍ୟକ: ଯେକୌଣସି କେନ୍ଦ୍ର ଏଥିରୁ ଆପଣଙ୍କ ଫର୍ମ ଖୋଜିବ)",
 };
 export default or;
