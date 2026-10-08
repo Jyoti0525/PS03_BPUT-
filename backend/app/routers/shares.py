@@ -134,7 +134,7 @@ def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
             "consent": {"mode": e.consent.mode, "proxy_relation": e.consent.proxy_relation} if e.consent else None,
         },
         note=note,
-        referral={"destination": ref.destination, "specialty": ref.specialty, "reason": ref.reason, "transport": ref.transport, "created_by": ref.created_by, "created_at": ref.created_at, "note_text": ref.note_text,
+        referral={"id": ref.id, "destination": ref.destination, "specialty": ref.specialty, "reason": ref.reason, "transport": ref.transport, "created_by": ref.created_by, "created_at": ref.created_at, "note_text": ref.note_text,
                   "status": ref.status, "received_by": ref.received_by, "received_at": ref.received_at} if ref else None,
         documents=docs,
         shared_by=s.created_by,

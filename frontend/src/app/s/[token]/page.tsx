@@ -1,7 +1,8 @@
 "use client";
 
 import { usePrefs } from "@/components/providers";
-import { fmtDateTime } from "@/lib/hooks";
+import { fmtDateTime, refCode } from "@/lib/hooks";
+import { langByCode } from "@/lib/i18n/languages";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { KeyRound, Printer, FileText, Building2, Clock, Send, AlertOctagon, AlertTriangle, Info, Lock, ExternalLink } from "lucide-react";
@@ -114,7 +115,7 @@ export default function SharedSummaryPage() {
                     {e?.urgency_source === "override" && <Badge tone="coral">{tr("Clinician override")}</Badge>}
                   </div>
                   <p className="mt-1 text-sm text-muted">
-                    {data.patient.age} y · {data.patient.sex} · <span className="font-mono">{data.patient.code}</span> {tr("· language")} {data.patient.language}
+                    {data.patient.age} y · {data.patient.sex} · <span className="font-mono">{data.patient.code}</span> · {tr(langByCode(data.patient.language).name)}
                   </p>
                   <p className="mt-2 font-medium text-ink">{tr(e?.chief_complaint)}</p>
                   <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
@@ -131,7 +132,7 @@ export default function SharedSummaryPage() {
 
             {data.referral && (
               <Card>
-                <CardHeader title={tr("Referred to {d}", { d: data.referral.destination })} subtitle={`${data.referral.specialty} · ${data.referral.transport.replace(/_/g, " ")} · by ${data.referral.created_by}`} icon={<Send className="size-4" />} />
+                <CardHeader title={tr("Referred to {d}", { d: data.referral.destination })} subtitle={`${data.referral.id ? `${refCode(data.referral.id)} · ` : ""}${data.referral.specialty} · ${data.referral.transport.replace(/_/g, " ")} · by ${data.referral.created_by}`} icon={<Send className="size-4" />} />
                 <p className="px-4 py-3 text-sm text-ink">{tr(data.referral.reason)}</p>
                 <ReceivedForm token={token} code={code} referral={data.referral} />
               </Card>

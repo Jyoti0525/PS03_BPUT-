@@ -622,7 +622,7 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
           <Textarea id="rf-text" rows={20} value={text} onChange={(e) => setText(e.target.value)} className="font-mono text-[13px]" />
         </div>
       </div>
-      <p className="mt-2 text-xs text-muted">{tr("Triage category:")} {enc.urgency && URGENCY_LABEL[enc.urgency]}{tr(". Export as PDF/FHIR from the case Export menu.")}</p>
+      <p className="mt-2 text-xs text-muted">{tr("Triage category:")} {enc.urgency && URGENCY_LABEL[enc.urgency]}{tr(". Export as PDF/FHIR from the case Share & export menu.")}</p>
     </Modal>
   );
 }

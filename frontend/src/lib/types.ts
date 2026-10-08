@@ -737,7 +737,7 @@ export interface SharedSummary {
     consent: { mode: ConsentMode; proxy_relation: string | null } | null;
   };
   note: Pick<TriageNote, "summary" | "flags" | "vitals" | "labs" | "timeline" | "missing_info" | "disagreements" | "rules_fired"> | null;
-  referral: { destination: string; specialty: string; reason: string; transport: string; created_by: string; created_at: string; note_text: string; status?: string; received_by?: string | null; received_at?: string | null } | null;
+  referral: { id?: string; destination: string; specialty: string; reason: string; transport: string; created_by: string; created_at: string; note_text: string; status?: string; received_by?: string | null; received_at?: string | null } | null;
   documents: { id: string; filename: string; kind: string; content_type: string; uploaded_at: string; url: string | null }[];
   shared_by: string;
   expires_at: string;

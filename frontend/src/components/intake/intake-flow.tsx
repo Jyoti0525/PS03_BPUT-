@@ -452,7 +452,8 @@ export function IntakeFlow({
     setBusy(true);
     try {
       const img = sampleReportImage(key, patient?.name ?? (newP.name || "Patient"));
-      const blob = await (await fetch(img.dataUrl)).blob();
+      // Decoded here, not with fetch(): the page's security policy does not allow fetching data: URLs.
+      const blob = new Blob([decodeURIComponent(img.dataUrl.slice(img.dataUrl.indexOf(",") + 1))], { type: "image/svg+xml" });
       const up = await api.uploadFile(new File([blob], `${key}_sample_report.svg`, { type: "image/svg+xml" }), "report", null, key, aiAssist);
       setFiles((cur) => [...cur, up]);
       toast(tr("Sample report attached"));
@@ -577,7 +578,8 @@ export function IntakeFlow({
         {result.patientCode && (
           <div className="mt-6 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
             <QRCodeSVG value={`jeevia:${result.patientCode}`} size={132} title={`${tr("QR code with your patient ID")} ${result.patientCode}`} />
-            <p className="mt-2 font-mono text-sm text-muted">{result.patientCode}</p>
+            <p className="mt-2 text-xs text-muted">{tr("Your patient ID — show it on your next visit")}</p>
+            <p className="font-mono text-base font-bold text-ink">{result.patientCode}</p>
           </div>
         )}
         <p className="mt-5 text-sm text-muted">

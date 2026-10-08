@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Send, Ambulance, Car, Footprints } from "lucide-react";
 import { api } from "@/lib/api";
-import { useAsync, timeAgo } from "@/lib/hooks";
+import { useAsync, timeAgo, refCode } from "@/lib/hooks";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, FieldError, Input, Label, Modal, Spinner } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
@@ -42,7 +42,7 @@ export default function ReferralsPage() {
               <li key={r.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-ink">
-                    <Link href={`/reviewer/case/${r.encounter_id}`} className="hover:underline">{r.patient_name}</Link> <span className="font-normal text-muted">→ {r.destination}</span>
+                    <Link href={`/reviewer/case/${r.encounter_id}`} className="hover:underline">{r.patient_name}</Link> <span className="font-normal text-muted">→ {r.destination}</span> <span className="ml-1 rounded bg-teal-50 px-1.5 py-0.5 font-mono text-xs font-medium text-teal-800">{refCode(r.id)}</span>
                   </p>
                   <p className="text-sm text-muted">{tr(r.specialty)} · {tr(r.reason)}</p>
                   <p className="text-xs text-subtle">{tr("by")} {r.created_by} · {timeAgo(r.created_at)}</p>
@@ -97,7 +97,7 @@ function ReceivedModal({ r, onClose, onDone }: { r: Referral; onClose: () => voi
       subtitle={tr("Close the referral only when the destination confirms the patient was seen. The receiving clinician can also confirm from the QR summary.")}
       footer={<><Button variant="secondary" onClick={onClose}>{tr("Cancel")}</Button><Button variant="teal" loading={busy} onClick={submit}>{tr("Close referral")}</Button></>}
     >
-      <p className="text-sm text-muted">{r.patient_name} → {r.destination}</p>
+      <p className="text-sm text-muted">{refCode(r.id)} · {r.patient_name} → {r.destination}</p>
       <div className="mt-3">
         <Label htmlFor="rc-who">{tr("Confirmed by")}</Label>
         <Input id="rc-who" value={who} onChange={(e) => setWho(e.target.value)} placeholder={tr("e.g. Dr Rao, casualty, District Hospital (phone)")} />

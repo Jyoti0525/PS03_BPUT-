@@ -59,7 +59,7 @@ def test_bhashini_used_only_when_offline_translation_cannot_run(monkeypatch):
 def test_bhashini_off_in_stub_profile(monkeypatch):
     from app.config import Settings
 
-    s = Settings(profile="stub", bhashini_user_id="u", bhashini_api_key="k")
+    s = Settings(profile="stub", JEEVIA_BHASHINI_USER_ID="u", JEEVIA_BHASHINI_API_KEY="k")
     assert s.bhashini_user_id == "u"  # an explicit setting wins over the profile
     assert Settings(profile="stub").bhashini_api_key is None
 
@@ -76,7 +76,8 @@ def test_offline_odia_voice_needs_no_network(client, nurse, monkeypatch):
     if not tts.available("or"):
         pytest.skip("MMS-TTS Odia model not downloaded")
     r = client.post(f"{API}/language/speak", json={"text": "ନମସ୍କାର", "language": "or", "allow_online": False}, headers=nurse)
-    assert r.status_code == 200 and r.headers["content-type"] == "audio/wav" and r.content[:4] == b"RIFF"
+    assert r.status_code == 200, r.text[:300]
+    assert r.headers["content-type"] == "audio/wav" and r.content[:4] == b"RIFF"
     assert r.headers["x-voice-engine"] == tts.ENGINE
 
 

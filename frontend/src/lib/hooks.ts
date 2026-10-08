@@ -74,6 +74,11 @@ export function timeAgo(iso: string, now = Date.now()) {
   return d > 1 ? gtr("{d} days ago", { d }) : gtr("1 day ago");
 }
 
+/** Short referral ID for slips, phone calls and the receiving team, e.g. REF-3F9A2C (the tail of the stored id). */
+export function refCode(id: string) {
+  return `REF-${id.replace(/^ref_/, "").slice(-6).toUpperCase()}`;
+}
+
 export function fmtWait(min: number) {
   if (min < 60) return gtr("{m}m", { m: min });
   return gtr("{h}h {m}m", { h: Math.floor(min / 60), m: min % 60 });
