@@ -103,3 +103,18 @@ def test_synthea_histories_load_once_and_show_a_trend(client, nurse, doctor):
     trend = client.get(f"{API}/encounters/{enc['id']}", headers=doctor).json()["note"]["trend"]
     bp = next(t for t in trend if t["parameter"].startswith("Systolic"))
     assert len(bp["points"]) >= 4 and bp["points"][-1] == {"label": "Today", "value": 150}
+
+
+def test_sample_hospital_clinic_and_camp_each_have_staff_and_a_queue(client):
+    from app.db import SessionLocal
+    from app.scenarios import facility_kinds
+
+    with SessionLocal() as db:
+        assert facility_kinds(db) is True
+        assert facility_kinds(db) is False
+    for phone, fac, n in (("9000000011", "fac_hospital_demo", 2), ("9000000015", "fac_clinic_demo", 1), ("9000000018", "fac_camp_demo", 2)):
+        h = login(client, phone)
+        q = client.get(f"{API}/queue?facility_id={fac}", headers=h).json()
+        assert len(q) == n, (fac, q)
+    hosp = login(client, "9000000011")
+    assert client.get(f"{API}/queue?facility_id=fac_hospital_demo", headers=hosp).json()[0]["urgency"] == "red"  # chest pain and sweating

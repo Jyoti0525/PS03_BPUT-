@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Smartphone, Stethoscope, HeartPulse, ClipboardList, UserRound, Briefcase, KeyRound, CheckCircle2, ShieldCheck, ArrowLeft, Syringe, LockKeyhole, Building2 } from "lucide-react";
-import { api, ApiError, getDeviceId } from "@/lib/api";
+import { api, API_MODE, ApiError, getDeviceId } from "@/lib/api";
 import { usePrefs, useSession } from "@/components/providers";
 import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
 import { SiteFooter, SiteHeader } from "@/components/site/site-chrome";
@@ -11,7 +11,7 @@ import { Button, Card, FieldError, Input, Label, Select, Segmented, cx } from "@
 import { toast } from "@/components/ui/toast";
 import { OtpBoxes, PinInput, NewPinFields, newPinError } from "@/components/auth/fields";
 import { WorkplacePicker, workplaceLabel, type Workplace } from "@/components/auth/workplace-picker";
-import { DEMO_LOGINS } from "@/lib/samples";
+import { DEMO_LOGINS, OTHER_FACILITY_LOGINS } from "@/lib/samples";
 import { SAMPLE_PIN } from "@/lib/pin";
 import { LANGUAGES } from "@/lib/i18n/languages";
 import { PIN_ROLES, type FacilityType, type NewOrganisationInput, type OrgKind, type OtpChallenge, type OtpVerifyResult, type Role, type User } from "@/lib/types";
@@ -579,6 +579,23 @@ function AuthInner() {
                   </button>
                 ))}
               </div>
+              {API_MODE === "live" && (
+                <>
+                  <p className="mt-3 text-xs font-semibold text-teal-800">{tr("Other facilities")}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {OTHER_FACILITY_LOGINS.map((d) => (
+                      <button
+                        key={d.phone}
+                        disabled={busy}
+                        onClick={() => void sampleSignIn(d.phone)}
+                        className="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-xs font-medium text-teal-800 hover:bg-teal-100"
+                      >
+                        {tr(d.label)}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

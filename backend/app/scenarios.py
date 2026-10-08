@@ -12,6 +12,8 @@
 * Long histories (Synthea): 12 people at PHC Manikpur with up to six earlier visits each, from Synthea's simulated
   lives re-cast with synthetic Indian names (app/synthea_histories.json, scripts/import_synthea.py). A new visit by any
   of them shows the blood-pressure (and glucose) trend across those visits.
+* Facility types: a sample district hospital (Puri), a private clinic (Bhubaneswar) and an NGO health camp (Kandhamal),
+  each with its own staff (phones 9000000011–18) and one or two patients waiting.
 * Occupational (D2): Kalinga Steel Works workers screened today in three departments (6 crusher, 6 furnace, 5
   stores); the crusher workers were also screened last year, so FEV1 is compared with their own earlier value.
 
@@ -153,6 +155,61 @@ def scenarios(db) -> bool:
     return True
 
 
+FACILITY_KINDS = [  # (facility, staff, waiting patients): one sample of each type the PS names that the scenarios above lack
+    (dict(id="fac_hospital_demo", name="District Headquarters Hospital, Puri (sample)", type="hospital", district="Puri", state="Odisha",
+          languages=["or", "hi", "en"], referral_destination="SCB Medical College, Cuttack (60 km)", beds_total=120, beds_occupied=94,
+          specialists=[{"key": "genmed", "label": "General Medicine", "available": True, "schedule": "Daily"},
+                       {"key": "obgyn", "label": "Obstetrics & Gynaecology", "available": True, "schedule": "Daily"},
+                       {"key": "paeds", "label": "Paediatrics", "available": True, "schedule": "Daily"},
+                       {"key": "cardio", "label": "Cardiology", "available": False, "schedule": "Visiting Tuesday", "refer_to": "SCB Medical College, Cuttack"}],
+          capabilities={"lab": True, "xray": True, "ecg": True, "oxygen": True, "ambulance": True, "pharmacy": True, "labour_room": True}),
+     [("usr_doc_hosp", "9000000011", "Dr. Ritu Panda (Casualty Medical Officer)", "doctor", "OMC-40211", "or"),
+      ("usr_mo_hosp", "9000000012", "Dr. Manoj Rath (Medical Officer i/c)", "medical_officer", "OMC-38804", "en"),
+      ("usr_nurse_hosp", "9000000013", "Lipika Das (Staff Nurse)", "nurse", "ONC-20931", "or"),
+      ("usr_recep_hosp", "9000000014", "Sanjay Behera (Registration Counter)", "receptionist", None, "or")],
+     [("JVA-H301", "Hari Pradhan", 58, "M", "Chest pain and sweating for one hour", {**NORMAL, "pulse": 108, "bp_systolic": 150, "bp_diastolic": 96}),
+      ("JVA-H302", "Mamata Sahu", 34, "F", "Fever for three days with body ache", {**NORMAL, "temp_f": 101.4})]),
+    (dict(id="fac_clinic_demo", name="Sai Family Clinic, Bhubaneswar (sample)", type="clinic", district="Khordha", state="Odisha",
+          languages=["or", "en"], referral_destination="Capital Hospital, Bhubaneswar (5 km)", beds_total=0, beds_occupied=0,
+          specialists=[{"key": "genmed", "label": "General Practice", "available": True, "schedule": "Mon–Sat, 9–1 and 5–8"}],
+          capabilities={"lab": False, "xray": False, "ecg": True, "oxygen": False, "ambulance": False, "pharmacy": True}),
+     [("usr_doc_clinic", "9000000015", "Dr. Pravat Mishra (General Practitioner)", "doctor", "OMC-29560", "or"),
+      ("usr_recep_clinic", "9000000016", "Rina Swain (Front Desk)", "receptionist", None, "or")],
+     [("JVA-C401", "Bijay Nayak", 46, "M", "Headache and blood pressure check", {**NORMAL, "bp_systolic": 146, "bp_diastolic": 92})]),
+    (dict(id="fac_camp_demo", name="Village Health Camp, Phulbani (sample)", type="health_camp", district="Kandhamal", state="Odisha",
+          languages=["or", "hi"], referral_destination="District Headquarters Hospital, Phulbani (18 km)", beds_total=0, beds_occupied=0, offline_mode=True,
+          specialists=[{"key": "genmed", "label": "General Medicine", "available": False, "schedule": "Camp doctor visits 11–2"}],
+          capabilities={"lab": False, "xray": False, "ecg": False, "oxygen": False, "ambulance": False, "pharmacy": True}),
+     [("usr_hw_camp", "9000000017", "Saraswati Kanhar (ASHA)", "health_worker", None, "or"),
+      ("usr_nurse_camp", "9000000018", "Jyotsna Mallick (ANM)", "nurse", "ONC-31544", "or")],
+     [("JVA-K501", "Ghasi Digal", 3, "M", "Child with loose motions since yesterday", {**NORMAL, "pulse": 120, "resp_rate": 30, "temp_f": 99.6}),
+      ("JVA-K502", "Sumitra Pradhan", 61, "F", "Knee pain for two months", NORMAL)]),
+]
+
+
+def facility_kinds(db) -> bool:
+    """A sample hospital, clinic and health camp, each with its own staff and patients waiting. Idempotent."""
+    if db.get(Facility, "fac_hospital_demo") or not db.get(Facility, "fac_phc_manikpur"):
+        return False
+    now = datetime.now(timezone.utc)
+    if not db.get(Organisation, "org_camp_demo"):
+        db.add(Organisation(id="org_camp_demo", name="Kandhamal Health Camps Trust (sample NGO)", kind="ngo", state="Odisha", district="Kandhamal", verified=False))
+        db.flush()
+    for fac, staff, waiting in FACILITY_KINDS:
+        org = {"source": "organisation", "organisation_id": "org_camp_demo"} if fac["type"] == "health_camp" else {}
+        db.add(Facility(**fac, **org))
+        db.flush()
+        for uid, phone, name, role, reg, lang in staff:
+            _user(db, uid, phone, name, role, fac["id"], reg, lang)
+        for i, (code, name, age, sex, chief, vitals) in enumerate(waiting):
+            p = _patient(db, code, f"{name} (sample)", age, sex, language="or")
+            _visit(db, p, fac["id"], now - (20 + 15 * i) * timedelta(minutes=1), chief, vitals=vitals)
+    db.add(Device(id="dev_kiosk_camp_1", label="Camp tablet", facility_id="fac_camp_demo", bound_by="Demo scenario", bound_at=now, last_seen_at=now))
+    audit.record(db, None, "CONFIG", "system", None, "Sample hospital, clinic and health camp added (synthetic)")
+    db.commit()
+    return True
+
+
 def call_scenarios(db) -> bool:
     """E6 demo follow-ups (added separately so an existing demo database gets them too). Idempotent."""
     from . import alerts as al
@@ -223,6 +280,7 @@ def main() -> None:
     with SessionLocal() as db:
         print("Demo scenarios added." if scenarios(db) else "Demo scenarios already present (or base seed missing).")
         print("Call scenarios added." if call_scenarios(db) else "Call scenarios already present (or base seed missing).")
+        print("Hospital, clinic and camp added." if facility_kinds(db) else "Hospital, clinic and camp already present (or base seed missing).")
         if get_settings().seed_synthea:
             print("Synthea histories added." if synthea_histories(db) else "Synthea histories already present (or base seed missing).")
 
