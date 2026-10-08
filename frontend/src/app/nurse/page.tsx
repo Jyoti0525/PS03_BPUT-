@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import { useAsync, useNow, fmtWait } from "@/lib/hooks";
 import { usePrefs, useSession } from "@/components/providers";
 import { AutoUpdates, PageHeader } from "@/components/layout/app-shell";
-import { Badge, Button, Card, Empty, ErrorNote, Input, Segmented, Spinner, Stat, cx } from "@/components/ui";
+import { Badge, Button, Card, Empty, ErrorNote, Input, Spinner, cx } from "@/components/ui";
 import { UrgencyBadge, english, urgencyBar } from "@/components/triage/note";
 
 /** Nursing station: every waiting patient, with what still needs doing at the bedside (vitals, observations). */
@@ -17,13 +17,15 @@ export default function NurseHome() {
   const fid = user!.facility_id!;
   const { data, error, loading, reload } = useAsync(() => api.queue(fid), [fid], { pollMs: 15_000 });
   const now = useNow(30_000);
-  const [filter, setFilter] = useState<"todo" | "all">("todo");
+  const [filter, setFilter] = useState<"todo" | "all" | "red" | "observed">("todo");
   const [q, setQ] = useState("");
 
   const needVitals = (data ?? []).filter((i) => !i.vitals_recorded && !i.observation_count);
+  const critical = (data ?? []).filter((i) => i.urgency === "red");
+  const observed = (data ?? []).filter((i) => (i.observation_count ?? 0) > 0);
   const items = useMemo(() => {
     const s = q.trim().toLowerCase();
-    const base = filter === "todo" ? needVitals : data ?? [];
+    const base = { todo: needVitals, all: data ?? [], red: critical, observed }[filter];
     return base.filter((i) => !s || `${i.patient_name} ${i.patient_code} ${i.token ?? ""}`.toLowerCase().includes(s));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, filter, q]);
@@ -35,23 +37,31 @@ export default function NurseHome() {
         subtitle={tr("Record vitals and bedside observations. The doctor sees them in the case straight away.")}
         actions={<AutoUpdates />}
       />
-      <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label={tr("Waiting")} value={data?.length ?? 0} />
-        <Stat label={tr("Vitals still needed")} value={needVitals.length} tone={needVitals.length ? "semi" : "rout"} />
-        <Stat label={tr("Critical")} value={data?.filter((i) => i.urgency === "red").length ?? 0} tone="crit" hint={tr("Attend first")} />
-        <Stat label={tr("Observed")} value={(data ?? []).filter((i) => (i.observation_count ?? 0) > 0).length} tone="teal" />
+      <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4" role="group" aria-label={tr("Show")}>
+        {(
+          [
+            ["todo", tr("Vitals still needed"), needVitals.length, needVitals.length ? "text-semi" : "text-rout", tr("Start here")],
+            ["all", tr("Waiting"), data?.length ?? 0, "text-ink", tr("Everyone in the queue")],
+            ["red", tr("Critical"), critical.length, "text-crit", tr("Attend first")],
+            ["observed", tr("Observed"), observed.length, "text-teal-700", tr("Observations recorded")],
+          ] as const
+        ).map(([v, label, n, color, hint]) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setFilter(v)}
+            aria-pressed={filter === v}
+            className={cx("rounded-[var(--radius-card)] border bg-surface px-4 py-3 text-left shadow-[var(--shadow-card)] transition-colors", filter === v ? "border-ink ring-1 ring-ink" : "border-line hover:border-subtle")}
+          >
+            <span className="block text-xs font-medium tracking-wide text-muted uppercase">{label}</span>
+            <span className={cx("mt-1 block text-2xl font-bold tabular-nums", color)}>{n}</span>
+            <span className="mt-0.5 block text-xs text-subtle">{hint}</span>
+          </button>
+        ))}
       </div>
       <Card>
         <div className="flex flex-wrap items-center gap-3 border-b border-line p-3">
-          <Segmented
-            value={filter}
-            onChange={setFilter}
-            options={[
-              { value: "todo", label: tr("Vitals needed"), count: needVitals.length },
-              { value: "all", label: tr("All waiting"), count: data?.length },
-            ]}
-          />
-          <div className="relative ml-auto w-full sm:w-64">
+          <div className="relative w-full">
             <Search className="absolute top-3 left-3 size-4 text-subtle" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("Name, ID or token")} className="h-10 pl-9" aria-label={tr("Filter patients")} />
           </div>

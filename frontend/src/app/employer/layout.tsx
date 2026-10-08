@@ -12,10 +12,10 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
       <AppShell
         section={tr("Employer")}
         nav={[
-          { href: "/employer", label: "Fitness overview", icon: <Briefcase />, exact: true },
-          { href: "/employer/workers", label: "Workers", icon: <Users /> },
-          { href: "/employer/workplaces", label: "Workplaces", icon: <Building2 /> },
-          { href: "/employer/organisation", label: "Organisation", icon: <Landmark /> },
+          { href: "/employer", label: tr("Fitness overview"), icon: <Briefcase />, exact: true },
+          { href: "/employer/workers", label: tr("Workers"), icon: <Users /> },
+          { href: "/employer/workplaces", label: tr("Workplaces"), icon: <Building2 /> },
+          { href: "/employer/organisation", label: tr("Organisation"), icon: <Landmark /> },
         ]}
       >
         {children}

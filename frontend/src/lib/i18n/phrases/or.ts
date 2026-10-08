@@ -2036,5 +2036,8 @@ const or: Record<string, string> = {
   "Show": "ଦେଖାନ୍ତୁ",
   "Most urgent first. Each row says why it is where it is; critical cases escalate after 15 minutes.": "ସବୁଠୁ ଜରୁରୀ ପ୍ରଥମେ। ପ୍ରତ୍ୟେକ ଧାଡ଼ି କହେ ଏହା କାହିଁକି ସେଠାରେ ଅଛି; ଗମ୍ଭୀର ମାମଲା 15 ମିନିଟ ପରେ ଆଗକୁ ପଠାଯାଏ।",
   "Sample accounts: one click signs in (OTP 123456 · staff PIN {pin})": "ନମୁନା ଖାତା: ଗୋଟିଏ କ୍ଲିକରେ ସାଇନ୍ ଇନ୍ (OTP 123456 · କର୍ମଚାରୀ ପିନ୍ {pin})",
+  "Start here": "ଏଠାରୁ ଆରମ୍ଭ କରନ୍ତୁ",
+  "Everyone in the queue": "ଧାଡ଼ିରେ ଥିବା ସମସ୍ତେ",
+  "Observations recorded": "ଅବଲୋକନ ଲେଖାଗଲା",
 };
 export default or;
