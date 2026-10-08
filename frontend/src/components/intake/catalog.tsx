@@ -83,7 +83,12 @@ function allQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_s
     (!c.sex || draft.sex === c.sex) &&
     (!c.duration_unset_or || !draft.duration || draft.duration === c.duration_unset_or) &&
     (!c.any || c.any.some(holds));
-  const qs = FLOW.filter((q) => holds(q.when ?? {})).map((q) => ({ qid: q.qid, question: q.question, options: q.options.map((o) => o.label) }));
+  const qs = FLOW.filter((q) => holds(q.when ?? {})).map((q) =>
+    // "Today" was already tapped: narrow it down instead of asking "since when" a second time.
+    q.qid === "dur" && draft.duration === "today"
+      ? { qid: q.qid, question: "You said today. Did it start in the last few hours?", options: ["In the last few hours", "Earlier today"] }
+      : { qid: q.qid, question: q.question, options: q.options.map((o) => o.label) },
+  );
   const first = new Set(FLOW.filter((q) => q.position === "first").map((q) => q.qid));
   return [...qs.filter((q) => first.has(q.qid)), ...qs.filter((q) => !first.has(q.qid))];
 }

@@ -2130,5 +2130,7 @@ const or: Record<string, string> = {
   "Forms filled in for any centre start with J-. Type it, or scan the patient's QR with a phone camera.": "ଯେକୌଣସି କେନ୍ଦ୍ର ପାଇଁ ଭରାଯାଇଥିବା ଫର୍ମ J- ରୁ ଆରମ୍ଭ ହୁଏ। ଏହାକୁ ଲେଖନ୍ତୁ, କିମ୍ବା ଫୋନ୍ କ୍ୟାମେରାରେ ରୋଗୀଙ୍କ QR ସ୍କାନ୍ କରନ୍ତୁ।",
   "Form reference": "ଫର୍ମ ସନ୍ଦର୍ଭ",
   "Check in": "ଚେକ୍-ଇନ୍ କରନ୍ତୁ",
+  "You said today. Did it start in the last few hours?": "ଆପଣ ଆଜି କହିଲେ। ଏହା ଗତ କିଛି ଘଣ୍ଟା ଭିତରେ ଆରମ୍ଭ ହେଲା କି?",
+  "Earlier today": "ଆଜି ଆଗରୁ",
 };
 export default or;

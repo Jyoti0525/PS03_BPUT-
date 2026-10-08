@@ -2130,5 +2130,7 @@ const hi: Record<string, string> = {
   "Forms filled in for any centre start with J-. Type it, or scan the patient's QR with a phone camera.": "किसी भी केंद्र के लिए भरे गए फ़ॉर्म J- से शुरू होते हैं। इसे लिखें, या फ़ोन कैमरे से मरीज़ का QR स्कैन करें।",
   "Form reference": "फ़ॉर्म संदर्भ",
   "Check in": "चेक-इन करें",
+  "You said today. Did it start in the last few hours?": "आपने आज बताया। क्या यह पिछले कुछ घंटों में शुरू हुआ?",
+  "Earlier today": "आज ही, लेकिन उससे पहले",
 };
 export default hi;

@@ -565,6 +565,12 @@ export function IntakeFlow({
         <p className="mt-6 text-sm text-muted">
           {t("kiosk.home.token")}: <span className="font-mono font-bold text-ink">{result.token}</span>
         </p>
+        {result.token.startsWith("J-") && (
+          <div className="mt-4 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
+            <QRCodeSVG value={`${window.location.origin}/desk?claim=${result.token}`} size={160} title={`${tr("QR code with your reference")} ${result.token}`} />
+            <p className="mt-2 text-xs text-muted">{tr("Take a photo or screenshot of this screen")}</p>
+          </div>
+        )}
       </Card>
     );
   }
@@ -1226,11 +1232,12 @@ export function IntakeFlow({
             <Row k="Consent" v={consentMode === "proxy" ? tr("Given by {name} ({rel})", { name: proxyName, rel: tr(proxyRel) }) : "Given by patient"} />
             <Row k="Computer helpers" v={aiAssist ? "Use AI helpers" : "Continue without AI"} />
             <Row k="Visit" v={category ?? "—"} />
-            <Row k="Problem" v={chief || "—"} />
+            {/* The patient checks their own words, not the English translation staff read. */}
+            <Row k="Problem" v={entries.find((e) => !lowHeard.has(e.original_text))?.original_text?.trim() || typed.trim() || chief || "—"} />
             {selected.some((x) => !chief.toLowerCase().includes(x.toLowerCase())) && <Row k="Also" v={selected.filter((x) => !chief.toLowerCase().includes(x.toLowerCase())).map((x) => tr(x)).join(", ")} />}
             <Row k="Since" v={duration ?? answers.dur?.answer ?? "—"} />
             <Row k="Files" v={tr("{n} report / photo", { n: files.filter((f) => f.kind !== "audio").length })} />
-            {Object.values(answers).length > 0 && <Row k="Answers" v={Object.values(answers).map((a) => a.answer).join(" · ")} />}
+            {Object.values(answers).length > 0 && <Row k="Answers" v={Object.values(answers).map((a) => tr(a.answer)).join(" · ")} />}
             {offline && (
               <p className="flex items-center gap-2 rounded-xl bg-semi-bg px-3 py-2 text-sm font-medium text-semi">
                 <WifiOff className="size-4" /> {t("kiosk.offline")}
