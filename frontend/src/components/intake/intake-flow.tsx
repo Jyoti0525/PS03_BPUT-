@@ -24,6 +24,9 @@ import { fmtDate } from "@/lib/hooks";
 import { FIELDS as VITAL_FIELDS } from "@/components/triage/observations";
 import { DURATIONS, SEVERITIES, SYMPTOMS, contextQuestions } from "./catalog";
 
+// The built-in contact (backend config default) is shown in the patient's language; a facility's own text is shown as typed.
+const DEFAULT_GRIEVANCE = "Grievance officer at this facility's front desk, or call 104";
+
 /** One speech engine's hearing of a recording (B9); `differences` non-empty = the two engines disagree. */
 type Hearing = { engine: string; text: string; translation?: string | null; differences: string[] };
 
@@ -583,7 +586,7 @@ export function IntakeFlow({
           </div>
         )}
         <p className="mt-5 text-sm text-muted">
-          {t("kiosk.done.grievance")} {result.grievanceContact ?? t("kiosk.done.grievance.default")}
+          {t("kiosk.done.grievance")} {!result.grievanceContact || result.grievanceContact === DEFAULT_GRIEVANCE ? t("kiosk.done.grievance.default") : result.grievanceContact}
         </p>
         {home && <p className="mt-5 rounded-xl border border-crit-line bg-crit-bg px-4 py-2.5 text-sm font-medium text-crit">{t("kiosk.home.danger")}</p>}
         {result.offline && (

@@ -447,5 +447,16 @@ const kn: Record<string, string> = {
   "Sudden — within minutes": "ಇದ್ದಕ್ಕಿದ್ದಂತೆ — ಕೆಲವೇ ನಿಮಿಷಗಳಲ್ಲಿ",
   "Yes — awake and normal": "ಹೌದು — ಎಚ್ಚರವಾಗಿದ್ದು ಸಾಮಾನ್ಯ",
   "Yes — on one side": "ಹೌದು — ಒಂದು ಬದಿಯಲ್ಲಿ",
+  "Health worker (ASHA / MPW)": "ಆರೋಗ್ಯ ಕಾರ್ಯಕರ್ತೆ (ಆಶಾ / ಎಂಪಿಡಬ್ಲ್ಯು)",
+  "Short notes, confirm GREEN, maternal follow-ups": "ಸಣ್ಣ ಟಿಪ್ಪಣಿ, ಹಸಿರು ದೃಢೀಕರಿಸಿ, ತಾಯಿ-ಮಗು ಫಾಲೋ-ಅಪ್",
+  "As a doctor, plus capacity and outbreak alerts": "ವೈದ್ಯರಂತೆ, ಜೊತೆಗೆ ಸಾಮರ್ಥ್ಯ ಮತ್ತು ಸಾಂಕ್ರಾಮಿಕ ಎಚ್ಚರಿಕೆಗಳು",
+  "Run the kiosk, record vitals, confirm up to YELLOW": "ಕಿಯೋಸ್ಕ್ ನಡೆಸಿ, ವೈಟಲ್ಸ್ ದಾಖಲಿಸಿ, ಹಳದಿವರೆಗೆ ದೃಢೀಕರಿಸಿ",
+  "Review triage notes, override, refer": "ಟ್ರಯಾಜ್ ಟಿಪ್ಪಣಿ ಪರಿಶೀಲಿಸಿ, ಬದಲಿಸಿ, ರೆಫರ್ ಮಾಡಿ",
+  "Register patients, manage kiosk devices": "ರೋಗಿಗಳನ್ನು ನೋಂದಾಯಿಸಿ, ಕಿಯೋಸ್ಕ್ ಸಾಧನಗಳನ್ನು ನಿರ್ವಹಿಸಿ",
+  "Facility setup, staff, audit": "ಕೇಂದ್ರ ಸೆಟಪ್, ಸಿಬ್ಬಂದಿ, ಆಡಿಟ್",
+  "Register your company, campus or camp": "ನಿಮ್ಮ ಕಂಪನಿ, ಕ್ಯಾಂಪಸ್ ಅಥವಾ ಶಿಬಿರ ನೋಂದಾಯಿಸಿ",
+  "Employer / Organisation": "ಉದ್ಯೋಗದಾತ / ಸಂಸ್ಥೆ",
+  "Medical Officer": "ವೈದ್ಯಾಧಿಕಾರಿ",
+  "Receptionist": "ಸ್ವಾಗತಕಾರ",
 };
 export default kn;

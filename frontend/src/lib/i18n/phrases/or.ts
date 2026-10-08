@@ -2062,5 +2062,9 @@ const or: Record<string, string> = {
   "Sudden — within minutes": "ହଠାତ୍ — କିଛି ମିନିଟରେ",
   "Yes — awake and normal": "ହଁ — ଜାଗ୍ରତ ଓ ସାଧାରଣ",
   "Yes — on one side": "ହଁ — ଗୋଟିଏ ପାଖରେ",
+  "Health worker (ASHA / MPW)": "ସ୍ୱାସ୍ଥ୍ୟ କର୍ମୀ (ଆଶା / ଏମପିଡବ୍ଲୁ)",
+  "Short notes, confirm GREEN, maternal follow-ups": "ଛୋଟ ନୋଟ, ସବୁଜ ନିଶ୍ଚିତ କରନ୍ତୁ, ମା ଓ ଶିଶୁ ଫଲୋ-ଅପ",
+  "As a doctor, plus capacity and outbreak alerts": "ଡାକ୍ତରଙ୍କ ପରି, ସହିତ କ୍ଷମତା ଓ ମହାମାରୀ ସତର୍କତା",
+  "Run the kiosk, record vitals, confirm up to YELLOW": "କିଓସ୍କ ଚଲାନ୍ତୁ, ଭାଇଟାଲ୍ସ ଲେଖନ୍ତୁ, ହଳଦିଆ ପର୍ଯ୍ୟନ୍ତ ନିଶ୍ଚିତ କରନ୍ତୁ",
 };
 export default or;

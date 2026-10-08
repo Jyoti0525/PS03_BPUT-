@@ -2062,5 +2062,9 @@ const hi: Record<string, string> = {
   "Sudden — within minutes": "अचानक — कुछ मिनटों में",
   "Yes — awake and normal": "हाँ — जागा हुआ और सामान्य",
   "Yes — on one side": "हाँ — एक तरफ़",
+  "Health worker (ASHA / MPW)": "स्वास्थ्य कार्यकर्ता (आशा / एमपीडब्ल्यू)",
+  "Short notes, confirm GREEN, maternal follow-ups": "छोटे नोट, हरा पुष्टि करें, माँ और शिशु का फ़ॉलो-अप",
+  "As a doctor, plus capacity and outbreak alerts": "डॉक्टर जैसा, साथ में क्षमता और प्रकोप अलर्ट",
+  "Run the kiosk, record vitals, confirm up to YELLOW": "कियोस्क चलाएँ, वाइटल्स दर्ज करें, पीले तक पुष्टि करें",
 };
 export default hi;
