@@ -578,6 +578,9 @@ export function IntakeFlow({
         <p className="mt-2 text-lg text-muted">{home ? t("kiosk.home.body") : t("kiosk.done.body")}</p>
         <p className="mt-6 text-sm font-semibold tracking-wider text-muted uppercase">{home ? t("kiosk.home.token") : t("kiosk.done.token")}</p>
         <p className="text-6xl font-extrabold tracking-tight text-ink tabular-nums">{result.token}</p>
+        <button type="button" onClick={() => speak(`${home ? t("kiosk.home.token") : t("kiosk.done.token")}: ${result.token.split("").join(" ")}`, lang)} className="mt-3 inline-flex min-h-12 items-center gap-1 rounded-full bg-canvas px-4 text-sm font-semibold text-ink-2 hover:bg-line" aria-label={t("common.listen")}>
+          <Volume2 className="size-4" /> {t("common.listen")}
+        </button>
         {result.patientCode && (
           <div className="mt-6 inline-flex flex-col items-center rounded-2xl border border-line bg-white p-4">
             <QRCodeSVG value={`jeevia:${result.patientCode}`} size={132} title={`${tr("QR code with your patient ID")} ${result.patientCode}`} />

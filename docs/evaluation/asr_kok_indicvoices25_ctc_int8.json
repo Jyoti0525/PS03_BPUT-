@@ -1,0 +1,211 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "kok",
+  "clips": 23,
+  "rejected_by_app": [
+   {
+    "file": "kok_002.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   },
+   {
+    "file": "kok_003.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   }
+  ],
+  "audio_seconds": 102.5,
+  "wer": 0.33,
+  "cer": 0.109,
+  "real_time_factor": 0.542,
+  "process_private_gb": 1.7,
+  "process_peak_working_set_gb": 1.07,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "kok_000.wav",
+   "reference": "देखून शाहा आलमाक परत येवचें पडलें आनी तेवटेन सुरतांत दुकळ पडलो",
+   "heard": "देखून शाह आलमाक परत येवचें पडलें आनी तेवटेन सुरतांत दुकोल पडलो",
+   "wer": 0.182,
+   "confidence": 0.931,
+   "english": "So Shah Alam had to return and there was a famine in Surat."
+  },
+  {
+   "file": "kok_001.wav",
+   "reference": "सुकणें",
+   "heard": "सुकणें",
+   "wer": 0.0,
+   "confidence": 0.954,
+   "english": "the birds"
+  },
+  {
+   "file": "kok_004.wav",
+   "reference": "हय हय हय",
+   "heard": "यो यो यो",
+   "wer": 1.0,
+   "confidence": 0.965,
+   "english": "yo yo"
+  },
+  {
+   "file": "kok_005.wav",
+   "reference": "या मुगो कोणे ना म्हणला हांवूय बेकारूच आसा यो",
+   "heard": "ना मुगो कोणें ना म्हणला यो हांवूंय बेकारूच आसा यो",
+   "wer": 0.444,
+   "confidence": 0.937,
+   "english": "No, no, no, no, no. No, no. No, no. No, no. No, no. I'm also useless."
+  },
+  {
+   "file": "kok_006.wav",
+   "reference": "आगो तुका सांगपाचे म्हणल्यार रिबंदरच्यान मुगो चोडना फेरीबोट आसा थंय म्हाका सलीम अली बर्ड सेंच्यूरी पळोवपाक मेळटली",
+   "heard": "आगो तुका सांगपाचें म्हणळ्यार रिबंदरच्यान मुगो चोडणा फेरीबोट आसा थंय आमकां सलीम अली बर्ड सेंन्च्युरी पळोवपाक मेळटली",
+   "wer": 0.294,
+   "confidence": 0.907,
+   "english": "Let me tell you first, there is a ferry boat from Ribandar to Mugo Chodna where we can see Salim Ali Bird Sanctuary."
+  },
+  {
+   "file": "kok_007.wav",
+   "reference": "दुसरे म्हळ्यार मुगो ओल्ड गोयच्यान दिवाडेर आसा थंय बोनेरा हो उत्सव व्हड प्रमाणान जाता दर वर्सा आ आनी सगळ्यांत लागी म्हणल्यार मुगो पणजे जेटी वयल्यान वेऱ्या बेती",
+   "heard": "दुसरें म्हळळ्यार मुगो ओल्ड गोंयच्यान दिवाडे घसा थंय बोनेराां मुगो हो उत्सव व्हड प्रमाणान जाता दर वर्सा आनी सगळ्यान लागीं म्हळ्यार मुगो पणजे चेट्टी वेयल्यान वेरें बेती",
+   "wer": 0.519,
+   "confidence": 0.891,
+   "english": "Secondly, Mugu Old Goa to Divade Ghas where the Bonera Mugu festival is held on a large scale every year and the nearest one is Mugu Panje Chetty Vela to Vera Beti."
+  },
+  {
+   "file": "kok_008.wav",
+   "reference": "थंय मुगो सीख धर्माचो गुरूद्ववार आसा आनी मायी हया नित्याची जेट्टी आसा ती आमकां पळोवपाक मेळटली",
+   "heard": "थंय मुगो सीख धर्माचो गुरुद्वारा आसा आनी मई ह्या नुस्त्याची जेट्टी आसा ती आमकां पळोवपाक मेळटली",
+   "wer": 0.25,
+   "confidence": 0.92,
+   "english": "There is a Gurudwara of Mugu Sikhism and we can see the fish jetty of May."
+  },
+  {
+   "file": "kok_009.wav",
+   "reference": "आगो दोन चाकी फूकट आनी चार चाकी गाडयांक टिकेट काडची पडटा",
+   "heard": "आगो दोन चाकी फुकट आनी चार चाकी गाडयांक तिकेट काडची पडटा",
+   "wer": 0.182,
+   "confidence": 0.964,
+   "english": "Tickets have to be picked up for two-wheelers free of cost and four-wheelers first."
+  },
+  {
+   "file": "kok_010.wav",
+   "reference": "आमकां मनशांक मुगो फूकट",
+   "heard": "आमकां मनशांक मुगो फुकट",
+   "wer": 0.25,
+   "confidence": 0.927,
+   "english": "Give us humans for free."
+  },
+  {
+   "file": "kok_011.wav",
+   "reference": "हय हय हय",
+   "heard": "हय हय हय",
+   "wer": 0.0,
+   "confidence": 0.904,
+   "english": "Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes Yes"
+  },
+  {
+   "file": "kok_012.wav",
+   "reference": "आगो वेळ म्हणलायर सगळे मुगो सुकती भरतीचेर अवलंबून आसा जर तर भरती आसा गो जाल्यार फेरीबोटी रोकड्यो पावता आनी जर सुकती आसा नी जाल्यार मात्श्यो त्यो सवका वता",
+   "heard": "आगो वेळ म्हणळ्यार सगळें मुगो सुक्ती भरतीचेर अवलंबून आसा जर तरर भरती आसा गो जाल्यार फेरीबोटी रोखड्यो पावतात आनी जर सुक्ती आसा न्ही जाल्यार मात्शो तर सवक वतात",
+   "wer": 0.429,
+   "confidence": 0.888,
+   "english": "Before time, it all depends on the tide. If it's hot, ferry boats arrive early, and if it's not, it's a little slow."
+  },
+  {
+   "file": "kok_013.wav",
+   "reference": "हय आमची हिंदी पिच्चरांनी खूब दाखयल्यात फेरीबोटी थंयचो सैम मुगो खुबूच वेगळो खुबूच मोलादिक म्हणटात तसो",
+   "heard": "हय आमची हिंदी पिक्चरांनी खूब दाखयल्यात फेरीबोटी थंयचो सैम मगो खुबूच वेगळो खुबूच मोलादीक म्हणटात तसो",
+   "wer": 0.188,
+   "confidence": 0.94,
+   "english": "Yes, our Hindi films have shown a lot of ferry boats, the nature there is very unique and very precious."
+  },
+  {
+   "file": "kok_014.wav",
+   "reference": "आगो तितले तू भियेनाका फेरी बोटी मुगो पंदरा ते वीसूच मिनटां घेता रोकड्यो पावतात त्यो",
+   "heard": "आगो इतलें तूं भियेनाका फेरीबोटी मुगो पंदरा ते वीसच मिनटां घेतात रोोकड्यो पावतात त्यो",
+   "wer": 0.467,
+   "confidence": 0.917,
+   "english": "It takes fifteen to twenty minutes before you can board a ferry to Vienna and reach Rokkadai."
+  },
+  {
+   "file": "kok_015.wav",
+   "reference": "ना ना ना ना यो तू",
+   "heard": "ना ना ना ना यो तूं",
+   "wer": 0.167,
+   "confidence": 0.955,
+   "english": "No, no, no, it's you."
+  },
+  {
+   "file": "kok_016.wav",
+   "reference": "यो यो यो यो यो रावलां तुका हांव बेगीनूच यो हां चड वेळ काडनाका",
+   "heard": "यो यो यो यो यो यो रावलां तुका हांव बेगीनूच यो हं चड वेळ काडनाका",
+   "wer": 0.143,
+   "confidence": 0.91,
+   "english": "yo yo yo yo yo yo I won't take you long to yo yo yo"
+  },
+  {
+   "file": "kok_017.wav",
+   "reference": "मेळया मेळया मेळया चलो बाय",
+   "heard": "मेळया मेळया मेळया चल बाय",
+   "wer": 0.2,
+   "confidence": 0.922,
+   "english": "mela mela mela let's go by"
+  },
+  {
+   "file": "kok_018.wav",
+   "reference": "इकरा पन्नास पांचशें अयशीं",
+   "heard": "इकरा पन्नास पांचशें अंयशीं",
+   "wer": 0.25,
+   "confidence": 0.868,
+   "english": "eleven fifty five hundred and eighty"
+  },
+  {
+   "file": "kok_019.wav",
+   "reference": "पांचशें",
+   "heard": "पांचें",
+   "wer": 1.0,
+   "confidence": 0.721,
+   "english": "The 5th"
+  },
+  {
+   "file": "kok_020.wav",
+   "reference": "धा हजार",
+   "heard": "धा हजार",
+   "wer": 0.0,
+   "confidence": 0.92,
+   "english": "Ten thousand"
+  },
+  {
+   "file": "kok_021.wav",
+   "reference": "दोन पेकेटां रसना इन्स्टा निंबूपानीचें मोल सातशें रुपया परस उणें आसा",
+   "heard": "दोन पॅकेटां रसना इंस्टा निंबू पानीचें मोल सातशीं रुपया परस उणें आसा",
+   "wer": 0.455,
+   "confidence": 0.924,
+   "english": "Two packets of Rasna Insta lemonade cost less than seven hundred rupees."
+  },
+  {
+   "file": "kok_022.wav",
+   "reference": "उजवी दिशा",
+   "heard": "उजवी दिशा",
+   "wer": 0.0,
+   "confidence": 0.994,
+   "english": "Right direction"
+  },
+  {
+   "file": "kok_023.wav",
+   "reference": "उडक्यो मारप",
+   "heard": "उडक्यो मारप",
+   "wer": 0.0,
+   "confidence": 0.995,
+   "english": "flying"
+  },
+  {
+   "file": "kok_024.wav",
+   "reference": "हॅलो प्राप्ती कशें हा",
+   "heard": "हॅलो कापती कशें आहा",
+   "wer": 0.5,
+   "confidence": 0.853,
+   "english": "hello how is the cut"
+  }
+ ]
+}

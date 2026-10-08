@@ -96,7 +96,7 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="no-print sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
-          <div className="flex h-14 items-center gap-3 px-4 lg:px-6">
+          <div className="flex h-14 items-center gap-2 px-4 sm:gap-3 lg:px-6">
             <Logo className="lg:hidden" />
             <span className={cx("rounded-md px-2 py-0.5 text-[11px] font-bold uppercase lg:hidden", a.chip)}>{section}</span>
             <div className="hidden min-w-0 flex-1 lg:block">
@@ -106,7 +106,7 @@ export function AppShell({ nav, children, section, accent = "teal" }: { nav: Nav
                 </p>
               )}
             </div>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
               <LanguageButton compact className="sm:hidden" />
               <LanguageButton className="hidden sm:block" />
               <A11yButton />
@@ -172,13 +172,13 @@ function AccountMenu({ name, role, onEmail, onPin, onSignOut }: { name: string; 
   };
   return (
     <div ref={ref} className="relative sm:border-l sm:border-line sm:pl-3">
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open} className="flex items-center gap-2 rounded-xl p-1 pr-2 hover:bg-canvas">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open} className="flex items-center gap-2 rounded-xl p-1 sm:pr-2 hover:bg-canvas">
         <span className="grid size-8 place-items-center rounded-full bg-coral-100 text-sm font-bold text-coral-700">{name.replace(/^Dr\.\s*/, "").charAt(0)}</span>
         <span className="hidden text-left leading-tight sm:block">
           <span className="block text-sm font-semibold text-ink">{name}</span>
           <span className="block text-[11px] text-muted">{role}</span>
         </span>
-        <ChevronDown className="size-4 text-muted" aria-hidden />
+        <ChevronDown className="hidden size-4 text-muted sm:block" aria-hidden />
       </button>
       {open && (
         <div role="menu" className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-line bg-surface p-1.5 shadow-[var(--shadow-pop)]">

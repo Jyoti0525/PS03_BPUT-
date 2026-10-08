@@ -1,0 +1,211 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "ks",
+  "clips": 23,
+  "rejected_by_app": [
+   {
+    "file": "ks_007.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   },
+   {
+    "file": "ks_022.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   }
+  ],
+  "audio_seconds": 87.5,
+  "wer": 0.404,
+  "cer": 0.168,
+  "real_time_factor": 0.948,
+  "process_private_gb": 1.78,
+  "process_peak_working_set_gb": 1.04,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "ks_000.wav",
+   "reference": "ہیٚلو",
+   "heard": "ہیٚلو",
+   "wer": 0.0,
+   "confidence": 0.917,
+   "english": "hello to you."
+  },
+  {
+   "file": "ks_001.wav",
+   "reference": "وعلیکُم السلام تُہۍ چھِو ٹھیٖک",
+   "heard": "وعلیکُم اسلام تُہۍ چھُو ٹھیٖک",
+   "wer": 0.4,
+   "confidence": 0.909,
+   "english": "Ulaikum Islam, you are right."
+  },
+  {
+   "file": "ks_002.wav",
+   "reference": "آ ٹھیٖک",
+   "heard": "آ ٹھیٖک",
+   "wer": 0.0,
+   "confidence": 0.994,
+   "english": "It's all right."
+  },
+  {
+   "file": "ks_003.wav",
+   "reference": "اچھا اچھا ٹھیٖک گوٚو أسۍ",
+   "heard": "اَچھا اَچھا ٹھیٖک گوٚو أچھ",
+   "wer": 0.6,
+   "confidence": 0.904,
+   "english": "All right, all right, all right."
+  },
+  {
+   "file": "ks_004.wav",
+   "reference": "آ بہٕ چھَس سُے أنیٖسا ؤنِو تُہۍ",
+   "heard": "آ بہٕ چھَس سُے أنیٖسہ ؤنِو تُہۍ",
+   "wer": 0.143,
+   "confidence": 0.96,
+   "english": "I'm going to tell you so."
+  },
+  {
+   "file": "ks_005.wav",
+   "reference": "اچھا اچھا ٹھیٖک گوٚو آ میے روٚٹ سُہ",
+   "heard": "اَچھا اَچھا ٹھیٖک گوٚو اۭ بیٚیہِ روٚٹ سُہ",
+   "wer": 0.5,
+   "confidence": 0.916,
+   "english": "Alright, alright, how did he end up?"
+  },
+  {
+   "file": "ks_006.wav",
+   "reference": "ٹھیٖک تُہۍ کیٛازِ چھو یَژھان سونہٕ مَرٕگ تہٕ پہلگام گژھُن",
+   "heard": "ٹھیٖک تُہۍ کیٛاہ چھُو یژھان سۄنہٕمَرگ تہٕ پہلگام گَژھُن",
+   "wer": 0.6,
+   "confidence": 0.85,
+   "english": "What exactly do you want to go to Sanamarg and Pahalgam?"
+  },
+  {
+   "file": "ks_008.wav",
+   "reference": "اچھا اچھا ٹھیٖک گوٚو",
+   "heard": "اچھا اچھا ٹھیٖک گوٚو",
+   "wer": 0.0,
+   "confidence": 0.951,
+   "english": "All right, all right."
+  },
+  {
+   "file": "ks_009.wav",
+   "reference": "اچھا اچھا ٹھیٖک گوٚو اَسہِ چھُ نیرُن کیٛاہ",
+   "heard": "اچھا اچھا ٹھیٖک گوٚو اَسہِ چھُ نیرُن کیٛاہ",
+   "wer": 0.0,
+   "confidence": 0.918,
+   "english": "Okay, okay, so what are we going to do?"
+  },
+  {
+   "file": "ks_010.wav",
+   "reference": "او مےٚ چھِ پاے مےٚ چھِ پاے تۄہہِ اوسوٕ لیٚوکھمُت تَتھ پٮ۪ٹھ مےٚ وُچھ",
+   "heard": "آ مےٚ چھِ پاےٚ چھِ پےَمہِت لیوٚکھما تَتھَنۍ مےٚ وُچھ",
+   "wer": 0.643,
+   "confidence": 0.588,
+   "english": "Come on, I've got money to pay, so I've seen it."
+  },
+  {
+   "file": "ks_011.wav",
+   "reference": "اَسہِ چھُ گَژھُن ییٚمہِ دۄہ سَنڈے مَنڈے دۄہ اِنشاء اللہ",
+   "heard": "اَسہِ چھُ گَژھُن ییٚمہِ دۄہ سَن مَنڈے دۄہ اِنشاء اللہ",
+   "wer": 0.1,
+   "confidence": 0.905,
+   "english": "We are going to this day on Sunday."
+  },
+  {
+   "file": "ks_012.wav",
+   "reference": "آ تَمہِ دۄہ چھِ واریاہ <unintelligible> تُہۍ نیٖرزیٚو صُبحٲے شیٚیہِ بَجہِ نیٖرزیٚو تُہۍ",
+   "heard": "آ تِم تہِ چھِ گۄڈِٕکۍ دۄہ تہٕ تُہۍ نیٖرزیو صُبحٲے شیٚی بَجہِیٖرزییو تُہۍ",
+   "wer": 0.692,
+   "confidence": 0.871,
+   "english": "It's also the first day and you'll need to leave at six o'clock in the morning."
+  },
+  {
+   "file": "ks_013.wav",
+   "reference": "نہ سونی آسہِ سونی آسہِ أتی آسہِ مین مارکیٹ بانڈی پورہ",
+   "heard": "نہٕ حظ سونُے آسہِ سونٕے آسہِ أتی آسہِ مین مارکیٚٹ بانٛڈی پورہ",
+   "wer": 0.545,
+   "confidence": 0.89,
+   "english": "Otherwise, the gold would have been mine and the main market would have been Bandipora."
+  },
+  {
+   "file": "ks_014.wav",
+   "reference": "تُہۍ ییٖزیٚو شیٚیہِ بَجہِ بٲگۍ مطلب نیٖززیٚو تُہۍ گَرِ گَرِ نیٖرزیٚو تُہۍ شیٚیہِ بَجہِ",
+   "heard": "تُہۍ ییٖزیٚ شیٚی بَجہِ بٲگ مطلب نیٖرزٚ تُہۍ گَر ب گَرِ نیٖرِو تُہۍ شیٚہِ بَجہِ",
+   "wer": 0.571,
+   "confidence": 0.732,
+   "english": "If you're going to take a shower, you'll have to leave the house at six o'clock."
+  },
+  {
+   "file": "ks_015.wav",
+   "reference": "ییٚتیٚتھ یسٹیڈیَم چھُ نا اَتھٕے وٲتزیٚو تُہۍ",
+   "heard": "ییٚتَتھ سِیڈیَم چھِنا أۍٕےٲتۍزیو تُہۍ",
+   "wer": 0.857,
+   "confidence": 0.679,
+   "english": "When you pick up the sodium, you'll be able to"
+  },
+  {
+   "file": "ks_016.wav",
+   "reference": "آ بیٚیہِ چھُوا تۄہہِ بیٚیہِ کانٛہہ سۭتۍ",
+   "heard": "بیٚیہِ چھُوا تہہِ بییہِانٛہہۭتۍ",
+   "wer": 0.714,
+   "confidence": 0.735,
+   "english": "And then there's the other one."
+  },
+  {
+   "file": "ks_017.wav",
+   "reference": "اچھا اچھا ٹھیٖک",
+   "heard": "اچھا اَچھا ٹھیٖک",
+   "wer": 0.333,
+   "confidence": 0.896,
+   "english": "All right, all right."
+  },
+  {
+   "file": "ks_018.wav",
+   "reference": "اچھا اچھا ٹھیٖک گوٚو پَتہٕ گَژھو أسۍ مطلب چھِ گۄڈٕ گژھو أسۍ پہلگام کیٛازِکہِ پہلگام چھِ واریاہ زیادٕ دوٗر تہٕ تمہِ پَتہٕ گَژھو أسۍ گُلمرگ تہٕ پہلگام واتو أسۍ کٔژن تانۍ گٲنٛٹَن منٛز تہٕ",
+   "heard": "اچھا اچھا ٹھیٖک گوٚو پَتہٕ گژھو أسۍ مطلب چھِ گۄڈٕنیٮ۪تھ گَژھو أسۍ پہلگام کیٛازِکہِہل پہلگام چھِ واریاہ زیادٕ دوٗر تہٕ تَمہِ پَتہٕ گَژھو أسۍ گُلمرگ تہٕ پہلگام واتو أسۍ کٔژَن تام گٲنٛٹَن منٛز تہٕ",
+   "wer": 0.206,
+   "confidence": 0.912,
+   "english": "Okay, okay, okay, then we'll go to Pahalgam first because Pahalgam is far away and then we'll go to Gulmarg and Pahalgam in a few hours."
+  },
+  {
+   "file": "ks_019.wav",
+   "reference": "تمہِ پَتہٕ کَرو أسۍ کٲم تہٕ أسۍ گژھو ہوٹلَس پؠٹھ",
+   "heard": "تَمۍ تَمہِ پَتہٕ کَرو أسۍ کٲم تہٕ أسۍ گَژھو ہوٹلَس پٮ۪ٹھ",
+   "wer": 0.4,
+   "confidence": 0.913,
+   "english": "They then went to work and we went to the hotel."
+  },
+  {
+   "file": "ks_020.wav",
+   "reference": "اَسہِ دِمو تۄہہِ یورٕ کھؠون چیٚون چھُ سونُے",
+   "heard": "أسۍ دِمو تۄہہِ یورے کھیٚون چیٚون چھُو سُونٕے",
+   "wer": 0.625,
+   "confidence": 0.826,
+   "english": "We'll let you know what you want to eat."
+  },
+  {
+   "file": "ks_021.wav",
+   "reference": "کھیوٚن چیٚون چھُ سونُے چاہے تُہۍ چاے چایِو ایِس کریٖم کھیٚیِو یا بَتہٕ کھیٚیِو سُہ چھُو تۄہہِ پَنٕنۍ مَرضی تہٕ تمہِ پَتہٕ کَرو أسۍ کٲم تَمہِ پَتہٕ گٔے ہاوو أسۍ تۄہہِ جایہِ واے تَپٲرۍ یی تۄہہِ مرضی تہٕ تمہِ پَتہٕ کَرو أسۍ کٲم تہٕ کھٔژِو تُہۍ بیٚیہِ گاڑِ تہٕ تمہِ پَتہٕ گَژھو أسۍ گُلمَرگ",
+   "heard": "کھٮ۪ون چٮٚون چھُ سٲُے چاہے تُہۍ چاے چیٚیِو یا آیِس کرٛیٖم کھیٚیِو یا بَتہٕ کھیٚیِو سُہ چھُو تۄہہِ پَنٕنۍ مرضی تہٕ تَمہِ پَتہٕ کَرو أسۍ کٲم تَمہِ پَتہٕ گٔے ہاوَو أسۍ تۄہہِ جایہِ وایہِ تَپٲرۍ یُ تۄہہِ مَرضیو تہٕ تَمہِ پَتہٕ کَرو أسۍ کٲم تہٕ کھٔسِو تُہۍ بیٚیہِ گاڑِ تہٕ تَمہِ پَتہٕ گَژھو أسۍ گُلمَرگ",
+   "wer": 0.296,
+   "confidence": 0.897,
+   "english": "Whether you eat tea or ice cream or coffee, it's up to you and then we'll do the work, then we'll show you the place you're sick and then we'll do the work and then you'll drive again and then we'll go to Gulmarg."
+  },
+  {
+   "file": "ks_023.wav",
+   "reference": "اہن حظ اہن حظ مطلب بیٚہمو أسۍ گُلمَرگٕے مطلب ترٛؠن دۄہن دِمو أسۍ نایٹ مطلب اَسہِ چھِ نایٹَس پؠٹھ گژھُن",
+   "heard": "اَہن حظ اَہَن حظ مطلب بیٚہمو أسۍ گُلمَرگٕے مطلب تٮ۪ن دۄہَن دہو أسۍ نایِٹ مطلب اَسہِ چھُ نایٹَس پٮ۪ٹھ گژھُن",
+   "wer": 0.4,
+   "confidence": 0.876,
+   "english": "Ahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+  },
+  {
+   "file": "ks_024.wav",
+   "reference": "اوا آ اَسہِ ڈے نایِٹ مگر ترٛؠن دۄہن بیٚہمو أسۍ گُلمَرگٕے مَگر",
+   "heard": "آ آ أسہِ دِے نایِٹ مگر ترٛٮ۪ن دۄہَن بیٚہمو أسۍ گُلمرگٕے مگر",
+   "wer": 0.583,
+   "confidence": 0.859,
+   "english": "It was day and night, but for three days we were in Gulmarg."
+  }
+ ]
+}

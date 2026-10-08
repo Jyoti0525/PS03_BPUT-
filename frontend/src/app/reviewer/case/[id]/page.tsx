@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, CheckCircle2, Pencil, ShieldAlert, Siren, Send, Download, Printer, FileJson, FileSpreadsheet, FileText, Stethoscope, Baby, HeartPulse,
+  ArrowLeft, CheckCircle2, Pencil, ShieldAlert, Siren, Send, Printer, FileJson, FileSpreadsheet, FileText, Stethoscope, Baby, HeartPulse,
   UserRoundCheck, Users, Timer, Paperclip, Copy, Ambulance, ChevronDown, Eye, QrCode,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
@@ -206,9 +206,11 @@ export default function CasePage() {
               {done ? `Reviewed by ${enc.reviewed_by}` : tr("Confirm note")}
             </Button>
           )}
-          <Button variant="secondary" onClick={() => setModal("edit")} icon={<Pencil className="size-4" />}>
-            {tr("Edit")}
-          </Button>
+          {done && (
+            <Link href="/reviewer" className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-ink px-4 text-sm font-semibold text-white hover:opacity-90">
+              {tr("Next patient")} <ArrowLeft className="size-4 rotate-180" />
+            </Link>
+          )}
           {/* E9: anyone reviewing may raise the urgency; only a doctor may lower it. */}
           <Button variant="secondary" onClick={() => setModal("override")} icon={<ShieldAlert className="size-4" />}>
             {tr(isDoctor ? "Override urgency" : "Raise urgency")}
@@ -222,11 +224,14 @@ export default function CasePage() {
             </Button>
           )}
           <div className="relative">
-            <Button variant="secondary" onClick={() => setExportOpen((o) => !o)} icon={<Download className="size-4" />} aria-haspopup="menu" aria-expanded={exportOpen}>
-              {tr("Share & export")} <ChevronDown className="size-3.5" />
+            <Button variant="secondary" onClick={() => setExportOpen((o) => !o)} aria-haspopup="menu" aria-expanded={exportOpen}>
+              {tr("More")} <ChevronDown className="size-3.5" />
             </Button>
             {exportOpen && (
               <div role="menu" className="absolute top-11 left-0 z-20 w-52 rounded-xl border border-line bg-white p-1 shadow-[var(--shadow-pop)]">
+                <button role="menuitem" onClick={() => { setExportOpen(false); setModal("edit"); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-canvas">
+                  <Pencil className="size-4" /> {tr("Edit note")}
+                </button>
                 <button role="menuitem" onClick={() => { setExportOpen(false); setFreshShare(null); setModal("share"); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-canvas">
                   <QrCode className="size-4" /> {tr("Share QR")}
                 </button>

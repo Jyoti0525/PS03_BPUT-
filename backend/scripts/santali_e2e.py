@@ -59,8 +59,9 @@ def main(clips: str, out: str = "docs/evaluation/santali_e2e.json") -> None:
 
         def note(text: str, lang: str, age: int) -> dict:
             pat = c.post(f"{API}/patients", json={"name": "Santali Test", "age": age, "sex": "F", "language": lang}, headers=nurse).json()
-            con = c.post(f"{API}/consents", json={"patient_id": pat["id"], "mode": "self", "privacy_context": "private", "language": lang,
+            con = c.post(f"{API}/consents", json={"patient_id": pat["id"], **({"mode": "self"} if age >= 18 else {"mode": "proxy", "proxy_name": "Test Parent", "proxy_relation": "Mother"}), "privacy_context": "private", "language": lang,
                                                   "scopes": ["triage"]}, headers=nurse).json()
+            assert "id" in pat and "id" in con, (pat, con)
             body = {"patient_id": pat["id"], "facility_id": "fac_phc_manikpur", "category": "maternal" if "pregnant" in text.lower() else "normal",
                     "language": lang, "chief_complaint": text, "selected_symptoms": [],
                     "symptoms": [] if lang == "en" else [{"text": "", "original_text": text, "language": lang, "source": "text"}], "answers": [], "file_ids": [],

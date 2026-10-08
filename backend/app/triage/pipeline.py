@@ -76,6 +76,9 @@ def _asks(triage: dict, key: str) -> bool:
 
 
 PER_ROLE = 3
+# Translation into English measured on FLEURS (docs/EVALUATION.md); for these it has not been, and a Santali test
+# (scripts/santali_e2e.py) lost chest pain and fever entirely, so their translated history always carries a warning.
+MT_UNMEASURED = {"brx", "doi", "kok", "ks", "mai", "mni", "sa", "sat"}
 ROLE_SEES = {"health_worker": {"health_worker"}, "nurse": {"health_worker", "nurse"}}  # doctor and medical officer see all
 
 
@@ -291,6 +294,9 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
             if chk := translation_check(x):
                 notes += [f"translation leaves out {FINDINGS[f][0].lower()}" for f in chk["missed"]]
                 notes += [f"translation says {FINDINGS[f][0].lower()}, the patient's words do not" for f in chk["added"]]
+            if x.get("language") in MT_UNMEASURED:
+                notes.append(f'translation from {x["language"]} has not been measured and may lose the meaning; ask the complaint again '
+                             "through someone who speaks the language")
             if notes:
                 problems.append(f'"{x["original_text"]}" → "{x["text"]}": {"; ".join(notes)}')
             rewrites += [f'{r["from"]} → {r["to"]}' for r in x.get("mt_rewrites") or []]

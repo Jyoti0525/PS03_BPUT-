@@ -35,7 +35,8 @@ export const LANGUAGES: Language[] = [
 export const langByCode = (code: string) => LANGUAGES.find((l) => l.code === code) ?? LANGUAGES[0];
 
 /**
- * Speech recognition measured on public read speech (FLEURS dev clips, human transcripts; docs/EVALUATION.md).
+ * Speech recognition measured on public speech with human transcripts (docs/EVALUATION.md): FLEURS read speech, and
+ * IndicVoices (CC BY 4.0, natural speech) for the eight languages FLEURS lacks (brx doi kok ks mai mni sa sat).
  * Any language not listed is unmeasured: the kiosk says so, and the health worker checks the transcript.
  */
 export const ASR_MEASURED: Record<string, { wer: number; clips: number }> = {
@@ -52,5 +53,13 @@ export const ASR_MEASURED: Record<string, { wer: number; clips: number }> = {
   ta: { wer: 38.1, clips: 25 },
   te: { wer: 31.5, clips: 25 },
   ur: { wer: 25.2, clips: 25 },
+  brx: { wer: 15.6, clips: 21 },
+  doi: { wer: 25.4, clips: 25 },
+  kok: { wer: 33.0, clips: 23 },
+  ks: { wer: 40.4, clips: 23 },
+  mai: { wer: 28.1, clips: 25 },
+  mni: { wer: 14.2, clips: 25 },
+  sa: { wer: 11.4, clips: 23 },
+  sat: { wer: 24.7, clips: 23 },
   // sd left out: the model writes Sindhi in Devanagari and FLEURS in Arabic script, so its WER measures the script.
 };

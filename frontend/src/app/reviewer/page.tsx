@@ -127,7 +127,7 @@ export default function QueuePage() {
                       <Badge>{tr(langByCode(i.language).name)}</Badge>
                     </div>
                     {i.order_reason && (
-                      <p className="mt-1 text-xs text-muted">
+                      <p className="mt-1 line-clamp-1 text-xs text-muted sm:line-clamp-none" title={i.order_reason}>
                         <span className="font-semibold text-ink-2">{tr("Why here:")}</span> {i.order_reason}
                       </p>
                     )}

@@ -1,0 +1,218 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "mni",
+  "clips": 25,
+  "rejected_by_app": [],
+  "audio_seconds": 269.9,
+  "wer": 0.142,
+  "cer": 0.045,
+  "real_time_factor": 0.295,
+  "process_private_gb": 1.74,
+  "process_peak_working_set_gb": 1.32,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "mni_000.wav",
+   "reference": "ꯑꯍꯨꯝ",
+   "heard": "ꯑꯍꯨꯝ",
+   "wer": 0.0,
+   "confidence": 1.0,
+   "english": "It's three"
+  },
+  {
+   "file": "mni_001.wav",
+   "reference": "ꯌꯥꯅꯤꯡꯉꯤ",
+   "heard": "ꯌꯥꯅꯤꯡꯉꯤ",
+   "wer": 0.0,
+   "confidence": 0.762,
+   "english": "I'm opposed to it."
+  },
+  {
+   "file": "mni_002.wav",
+   "reference": "<unintelligible> ꯑꯩꯒꯤ ꯑꯦꯝ ꯇꯤ ꯑꯦꯟ ꯑꯦꯜꯒꯤ ꯀꯤ ꯃꯣꯕꯥꯏꯜ ꯄ꯭ꯂꯥꯟꯗ ꯊꯥ ꯑꯁꯤꯒꯤ ꯗꯇꯥ ꯁꯤꯖꯤꯟꯅꯕꯒꯤ ꯃꯇꯥꯡꯗ ꯈꯪꯕ ꯃꯊꯧ ꯇꯥꯏ ꯑꯩꯒꯤ ꯃꯣꯕꯥꯏꯜ ꯅꯝꯕꯔ ꯑꯁꯤ ꯅꯥꯏꯟ ꯅꯥꯏꯟ ꯋꯥꯟ ꯁꯚꯦꯟ ꯇꯨ ꯋꯥꯟ ꯗꯕꯜ ꯖꯤꯔꯣ ꯐꯥꯏꯚ ꯋꯥꯟꯅꯤ",
+   "heard": "ꯑꯩꯒꯤ ꯑꯦꯝ ꯇꯤ ꯑꯦꯟ ꯑꯦꯜꯒꯤ ꯀꯤ ꯃꯣꯕꯥꯏꯜ ꯄ꯭ꯂꯥꯟꯗ ꯊꯥ ꯑꯁꯤꯒꯤ ꯗꯇꯥ ꯁꯤꯖꯤꯟꯅꯕꯒꯤ ꯃꯇꯥꯡꯗ ꯈꯪꯕ ꯃꯊꯧ ꯇꯥꯏ ꯑꯩꯒꯤ ꯃꯣꯕꯥꯏꯜ ꯅꯝꯕꯔ ꯑꯁꯤ ꯅꯥꯏꯟ ꯅꯥꯏꯟ ꯋꯥꯟ ꯁꯕꯦꯟ ꯇꯨ ꯋꯥꯟ ꯗꯕꯜ ꯖꯤꯦꯔꯣ ꯐꯥꯏꯚ ꯋꯥꯟꯅꯤ",
+   "wer": 0.097,
+   "confidence": 0.952,
+   "english": "What I need to know about my MTNL's mobile plant data usage for this month My mobile number is nine nine seven two one double zero five one."
+  },
+  {
+   "file": "mni_003.wav",
+   "reference": "ꯍꯜꯂꯣ ꯑꯩꯅ ꯇꯧꯔꯤꯁꯦ ꯑꯥꯏ ꯁꯤ ꯇꯤꯒꯤ ꯀꯁꯇꯃꯔ ꯀꯤꯌꯔꯅꯤꯀꯣ ꯑꯩꯒꯤ ꯅꯍꯥꯟ ꯕꯨꯛ ꯇꯧꯈꯤꯕ ꯇ꯭ꯔꯦꯟꯒꯤ ꯕꯨꯛ ꯇꯧꯈꯤꯕ ꯇꯤꯀꯦꯠꯁꯦ ꯑꯩ ꯀꯦꯟꯁꯦꯜ ꯇꯧꯅꯤꯡꯉꯦ ꯍꯥꯏꯗꯤ ꯑꯩꯒꯤ ꯏꯃꯔꯖꯦꯟꯁꯤ ꯑꯃ ꯂꯩꯕꯅꯤꯅ ꯑꯗꯨꯅ ꯑꯩꯒꯤ ꯑꯥꯏ ꯗꯤ ꯅꯝꯕꯔꯁꯤꯅ",
+   "heard": "ꯍꯦꯜꯂꯣ ꯑꯩꯅ ꯇꯧꯔꯤꯁꯦ ꯑꯥꯏ ꯁꯤ ꯇꯤꯒꯤ ꯀꯁꯇꯃꯔ ꯀꯦꯌꯔꯅꯤꯀꯣ ꯑꯩꯒꯤ ꯅꯍꯥꯟ ꯕꯨꯛ ꯇꯧꯈꯤꯕ ꯇ꯭ꯔꯦꯟꯒꯤ ꯕꯨꯛ ꯇꯧꯈꯤꯕ ꯇꯤꯀꯦꯠꯁꯦ ꯑꯩ ꯀꯦꯟꯁꯦꯜ ꯇꯧꯅꯤꯡꯉꯦ ꯍꯥꯏꯗꯤ ꯑꯩꯒꯤ ꯏꯃꯥꯔꯖꯦꯟꯁꯤ ꯑꯃ ꯂꯩꯕꯅꯤꯅ ꯑꯗꯨꯅ ꯑꯩꯒꯤ ꯑꯥꯏ ꯗꯤ ꯅꯝꯕꯔꯁꯤꯅ",
+   "wer": 0.103,
+   "confidence": 0.952,
+   "english": "Hello, I want to cancel my booked train tickets from ICT's Customer Carrenico, where I have an emergency, so my ID number is here."
+  },
+  {
+   "file": "mni_004.wav",
+   "reference": "ꯑꯦꯝ ꯑꯦꯟ ꯋꯥꯏ ꯋꯥꯟ ꯇꯨ ꯊ꯭ꯔꯤ ꯑꯗꯨꯒ ꯄꯤ ꯑꯦꯟ ꯑꯥꯔ ꯅꯝꯕꯔꯁꯤꯅ ꯁꯤꯛꯁ ꯐꯣꯔ ꯁꯕꯦꯟ ꯑꯩꯠ ꯐꯥꯏꯚ ꯑꯗꯨꯒ ꯑꯩꯒꯤ ꯄꯥꯁꯋꯔꯠꯅ ꯊ꯭ꯔꯤ ꯐꯣꯔ ꯐꯥꯏꯚ ꯁꯤꯛꯁ ꯁꯕꯦꯟ",
+   "heard": "ꯑꯦꯝ ꯑꯦꯟ ꯋꯥꯏ ꯋꯥꯟ ꯇꯨ ꯊ꯭ꯔꯤ ꯑꯗꯨꯒ ꯄꯤ ꯑꯦꯟ ꯑꯥꯔ ꯅꯝꯕꯔꯁꯤꯅ ꯁꯤꯛꯁ ꯐꯣꯔ ꯁꯚꯦꯟ ꯑꯦꯠ ꯐꯥꯏꯚ ꯑꯗꯨꯒ ꯑꯩꯒꯤ ꯄꯥꯁꯋꯥꯔꯠꯅ ꯊ꯭ꯔꯤ ꯐꯣꯔ ꯐꯥꯏꯚ ꯁꯤꯛꯁ ꯁꯚꯦꯟ",
+   "wer": 0.167,
+   "confidence": 0.961,
+   "english": "MNY One Two Three and PNR Number is Six for Seven at Five and My Password is Three for Five Six Seven."
+  },
+  {
+   "file": "mni_005.wav",
+   "reference": "ꯄꯥꯎꯃꯤꯁꯤꯡ ꯉꯥꯛꯅꯕ ꯀꯃꯤꯇꯤꯒꯤ ꯃꯇꯨꯡ ꯏꯟꯅ ꯄꯥꯎꯃꯤ ꯇꯇꯨꯛ ꯐꯥꯈꯤꯕꯁꯤꯡꯅ ꯍꯥꯠꯈ꯭ꯔꯦ",
+   "heard": "ꯄꯥꯎꯃꯤꯁꯤꯡ ꯉꯥꯛꯅꯕ ꯀꯃꯤꯇꯤꯒꯤ ꯃꯇꯨꯡ ꯏꯟꯅ ꯄꯥꯎꯃꯤ ꯇꯔꯨꯛ ꯐꯥꯈꯤꯕꯁꯤꯡꯅ ꯍꯥꯠꯈ꯭ꯔꯦ",
+   "wer": 0.111,
+   "confidence": 0.975,
+   "english": "According to the Committee to Protect Journalists, six journalists have been killed by their captors."
+  },
+  {
+   "file": "mni_006.wav",
+   "reference": "ꯑꯩꯒꯤ ꯍꯟꯗꯛꯀꯤ ꯇ꯭ꯔꯦꯟꯒꯤ ꯈꯣꯡꯆꯠ ꯑꯗꯨꯒꯤ ꯃꯇꯥꯡꯗ ꯑꯩꯉꯣꯟꯗ ꯍꯨꯏꯜ ꯆꯤꯌꯔ ꯁꯥꯔꯚꯤꯁ ꯁꯤꯌꯔ ꯇꯧꯅꯕ ꯂꯩꯔꯦ ꯀꯜꯀꯇꯥꯗꯒꯤ ꯖꯦꯄꯨꯔ ꯐꯥꯎꯕꯒꯤ ꯈꯣꯡꯆꯠ ꯑꯁꯤꯒꯤꯗꯃꯛ ꯃꯁꯤ ꯑꯩꯅ ꯀꯔꯝꯅ ꯊꯥꯖꯤꯟꯕ ꯌꯥꯒꯅꯤ",
+   "heard": "ꯑꯩꯒꯤ ꯍꯟꯗꯛꯀꯤ ꯇ꯭ꯔꯦꯟꯒꯤ ꯈꯣꯡꯆꯠ ꯑꯗꯨꯒꯤ ꯃꯇꯥꯡꯗ ꯑꯩꯉꯣꯟꯗ ꯍꯨꯏꯜ ꯆꯤꯌꯔ ꯁꯥꯔꯚꯤꯁ ꯁꯤꯌꯔ ꯇꯧꯅꯕ ꯂꯩꯔꯦ ꯀꯜꯀꯇꯥꯗꯒꯤ ꯖꯦꯄꯨꯔ ꯐꯥꯎꯕꯒꯤ ꯈꯣꯡꯆꯠ ꯑꯁꯤꯒꯤꯗꯃꯛ ꯃꯁꯤ ꯑꯩꯅ ꯀꯔꯝꯅ ꯊꯥꯖꯤꯟꯕ ꯌꯥꯒꯅꯤ",
+   "wer": 0.0,
+   "confidence": 0.968,
+   "english": "I have a wheelchair service to share with you about my recent train journey from Calcutta to Jaipur. How can I send it?"
+  },
+  {
+   "file": "mni_007.wav",
+   "reference": "ꯂꯨꯄꯥ ꯂꯤꯁꯤꯡ ꯇꯔꯥꯒꯤ ꯇ꯭ꯔꯥꯟꯁꯦꯛꯁꯟ ꯌꯥꯈ꯭ꯔꯕ ꯃꯇꯨꯡꯗ ꯐꯥꯎꯕ ꯑꯦꯂꯦꯛꯇ꯭ꯔꯤꯁꯤꯇꯤ ꯕꯣꯔꯠꯇꯒꯤ ꯀꯟꯐꯥꯔꯃꯦꯁꯟ ꯐꯪꯗ꯭ꯔꯤꯕ ꯀꯔꯤꯒꯤꯅꯣ",
+   "heard": "ꯂꯨꯄꯥ ꯂꯤꯁꯤꯡ ꯇꯔꯥꯒꯤ ꯇ꯭ꯔꯥꯟꯖꯦꯛꯁꯟ ꯌꯥꯈ꯭ꯔꯕ ꯃꯇꯨꯡꯗ ꯐꯥꯎꯕ ꯑꯦꯂꯦꯛꯇ꯭ꯔꯤꯁꯤꯇꯤ ꯕꯣꯔꯠꯇꯒꯤ ꯀꯟꯐꯔꯃꯦꯁꯟ ꯐꯪꯗ꯭ꯔꯤꯕ ꯀꯔꯤꯒꯤꯅꯣ",
+   "wer": 0.167,
+   "confidence": 0.954,
+   "english": "Why havent I got the confirmation from electricity board even after clearing the transaction of thousands of rupees?"
+  },
+  {
+   "file": "mni_008.wav",
+   "reference": "ꯍꯜꯂꯣ ꯂꯦꯗꯤꯁ ꯀꯣꯅꯔ ꯔꯦꯁꯇꯨꯔꯦꯟ",
+   "heard": "ꯍꯜꯂꯣ ꯂꯦꯗꯤꯁ ꯀꯣꯅꯔ ꯔꯦꯁꯇꯨꯔꯦꯟ",
+   "wer": 0.0,
+   "confidence": 0.876,
+   "english": "Hallelujah Lady's Conner Restaurant"
+  },
+  {
+   "file": "mni_009.wav",
+   "reference": "ꯑꯣꯀꯦ",
+   "heard": "ꯑꯣꯀꯦ",
+   "wer": 0.0,
+   "confidence": 0.964,
+   "english": "Ahhhhhhhhhhhhhhhhhhhhhhhhh"
+  },
+  {
+   "file": "mni_010.wav",
+   "reference": "ꯑꯩꯅ ꯅꯣꯏꯗ",
+   "heard": "ꯑꯩꯅ ꯅꯣꯏꯗ",
+   "wer": 0.0,
+   "confidence": 0.974,
+   "english": "I'm not new."
+  },
+  {
+   "file": "mni_011.wav",
+   "reference": "ꯑꯣꯗꯔ ꯇꯧꯕ ꯄꯣꯠ ꯆꯩꯁꯤꯡꯗꯨ ꯅꯣꯏ ꯊꯨꯡꯂꯛꯈ꯭ꯔꯦ ꯑꯗꯨꯕꯨ ꯅꯣꯏꯒꯤ ꯔꯤꯁꯤꯞꯇꯤ ꯊꯨꯡꯂꯛꯇ꯭ꯔꯤ ꯔꯤꯁꯤꯞꯇꯨ ꯑꯊꯨꯕ ꯃꯇꯝꯗ ꯔꯤꯁꯤꯞꯇꯣ ꯅꯣꯏꯒꯤ ꯀꯦꯁ ꯃꯦꯃꯣ ꯌꯥꯎꯅ",
+   "heard": "ꯑꯣꯗꯔ ꯇꯧꯕ ꯄꯣꯠ ꯆꯩꯁꯤꯡꯗꯨ ꯅꯣꯏ ꯊꯨꯝꯂꯛꯈ꯭ꯔꯦ ꯑꯗꯨꯕꯨ ꯅꯣꯏꯒꯤ ꯔꯤꯁꯤꯞꯇꯨ ꯊꯨꯝꯂꯛꯇ꯭ꯔꯤ ꯔꯤꯁꯤꯞꯇꯨ ꯑꯊꯨꯕ ꯃꯇꯝꯗ ꯔꯤꯁꯤꯞꯇꯨ ꯅꯣꯏꯒꯤ ꯀꯦꯁ ꯃꯦꯃꯣ ꯌꯥꯎꯅ",
+   "wer": 0.222,
+   "confidence": 0.961,
+   "english": "The order item has been redeemed but the new receipt has not been redeemed. The receipt will soon be redeemed, including the new cash memo."
+  },
+  {
+   "file": "mni_012.wav",
+   "reference": "ꯅꯣꯏꯒꯤ ꯁꯤꯛꯅꯦꯆꯔ ꯁꯤꯜ ꯌꯥꯎꯅ ꯑꯩꯉꯣꯟꯗ ꯊꯥꯕꯤꯅꯕ ꯑꯩ ꯅꯣꯏꯗ ꯈꯪꯍꯟꯖꯔꯤ ꯊꯦꯡꯛ ꯌꯨ",
+   "heard": "ꯅꯣꯏꯒꯤ ꯁꯤꯒꯅꯦꯆꯔ ꯁꯤꯜ ꯌꯥꯎꯅ ꯑꯩꯉꯣꯟꯗ ꯊꯥꯕꯤꯅꯕ ꯑꯩ ꯅꯣꯏꯗ ꯈꯪꯍꯟꯖꯔꯤ ꯊꯦꯡꯀ꯭ꯌꯨ",
+   "wer": 0.273,
+   "confidence": 0.958,
+   "english": "Please let me know if you want me to send you a message, including a new signature seal."
+  },
+  {
+   "file": "mni_013.wav",
+   "reference": "ꯑꯗꯣꯝꯅ ꯊꯛꯅꯕ ꯃꯍꯤ ꯃꯅꯥꯏꯁꯤꯡ ꯏꯁꯀꯤꯟꯀꯤꯌꯔ ꯑꯥꯏꯇꯦꯝꯁꯤꯡ ꯀꯤꯌꯔꯒꯤ ꯑꯥꯏꯇꯦꯝꯁꯤꯡ ꯊꯝꯕ꯭ꯔꯥ",
+   "heard": "ꯑꯗꯣꯝꯅ ꯊꯛꯅꯕ ꯃꯍꯤ ꯃꯅꯥꯏꯁꯤꯡ ꯏꯁꯀꯤꯟ ꯀꯤꯌꯔ ꯑꯥꯏꯇꯦꯝꯁꯤꯡ ꯀꯤꯌꯔꯒꯤ ꯑꯥꯏꯇꯦꯝꯁꯤꯡ ꯊꯝꯕ꯭ꯔꯥ",
+   "wer": 0.222,
+   "confidence": 0.947,
+   "english": "Do you have any medical supplies, sick care items, or care items?"
+  },
+  {
+   "file": "mni_014.wav",
+   "reference": "ꯑꯩꯅ ꯃꯅꯥꯛ ꯅꯛꯄ ꯁꯍꯔꯁꯤꯡ ꯅꯠꯇ꯭ꯔꯒ ꯁꯍꯔ ꯑꯆꯧꯕꯁꯤꯡ ꯅꯠꯇ꯭ꯔꯒ ꯔꯥꯏꯖ꯭ꯌꯁꯤꯡꯗ ꯆꯠꯄ ꯃꯇꯝꯗ ꯁꯦꯐꯇꯤ ꯑꯃꯗꯤ ꯁꯦꯀ꯭ꯌꯨꯔꯤꯇꯤꯒꯤ ꯑꯋꯥꯕ ꯑꯃ ꯍꯦꯛꯇ ꯊꯦꯡꯅꯈꯤꯕ ꯃꯇꯝꯗꯨꯗꯤ ꯅꯥꯒꯂꯦꯟꯗꯒꯤ ꯑꯩ ꯇ꯭ꯔꯥꯚꯦꯜ ꯇꯧꯔꯒ ꯒꯨꯋꯥꯍꯥꯇꯤ ꯆꯠꯀꯅꯤ ꯍꯥꯏꯕ ꯃꯇꯝꯗ ꯇ꯭ꯔꯦꯟꯗꯒꯤ ꯆꯠꯄ ꯃꯇꯝꯗ ꯑꯩꯒꯤ ꯕꯦꯛꯇꯒꯤ ꯑꯩꯒꯤ ꯐꯣꯟ ꯍꯨꯔꯥꯟꯈꯤꯕꯅꯤ",
+   "heard": "ꯑꯩꯅ ꯃꯅꯥꯛ ꯅꯛꯄ ꯁꯍꯔꯁꯤꯡ ꯅꯠꯇ꯭ꯔꯒ ꯁꯍꯔ ꯑꯆꯥꯎꯕꯁꯤꯡ ꯅꯠꯇ꯭ꯔꯒ ꯔꯥꯖ꯭ꯌꯥꯁꯤꯡꯗ ꯆꯠꯄ ꯃꯇꯝꯗ ꯁꯦꯐꯇꯤ ꯑꯃꯗꯤ ꯁꯦꯀ꯭ꯌꯨꯔꯤꯇꯤꯒꯤ ꯑꯋꯥꯕ ꯑꯃ ꯍꯦꯛꯇ ꯇꯦꯡꯅꯈꯤꯕ ꯃꯇꯝꯗꯨꯗꯤ ꯅꯥꯒꯥꯂꯦꯟꯗꯒꯤ ꯑꯩ ꯇ꯭ꯔꯥꯕꯦꯜ ꯇꯧꯔꯒ ꯒꯨꯍꯥꯇꯤ ꯆꯠꯈꯤꯅꯤ ꯍꯥꯏꯕ ꯃꯇꯝꯗ ꯇ꯭ꯔꯦꯟꯗꯒꯤ ꯆꯠꯄ ꯃꯇꯝꯗ ꯑꯩꯒꯤ ꯕꯦꯛꯇꯒꯤ ꯑꯩꯒꯤ ꯐꯣꯟ ꯍꯨꯔꯟꯈꯤꯕꯅꯤ",
+   "wer": 0.229,
+   "confidence": 0.952,
+   "english": "I was travelling to Guwahati from Nagaland when I faced a safety and security issue while travelling to nearby cities or towns or states when my phone was stolen from my backpack while travelling by train."
+  },
+  {
+   "file": "mni_015.wav",
+   "reference": "ꯑꯩ ꯍꯨꯔꯥꯟꯈ꯭ꯔꯦ ꯍꯥꯏꯕꯁꯦ ꯈꯪꯗ꯭ꯔꯤ ꯈꯪꯗ꯭ꯔꯦꯕ ꯑꯗꯨꯅ ꯑꯩ ꯇ꯭ꯔꯦꯟꯗꯒꯤ ꯃꯈꯥ ꯀꯨꯝꯂꯛꯄ ꯃꯇꯝꯗ ꯐꯣꯟꯁꯦ ꯂꯧꯊꯣꯛꯂꯒ ꯏꯃꯥꯟꯅꯕꯤꯈꯣꯏꯕꯨ ꯀꯣꯟꯇꯦꯛ ꯇꯧꯒꯦ ꯍꯥꯏꯅ ꯂꯩꯕ ꯃꯇꯝꯗ ꯑꯩꯒꯤ ꯐꯣꯟꯁꯦ ꯂꯩꯈꯤꯗꯕꯅꯦ ꯑꯗꯨꯅ ꯑꯩ ꯈꯔ ꯑꯋꯥꯕ ꯐꯪꯈꯤꯕꯅꯤ ꯏꯃꯥꯟꯅꯕꯤ ꯑꯃꯗꯤ ꯏꯃꯨꯡꯁꯤꯡꯕꯨ ꯀꯣꯟꯇꯦꯛ ꯇꯧꯒꯦ ꯍꯥꯏꯅ ꯑꯩ ꯇꯧꯕ ꯃꯇꯝꯗ ꯑꯩ ꯑꯋꯥꯕ ꯈꯔ ꯐꯪꯈꯤꯕꯅꯦ ꯑꯗꯨ ꯃꯇꯝꯗ",
+   "heard": "ꯑꯩ ꯍꯨꯔꯟꯈ꯭ꯔꯦ ꯍꯥꯏꯕꯁꯦ ꯈꯗ꯭ꯔꯤ ꯈꯪꯗ꯭ꯔꯤꯑꯕ ꯑꯗꯨꯅ ꯑꯩ ꯇ꯭ꯔꯦꯟꯗꯒꯤ ꯃꯀꯥ ꯀꯨꯝꯂꯛꯄ ꯃꯇꯝꯗ ꯐꯣꯟꯁꯦ ꯂꯧꯊꯣꯛꯂꯒ ꯏꯃꯥꯟꯅꯕꯤ ꯀꯣꯏꯕꯨ ꯀꯣꯟꯇꯦꯛ ꯇꯧꯒꯦ ꯍꯥꯏꯅ ꯂꯩꯕ ꯃꯇꯝꯗ ꯑꯩꯒꯤ ꯐꯣꯟꯁꯦ ꯂꯩꯈꯤꯗꯕꯅꯤ ꯑꯗꯨꯅ ꯑꯩ ꯈꯔ ꯑꯋꯥꯕ ꯐꯪꯈꯤꯕꯅꯤ ꯏꯃꯥꯟꯅꯕꯤ ꯑꯃꯗꯤ ꯏꯃꯨꯡꯁꯤꯡꯕꯨ ꯀꯣꯟꯇꯦꯛ ꯇꯧꯒꯦ ꯍꯥꯏꯅ ꯑꯩ ꯇꯧꯕ ꯃꯇꯝꯗ ꯑꯩ ꯑꯋꯥꯕ ꯈꯔ ꯐꯪꯈꯤꯕꯅꯤ ꯑꯗꯨ ꯃꯇꯝꯗ",
+   "wer": 0.19,
+   "confidence": 0.963,
+   "english": "I don't know if I've been robbed, so I had to get off my phone when I was on the train and contact my mother-in-law, so I got a little upset."
+  },
+  {
+   "file": "mni_016.wav",
+   "reference": "ꯀꯨꯀꯤꯁꯀꯤ ꯄꯣꯠꯂꯝ ꯄꯨꯝꯅꯃꯛ ꯌꯣꯟꯊꯣꯛꯈ꯭ꯔꯤꯕ ꯀꯔꯤꯒꯤꯅꯣ",
+   "heard": "ꯀꯨꯀꯤꯁꯀꯤ ꯄꯣꯠꯂꯝ ꯄꯨꯝꯅꯃꯛ ꯌꯣꯟꯊꯣꯛꯈ꯭ꯔꯤꯕ ꯀꯔꯤꯒꯤꯅꯣ",
+   "wer": 0.0,
+   "confidence": 0.976,
+   "english": "Why are all the cookies sold out?"
+  },
+  {
+   "file": "mni_017.wav",
+   "reference": "ꯏꯝꯐꯥꯜ ꯋꯦꯁꯀꯤ ꯑꯣꯏꯅ ꯑꯩꯈꯣꯏꯅ ꯌꯥꯝꯅ ꯇꯣꯏꯅ ꯊꯦꯡꯅꯕ ꯑꯋꯥꯕꯁꯤꯡ ꯍꯥꯏꯔꯒꯗꯤ ꯑꯩꯈꯣꯏꯒꯤ ꯗ꯭ꯔꯦꯅꯦꯁꯀꯤ ꯁꯤꯁꯇꯦꯝꯁꯦ ꯑꯩꯈꯣꯏꯒꯤ",
+   "heard": "ꯏꯝꯐꯥꯜ ꯋꯦꯁꯀꯤ ꯑꯣꯏꯅ ꯑꯩꯈꯣꯏꯅ ꯌꯥꯝꯅ ꯇꯣꯏꯅ ꯊꯦꯡꯅꯕ ꯑꯋꯥꯕꯁꯤꯡ ꯍꯥꯏꯔꯒꯗꯤ ꯑꯩꯈꯣꯏꯒꯤ ꯗ꯭ꯔꯦꯅꯦꯖꯀꯤ ꯁꯤꯁꯇꯦꯝꯁꯦ ꯑꯩꯈꯣꯏꯒꯤ",
+   "wer": 0.077,
+   "confidence": 0.979,
+   "english": "The most common problems that we face in terms of infrastructure are from our drainage systems."
+  },
+  {
+   "file": "mni_018.wav",
+   "reference": "ꯈꯔ ꯏꯁꯤꯡ ꯇꯨꯡꯉꯒ ꯂꯩꯕ ꯏꯁꯤꯡ ꯆꯦꯟꯗꯕ ꯃꯐꯝ ꯑꯩꯈꯣꯏꯒꯤ ꯃꯁꯤ ꯃꯤꯅꯤꯁꯤꯄꯥꯂꯤꯇꯤꯅ ꯑꯩꯈꯣꯏꯒꯤ ꯑꯃꯣꯠ ꯑꯀꯥꯏ ꯍꯨꯟꯗꯣꯛꯐꯝ ꯃꯐꯝꯁꯦ ꯃꯐꯝ ꯆꯥꯅ ꯊꯝꯗꯕ ꯂꯩꯔꯒꯁꯨ ꯌꯦꯡꯁꯤꯟꯕ ꯋꯥꯠꯄ ꯆꯥꯡ ꯅꯥꯏꯅ ꯂꯧꯕ ꯂꯥꯛꯇꯕꯗꯒꯤ ꯃꯌꯥꯝꯅ ꯁꯨꯝ ꯈꯣꯡꯕꯥꯜ ꯂꯨꯄꯥꯟꯗ ꯄꯣꯠ ꯆꯩꯁꯦ ꯊꯥꯗꯕ ꯍꯦꯜꯂꯛꯄꯗꯒꯤ",
+   "heard": "ꯈꯔ ꯏꯁꯤꯡ ꯇꯨꯡꯉꯒ ꯂꯩꯕ ꯏꯁꯤꯡ ꯆꯦꯟꯗꯕ ꯃꯐꯝ ꯑꯩꯈꯣꯏꯒꯤ ꯃꯁꯤ ꯃ꯭ꯌꯨꯅꯤꯁꯤꯄꯥꯂꯤꯇꯤꯅ ꯑꯩꯈꯣꯏꯒꯤ ꯑꯃꯣꯠ ꯑꯀꯥꯏ ꯍꯨꯟꯗꯣꯛꯄ ꯃꯐꯝꯁꯦ ꯃꯐꯝ ꯆꯥꯅ ꯊꯝꯗꯕ ꯂꯩꯔꯒꯁꯨ ꯌꯦꯡꯁꯤꯟꯕ ꯋꯥꯠꯄ ꯆꯥꯡ ꯅꯥꯏꯅ ꯂꯧꯕ ꯂꯥꯛꯇꯕꯗꯒꯤ ꯃꯌꯥꯝꯅ ꯁꯨꯝ ꯈꯣꯡꯕꯥꯟ ꯂꯨꯄꯥꯟꯗ ꯄꯣꯠꯆꯁꯦ ꯊꯥꯗꯕ ꯍꯦꯜꯂꯛꯄꯗꯒꯤ",
+   "wer": 0.152,
+   "confidence": 0.953,
+   "english": "Since we have a waterlogged drainage system, which is not properly maintained by the municipality in our waste disposal area, the lack of maintenance has become a regular feature, leading to an increase in the amount of waste being dumped deep into the river."
+  },
+  {
+   "file": "mni_019.wav",
+   "reference": "ꯑꯩꯈꯣꯏꯒꯤ ꯏꯁꯤꯡ ꯆꯦꯟꯕꯗ ꯅꯨꯡꯉꯥꯏꯇꯦ ꯂꯣꯏꯅꯅ ꯑꯩꯈꯣꯏꯒꯤ ꯑꯅꯥꯕ ꯃꯈꯜ ꯃꯈꯜ ꯊꯣꯛꯂꯛꯄ ꯍꯦꯜꯍꯜꯂꯦ ꯃꯁꯤꯒꯨꯝꯕꯁꯤꯡ ꯑꯁꯦ ꯑꯩꯈꯣꯏꯅ ꯇꯣꯏꯅ ꯊꯦꯡꯅꯕ ꯄꯣꯠ ꯉꯥꯛꯇꯅꯦ ꯑꯗꯨꯕꯨ ꯑꯩꯈꯣꯏꯒꯤ ꯂꯩꯀꯥꯏꯒꯤ ꯀ꯭ꯂꯕꯀꯤ ꯅꯍꯥꯔꯣꯜ ꯀꯩꯀꯩ ꯃꯌꯥꯝ ꯄꯨꯟꯗꯨꯅ ꯑꯩꯈꯣꯏ ꯃꯔꯛ ꯃꯔꯛꯇ ꯁꯣꯁꯦꯜ ꯁꯥꯔꯚꯤꯁ ꯇꯧꯗꯨꯅ ꯁꯦꯡꯕ ꯌꯥꯎꯋꯤ ꯑꯗꯨꯕꯨ ꯍꯦꯟꯅ ꯆꯥꯎꯅ ꯇꯧꯒꯗꯕ ꯃꯇꯥꯡ ꯂꯩꯔꯕꯗꯤ ꯑꯩꯈꯣꯏ ꯑꯗꯨꯝ",
+   "heard": "ꯑꯩꯈꯣꯏꯒꯤ ꯏꯁꯤꯡ ꯆꯦꯟꯕꯗ ꯅꯨꯡꯉꯥꯏꯇꯦ ꯂꯣꯏꯅ ꯂꯣꯏꯅꯅ ꯑꯩꯈꯣꯏꯒꯤ ꯑꯅꯥꯕ ꯃꯈꯜ ꯃꯈꯜ ꯊꯣꯛꯣꯔꯛꯄ ꯍꯦꯜꯍꯜꯂꯦ ꯃꯁꯤꯒꯨꯝꯕꯁꯤꯡ ꯑꯁꯦ ꯑꯩꯈꯣꯏꯅ ꯇꯣꯏꯅ ꯊꯦꯡꯅꯕ ꯄꯣꯠ ꯉꯥꯛꯇꯅꯤ ꯑꯗꯨꯕꯨ ꯑꯩꯈꯣꯏꯒꯤ ꯂꯩꯀꯥꯏꯒꯤ ꯀ꯭ꯂꯕꯀꯤ ꯅꯍꯥꯔꯣꯜ ꯀꯩꯀꯩ ꯃꯌꯥꯝ ꯄꯨꯟꯗꯨꯅ ꯑꯩꯈꯣꯏ ꯃꯔꯛ ꯃꯔꯛꯇ ꯁꯣꯁꯦꯜ ꯁꯥꯔꯚꯤꯁ ꯇꯧꯗꯨꯅ ꯁꯦꯡꯕ ꯌꯥꯎꯋꯤ ꯑꯗꯨꯕꯨ ꯍꯦꯟꯅ ꯆꯥꯎꯅ ꯇꯧꯒꯗꯕ ꯑꯃꯇꯪ ꯂꯩꯔꯕꯗꯤ ꯑꯩꯈꯣꯏ ꯑꯗꯨꯝ",
+   "wer": 0.095,
+   "confidence": 0.963,
+   "english": "We are not happy with our water flow, but it has also increased the number of our diseases. These are things that we often encounter, but many of the members of our garden club work together to keep us clean by socializing among ourselves, but we still have something more to do."
+  },
+  {
+   "file": "mni_020.wav",
+   "reference": "ꯑꯩꯈꯣꯏꯒꯤ ꯑꯦ ꯃꯦ ꯂꯦꯒꯨꯝꯕ ꯑꯗꯩꯗꯤ ꯃꯤꯅꯤꯁꯤꯄꯥꯂꯤꯇꯤ ꯆꯠꯇꯨꯅ ꯀꯥꯎꯁꯤꯂꯔ ꯆꯠꯇꯨꯅ ꯎꯅꯗꯨꯅ ꯃꯈꯣꯏꯗꯒꯤꯁꯨ ꯑꯩꯈꯣꯏꯅ ꯂꯧꯕ ꯌꯥꯕ ꯈꯨꯗꯣꯡꯆꯥꯕꯁꯤꯡ ꯂꯧꯗꯨꯅ ꯍꯣꯠꯅꯗꯨꯅ ꯑꯩꯈꯣꯏꯒꯤ ꯂꯩꯔꯤꯕꯁꯤꯡ ꯑꯁꯦ ꯍꯦꯟꯅ ꯐꯒꯠꯅꯕꯗꯤ ꯍꯣꯠꯅꯩ",
+   "heard": "ꯑꯩꯈꯣꯏꯒꯤ ꯑꯦꯝ ꯑꯦꯜ ꯑꯦꯒꯨꯝꯕ ꯑꯗꯩꯗꯤ ꯃ꯭ꯌꯨꯅꯤꯁꯤꯄꯥꯂꯤꯇꯤ ꯆꯠꯇꯨꯅ ꯀꯥꯎꯟꯁꯤꯜꯂꯔ ꯆꯠꯇꯨꯅ ꯎꯅꯗꯨꯅ ꯃꯈꯣꯏꯗꯒꯤꯁꯨ ꯑꯩꯈꯣꯏꯅ ꯂꯧꯕ ꯌꯥꯕ ꯈꯨꯗꯣꯡꯆꯥꯕꯁꯤꯡ ꯂꯧꯗꯨꯅ ꯍꯣꯠꯅꯗꯨꯅ ꯑꯩꯈꯣꯏꯒꯤ ꯂꯩꯔꯤꯕꯁꯤꯡ ꯑꯁꯦ ꯍꯦꯟꯅ ꯐꯒꯠꯅꯕꯗꯤ ꯍꯣꯠꯅꯩ",
+   "wer": 0.217,
+   "confidence": 0.957,
+   "english": "We strive to make our residents better by meeting with our MLA's and municipal councilors and taking advantage of the opportunities we can get from them as well."
+  },
+  {
+   "file": "mni_021.wav",
+   "reference": "ꯑꯩꯒꯤ ꯃꯣꯠꯇꯗꯤ ꯂꯩꯁꯦ ꯑꯩ ꯌꯥꯝ ꯄꯥꯝꯖꯩ ꯃꯔꯝꯗꯤ ꯀꯅꯥ ꯍꯧꯖꯤꯛꯇꯤ ꯀꯅꯥ ꯂꯩ ꯄꯥꯝꯗꯕ ꯃꯤ ꯂꯩꯕ꯭ꯔꯥ ꯂꯩꯁꯦ ꯌꯥꯝꯅ ꯀꯥꯟꯅꯕ ꯄꯤꯌꯦ",
+   "heard": "ꯑꯩꯒꯤ ꯃꯣꯠꯇꯗꯤ ꯂꯩꯁꯦ ꯑꯩ ꯌꯥꯝ ꯄꯥꯝꯖꯩ ꯃꯔꯝꯗꯤ ꯀꯅꯥ ꯍꯧꯖꯤꯛꯇꯤ ꯀꯅꯥ ꯂꯩ ꯄꯥꯝꯗꯕ ꯃꯤ ꯂꯩꯕ꯭ꯔꯥ ꯂꯩꯁꯤ ꯌꯥꯝꯅ ꯀꯥꯟꯅꯕ ꯄꯤꯌꯦ",
+   "wer": 0.056,
+   "confidence": 0.96,
+   "english": "I like it more when I'm in my moto because if there are people who don't want to buy it now, the flower is very useful."
+  },
+  {
+   "file": "mni_022.wav",
+   "reference": "ꯑꯗꯨꯒ ꯂꯩ ꯊꯥꯔꯒ ꯍꯧꯕ ꯃꯇꯝꯗꯅ ꯃꯤ ꯑꯃ ꯑꯃ ꯂꯥꯛꯄꯁꯨ ꯌꯥꯝꯅ ꯑꯦꯛꯇ꯭ꯔꯦꯛꯇꯤꯞ ꯄꯤꯌꯦ ꯑꯗꯨꯒ ꯕꯥꯎꯟꯗꯔꯤꯁꯨ ꯀ꯭ꯂꯤꯌꯔ ꯑꯣꯏꯍꯜꯂꯦ ꯐꯖꯕ ꯄꯤꯌꯦ ꯑꯗꯨꯒ ꯏꯚꯟ ꯌꯨꯝ ꯃꯅꯨꯡꯗꯁꯨ ꯑꯩꯈꯣꯏꯅ ꯗꯦꯀꯣꯔꯦꯠ ꯇꯧꯕ ꯐꯪꯉꯦ",
+   "heard": "ꯑꯗꯨꯒ ꯂꯩ ꯊꯥꯔꯒ ꯍꯧꯕ ꯃꯇꯝꯗꯅ ꯃꯤ ꯑꯃ ꯑꯃ ꯂꯥꯛꯑꯕꯁꯨ ꯌꯥꯝꯅ ꯑꯦꯇ꯭ꯔꯦꯛꯇꯤꯞ ꯄꯤꯌꯦ ꯑꯗꯨꯒ ꯕꯥꯎꯟꯗꯔꯤꯁꯨ ꯀ꯭ꯂꯤꯌꯥꯂꯤꯌꯥꯔ ꯑꯣꯏꯍꯜꯂꯦ ꯐꯖꯕ ꯄꯤꯌꯦ ꯑꯗꯨꯒ ꯏꯚꯟ ꯌꯨꯝ ꯃꯅꯨꯡꯗꯁꯨ ꯑꯩꯈꯣꯏꯅ ꯗꯗꯤꯀꯣꯔꯦꯠ ꯇꯧꯕ ꯐꯪꯉꯦ",
+   "wer": 0.154,
+   "confidence": 0.95,
+   "english": "And when the flowers start blooming, even if a person comes, it gives a lot of attention and the boundary is also made clearer, it gives beauty and we also get to do a documentary in Evan's house."
+  },
+  {
+   "file": "mni_023.wav",
+   "reference": "ꯃꯣꯁꯂꯤ ꯑꯦꯚꯔꯒ꯭ꯔꯤꯟꯗꯤ ꯑꯩ ꯌꯥꯝ ꯄꯥꯝꯖꯩ ꯑꯦꯚꯔꯒ꯭ꯔꯤꯟꯗꯤ ꯑꯃꯗ ꯊꯝꯂꯁꯨ ꯑꯃꯗ ꯊꯝꯂꯁꯨ ꯌꯥꯝ ꯐꯖꯩꯌꯦ ꯑꯗꯨꯅ ꯑꯩꯗꯤ ꯈꯣꯏꯗꯥꯖꯕ ꯍꯥꯏꯔꯗꯤ ꯂꯩꯁꯦ ꯑꯩ ꯌꯥꯝ ꯄꯥꯝꯃꯦ ꯑꯗꯨꯒ",
+   "heard": "ꯃꯣꯁꯂꯤ ꯑꯦꯕꯔꯒ꯭ꯔꯤꯟꯗꯤ ꯑꯩ ꯌꯥꯝ ꯄꯥꯝꯖꯩ ꯑꯦꯕꯔꯒ꯭ꯔꯤꯟꯗꯤ ꯑꯃꯥꯗ ꯊꯝꯂꯁꯨ ꯑꯃꯗ ꯊꯝꯃꯁꯨ ꯌꯥꯝ ꯐꯖꯩꯌꯦ ꯑꯗꯨꯅ ꯑꯩꯗꯤ ꯈꯣꯏꯗꯥꯖꯕ ꯍꯥꯏ ꯍꯥꯏꯔꯗꯤ ꯂꯩꯁꯦ ꯑꯩ ꯌꯥꯝ ꯄꯥꯝꯃꯦ ꯑꯗꯨꯒ",
+   "wer": 0.238,
+   "confidence": 0.956,
+   "english": "Mosley Abergrindy I like a lot, Abergrindy in one but it's also nice to keep in one, so I'll tell you what I love, and I like it more."
+  },
+  {
+   "file": "mni_024.wav",
+   "reference": "ꯏꯚꯟ ꯍꯧꯖꯤꯛꯀꯥꯟꯗꯤ ꯍꯣꯁꯄꯤꯇꯥꯜꯗ ꯑꯣꯏꯔꯣ ꯀ꯭ꯂꯤꯅꯤꯛ ꯃꯆꯥ ꯃꯆꯥꯗ ꯑꯣꯏꯔꯣ ꯗꯨꯀꯥꯟꯗ ꯑꯣꯏꯔꯣ",
+   "heard": "ꯏꯚꯟ ꯍꯧꯖꯤꯛꯀꯥꯟꯗꯤ ꯍꯣꯁꯄꯤꯇꯥꯜꯗ ꯑꯣꯏꯔꯣ ꯀ꯭ꯂꯤꯅꯤꯛ ꯃꯆꯥ ꯃꯆꯥꯗ ꯑꯣꯏꯔꯣ ꯗꯨꯀꯥꯟꯗ ꯑꯣꯏꯔꯣ",
+   "wer": 0.0,
+   "confidence": 0.983,
+   "english": "Evan is in the hospital at the Aero Clinic in the Aero store with a child."
+  }
+ ]
+}

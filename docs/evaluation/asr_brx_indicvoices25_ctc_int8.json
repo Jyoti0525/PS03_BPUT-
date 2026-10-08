@@ -1,0 +1,203 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "brx",
+  "clips": 21,
+  "rejected_by_app": [
+   {
+    "file": "brx_000.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   },
+   {
+    "file": "brx_006.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   },
+   {
+    "file": "brx_012.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   },
+   {
+    "file": "brx_013.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   }
+  ],
+  "audio_seconds": 86.8,
+  "wer": 0.156,
+  "cer": 0.056,
+  "real_time_factor": 0.468,
+  "process_private_gb": 2.1,
+  "process_peak_working_set_gb": 1.38,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "brx_001.wav",
+   "reference": "आं थाखा थाखानि सोमोन्दै बुंनो सान्दों थाखायाथ' जोंनो गोनां थाखा नङाबानो जेरैबो राहा गैखाया",
+   "heard": "आं थाखा थाखानि सोमोन्दै बुंनो सानदों थाखाथ' जोंनो गोनां थाखा नङाबानो जेरैबो राहा गैखाया",
+   "wer": 0.143,
+   "confidence": 0.947,
+   "english": "I want to talk about the situation where we don't have the necessary resources."
+  },
+  {
+   "file": "brx_002.wav",
+   "reference": "बेनिखायनो थाखाखौ जोङो बुथुमनो नाजानांगौ",
+   "heard": "बेनिखायनो थाखाखौ जोङो बुथुमनो नाजानांगौ",
+   "wer": 0.0,
+   "confidence": 0.974,
+   "english": "Therefore, it is necessary to try to collect the amount as much as possible."
+  },
+  {
+   "file": "brx_003.wav",
+   "reference": "बे थाखाया",
+   "heard": "बे थाखाया",
+   "wer": 0.0,
+   "confidence": 0.938,
+   "english": "This is the position."
+  },
+  {
+   "file": "brx_004.wav",
+   "reference": "बुथुमनायाव बुरजाफोर जालाङोब्ला जोङो भबिसथआव गावनि फिसानि फरायनाय गाननाय जोमनाय",
+   "heard": "बुथुमनायाव बुरजाफोर जालाङोब्ला जोङो भबिसतआव गावनि फिसानि फरायनाय गाननाय जोमनाय",
+   "wer": 0.1,
+   "confidence": 0.965,
+   "english": "If there are excesses in the collection, you will lose your spouse's reading clothes in Bhavishya."
+  },
+  {
+   "file": "brx_005.wav",
+   "reference": "गिदिर गोलाव खालामनाय बेफोराव",
+   "heard": "गिदिर गोलाव खालामनाय बेफोराव",
+   "wer": 0.0,
+   "confidence": 0.943,
+   "english": "They are made of large grains."
+  },
+  {
+   "file": "brx_007.wav",
+   "reference": "आरो",
+   "heard": "आरो",
+   "wer": 0.0,
+   "confidence": 1.0,
+   "english": "and so on."
+  },
+  {
+   "file": "brx_008.wav",
+   "reference": "आरो बे रांजोंनो जोङो मेला",
+   "heard": "आरो बे रांजोंनो जोङो मेला",
+   "wer": 0.0,
+   "confidence": 0.907,
+   "english": "And it is with this money that the fair ends."
+  },
+  {
+   "file": "brx_009.wav",
+   "reference": "ओंखाम ओंख्रि बायदिसिना मैगं थायगं बायनायफ्राव बेफोरखौ नांगौ गाननाय जोमनाय",
+   "heard": "ओंखाम ओंख्रि बायदिसिना मैगं थाइगं बायनायफ्राव बेफोरखौ नांगौ गाननाय जोमनाय",
+   "wer": 0.1,
+   "confidence": 0.967,
+   "english": "Make sure you wear them when you're shopping for a variety of vegetables."
+  },
+  {
+   "file": "brx_010.wav",
+   "reference": "न'खराव जा फिसाफोरनो",
+   "heard": "न'खराव जा फिसाफोरनो",
+   "wer": 0.0,
+   "confidence": 0.928,
+   "english": "What to do with the children at home"
+  },
+  {
+   "file": "brx_011.wav",
+   "reference": "फरायनायाव",
+   "heard": "फरायनायाव",
+   "wer": 0.0,
+   "confidence": 0.966,
+   "english": "In reading"
+  },
+  {
+   "file": "brx_014.wav",
+   "reference": "बे थाखाजोंनो जोङो आबाद मावनायाव",
+   "heard": "बे थाखायैजोंनो जोङो आबाद मावनायाव",
+   "wer": 0.2,
+   "confidence": 0.896,
+   "english": "This is the reason for the decline in agricultural productivity."
+  },
+  {
+   "file": "brx_015.wav",
+   "reference": "आबाद मावनायाव आलु बायनाय",
+   "heard": "आबाद मावनायाव आलु बायनाय",
+   "wer": 0.0,
+   "confidence": 0.994,
+   "english": "Purchase of potatoes in agriculture"
+  },
+  {
+   "file": "brx_016.wav",
+   "reference": "माबा बायनाय",
+   "heard": "ामा बायनाय",
+   "wer": 0.5,
+   "confidence": 0.775,
+   "english": "Purchase of rice"
+  },
+  {
+   "file": "brx_017.wav",
+   "reference": "हासार बायनाय बायदिसिना मुवाफोरखौ जोङो बायनो थाखाय जोङो बुथुमनांगौ",
+   "heard": "हासार बायनाय बायदिसिना मुवाफोरखौ जोङो बायनो थाखाय जोङो बुथुमनांगौ",
+   "wer": 0.0,
+   "confidence": 0.913,
+   "english": "You have to collect a lot of different things to buy fertilizers."
+  },
+  {
+   "file": "brx_018.wav",
+   "reference": "दा राङानो आसोल राङानो गुदि रां नङाबानो ओ संसारा थांना थानो हाया बिनिखायनो जोंनो रांखौ दरखार आरो बुथुमनानै लानाया गाहाम",
+   "heard": "दा राङानो आसल राङानो गुदि रां नङाबानो संसारा थांनानै थानो हाया बेनिखायनो जोंनो रां रांखौ दरखार आरो बुथुमनानै लानायानो गाहाम",
+   "wer": 0.3,
+   "confidence": 0.953,
+   "english": "Now the world cannot survive without real money being the primary currency, so it is better for us to spend and collect money."
+  },
+  {
+   "file": "brx_019.wav",
+   "reference": "दा बेनोल'",
+   "heard": "दा बेनोल'",
+   "wer": 0.0,
+   "confidence": 0.975,
+   "english": "Now it's just the band."
+  },
+  {
+   "file": "brx_020.wav",
+   "reference": "जोङो जेनेबा मोनसे बुस्थु गैया नांथारगौ",
+   "heard": "जोङो जेन'बा मोनसे बुस्थु गैया नांथारगौ",
+   "wer": 0.333,
+   "confidence": 0.947,
+   "english": "If you're tired, you don't have to have a butt."
+  },
+  {
+   "file": "brx_021.wav",
+   "reference": "बबाव मोनब्रबनो बे जोङो रां दोनथुमनाय जोंनो जोङो बेफोरखौ",
+   "heard": "बबाव मोनब्रोमनो बे जोङो रां दोनथुमनायजोंनो जोङो बेफोरखौ",
+   "wer": 0.333,
+   "confidence": 0.933,
+   "english": "In order to achieve this, it is necessary to save money and save them."
+  },
+  {
+   "file": "brx_022.wav",
+   "reference": "सोरजिनानै लानो हायो जेरखम",
+   "heard": "सोरजिनानै लानो हायो जेरखम",
+   "wer": 0.0,
+   "confidence": 0.971,
+   "english": "Coughing can be done by creating"
+  },
+  {
+   "file": "brx_023.wav",
+   "reference": "जेरै <unintelligible>",
+   "heard": "जेरैनाखि",
+   "wer": 1.0,
+   "confidence": 0.88,
+   "english": "such as"
+  },
+  {
+   "file": "brx_024.wav",
+   "reference": "मा होनना बुङो",
+   "heard": "मा होनना बुङो",
+   "wer": 0.0,
+   "confidence": 0.988,
+   "english": "what is it called"
+  }
+ ]
+}

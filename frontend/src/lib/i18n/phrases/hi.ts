@@ -2077,5 +2077,11 @@ const hi: Record<string, string> = {
   "The last visit was RED: a person calls, not the agent": "पिछली मुलाक़ात लाल थी: एजेंट नहीं, व्यक्ति कॉल करेगा",
   "The last visit was YELLOW: a person calls, not the agent": "पिछली मुलाक़ात पीली थी: एजेंट नहीं, व्यक्ति कॉल करेगा",
   "Festivals, seasons and worker names for this state come from the Jeevia server. Start the server to view or edit them.": "इस राज्य के त्योहार, मौसम और कार्यकर्ताओं के नाम Jeevia सर्वर से आते हैं। देखने या बदलने के लिए सर्वर चालू करें।",
+  "More options": "और विकल्प",
+  "Tap to read the rules": "नियम पढ़ने के लिए दबाएँ",
+  "Tap, type or speak what the patient says.": "मरीज़ जो कहे, उसे दबाकर, लिखकर या बोलकर दर्ज करें।",
+  "Next patient": "अगला मरीज़",
+  "More": "और",
+  "Edit note": "नोट बदलें",
 };
 export default hi;

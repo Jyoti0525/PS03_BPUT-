@@ -1,0 +1,157 @@
+{
+ "typed": [
+  {
+   "english": "Chest pain spreading to the left arm since morning, with sweating",
+   "santali": "ᱵᱳᱭᱫᱟ ᱨᱮᱭᱟᱜ ᱜᱷᱟᱹᱞ ᱫᱚ ᱫᱤᱱ ᱫᱤᱱ ᱠᱷᱚᱱ ᱮᱰᱮᱧ ᱵᱟᱛᱟᱨᱮ ᱯᱟᱥᱱᱟᱣ ᱟᱠᱟᱱᱟ, ᱚᱱᱟ ᱥᱟᱶ ᱜᱮ ଘାମ ᱦᱚᱸ ᱯᱟᱥᱱᱟᱣ ᱟᱠᱟᱱᱟ ᱾",
+   "english_in_note": "The outbreak of the virus has spread from day to day, as well as the virus itself.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "red",
+   "urgency_santali": "yellow",
+   "same": false
+  },
+  {
+   "english": "Fever for four days with headache",
+   "santali": "ᱪᱟᱹᱨᱤ ᱢᱟᱦᱟ ᱫᱷᱟᱹᱵᱤᱡ ᱜᱷᱟᱹᱞ ᱥᱟᱶ ᱜᱷᱟᱹᱞ ᱦᱚᱭᱩᱜ ᱟ ᱾",
+   "english_in_note": "Injuries can last up to four days.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "red",
+   "urgency_santali": "yellow",
+   "same": false
+  },
+  {
+   "english": "Loose motions six times since yesterday and vomiting",
+   "santali": "ᱪᱟᱞᱟᱣᱮᱱ ᱫᱤᱱ ᱠᱷᱚᱱ ᱛᱩᱨᱩᱭ ᱫᱷᱟᱣ ᱦᱤᱫᱤᱡ ᱟᱨ ᱵᱳᱢ ᱦᱳᱭᱳᱜᱼᱟ ᱾",
+   "english_in_note": "There are six hidies and bombs from the previous day.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "yellow",
+   "urgency_santali": "yellow",
+   "same": true
+  },
+  {
+   "english": "Cough for three weeks with blood in the sputum",
+   "santali": "ᱯᱮ ᱦᱟᱯᱛᱟ ᱫᱷᱟᱹᱵᱤᱡ ᱠᱟᱪ ᱠᱟᱛᱮ ᱴᱩᱯᱚᱴᱚᱢ ᱨᱮ ᱞᱚᱫᱚᱢ ᱦᱩᱭᱩᱜᱼᱟ ᱾",
+   "english_in_note": "It is infused into the topsoil for up to three weeks.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "red",
+   "urgency_santali": "yellow",
+   "same": false
+  },
+  {
+   "english": "My child has fever and is not able to drink",
+   "santali": "ᱤᱧᱟᱹᱜ ᱜᱤᱫᱽᱨᱟᱹ ᱫᱚ ᱡᱳᱨ ᱟᱠᱟᱱᱟ ᱟᱨ ᱩᱱᱤ ᱫᱚ پیئڻ ᱵᱟᱝ ᱫᱟᱲᱮᱹᱭᱟᱜᱼᱟ ᱾",
+   "english_in_note": "My child is stressed and can't drink.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "red",
+   "urgency_santali": "yellow",
+   "same": false
+  },
+  {
+   "english": "Sudden weakness of the right arm and leg one hour ago",
+   "santali": "ᱢᱤᱫ ᱴᱟᱲᱟᱝ ᱞᱟᱦᱟ ᱫᱟᱵᱤ ᱛᱤ ᱟᱨ پیر ᱨᱮᱭᱟᱜ ᱚᱰᱮᱜᱮ ᱵᱮᱼᱵᱩᱫᱤᱥ ᱦᱩᱭ ᱞᱮᱱᱟ ᱾",
+   "english_in_note": "An hour earlier, the left arm and leg were also amputated.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "yellow",
+   "urgency_santali": "yellow",
+   "same": true
+  },
+  {
+   "english": "I am seven months pregnant and have bleeding",
+   "santali": "ᱤᱧ ᱫᱚ ᱮᱭᱟᱭ ᱪᱟᱸᱫᱳ ᱨᱮᱱ ᱜᱳᱭᱤᱱ ᱟᱨ ᱤᱧ ᱴᱷᱮᱱ ᱠᱷᱚᱱ ᱨᱟᱹᱲᱚᱜ ᱠᱟᱱᱟ ᱾",
+   "english_in_note": "I'm a seven-month-old pig and I'm crying.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "red",
+   "urgency_santali": "yellow",
+   "same": false
+  },
+  {
+   "english": "Mild knee pain for one month",
+   "santali": "ᱢᱤᱫ ᱪᱟᱸᱫᱚ ᱞᱟᱹᱜᱤᱫ ᱦᱩᱰᱤᱧ ᱜᱷᱩᱱᱰᱩ ᱨᱮᱭᱟᱜ ᱜᱷᱟᱹᱞ ᱾",
+   "english_in_note": "Minor hiccups for a month.",
+   "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+   "urgency_english": "yellow",
+   "urgency_santali": "yellow",
+   "same": true
+  }
+ ],
+ "spoken": [
+  {
+   "file": "sat_000.wav",
+   "status": 200,
+   "heard": "ᱟᱞᱮ ᱚᱲᱟᱜ ᱨᱮ ᱛᱮᱦᱤᱧ ᱤᱧ ᱵᱚᱭᱦᱟ ᱠᱩᱲᱤᱭᱟᱜ ᱡᱚᱱᱢᱚ ᱫᱤᱱ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱟᱨᱚᱱ ᱛᱮ ᱟᱢᱟᱜ ᱫᱚᱠᱟᱱ ᱠᱷ ᱠᱤᱪᱷᱩ ᱡᱤᱱᱤᱥᱤᱧ ᱡᱚᱢ ᱡᱤᱱᱤᱥᱤᱧ ᱤᱫᱤᱭᱟ",
+   "english": {
+    "text": "We have my sister's birthday at home, so I'll take some food items to your store.",
+    "language": "en",
+    "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+    "rewrites": [],
+    "unsure": []
+   },
+   "confidence": 0.936
+  },
+  {
+   "file": "sat_001.wav",
+   "status": 200,
+   "heard": "ᱟᱸᱡᱚᱢ ᱞᱤᱫᱟᱹᱧ ᱟᱢᱟᱜ ᱫᱚᱠᱟᱱ ᱨᱮ ᱵᱚᱞᱮ ᱟᱹᱰᱤ ᱵᱷᱟᱞᱮᱼ ᱵᱷᱟᱞᱮ ᱡᱤᱱᱤᱥ ᱧᱟᱢᱚᱜ ᱠᱟᱱᱟ ᱟᱞᱮ ᱚᱲᱟᱜ ᱯᱷᱮᱰ ᱨᱮᱱ ᱢᱤᱫᱴᱮᱱ ᱫᱟᱫᱟᱭ ᱞᱟᱹᱭ ᱟᱹᱫᱤᱧᱟ ᱡᱮ ᱱᱚᱰᱮ ᱟᱭᱢᱟ ᱠᱤᱪᱷᱩ ᱢᱚᱡᱽ ᱡᱤᱱᱤᱥ ᱧᱟᱢᱚᱜ ᱠᱟᱱᱟ ᱚᱱᱟᱛᱮ ᱟᱢ ᱴᱷᱮᱡ ᱤᱧ ᱦᱮᱡ ᱮᱱᱟ",
+   "english": {
+    "text": "Listen, you've got a lot of good stuff in your store. Let's say a housekeeper tells us that there's a lot of good stuff out there, so you'll come to me.",
+    "language": "en",
+    "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+    "rewrites": [],
+    "unsure": []
+   },
+   "confidence": 0.94
+  },
+  {
+   "file": "sat_002.wav",
+   "status": 200,
+   "heard": "ᱛᱚ ᱤᱧ ᱠᱮᱠ ᱟᱨ ᱠᱤᱪᱷᱩ ᱵᱷᱟᱡᱟ ᱯᱳᱚᱲᱟ ᱡᱤᱱᱤᱥ ᱡᱮᱢᱚᱱ ᱡᱮᱢᱚᱱ",
+   "english": {
+    "text": "Then I'd like to have a cake and some fried things.",
+    "language": "en",
+    "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+    "rewrites": [],
+    "unsure": []
+   },
+   "confidence": 0.921
+  },
+  {
+   "file": "sat_003.wav",
+   "status": 200,
+   "heard": "ᱥᱤᱸᱜᱟᱹᱟᱲᱟ ᱵᱨᱮᱰ ᱪᱚᱯ ᱚᱱᱟ ᱠᱚᱜᱮ ᱵᱷᱟᱡᱟ ᱡᱤᱱᱤᱥ ᱤᱧ ᱤᱫᱤ ᱛᱟᱢᱟ ᱚᱱᱟ ᱥᱚᱸᱜᱮ ᱩᱱᱟᱹᱜ ᱠᱚ ᱡᱤᱱᱤᱥ ᱤᱧ ᱦᱟᱛᱟᱣ ᱞᱮᱠᱷᱟᱡ ᱛᱚ ᱤᱧ ᱥᱚᱥ ᱟᱨ ᱪᱟᱹᱴᱱᱤ ᱚᱱᱟ ᱠᱚᱫᱚ ᱯᱷᱨᱤᱧ ᱧᱟᱢ ᱟᱥᱮ ᱵᱟᱝ",
+   "english": {
+    "text": "Bread chop in the evening, I need to take those fried things, so I don't have to buy so many things and I don't want to get them for free.",
+    "language": "en",
+    "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+    "rewrites": [],
+    "unsure": []
+   },
+   "confidence": 0.904
+  },
+  {
+   "file": "sat_004.wav",
+   "status": 200,
+   "heard": "ᱚᱱᱟᱛᱤᱧ ᱟᱸᱡᱚᱢᱫᱟ ᱟᱢ ᱴᱷᱮᱱ ᱟᱨ ᱚᱱᱟ ᱞᱟᱹᱭ ᱞᱟᱹᱜᱤᱫ ᱤᱧ ᱦᱮᱡ ᱮᱱᱟ",
+   "english": {
+    "text": "So listen to me and I'll come tell you.",
+    "language": "en",
+    "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+    "rewrites": [],
+    "unsure": []
+   },
+   "confidence": 0.934
+  },
+  {
+   "file": "sat_005.wav",
+   "status": 200,
+   "heard": "ᱵᱷᱟᱨᱚᱛ ᱫᱤᱥᱚᱢ ᱨᱮᱫᱚ ᱯᱷᱩᱴᱵᱚᱞ ᱠᱚ ᱮᱱᱮᱡᱼᱟ ᱟᱨ ᱠᱨᱤᱠᱮᱴ ᱵᱟᱹᱞᱩ ᱜᱩᱰᱩ ᱟᱨ ᱥᱚᱨᱮᱥ ᱮᱱᱮᱡ ᱠᱤᱱ ᱫᱚ ᱥᱚᱪᱤᱱ ᱟᱨ ᱫᱷᱳᱱᱤ",
+   "english": {
+    "text": "Football is danced in India and cricket ball is played and the best dancers are Sachin and Dhonis.",
+    "language": "en",
+    "engine": "IndicTrans2-200M (AI4Bharat, offline)",
+    "rewrites": [],
+    "unsure": []
+   },
+   "confidence": 0.923
+  }
+ ],
+ "typed_same_urgency": 3
+}

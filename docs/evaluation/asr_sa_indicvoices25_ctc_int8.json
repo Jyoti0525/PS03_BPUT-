@@ -1,0 +1,211 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "sa",
+  "clips": 23,
+  "rejected_by_app": [
+   {
+    "file": "sa_009.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   },
+   {
+    "file": "sa_011.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   }
+  ],
+  "audio_seconds": 209.4,
+  "wer": 0.114,
+  "cer": 0.018,
+  "real_time_factor": 0.305,
+  "process_private_gb": 1.78,
+  "process_peak_working_set_gb": 1.31,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "sa_000.wav",
+   "reference": "सेफ़् हार्वेस्ट् इत्यस्य डिस्कौण्ट् युक्तानि वस्तूनि आवलीरूपेण दर्शय",
+   "heard": "सेफ़् हार्वेस्ट् इत्यस्य डिस्कौण्ट् युक्तानि वस्तूनि आवलीरूपेण दर्शय",
+   "wer": 0.0,
+   "confidence": 0.984,
+   "english": "List items with discounts on Safe Harvest"
+  },
+  {
+   "file": "sa_001.wav",
+   "reference": "पञ्चाशत् प्रतिशताधिक इत्येतद्युक्तानि सर्वाणि उत्पाद्यानि आवलीरूपेण दर्शय",
+   "heard": "पञ्चाशत् प्रतिशताधिक इत्येतदुक्तानि सर्वाणि उत्पाद्यानि आवलीरूपेण दर्शय",
+   "wer": 0.143,
+   "confidence": 0.978,
+   "english": "List all products with more than fifty percent"
+  },
+  {
+   "file": "sa_002.wav",
+   "reference": "अपिटास् चिप्स् उपरि कान्यपि आफ़र्स् सन्ति वा",
+   "heard": "अपिटास् चिप्स् उपरि कान्यपि आफ़र्स् सन्ति वा",
+   "wer": 0.0,
+   "confidence": 0.939,
+   "english": "are there any offers on apitas chips"
+  },
+  {
+   "file": "sa_003.wav",
+   "reference": "अहं संस्कृतक्षेत्रे द्वादशवर्षतः अस्मि पूर्वं तु संस्कृतस्य ज्ञानमासीत् अपि च तस्मात् तस्याम् आसक्तिः अपि आसीत्",
+   "heard": "अहं संस्कृतक्षेत्रे द्वादशवर्षतः अस्मि पूर्वं तु संस्कृतस्य ज्ञानम् आसीत् अपि च तस्मात् तस्याम् आसक्तिः अपि आसीत्",
+   "wer": 0.133,
+   "confidence": 0.975,
+   "english": "I have been in the Sanskrit field for twelve years now, having knowledge of and attachment to Sanskrit."
+  },
+  {
+   "file": "sa_004.wav",
+   "reference": "किन्तु अवसरम् आसीत् इति अतः कारणात् प्रविष्टवती काव्य काव्यस्य परीक्षां स्वीकृत्य स्वर्णपदकमपि प्राप्नो प्राप्तवती",
+   "heard": "किन्तु अवसरम् आसीत् इति अतः कारणात् प्रविष्टवती काव्य काव्यस्य परीक्षां स्वीकृत्य स्वर्णपदकमपि प्राप्नो प्राप्तवती",
+   "wer": 0.0,
+   "confidence": 0.968,
+   "english": "But because there was an opportunity, Kavya entered the poetry exam and got the gold medal."
+  },
+  {
+   "file": "sa_005.wav",
+   "reference": "तदा पञ्च पञ्चदशानन्तरं परि पञ्चदशवर्षानन्तरं परीक्षां स्वीकृत्य स्वर्णपदकं प्राप्तवती इति मम मनसि बहु",
+   "heard": "तदा पञ्च पञ्चदशानन्तरं पञ्चदशवर्षानन्तरं परीक्षां स्वीकृत्य स्वमर्रणपदकं प्राप्तवती इति मम मनसि बहु",
+   "wer": 0.154,
+   "confidence": 0.965,
+   "english": "Then five decades later, fifteen years later, I think she took the exam and got her silver medal."
+  },
+  {
+   "file": "sa_006.wav",
+   "reference": "उत्तेजकरः विचारः स्थापितं अनन्तरं साहित्यपरीक्षां स्वीकृत्य विद्वत् पर्यन्तं सततं संस्कृते मग्ना आसम्",
+   "heard": "उत्तेजकरः विचारः स्थापित अनन्तरं साहित्यपरीक्षां स्वीकृत्य विद्वत् पर्यन्तं सततं संस्कृते मग्ना आसम्",
+   "wer": 0.083,
+   "confidence": 0.962,
+   "english": "After establishing a radical idea, he took a literary examination and remained engaged in a sustained culture until he became a scholar."
+  },
+  {
+   "file": "sa_007.wav",
+   "reference": "य यत्र कुत्रापि अवसरः प्राप्नोमि तत्र सर्वदा जिज्ञासया तत्र भव भविष्यामि सम्यक् परीक्षायाम् अङ्कान्यपि प्राप्तवती एवम् अहं धन्या अस्मि इति मन्ये",
+   "heard": "यत्र कुत्रापि अवसरः प्राप्नोमि तत्र सर्वदा जिज्ञासया तत्र भव भविष्यामि सम्यक् परीक्षायाम् अङ्कानि अपि प्राप्तवती एवम् अहं धन्या अस्मि इति मन्ये",
+   "wer": 0.143,
+   "confidence": 0.959,
+   "english": "Wherever I get an opportunity, I am always curious that you will also get marks in the next exam and I am thankful for that."
+  },
+  {
+   "file": "sa_008.wav",
+   "reference": "अहम् अन्तर्जालमाध्यमेन एकां शाटिकां स्वीकृतवती चित्रे तु बहु सम्यक् आसीत् धनमपि सम्यक् एव आसीत् तदर्थम् अहं शीघ्रम् ओर्डर् दत्तवती यदा तत् आगतं तत् सम्यक् एव नासीत्",
+   "heard": "अहम् अन्तर्जालमाध्यमेन एकां शाटिकां स्वीकृतवती चित्रे तु बहु सम्यक् आसीत् धनमपि सम्यक् एव आसीत् तदर्थम् अहं शीघ्रम् आर्डर् दत्तवती यदा तद् आगतं तत् सम्यक् एव नासीत्",
+   "wer": 0.077,
+   "confidence": 0.965,
+   "english": "The picture I took of a saree online was very good and the money was also good, so I placed an order early when it arrived and it was not good."
+  },
+  {
+   "file": "sa_010.wav",
+   "reference": "बहु",
+   "heard": "बहु",
+   "wer": 0.0,
+   "confidence": 1.0,
+   "english": "A number of"
+  },
+  {
+   "file": "sa_012.wav",
+   "reference": "ट्रान्स्परेण्ट् आसीत् धातुं ध्रा धर्तुमेव न शक्यते",
+   "heard": "ट्रान्स्परेण्ट् आसीत् धातुं ध्रा धर्तुमेव न शक्यते",
+   "wer": 0.0,
+   "confidence": 0.926,
+   "english": "The metal, which was transparent, could not be crushed."
+  },
+  {
+   "file": "sa_013.wav",
+   "reference": "मम आवल्याः विषयान् क्रमेण वद",
+   "heard": "मम आवल्याः विषयान् क्रमेण वद",
+   "wer": 0.0,
+   "confidence": 1.0,
+   "english": "tell me the topics in my list in order"
+  },
+  {
+   "file": "sa_014.wav",
+   "reference": "अहम् ए ऐ सी टी ई अनुमोदिताः डिप्लोमा पाठ्यक्रमयुक्ताः सर्वाः संस्थाः द्रष्टुम् इच्छामि",
+   "heard": "अहं ए ऐ सी टी ई अनुमोदिताः डिप्लोमा पाठ्यक्रमयुक्ताः सर्वाः संस्थाः द्रष्टुमिच्छामि",
+   "wer": 0.231,
+   "confidence": 0.972,
+   "english": "I want to see all the AICTE approved institutes offering Diploma courses"
+  },
+  {
+   "file": "sa_015.wav",
+   "reference": "भवतः पत्रं पठता केनापि ज्ञातव्यं भवति यत् निर्दिष्टं कार्यं कर्तुं कस्यैचित् व्यक्त्यै भवान् केन अधिकारेण अनुमतिं प्रदातुं शक्नोति इति",
+   "heard": "भवतः पत्रं पठता केनापि ज्ञातव्यं भवति यत् निर्दिष्टं कार्यं कर्तुं कस्यैचित् व्यक्त्यै भवान् केन अधिकारेण अनुमतिं प्रदातुं शक्नोति इति",
+   "wer": 0.0,
+   "confidence": 0.981,
+   "english": "Anyone reading your letter needs to know why you can authorize someone to do a specific job."
+  },
+  {
+   "file": "sa_016.wav",
+   "reference": "अहं राजस्थानप्रदेशे निवसामि तत्र दाल् बाटि इति चूर्मा इति कदन्नरोटिकां जनाः खादन्ति बाटि इति अन्नस्य एका पिण्डाकारिका भवति सा पिष्टेन निर्मिता तस्य घृतेन अत्योपसेचनङ्क्रियते",
+   "heard": "अहं राजस्थानप्रदेशे निवसामि तत्र दाल् बाटी इति चूर्मा इति कदन्नरोटिकां जनाः खादन्ति बाटी इति अन्नस्य एका पिण्डाकारिका भवति सा पिष्टेन निर्मिता तस्य घृतेन अत्युपसेचनंङ् क्रियते",
+   "wer": 0.167,
+   "confidence": 0.973,
+   "english": "I live in Rajasthan, where people eat Dal Bati, Churma, a piece of bread called Bati, which is made of starch and is highly distilled because of its detestability."
+  },
+  {
+   "file": "sa_017.wav",
+   "reference": "बाटि दाल् इत्यनेन सह खादन्ति",
+   "heard": "बाटी दाल् इत्यनेन सह खादन्ति",
+   "wer": 0.2,
+   "confidence": 0.975,
+   "english": "Eat with Bati Dal"
+  },
+  {
+   "file": "sa_018.wav",
+   "reference": "राजस्थानप्रदेशे अस्य गौरवमयः इतिहासः वर्तते दाल् बाटि इति प्राक्काले राज्ञां प्रियतमं भोजनम् आसीत् अधुना जनाः इदं भोक्तुं भोजनालये",
+   "heard": "राजस्थानप्रदेशे अस्य गौरवमयः इतिहासः वर्तते दाल्बाटी इति प्राक्काले राज्ञां प्रियतमं भोजनम् आसीत् अधुना जनाः इदं भोक्तुं भोजनालये",
+   "wer": 0.111,
+   "confidence": 0.98,
+   "english": "It has a glorious history in the state of Rajasthan. Dalbati was once a favourite dish of the kings and now people eat it in restaurants."
+  },
+  {
+   "file": "sa_019.wav",
+   "reference": "अपि गच्छन्ति यतोहि अस्य निर्माणे गृहे अधिकः कालः अपेक्षते अत्र विद्यमानाः प्रसिद्धभोजनालयः",
+   "heard": "अपि गच्छन्ति यतोहि अस्य निर्माणे गृहे अधिकः कालः अपेक्षते अत्र विद्यमानाः प्रसिद्धभोजनालयः",
+   "wer": 0.0,
+   "confidence": 0.988,
+   "english": "They also go because it takes more time to build the house than the famous restaurants here."
+  },
+  {
+   "file": "sa_020.wav",
+   "reference": "वर्तन्ते यथा हरिशङ्कर् भोजनालयः रामाडा होटल् इति होटल् होलिडे इन् इत्यादयः",
+   "heard": "वर्तन्ते यथा हरिशङ्करभोजनालयः रामाडा होटेल् इति होटेल् हालिडे इन् इत्यादयः",
+   "wer": 0.455,
+   "confidence": 0.95,
+   "english": "There are restaurants like Harishankar Restaurant, Ramada Hotel, Hotel Holiday Inn, etc."
+  },
+  {
+   "file": "sa_021.wav",
+   "reference": "बालकाः स्वस्य रिक्तसमये मनोरञ्जनाय वीडियोगेम्स् क्रीडन्ति चलचित्रानि पश्यन्ति",
+   "heard": "बालकाः स्वस्य रिक्तसमये मनोरञ्जनाय वीडियो गेम्स् क्रीडन्ति चलचित्राणि पश्यन्ति",
+   "wer": 0.375,
+   "confidence": 0.97,
+   "english": "Children play video games and watch movies in their free time to have fun."
+  },
+  {
+   "file": "sa_022.wav",
+   "reference": "क्रिकेट् क्रीडनं क्रीडन्ति क्रिकेट् मेचस् पश्यन्ति फ़ुट्बाल् मेचस् पश्यन्ति दूरवाण्यां गेमिङ्ग् करोति",
+   "heard": "क्रिकेट् क्रीडनं क्रीडन्ति क्रिकेट् मेचस् पश्यन्ति फ़ुट्बाल् मेचस् पश्यन्ति दूरवाण्यां गेमिङ्ग् करोति",
+   "wer": 0.0,
+   "confidence": 0.945,
+   "english": "Playing cricket, watching cricket matches, watching football matches, gaming on the phone."
+  },
+  {
+   "file": "sa_023.wav",
+   "reference": "इत्यादयाः",
+   "heard": "इत्यादयः",
+   "wer": 1.0,
+   "confidence": 0.934,
+   "english": "and so on."
+  },
+  {
+   "file": "sa_024.wav",
+   "reference": "कार्यक्रमानि करो करो कुर्वन्ति",
+   "heard": "कार्यक्रमानि करो करो कुर्वन्ति",
+   "wer": 0.0,
+   "confidence": 0.969,
+   "english": "do events"
+  }
+ ]
+}

@@ -138,6 +138,18 @@ def test_rules_read_the_original_words_when_translation_is_wrong(client, nurse):
     assert language.MT_ENGINE in flag["reason"] and "or" in flag["reason"]
 
 
+def test_translation_from_an_unmeasured_language_always_warns(client, nurse):
+    """Measured 8 Oct (scripts/santali_e2e.py): IndicTrans2 turned a Santali "chest pain to the left arm" into "the
+    outbreak of the virus has spread", and the note came out YELLOW instead of RED. No word list can catch that in
+    Santali, so the reviewer is always told to ask again."""
+    sym = {"text": "The outbreak of the virus has spread from day to day.", "original_text": "ᱵᱳᱭᱫᱟ ᱨᱮᱭᱟᱜ ᱜᱷᱟᱹᱞ", "language": "sat",
+           "source": "text", "engine": language.MT_ENGINE}
+    _, body = new_intake(client, nurse, symptoms=[sym])
+    enc = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()
+    flag = next(f for f in enc["note"]["flags"] if f["code"] == "MT-CHECK")
+    assert flag["severity"] == "warning" and "has not been measured" in flag["reason"]
+
+
 @needs("torch")
 def test_overlapping_translations_do_not_hang(monkeypatch):
     """IndicProcessor hands placeholder maps from preprocess to postprocess through one shared queue and clears it

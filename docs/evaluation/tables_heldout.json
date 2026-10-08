@@ -1,0 +1,273 @@
+{
+ "engine": "PP-StructureV3 table",
+ "reports_per_type": 8,
+ "seconds_total": 345.8,
+ "seconds_per_page": 8.6,
+ "by_type": {
+  "scan": {
+   "reports": 8,
+   "no_table": 0,
+   "rows": 68,
+   "exact": 9,
+   "missed": 50,
+   "wrong": 9,
+   "ocr_errors": 1,
+   "ocr_errors_flagged": 0
+  },
+  "photo": {
+   "reports": 8,
+   "no_table": 0,
+   "rows": 68,
+   "exact": 2,
+   "missed": 61,
+   "wrong": 5,
+   "ocr_errors": 0,
+   "ocr_errors_flagged": 0
+  },
+  "poor_photo": {
+   "reports": 8,
+   "no_table": 0,
+   "rows": 68,
+   "exact": 1,
+   "missed": 61,
+   "wrong": 6,
+   "ocr_errors": 7,
+   "ocr_errors_flagged": 1
+  },
+  "photocopy": {
+   "reports": 8,
+   "no_table": 0,
+   "rows": 68,
+   "exact": 11,
+   "missed": 52,
+   "wrong": 5,
+   "ocr_errors": 1,
+   "ocr_errors_flagged": 0
+  },
+  "thermal": {
+   "reports": 8,
+   "no_table": 0,
+   "rows": 68,
+   "exact": 8,
+   "missed": 56,
+   "wrong": 4,
+   "ocr_errors": 0,
+   "ocr_errors_flagged": 0
+  }
+ },
+ "total": {
+  "reports": 40,
+  "no_table": 0,
+  "rows": 340,
+  "exact": 31,
+  "missed": 280,
+  "wrong": 29,
+  "ocr_errors": 9,
+  "ocr_errors_flagged": 1
+ },
+ "wrong_values": [
+  {
+   "type": "scan",
+   "id": "r000",
+   "test": "haemoglobin",
+   "truth": "12.9",
+   "table": "1,50,000"
+  },
+  {
+   "type": "scan",
+   "id": "r002",
+   "test": "glucose_random",
+   "truth": "107",
+   "table": "3.5"
+  },
+  {
+   "type": "scan",
+   "id": "r002",
+   "test": "potassium",
+   "truth": "3.4",
+   "table": "70"
+  },
+  {
+   "type": "scan",
+   "id": "r003",
+   "test": "haemoglobin",
+   "truth": "13.7",
+   "table": "13.0"
+  },
+  {
+   "type": "scan",
+   "id": "r003",
+   "test": "creatinine",
+   "truth": "1.19",
+   "table": "58"
+  },
+  {
+   "type": "scan",
+   "id": "r004",
+   "test": "cholesterol",
+   "truth": "317",
+   "table": "200"
+  },
+  {
+   "type": "scan",
+   "id": "r004",
+   "test": "glucose_random",
+   "truth": "207",
+   "table": "70"
+  },
+  {
+   "type": "scan",
+   "id": "r007",
+   "test": "glucose_fasting",
+   "truth": "234",
+   "table": "70"
+  },
+  {
+   "type": "scan",
+   "id": "r007",
+   "test": "glucose_pp",
+   "truth": "217",
+   "table": "83"
+  },
+  {
+   "type": "photo",
+   "id": "r000",
+   "test": "platelets",
+   "truth": "317000",
+   "table": "6.18"
+  },
+  {
+   "type": "photo",
+   "id": "r003",
+   "test": "haemoglobin",
+   "truth": "13.7",
+   "table": "70"
+  },
+  {
+   "type": "photo",
+   "id": "r004",
+   "test": "cholesterol",
+   "truth": "317",
+   "table": "70"
+  },
+  {
+   "type": "photo",
+   "id": "r004",
+   "test": "glucose_random",
+   "truth": "207",
+   "table": "15"
+  },
+  {
+   "type": "photo",
+   "id": "r006",
+   "test": "urea",
+   "truth": "37",
+   "table": "17"
+  },
+  {
+   "type": "poor_photo",
+   "id": "r002",
+   "test": "potassium",
+   "truth": "3.4",
+   "table": "135"
+  },
+  {
+   "type": "poor_photo",
+   "id": "r003",
+   "test": "pcv",
+   "truth": "51.4",
+   "table": "1.50"
+  },
+  {
+   "type": "poor_photo",
+   "id": "r003",
+   "test": "glucose_fasting",
+   "truth": "206",
+   "table": "70"
+  },
+  {
+   "type": "poor_photo",
+   "id": "r004",
+   "test": "sodium",
+   "truth": "127",
+   "table": "53"
+  },
+  {
+   "type": "poor_photo",
+   "id": "r005",
+   "test": "pcv",
+   "truth": "31.7",
+   "table": "11.2"
+  },
+  {
+   "type": "poor_photo",
+   "id": "r006",
+   "test": "creatinine",
+   "truth": "3.22",
+   "table": "37"
+  },
+  {
+   "type": "photocopy",
+   "id": "r000",
+   "test": "platelets",
+   "truth": "317000",
+   "table": "125"
+  },
+  {
+   "type": "photocopy",
+   "id": "r003",
+   "test": "platelets",
+   "truth": "4.87",
+   "table": "14,900"
+  },
+  {
+   "type": "photocopy",
+   "id": "r003",
+   "test": "creatinine",
+   "truth": "1.19",
+   "table": "4.87"
+  },
+  {
+   "type": "photocopy",
+   "id": "r004",
+   "test": "ldl",
+   "truth": "151",
+   "table": "100"
+  },
+  {
+   "type": "photocopy",
+   "id": "r005",
+   "test": "alt",
+   "truth": "67",
+   "table": "40"
+  },
+  {
+   "type": "thermal",
+   "id": "r002",
+   "test": "urea",
+   "truth": "43",
+   "table": "0.6"
+  },
+  {
+   "type": "thermal",
+   "id": "r002",
+   "test": "glucose_pp",
+   "truth": "272",
+   "table": "70"
+  },
+  {
+   "type": "thermal",
+   "id": "r004",
+   "test": "potassium",
+   "truth": "5.2",
+   "table": "3.5"
+  },
+  {
+   "type": "thermal",
+   "id": "r007",
+   "test": "cholesterol",
+   "truth": "250",
+   "table": "66"
+  }
+ ]
+}

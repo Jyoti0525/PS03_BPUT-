@@ -190,7 +190,7 @@ export default function CallPage() {
       <Link href="/nurse/followups" className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-ink"><ArrowLeft className="size-4" /> {tr("Follow-ups")}</Link>
       <PageHeader
         title={tr("Reminder call — {n}", { n: f.patient_name })}
-        subtitle={tr("Simulated: no phone call is made in this build. The agent's lines are shown and read aloud here; type, tap or speak what the patient says.")}
+        subtitle={tr("Tap, type or speak what the patient says.")}
       />
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <Card>
@@ -212,22 +212,32 @@ export default function CallPage() {
                 <p className="font-semibold">{human ? tr("A person must call, not the agent") : tr("The agent may call")}</p>
                 <p>{tr(f.who_calls.why)}</p>
               </div>
-              <div>
-                <p className="mb-1 text-sm font-medium text-ink">{tr("Language of the call")}</p>
-                <Select value={lang} onChange={(e) => setLang(e.target.value as Lang | "patient")} className="max-w-xs">
-                  <option value="patient">{tr("Patient's language")}</option>
-                  {CALL_LANGS.map((l) => <option key={l} value={l}>{langName(l)} · {langByCode(l).name}</option>)}
-                </Select>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {!human && tel.data?.calls && (
-                  <Button variant="teal" icon={<PhoneCall className="size-4" />} loading={busy === "phone"} onClick={() => start("agent", "phone")}>
-                    {tr("Ring the demo phone {n}", { n: tel.data.demo_to ?? "" })}
-                  </Button>
-                )}
-                {!human && <Button variant={tel.data?.calls ? "secondary" : "teal"} icon={<Phone className="size-4" />} loading={busy === "start"} onClick={() => start("agent")}>{tr("Start agent call")}</Button>}
-                <Button variant={human ? "teal" : "secondary"} icon={<UserRound className="size-4" />} loading={busy === "start"} onClick={() => start("human")}>{tr("I will call and read the script")}</Button>
-              </div>
+              {/* One clear next step; the rest is folded away */}
+              {human ? (
+                <Button size="lg" variant="teal" icon={<UserRound className="size-4" />} loading={busy === "start"} onClick={() => start("human")}>{tr("I will call and read the script")}</Button>
+              ) : (
+                <Button size="lg" variant="teal" icon={<Phone className="size-4" />} loading={busy === "start"} onClick={() => start("agent")}>{tr("Start agent call")}</Button>
+              )}
+              <details className="rounded-xl border border-line text-sm">
+                <summary className="cursor-pointer px-3 py-2 font-medium text-muted hover:text-ink">{tr("More options")}</summary>
+                <div className="space-y-3 border-t border-line p-3">
+                  <div>
+                    <p className="mb-1 text-sm font-medium text-ink">{tr("Language of the call")}</p>
+                    <Select value={lang} onChange={(e) => setLang(e.target.value as Lang | "patient")} className="max-w-xs">
+                      <option value="patient">{tr("Patient's language")}</option>
+                      {CALL_LANGS.map((l) => <option key={l} value={l}>{langName(l)} · {langByCode(l).name}</option>)}
+                    </Select>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {!human && tel.data?.calls && (
+                      <Button variant="secondary" icon={<PhoneCall className="size-4" />} loading={busy === "phone"} onClick={() => start("agent", "phone")}>
+                        {tr("Ring the demo phone {n}", { n: tel.data.demo_to ?? "" })}
+                      </Button>
+                    )}
+                    {!human && <Button variant="secondary" icon={<UserRound className="size-4" />} loading={busy === "start"} onClick={() => start("human")}>{tr("I will call and read the script")}</Button>}
+                  </div>
+                </div>
+              </details>
             </div>
           ) : (
             <div className="p-4">
@@ -295,7 +305,8 @@ export default function CallPage() {
 
         <div className="space-y-4">
           <Card>
-            <CardHeader icon={<ShieldAlert className="size-4" />} title={tr("What the agent may do")} />
+            <details>
+            <summary className="cursor-pointer list-none"><CardHeader icon={<ShieldAlert className="size-4" />} title={tr("What the agent may do")} subtitle={tr("Tap to read the rules")} /></summary>
             <ul className="space-y-2 p-4 text-sm text-ink-2">
               <li>{tr("Logistics and yes / no questions only. It never answers with advice: under India's Telemedicine Practice Guidelines 2020 an AI platform may not counsel a patient.")}</li>
               <li>{tr("A danger sign said anywhere ends the call and pages a person. So does “not sure” on a danger-sign question.")}</li>
@@ -303,6 +314,7 @@ export default function CallPage() {
               <li>{tr("On a phone that is not hers, or when someone else answers, nothing about health is said.")}</li>
               <li>{tr("Answers are read by fixed rules, not by a model: the intake word lists in English, Hindi and Odia, and the English translation for other languages. A word like “less” or “a little” counts as not sure.")}</li>
             </ul>
+            </details>
             {call?.sources && (
               <p className="border-t border-line px-4 py-3 text-xs text-muted">{tr("Danger signs from")}: {call.sources.map((s) => s.short).join("; ")}</p>
             )}

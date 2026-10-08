@@ -1,0 +1,218 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "mai",
+  "clips": 25,
+  "rejected_by_app": [],
+  "audio_seconds": 206.9,
+  "wer": 0.281,
+  "cer": 0.101,
+  "real_time_factor": 0.322,
+  "process_private_gb": 1.78,
+  "process_peak_working_set_gb": 1.34,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "mai_000.wav",
+   "reference": "दरभंगा मधुबनी अररिया उ पूर्णियाँ",
+   "heard": "दरभङ्गा मधुबनी अररिया पूर्णिय",
+   "wer": 0.6,
+   "confidence": 0.941,
+   "english": "Darbhanga Madhubani Araria Purnia"
+  },
+  {
+   "file": "mai_001.wav",
+   "reference": "आओर मधेपुरा",
+   "heard": "आओर मधेपुरा",
+   "wer": 0.0,
+   "confidence": 0.972,
+   "english": "and Madhepura."
+  },
+  {
+   "file": "mai_002.wav",
+   "reference": "जारनिमे देखियौ लस्की बनबै छियै लगामे ओकरा जारनि तोरै छियै अमाठी आमके जरना तोरलहुॅं बोझ बान्हलहुॅं लेलहुॅं",
+   "heard": "जारनिमे देखियौ लस्की बनबै छियै लगामे ओकरा जारनि तोड़ै छियै अमठी आमके जरना तोड़लहुँ भोझ बान्हलहुँ लाबलहुँं",
+   "wer": 0.353,
+   "confidence": 0.868,
+   "english": "You see in the jar, you make a laski, you break it in the jar, you break the jar of mango, you tie it."
+  },
+  {
+   "file": "mai_003.wav",
+   "reference": "हेवए गोइठा ठोकलहुॅं गायके सोँठी लायलहुॅं खरीद कऽ ओकरा पाथलहुॅं सुखेलहुॅं तब चूल्हामे जलबै छियै ने",
+   "heard": "हेबह गोइठा ठोकलहुँ गायके संठी लाबलहुॅँ ख़रीदकऽ ओकरा पाथलहुॅँ स सुखेलहुॅँ तब चूल्हामे जलबै छियै नहि",
+   "wer": 0.625,
+   "confidence": 0.82,
+   "english": "He will take the cow's crib, buy it, put it away, and dry it; then you will not go to the oven."
+  },
+  {
+   "file": "mai_004.wav",
+   "reference": "नै भेल तऽ गैसो गैस भरा लेलहुॅं गैस सुविधा देखलहुॅं तऽ भरेलहुॅं आ नहि सुविधा देखलहुॅं तऽ नहि भरेलहुॅं गैस महँगा भए गेलै तऽ नहि भरेलहुॅं ओहिसँ बढ़िऑं जरने बिछ कऽ लाबलु",
+   "heard": "नहिऽ गैो गैस भरा लेलहुॅं गैस सुविधा देखलहुॅं तऽ भरेलहुँ आ नहि सुविधा देखलहुॅँ तऽ नहि भरेलहुॅँ गैस महगा भए गेलै तऽ नहि भरेलहुँं से बढ़िआँ जरने बीछकऽ लाबलहुॅँ",
+   "wer": 0.438,
+   "confidence": 0.783,
+   "english": "Otherwise, if you see a gas facility to fill the gas, you fill it up, and if you see a gas facility, you don't fill it up."
+  },
+  {
+   "file": "mai_005.wav",
+   "reference": "हेवए फाल बनेलहुॅं साड़ी आरके फाल बनाए लेलहुॅं सी लेलहुॅं धागासँ चलि गेलहुॅं असुआरि बसुआरि गाछी कलम आर अपन",
+   "heard": "हे फल बनेलहुँ साड़ी आरके फल बना लेलहुँ आ सी लेलहुँ धागासँ चलि गेलहुँ आ साररि बसुरि गाछी कलम आर अपन",
+   "wer": 0.632,
+   "confidence": 0.816,
+   "english": "O fruit, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made a sari, I made"
+  },
+  {
+   "file": "mai_006.wav",
+   "reference": "बहारि खररि कऽ खर्रा लेलहुॅं हाथके आमके पत्ता गिरल जुमके पत्ता गिरल पीपरके पत्ता गिरल गऽ यहए सबके पात अपन खररि कऽ लए अयलहुॅं अपन चूल्हामे खाना बनैलु ओइ सबसँ",
+   "heard": "बहारि खररििकऽ खर्रा लेलहुँ हाथके आमके पत्ता गिरल झूमके पत्ता गिरल पीपरके पत्ता गिरल इएह सबके पात अपन खरड़िकऽ लए एलहुॅँ अपन चूल्हामे खाना बनेलहुँ ओहि सबसँ",
+   "wer": 0.367,
+   "confidence": 0.842,
+   "english": "The leaves of the mango fell, the leaves of the jhum fell, the leaves of the peeper fell, all the leaves came to my kharif, and I made food on my stove."
+  },
+  {
+   "file": "mai_007.wav",
+   "reference": "नै भेल तऽ लक्सियो लए कऽ लग्गो लए कऽ अपन तोइर लेलु जरना अमाठी भेल इसब अमाठी भेल हेवए धार मे भेल धार मे लक्सी लगेलु घिचलु भसाठी भेल लकड़ी ओहो सब भासल गेल तऽ पकरलु",
+   "heard": "नहि भेल तऽ लसकियो लए कऽ लगो लए कऽ अपन तोड़ि लेलहुँ जरना अमाठी भेल ईसभ अमाठी भेल वएह धारमे भेल धारमे लसकी लगेलहुँ घिचलहुँ भसाठी भेल लकड़ी ओहोसभ भासल गेल तऽ पकड़लहुँ",
+   "wer": 0.472,
+   "confidence": 0.898,
+   "english": "If not, then take the lassi and put it on yourself and break it. If they are immature, then put the lassi on the stream in the same stream. If they are soaked, then they will catch the burnt wood."
+  },
+  {
+   "file": "mai_008.wav",
+   "reference": "कटिहारमे तकनीकी माध्यमसँ स्वास्थ्य सेवाके उपयोग एखन धीरे धीरे आगू बढ़ि रहल यऽ एखन सबके समझमे ई चीज अनै सब तक ई जन जन तक ई चीज अहाँके पहुँचल यऽ",
+   "heard": "बिहारमे तकनीकी माध्यमसँ स्वास्थ्य सेवाके उपयोग अखन धीरे धीरे आगू बढ़ि रहल यऽ अखन सबके समझमे ई चीज आओर नहि सब तक ई जन जन तक ई चीज अहाँके पहुँचल यऽ",
+   "wer": 0.167,
+   "confidence": 0.933,
+   "english": "The use of healthcare through technology is now slowly advancing in Bihar, where it is now widely understood that these things are no longer accessible to these people."
+  },
+  {
+   "file": "mai_009.wav",
+   "reference": "जे ओन तकनीकी माध्यमसँ स्वास्थ्य सेवाके उपयोग ई जन जन तक एखन नहि पहुँचल यऽ जेना कि ई मेड ई टेली मेडिसीन",
+   "heard": "जे आन तकनीकी माध्यमसँ स्वास्थ्य सेवाके उपयोग ई जन जन तक अखन नहि पहुँचल यऽ जेनाकि ई टेलीमेडिसीन",
+   "wer": 0.364,
+   "confidence": 0.926,
+   "english": "The use of health services through other technologies may no longer reach these people, such as telemedicine."
+  },
+  {
+   "file": "mai_010.wav",
+   "reference": "ईसब चीज अभी बहुत आदमीके समझसँ परे छै तैं दुआरे एकर प्रचार प्रसारक आव जहाँ तक तकनीकी माध्यमसँ",
+   "heard": "ई सब चीज अभी बहुत आदमीके समझसँ पड़ै छै ताहि दुआरे एकर प्रचार प्रसारक आवश्यक जहाँ तक तकनीकी माध्यमसँ",
+   "wer": 0.278,
+   "confidence": 0.886,
+   "english": "All these things are now understood by many people, so it is necessary to propagate them as far as technology is concerned."
+  },
+  {
+   "file": "mai_011.wav",
+   "reference": "तकनीकी माध्यमसँ स्वास्थ्य सेवाके बात छै तऽ एखन टोटल लगभग चीज जे छै",
+   "heard": "तकनीकी माध्यमसँ स्वास्थ सेवाके बात छै तऽ एखन टोटल लगभग चीज जे छै",
+   "wer": 0.077,
+   "confidence": 0.951,
+   "english": "When it comes to healthcare through technology, now the total is almost the same."
+  },
+  {
+   "file": "mai_012.wav",
+   "reference": "तकनीकी हिसाबसँ ही स्वास्थ्य सेवामे उपयोग भेल जा रहल अछि आओर दिनोदिन ई चीज बढ़ि रहल छै तैं दुआरे आइ जे दस दिनमे काज होइके चाही उ दू दिनमे हमर अहाँके भए जाइए आज कल टोटल जे छै तकनीकीपर ही आधारित स्वास्थ्य",
+   "heard": "तकनीकी हिसाबसँ ही स्वास्थ्य सेवामे उपयोग भेल जा रहल अछि आओर दिनोदिन ई चीज बढ़ि रहल छै ताहि दुआरे आइ जे दस दिनमे काज होइके चाही ओ दू दिनमे हमर अहाँके भए जाइए आइकाल्हि टोटल जे छै तकनीक परर ही आधारित स्वास्थ्य",
+   "wer": 0.143,
+   "confidence": 0.928,
+   "english": "Technology is being used in healthcare and it is increasing day by day, so the work that needs to be done in ten days today, in two days, I will give you the total that is technology-based health today."
+  },
+  {
+   "file": "mai_013.wav",
+   "reference": "के देखरेख होइ छै तैं दुआरे ऑनलाइन टेली मेडीसिन के प्रति एखन बहुत कम आदमीके जानकारी यऽ तैं दुआरे एकर जानकारीके आओर वृहत रूपसँ करबाके लेल सरकारके एकरा प्रति ध्यान दैके चाही ओकर बादो बिहारमे",
+   "heard": "के देखरेख होइ छै तैहि दुआरे ऑनलाइन टेलीमेडिसिनके प्रति अखन बहुत कम आदमीके जानकारी यऽ ताहि दुआरे एकर जानकारीके आओर वृहत रूपसँ करबाक लेल सरकारके एकरा प्रति ध्यान दैके चाही ओकर बाद ओ बिहारमे",
+   "wer": 0.257,
+   "confidence": 0.918,
+   "english": "Very few people are now aware of online telemedicine, so the government should pay attention to it in order to make its information more comprehensive."
+  },
+  {
+   "file": "mai_014.wav",
+   "reference": "तकनीकी स्वास्थ्य माध्यमसँ बहुत कम यऽ आन स्टेटक अपेक्षा",
+   "heard": "तकनीकी स्वास्थ्य माध्यमसँ बहुत कम यऽ आन स्टेटक अपेक्षा",
+   "wer": 0.0,
+   "confidence": 0.942,
+   "english": "Much less than in other states through technical health"
+  },
+  {
+   "file": "mai_015.wav",
+   "reference": "तैं दुआरे तकनीकी शिक्षा",
+   "heard": "ताहि दुआरे तकनीकी शिक्षा",
+   "wer": 0.25,
+   "confidence": 0.916,
+   "english": "Thus, technical education."
+  },
+  {
+   "file": "mai_016.wav",
+   "reference": "बहुत ही आवश्यक छै",
+   "heard": "बहुत ही आवश्यक छै",
+   "wer": 0.0,
+   "confidence": 0.925,
+   "english": "It is very essential"
+  },
+  {
+   "file": "mai_017.wav",
+   "reference": "सुपौल जिलामे ने मतलब शिल्पके मतलब जेना शिल्प भए गेल तऽ पत्थरके तऽ नहि बनि रहल छै मूर्ति छोट छोट बनै छै",
+   "heard": "सुपौल जिलामे ने मतलब शिल्पके मतलब जेना शिल्प भए गेल तऽ पत्थरके तऽ नहि बनि रहल छै मूर्ति ओहो छोट छोट बनै छै",
+   "wer": 0.045,
+   "confidence": 0.933,
+   "english": "In Supaul district, no means craft, just like craft, stone is not being made, idols are being made small."
+  },
+  {
+   "file": "mai_018.wav",
+   "reference": "मगर ने माटीके मूर्ति ने बहुत ही जादा बनै छै किएकि ने माटीके मूर्ति छोट मोट कलाकार छै जेना ओ",
+   "heard": "मगर ने माटिके मूर्ति ने बहुत ही जादा बनै छै कियाकि न माटिके मूर्ति छोट मोट कलाकार छै जेना ओ",
+   "wer": 0.2,
+   "confidence": 0.88,
+   "english": "But neither the clay idols are made much because the clay idols are small artists as they are."
+  },
+  {
+   "file": "mai_019.wav",
+   "reference": "दुर्गापूजाके मूर्ति बनबै छै ओहो मूर्ति एते भव्य बनबै छै जेकर लागै छै जे साक्षात भगवती प्रकट भए गेलै हँ",
+   "heard": "दुर्गा पूजाके मूर्ति बनबै छै ओहो मूर्ति एतय भव्य बनबै छै जकर लागै छै जे साक्षात भगवती प्रकट भए गेलै हँ",
+   "wer": 0.2,
+   "confidence": 0.889,
+   "english": "He makes the idol of Durga Puja here grand, which seems that Bhagwati has already appeared."
+  },
+  {
+   "file": "mai_020.wav",
+   "reference": "आओर दुर्गापूजा भए गेलै ओकरबाद सरस्वती पूजाके मूर्ति बनै छै विश्वकर्मा पूजाके मूर्ति बनै छै",
+   "heard": "आओर दुर्गा पूजा भए गेलै ओकर बाद सरस्वती पूजाके मूर्ति बनै छै विश्वकर्मा पूजाके मूर्ति बनै छै",
+   "wer": 0.267,
+   "confidence": 0.909,
+   "english": "And after Durga Puja is done, idols of Saraswati Puja are made, idols of Vishwakarma Puja are made."
+  },
+  {
+   "file": "mai_021.wav",
+   "reference": "इसब मूर्ति बहुत ही अच्छा बनबै छै आओर ई पीढ़ी दर पीढ़ी चलि अयलै हँ किएकि देखियौ जेना ओकर बाप बनेलकै हम तऽ देखलौ हँ जे तीन पीढ़ी तक कियाकि हमर",
+   "heard": "ईसभ मूर्ति बहुत ही अच्छा बनबै छै आओर ई पीढ़ी दर पीढ़ी चलि एलै हँ कआाकि देखिौ जेना ओकर बाप बनेलकै हम तऽ देखलहुँ हँ जे तीन पीढ़ी तक कियकि हमर",
+   "wer": 0.194,
+   "confidence": 0.877,
+   "english": "These idols do very well and they have been passed down from generation to generation, as their father did, I have seen for three generations because of me."
+  },
+  {
+   "file": "mai_022.wav",
+   "reference": "देखै छियै हमर सबके परदादा दादा बनेलकै हँ मूर्ति सब बनबैत देखलियै हँ तकरबाद से बाबाके देख रहल छी पापाके देख रहल छी एना कऽ कऽ देख रहल छियै",
+   "heard": "देखै छियै हमर सबकेँ परदादा दादा बनेलकै हँ मूर्ति सब बनबैत देखलियै हँ तऽरा सब बाबाके देख रहल छियै पापाके देख रहल छियै एना कए कऽ देख रहल छियै",
+   "wer": 0.207,
+   "confidence": 0.813,
+   "english": "You see us as great-grandfathers, yes, you see the idols being made, yes, you see all the papa's, you see the papa's, you see how they are doing."
+  },
+  {
+   "file": "mai_023.wav",
+   "reference": "आओर जहाँ तक रहलै हस्त कला तऽ हस्त कलामे जेना बाँसके देखै छियै छिट्टा पथिया आओर कोनिऑं",
+   "heard": "आओर जहाँ तक रहलै हस्तकला तऽ हस्तकलामे जेना बाँंसके देखै छियै छिट्टा पथिया आओर कोनिया",
+   "wer": 0.353,
+   "confidence": 0.903,
+   "english": "And as far as handicrafts go, in handicrafts like bamboo, you will find small patias and konias."
+  },
+  {
+   "file": "mai_024.wav",
+   "reference": "आओर सुप्ति इसब बनाए कऽ ने मतलब मार्केटमे एकर उपलब्ध कराबै छै आओर लाहके लाह कला जेना छै ने लाह कला",
+   "heard": "आओर सुपती ईसभ बनाकऽ ने मतलब मार्केटमे एकर उपलब्ध कराबै छै आओर लाहके लाह कला जेना छै ने लाह कला",
+   "wer": 0.19,
+   "confidence": 0.913,
+   "english": "And Supati does not make these means make them available in the market and Lahke Lah Kala is like Lahke Lah Kala or Lah Kala."
+  }
+ ]
+}

@@ -1,0 +1,217 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "doi",
+  "clips": 25,
+  "audio_seconds": 225.2,
+  "wer": 0.254,
+  "cer": 0.11,
+  "real_time_factor": 0.308,
+  "process_private_gb": 2.05,
+  "process_peak_working_set_gb": 1.39,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "doi_000.wav",
+   "reference": "रंगोली की बनाई जांदी ऐ रंगोली दी इक मान्यता ऐ कि जिस दिन राम जी बारां वर्श दा जेह्ड़ा बनबास हा ओह् कट्टियै अयोध्या बापस आए हे ते उं'दे सुआगत बास्तै जेह्ड़े हे लोकें गी रंगोलियां बनाई गेइयां हियां",
+   "heard": "रंगोली की बनाई जंदी ऐ रंगोली दी इक मान्यता ऐ कि जिस दिन राम जी बारां बर्ष दा जेह्ड़ा वनवास हा ओह् कट्टियै अयोध्या बापस आए हे ते उं'दे सुआगत आस्तै जेह्ड़े हे लोकें गी रंगोलियां बनाई हियां हियां",
+   "wer": 0.125,
+   "confidence": 0.915,
+   "english": "There is a belief in rangoli that on the day when Ramji, who was in exile for twelve years, came back to Ayodhya and welcomed those who had made rangolis to these people."
+  },
+  {
+   "file": "doi_001.wav",
+   "reference": "ते तां इ'यां मन्नेआ जंदा जिस दिन दिवाली दा त्यार होंदा ऐ लोग अपने अपने घर रंगोलियां जेह्ड़िया न ओह् बनादे न",
+   "heard": "ते तां गै मन्नेआ जंदा ऐ जिस दिन बी दिवाली दा ध्यार होंदा ऐ ते लोक अपने अपने घर रंगोलियां जेह्ड़ियां न ओह् बनांदे न",
+   "wer": 0.391,
+   "confidence": 0.901,
+   "english": "And it is believed that even on the day when Diwali is in full swing, people make rangolis at their homes."
+  },
+  {
+   "file": "doi_002.wav",
+   "reference": "ओह्दे बाद सूर्यै गी पानी अस दिन्नें साढ़े रिचूअल साढ़े हिन्दू धर्म बिच्च जेह्ड़े न लोग सूर्य भगवान गी जेह्ड़ा न पानी दिंदे न",
+   "heard": "ओह्दे बाद सूरज गी पानी अस दिन्ने साढ़े रिचुअल साढ़े हिंदू धर्म बिच जेह्ड़े न लोोग सूरज भगवान गी जेह्ड़ा ऐ पानी दिंदे न ते",
+   "wer": 0.375,
+   "confidence": 0.956,
+   "english": "After that, water is given to the Sun, which is the water that is given to the Sun God and is the real half of Hinduism."
+  },
+  {
+   "file": "doi_003.wav",
+   "reference": "क्योंकि जिसी मन्नेआ जंदा जिसी बंदे गी ज्यादा क्रोध ते ओह् सूर्य भगवान गी पानी देओ",
+   "heard": "क्योंकि जिसी मन्नेआ जंदा कि जिसी बंदे गी जाैदा क्रोध औंदा ते ओह् सूरज भगवान गी पानी देओ ते",
+   "wer": 0.312,
+   "confidence": 0.91,
+   "english": "Because whoever is supposed to get angry and give water to the Sun God."
+  },
+  {
+   "file": "doi_004.wav",
+   "reference": "ओह्दा क्रोध जेह्ड़ा ओह् शान्त होई जंदा ओह्दे बाद जेह्ड़ा अस तिलक जेह्ड़ा ऐ ओह् अस की लान्ने क्योंकि तिलक जेह्ड़ा ऐ ओह् शुद्ध होंदा ते मन्नेआ जंदा कि ब्राहमण गी जेह्ड़ा़ तिलक ऐ ओह् लोआना चाहिदा होर रोज उसी लाना चाहिदा न्हाई धोइयै",
+   "heard": "ओह्दा क्रोध जेह्ड़ा ऐ ओह् शांत होई जंदा ओह्दे बाद जेह्ड़ा तिलक जेह्ड़ा ऐ ओह् अस कीऽ लान्ने क्योंकि तिलक जेह्ड़ा होंदा ओह् शुद्ध होंदा ते मन्नेआ जंदा कि ब्राह्मण गी जेह्ड़ा तिलक ऐ ओह् लोआना चाहिदा और रोज उसी लाना चाहिदा न्हाई धोइयै",
+   "wer": 0.182,
+   "confidence": 0.936,
+   "english": "After that the tilak that is the tilak will be taken away because the tilak that is the tilak will be pure and it will be believed that the Brahmin should take the tilak that is the tilak and wash it every day."
+  },
+  {
+   "file": "doi_005.wav",
+   "reference": "तिलक दी ते तिलक जेह्ड़ा ओह् असेंगी शुद्ध बनांदा ते होर इक हिन्दू दी निशानी ऐ ओह्दे बाद कि अस धागा जेह्ड़ा धागा होंदा ओह् शुद्ध होंदा ओह् इक ग्यान दा प्रतीक होंदा ते उसी जदूं बी अस मंदर जन्नें ओह् असेंगी धागा पोआंदे ओह्दे बाद अस मंदर जन्नें पूजा करने ते",
+   "heard": "ते तिलक दी तिलक जेह्ड़ा ऐ ओह् असें गी शुद्ध बनांदा होर इक हिंदू दी निशानी ऐ ओह्दे बाद कि अस धागा जेह्ड़ा ऐ जेह्ड़ धागा होंदा ओह् शुद्ध होंदा ओह् इक्क ज्ञान दा प्रतीक होंदा ते उसी जदूं बी अस मंदिर जाने ते ओह् असेंगी धागा पोआदे ओह्दे बाद अस मंदिर जाने पूजा करने ते",
+   "wer": 0.327,
+   "confidence": 0.92,
+   "english": "And Tilak's tilak which is what makes us pure is another Hindu's symbol, after that whatever thread we have is pure, that is the only symbol of knowledge and that whenever we go to the temple and they wear the thread to us, then we go to the temple and worship."
+  },
+  {
+   "file": "doi_006.wav",
+   "reference": "ओह्दे बाद बड़े सारे साढ़े कल्चर बिच्च बड़े सारे रीचुअल्स न ते एह जेह्ड़ियां चीज़ां न एह् साढ़े इक हिन्दू धर्म बिच्च मन्नेआ जंदा",
+   "heard": "ओह्दे बाद बड़े सारे साढ़े कल्चर बिचि बड़े सारे रिचुअल्स न ते एह् जेह्ड़ियां चीजां न एह् साढ़े हिंदू धर्म बिच मन्नेआ जंदा",
+   "wer": 0.292,
+   "confidence": 0.928,
+   "english": "After that, there are many cultures, many rituals, and these things are considered to be half of Hinduism."
+  },
+  {
+   "file": "doi_007.wav",
+   "reference": "पंज जून दौ हजार अट्ठ छे जून उन्नी सौ नड़िनवैं पंज फरबरी दो ज्हार दो ठाई अगस्त दो ज्हार पंज चौदां अक्तूबर दो ज्हार पंज",
+   "heard": "पंज जून दो ज्हार अट्ठ छे जून उन्नी सौ नड़ीिनवैं पंज फरवरी दो ज्हार दो ठाई अगस्त दो ज्हार पंज चौदां अक्तूबर दो ज्हार त्रैऽ",
+   "wer": 0.2,
+   "confidence": 0.94,
+   "english": "June five, two thousand eight, June six, nine hundred and nine, February five, two thousand two, August two thousand five, fourteen, October two thousand three."
+  },
+  {
+   "file": "doi_008.wav",
+   "reference": "अज्ज में तुसेंगी दस्स कशा लेइयै दस्स लक्ख दे बिच",
+   "heard": "अज्ज में तुसें गी दस शा लेइयै ते दस लक्ख दे बिच",
+   "wer": 0.6,
+   "confidence": 0.916,
+   "english": "Today I'll give you between ten and a million."
+  },
+  {
+   "file": "doi_009.wav",
+   "reference": "कोई पंज नंबर सनाना चाह्न्ना ते बाकी जेह्ड़ा पैह्ला नंबर ऐओह् ऐ",
+   "heard": "कोई पंज नम्बर सनाना चांह्दा ते बाकी जेह्ड़ा पैह्ला नम्बर ऐ ओह् ऐ",
+   "wer": 0.417,
+   "confidence": 0.947,
+   "english": "Someone wants to play number five and the other number is the first one."
+  },
+  {
+   "file": "doi_010.wav",
+   "reference": "पञाह्ं ते दूआ नंबर ऐ जेह्ड़ा ऐ ते ओह् ऐ डेढ़ सौ ते त्रीआ नंबर ऐ जेह्ड़ा ते ओह् ऐ पंदरां सौ",
+   "heard": "पंजाह् ते दूआा नम्बर ऐ जेह्ड़ा ऐ तां ओह् ऐ डेढ सौ ते त्रीआ नं्बर ऐ जेह्ड़ा तां ओह् ऐ पंदरां सौ",
+   "wer": 0.318,
+   "confidence": 0.936,
+   "english": "The fifth and the second number is then one and a half hundred and the third number is then fifteen hundred."
+  },
+  {
+   "file": "doi_011.wav",
+   "reference": "चौथा नंबर ऐ जेह्ड़ा तां ओह् ऐ ओह् ऐ पंजाह् ज्हार ते जेह्ड़ा मेरा लास्ट ते आखिरी नंबर ऐ तां ओह् ऐ दो लक्ख",
+   "heard": "चौथा नम्बर ऐ जेह्ड़ा तां ओह् ऐ पंजाह् ज्हार ते जेह्ड़ा मेरा लास्ट ते आखरी नम्बर ऐ तां ओह् ऐ दो लक्ख",
+   "wer": 0.208,
+   "confidence": 0.935,
+   "english": "The fourth number is fifty thousand and my last and last number is two lakh."
+  },
+  {
+   "file": "doi_012.wav",
+   "reference": "छोड़ो",
+   "heard": "छोड़ो",
+   "wer": 0.0,
+   "confidence": 0.962,
+   "english": "leave"
+  },
+  {
+   "file": "doi_013.wav",
+   "reference": "जेह्ड़ा में आर्डर दित्ते दा हा इत्थै मतलब कि जेह्ड़ा थुआढ़ा आर्डर जेह्ड़ा ओह् टैम दा नेईं पुज्जेआ ओह् बजह् कन्नै कि ओह् होई गेआ में जेह्ड़ा अट्ठ बजे जेह्ड़ा ड्यूटी जाना हा ओह् अपने थोह्ड़ा जेह्ड़े होएआ सिस्टम",
+   "heard": "जेह्ड़ा में आर्डर दित्ते हा इत्थै मतलब कि जेह्ड़ थुआ़ा आर्डर जेह्ड़ा ओह् टैम दा निं पुज्जेआ ओह् ओह्दे वजह् कन्नै केह् ओह् होइेआ में जेह्ड़े अट्ठ बजे जेह्ड़े ड्यूटी जाना हा ओह् अपने थोह्ड़ा जेह्ड़ा होएआ सिस्टम",
+   "wer": 0.308,
+   "confidence": 0.878,
+   "english": "What I ordered here means that the order that came to Tam's name was because of what happened to the eight o'clock duty that happened to my little system."
+  },
+  {
+   "file": "doi_014.wav",
+   "reference": "उसी आर्डर गी में बापस करना चांह्दा हा मतलब कि जेह्ड़ा आर्डर में दित्ते दा हा ओह् आर्डर तुसें बापस लेई जाना",
+   "heard": "उसदी आर्डर गी में बापस करना चांह्दा ह मतलब कि जेह्ड़ा आर्डर में दित्ते दा हा ओह् आर्डर तुसें बापस लेई जाना",
+   "wer": 0.091,
+   "confidence": 0.913,
+   "english": "His order I want to return means to take back to you the order I placed."
+  },
+  {
+   "file": "doi_015.wav",
+   "reference": "की जे में जेह्ड़ा टाइम दित्ते दा हा तुसे ईं ओह् टाइम दा तुसें नेईं पुज्जे मतलब कि में दित्ते दा हा सत्त बजे दा जेह्ड़ा के में अट्ठ बजे ड्यूटी जाना हा मतलब कि तुस अट्ठ बजे बी नेईं पुज्जे एह् जेह्ड़ा में आर्डर ऐ में कैंसल कराया हुन एह् आर्डर तुस बापस लेई जाओ जेह्ड़ा मिकी नेईं चाहिदा",
+   "heard": "की जे में जेह्ड़ा टाइम दित्ते दा तुसें ओह् टाइम तुसें नेईं पुज्जे मतलब कि में दित्ते दा हा सत्त बजे दा जेह्ड़ा ते में अट्ठ बजे ड्यूटी जाना हा मतलब कि ओह् अट्ठ बजे बी नि पुज्जे एह् जेह्ड़ा में आर्डर ऐ में कैंसल कराया हून एह् आर्डर तुस बापस लेई जाओ जेह्ड़ा मिकी नेईं चाहिदा",
+   "wer": 0.133,
+   "confidence": 0.908,
+   "english": "Because you didn't arrive at the time I gave you, that is, I gave you seven o'clock, and I had to go to duty at eight o'clock, that is, it arrived at eight o'clock."
+  },
+  {
+   "file": "doi_016.wav",
+   "reference": "क्या आर्गेनिक इंडिया ब्रांड च कोई रियासती आइटम ऐ",
+   "heard": "क्या आऑर्गेनिक इंडिया ब्रांड च कोई रियासती आइटम ऐ",
+   "wer": 0.111,
+   "confidence": 0.934,
+   "english": "Are there any state-of-the-art items under the Organic India brand?"
+  },
+  {
+   "file": "doi_017.wav",
+   "reference": "मेरी आइटम सूची चा जीआरबी बॉम्बे हलवा हटाओ",
+   "heard": "मेरी आइटम सूची चा जीआरबी बाम्बे हलवा हटाओ",
+   "wer": 0.125,
+   "confidence": 0.955,
+   "english": "remove grb bambe halwa from my item list"
+  },
+  {
+   "file": "doi_018.wav",
+   "reference": "दिक्खो जी मबारख मंड़ी ते में गेआ निं",
+   "heard": "दिक्खो जी मुबारक मंडी ते में गेआ नी",
+   "wer": 0.375,
+   "confidence": 0.886,
+   "english": "Look at the happy market and I didn't go."
+  },
+  {
+   "file": "doi_019.wav",
+   "reference": "पर जेह्ड़े उत्थूं दे रौह्ने आह्ले हैन बजुर्ग जेह्के स्याने बजुर्ग बेचारे राजे ते उं'दे बारै जानदा में जि'यां हरि पैलेस होई आ जे हरि राम",
+   "heard": "पर जेह्ड़े उत्थुआं दे रौह्ने आह्ले है न बजुर्ग जेह्के स्याने बजुर्ग बचैाररे राजे ते उं'दे बारे जानदा में जि'यां हर पैलेस होई गे जी हरी राम",
+   "wer": 0.321,
+   "confidence": 0.917,
+   "english": "But those who are going to live upstairs are the elders, while the younger elders know about the king and him as every palace has become Hari Ram."
+  },
+  {
+   "file": "doi_020.wav",
+   "reference": "ते उद्धऱ में गेदा ओह् पैह्ले मुबारख मंड़ी दे रौंह्न आह्ले न ते उत्थुआं उ'नें शिफ्ट करी लेआ उप्पर",
+   "heard": "ते उद्धर में गेदा ओह् पैह्लें मुबारख मंडी दे रौह्ने आह्ले न ते उत्थुआं उ'नें शिफ्ट करी लेआ उप्पर",
+   "wer": 0.2,
+   "confidence": 0.947,
+   "english": "And as mentioned they are residents of Mubarak Mandi first and from there they shifted to above."
+  },
+  {
+   "file": "doi_021.wav",
+   "reference": "हरि पैलेस कोल ते",
+   "heard": "भरी पैलेस कोल ते",
+   "wer": 0.25,
+   "confidence": 0.951,
+   "english": "near Bhari Palace."
+  },
+  {
+   "file": "doi_022.wav",
+   "reference": "उद्धर में गेआ बाकी अंदर में दिक्खेआ बूहुत पेआ उं'दे कोल बोह्त समान पेदा कताबां होइआं जि'यां बड़े बड़े फोटू और बगैरा अपनियां जेह्कियां छोटियां छोटियां चीजां होंदियां पराने जमाने दियां",
+   "heard": "उद्धर में गेआ बाकी अंदर में दिक्खेआ बोह्त पेआ उं'दे कोल बोह्त समान पेदा कताबां होई गेइयां जि'यां बड़े बड़े फोटू होर बगैरा अपनियां जेह्कियां छोटियां छोटियां चीजां होंदियां पराने जमाने",
+   "wer": 0.152,
+   "confidence": 0.929,
+   "english": "The rest of me went inside and I saw that they had a lot of stuff coming out of them, like big photos, other things, etc. My little things used to be old-fashioned."
+  },
+  {
+   "file": "doi_023.wav",
+   "reference": "ओह् दिक्खियां इ'यां बड़ा अच्छा लग्गेआ",
+   "heard": "ओह् दिक्खियां ते बड़ा इ'यां अच्छा लग्गेआ",
+   "wer": 0.429,
+   "confidence": 0.955,
+   "english": "They looked and felt so good."
+  },
+  {
+   "file": "doi_024.wav",
+   "reference": "ते फ्ही होनियां चाही दियां वैसे इ'यां होऐ कि होर लोके ईं दिक्खने ई औना चाहिदा उ'नेंई कि उ'नें बी पता लग्गेै की बजुर्ग जेहड़े पैह्ले राजे रुजे कि'यां रौंह्दे हे कि'यां जींदे हे",
+   "heard": "ते ठीक होनियां चाहिदियां वैसे इ'यां बाकी होर लोकें बीे दिक्खने औना चाहिदा उ'नेंगी कि उ'नेंगी बी पता लग्गै कि बजुर्ग जेह्ड़े पैह्ले राजे रुजे कि'यां रौंह्दे हे कि'यां जंदे हे",
+   "wer": 0.359,
+   "confidence": 0.875,
+   "english": "And those who want to be healed should also come to see the rest of the people so that they will also know how the elders who lived during the first kings used to go."
+  }
+ ]
+}

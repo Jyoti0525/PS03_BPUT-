@@ -1,0 +1,211 @@
+{
+ "summary": {
+  "engine": "IndicConformer-600M int8 (AI4Bharat, offline)",
+  "decoding": "ctc",
+  "language": "sat",
+  "clips": 23,
+  "rejected_by_app": [
+   {
+    "file": "sat_009.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   },
+   {
+    "file": "sat_024.wav",
+    "why": "The recording is too short — hold the mic button while speaking"
+   }
+  ],
+  "audio_seconds": 214.1,
+  "wer": 0.247,
+  "cer": 0.077,
+  "real_time_factor": 0.313,
+  "process_private_gb": 1.78,
+  "process_peak_working_set_gb": 1.4,
+  "model": "indic-conformer-600m-int8"
+ },
+ "clips": [
+  {
+   "file": "sat_000.wav",
+   "reference": "ᱟᱞᱮ ᱚᱲᱟᱜ ᱨᱮ ᱛᱮᱦᱤᱧ ᱤᱧ ᱵᱚᱭᱦᱟ ᱠᱩᱲᱤᱭᱟᱜ ᱡᱚᱱᱢᱚ ᱫᱤᱱ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱟᱨᱚᱱ ᱛᱮ ᱟᱢᱟᱜ ᱫᱚᱠᱟᱱ ᱠᱷᱚᱱ ᱠᱤᱪᱷᱩ ᱡᱤᱱᱤᱥ ᱤᱧ ᱡᱚᱢ ᱡᱤᱱᱤᱥ ᱤᱧ ᱤᱫᱤᱭᱟ",
+   "heard": "ᱟᱞᱮ ᱚᱲᱟᱜ ᱨᱮ ᱛᱮᱦᱤᱧ ᱤᱧ ᱵᱚᱭᱦᱟ ᱠᱩᱲᱤᱭᱟᱜ ᱡᱚᱱᱢᱚ ᱫᱤᱱ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱟᱨᱚᱱ ᱛᱮ ᱟᱢᱟᱜ ᱫᱚᱠᱟᱱ ᱠᱷ ᱠᱤᱪᱷᱩ ᱡᱤᱱᱤᱥᱤᱧ ᱡᱚᱢ ᱡᱤᱱᱤᱥᱤᱧ ᱤᱫᱤᱭᱟ",
+   "wer": 0.217,
+   "confidence": 0.936,
+   "english": "We have my sister's birthday at home, so I'll take some food items to your store."
+  },
+  {
+   "file": "sat_001.wav",
+   "reference": "ᱟᱸᱡᱚᱢ ᱞᱤᱫᱟᱹᱧ ᱟᱢᱟᱜ ᱫᱚᱠᱟᱱ ᱨᱮ ᱵᱚᱞᱮ ᱟᱹᱰᱤ ᱵᱷᱟᱞᱮ ᱵᱷᱟᱞᱮ ᱡᱤᱱᱤᱥ ᱧᱟᱢᱚᱜ ᱠᱟᱱᱟ ᱟᱞᱮ ᱚᱲᱟᱜ ᱯᱷᱮᱰ ᱨᱮᱱ ᱢᱤᱫᱴᱮᱱ ᱫᱟᱫᱟᱭ ᱞᱟᱹᱭ ᱟᱫᱤᱧᱟ ᱡᱮ ᱱᱚᱸᱰᱮ ᱟᱭᱢᱟ ᱠᱤᱪᱷᱩ ᱢᱚᱡᱽ ᱡᱤᱱᱤᱥ ᱧᱟᱢᱚᱜ ᱠᱟᱱᱟ ᱚᱱᱟᱛᱮ ᱟᱢ ᱴᱷᱮᱱ ᱤᱧ ᱦᱮᱡ ᱮᱱᱟ",
+   "heard": "ᱟᱸᱡᱚᱢ ᱞᱤᱫᱟᱹᱧ ᱟᱢᱟᱜ ᱫᱚᱠᱟᱱ ᱨᱮ ᱵᱚᱞᱮ ᱟᱹᱰᱤ ᱵᱷᱟᱞᱮᱼ ᱵᱷᱟᱞᱮ ᱡᱤᱱᱤᱥ ᱧᱟᱢᱚᱜ ᱠᱟᱱᱟ ᱟᱞᱮ ᱚᱲᱟᱜ ᱯᱷᱮᱰ ᱨᱮᱱ ᱢᱤᱫᱴᱮᱱ ᱫᱟᱫᱟᱭ ᱞᱟᱹᱭ ᱟᱹᱫᱤᱧᱟ ᱡᱮ ᱱᱚᱰᱮ ᱟᱭᱢᱟ ᱠᱤᱪᱷᱩ ᱢᱚᱡᱽ ᱡᱤᱱᱤᱥ ᱧᱟᱢᱚᱜ ᱠᱟᱱᱟ ᱚᱱᱟᱛᱮ ᱟᱢ ᱴᱷᱮᱡ ᱤᱧ ᱦᱮᱡ ᱮᱱᱟ",
+   "wer": 0.118,
+   "confidence": 0.94,
+   "english": "Listen, you've got a lot of good stuff in your store. Let's say a housekeeper tells us that there's a lot of good stuff out there, so you'll come to me."
+  },
+  {
+   "file": "sat_002.wav",
+   "reference": "ᱛᱳ ᱤᱧ ᱠᱮᱠ ᱟᱨ ᱠᱤᱪᱷᱩ ᱵᱷᱟᱡᱟ ᱯᱳᱲᱟ ᱡᱤᱱᱤᱥ ᱡᱮᱢᱚᱱ ᱡᱮᱢᱚᱱ",
+   "heard": "ᱛᱚ ᱤᱧ ᱠᱮᱠ ᱟᱨ ᱠᱤᱪᱷᱩ ᱵᱷᱟᱡᱟ ᱯᱳᱚᱲᱟ ᱡᱤᱱᱤᱥ ᱡᱮᱢᱚᱱ ᱡᱮᱢᱚᱱ",
+   "wer": 0.2,
+   "confidence": 0.921,
+   "english": "Then I'd like to have a cake and some fried things."
+  },
+  {
+   "file": "sat_003.wav",
+   "reference": "ᱥᱤᱸᱜᱟᱲᱟ ᱵᱨᱮᱰ ᱪᱚᱯ ᱚᱱᱟᱠᱚᱜᱮ ᱵᱷᱟᱡᱟ ᱡᱤᱱᱤᱥ ᱤᱧ ᱤᱫᱤ ᱛᱟᱢᱟ ᱚᱱᱟ ᱥᱚᱸᱜᱮ ᱚᱱᱟ ᱠᱚ ᱡᱤᱱᱤᱥ ᱤᱧ ᱦᱟᱛᱟᱣ ᱞᱮᱠᱷᱟᱱ ᱤᱧ ᱥᱚᱥ ᱟᱨ ᱪᱟᱹᱴᱱᱤ ᱚᱱᱟ ᱠᱚ ᱯᱷᱨᱤᱧ ᱧᱟᱢ ᱟᱥᱮ ᱵᱟᱝ",
+   "heard": "ᱥᱤᱸᱜᱟᱹᱟᱲᱟ ᱵᱨᱮᱰ ᱪᱚᱯ ᱚᱱᱟ ᱠᱚᱜᱮ ᱵᱷᱟᱡᱟ ᱡᱤᱱᱤᱥ ᱤᱧ ᱤᱫᱤ ᱛᱟᱢᱟ ᱚᱱᱟ ᱥᱚᱸᱜᱮ ᱩᱱᱟᱹᱜ ᱠᱚ ᱡᱤᱱᱤᱥ ᱤᱧ ᱦᱟᱛᱟᱣ ᱞᱮᱠᱷᱟᱡ ᱛᱚ ᱤᱧ ᱥᱚᱥ ᱟᱨ ᱪᱟᱹᱴᱱᱤ ᱚᱱᱟ ᱠᱚᱫᱚ ᱯᱷᱨᱤᱧ ᱧᱟᱢ ᱟᱥᱮ ᱵᱟᱝ",
+   "wer": 0.259,
+   "confidence": 0.904,
+   "english": "Bread chop in the evening, I need to take those fried things, so I don't have to buy so many things and I don't want to get them for free."
+  },
+  {
+   "file": "sat_004.wav",
+   "reference": "ᱚᱱᱟᱛᱤᱧ ᱟᱸᱡᱚᱢᱮᱫᱟ ᱟᱢ ᱴᱷᱮᱱ ᱟᱨ ᱚᱱᱟ ᱞᱟᱹᱭ ᱞᱟᱹᱜᱤᱫ ᱤᱧ ᱦᱮᱡ ᱮᱱᱟ",
+   "heard": "ᱚᱱᱟᱛᱤᱧ ᱟᱸᱡᱚᱢᱫᱟ ᱟᱢ ᱴᱷᱮᱱ ᱟᱨ ᱚᱱᱟ ᱞᱟᱹᱭ ᱞᱟᱹᱜᱤᱫ ᱤᱧ ᱦᱮᱡ ᱮᱱᱟ",
+   "wer": 0.091,
+   "confidence": 0.934,
+   "english": "So listen to me and I'll come tell you."
+  },
+  {
+   "file": "sat_005.wav",
+   "reference": "ᱵᱷᱟᱨᱚᱛ ᱫᱤᱥᱚᱢ ᱨᱮᱫᱚ ᱯᱷᱩᱴᱵᱚᱞ ᱠᱚ ᱮᱱᱮᱡᱼᱟ ᱟᱨ ᱠᱨᱤᱠᱮᱴ ᱵᱷᱟᱞᱩᱠ ᱜᱩᱰᱩ ᱟᱨ ᱥᱚᱨᱮᱥ ᱮᱱᱮᱡ ᱠᱤᱱᱫᱚ ᱮᱸᱜ ᱥᱚᱪᱤᱱ ᱟᱨ ᱫᱷᱚᱱᱤ",
+   "heard": "ᱵᱷᱟᱨᱚᱛ ᱫᱤᱥᱚᱢ ᱨᱮᱫᱚ ᱯᱷᱩᱴᱵᱚᱞ ᱠᱚ ᱮᱱᱮᱡᱼᱟ ᱟᱨ ᱠᱨᱤᱠᱮᱴ ᱵᱟᱹᱞᱩ ᱜᱩᱰᱩ ᱟᱨ ᱥᱚᱨᱮᱥ ᱮᱱᱮᱡ ᱠᱤᱱ ᱫᱚ ᱥᱚᱪᱤᱱ ᱟᱨ ᱫᱷᱳᱱᱤ",
+   "wer": 0.222,
+   "confidence": 0.923,
+   "english": "Football is danced in India and cricket ball is played and the best dancers are Sachin and Dhonis."
+  },
+  {
+   "file": "sat_006.wav",
+   "reference": "ᱛᱩᱨᱩᱭ",
+   "heard": "ᱛᱩᱨᱩᱭ",
+   "wer": 0.0,
+   "confidence": 0.884,
+   "english": "Six"
+  },
+  {
+   "file": "sat_007.wav",
+   "reference": "ᱯᱚᱨᱟᱱ ᱱᱚᱢᱵᱚᱨ ᱛᱷᱨᱤ ᱱᱟᱭᱤᱱ ᱯᱷᱳᱨ ᱚᱣᱟᱱ ᱰᱚᱵᱚᱞ ᱯᱷᱟᱭᱤᱵᱷ ᱱᱟᱭᱤᱱ ᱥᱮᱵᱷᱮᱱ ᱯᱷᱟᱭᱤᱵᱷ ᱚᱣᱟᱱ ᱥᱤᱠᱥ ᱚᱣᱟᱱ ᱥᱟᱶ ᱤᱧᱟᱹᱜ ᱮ ᱯᱤ ᱮᱠᱟᱣᱩᱱᱴ ᱨᱮᱭᱟᱜ ᱞᱮᱱᱫᱮᱱ ᱨᱮᱭᱟᱜ ᱵᱚᱨᱱᱚᱱᱟ ᱩᱫᱩᱜ ᱟᱹᱧ ᱢᱮ",
+   "heard": "ᱯᱟᱱ ᱱᱚᱢᱵᱚᱨ ᱛᱷᱨᱤ ᱱᱟᱭᱤᱱ ᱯᱷᱳᱨ ᱣᱟᱱ ᱰᱚᱵᱚᱞ ᱯᱷᱟᱭᱤᱵᱷ ᱱᱟᱭᱤᱱ ᱥᱮᱵᱷᱮᱱ ᱯᱷᱟᱭᱤᱵᱷ ᱚᱣᱟᱱ ᱥᱤᱠᱥ ᱣᱟᱱ ᱥᱟᱶ ᱤᱧᱟᱹᱜ ᱮ ᱯᱤ ᱮᱠᱟᱣᱩᱱᱴ ᱨᱮᱭᱟᱜ ᱞᱮᱱᱫᱮᱱ ᱨᱮᱭᱟᱜ ᱵᱚᱨᱱᱚᱱᱟ ᱩᱫᱩᱜ ᱟᱹᱧ ᱢᱮ",
+   "wer": 0.115,
+   "confidence": 0.947,
+   "english": "Show the transcation details of my AP account with PAN number 3, 9, 4, double, 5, 9, 7, 5, and 1, 6"
+  },
+  {
+   "file": "sat_008.wav",
+   "reference": "ᱛᱩᱨᱩᱭ ᱮᱭᱟᱭ ᱯᱮ ᱛᱩᱨᱩᱭ ᱮᱭᱟᱭ ᱢᱚᱬᱮ ᱤᱨᱟᱹᱞ ᱥᱩᱱ ᱢᱚᱬᱮ ᱤᱨᱟᱹᱞ ᱯᱮ ᱯᱷᱚᱱ ᱱᱚᱢᱵᱚᱨ ᱠᱚ ᱞᱟᱹᱜᱤᱫ ᱴᱷᱤᱠᱟᱹ ᱥᱤᱫᱽ ᱥᱟᱠᱟᱢ ᱰᱟᱣᱩᱱᱞᱳᱰ ᱞᱟᱹᱜᱤᱫ ᱫᱟᱭᱟ ᱠᱟᱛᱮᱫ ᱥᱩᱵᱤᱫᱷᱟ ᱧᱟᱢ ᱠᱚᱣᱟᱜ ᱧᱩᱛᱩᱢ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+   "heard": "ᱛᱩᱨᱩᱭ ᱮᱭᱟᱭ ᱯᱮ ᱛᱩᱨᱩᱭ ᱮᱭᱟᱭ ᱢᱚᱬᱮ ᱤᱨᱟᱹᱞ ᱥᱩᱱ ᱢᱚᱬᱮ ᱤᱨᱟᱹᱞ ᱯᱮ ᱯᱷᱳᱱ ᱱᱟᱢᱵᱟᱨ ᱠᱚ ᱞᱟᱹᱜᱤᱫ ᱴᱷᱤᱠᱟᱹ ᱥᱤᱫᱽ ᱥᱟᱠᱟᱢ ᱰᱟᱣᱩᱱᱞᱳᱰ ᱞᱟᱹᱜᱤᱫ ᱫᱟᱭᱟ ᱠᱟᱛᱮᱫ ᱥᱩᱵᱤᱫᱷᱟ ᱧᱟᱢ ᱠᱚᱣᱟᱜ ᱧᱩᱛᱩᱢ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+   "wer": 0.071,
+   "confidence": 0.946,
+   "english": "Please select the beneficiary's name in order to download the beneficiary certificate for phone number six seven three six seven five eight seven seven eight seven seven eight seven seven eight seven eight seven eight five eight three."
+  },
+  {
+   "file": "sat_010.wav",
+   "reference": "ᱦᱮᱞᱳ ᱤᱧ ᱜᱮ ᱥᱩᱠᱩᱨᱢᱩᱱᱤ ᱢᱩᱨᱢᱩ ᱢᱮᱱᱮᱜᱼᱟᱹᱧ ᱤᱭᱟᱹ ᱞᱩᱠᱩᱭᱠᱟᱱᱟᱞᱤ ᱠᱷᱚᱱᱟᱜ ᱟᱢ ᱜᱮ ᱨᱟ ᱪᱤ ᱨᱤᱱᱤᱡ ᱥᱮᱬᱟ ᱰᱟᱠᱛᱟᱨ ᱫᱚ",
+   "heard": "ᱢᱮᱱᱫᱟᱹᱧ ᱤᱧ ᱜᱮᱮ ᱥᱩᱠᱩᱨᱢᱩᱱᱤ ᱢᱩᱨᱢᱩ ᱢᱮᱱᱮᱫ ᱟᱹᱧ ᱤᱭᱟᱹ ᱞᱩᱠᱩᱭ ᱠᱟᱱᱟᱞᱤ ᱠᱷᱚᱝ ᱟᱢᱜᱮ ᱨᱟᱟᱸᱪᱤ ᱨᱤᱱᱤᱡ ᱥᱮᱬᱟ ᱰᱟᱠᱛᱟᱨ ᱫᱚ",
+   "wer": 0.588,
+   "confidence": 0.878,
+   "english": "I am Sukurmani Murmu, which means you are the great doctor of Ranchi."
+  },
+  {
+   "file": "sat_011.wav",
+   "reference": "ᱚ ᱦᱚᱸ ᱟᱫᱚ ᱤᱧ ᱢᱮᱱᱮᱫ ᱟᱹᱧ ᱦᱟᱯᱮ ᱥᱮ ᱤᱧ ᱦᱚᱸ ᱱᱤᱛᱳᱜ ᱯᱮᱥᱮᱱᱤᱧ ᱵᱮᱱᱟᱣ ᱠᱟᱱᱟᱹᱧ ᱟᱫᱚ ᱢᱮᱱᱮᱜᱼᱟᱹᱧ ᱦᱟᱯᱮᱥᱮᱧ ᱯᱷᱳᱱᱟᱭᱟ ᱞᱟᱹᱭᱮᱜᱼᱟᱹᱧ ᱚᱸᱰᱮ ᱢᱮᱱᱮᱫ ᱫᱚᱠᱚ ᱥᱮᱬᱟ ᱰᱟᱠᱛᱟᱨ ᱢᱮᱱᱟᱭᱟ ᱟᱫᱚ ᱪᱮᱫᱞᱮᱠᱟᱱ ᱨᱩᱜᱤ ᱠᱚᱢ ᱧᱮᱞ ᱠᱟᱣᱟ",
+   "heard": "ᱚ ᱦᱚᱸ ᱟᱫᱚ ᱤᱧ ᱢᱮᱱᱮᱫ ᱟᱹᱧ ᱦᱟᱯᱮᱥᱮ ᱤᱧᱦᱚᱸ ᱱᱤᱛᱚᱜ ᱯᱮᱥᱮᱱᱴ ᱤ ᱵᱮᱱᱟᱣ ᱠᱟᱹᱱᱟᱹᱧ ᱟᱫᱚ ᱢᱮᱱᱮᱫ ᱟᱹᱧ ᱦᱟᱯᱮᱥᱮᱧ ᱯᱷᱳᱱᱟᱞᱤᱧ ᱚᱸᱰᱮ ᱢᱮᱱᱮᱫ ᱫᱚᱠᱚ ᱥᱮᱬᱟ ᱰᱟᱠᱛᱟᱨ ᱢᱮᱱᱟᱭᱟ ᱟᱫᱚ ᱪᱮᱫ ᱞᱮᱠᱟᱱ ᱨᱩᱜᱤ ᱠᱚᱢ ᱧᱮᱞ ᱠᱚᱣᱟ",
+   "wer": 0.452,
+   "confidence": 0.897,
+   "english": "So I mean, I'm going to make a patient now, and I'm going to make a call next week, so that means the big doctor knows what kind of patients are less likely to see."
+  },
+  {
+   "file": "sat_012.wav",
+   "reference": "<unintelligible>",
+   "heard": "ᱦᱸ ᱦᱮᱸ",
+   "wer": 2.0,
+   "confidence": 0.694,
+   "english": "hey hey hey hey hey hey hey hey hey hey hey hey hey he"
+  },
+  {
+   "file": "sat_013.wav",
+   "reference": "ᱢᱟᱱᱮ",
+   "heard": "ᱢᱟᱱᱮ",
+   "wer": 0.0,
+   "confidence": 0.99,
+   "english": "I mean, I mean"
+  },
+  {
+   "file": "sat_014.wav",
+   "reference": "ᱦᱳᱭ ᱟᱫᱚ ᱚᱱᱟᱜᱤᱧ ᱢᱮᱱᱮᱫᱼᱟ ᱦᱟᱯᱮᱥᱮ ᱞᱟᱹᱭᱮᱜᱼᱟᱹᱧ ᱞᱟᱹᱭᱮᱫ ᱫᱚᱠᱚ ᱮᱱᱠᱷᱟᱱ ᱞᱟᱹᱭᱮᱫᱼᱟᱹᱧ ᱦᱟᱯᱮᱥᱮ ᱯᱷᱳᱱ ᱠᱟᱛᱮᱧ ᱵᱟᱲᱟᱭ ᱤᱭᱟᱹᱭᱟ ᱢᱟᱱᱮ ᱠᱟᱛᱷᱟᱧ ᱦᱟᱛᱟᱣᱟ ᱠᱤ ᱪᱮᱫᱞᱮᱠᱟᱱ ᱯᱮᱥᱮᱱ ᱠᱚ ᱧᱮᱞ ᱠᱚᱣᱟᱭ ᱮᱱᱠᱷᱟᱱ ᱫᱚ ᱪᱟᱞᱟᱜ ᱦᱩᱭᱩᱜᱼᱟ",
+   "heard": "ᱦᱳᱭ ᱟᱫᱚ ᱚᱱᱟᱜᱤᱧ ᱢᱮᱱᱮᱫᱼᱟ ᱦᱟᱯᱮ ᱥᱮᱫ ᱞ ᱤᱧ ᱞᱟᱹᱭᱮᱫ ᱫᱚᱠᱚ ᱮᱱᱠᱷᱟᱱ ᱞ ᱤᱧ ᱦᱟᱯᱮ ᱥᱮᱫ ᱯᱷᱳᱱ ᱠᱟᱛᱮᱧ ᱵᱟᱲᱟᱭ ᱤᱭᱟᱹᱭᱟ ᱢᱟᱱᱮ ᱠᱟᱛᱷᱟᱧ ᱦᱟᱛᱟᱣᱟ ᱠᱤ ᱪᱮᱫ ᱞᱮᱠᱟᱱ ᱯᱮᱥᱮᱱᱴ ᱠᱚ ᱧᱮᱞ ᱠᱚᱣᱟ ᱮᱱᱠᱷᱟᱱ ᱫᱚ ᱪᱟᱞᱟᱜ ᱦᱩᱭᱩᱜᱼᱟ",
+   "wer": 0.429,
+   "confidence": 0.911,
+   "english": "Maybe I'll tell you later in the week, so I'll call you later in the week to let you know if I know what kind of appointments you'll see and if you'll go."
+  },
+  {
+   "file": "sat_015.wav",
+   "reference": "ᱟᱫᱚ ᱡᱮᱛᱮᱞᱮᱠᱟᱱ ᱢᱟᱱᱮ ᱤᱭᱟᱹ ᱨᱩᱜᱤ ᱠᱚᱜᱮᱢ ᱧᱮᱞ ᱠᱚᱣᱟ ᱥᱮ",
+   "heard": "ᱟᱫᱚ ᱡᱮᱛᱮ ᱞᱮᱠᱟᱱ ᱢᱟᱱᱮ ᱤᱭᱟᱹ ᱨᱩᱜᱤ ᱠᱚᱜᱮᱢ ᱧᱮᱞ ᱠᱚᱣᱟ ᱥᱮ",
+   "wer": 0.222,
+   "confidence": 0.967,
+   "english": "Do you see the patient in a different way?"
+  },
+  {
+   "file": "sat_016.wav",
+   "reference": "ᱦᱳᱭ ᱟᱫᱚ ᱚᱱᱟᱜᱮ ᱢᱮᱱᱮᱜᱼᱟ ᱞᱮ ᱟᱨ ᱛᱤᱥ ᱛᱤᱥ ᱠᱚ ᱛᱟᱦᱮᱱᱟ ᱚᱸᱰᱮ ᱫᱚ ᱥᱮ ᱟᱨᱦᱚᱸ ᱮᱴᱟᱜ ᱠᱚᱨᱮ ᱪᱮᱢᱵᱟᱨ ᱠᱚᱢ ᱠᱷᱩᱞᱟᱹᱣ ᱠᱟᱜᱼᱟ",
+   "heard": "ᱦᱳᱭ ᱟᱫᱚ ᱚᱱᱟᱜᱮ ᱢᱮᱱᱮᱫᱼᱟ ᱞᱮ ᱟᱨ ᱛᱤᱥ ᱛᱤᱥ ᱠᱚᱢ ᱛᱟᱦᱮᱱᱟ ᱚᱸᱰᱮ ᱫᱚ ᱥᱮ ᱟᱨᱦᱚᱸ ᱮᱴᱟᱜ ᱠᱚᱨᱮ ᱪᱮᱢᱵᱟᱨ ᱠᱚᱢ ᱠᱷᱩᱞᱟᱹᱣ ᱠᱟᱜᱼᱟ",
+   "wer": 0.1,
+   "confidence": 0.917,
+   "english": "Maybe that's what they say, and when there's less, there's less room to open."
+  },
+  {
+   "file": "sat_017.wav",
+   "reference": "ᱦᱳᱭᱛᱳ ᱟᱫᱚ ᱛᱤᱱ ᱠᱷᱚᱱ ᱢᱟᱱᱮ ᱴᱟᱭᱤᱢ ᱛᱤᱱ ᱨᱮ ᱛᱤᱱ ᱛᱤᱱᱮᱢ ᱫᱩᱲᱩᱵᱼᱟ ᱛᱤᱱᱟᱹᱜ ᱜᱷᱟᱹᱲᱤᱠ ᱠᱛᱮᱫ ᱮᱢ ᱫᱩᱲᱩᱵᱼᱟ ᱤᱱᱟᱹ ᱫᱚ ᱤᱱᱟᱹ ᱚᱠᱛᱚ ᱨᱮ",
+   "heard": "ᱦᱳᱭᱛᱳ ᱟᱫᱚ ᱛᱤᱱ ᱠᱷᱚᱱᱮᱢ ᱢᱟᱱᱮ ᱴᱟᱭᱤᱢ ᱛᱤᱱ ᱨᱮ ᱛᱤᱱ ᱛᱤᱱᱮᱢ ᱫᱩᱲᱩᱵᱼᱟ ᱛᱤᱱᱟᱹᱜ ᱜᱷᱟᱹᱲᱤᱡ ᱠᱟᱛᱮᱢ ᱫᱩᱲᱩᱵᱼᱟ ᱤᱱᱟᱹᱜ ᱫᱚ ᱤᱱᱟᱹ ᱚᱠᱛᱚᱨ ᱨᱮ",
+   "wer": 0.286,
+   "confidence": 0.901,
+   "english": "Maybe it's about how much time you sit at the same time, how long you sit at the same time."
+  },
+  {
+   "file": "sat_018.wav",
+   "reference": "ᱚ ᱦᱚᱸ",
+   "heard": "ᱚ ᱦᱚᱸ",
+   "wer": 0.0,
+   "confidence": 0.928,
+   "english": "as well as"
+  },
+  {
+   "file": "sat_019.wav",
+   "reference": "ᱟᱫᱚ ᱚᱱᱟᱜᱤᱧ ᱢᱮᱱᱮᱜᱼᱟ ᱯᱟᱪᱮᱫ ᱟᱨᱦᱚᱸ ᱛᱤᱥ ᱛᱤᱥ ᱠᱚᱨᱮ ᱫᱩᱲᱩᱵᱼᱟᱭ ᱵᱟᱭ ᱵᱟᱭ ᱢᱮᱱᱚᱜᱚᱜᱼᱟ ᱟᱫᱚᱧ ᱢᱮᱱᱮᱜᱼᱟ ᱦᱟᱯᱮᱥᱮ ᱠᱩᱞᱤ ᱠᱟᱛᱮᱫ ᱜᱮᱵᱚᱱ ᱵᱟᱲᱟᱭ ᱧᱟᱢᱟ ᱠᱤ ᱛᱤᱥ ᱠᱚᱨᱮ ᱛᱤᱥ ᱛᱤᱥᱮ ᱫᱩᱲᱩᱵ ᱠᱟᱱᱟ ᱥᱮ ᱪᱷᱩᱴᱤ ᱠᱚ ᱢᱟᱱᱮ ᱟᱨᱦᱚᱸ ᱛᱤᱱᱟᱹᱜ ᱜᱟᱱ ᱤᱭᱟᱹ ᱠᱚ ᱢᱮᱱᱟᱜᱼᱟ ᱪᱮᱢᱵᱟᱨ ᱠᱚ ᱛᱟᱭ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱚᱨᱮ ᱫᱩᱲᱩᱵᱼᱟᱭ ᱯᱟᱪᱮᱫ ᱢᱮᱱᱮᱜᱼᱟ ᱞᱮ",
+   "heard": "ᱟᱫᱚ ᱚᱱᱟᱜᱤᱧ ᱢᱮᱱᱮᱫᱼᱟ ᱯᱟᱪᱮᱫ ᱟᱨᱦᱚᱸ ᱛᱤᱥ ᱛᱤᱥ ᱠᱚᱨᱮ ᱫᱩᱲᱩᱵ ᱟᱭ ᱵᱟᱭ ᱵᱟᱭ ᱢᱮᱱᱚᱜᱚᱜᱼᱟ ᱟᱫᱚᱧ ᱢᱮᱱᱮᱫᱼᱟ ᱦᱟᱯᱮᱥᱮ ᱠᱩᱞᱤ ᱠᱟᱛᱮᱫ ᱜᱮᱵᱚᱱ ᱵᱟᱲᱟᱭ ᱧᱟᱢᱟ ᱠᱤ ᱛᱤᱥ ᱠᱚᱨᱮ ᱛᱤᱥ ᱛᱤᱥᱮ ᱫᱩᱲᱩᱵ ᱠᱟᱱᱟ ᱥᱮ ᱪᱷᱩᱴᱤ ᱠᱚ ᱢᱟᱱᱮ ᱟᱨᱦᱚᱸ ᱛᱤᱱᱟᱹᱜ ᱜᱟᱱ ᱤᱭᱟᱹ ᱠᱚ ᱢᱮᱱᱟᱜᱼᱟ ᱪᱮᱢᱵᱟᱨ ᱠᱚ ᱛᱟᱭᱟᱭ ᱢᱮᱱᱟᱜᱼᱟ ᱚᱱᱟ ᱠᱚᱨᱮ ᱫᱩᱲᱩᱵ ᱟᱭ ᱯᱟᱪᱮᱫ ᱢᱮᱱᱮᱫᱼᱟ ᱞᱮ",
+   "wer": 0.17,
+   "confidence": 0.924,
+   "english": "You'll be asked if you don't want to sit any more times, you'll be asked if you want to know when you're sitting or if the holidays mean there are more people sitting in the chambers."
+  },
+  {
+   "file": "sat_020.wav",
+   "reference": "ᱦᱳᱭ ᱮᱱᱠᱷᱟᱱ ᱟᱞᱮ ᱪᱟᱞᱟᱜᱼᱟᱞᱮ ᱦᱟᱸᱜ ᱟᱞᱮ ᱦᱚᱸ ᱢᱟᱱᱮ ᱤᱭᱟᱹ ᱥᱳᱞᱳ ᱥᱚᱛᱨᱚ ᱛᱟᱹᱨᱤᱠᱷ ᱫᱚ ᱢᱟᱱᱮ ᱥᱟᱺᱜᱤᱧ ᱜᱮᱭᱟ ᱥᱮ ᱮᱱᱠᱷᱟᱱ ᱫᱚ ᱚᱱᱟ ᱠᱷᱟᱹᱛᱤᱨ ᱢᱮᱱᱮᱜᱼᱟ ᱞᱮ ᱫᱳ ᱫᱤᱱ ᱤᱭᱟ ᱫᱳ ᱫᱤᱱ ᱵᱟᱨ ᱦᱳᱭ ᱞᱟᱜᱟᱜᱼᱟ ᱟᱫᱚ ᱥᱮᱴᱮᱨᱚᱜ ᱯᱮ ᱨᱩᱣᱟᱹᱜ ᱦᱚᱲ ᱦᱤᱥᱟᱹᱵᱽ ᱛᱮᱫᱚ ᱢᱟᱱᱮ ᱩᱱᱟᱹᱜ ᱤᱥᱯᱤᱰ ᱵᱟᱢ ᱤᱫᱤᱭᱮᱭᱟ ᱥᱮ ᱮᱱᱠᱷᱟᱱ ᱫᱚ ᱞᱟᱜᱟᱜ ᱜᱮᱭᱟ ᱟᱫᱚ ᱚᱱᱟ ᱪᱮᱠᱟ ᱫᱳ ᱫᱤᱱᱤᱧ ᱞᱟᱹᱭ ᱠᱮᱜᱼᱟ",
+   "heard": "ᱦᱳᱭ ᱮᱱᱠᱷᱟᱱ ᱟᱞᱮ ᱪᱟᱞᱟᱜ ᱟᱞᱮ ᱦᱜ ᱟᱞᱮ ᱦᱚᱸ ᱢᱟᱱᱮ ᱤᱱᱟᱹ ᱥᱳᱞᱳ ᱥᱚᱛᱨᱚ ᱛᱟᱹᱨᱤᱠᱷ ᱫᱚ ᱢᱟᱱᱮ ᱥᱟᱺᱜᱤᱧ ᱜᱮᱭᱟ ᱥᱮ ᱮᱱᱠᱷᱟᱱ ᱫᱚ ᱚᱱᱟ ᱠᱷᱟᱹᱛᱤᱨ ᱛᱮ ᱢᱮᱱᱮᱫᱼᱟ ᱞᱮ ᱫᱩ ᱫᱤᱱ ᱤᱭᱟᱹ ᱫᱩ ᱫᱤᱱ ᱵᱟᱭ ᱦᱳᱭ ᱞᱟᱜᱟᱜᱼᱟ ᱟᱫᱚ ᱥᱮᱴᱮᱨᱚᱜ ᱛᱮ ᱨᱩᱣᱟᱹᱜ ᱦᱚᱲ ᱦᱤᱥᱟᱹᱵ ᱛᱮᱫᱚ ᱢᱟᱱᱮ ᱩᱱᱟᱹᱜ ᱤᱥᱯᱤᱰ ᱦᱚᱸ ᱵᱟᱢ ᱤᱫᱤᱭ ᱜᱮᱭᱟ ᱥᱮ ᱮᱱᱠᱷᱟᱱ ᱫᱚ ᱞᱟᱜᱟᱜ ᱜᱮᱭᱟ ᱟᱫᱚ ᱚᱱᱟ ᱪᱤᱠᱟᱹ ᱫᱳ ᱫᱤᱱᱤᱧ ᱞᱟᱹᱭ ᱠᱮᱜᱼᱟ",
+   "wer": 0.291,
+   "confidence": 0.907,
+   "english": "If we're going, we'll also mean that the same solo schedule means distance, or if it means that it's not going to be a bad day, or if it's going to be a bad day, it's going to mean that you won't be able to pick up as much speed as the next person to arrive, or if it's necessary, tell them what day it's going to be."
+  },
+  {
+   "file": "sat_021.wav",
+   "reference": "ᱟᱪᱪᱷᱟ ᱴᱷᱤᱠ ᱜᱮᱭᱟ ᱛᱚᱵᱮ ᱱᱟᱜ ᱟᱞᱮ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟᱞᱮ",
+   "heard": "ᱟᱪᱪᱷᱟ ᱴᱷᱤᱠ ᱜᱮᱭᱟ ᱛᱚᱵᱮ ᱦᱦᱜ ᱟᱞᱮ ᱪᱟᱞᱟᱜ ᱠᱟᱱᱟᱞᱮ",
+   "wer": 0.125,
+   "confidence": 0.877,
+   "english": "That's right, but are we going?"
+  },
+  {
+   "file": "sat_022.wav",
+   "reference": "ᱦᱮᱸᱻ",
+   "heard": "ᱦᱮᱸ",
+   "wer": 1.0,
+   "confidence": 0.994,
+   "english": "Support"
+  },
+  {
+   "file": "sat_023.wav",
+   "reference": "ᱦᱮᱸ ᱦᱮᱸ ᱰᱟᱠᱛᱟᱨ ᱤᱭᱟᱹ ᱱᱩᱠᱩ ᱤᱭᱟᱹ ᱠᱟᱹᱴᱤᱡ ᱩᱱᱠᱩ ᱯᱩᱱᱭᱟ ᱠᱟᱴᱟ ᱜᱟᱹᱭ ᱰᱟᱝᱨᱟ ᱠᱚᱨᱮᱱ ᱨᱟᱱ ᱮᱢᱚᱜ ᱤᱡ ᱠᱟᱱ ᱜᱤᱭᱟᱹᱧ",
+   "heard": "ᱦᱮᱸ ᱦᱮᱸ ᱰᱟᱠᱛᱚᱨ ᱤᱭᱟᱹ ᱱᱩᱠᱩ ᱤᱭᱟᱹ ᱠᱟᱹᱴᱤᱡ ᱩᱱᱩᱠᱩ ᱯᱩᱱᱭᱟ ᱠᱟᱴᱷᱟ ᱜᱟᱹᱭ ᱰᱟᱝᱨᱟ ᱠᱚᱨᱮᱱ ᱨᱟᱱ ᱮᱢᱚᱜᱤᱡ ᱠᱟᱱ ᱜᱮᱭᱟ",
+   "wer": 0.333,
+   "confidence": 0.88,
+   "english": "The support team is a team of four players."
+  }
+ ]
+}

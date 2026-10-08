@@ -2077,5 +2077,11 @@ const or: Record<string, string> = {
   "The last visit was RED: a person calls, not the agent": "ଶେଷ ଭେଟ ଲାଲ ଥିଲା: ଏଜେଣ୍ଟ ନୁହେଁ, ଜଣେ ବ୍ୟକ୍ତି କଲ୍ କରିବେ",
   "The last visit was YELLOW: a person calls, not the agent": "ଶେଷ ଭେଟ ହଳଦିଆ ଥିଲା: ଏଜେଣ୍ଟ ନୁହେଁ, ଜଣେ ବ୍ୟକ୍ତି କଲ୍ କରିବେ",
   "Festivals, seasons and worker names for this state come from the Jeevia server. Start the server to view or edit them.": "ଏହି ରାଜ୍ୟର ପର୍ବ, ଋତୁ ଓ କର୍ମୀଙ୍କ ନାମ Jeevia ସର୍ଭରରୁ ଆସେ। ଦେଖିବା ବା ବଦଳାଇବା ପାଇଁ ସର୍ଭର ଚାଲୁ କରନ୍ତୁ।",
+  "More options": "ଅଧିକ ବିକଳ୍ପ",
+  "Tap to read the rules": "ନିୟମ ପଢ଼ିବାକୁ ଦବାନ୍ତୁ",
+  "Tap, type or speak what the patient says.": "ରୋଗୀ ଯାହା କୁହନ୍ତି, ଦବାଇ, ଲେଖି କିମ୍ବା କହି ଦର୍ଜ କରନ୍ତୁ।",
+  "Next patient": "ପରବର୍ତ୍ତୀ ରୋଗୀ",
+  "More": "ଅଧିକ",
+  "Edit note": "ନୋଟ୍ ବଦଳାନ୍ତୁ",
 };
 export default or;

@@ -117,6 +117,51 @@ the FLEURS English sentence is the reference.
 - **Reproduce:** `python backend/scripts/eval_fleurs_all.py`; per language
   `docs/evaluation/asr_<lang>_fleurs_dev25_ctc_int8_conf.json`.
 
+## Speech — the eight languages FLEURS lacks (IndicVoices, 8 Oct)
+
+FLEURS has no Bodo, Dogri, Konkani, Kashmiri, Maithili, Manipuri, Sanskrit or Santali. These use the first 25 clips of
+each language from **IndicVoices** (AI4Bharat, CC BY 4.0), with the same engine and settings. IndicVoices is natural
+(unscripted) speech, not read sentences, so these figures are not directly comparable with the FLEURS table: natural
+speech is usually harder. Clips under 1 s were refused by the app, as the kiosk does ("too short"), and are not scored.
+
+| Language | Clips scored | WER | CER | Processing time per second of speech |
+|---|---|---|---|---|
+| Bodo | 21 | 15.6 % | 5.6 % | 0.47 s |
+| Dogri | 25 | 25.4 % | 11.0 % | 0.31 s |
+| Konkani | 23 | 33.0 % | 10.9 % | 0.54 s |
+| Kashmiri | 23 | 40.4 % | 16.8 % | 0.95 s |
+| Maithili | 25 | 28.1 % | 10.1 % | 0.32 s |
+| Manipuri | 25 | 14.2 % | 4.5 % | 0.30 s |
+| Sanskrit | 23 | 11.4 % | 1.8 % | 0.31 s |
+| Santali (Ol Chiki) | 23 | 24.7 % | 7.7 % | 0.31 s |
+
+- With these, every one of the 22 scheduled languages except Sindhi has a measured speech figure, shown in the kiosk's
+  language menu.
+- **Kashmiri** is the weakest and the slowest; read-back to the patient matters most there.
+- 25 clips per language is a small sample; treat a difference of a few points as noise.
+- Per clip: `docs/evaluation/asr_<lang>_indicvoices25_ctc_int8.json`. Reproduce:
+  `python backend/scripts/eval_asr.py models/eval/iv_<lang> <lang>`.
+
+## Santali (Ol Chiki) end to end (8 Oct)
+
+`backend/scripts/santali_e2e.py` runs the real API in-process (offline, temporary database, no online services).
+
+**Spoken:** six IndicVoices Santali clips (CC BY 4.0) through `/speech/transcribe`. All six were heard in Ol Chiki
+(confidence 0.90–0.94) and translated into sensible English ("Then I'd like to have a cake and some fried things").
+Speech WER on 23 clips is 24.7 % (table above).
+
+**Typed:** we have no Santali speaker, so eight English complaints were put into Santali by IndicTrans2 and then
+entered as a patient would. The English the note got back was mostly nonsense ("chest pain to the left arm" →
+"the outbreak of the virus has spread"; "seven months pregnant with bleeding" → "a seven-month-old pig"), and
+**5 of the 5 RED complaints came out YELLOW** (3 YELLOW stayed YELLOW). Two machine translations in a row compound
+their errors, so this is a pessimistic test, but the rules have no Santali word list to fall back on.
+
+**What changed:** a translated history from any language whose translation is unmeasured (Bodo, Dogri, Konkani,
+Kashmiri, Maithili, Manipuri, Sanskrit, Santali) now always carries the MT-CHECK **warning** "translation … has not
+been measured and may lose the meaning; ask the complaint again through someone who speaks the language" (test
+`test_translation_from_an_unmeasured_language_always_warns`). Santali works end to end, but the complaint must be
+confirmed by a person. Per case: `docs/evaluation/santali_e2e.json`.
+
 ## Errors by language, sex and age band (G7, 7 Oct)
 
 Reproduce: `python backend/scripts/eval_bias.py` → `docs/evaluation/bias.json`.
@@ -581,6 +626,42 @@ asked on any readable capture (`docs/evaluation/ocr_synth_rapidocr.json`). The h
   handwriting on the page and folds. Real-world error will be higher.
 - Printed reports only. Handwriting is measured separately below.
 - Every value read from a photo is shown as read from a photo, beside the image, for the reviewer to confirm.
+
+## Second document-type label: the image model (B10, 8 Oct)
+
+The text-based label (`images.doc_type`, words found by OCR) is checked by **Qwen3-VL-4B** (Q4_K_M, llama.cpp, offline
+on the laptop CPU), which looks at the picture itself. When the two disagree, the reviewer sees "The image model sees
+this as …, the text reading as … — check the picture". The image model never replaces the text label.
+
+| Pictures | Count | Text label right | Image model right | Disagreed | Disagreed where the text label was wrong |
+|---|---|---|---|---|---|
+| Synthetic lab reports (6 each: photo, poor photo, thermal) | 18 | 17 | 18 | 1 | 1 |
+| Synthetic medicine strips (clean, blurred, glare, photo, torn) | 14 | 14 | 14 | 0 | 0 |
+| Public handwritten prescriptions (rx_hand, read only) | 15 | 3 | 11 | 8 | 8 |
+| **All** | **47** | **34 (72 %)** | **43 (91 %)** | **9** | **9** |
+
+- Every disagreement was a case where the text label was wrong, so no warning was a false alarm on these 47.
+- Handwriting is where it helps: OCR finds few printed words on a handwritten prescription, so the text label says
+  "other document" for 12 of 15; the image model recognises 11 of 15.
+- Both were wrong together on 4 prescriptions ("other document"). Those get no warning; the reviewer still sees the
+  picture.
+- **Speed:** median 11.2 s per picture (1.6–57 s) on the laptop CPU, run after the upload reply. Off unless
+  `JEEVIA_VLM_URL` is set (`backend/scripts/start_vlm.sh`).
+- Per picture: `docs/evaluation/vlm_doctype.json`. Reproduce: `python backend/scripts/eval_vlm_doctype.py`.
+
+## Table reader as a third reading: tried and left off (PP-StructureV3, 8 Oct)
+
+PaddleOCR's table models were tried as a third reading of report rows (`app/triage/tables.py`).
+- **Full PP-StructureV3** (layout model plus two RT-DETR-L cell detectors): over 15 minutes of CPU for **one page** on
+  the demo laptop; stopped.
+- **Light set** (no layout step, end-to-end table models, mobile OCR): 8.6 s per page, but on 40 held-out synthetic
+  reports (8 per capture type) it read only **31 of 340 values exactly**; 280 were not found and 29 were wrong. Our
+  reports are printed without cell borders, and the table model merges several tests into one cell
+  ("Test Name Result 12.9 48.3 3,900"). Of 9 values the two OCR engines got wrong, it would have flagged 1.
+- **Decision:** it stays off (`JEEVIA_TABLE_PYTHON` unset). Turned on, its 29 wrong values would put false "check the
+  crop" warnings on reports the two OCR engines already read at 99.3 % (scan and photo). The two-engine reading with
+  row joining by position remains the method.
+- Per value: `docs/evaluation/tables_heldout.json`. Reproduce: `python backend/scripts/eval_tables.py 8`.
 
 ## Checking the numbers on a report (B2)
 

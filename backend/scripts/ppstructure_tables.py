@@ -46,13 +46,16 @@ class _Cells(HTMLParser):
 
 
 def main(paths: list[str]) -> None:
-    from paddleocr import PPStructureV3
+    # The full PP-StructureV3 (layout model plus two RT-DETR-L cell detectors) took over 15 minutes for one page on the
+    # demo laptop's CPU (8 Oct). This lighter set of the same models runs in about 9 s per page: no layout step, the
+    # end-to-end table models instead of the cell detectors, and the mobile OCR models.
+    from paddleocr import TableRecognitionPipelineV2
 
-    pipe = PPStructureV3(use_doc_orientation_classify=False, use_doc_unwarping=False, use_seal_recognition=False,
-                         use_formula_recognition=False, use_chart_recognition=False, use_region_detection=False)
+    pipe = TableRecognitionPipelineV2(use_doc_orientation_classify=False, use_doc_unwarping=False, use_layout_detection=False,
+                                      text_detection_model_name="PP-OCRv5_mobile_det", text_recognition_model_name="PP-OCRv5_mobile_rec")
     for p in paths:
         tables = []
-        for res in pipe.predict(p):
+        for res in pipe.predict(p, use_e2e_wired_table_rec_model=True, use_e2e_wireless_table_rec_model=True, use_table_orientation_classify=False):
             for t in (res.json.get("res") or res.json).get("table_res_list") or []:
                 cells = _Cells()
                 cells.feed(t.get("pred_html") or "")
