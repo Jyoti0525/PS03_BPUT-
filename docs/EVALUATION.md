@@ -214,8 +214,8 @@ pack is tested without anyone writing a case for it, and CI (`pytest`) fails if 
 
 | Case | What it checks | Rules covered |
 |---|---|---|
-| Firing | an input made from the condition fires the rule | **162 / 162** |
-| Non-firing | the nearest input with ordinary values elsewhere gives a definite no | **162 / 162** |
+| Firing | an input made from the condition fires the rule | **167 / 167** (162 on 8 Oct morning; 5 rules added since, same test) |
+| Non-firing | the nearest input with ordinary values elsewhere gives a definite no | **167 / 167** (162 on 8 Oct morning; 5 rules added since, same test) |
 | Boundary | each threshold on the firing path: fires exactly at the published value (≥, ≤) or one step inside it (>, <), not one step past | 52 rules with a numeric threshold, 68 thresholds |
 | Unknown input | the measurement or danger sign the rule relied on is removed: the rule says "unknown", never "no" | 76 rules, 84 leaves |
 

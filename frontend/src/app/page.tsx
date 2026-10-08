@@ -321,7 +321,7 @@ export default function Landing() {
               </Reveal>
               <Reveal delay={320} className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-line pt-7">
                 {[
-                  { n: 22, s: "+" },
+                  { n: 22, s: "" },
                   { n: 4, s: " min" },
                   { n: 100, s: "%" },
                 ].map((x, i) => (
