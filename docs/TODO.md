@@ -365,7 +365,7 @@ The user's rule (6 Oct): nothing waits until after the mid-evaluation; every ite
 - [x] Strict pass against the official PS03 document (8 Oct, f832c9a): visible disclaimer now says "Educational
   prototype" (exports, case screen, QR slips, hi/or/kn); photos of the problem are described for the reviewer (basic
   visual input; tested live 8 Oct: 3 of 3 described plainly after a prompt fix, median 11 s); HbA1c trend across visits (D5); D4 row corrected (real calls to the demo number, 11 languages).
-- [x] UI clean-up, second pass (8 Oct, uncommitted): nursing station count cards are the filter (vitals needed, waiting, critical, observed), replacing the tab switch; employer menu translated.
+- [x] UI clean-up, second pass (8 Oct, 520c8a3): nursing station count cards are the filter (vitals needed, waiting, critical, observed), replacing the tab switch; employer menu translated.
 - [x] UI clean-up for first-time users (8 Oct, f832c9a): one account menu instead of three header icons; supervisor
   menu grouped (Facility, Safety & records, Tools); queue count cards are the filter; Share QR and exports in one menu;
   self-refreshing lists lose their Refresh buttons; kiosk's offline simulator moved behind a staff settings button.
