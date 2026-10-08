@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { CalendarDays, CloudRain, Plus, Save, Search, Trash2, UserRound } from "lucide-react";
 import { api } from "@/lib/api";
+import { ApiError } from "@/lib/api/contract";
 import { useAsync } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
-import { Badge, Button, Card, CardHeader, ErrorNote, Input, Label, Spinner, cx } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, Empty, ErrorNote, Input, Label, Spinner, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import type { CadreKey, LocalFestival, OnsetReading, RegionCalendar, RegionConfig, VisitCalendar, VisitKind } from "@/lib/types";
 
@@ -33,8 +34,17 @@ const CADRES: { key: CadreKey; what: string }[] = [
  *  names of its front-line workers. Shipped per state (regions.yaml, every date sourced); a supervisor can change it. */
 export default function RegionalCalendarPage() {
   const { user } = useSession();
+  const { tr } = usePrefs();
   const fid = user!.facility_id!;
   const { data, error, reload } = useAsync(() => api.facilityCalendar(fid), [fid]);
+  // 501: the browser-only demo has no calendar (it lives on the server with its sources). Not a fault, so no retry.
+  if (error instanceof ApiError && error.status === 501)
+    return (
+      <>
+        <PageHeader title={tr("Regional calendar")} />
+        <Card><Empty icon={<CalendarDays className="size-6" />} title={tr("The regional calendar needs the live API")} body={tr("Festivals, seasons and worker names for this state come from the Jeevia server. Start the server to view or edit them.")} /></Card>
+      </>
+    );
   if (error) return <ErrorNote error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
   return <CalendarView key={JSON.stringify(data.region_config)} data={data} fid={fid} canEdit={user!.role === "supervisor"} onSaved={reload} />;

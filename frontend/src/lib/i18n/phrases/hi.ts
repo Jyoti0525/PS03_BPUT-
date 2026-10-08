@@ -2066,5 +2066,16 @@ const hi: Record<string, string> = {
   "Short notes, confirm GREEN, maternal follow-ups": "छोटे नोट, हरा पुष्टि करें, माँ और शिशु का फ़ॉलो-अप",
   "As a doctor, plus capacity and outbreak alerts": "डॉक्टर जैसा, साथ में क्षमता और प्रकोप अलर्ट",
   "Run the kiosk, record vitals, confirm up to YELLOW": "कियोस्क चलाएँ, वाइटल्स दर्ज करें, पीले तक पुष्टि करें",
+  "{w} weeks at last visit": "पिछली मुलाक़ात पर {w} सप्ताह",
+  "Due": "तय तारीख़",
+  "not reached": "संपर्क नहीं हुआ",
+  "reached": "संपर्क हुआ",
+  "came": "जाँच के लिए आए",
+  "Husband's phone": "पति का फ़ोन",
+  "Family phone": "परिवार का फ़ोन",
+  "No follow-ups due": "कोई फ़ॉलो-अप बाकी नहीं",
+  "The last visit was RED: a person calls, not the agent": "पिछली मुलाक़ात लाल थी: एजेंट नहीं, व्यक्ति कॉल करेगा",
+  "The last visit was YELLOW: a person calls, not the agent": "पिछली मुलाक़ात पीली थी: एजेंट नहीं, व्यक्ति कॉल करेगा",
+  "Festivals, seasons and worker names for this state come from the Jeevia server. Start the server to view or edit them.": "इस राज्य के त्योहार, मौसम और कार्यकर्ताओं के नाम Jeevia सर्वर से आते हैं। देखने या बदलने के लिए सर्वर चालू करें।",
 };
 export default hi;

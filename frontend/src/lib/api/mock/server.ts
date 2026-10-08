@@ -10,6 +10,7 @@ import type { JeeviaApi } from "../contract";
 import { ApiError } from "../contract";
 import { getDeviceId, getTokens, setTokens } from "../tokens";
 import type {
+  Followup,
   AuditAction,
   AuditEvent,
   Consent,
@@ -37,7 +38,7 @@ import { ADMIN_ROLES, DOCTOR_ROLES, PIN_ROLES, REVIEWER_ROLES, SIGN_OFF, STAFF_R
 import { SAMPLE_PIN, pinProblem } from "@/lib/pin";
 import { evaluate } from "./rules";
 import { buildNote, sampleReportImage, type UploadedForNote } from "./note";
-import { DEMO_OTP, SEED_COHORTS, SEED_FACILITIES, SEED_HISTORY, SEED_PATIENTS, SEED_TODAY, SEED_USERS } from "./seed";
+import { DEMO_OTP, SEED_COHORTS, SEED_FACILITIES, SEED_FOLLOWUPS, SEED_HISTORY, SEED_PATIENTS, SEED_TODAY, SEED_USERS } from "./seed";
 import { buildExport } from "@/lib/export";
 
 const DB_KEY = "jeevia.mockdb.v4";
@@ -451,6 +452,9 @@ async function pinMatches(u: { id: string; phone: string; pinHash?: string | nul
 }
 
 const MOCK_ORG = { id: "org_kalinganagar", name: "Kalinga Steel Works (sample)", kind: "industrial" as const, registration_no: null, state: "Odisha", district: "Jajpur", address: null, contact_phone: null, verified: false, created_at: new Date(0).toISOString() };
+
+// Follow-ups live in memory in the local demo (attempts reset on reload); calls and SMS need the server.
+const mockFollowups: Followup[] = structuredClone(SEED_FOLLOWUPS);
 
 async function withDb<T>(fn: (d: DB) => Promise<T>): Promise<T> {
   const d = await load();
@@ -1521,13 +1525,24 @@ export const mockApi: JeeviaApi = {
 
   syndromicCsv: async (days = 14) => ({ filename: `syndromic_${days}d.csv`, mime: "text/csv", blob: new Blob(["date,place,visits,fever,respiratory,gastro,rash\n"], { type: "text/csv" }) }),
 
-  listFollowups: async () => [],
+  listFollowups: async (scope = "active", programme = "all") =>
+    mockFollowups.filter((f) => (programme === "all" || f.programme === programme) && (scope === "all" || !["done", "cancelled"].includes(f.status))),
   listHealthWorkers: () =>
     withDb(async (d) => {
       const me = await current(d);
       return d.users.filter((u) => u.facility_id === me.facility_id && u.role === "health_worker").map((u) => ({ id: u.id, name: u.name }));
     }),
-  followupAttempt: () => Promise.reject(new ApiError(501, "Follow-ups need the Jeevia server (local demo mode)")),
+  followupAttempt: (id, outcome, note = "") =>
+    withDb(async (d) => {
+      const me = await current(d);
+      const f = mockFollowups.find((x) => x.id === id);
+      if (!f) throw new ApiError(404, "Follow-up not found");
+      f.attempts = [...f.attempts, { at: new Date().toISOString(), by: me.name, outcome, note: note || null }];
+      if (outcome === "came") Object.assign(f, { status: "done", resolved_at: new Date().toISOString() });
+      else if (outcome === "reached") f.status = "contacted";
+      else if (f.attempts.filter((a) => a.outcome === "not_reached").length >= 2) f.status = "call_due";
+      return { ...f };
+    }),
   startCall: () => Promise.reject(new ApiError(501, "Reminder calls need the Jeevia server (local demo mode)")),
   telephonyStatus: async () => ({ calls: false, sms: false, demo_to: null, missing: ["the Jeevia server"] }),
   followupSms: () => Promise.reject(new ApiError(501, "SMS needs the Jeevia server (local demo mode)")),

@@ -1,5 +1,5 @@
 /** Minimal sample data: two facilities, sample staff, three sample patients. No real patient records. */
-import type { Cohort, Facility, IntakePayload, Patient, User } from "@/lib/types";
+import type { Followup, Cohort, Facility, IntakePayload, Patient, User } from "@/lib/types";
 
 export const DEMO_OTP = "123456";
 
@@ -150,4 +150,22 @@ export const SEED_COHORTS: Cohort[] = [
       { worker_code: "KSW-1045", department: "Furnace", fitness_status: "pending_review", last_screened_at: null },
     ],
   },
+];
+
+/** Demo follow-ups (local demo mode): one missed pregnancy check, one due today, one chronic review whose reminder call is due after two failed visits. */
+export const SEED_FOLLOWUPS: Followup[] = [
+  { id: "fu_001", patient_id: "pat_003", patient_code: "JVA-P003", patient_name: "Priya Sharma", village: "Manikpur", phone: "9876543210", phone_belongs_to: "husband",
+    kind: "anc_checkup", programme: "maternal", condition: null, who_calls: { who: "human", why: "The last visit was YELLOW: a person calls, not the agent" },
+    due_at: iso(2 * DAY), status: "missed", missed_at: iso(1 * DAY), attempts: [], assigned_to: "usr_hw1", assigned_name: "Kamla Devi (ASHA)", gestation_weeks: 28,
+    call_script: "Namaste. This is PHC Manikpur. Priya's pregnancy check-up was due two days ago. Please come to the centre this week.", resolved_at: null },
+  { id: "fu_002", patient_id: "pat_001", patient_code: "JVA-P001", patient_name: "Radha Kumari", village: "Manikpur", phone: "9876543210", phone_belongs_to: "self",
+    kind: "chronic_review", programme: "chronic", condition: "Hypertension", who_calls: { who: "agent", why: "Routine follow-up: the agent may call, and any danger sign hands the call to a person" },
+    due_at: iso(0), status: "scheduled", missed_at: null, attempts: [], assigned_to: "usr_nurse1", assigned_name: "Sunita Yadav (ANM)", gestation_weeks: null,
+    call_script: "Namaste. This is PHC Manikpur. Your blood pressure check is due today.", resolved_at: null },
+  { id: "fu_003", patient_id: "pat_002", patient_code: "JVA-P002", patient_name: "Lakshmi Devi", village: "Mau", phone: "9880111223", phone_belongs_to: "household",
+    kind: "chronic_review", programme: "chronic", condition: "Diabetes", who_calls: { who: "agent", why: "Routine follow-up: the agent may call, and any danger sign hands the call to a person" },
+    due_at: iso(5 * DAY), status: "call_due", missed_at: iso(4 * DAY),
+    attempts: [{ at: iso(3 * DAY), by: "Sunita Yadav (ANM)", outcome: "not_reached", note: "House locked" }, { at: iso(1 * DAY), by: "Sunita Yadav (ANM)", outcome: "not_reached", note: null }],
+    assigned_to: "usr_nurse1", assigned_name: "Sunita Yadav (ANM)", gestation_weeks: null,
+    call_script: "Namaste. This is PHC Manikpur. Your sugar check is overdue. Please come to the centre this week.", resolved_at: null },
 ];

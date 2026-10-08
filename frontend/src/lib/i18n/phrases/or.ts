@@ -2066,5 +2066,16 @@ const or: Record<string, string> = {
   "Short notes, confirm GREEN, maternal follow-ups": "ଛୋଟ ନୋଟ, ସବୁଜ ନିଶ୍ଚିତ କରନ୍ତୁ, ମା ଓ ଶିଶୁ ଫଲୋ-ଅପ",
   "As a doctor, plus capacity and outbreak alerts": "ଡାକ୍ତରଙ୍କ ପରି, ସହିତ କ୍ଷମତା ଓ ମହାମାରୀ ସତର୍କତା",
   "Run the kiosk, record vitals, confirm up to YELLOW": "କିଓସ୍କ ଚଲାନ୍ତୁ, ଭାଇଟାଲ୍ସ ଲେଖନ୍ତୁ, ହଳଦିଆ ପର୍ଯ୍ୟନ୍ତ ନିଶ୍ଚିତ କରନ୍ତୁ",
+  "{w} weeks at last visit": "ଶେଷ ଭେଟରେ {w} ସପ୍ତାହ",
+  "Due": "ଧାର୍ଯ୍ୟ ତାରିଖ",
+  "not reached": "ଯୋଗାଯୋଗ ହେଲା ନାହିଁ",
+  "reached": "ଯୋଗାଯୋଗ ହେଲା",
+  "came": "ଯାଞ୍ଚ ପାଇଁ ଆସିଲେ",
+  "Husband's phone": "ସ୍ୱାମୀଙ୍କ ଫୋନ୍",
+  "Family phone": "ପରିବାରର ଫୋନ୍",
+  "No follow-ups due": "କୌଣସି ଫଲୋ-ଅପ୍ ବାକି ନାହିଁ",
+  "The last visit was RED: a person calls, not the agent": "ଶେଷ ଭେଟ ଲାଲ ଥିଲା: ଏଜେଣ୍ଟ ନୁହେଁ, ଜଣେ ବ୍ୟକ୍ତି କଲ୍ କରିବେ",
+  "The last visit was YELLOW: a person calls, not the agent": "ଶେଷ ଭେଟ ହଳଦିଆ ଥିଲା: ଏଜେଣ୍ଟ ନୁହେଁ, ଜଣେ ବ୍ୟକ୍ତି କଲ୍ କରିବେ",
+  "Festivals, seasons and worker names for this state come from the Jeevia server. Start the server to view or edit them.": "ଏହି ରାଜ୍ୟର ପର୍ବ, ଋତୁ ଓ କର୍ମୀଙ୍କ ନାମ Jeevia ସର୍ଭରରୁ ଆସେ। ଦେଖିବା ବା ବଦଳାଇବା ପାଇଁ ସର୍ଭର ଚାଲୁ କରନ୍ତୁ।",
 };
 export default or;

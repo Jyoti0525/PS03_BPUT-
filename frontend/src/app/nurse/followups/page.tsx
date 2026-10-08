@@ -27,6 +27,8 @@ const PHONE: Record<string, string> = {
   household: "Family phone — say nothing about pregnancy",
   none: "No phone — home visit only",
 };
+// The pregnancy warning is for pregnancy follow-ups; a chronic patient's shared phone only needs naming.
+const PHONE_CHRONIC: Record<string, string> = { husband: "Husband's phone", household: "Family phone" };
 
 const WHO: Record<Followup["who_calls"]["who"], { label: string; icon: React.ReactNode; tone: "teal" | "semi" | "neutral" }> = {
   agent: { label: "Agent may call", icon: <Bot className="size-3.5" />, tone: "teal" },
@@ -108,7 +110,7 @@ export default function FollowupsPage() {
                     <span className="inline-flex items-center gap-1"><CalendarClock className="size-4" /> {tr("Due")} {fmtDate(f.due_at)}</span>
                     <span className="inline-flex items-center gap-1">
                       {f.phone_belongs_to === "none" || !f.phone ? <PhoneOff className="size-4" /> : <Phone className="size-4" />}
-                      {f.phone ?? tr("no phone")} · {tr(PHONE[f.phone_belongs_to ?? "household"] ?? PHONE.household)}
+                      {f.phone ?? tr("no phone")} · {tr((f.programme === "chronic" && PHONE_CHRONIC[f.phone_belongs_to ?? "household"]) || PHONE[f.phone_belongs_to ?? "household"] || PHONE.household)}
                     </span>
                     {f.assigned_name && <span className="text-muted">{tr("Assigned to")} {f.assigned_name}</span>}
                   </p>
