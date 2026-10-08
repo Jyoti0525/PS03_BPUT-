@@ -370,7 +370,7 @@ The user's rule (6 Oct): nothing waits until after the mid-evaluation; every ite
   way: sample reports failed to attach (security policy blocked fetching data: URLs); referrals now carry a short ID
   (REF-XXXXXX) on the referrals list and the receiving summary; patient ID labelled under the token QR; 19 newer kiosk
   safety questions translated into Hindi, Odia and Kannada; share page shows the language name, not its code.
-- [x] Last English on patient and sign-in screens (8 Oct, uncommitted): sign-in role cards (ASHA / MPW, Medical Officer and others) in Hindi, Odia and Kannada; the default grievance contact on the kiosk slip shown in the patient's language (a facility's own text stays as typed).
+- [x] Last English on patient and sign-in screens (8 Oct, 1adec2e): sign-in role cards (ASHA / MPW, Medical Officer and others) in Hindi, Odia and Kannada; the default grievance contact on the kiosk slip shown in the patient's language (a facility's own text stays as typed).
 - [x] UI clean-up, second pass (8 Oct, 520c8a3): nursing station count cards are the filter (vitals needed, waiting, critical, observed), replacing the tab switch; employer menu translated.
 - [x] UI clean-up for first-time users (8 Oct, f832c9a): one account menu instead of three header icons; supervisor
   menu grouped (Facility, Safety & records, Tools); queue count cards are the filter; Share QR and exports in one menu;
