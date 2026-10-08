@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { A11yButton, LanguageButton, Logo } from "@/components/layout/chrome";
+import { SampleDataSwitch } from "@/components/site/sample-data";
 import { StatusPill } from "@/components/site/system-status";
 import { HOME_FOR_ROLE } from "@/components/layout/role-gate";
 import { useSession } from "@/components/providers";
@@ -83,6 +84,7 @@ export function SiteHeader() {
           </ul>
         </nav>
         <div className="flex items-center justify-end gap-2">
+          <SampleDataSwitch className="hidden md:inline-flex" />
           <StatusPill className="hidden xl:inline-flex" />
           <LanguageButton className="hidden sm:block" />
           <LanguageButton compact className="sm:hidden" />
@@ -119,7 +121,8 @@ export function SiteHeader() {
                 {cta.label}
               </Link>
             </div>
-            <div className="mt-3 flex justify-center pb-2">
+            <div className="mt-3 flex flex-wrap justify-center gap-2 pb-2">
+              <SampleDataSwitch className="inline-flex md:hidden" />
               <A11yButton />
             </div>
           </nav>

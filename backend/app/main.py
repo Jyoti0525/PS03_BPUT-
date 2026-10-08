@@ -12,7 +12,7 @@ from . import mailer
 from .config import get_settings
 from .db import SessionLocal, engine, init_db
 from .observability import RequestContextMiddleware, metrics_endpoint, setup_logging
-from .routers import admin, alerts as alerts_router, auth, directory as directory_router, encounters, facilities, files, kiosk, language as language_router, organisations, patients, shares, telephony as telephony_router
+from .routers import admin, alerts as alerts_router, auth, demo as demo_router, directory as directory_router, encounters, facilities, files, kiosk, language as language_router, organisations, patients, shares, telephony as telephony_router
 
 settings = get_settings()
 setup_logging(settings.log_level)
@@ -61,7 +61,9 @@ async def lifespan(_: FastAPI):
 
         with SessionLocal() as db:
             seed(db)
-        if settings.seed_scenarios:
+        from .routers.demo import samples_on
+
+        if settings.seed_scenarios and samples_on():  # switched off on the landing page: stay off across restarts
             from .scenarios import call_scenarios, facility_kinds, scenarios, synthea_histories
 
             with SessionLocal() as db:
@@ -128,7 +130,7 @@ app.add_middleware(
 )
 
 API = "/api/v1"
-for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router, shares.router, directory_router.router, organisations.router, language_router.router, alerts_router.router, telephony_router.router):
+for r in (auth.router, facilities.router, patients.router, encounters.router, files.router, admin.router, kiosk.router, shares.router, directory_router.router, organisations.router, language_router.router, alerts_router.router, telephony_router.router, demo_router.router):
     app.include_router(r, prefix=API)
 
 

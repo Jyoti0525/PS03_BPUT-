@@ -5,7 +5,7 @@
  */
 const en = {
   "app.tagline": "Human-in-the-loop triage support for India's health facilities",
-  "disclaimer.short": "Educational prototype · triage support only · not a diagnosis · every entry is reviewed by qualified health staff",
+  "disclaimer.short": "Educational prototype · triage support only · not a diagnosis",
   "disclaimer.data": "Synthetic demo data — no real patients",
   "common.next": "Next",
   "common.back": "Back",
@@ -124,7 +124,7 @@ export type DictKey = keyof typeof en;
 
 const hi: Partial<Record<DictKey, string>> = {
   "app.tagline": "भारत की स्वास्थ्य सुविधाओं के लिए मानव-निगरानी वाली ट्रायेज सहायता",
-  "disclaimer.short": "शैक्षिक प्रोटोटाइप · केवल ट्रायेज सहायता · निदान नहीं · हर प्रविष्टि योग्य स्वास्थ्य कर्मी देखते हैं",
+  "disclaimer.short": "शैक्षिक प्रोटोटाइप · केवल ट्रायेज सहायता · निदान नहीं",
   "disclaimer.data": "कृत्रिम डेमो डेटा — कोई असली मरीज़ नहीं",
   "common.next": "आगे",
   "common.back": "पीछे",
@@ -235,7 +235,7 @@ const hi: Partial<Record<DictKey, string>> = {
 
 const or: Partial<Record<DictKey, string>> = {
   "app.tagline": "ଭାରତର ସ୍ୱାସ୍ଥ୍ୟ କେନ୍ଦ୍ର ପାଇଁ ମଣିଷ-ତଦାରଖ ଟ୍ରାଇଏଜ୍ ସହାୟତା",
-  "disclaimer.short": "ଶିକ୍ଷାଗତ ପ୍ରୋଟୋଟାଇପ୍ · କେବଳ ଟ୍ରାଇଏଜ୍ ସହାୟତା · ରୋଗ ନିର୍ଣ୍ଣୟ ନୁହେଁ · ପ୍ରତ୍ୟେକ ତଥ୍ୟ ଯୋଗ୍ୟ ସ୍ୱାସ୍ଥ୍ୟକର୍ମୀ ଦେଖନ୍ତି",
+  "disclaimer.short": "ଶିକ୍ଷାଗତ ପ୍ରୋଟୋଟାଇପ୍ · କେବଳ ଟ୍ରାଇଏଜ୍ ସହାୟତା · ରୋଗ ନିର୍ଣ୍ଣୟ ନୁହେଁ",
   "disclaimer.data": "କୃତ୍ରିମ ଡେମୋ ତଥ୍ୟ — କୌଣସି ପ୍ରକୃତ ରୋଗୀ ନୁହେଁ",
   "common.next": "ଆଗକୁ",
   "common.back": "ପଛକୁ",
@@ -347,7 +347,7 @@ const or: Partial<Record<DictKey, string>> = {
 /** Kannada: the patient screens only (kiosk, pre-arrival, intake); staff screens stay in English. */
 const kn: Partial<Record<DictKey, string>> = {
   "app.tagline": "ಭಾರತದ ಆರೋಗ್ಯ ಕೇಂದ್ರಗಳಿಗೆ ಮಾನವ-ಮೇಲ್ವಿಚಾರಣೆಯ ಟ್ರಯಾಜ್ ಬೆಂಬಲ",
-  "disclaimer.short": "ಶೈಕ್ಷಣಿಕ ಮಾದರಿ · ಟ್ರಯಾಜ್ ಬೆಂಬಲ ಮಾತ್ರ · ರೋಗನಿರ್ಣಯವಲ್ಲ · ಪ್ರತಿ ನಮೂದನ್ನು ಅರ್ಹ ಆರೋಗ್ಯ ಸಿಬ್ಬಂದಿ ಪರಿಶೀಲಿಸುತ್ತಾರೆ",
+  "disclaimer.short": "ಶೈಕ್ಷಣಿಕ ಮಾದರಿ · ಟ್ರಯಾಜ್ ಬೆಂಬಲ ಮಾತ್ರ · ರೋಗನಿರ್ಣಯವಲ್ಲ",
   "disclaimer.data": "ಕೃತಕ ಡೆಮೊ ಡೇಟಾ — ನಿಜವಾದ ರೋಗಿಗಳಿಲ್ಲ",
   "common.next": "ಮುಂದೆ",
   "common.back": "ಹಿಂದೆ",

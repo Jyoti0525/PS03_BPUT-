@@ -118,6 +118,22 @@ A forgotten staff PIN is reset by the facility supervisor (Admin → Staff → R
 staff PIN `4826`), three fictional patients, the sample organisation *Kalinga Steel Works* with three roster workers,
 and the kiosk link `MANIKPUR`. It never touches a database that already has facilities.
 
+Six facility types have sample staff (phones 9000000001–18): PHC Manikpur, the campus health centre, the
+Kalinganagar industrial unit, a district hospital (Puri), a clinic (Bhubaneswar) and a health camp (Kandhamal). The
+sign-in page lists them under "Other facilities" when the app talks to the server.
+
+### Demo laptop: sample-data switch (do this before every demo)
+
+Start the API with `JEEVIA_DEMO_CONTROLS=true` (SQLite only; refused on PostgreSQL, off by default). The landing
+page's navbar then shows a **Sample patients** switch (inside the menu on a phone):
+- **Reload** (the circular-arrow button, or switching on): rebuilds the demo database with every sample patient timed from now.
+  Do this just before the demo, or the queue shows waits counted from the day the database was first seeded ("60 h").
+- **Switch off:** the same rebuild, then every sample patient and visit is removed; facilities, staff accounts and
+  kiosk links stay, so the demo can start from empty queues and enter patients live.
+
+Both clear everything else entered on that server. Uploaded files already on disk are left in place. API:
+`GET/POST /api/v1/demo/samples` with `{"on": true|false}`.
+
 To reset production to the sample state (destructive — removes all real records):
 1. Take a `pg_dump` first.
 2. Drop all tables (`Base.metadata.drop_all`) against the production URL.

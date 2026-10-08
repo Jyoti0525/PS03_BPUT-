@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     otp_provider: str = "mock"
     demo_otp: str | None = "123456"
     # Sample accounts that may use demo_otp even when a real SMS provider is configured.
-    demo_phones: str = "9000000001,9000000002,9000000003,9000000004,9000000005,9000000006,9000000007,9000000008,9000000009,9000000010"
+    demo_phones: str = "9000000001,9000000002,9000000003,9000000004,9000000005,9000000006,9000000007,9000000008,9000000009,9000000010,9000000011,9000000012,9000000013,9000000014,9000000015,9000000016,9000000017,9000000018"
     twilio_account_sid: str | None = None
     twilio_api_key_sid: str | None = None
     twilio_api_key_secret: str | None = None
@@ -142,6 +142,8 @@ class Settings(BaseSettings):
     web_base_url: str = "http://localhost:3000"
     timezone: str = "Asia/Kolkata"
     seed_demo: bool = True
+    # Sample-data switch on the landing page (routers/demo.py): rebuilds the demo database. Local SQLite only.
+    demo_controls: bool = False
     seed_scenarios: bool = True  # demo scenarios for campus fevers, missed visits, capacity, workplace screening (app/scenarios.py)
     seed_synthea: bool = True  # with seed_scenarios: 12 patients with earlier visits from Synthea (app/synthea_histories.json)
     log_level: str = "INFO"

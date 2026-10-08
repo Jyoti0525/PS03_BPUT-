@@ -13,6 +13,8 @@ import { StatusPanel } from "@/components/site/system-status";
 import { CountUp, Reveal, useInView } from "@/components/site/motion";
 import { useSite, type SiteCopy } from "@/lib/i18n/site";
 import { cx } from "@/components/ui";
+import { API_MODE } from "@/lib/api";
+import { API_BASE } from "@/lib/api/live";
 
 const U_STYLE = {
   red: { pill: "bg-crit-bg text-crit", dot: "bg-crit" },
@@ -22,8 +24,41 @@ const U_STYLE = {
 const RANK = { red: 0, yellow: 1, green: 2 } as const;
 const AVATAR = ["bg-coral-50 text-coral-500", "bg-teal-50 text-teal-700"];
 
-/** Hero visual: a queue that keeps receiving patients and re-sorts them by rules-engine urgency. */
+type Preview = {
+  facility: string;
+  waiting: number;
+  red: number;
+  rules: number;
+  items: { name: string; age: number | null; sex: string | null; complaint: string; urgency: "red" | "yellow" | "green"; why: string; wait_minutes: number }[];
+};
+
+/** On the demo laptop (server JEEVIA_DEMO_CONTROLS) the real queue of PHC Manikpur, synthetic patients only; elsewhere null. */
+function useQueuePreview() {
+  const [p, setP] = useState<Preview | null>(null);
+  useEffect(() => {
+    if (API_MODE !== "live") return;
+    let stop = false;
+    const load = () =>
+      fetch(`${API_BASE}/demo/queue-preview`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j: Preview | null) => {
+          if (!stop) setP(j);
+        })
+        .catch(() => {});
+    void load();
+    const t = setInterval(load, 15000);
+    return () => {
+      stop = true;
+      clearInterval(t);
+    };
+  }, []);
+  return p;
+}
+
+/** Hero visual: the real queue when the demo server allows it, else a queue that keeps receiving patients and re-sorts them by urgency. */
 function LiveQueue({ c }: { c: SiteCopy }) {
+  const { tr } = usePrefs();
+  const real = useQueuePreview();
   const pool = c.queue.patients;
   const [ids, setIds] = useState<number[]>([0, 2, 4, 5]);
   const [fresh, setFresh] = useState<number | null>(null);
@@ -31,6 +66,7 @@ function LiveQueue({ c }: { c: SiteCopy }) {
   const label = (u: "red" | "yellow" | "green") => (u === "red" ? c.queue.critical : u === "yellow" ? c.queue.semi : c.queue.routine);
 
   useEffect(() => {
+    if (real) return;
     const order = [1, 3, 0, 2, 4, 5];
     const t = setInterval(() => {
       const next = order[cursor.current % order.length];
@@ -43,9 +79,18 @@ function LiveQueue({ c }: { c: SiteCopy }) {
       setFresh(next);
     }, 3400);
     return () => clearInterval(t);
-  }, [pool]);
+  }, [pool, real]);
 
-  const critical = ids.filter((i) => pool[i].u === "red").length;
+  const rows = real
+    ? real.items.map((p, k) => ({
+        key: `r${k}`,
+        name: `${p.name}${p.age != null ? `, ${p.age}${p.sex ?? ""}` : ""}`,
+        detail: `${p.complaint} · ${tr("waiting {m} min", { m: p.wait_minutes })}${p.why ? ` · ${p.why}` : ""}`,
+        u: p.urgency,
+        fresh: false,
+      }))
+    : ids.map((i) => ({ key: `d${i}`, name: pool[i].name, detail: pool[i].detail, u: pool[i].u, fresh: fresh === i }));
+  const critical = real ? real.red : ids.filter((i) => pool[i].u === "red").length;
 
   return (
     <div className="relative mx-auto w-full max-w-md pt-12 pb-20 lg:max-w-none">
@@ -53,46 +98,53 @@ function LiveQueue({ c }: { c: SiteCopy }) {
         <p className="flex items-center gap-1.5 text-[11px] font-medium text-muted">
           <Cpu className="size-3.5 text-teal-600" /> {c.queue.rules}
         </p>
-        <p className="mt-0.5 text-sm font-bold text-ink">{c.queue.rulesBody}</p>
+        <p className="mt-0.5 text-sm font-bold text-ink">{real ? tr("{n} cited rules · ATP · IMCI", { n: real.rules }) : c.queue.rulesBody}</p>
       </div>
 
       <div className="relative rounded-[28px] border border-white/70 bg-white/90 p-5 shadow-[0_30px_80px_-30px_rgb(22_24_43/0.35)] backdrop-blur sm:p-6">
         <div className="flex items-center justify-between gap-3">
-          <p className="flex items-center gap-2 font-bold text-ink">
-            <span className="relative inline-flex size-2.5 rounded-full text-crit live-dot">
-              <span className="size-2.5 rounded-full bg-crit" />
-            </span>
-            {c.queue.title}
-          </p>
-          <span className="rounded-full bg-crit-bg px-3 py-1 text-xs font-bold tracking-wide text-crit uppercase transition-all">
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 font-bold text-ink">
+              <span className="relative inline-flex size-2.5 rounded-full text-crit live-dot">
+                <span className="size-2.5 rounded-full bg-crit" />
+              </span>
+              {c.queue.title}
+            </p>
+            {real && <p className="mt-0.5 truncate pl-4.5 text-xs text-muted">{tr("Live from {f} · synthetic patients", { f: real.facility })}</p>}
+          </div>
+          <span className="shrink-0 rounded-full bg-crit-bg px-3 py-1 text-xs font-bold tracking-wide text-crit uppercase transition-all">
             {critical} {c.queue.critical}
           </span>
         </div>
         <ul className="mt-4 divide-y divide-line">
-          {ids.map((i, k) => {
-            const p = pool[i];
-            return (
-              <li key={i} className={cx("flex items-center gap-3 rounded-xl py-3.5 transition-all duration-500", fresh === i && "row-enter")}>
-                <span className={cx("grid size-10 shrink-0 place-items-center rounded-full text-sm font-bold", AVATAR[k % 2])}>{p.name.charAt(0)}</span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-ink">{p.name}</p>
-                  <p className="truncate text-xs text-muted">{p.detail}</p>
-                </div>
-                <span className={cx("inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase", U_STYLE[p.u].pill)}>
-                  <span className={cx("size-2 rounded-full", U_STYLE[p.u].dot)} />
-                  <span className="hidden sm:inline">{label(p.u)}</span>
-                </span>
-              </li>
-            );
-          })}
+          {rows.length === 0 && <li className="py-6 text-center text-sm text-muted">{tr("No one waiting right now.")}</li>}
+          {rows.map((p, k) => (
+            <li key={p.key} className={cx("flex items-center gap-3 rounded-xl py-3.5 transition-all duration-500", p.fresh && "row-enter")}>
+              <span className={cx("grid size-10 shrink-0 place-items-center rounded-full text-sm font-bold", AVATAR[k % 2])}>{p.name.charAt(0)}</span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-ink">{p.name}</p>
+                <p className="truncate text-xs text-muted">{p.detail}</p>
+              </div>
+              <span className={cx("inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase", U_STYLE[p.u].pill)}>
+                <span className={cx("size-2 rounded-full", U_STYLE[p.u].dot)} />
+                <span className="hidden sm:inline">{label(p.u)}</span>
+              </span>
+            </li>
+          ))}
         </ul>
         <div className="mt-2 flex items-center justify-between border-t border-line pt-4 text-xs">
           <span className="flex items-center gap-1.5 text-muted">
-            <Sparkles className="size-3.5 text-teal-600" /> {c.queue.footerLeft}
+            <Sparkles className="size-3.5 text-teal-600" /> {real ? tr("{n} waiting", { n: real.waiting }) : c.queue.footerLeft}
           </span>
-          <span className="flex items-center gap-1 font-semibold text-coral-500">
-            {c.queue.footerRight} <ArrowRight className="size-3.5" />
-          </span>
+          {real ? (
+            <Link href="/reviewer" className="flex items-center gap-1 font-semibold text-coral-500 hover:underline">
+              {tr("Open the queue")} <ArrowRight className="size-3.5" />
+            </Link>
+          ) : (
+            <span className="flex items-center gap-1 font-semibold text-coral-500">
+              {c.queue.footerRight} <ArrowRight className="size-3.5" />
+            </span>
+          )}
         </div>
       </div>
 
