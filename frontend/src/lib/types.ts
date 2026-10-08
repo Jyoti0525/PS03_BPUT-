@@ -508,6 +508,18 @@ export interface Flag {
   label: string;
   severity: FlagSeverity;
   reason: string;
+  /** "clinical": a rule or follow-up about the patient; "data": how the information was captured (translation, OCR, offline). */
+  group?: "clinical" | "data";
+}
+
+/** What a doctor reads before the complaint details, from the patient's answers only. */
+export interface NoteHistory {
+  positives: string[];
+  /** Pertinent negatives: what the patient said "no" to. */
+  negatives: string[];
+  allergies: string;
+  medicines: string[];
+  past: string[];
 }
 
 export interface RuleHit {
@@ -563,6 +575,7 @@ export interface TriageResult {
 
 export interface TriageNote {
   summary: string;
+  history?: NoteHistory;
   flags: Flag[];
   rules_fired: RuleHit[];
   triage?: TriageResult;
@@ -1221,4 +1234,4 @@ export interface Reminder {
   message: string;
 }
 
-export type ExportFormat = "pdf" | "json" | "csv" | "fhir" | "print";
+export type ExportFormat = "pdf" | "json" | "csv" | "fhir" | "cda" | "print";

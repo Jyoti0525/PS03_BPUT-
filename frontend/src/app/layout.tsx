@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_Ol_Chiki } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { DisclaimerBar } from "@/components/layout/chrome";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+// Santali in Ol Chiki: not on most Android tablets; fetched only when Ol Chiki text is on screen (unicode-range).
+const olChiki = Noto_Sans_Ol_Chiki({ variable: "--font-olchiki", subsets: ["ol-chiki"], preload: false });
 
 export const metadata: Metadata = {
   title: { default: "Jeevia — Triage support", template: "%s · Jeevia" },
@@ -23,7 +25,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    <html lang="en" className={`${inter.variable} ${olChiki.variable} h-full`}>
       <body className="min-h-full">
         <Providers>
           <DisclaimerBar />

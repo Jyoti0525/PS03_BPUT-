@@ -237,6 +237,7 @@ export default function CasePage() {
                     ["json", "JSON", <FileJson key="j" className="size-4" />],
                     ["csv", "CSV", <FileSpreadsheet key="c" className="size-4" />],
                     ["fhir", "FHIR R4 bundle", <FileJson key="f" className="size-4" />],
+                    ["cda", "HL7 CDA document", <FileJson key="cda" className="size-4" />],
                   ] as const
                 ).map(([f, label, icon]) => (
                   <button key={f} onClick={() => doExport(f)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ink hover:bg-canvas">
@@ -506,12 +507,16 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
   const [destination, setDestination] = useState(defaultDest);
   const [specialty, setSpecialty] = useState(spec?.label ?? "General Medicine");
   const [reason, setReason] = useState("");
+  const [given, setGiven] = useState("");
+  const { user } = useSession();
   const [transport, setTransport] = useState<"self" | "ambulance_108" | "facility_vehicle">(enc.urgency === "red" ? "ambulance_108" : "self");
   const [edited, setEdited] = useState<string | null>(null);
   const [withQr, setWithQr] = useState(true);
   const [busy, setBusy] = useState(false);
 
-  const generated = useMemo(() => referralText(enc, facility, destination, specialty, reason || enc.chief_complaint), [enc, facility, destination, specialty, reason]);
+  const generated = useMemo(() => referralText(enc, facility, destination, specialty, reason || enc.chief_complaint, { given, referrer: user ? { name: user.name, role: user.role, phone: user.phone } : null }),
+    [enc, facility, destination, specialty, reason, given, user],
+  );
   // Show the generated text until the doctor edits it by hand.
   const text = edited ?? generated;
   const setText = setEdited;
@@ -588,6 +593,10 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
           <div>
             <Label htmlFor="rf-reason">{tr("Reason")}</Label>
             <Textarea id="rf-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr(enc.chief_complaint)} />
+          </div>
+          <div>
+            <Label htmlFor="rf-given">{tr("Treatment given here")}</Label>
+            <Textarea id="rf-given" rows={3} value={given} onChange={(e) => setGiven(e.target.value)} placeholder={tr("e.g. Aspirin 300 mg chewed at 10:40; oxygen 4 L/min")} />
           </div>
           <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-teal-200 bg-teal-50/60 p-3 text-sm">
             <input type="checkbox" checked={withQr} onChange={(e) => setWithQr(e.target.checked)} className="mt-0.5 size-4 accent-teal-700" />

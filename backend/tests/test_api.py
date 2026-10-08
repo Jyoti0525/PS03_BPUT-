@@ -129,6 +129,15 @@ def test_referral_and_exports(client, nurse, doctor):
     assert pdf.status_code == 200 and pdf.content.startswith(b"%PDF")
     fhir = client.get(f"{API}/encounters/{enc['id']}/export?format=fhir", headers=doctor).json()
     assert fhir["resourceType"] == "Bundle" and fhir["entry"][0]["resource"]["resourceType"] == "Composition"
+    cda = client.get(f"{API}/encounters/{enc['id']}/export?format=cda", headers=doctor)
+    assert cda.status_code == 200 and cda.headers["content-type"].startswith("application/xml")
+    from xml.etree import ElementTree as ET
+    root = ET.fromstring(cda.content)
+    ns = {"h": "urn:hl7-org:v3"}
+    assert root.tag == "{urn:hl7-org:v3}ClinicalDocument" and root.find("h:code", ns).get("code") == "54094-8"
+    titles = [t.text for t in root.findall(".//h:section/h:title", ns)]
+    assert {"Disclaimer", "Chief complaint", "Triage urgency", "Vital signs", "Rules fired"} <= set(titles)
+    assert "Not a diagnosis" in cda.text
 
 
 def test_queue_sorted_by_urgency(client, doctor):

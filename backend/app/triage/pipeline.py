@@ -51,6 +51,18 @@ def original_words(intake: dict) -> list[dict]:
                         "translation_engine": engines[-1] if len(engines) > 1 or e.get("source") != "voice" else None})
     return out
 
+def _for(duration: str | None) -> str:
+    """" for 3–7 days", " since today", " (started in the last few hours)"."""
+    if not duration:
+        return ""
+    d = duration.strip()
+    if d.lower() == "today":
+        return " since today"
+    if d.lower().startswith("in the last"):
+        return f" (started {d.lower()})"
+    return f" for {d.lower() if d[0].isupper() and not d[:2].isupper() else d}"
+
+
 def _present(triage: dict, fid: str) -> bool:
     return (triage.get("findings") or {}).get(fid, {}).get("value") is True
 
@@ -394,11 +406,11 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     sex = {"F": "female", "M": "male"}.get(patient.sex, "patient")
     parts = [
         f"{patient.age}-year-old {sex}, {'general' if cat == 'normal' else cat} visit.",
-        f"Chief complaint: {intake['chief_complaint']}{' for ' + intake['duration'] if intake.get('duration') else ''}.",
+        f"Chief complaint: {intake['chief_complaint']}{_for(intake.get('duration'))}.",
         *([f"Onset vague: \"{began['raw']}\"."] if began["certainty"] == "VAGUE" else []),
     ]
-    if intake.get("selected_symptoms"):
-        parts.append(f"Also reports: {', '.join(intake['selected_symptoms'])}.")
+    if also := [x for x in intake.get("selected_symptoms") or [] if x.lower() not in intake["chief_complaint"].lower()]:
+        parts.append(f"Also reports: {', '.join(also)}.")
     if intake.get("severity") is not None:
         parts.append(f"Self-rated severity {intake['severity']}/10.")
     if (intake.get("maternal") or {}).get("gestation_weeks"):
@@ -415,13 +427,33 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         if occ.get("fev1_l"):
             base = f" (earliest recorded {occ['fev1_baseline_l']:g} L)" if occ.get("fev1_baseline_l") else ""
             parts.append(f"FEV1 {occ['fev1_l']:g} L{', FVC ' + format(occ['fvc_l'], 'g') + ' L' if occ.get('fvc_l') else ''}{base}.")
+    hx = clinical_history(intake, triage)
+    if hx["positives"]:
+        parts.append("On questioning: " + "; ".join(hx["positives"]) + ".")
+    if hx["negatives"]:
+        parts.append("Denies: " + "; ".join(hx["negatives"]) + ".")
+    parts.append(f"Allergies: {hx['allergies']}.")
+    if hx["medicines"]:
+        parts.append("Regular medicines: " + "; ".join(hx["medicines"]) + ".")
+    if hx["past"]:
+        parts.append("Past history: " + "; ".join(hx["past"]) + ".")
+    off = [x for x in vitals if x["status"] == "abnormal"]
+    if off:
+        parts.append("Abnormal vitals: " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in off) + ".")
+    if hx["allergies"] == "not asked":
+        missing.append("Medicine allergies not recorded — ask before prescribing")
     abn = [x for x in labs if x["status"] == "abnormal"]
     if abn:
         parts.append("Uploaded report shows " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in abn) + " outside reference range.")
     parts.append("Summary organises patient-provided information only; it is not a diagnosis.")
 
+    rule_codes = {h["rule_id"] for h in hits} | {f["id"] for f in triage.get("followups", [])} | {"PPE-GAP"}
+    for f in flags:  # the reviewer reads clinical warnings first; notices about how the data was captured come after
+        f["group"] = "clinical" if f["code"] in rule_codes else "data"
+
     return {
         "summary": " ".join(parts),
+        "history": hx,
         "flags": flags,
         "rules_fired": hits,
         "triage": {
@@ -451,6 +483,33 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         "ai_assist": intake.get("ai_assist", True),
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+# Findings that are history, not complaint: shown under Allergies / Past history, not as "on questioning".
+PAST = ("diabetes_known", "hypertension_known", "heart_disease_known", "tb_history", "asthma", "anticoagulated", "chemo_recent", "immunisation_incomplete", "adherence_poor")
+
+
+def clinical_history(intake: dict, triage: dict) -> dict:
+    """What a doctor reads before the complaint details: positives and pertinent negatives from the kiosk's closed
+    questions, allergies, regular medicines and past history. Only answers the patient gave; nothing inferred."""
+    fnd = triage.get("findings") or {}
+    asked = lambda f: any(e.startswith("answer to") for e in (fnd.get(f) or {}).get("evidence") or [])  # noqa: E731
+    pos = [fnd[k]["label"].lower() if not fnd[k]["label"][:2].isupper() else fnd[k]["label"] for k in fnd if fnd[k]["value"] is True and asked(k) and k not in PAST and k != "allergy_drug"]
+    neg = [fnd[k]["label"].lower() if not fnd[k]["label"][:2].isupper() else fnd[k]["label"] for k in fnd if fnd[k]["value"] is False and asked(k) and k not in PAST and k != "allergy_drug"]
+    a = (fnd.get("allergy_drug") or {}).get("value")
+    allergies = "reports a medicine allergy — confirm which medicine" if a is True else "no known medicine allergy" if a is False else "not asked"
+    meds = [f"{m['name']}{' ' + m['strength'] if m.get('strength') else ''} (confirmed)" for m in intake.get("medications_confirmed") or []]
+    if (c := (intake.get("chronic") or {})).get("current_medicines"):
+        meds.append(f"{c['current_medicines']} (as told)")
+    ans = {x.get("qid"): x.get("answer") or "" for x in intake.get("answers") or []}
+    if ans.get("regular_meds", "").startswith("Yes — other"):
+        meds.append("takes other medicines daily — names not given")
+    past = [fnd[k]["label"] for k in PAST if (fnd.get(k) or {}).get("value") is True]
+    if c.get("condition"):
+        past.insert(0, f"Known {c['condition']}")
+    if ans.get("long_illness") == "Other":
+        past.append("Another long-term illness — ask which")
+    return {"positives": pos, "negatives": neg, "allergies": allergies, "medicines": meds, "past": list(dict.fromkeys(past))}
 
 
 def infer_specialist(intake: dict, age: int, triage: dict | None = None) -> str:

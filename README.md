@@ -145,7 +145,7 @@ real capture time so waiting time is never understated.
 | SMS sign-in | **Twilio Verify** | Sends and checks one-time codes for phone login. |
 | Document storage | **Cloudinary** (private, `jeevia/<facility>/<yyyy-mm>/<kind>/`) | Report scans, prescription photos, voice recordings. Uploaded as authenticated assets; served only through the API with signed downloads. |
 | Rules | YAML rule files | AIIMS Triage Protocol, IMCI and maternal red flags; deterministic urgency. |
-| Exports | fpdf2 and built-in writers | Triage note as PDF, print, JSON, CSV and FHIR R4. |
+| Exports | fpdf2 and built-in writers | Triage note as PDF, print, JSON, CSV, FHIR R4 and HL7 CDA R2. |
 | Speech to text | **IndicConformer-600M** (AI4Bharat, MIT), 8-bit ONNX on ONNX Runtime, offline | Voice intake in the 22 scheduled languages. Read-back uses the browser's speechSynthesis. |
 | Translation | **IndicTrans2** distilled 200M (AI4Bharat, MIT), offline | Indian language ↔ English; the original words stay beside the translation. |
 | Second speech engine | **Sarvam Saaras v3** (online, India) or, offline, **IndicWhisper** (AI4Bharat Vistaar, MIT) | Hears the same recording when the patient allowed AI help; a different number or symptom is flagged for the patient to settle (B9). |
@@ -166,10 +166,10 @@ real capture time so waiting time is never understated.
 
 **Clinical review**
 - Queue ordered by urgency then waiting time, with auto-escalation timers.
-- Case view: summary, flags (not confidence scores), rules trace, source disagreements, vitals and report values with image crops, trends against earlier visits, timeline, missing information, follow-up questions.
+- Case view: summary with a history block (on questioning, denies, allergies, medicines, past history), flags (clinical first, data notices apart; not confidence scores), rules trace, source disagreements, vitals and report values with image crops, trends against earlier visits, timeline, missing information, follow-up questions.
 - Doctor and nurse views of the same note.
 - Confirm, edit, override with reason, escalate and acknowledge, refer (destination suggested from on-duty specialists).
-- Export as PDF, print, JSON, CSV or FHIR R4.
+- Export as PDF, print, JSON, CSV, FHIR R4 or HL7 CDA R2 (schema-valid).
 - Record occupational fitness (fit / restrictions / temporarily unfit) for rostered workers; correct patient details.
 - **QR summary**: time-limited link + 6-digit code showing patient details, the reviewed note, the referral and uploaded documents; locks after 8 wrong codes; revocable; every opening audited.
 
@@ -256,6 +256,9 @@ then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEAT
 | `CORS_ORIGINS`, `WEB_BASE_URL` | Web app origin; used in kiosk and share links | `https://jeevia-triage.vercel.app` |
 | `SEED_DEMO` | Seed sample data into an empty database | `true` |
 | `LLM_URL` | llama.cpp server for the note summary (e.g. `http://127.0.0.1:8031`); unset = template summary only | unset |
+| `VLM_URL` | llama.cpp server with Qwen3-VL-4B for a second document-type label (`backend/scripts/start_vlm.sh`, `http://127.0.0.1:8032`); unset = off | unset |
+| `TABLE_PYTHON` | Python of a separate PaddleOCR environment (`models/venv-paddle`) for PP-StructureV3 table reading of report photos; unset = off | unset |
+| `SEED_SYNTHEA` | With the demo scenarios, add 12 patients with earlier visits from Synthea (`app/synthea_histories.json`) | `true` |
 | `SARVAM_API_KEY` (no prefix needed) | Sarvam AI: Bulbul voice for reminder-call lines in 11 languages, the online second speech engine, handwriting reading; unset = the device's own voice, IndicWhisper as the second engine, no handwriting reading | set |
 | `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | Real reminder calls (keypad answers) and reminder SMS through Twilio; the token checks Twilio's webhooks | set |
 | `VONAGE_API_KEY`, `VONAGE_API_SECRET`, `VONAGE_APPLICATION_ID`, `VONAGE_PRIVATE_KEY_PATH` | Vonage instead of Twilio for calls and SMS (used when the key is set); the private key file belongs to the Vonage application and is never committed | set |

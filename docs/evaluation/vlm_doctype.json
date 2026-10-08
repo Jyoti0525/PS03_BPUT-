@@ -1,0 +1,361 @@
+{
+ "model": "Qwen3-VL-4B-Instruct Q4_K_M (llama.cpp, offline)",
+ "by_type": {
+  "lab_report": {
+   "n": 18,
+   "text_right": 17,
+   "image_right": 18,
+   "image_none": 0,
+   "differ": 1,
+   "differ_text_wrong": 1
+  },
+  "medicine_strip": {
+   "n": 14,
+   "text_right": 14,
+   "image_right": 14,
+   "image_none": 0,
+   "differ": 0,
+   "differ_text_wrong": 0
+  },
+  "prescription": {
+   "n": 15,
+   "text_right": 3,
+   "image_right": 11,
+   "image_none": 0,
+   "differ": 8,
+   "differ_text_wrong": 8
+  }
+ },
+ "median_seconds": 11.2,
+ "pictures": [
+  {
+   "file": "photo/r000.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 4.1
+  },
+  {
+   "file": "photo/r001.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 14.3
+  },
+  {
+   "file": "photo/r002.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 10.9
+  },
+  {
+   "file": "photo/r003.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 11.2
+  },
+  {
+   "file": "photo/r004.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 13.0
+  },
+  {
+   "file": "photo/r005.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 12.1
+  },
+  {
+   "file": "poor_photo/r000.jpg",
+   "truth": "lab_report",
+   "text_label": "other_document",
+   "image_label": "lab_report",
+   "seconds": 11.2
+  },
+  {
+   "file": "poor_photo/r001.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 11.2
+  },
+  {
+   "file": "poor_photo/r002.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 11.1
+  },
+  {
+   "file": "poor_photo/r003.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 11.4
+  },
+  {
+   "file": "poor_photo/r004.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 11.9
+  },
+  {
+   "file": "poor_photo/r005.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 10.6
+  },
+  {
+   "file": "thermal/r000.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 14.3
+  },
+  {
+   "file": "thermal/r001.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 21.8
+  },
+  {
+   "file": "thermal/r002.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 35.1
+  },
+  {
+   "file": "thermal/r003.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 28.8
+  },
+  {
+   "file": "thermal/r004.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 34.1
+  },
+  {
+   "file": "thermal/r005.jpg",
+   "truth": "lab_report",
+   "text_label": "lab_report",
+   "image_label": "lab_report",
+   "seconds": 14.5
+  },
+  {
+   "file": "strips/blurred_00.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.5
+  },
+  {
+   "file": "strips/blurred_03.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.3
+  },
+  {
+   "file": "strips/blurred_06.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 6.9
+  },
+  {
+   "file": "strips/clean_01.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.2
+  },
+  {
+   "file": "strips/clean_04.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.6
+  },
+  {
+   "file": "strips/clean_07.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.6
+  },
+  {
+   "file": "strips/glare_02.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 8.9
+  },
+  {
+   "file": "strips/glare_05.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 8.8
+  },
+  {
+   "file": "strips/photo_00.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 8.8
+  },
+  {
+   "file": "strips/photo_03.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 8.4
+  },
+  {
+   "file": "strips/photo_06.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 8.3
+  },
+  {
+   "file": "strips/torn_01.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.5
+  },
+  {
+   "file": "strips/torn_04.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.8
+  },
+  {
+   "file": "strips/torn_07.jpg",
+   "truth": "medicine_strip",
+   "text_label": "medicine_strip",
+   "image_label": "medicine_strip",
+   "seconds": 7.8
+  },
+  {
+   "file": "rx_hand/rx000.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 1.6
+  },
+  {
+   "file": "rx_hand/rx001.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "other_document",
+   "seconds": 17.2
+  },
+  {
+   "file": "rx_hand/rx002.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 11.4
+  },
+  {
+   "file": "rx_hand/rx003.jpg",
+   "truth": "prescription",
+   "text_label": "prescription",
+   "image_label": "prescription",
+   "seconds": 57.2
+  },
+  {
+   "file": "rx_hand/rx004.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 27.6
+  },
+  {
+   "file": "rx_hand/rx005.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "other_document",
+   "seconds": 13.9
+  },
+  {
+   "file": "rx_hand/rx006.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 13.4
+  },
+  {
+   "file": "rx_hand/rx007.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 13.3
+  },
+  {
+   "file": "rx_hand/rx008.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 12.0
+  },
+  {
+   "file": "rx_hand/rx009.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "other_document",
+   "seconds": 10.6
+  },
+  {
+   "file": "rx_hand/rx010.jpg",
+   "truth": "prescription",
+   "text_label": "prescription",
+   "image_label": "prescription",
+   "seconds": 10.6
+  },
+  {
+   "file": "rx_hand/rx011.jpg",
+   "truth": "prescription",
+   "text_label": "prescription",
+   "image_label": "prescription",
+   "seconds": 10.9
+  },
+  {
+   "file": "rx_hand/rx012.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 10.1
+  },
+  {
+   "file": "rx_hand/rx013.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "other_document",
+   "seconds": 13.3
+  },
+  {
+   "file": "rx_hand/rx014.jpg",
+   "truth": "prescription",
+   "text_label": "other_document",
+   "image_label": "prescription",
+   "seconds": 11.9
+  }
+ ]
+}

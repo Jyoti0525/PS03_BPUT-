@@ -72,7 +72,7 @@ rules:
     urgency: red
     when: { all: [ { age_days: [lt, 61] }, { any: [ { vital: [temp_c, lt, 36] }, { vital: [temp_c, gt, 39] } ] } ] }
   - id: IITT-P-HIGH-RISK-TRAUMA
-    description: High-risk trauma — fall from height, road crash mechanism, penetrating or crush injury
+    description: High-risk trauma — fall from height, road crash mechanism, penetrating or crush injury, or injury on blood thinners / with a bleeding disorder
     urgency: red
     source: iitt_card
     when:
@@ -81,13 +81,14 @@ rules:
         - finding: road_traffic_high_risk
         - finding: penetrating_injury
         - finding: crush_injury
+        - all: [ { finding: injury }, { finding: anticoagulated } ]
   - id: IITT-P-BURN-UNDER-2
     description: Any burn at age under 2
     urgency: red
     source: iitt_card
     when: { all: [ { finding: burn }, { age_years: [lt, 2] } ] }
   - id: IITT-P-MAJOR-BURN
-    description: Major burn — face or neck, circumferential, or more than 15 % of the body (both arms are 18 % in an adult, more in a child)
+    description: Major burn — face or neck, circumferential, inhalation injury, or more than 15 % of the body (both arms are 18 % in an adult, more in a child)
     urgency: red
     source: iitt_card
     when: { all: [ { finding: burn }, { finding: burn_major } ] }

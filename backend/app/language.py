@@ -251,7 +251,10 @@ def translate(texts: list[str], src: str, tgt: str, alternatives: bool = False) 
         enc = tok(batch, truncation=True, padding="longest", return_tensors="pt", return_attention_mask=True).to(device)
         with torch.inference_mode():
             # use_cache=False: the model repo's decoder expects the legacy tuple KV-cache that transformers 4.4x+ replaced.
-            out = model.generate(**enc, use_cache=False, min_length=0, max_length=256, num_beams=BEAMS, num_return_sequences=n,
+            # Output length is capped at about twice the input: a sentence the model cannot end (a garbled transcript in
+            # Kashmiri did, 8 Oct) would otherwise run to 256 tokens, each step slower without the cache: minutes, not seconds.
+            cap = min(256, 2 * int(enc["input_ids"].shape[1]) + 16)
+            out = model.generate(**enc, use_cache=False, min_length=0, max_length=cap, num_beams=BEAMS, num_return_sequences=n,
                                  output_scores=alternatives, return_dict_in_generate=True)
         decoded = ip.postprocess_batch(tok.batch_decode(out.sequences, skip_special_tokens=True, clean_up_tokenization_spaces=True), lang=IT2_TAGS[tgt])
     if not alternatives:

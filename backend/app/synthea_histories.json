@@ -1,0 +1,900 @@
+{
+ "meta": {
+  "source": "Synthea (Apache-2.0), seed 1008, population 60; US clinical course, synthetic Indian demographics",
+  "people": 12,
+  "visits": 71
+ },
+ "people": [
+  {
+   "code": "SYN-001",
+   "name": "Savitri Nishad",
+   "age": 19,
+   "sex": "F",
+   "language": "hi",
+   "village": "Kalyanpur",
+   "conditions": [
+    "asthma"
+   ],
+   "visits": [
+    {
+     "date": "2021-07-10",
+     "chief_complaint": "Follow-up for asthma",
+     "vitals": {
+      "bp_diastolic": 72.0,
+      "bp_systolic": 141.0,
+      "pulse": 79.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2022-07-16",
+     "chief_complaint": "Follow-up for asthma",
+     "vitals": {
+      "bp_diastolic": 72.0,
+      "bp_systolic": 137.0,
+      "pulse": 81.0,
+      "resp_rate": 13.0
+     }
+    },
+    {
+     "date": "2023-07-22",
+     "chief_complaint": "Follow-up for asthma",
+     "vitals": {
+      "bp_diastolic": 77.0,
+      "bp_systolic": 145.0,
+      "pulse": 61.0,
+      "resp_rate": 13.0
+     }
+    },
+    {
+     "date": "2024-07-27",
+     "chief_complaint": "Follow-up for asthma",
+     "vitals": {
+      "bp_diastolic": 71.0,
+      "bp_systolic": 136.0,
+      "pulse": 75.0,
+      "resp_rate": 12.0
+     }
+    },
+    {
+     "date": "2025-08-02",
+     "chief_complaint": "Follow-up for asthma",
+     "vitals": {
+      "bp_diastolic": 80.0,
+      "bp_systolic": 140.0,
+      "pulse": 74.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2026-08-08",
+     "chief_complaint": "Follow-up for asthma",
+     "vitals": {
+      "bp_diastolic": 79.0,
+      "bp_systolic": 135.0,
+      "pulse": 69.0,
+      "resp_rate": 16.0
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-002",
+   "name": "Geeta Maurya",
+   "age": 48,
+   "sex": "F",
+   "language": "hi",
+   "village": "Bargarh",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2021-06-14",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 70.0,
+      "bp_systolic": 126.0,
+      "pulse": 76.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2022-06-13",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 76.0,
+      "bp_systolic": 99.0,
+      "pulse": 70.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2023-06-26",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 71.0,
+      "bp_systolic": 127.0,
+      "pulse": 73.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2024-07-01",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 75.0,
+      "bp_systolic": 126.0,
+      "pulse": 76.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2025-07-07",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 76.0,
+      "bp_systolic": 123.0,
+      "pulse": 78.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2026-07-13",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 70.0,
+      "bp_systolic": 112.0,
+      "pulse": 98.0,
+      "resp_rate": 16.0
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-003",
+   "name": "Meena Kushwaha",
+   "age": 32,
+   "sex": "F",
+   "language": "hi",
+   "village": "Sitapur Khurd",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2019-07-02",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 75.0,
+      "bp_systolic": 122.0,
+      "pulse": 74.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2021-02-07",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "resp_rate": 28.6,
+      "pulse": 178.6,
+      "spo2": 88.7,
+      "bp_diastolic": 80.0,
+      "bp_systolic": 119.0,
+      "temp_f": 103.6
+     }
+    },
+    {
+     "date": "2022-07-05",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 80.0,
+      "bp_systolic": 127.0,
+      "pulse": 78.0,
+      "resp_rate": 13.0
+     }
+    },
+    {
+     "date": "2025-07-08",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 102.0,
+      "bp_systolic": 160.0,
+      "pulse": 98.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2026-07-14",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 89.0,
+      "bp_systolic": 133.0,
+      "pulse": 62.0,
+      "resp_rate": 15.0
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-004",
+   "name": "Asha Tiwari",
+   "age": 60,
+   "sex": "F",
+   "language": "hi",
+   "village": "Nayagaon",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2024-07-17",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 89.0,
+      "bp_systolic": 131.0,
+      "pulse": 90.0,
+      "resp_rate": 15.0,
+      "glucose": 87.7
+     }
+    },
+    {
+     "date": "2024-08-16",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 77.0,
+      "bp_systolic": 123.0
+     }
+    },
+    {
+     "date": "2024-10-15",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 78.0,
+      "bp_systolic": 125.0
+     }
+    },
+    {
+     "date": "2024-12-14",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 80.0,
+      "bp_systolic": 123.0
+     }
+    },
+    {
+     "date": "2025-07-23",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 76.0,
+      "bp_systolic": 124.0,
+      "pulse": 80.0,
+      "resp_rate": 14.0,
+      "glucose": 76.2
+     }
+    },
+    {
+     "date": "2026-07-29",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 76.0,
+      "bp_systolic": 127.0,
+      "pulse": 76.0,
+      "resp_rate": 15.0,
+      "glucose": 79.9
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-005",
+   "name": "Rakesh Nishad",
+   "age": 54,
+   "sex": "M",
+   "language": "hi",
+   "village": "Sitapur Khurd",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2023-06-10",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 74.0,
+      "bp_systolic": 112.0,
+      "pulse": 73.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2024-06-15",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 67.0,
+      "bp_systolic": 117.0,
+      "pulse": 80.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2025-06-21",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 94.0,
+      "bp_systolic": 128.0,
+      "pulse": 84.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2025-09-19",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 69.0,
+      "bp_systolic": 106.0
+     }
+    },
+    {
+     "date": "2025-11-18",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 58.0,
+      "bp_systolic": 81.0
+     }
+    },
+    {
+     "date": "2026-06-27",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 55.0,
+      "bp_systolic": 76.0,
+      "pulse": 80.0,
+      "resp_rate": 13.0
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-006",
+   "name": "Rekha Nishad",
+   "age": 60,
+   "sex": "F",
+   "language": "hi",
+   "village": "Kalyanpur",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2021-08-04",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 76.0,
+      "bp_systolic": 109.0,
+      "pulse": 78.0,
+      "resp_rate": 12.0,
+      "glucose": 99.1
+     }
+    },
+    {
+     "date": "2022-08-10",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 73.0,
+      "bp_systolic": 102.0,
+      "pulse": 88.0,
+      "resp_rate": 12.0,
+      "glucose": 81.5
+     }
+    },
+    {
+     "date": "2023-08-16",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 73.0,
+      "bp_systolic": 108.0,
+      "pulse": 70.0,
+      "resp_rate": 15.0,
+      "glucose": 77.7
+     }
+    },
+    {
+     "date": "2024-08-21",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 76.0,
+      "bp_systolic": 109.0,
+      "pulse": 72.0,
+      "resp_rate": 15.0,
+      "glucose": 67.9
+     }
+    },
+    {
+     "date": "2025-08-27",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 75.0,
+      "bp_systolic": 109.0,
+      "pulse": 91.0,
+      "resp_rate": 15.0,
+      "glucose": 70.7
+     }
+    },
+    {
+     "date": "2026-09-02",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 70.0,
+      "bp_systolic": 106.0,
+      "pulse": 96.0,
+      "resp_rate": 14.0,
+      "glucose": 68.0
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-007",
+   "name": "Asha Kushwaha",
+   "age": 83,
+   "sex": "F",
+   "language": "hi",
+   "village": "Rampur",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2025-01-18",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 66.0,
+      "bp_systolic": 101.0,
+      "pulse": 83.0,
+      "resp_rate": 12.0
+     }
+    },
+    {
+     "date": "2025-02-15",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 71.0,
+      "bp_systolic": 101.0,
+      "pulse": 82.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2025-07-26",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 68.0,
+      "bp_systolic": 100.0,
+      "pulse": 85.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2026-01-03",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 67.0,
+      "bp_systolic": 90.0,
+      "pulse": 79.0,
+      "resp_rate": 13.0
+     }
+    },
+    {
+     "date": "2026-01-17",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 68.0,
+      "bp_systolic": 96.0,
+      "pulse": 84.0,
+      "resp_rate": 13.0
+     }
+    },
+    {
+     "date": "2026-08-01",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 72.0,
+      "bp_systolic": 99.0,
+      "pulse": 78.0,
+      "resp_rate": 16.0
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-008",
+   "name": "Rajendra Maurya",
+   "age": 45,
+   "sex": "M",
+   "language": "hi",
+   "village": "Sitapur Khurd",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2023-07-18",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 84.0,
+      "bp_systolic": 106.0,
+      "pulse": 80.0,
+      "resp_rate": 13.0,
+      "glucose": 65.8
+     }
+    },
+    {
+     "date": "2024-05-28",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 89.0,
+      "bp_systolic": 117.0,
+      "pulse": 81.0,
+      "resp_rate": 12.0,
+      "glucose": 97.7
+     }
+    },
+    {
+     "date": "2024-07-23",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 83.0,
+      "bp_systolic": 104.0,
+      "pulse": 65.0,
+      "resp_rate": 13.0,
+      "glucose": 70.2
+     }
+    },
+    {
+     "date": "2025-07-29",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 87.0,
+      "bp_systolic": 119.0,
+      "pulse": 97.0,
+      "resp_rate": 13.0,
+      "glucose": 77.0
+     }
+    },
+    {
+     "date": "2026-02-17",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 90.0,
+      "bp_systolic": 103.0,
+      "pulse": 72.0,
+      "resp_rate": 14.0,
+      "glucose": 90.4
+     }
+    },
+    {
+     "date": "2026-08-04",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 89.0,
+      "bp_systolic": 112.0,
+      "pulse": 81.0,
+      "resp_rate": 13.0,
+      "glucose": 73.1
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-009",
+   "name": "Asha Shukla",
+   "age": 74,
+   "sex": "F",
+   "language": "hi",
+   "village": "Bhaironpur",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2025-04-16",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 65.0,
+      "bp_systolic": 99.0,
+      "pulse": 96.0,
+      "resp_rate": 12.0,
+      "glucose": 99.7
+     }
+    },
+    {
+     "date": "2025-07-16",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 67.0,
+      "bp_systolic": 106.0,
+      "pulse": 75.0,
+      "resp_rate": 14.0,
+      "glucose": 75.0
+     }
+    },
+    {
+     "date": "2025-12-10",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 64.0,
+      "bp_systolic": 97.0,
+      "pulse": 66.0,
+      "resp_rate": 14.0,
+      "glucose": 93.3
+     }
+    },
+    {
+     "date": "2026-01-14",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 67.0,
+      "bp_systolic": 101.0,
+      "pulse": 71.0,
+      "resp_rate": 14.0,
+      "glucose": 65.6
+     }
+    },
+    {
+     "date": "2026-03-11",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 66.0,
+      "bp_systolic": 105.0,
+      "pulse": 97.0,
+      "resp_rate": 14.0,
+      "glucose": 91.9
+     }
+    },
+    {
+     "date": "2026-07-08",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 64.0,
+      "bp_systolic": 93.0,
+      "pulse": 84.0,
+      "resp_rate": 12.0,
+      "glucose": 73.8
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-010",
+   "name": "Asha Verma",
+   "age": 29,
+   "sex": "F",
+   "language": "hi",
+   "village": "Rampur",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2021-06-03",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 54.0,
+      "bp_systolic": 95.0,
+      "pulse": 78.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2022-06-09",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 58.0,
+      "bp_systolic": 104.0,
+      "pulse": 78.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2023-06-15",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 48.0,
+      "bp_systolic": 87.0,
+      "pulse": 84.0,
+      "resp_rate": 15.0
+     }
+    },
+    {
+     "date": "2024-06-20",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 54.0,
+      "bp_systolic": 98.0,
+      "pulse": 73.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2025-06-26",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 55.0,
+      "bp_systolic": 84.0,
+      "pulse": 63.0,
+      "resp_rate": 14.0
+     }
+    },
+    {
+     "date": "2026-07-02",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 57.0,
+      "bp_systolic": 103.0,
+      "pulse": 81.0,
+      "resp_rate": 15.0
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-011",
+   "name": "Lakshmi Gupta",
+   "age": 62,
+   "sex": "F",
+   "language": "hi",
+   "village": "Devipur",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2022-08-02",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 82.0,
+      "bp_systolic": 119.0,
+      "pulse": 61.0,
+      "resp_rate": 15.0,
+      "glucose": 74.4
+     }
+    },
+    {
+     "date": "2022-11-22",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 85.0,
+      "bp_systolic": 118.0,
+      "pulse": 86.0,
+      "resp_rate": 16.0,
+      "glucose": 69.9
+     }
+    },
+    {
+     "date": "2023-08-08",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 85.0,
+      "bp_systolic": 117.0,
+      "pulse": 75.0,
+      "resp_rate": 13.0,
+      "glucose": 98.2
+     }
+    },
+    {
+     "date": "2024-08-13",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 91.0,
+      "bp_systolic": 127.0,
+      "pulse": 61.0,
+      "resp_rate": 14.0,
+      "glucose": 74.7
+     }
+    },
+    {
+     "date": "2025-08-19",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 73.0,
+      "bp_systolic": 114.0,
+      "pulse": 78.0,
+      "resp_rate": 15.0,
+      "glucose": 73.1
+     }
+    },
+    {
+     "date": "2026-08-25",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 76.0,
+      "bp_systolic": 108.0,
+      "pulse": 80.0,
+      "resp_rate": 15.0,
+      "glucose": 89.6
+     }
+    }
+   ]
+  },
+  {
+   "code": "SYN-012",
+   "name": "Usha Maurya",
+   "age": 92,
+   "sex": "F",
+   "language": "hi",
+   "village": "Rampur",
+   "conditions": [
+    "high blood pressure"
+   ],
+   "visits": [
+    {
+     "date": "2021-07-08",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 56.0,
+      "bp_systolic": 106.0,
+      "pulse": 63.0,
+      "resp_rate": 14.0,
+      "glucose": 67.5
+     }
+    },
+    {
+     "date": "2022-07-14",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 59.0,
+      "bp_systolic": 109.0,
+      "pulse": 95.0,
+      "resp_rate": 14.0,
+      "glucose": 69.2
+     }
+    },
+    {
+     "date": "2023-07-20",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 55.0,
+      "bp_systolic": 114.0,
+      "pulse": 93.0,
+      "resp_rate": 14.0,
+      "glucose": 64.3
+     }
+    },
+    {
+     "date": "2024-07-25",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 63.0,
+      "bp_systolic": 107.0,
+      "pulse": 72.0,
+      "resp_rate": 14.0,
+      "glucose": 81.0
+     }
+    },
+    {
+     "date": "2025-07-31",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 58.0,
+      "bp_systolic": 100.0,
+      "pulse": 77.0,
+      "resp_rate": 14.0,
+      "glucose": 88.1
+     }
+    },
+    {
+     "date": "2026-08-06",
+     "chief_complaint": "Follow-up for high blood pressure",
+     "vitals": {
+      "bp_diastolic": 58.0,
+      "bp_systolic": 104.0,
+      "pulse": 92.0,
+      "resp_rate": 13.0,
+      "glucose": 75.5
+     }
+    }
+   ]
+  }
+ ]
+}

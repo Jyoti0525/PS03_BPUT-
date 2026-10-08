@@ -1,0 +1,979 @@
+{
+ "version": 2,
+ "fields": {
+  "text": "Everything the patient said or tapped, lower-cased (chief complaint, symptom tiles, symptom sentences).",
+  "age": "Age in years.",
+  "category": "Visit type (general, maternal, chronic, occupational and so on).",
+  "duration": "The duration tile, empty when not chosen.",
+  "sex": "Sex at registration (F, M, O)."
+ },
+ "tests": {
+  "words": {
+   "field": "text",
+   "means": "text contains any of these word stems"
+  },
+  "age_lt": {
+   "field": "age",
+   "means": "age below the number"
+  },
+  "age_gte": {
+   "field": "age",
+   "means": "age at or above the number"
+  },
+  "category": {
+   "field": "category",
+   "means": "category equals"
+  },
+  "duration_unset_or": {
+   "field": "duration",
+   "means": "duration empty or equal to the value"
+  },
+  "sex": {
+   "field": "sex",
+   "means": "sex equals"
+  },
+  "not_category": {
+   "field": "category",
+   "means": "category is not"
+  }
+ },
+ "questions": [
+  {
+   "qid": "dur",
+   "position": "first",
+   "question": "Since when do you have this problem?",
+   "when": {
+    "duration_unset_or": "today"
+   },
+   "options": [
+    {
+     "label": "In the last few hours"
+    },
+    {
+     "label": "Today"
+    },
+    {
+     "label": "1–2 days"
+    },
+    {
+     "label": "3–7 days"
+    },
+    {
+     "label": "More than a week"
+    }
+   ]
+  },
+  {
+   "qid": "conscious",
+   "safety": true,
+   "question": "Is the patient fully awake and talking or responding normally?",
+   "when": {
+    "any": [
+     {
+      "age_lt": 5
+     },
+     {
+      "words": [
+       "fits",
+       "convuls",
+       "dizz",
+       "faint",
+       "injury",
+       "head",
+       "confus",
+       "fever"
+      ]
+     }
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes — awake and normal",
+     "match": "Yes",
+     "sets": {
+      "unresponsive": false,
+      "altered_mental_status": false
+     }
+    },
+    {
+     "label": "Drowsy or confused",
+     "match": "Drowsy",
+     "sets": {
+      "altered_mental_status": true,
+      "lethargy": true
+     }
+    },
+    {
+     "label": "Not responding",
+     "match": "Not",
+     "sets": {
+      "unresponsive": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "mechanism",
+   "safety": true,
+   "question": "How did the injury happen?",
+   "when": {
+    "words": [
+     "injury",
+     "burn",
+     "fall",
+     "accident"
+    ]
+   },
+   "options": [
+    {
+     "label": "Fall from a height (tree, roof, ladder)",
+     "match": "Fall",
+     "sets": {
+      "fall_from_height": true
+     }
+    },
+    {
+     "label": "Road accident",
+     "match": "Road",
+     "sets": {
+      "road_traffic_high_risk": true
+     }
+    },
+    {
+     "label": "Stabbed or hit with a weapon",
+     "match": "Stab",
+     "sets": {
+      "penetrating_injury": true
+     }
+    },
+    {
+     "label": "Crushed under something",
+     "match": "Crush",
+     "sets": {
+      "crush_injury": true
+     }
+    },
+    {
+     "label": "Burn",
+     "match": "Burn",
+     "sets": {
+      "burn": true
+     }
+    },
+    {
+     "label": "Bite by a dog or animal",
+     "match": "Bite",
+     "sets": {
+      "animal_bite": true
+     }
+    },
+    {
+     "label": "Snake bite",
+     "match": "Snake",
+     "sets": {
+      "snake_bite": true
+     }
+    },
+    {
+     "label": "Minor — slipped or small cut",
+     "match": "Minor",
+     "sets": {
+      "fall_from_height": false,
+      "road_traffic_high_risk": false,
+      "penetrating_injury": false,
+      "crush_injury": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "one_side",
+   "safety": true,
+   "question": "Any weakness, numbness or drooping on one side of the face or body?",
+   "when": {
+    "age_gte": 12,
+    "words": [
+     "dizz",
+     "headache",
+     "weak",
+     "numb",
+     "speech",
+     "tired"
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes — on one side",
+     "match": "Yes",
+     "sets": {
+      "one_sided_weakness": true
+     }
+    },
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "one_sided_weakness": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "sudden_head",
+   "safety": true,
+   "question": "Did the headache start suddenly, within seconds or minutes?",
+   "when": {
+    "words": [
+     "headache"
+    ]
+   },
+   "options": [
+    {
+     "label": "Sudden — within minutes",
+     "match": "Sudden",
+     "sets": {
+      "headache_sudden": true
+     }
+    },
+    {
+     "label": "Gradually",
+     "match": "Gradual",
+     "sets": {
+      "headache_sudden": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "sudden_abd",
+   "safety": true,
+   "question": "Did the stomach pain start suddenly?",
+   "when": {
+    "words": [
+     "stomach"
+    ]
+   },
+   "options": [
+    {
+     "label": "Sudden — within minutes",
+     "match": "Sudden",
+     "sets": {
+      "abdominal_pain_sudden": true
+     }
+    },
+    {
+     "label": "Gradually",
+     "match": "Gradual",
+     "sets": {
+      "abdominal_pain_sudden": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "chest_radiation",
+   "safety": true,
+   "question": "Does the pain spread to the arm, jaw or back?",
+   "when": {
+    "words": [
+     "chest"
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes — spreads to arm / jaw",
+     "match": "Yes",
+     "sets": {
+      "chest_pain_radiating": true
+     }
+    },
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "chest_pain_radiating": false
+     }
+    },
+    {
+     "label": "Not sure"
+    }
+   ]
+  },
+  {
+   "qid": "chest_sweat",
+   "safety": true,
+   "question": "Is there sweating or feeling faint with the pain?",
+   "when": {
+    "words": [
+     "chest"
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes — sweating",
+     "match": "Yes",
+     "sets": {
+      "sweating": true
+     }
+    },
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "sweating": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "breath_speech",
+   "safety": true,
+   "question": "Can the patient speak a full sentence without stopping for breath?",
+   "when": {
+    "words": [
+     "breath"
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes",
+     "match": "Yes",
+     "sets": {
+      "incomplete_sentences": false
+     }
+    },
+    {
+     "label": "No — difficulty breathing while talking",
+     "match": "No",
+     "sets": {
+      "incomplete_sentences": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "child_danger",
+   "safety": true,
+   "question": "Is the child able to drink or breastfeed?",
+   "when": {
+    "words": [
+     "fever"
+    ],
+    "age_lt": 5
+   },
+   "options": [
+    {
+     "label": "Yes",
+     "match": "Yes",
+     "sets": {
+      "unable_to_drink": false,
+      "vomits_everything": false
+     }
+    },
+    {
+     "label": "No — unable to drink",
+     "match": "No",
+     "sets": {
+      "unable_to_drink": true
+     }
+    },
+    {
+     "label": "Vomits everything",
+     "match": "Vomits",
+     "sets": {
+      "vomits_everything": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "fever_bleed",
+   "safety": true,
+   "question": "Any rash, bleeding gums or black stools?",
+   "when": {
+    "words": [
+     "fever"
+    ]
+   },
+   "options": [
+    {
+     "label": "No"
+    },
+    {
+     "label": "Rash",
+     "match": "Rash",
+     "sets": {
+      "rash": true
+     }
+    },
+    {
+     "label": "Bleeding",
+     "match": "Bleeding",
+     "sets": {
+      "bleeding": true,
+      "gum_bleed": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "mat_vision",
+   "safety": true,
+   "question": "Any blurred vision or seeing spots?",
+   "when": {
+    "words": [
+     "headache"
+    ],
+    "category": "maternal"
+   },
+   "options": [
+    {
+     "label": "Yes — blurred vision",
+     "match": "Yes",
+     "sets": {
+      "visual_disturbance": true
+     }
+    },
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "visual_disturbance": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "mat_movement",
+   "safety": true,
+   "question": "Is the baby moving as usual today?",
+   "when": {
+    "category": "maternal"
+   },
+   "options": [
+    {
+     "label": "Yes",
+     "match": "Yes",
+     "sets": {
+      "reduced_fetal_movement": false
+     }
+    },
+    {
+     "label": "Less than usual — reduced movement",
+     "match": "Less",
+     "sets": {
+      "reduced_fetal_movement": true
+     }
+    },
+    {
+     "label": "Not yet felt (early pregnancy)"
+    }
+   ]
+  },
+  {
+   "qid": "mat_bleed",
+   "safety": true,
+   "question": "Any bleeding or fluid leaking?",
+   "when": {
+    "category": "maternal"
+   },
+   "options": [
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "vaginal_bleeding": false,
+      "fluid_leaking": false
+     }
+    },
+    {
+     "label": "Yes — bleeding",
+     "match": "Yes",
+     "sets": {
+      "vaginal_bleeding": true
+     }
+    },
+    {
+     "label": "Fluid leaking",
+     "match": "Fluid",
+     "sets": {
+      "fluid_leaking": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "dehyd",
+   "safety": true,
+   "question": "Dry mouth, sunken eyes or passing very little urine?",
+   "when": {
+    "words": [
+     "diarr",
+     "loose"
+    ]
+   },
+   "options": [
+    {
+     "label": "No"
+    },
+    {
+     "label": "Yes — sunken eyes / dry mouth",
+     "match": "Yes",
+     "sets": {
+      "dehydration": true,
+      "sunken_eyes": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "inj_loc",
+   "safety": true,
+   "question": "Did the person faint or hit their head?",
+   "when": {
+    "words": [
+     "injury",
+     "burn"
+    ]
+   },
+   "options": [
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "syncope": false,
+      "head_injury": false
+     }
+    },
+    {
+     "label": "Yes — fainted / head injury",
+     "match": "Yes",
+     "sets": {
+      "syncope": true,
+      "head_injury": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "abd_where",
+   "question": "Where is the pain?",
+   "when": {
+    "words": [
+     "stomach"
+    ]
+   },
+   "options": [
+    {
+     "label": "Upper",
+     "match": "Upper",
+     "sets": {
+      "upper_abdominal_pain": true
+     }
+    },
+    {
+     "label": "Lower right"
+    },
+    {
+     "label": "Lower left"
+    },
+    {
+     "label": "All over"
+    }
+   ]
+  },
+  {
+   "qid": "chr_meds",
+   "core": true,
+   "question": "Are you taking your medicines every day?",
+   "when": {
+    "category": "chronic"
+   },
+   "options": [
+    {
+     "label": "Yes, every day",
+     "match": "Yes",
+     "sets": {
+      "adherence_poor": false
+     }
+    },
+    {
+     "label": "Sometimes miss",
+     "match": "Sometimes",
+     "sets": {
+      "adherence_poor": true
+     }
+    },
+    {
+     "label": "Stopped taking",
+     "match": "Stopped",
+     "sets": {
+      "adherence_poor": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "preg_check",
+   "safety": true,
+   "question": "Could you be pregnant — is your period late?",
+   "when": {
+    "sex": "F",
+    "age_gte": 12,
+    "age_lt": 51,
+    "not_category": "maternal",
+    "words": [
+     "stomach",
+     "bleed",
+     "faint",
+     "dizz",
+     "vomit"
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes — pregnant",
+     "match": "Yes",
+     "sets": {
+      "pregnant": true
+     }
+    },
+    {
+     "label": "Period is late — maybe",
+     "match": "Period",
+     "sets": {
+      "pregnancy_possible": true
+     }
+    },
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "pregnant": false,
+      "pregnancy_possible": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "cough_weeks",
+   "question": "Has the cough lasted 2 weeks or more?",
+   "when": {
+    "words": [
+     "cough"
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes — 2 weeks or more",
+     "match": "Yes",
+     "sets": {
+      "cough_long": true
+     }
+    },
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "cough_long": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "cough_tb",
+   "safety": true,
+   "question": "Any blood in the spit, weight loss or sweating at night?",
+   "when": {
+    "words": [
+     "cough"
+    ]
+   },
+   "options": [
+    {
+     "label": "None of these",
+     "match": "None",
+     "sets": {
+      "haemoptysis": false,
+      "weight_loss": false,
+      "night_sweats": false
+     }
+    },
+    {
+     "label": "Blood in the spit",
+     "match": "Blood",
+     "sets": {
+      "haemoptysis": true
+     }
+    },
+    {
+     "label": "Weight loss",
+     "match": "Weight",
+     "sets": {
+      "weight_loss": true
+     }
+    },
+    {
+     "label": "Sweating at night",
+     "match": "Sweating",
+     "sets": {
+      "night_sweats": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "stool_blood",
+   "safety": true,
+   "question": "Is there blood in the stool?",
+   "when": {
+    "words": [
+     "diarr",
+     "loose"
+    ]
+   },
+   "options": [
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "blood_in_stool": false
+     }
+    },
+    {
+     "label": "Yes — blood in stool",
+     "match": "Yes",
+     "sets": {
+      "blood_in_stool": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "vomit",
+   "question": "Any vomiting?",
+   "when": {
+    "words": [
+     "stomach",
+     "diarr",
+     "loose",
+     "fever",
+     "headache"
+    ],
+    "not_category": "maternal"
+   },
+   "options": [
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "vomiting": false
+     }
+    },
+    {
+     "label": "Yes — a few times",
+     "match": "Yes",
+     "sets": {
+      "vomiting": true
+     }
+    },
+    {
+     "label": "Vomits everything",
+     "match": "Vomits",
+     "sets": {
+      "vomiting": true,
+      "vomits_everything": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "fever_chills",
+   "question": "Does the fever come with shivering or chills?",
+   "when": {
+    "words": [
+     "fever"
+    ]
+   },
+   "options": [
+    {
+     "label": "Yes — shivering",
+     "match": "Yes",
+     "sets": {
+      "chills": true
+     }
+    },
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "chills": false
+     }
+    }
+   ]
+  },
+  {
+   "qid": "urine_burn",
+   "question": "Any burning or pain when passing urine?",
+   "when": {
+    "any": [
+     {
+      "words": [
+       "fever"
+      ]
+     },
+     {
+      "words": [
+       "stomach"
+      ]
+     }
+    ]
+   },
+   "options": [
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "dysuria": false
+     }
+    },
+    {
+     "label": "Yes — burning",
+     "match": "Yes",
+     "sets": {
+      "dysuria": true
+     }
+    }
+   ]
+  },
+  {
+   "qid": "child_vacc",
+   "question": "Has the child had all the vaccines due for their age?",
+   "when": {
+    "age_lt": 5
+   },
+   "options": [
+    {
+     "label": "Yes — all done",
+     "match": "Yes",
+     "sets": {
+      "immunisation_incomplete": false
+     }
+    },
+    {
+     "label": "Some missed",
+     "match": "Some",
+     "sets": {
+      "immunisation_incomplete": true
+     }
+    },
+    {
+     "label": "Not sure"
+    }
+   ]
+  },
+  {
+   "qid": "allergy",
+   "core": true,
+   "question": "Are you allergic to any medicine?",
+   "options": [
+    {
+     "label": "No known allergy",
+     "match": "No",
+     "sets": {
+      "allergy_drug": false
+     }
+    },
+    {
+     "label": "Yes — to a medicine",
+     "match": "Yes",
+     "sets": {
+      "allergy_drug": true
+     }
+    },
+    {
+     "label": "Not sure"
+    }
+   ]
+  },
+  {
+   "qid": "regular_meds",
+   "core": true,
+   "question": "Do you take any medicine every day?",
+   "when": {
+    "not_category": "chronic"
+   },
+   "options": [
+    {
+     "label": "No",
+     "match": "No",
+     "sets": {
+      "anticoagulated": false
+     }
+    },
+    {
+     "label": "Yes — a blood thinner (like warfarin)",
+     "match": "Yes — a blood",
+     "sets": {
+      "anticoagulated": true
+     }
+    },
+    {
+     "label": "Yes — other medicines"
+    }
+   ]
+  },
+  {
+   "qid": "long_illness",
+   "core": true,
+   "question": "Do you have a long-term illness?",
+   "when": {
+    "age_gte": 12,
+    "not_category": "chronic"
+   },
+   "options": [
+    {
+     "label": "None",
+     "match": "None",
+     "sets": {
+      "diabetes_known": false,
+      "hypertension_known": false,
+      "heart_disease_known": false,
+      "tb_history": false
+     }
+    },
+    {
+     "label": "Diabetes (sugar)",
+     "match": "Diabetes",
+     "sets": {
+      "diabetes_known": true
+     }
+    },
+    {
+     "label": "High blood pressure",
+     "match": "High",
+     "sets": {
+      "hypertension_known": true
+     }
+    },
+    {
+     "label": "Heart disease",
+     "match": "Heart",
+     "sets": {
+      "heart_disease_known": true
+     }
+    },
+    {
+     "label": "TB now or before",
+     "match": "TB",
+     "sets": {
+      "tb_history": true
+     }
+    },
+    {
+     "label": "Other"
+    }
+   ]
+  }
+ ]
+}

@@ -223,8 +223,8 @@ export function IntakeFlow({
   }, [entries, typed, selected, category, chronic.condition, lowHeard]);
 
   const questions = useMemo(
-    () => (category ? contextQuestions({ chief_complaint: chief, selected_symptoms: selected, category, symptoms: entries, duration }, age, patientLoad) : []),
-    [chief, selected, category, entries, duration, age, patientLoad],
+    () => (category ? contextQuestions({ chief_complaint: chief, selected_symptoms: selected, category, symptoms: entries, duration, sex: patient?.sex ?? newP.sex }, age, patientLoad) : []),
+    [chief, selected, category, entries, duration, age, patientLoad, patient?.sex, newP.sex],
   );
 
   const STEP_TITLE: Record<Step, DictKey> = {

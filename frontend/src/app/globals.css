@@ -4,7 +4,7 @@
 @custom-variant iconmode (&:where([data-icon-mode="true"] *));
 
 @theme {
-  --font-sans: var(--font-inter), "Noto Sans", "Noto Sans Devanagari", "Noto Sans Oriya", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: var(--font-inter), var(--font-olchiki), "Noto Sans", "Noto Sans Devanagari", "Noto Sans Oriya", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --color-ink: #16182b;
   --color-ink-2: #2d2d44;

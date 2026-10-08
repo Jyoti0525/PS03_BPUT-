@@ -2,6 +2,7 @@ import { Thermometer, Wind, HeartCrack, Brain, Droplets, Bandage, BatteryLow, Za
 import type { ReactNode } from "react";
 import type { DictKey } from "@/lib/i18n/dict";
 import type { IntakePayload } from "@/lib/types";
+import flow from "@/lib/question_flow.json";
 
 /** Icon-first symptom tiles. `en` is the working-language text sent to the rules engine. */
 export const SYMPTOMS: { key: DictKey; en: string; icon: ReactNode }[] = [
@@ -46,51 +47,43 @@ export interface ContextQuestion {
   options: string[];
 }
 
+type Cond = { words?: string[]; age_lt?: number; age_gte?: number; category?: string; not_category?: string; sex?: string; duration_unset_or?: string; any?: Cond[] };
+type FlowQuestion = { qid: string; question: string; safety?: boolean; core?: boolean; position?: "first"; when?: Cond; options: { label: string }[] };
+
+/** Questions whose answer can make a case RED (`safety: true`). Always asked, whatever the facility's load. */
+const FLOW = flow.questions as FlowQuestion[];
+const SAFETY = new Set(FLOW.filter((q) => q.safety).map((q) => q.qid));
+/** History every note needs (`core: true`): allergies, regular medicines, long-term illness. */
+const CORE = new Set(FLOW.filter((q) => q.core).map((q) => q.qid));
+
 /**
  * Context engine: asks what the reviewer will need that the patient has not yet said.
  * Bounded, closed-ended questions only — answers feed the deterministic rules engine.
+ * The questions, their conditions and the findings each answer sets are one versioned file shared with the backend:
+ * backend/app/triage/question_flow.yaml, built into lib/question_flow.json (CI fails when the two differ).
  */
-/** Questions whose answer can make a case RED. Always asked, whatever the facility's load. */
-const SAFETY = new Set(["conscious", "mechanism", "one_side", "sudden_head", "sudden_abd", "chest_radiation", "chest_sweat", "breath_speech", "child_danger", "fever_bleed", "mat_vision", "mat_movement", "mat_bleed", "dehyd", "inj_loc"]);
-
-/** F2: the question budget follows the facility's patient load. High: safety questions only. Normal: up to 7. Low: all. */
-export function contextQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_symptoms" | "category" | "symptoms" | "duration">, age: number, load: "low" | "normal" | "high" = "normal"): ContextQuestion[] {
+/** F2: the question budget follows the facility's patient load. High: safety questions only. Normal: safety, then core history, then
+ * others up to 9. Low: all. */
+export function contextQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_symptoms" | "category" | "symptoms" | "duration"> & { sex?: string }, age: number, load: "low" | "normal" | "high" = "normal"): ContextQuestion[] {
   const all = allQuestions(draft, age);
   if (load === "low") return all;
   if (load === "high") return all.filter((q) => SAFETY.has(q.qid));
-  let room = 7 - all.filter((q) => SAFETY.has(q.qid)).length; // every safety question, then others while there is room
-  return all.filter((q) => SAFETY.has(q.qid) || room-- > 0);
+  let room = 9 - all.filter((q) => SAFETY.has(q.qid) || CORE.has(q.qid)).length; // every safety and core question, then others while there is room
+  return all.filter((q) => SAFETY.has(q.qid) || CORE.has(q.qid) || room-- > 0);
 }
 
-function allQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_symptoms" | "category" | "symptoms" | "duration">, age: number): ContextQuestion[] {
+function allQuestions(draft: Pick<IntakePayload, "chief_complaint" | "selected_symptoms" | "category" | "symptoms" | "duration"> & { sex?: string }, age: number): ContextQuestion[] {
   const text = [draft.chief_complaint, ...draft.selected_symptoms, ...draft.symptoms.map((s) => s.text)].join(" ").toLowerCase();
-  const qs: ContextQuestion[] = [];
-  const has = (...w: string[]) => w.some((x) => text.includes(x));
-  // Danger questions first: each answer resolves an AIIMS / WHO IITT Red criterion that would otherwise stay unknown.
-  if (age < 5 || has("fits", "convuls", "dizz", "faint", "injury", "head", "confus", "fever"))
-    qs.push({ qid: "conscious", question: "Is the patient fully awake and talking or responding normally?", options: ["Yes — awake and normal", "Drowsy or confused", "Not responding"] });
-  if (has("injury", "burn", "fall", "accident"))
-    qs.push({ qid: "mechanism", question: "How did the injury happen?", options: ["Fall from a height (tree, roof, ladder)", "Road accident", "Stabbed or hit with a weapon", "Crushed under something", "Burn", "Bite by a dog or animal", "Snake bite", "Minor — slipped or small cut"] });
-  if (age >= 12 && has("dizz", "headache", "weak", "numb", "speech", "tired"))
-    qs.push({ qid: "one_side", question: "Any weakness, numbness or drooping on one side of the face or body?", options: ["Yes — on one side", "No"] });
-  if (has("headache")) qs.push({ qid: "sudden_head", question: "Did the headache start suddenly, within seconds or minutes?", options: ["Sudden — within minutes", "Gradually"] });
-  if (has("stomach")) qs.push({ qid: "sudden_abd", question: "Did the stomach pain start suddenly?", options: ["Sudden — within minutes", "Gradually"] });
-  if (has("chest")) {
-    qs.push({ qid: "chest_radiation", question: "Does the pain spread to the arm, jaw or back?", options: ["Yes — spreads to arm / jaw", "No", "Not sure"] });
-    qs.push({ qid: "chest_sweat", question: "Is there sweating or feeling faint with the pain?", options: ["Yes — sweating", "No"] });
-  }
-  if (has("breath")) qs.push({ qid: "breath_speech", question: "Can the patient speak a full sentence without stopping for breath?", options: ["Yes", "No — difficulty breathing while talking"] });
-  if (has("fever") && age < 5) qs.push({ qid: "child_danger", question: "Is the child able to drink or breastfeed?", options: ["Yes", "No — unable to drink", "Vomits everything"] });
-  if (has("fever")) qs.push({ qid: "fever_bleed", question: "Any rash, bleeding gums or black stools?", options: ["No", "Rash", "Bleeding"] });
-  if (has("headache") && draft.category === "maternal") qs.push({ qid: "mat_vision", question: "Any blurred vision or seeing spots?", options: ["Yes — blurred vision", "No"] });
-  if (draft.category === "maternal") {
-    qs.push({ qid: "mat_movement", question: "Is the baby moving as usual today?", options: ["Yes", "Less than usual — reduced movement", "Not yet felt (early pregnancy)"] });
-    qs.push({ qid: "mat_bleed", question: "Any bleeding or fluid leaking?", options: ["No", "Yes — bleeding", "Fluid leaking"] });
-  }
-  if (has("diarr", "loose")) qs.push({ qid: "dehyd", question: "Dry mouth, sunken eyes or passing very little urine?", options: ["No", "Yes — sunken eyes / dry mouth"] });
-  if (has("injury", "burn")) qs.push({ qid: "inj_loc", question: "Did the person faint or hit their head?", options: ["No", "Yes — fainted / head injury"] });
-  if (has("stomach")) qs.push({ qid: "abd_where", question: "Where is the pain?", options: ["Upper", "Lower right", "Lower left", "All over"] });
-  if (!draft.duration || draft.duration === "today") qs.unshift({ qid: "dur", question: "Since when do you have this problem?", options: ["In the last few hours", "Today", "1–2 days", "3–7 days", "More than a week"] });
-  if (draft.category === "chronic") qs.push({ qid: "chr_meds", question: "Are you taking your medicines every day?", options: ["Yes, every day", "Sometimes miss", "Stopped taking"] });
-  return qs;
+  const holds = (c: Cond): boolean =>
+    (!c.words || c.words.some((w) => text.includes(w))) &&
+    (c.age_lt === undefined || age < c.age_lt) &&
+    (c.age_gte === undefined || age >= c.age_gte) &&
+    (!c.category || draft.category === c.category) &&
+    (!c.not_category || draft.category !== c.not_category) &&
+    (!c.sex || draft.sex === c.sex) &&
+    (!c.duration_unset_or || !draft.duration || draft.duration === c.duration_unset_or) &&
+    (!c.any || c.any.some(holds));
+  const qs = FLOW.filter((q) => holds(q.when ?? {})).map((q) => ({ qid: q.qid, question: q.question, options: q.options.map((o) => o.label) }));
+  const first = new Set(FLOW.filter((q) => q.position === "first").map((q) => q.qid));
+  return [...qs.filter((q) => first.has(q.qid)), ...qs.filter((q) => !first.has(q.qid))];
 }

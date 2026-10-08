@@ -19,6 +19,8 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 
+from app.triage import question_flow
+
 SYMPTOM, SIGN = "symptom", "sign"
 
 # finding id -> (label, kind)
@@ -92,6 +94,7 @@ FINDINGS: dict[str, tuple[str, str]] = {
     "injury": ("Injury", SYMPTOM),
     "burn": ("Burn", SYMPTOM),
     "burn_major": ("Burn of face, neck, both arms or legs, or most of the body", SYMPTOM),
+    "anticoagulated": ("On blood thinners or has a bleeding disorder", SYMPTOM),
     "head_injury": ("Head injury", SYMPTOM),
     "fall_from_height": ("Fall from height", SYMPTOM),
     "road_traffic_high_risk": ("Road crash — high-risk mechanism", SYMPTOM),
@@ -114,6 +117,18 @@ FINDINGS: dict[str, tuple[str, str]] = {
     "labour_pains": ("Labour pains / contractions", SYMPTOM),
     "swelling_face_hands": ("Swelling of face or hands", SYMPTOM),
     "upper_abdominal_pain": ("Upper abdominal pain", SYMPTOM),
+    # history the kiosk asks for (question_flow.yaml): not danger signs, but a doctor needs them
+    "cough_long": ("Cough for 2 weeks or more", SYMPTOM),
+    "chills": ("Shivering or chills with fever", SYMPTOM),
+    "dysuria": ("Burning or pain passing urine", SYMPTOM),
+    "pregnancy_possible": ("Period late — pregnancy possible", SYMPTOM),
+    "allergy_drug": ("Known allergy to a medicine", SYMPTOM),
+    "diabetes_known": ("Known diabetes", SYMPTOM),
+    "hypertension_known": ("Known high blood pressure", SYMPTOM),
+    "heart_disease_known": ("Known heart disease", SYMPTOM),
+    "tb_history": ("TB now or in the past", SYMPTOM),
+    "immunisation_incomplete": ("Vaccines not up to date for age", SYMPTOM),
+    "adherence_poor": ("Misses or has stopped regular medicines", SYMPTOM),
     # outside evaluations
     "known_time_sensitive_dx": ("Outside report of heart attack, stroke, sepsis, aortic dissection or leukaemia", SYMPTOM),
     "chemo_recent": ("Chemotherapy in the last 14 days", SYMPTOM),
@@ -199,9 +214,12 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     # "burning" is a sensation (in the chest, while passing urine); a burn is burn / burns / burnt / burned
     "burn": {"en": [r"burn(s|t|ed)?\b", r"scald\w*", r"jal (gaya|gayi|gaye)"], "hi": ["जल गया", "जल गई", "जल गए", "जल गयी", "झुलस", "जलना"], "or": ["ପୋଡ଼ି", "ଜଳିଗଲା"]},
     # IITT reference card, major burns: face or neck, circumferential, or more than 15 % of the body (both arms are 18 %)
-    "burn_major": {"en": [r"burn\w*\b.{0,60}\b(face|neck|both (arms|legs|hands)|whole body|all over)", r"\b(face|neck|both (arms|legs|hands)|whole body)\b.{0,40}\bburn(s|t|ed)?\b"],
+    "burn_major": {"en": [r"burn\w*\b.{0,60}\b(face|neck|both (arms|legs|hands)|whole body|all over)", r"\b(smoke|fumes?) inhal\w*", r"inhalation (injury|burn)", r"circumferential burn\w*", r"\b(face|neck|both (arms|legs|hands)|whole body)\b.{0,40}\bburn(s|t|ed)?\b"],
                    "hi": ["दोनों हाथ … जल ग", "दोनों पैर … जल ग", "चेहरा … जल ग", "चेहरे … जल ग", "गर्दन … जल ग", "पूरा शरीर … जल ग", "पूरे शरीर … जल ग", "दोनों हाथ … झुलस", "चेहरा … झुलस"],
                    "or": ["ଦୁଇ ହାତ … ପୋଡ଼", "ଦୁଇ ଗୋଡ଼ … ପୋଡ଼", "ମୁହଁ … ପୋଡ଼", "ବେକ … ପୋଡ଼", "ସାରା ଦେହ … ପୋଡ଼"]},
+    "anticoagulated": {"en": [r"blood[- ]thinner\w*", r"warfarin", r"acenocoumarol", r"acitrom", r"apixaban", r"rivaroxaban", r"dabigatran", r"\bheparin", r"anticoagula\w*",
+                               r"ha?emophilia", r"bleeding disorder"],
+                       "hi": ["खून पतला करने की दवा", "खून पतला करने वाली दवा", "हीमोफीलिया"], "or": ["ରକ୍ତ ପତଳା କରିବା ଔଷଧ", "ରକ୍ତ ପତଳା ଔଷଧ", "ହିମୋଫିଲିଆ"]},
     "asthma": {"en": [r"asthma\w*", r"\bdama\b"], "hi": ["दमा", "अस्थमा"], "or": ["ଶ୍ୱାସ ରୋଗ", "ଆଜମା", "ଆସ୍ଥମା", "ହାପଜ୍ୱର"]},
     "jaundice": {"en": [r"jaundice\w*", r"yellow(ish|ness)? (of )?(the )?(eyes|skin)", r"(eyes|skin) (are |is |turned |look )?yellow", r"piliya"], "hi": ["पीलिया", "आंखें पीली", "आँखें पीली", "आंखों में पीला"], "or": ["ଜଣ୍ଡିସ", "ଆଖି ହଳଦିଆ", "କାମଳ"]},
     "haematuria": {"en": [r"blood (in|with) (the |my )?(urine|pee)", r"(bloody|red) urine", r"ha?ematuria", r"urine (is )?(red|bloody)"], "hi": ["पेशाब में खून", "पेशाब … खून", "पेशाब लाल"], "or": ["ପରିସ୍ରାରେ ରକ୍ତ", "ପରିସ୍ରା … ରକ୍ତ"]},
@@ -227,6 +245,18 @@ LEXICON: dict[str, dict[str, list[str]]] = {
     "labour_pains": {"en": [r"labou?r pains?", r"contractions?", r"in labou?r"], "hi": ["प्रसव पीड़ा", "दर्द शुरू"], "or": ["ପ୍ରସବ ଯନ୍ତ୍ରଣା"]},
     "swelling_face_hands": {"en": [r"(swollen|swelling (of|in)( the)?) (face|hands|fingers)", r"(face|hands) (are |is )?swollen"], "hi": ["चेहरे पर सूजन", "हाथों में सूजन"], "or": ["ମୁହଁ ଫୁଲିଛି", "ହାତ ଫୁଲିଛି"]},
     "known_time_sensitive_dx": {"en": [r"heart attack", r"myocardial infarction", r"acute coronary", r"aortic dissection", r"sepsis", r"leuka?emia", r"aplastic ana?emia"], "hi": ["दिल का दौरा"], "or": ["ହୃଦଘାତ"]},
+    "cough_long": {"en": [r"cough\w*[\w ]{0,20}(for )?(two|2|three|3|several|many) (weeks|months)", r"cough\w*[\w ]{0,20}(a )?month"], "hi": [], "or": []},
+    "chills": {"en": [r"chills?", r"shiver\w*", r"rigou?rs?", r"kanpkapi"], "hi": ["कंपकंपी", "ठंड लग"], "or": ["ଥରି"]},
+    "dysuria": {"en": [r"burning (urine|micturition|while (passing )?urin\w*|when (i )?pee)", r"pain(ful)? (while |when |on )?(passing )?urin\w*", r"dysuria"],
+                "hi": ["पेशाब में जलन"], "or": ["ପରିସ୍ରାରେ ଜଳା"]},
+    "pregnancy_possible": {"en": [r"(missed|late) (my )?periods?", r"periods? (is |are )?(late|missed|not come)"], "hi": ["माहवारी नहीं"], "or": []},
+    "allergy_drug": {"en": [r"allerg\w* to (penicillin|sulpha|sulfa|aspirin|antibiotic\w*|medicine\w*|tablets?|injection)"], "hi": [], "or": []},
+    "diabetes_known": {"en": [r"(i am|known|have|has) (a )?diabet\w*", r"sugar (patient|problem|disease)"], "hi": ["शुगर की बीमारी"], "or": []},
+    "hypertension_known": {"en": [r"(have|has|known) (high )?(bp|blood pressure|hypertension)", r"bp patient"], "hi": [], "or": []},
+    "heart_disease_known": {"en": [r"heart (disease|patient|problem)", r"had a heart attack"], "hi": [], "or": []},
+    "tb_history": {"en": [r"(had|have|has) (tb|tuberculosis)", r"tb (medicine|treatment)"], "hi": [], "or": []},
+    "immunisation_incomplete": {"en": [r"(not|never) (been )?(vaccinated|immuni[sz]ed)", r"missed (his |her )?(vaccines?|injections?|tikka)"], "hi": [], "or": []},
+    "adherence_poor": {"en": [r"(stopped|not taking|missed|skip\w*) (my |the )?(medicines?|tablets?|pills)"], "hi": [], "or": []},
     "chemo_recent": {"en": [r"chemo(therapy)?"], "hi": ["कीमो"], "or": ["କେମୋ"]},
 }
 
@@ -252,47 +282,8 @@ TILES: dict[str, list[str]] = {
 
 # Structured answers: (question id, answer prefix) -> {finding: value}. Prefix match on the
 # English option text the kiosk sends, so a translated UI still produces the same codes.
-ANSWERS: list[tuple[str, str, dict[str, bool]]] = [
-    ("chest_radiation", "Yes", {"chest_pain_radiating": True}),
-    ("chest_radiation", "No", {"chest_pain_radiating": False}),
-    ("chest_sweat", "Yes", {"sweating": True}),
-    ("chest_sweat", "No", {"sweating": False}),
-    ("breath_speech", "No", {"incomplete_sentences": True}),
-    ("breath_speech", "Yes", {"incomplete_sentences": False}),
-    ("child_danger", "No", {"unable_to_drink": True}),
-    ("child_danger", "Vomits", {"vomits_everything": True}),
-    ("child_danger", "Yes", {"unable_to_drink": False, "vomits_everything": False}),
-    ("fever_bleed", "Rash", {"rash": True}),
-    ("fever_bleed", "Bleeding", {"bleeding": True, "gum_bleed": True}),
-    ("mat_vision", "Yes", {"visual_disturbance": True}),
-    ("mat_vision", "No", {"visual_disturbance": False}),
-    ("mat_movement", "Less", {"reduced_fetal_movement": True}),
-    ("mat_movement", "Yes", {"reduced_fetal_movement": False}),
-    ("mat_bleed", "Yes", {"vaginal_bleeding": True}),
-    ("mat_bleed", "Fluid", {"fluid_leaking": True}),
-    ("mat_bleed", "No", {"vaginal_bleeding": False, "fluid_leaking": False}),
-    ("dehyd", "Yes", {"dehydration": True, "sunken_eyes": True}),
-    ("inj_loc", "Yes", {"syncope": True, "head_injury": True}),
-    ("inj_loc", "No", {"syncope": False, "head_injury": False}),
-    ("abd_where", "Upper", {"upper_abdominal_pain": True}),
-    ("conscious", "Yes", {"unresponsive": False, "altered_mental_status": False}),
-    ("conscious", "Drowsy", {"altered_mental_status": True, "lethargy": True}),
-    ("conscious", "Not", {"unresponsive": True}),
-    ("one_side", "Yes", {"one_sided_weakness": True}),
-    ("one_side", "No", {"one_sided_weakness": False}),
-    ("mechanism", "Fall", {"fall_from_height": True}),
-    ("mechanism", "Road", {"road_traffic_high_risk": True}),
-    ("mechanism", "Stab", {"penetrating_injury": True}),
-    ("mechanism", "Crush", {"crush_injury": True}),
-    ("mechanism", "Burn", {"burn": True}),
-    ("mechanism", "Bite", {"animal_bite": True}),
-    ("mechanism", "Snake", {"snake_bite": True}),
-    ("mechanism", "Minor", {"fall_from_height": False, "road_traffic_high_risk": False, "penetrating_injury": False, "crush_injury": False}),
-    ("sudden_head", "Sudden", {"headache_sudden": True}),
-    ("sudden_head", "Gradual", {"headache_sudden": False}),
-    ("sudden_abd", "Sudden", {"abdominal_pain_sudden": True}),
-    ("sudden_abd", "Gradual", {"abdominal_pain_sudden": False}),
-]
+# Kiosk answer → findings, from the shared question_flow.yaml (the kiosk reads the same file as JSON).
+ANSWERS: list[tuple[str, str, dict[str, bool]]] = question_flow.answers_table()
 
 # Negation scope: at most two words, and never across "and"/"with"/"aur" (a false negation hides a
 # symptom; a missed negation only over-triages, so the window is deliberately short).
@@ -426,7 +417,8 @@ def extract(intake: dict, category: str | None = None) -> dict[str, Finding]:
     for a in intake.get("answers", []) or []:
         qid, ans = a.get("qid", ""), (a.get("answer") or "").strip()
         for q, prefix, values in ANSWERS:
-            if q == qid and ans.lower().startswith(prefix.lower()):
+            # Whole-word prefix: "Not sure" must not be read as "No", nor "None" as "No".
+            if q == qid and ans.lower().startswith(prefix.lower()) and not ans[len(prefix):len(prefix) + 1].isalpha():
                 for fid, val in values.items():
                     _merge(out, fid, val, f'answer to "{a.get("question") or qid}": {ans}')
 

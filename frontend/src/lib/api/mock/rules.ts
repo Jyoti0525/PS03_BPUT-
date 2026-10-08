@@ -4,6 +4,10 @@
  * The authoritative rules live in `backend/app/triage/rules/*.yaml` (AIIMS Triage Protocol for
  * adults, IMCI for children under 5, maternal red flags). This port exists so the frontend can run
  * with no backend. Urgency is ONLY ever produced here — never by a language model.
+ *
+ * LABELLED, NOT SYNCED (8 Oct): this is a small subset written early in the project. It does not have the WHO IITT,
+ * NTEP, GINA, local or follow-up rules, so its colours can differ from the backend. Every mock note carries the
+ * MOCK-RULES info flag and the header shows "Local demo mode — no server". Live mode is the demo path.
  */
 import type { IntakePayload, RuleHit, Urgency } from "@/lib/types";
 

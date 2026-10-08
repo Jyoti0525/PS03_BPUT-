@@ -62,11 +62,13 @@ async def lifespan(_: FastAPI):
         with SessionLocal() as db:
             seed(db)
         if settings.seed_scenarios:
-            from .scenarios import call_scenarios, scenarios
+            from .scenarios import call_scenarios, scenarios, synthea_histories
 
             with SessionLocal() as db:
                 scenarios(db)
                 call_scenarios(db)
+                if settings.seed_synthea:
+                    synthea_histories(db)
     from . import directory
 
     if get_settings().directory_autoload:

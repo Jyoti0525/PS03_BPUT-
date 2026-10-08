@@ -36,6 +36,15 @@ rules:
       any:
         - all: [ { finding: cough }, { any: [ { finding: weight_loss }, { finding: night_sweats } ] } ]
         - all: [ { any: [ { finding: cough }, { finding: fever } ] }, { onset_hours: [gte, 336] } ]
+        - finding: cough_long
+  - id: LOCAL-POSSIBLE-ECTOPIC
+    description: Late period or pregnancy with stomach pain, bleeding or fainting — pregnancy test and doctor today (rule out ectopic pregnancy)
+    urgency: yellow
+    review_by: doctor
+    when:
+      all:
+        - any: [ { finding: pregnancy_possible }, { finding: pregnant } ]
+        - any: [ { finding: abdominal_pain }, { finding: vaginal_bleeding }, { finding: syncope } ]
   - id: GINA-ASTHMA-LOW-SPO2
     description: Asthma or wheeze with SpO₂ below 94 % — not a mild flare; treat now and reassess within the hour
     urgency: yellow

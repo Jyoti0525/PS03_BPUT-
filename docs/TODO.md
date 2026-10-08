@@ -321,11 +321,11 @@ Draft of 6 Oct: 22 slides in the [Slides artifact](https://claude.ai/artifact/Fs
 - [x] Occupational sources: re-read 6 Oct on PubMed: ATS 2014 workplace spirometry (PMID 24735032, 15 % FEV1 decline plus ageing), ERS 2020 chronic cough > 8 weeks (PMID 31515408)
 - [x] **Closed 7 Oct (0a36c36):** new local rule `LOCAL-SEVERE-HTN` (labelled "Local facility rule", not a guideline): ≥ 180 / ≥ 110 mmHg, or ≥ 160 / ≥ 100 with headache, visual change, chest pain, breathlessness or one-sided weakness → YELLOW with a doctor's review. 166/102 with headache is now YELLOW (`tests/test_clinical_decisions.py`). Was: non-pregnant adult with BP 166/102 and headache comes out GREEN (ATP RED needs > 220 / > 110; IITT's BP line is pregnancy only). Check whether IITT or another Indian source gives a YELLOW for severe hypertension with symptoms (found 6 Oct while building the E6 demo)
 - [x] **Closed 7 Oct, kept as published:** the WHO IITT age ≥ 12 card says exactly this ("any two of altered mental status, stiff neck, hypothermia or fever, headache" → RED), so loosening it would weaken a published RED criterion. Over-triage of febrile headache is accepted; the doctor can override with a reason (E9). Test pins it. Was: IITT adult "any two of fever, headache, altered mental status, stiff neck" → RED (IITT-A-MENINGISM): makes every febrile headache RED. Check against the full WHO tool (found 6 Oct while building the campus fever demo)
-- [ ] Indian clinical ASR paper (arXiv 2512.10967)
-- [ ] CDSCO medical-device software guidance, current status
-- [ ] ATP adoption sites named in the 16 Sep plan
-- [ ] IITT thresholds against the full WHO tool, not only the reference card
-- [ ] Finale judging criteria on the official listing
+- [x] Indian clinical ASR paper (arXiv 2512.10967). **Read 8 Oct (uncommitted):** Kumar et al., "ASR Under the Stethoscope" (30 Nov 2025, CC BY 4.0): IndicWhisper, Whisper, Sarvam, Google, Gemma3n, Omnilingual, Vaani and Gemini on clinical conversations in Kannada, Hindi and Indian English; wide spread across models, failures on code-mixed and vernacular speech, and gaps by speaker role (patient vs clinician) and gender. Supports what we built: a second engine (B9), per-language confidence, read-back, and the team recordings (§2) to measure patient-style speech. Their data is not public, so we cannot score on it.
+- [x] CDSCO medical-device software guidance, current status. **Checked 8 Oct (uncommitted):** CDSCO issued a *draft* Guidance Document on Medical Device Software under MDR 2017 on 21 Oct 2025 (risk class A–D by medical purpose, significance of the information, and seriousness of the condition; AI change protocol). Secondary sources disagree on whether a final version came out in 2026; the CDSCO site was not readable here, so we say "draft, Oct 2025" on slides. Human review does not by itself take software out of scope; our position is an educational prototype, not a device, and a field pilot would need classification first.
+- [x] ATP adoption sites named in the 16 Sep plan. **Checked 8 Oct (uncommitted):** ATP in use at AIIMS New Delhi since 2010 (about 1.5 lakh ED patients a year); adopted and modified at AIIMS Bhubaneswar, CMC Vellore and GTB Delhi; Kerala DHS uses a similar protocol in medical colleges, district hospitals and CHCs (J Emerg Trauma Shock 2020;13(2), PMID 36353399 validation). AIIMS Bhubaneswar is the Odisha example for the slides.
+- [x] IITT thresholds against the full WHO tool, not only the reference card. **Checked 8 Oct (uncommitted)** against WHO's adult tool and reference card PDFs (who.int/tools/triage): every number matches (Red HR < 50 / > 150; high-risk HR < 60 / > 130, RR < 10 / > 30, temp < 36 / > 39, SpO₂ < 92, AVPU; pregnancy SBP ≥ 160 / DBP ≥ 110; burns > 15 %, age < 2 or > 70). Two card items were missing and are now rules: trauma in a patient on blood thinners or with a bleeding disorder (new finding `anticoagulated`), and inhalation injury as a major burn. Not encoded, with reason: "ECG with acute ischaemia" (no ECG input), "known diagnosis requiring urgent surgery" and "pregnancy referred for complications" (need a referral record), polytrauma (not reliably said in a complaint).
+- [ ] Finale judging criteria on the official listing. **Tried 8 Oct:** hackathon.bput.ac.in renders with JavaScript and shows nothing to a fetch; a search summary gives innovation 30 / technical 25 / UX 20 / impact 15 / presentation 10 and a 10-minute pitch with 5-minute Q&A, but that could not be traced to an official page, so it is not used. **Left:** read it in a browser or ask the organisers (below).
 
 **For the organisers**
 - [ ] Demo slot length; live or recorded demo; projector or machine provided; is a hosted link required?
@@ -346,15 +346,22 @@ The user's rule (6 Oct): nothing waits until after the mid-evaluation; every ite
 
 - [x] docTR second OCR engine and OCR disagreement flag (7 Oct, uncommitted; see B9)
 - [ ] PP-StructureV3 table extraction
-- [ ] HL7 CDA export
-- [ ] Synthea longitudinal histories with Indian demographics
+- [x] HL7 CDA export. **Done 8 Oct (uncommitted):** `exports.to_cda`, CDA R2 ClinicalDocument (LOINC 54094-8) with narrative sections and structured vitals and report values; valid against HL7's CDA R2 schema in three cases (`tests/test_cda.py`); "HL7 CDA document" in the case export menu (live and mock).
+- [x] Synthea longitudinal histories with Indian demographics. **Done 8 Oct (uncommitted):** Synthea (Apache-2.0, seed 1008, 60 people) run locally; `scripts/import_synthea.py` keeps 12 adults with hypertension or asthma (Synthea's US disease model), 71 earlier visits with their BP, pulse, respiration and glucose, and gives them synthetic Indian names, ages and villages near PHC Manikpur. Seeded as SYN-001… (`JEEVIA_SEED_SYNTHEA`); a new visit shows the BP trend (test). No Indian prevalence model exists for Synthea, so the disease mix is not Indian; said in FEATURES.md.
 - [ ] Santali (Ol Chiki) end to end
 - [ ] Live telephony for the calling agent. *Built 6 Oct (0a36c36)*: Twilio calls with Sarvam's voice and keypad answers, the free answer recorded, transcribed and deleted, reminder SMS and staff SMS on a danger sign; only the demo phone is ever dialled; 6 tests against a fake Twilio. Vonage added the same day (Voice API with NCCO, SMS API; 2 more tests); `cloudflared` installed for the tunnel. Tried live: Vonage SMS works (staff alert and reminders, one segment each); Vonage's trial rejects voice calls to India ("restricted"); a Twilio trial cannot buy a number. **Left:** a live call needs a paid Vonage or Twilio account; a phone-simulator page for the demo was proposed and set aside by the user (6 Oct), to revisit later
 - [ ] Qwen3-VL-4B document-type label
 - [x] 300-patient synthetic set and full fairness split. **Done 8 Oct (2da0140):** see §5 fairness and EVALUATION.md.
 - [x] Settle cases where the expected colour and the protocol differ. **Done 8 Oct (2da0140):** cited rules NTEP-PRESUMPTIVE-TB, GINA-ASTHMA-LOW-SPO2, IITT-A/P-MAJOR-BURN; follow-up flags (rules/followup.yaml) for BP 160/100+, jaundice, blood in urine that never change the colour; 300-set agreement 78.0 → 84.0 %.
 - [ ] Indic Parler-TTS pre-generated prompt audio. *Instead, 6 Oct:* Sarvam Bulbul v3 speaks the call lines (online, 11 languages)
-- [ ] Question flow moved to versioned YAML with a shared field dictionary; CI fails on undefined fields
+- [x] Question flow moved to versioned YAML with a shared field dictionary; CI fails on undefined fields. **Done 8 Oct (uncommitted):** `backend/app/triage/question_flow.yaml` (version 1, 18 questions) is read by the rules and, as `frontend/src/lib/question_flow.json`, by the kiosk; the dictionary is `findings.FINDINGS`. Same 39 answer-to-finding entries as before, and the kiosk picks the same questions in the same order for 2,430 sample intakes.
+- [x] Note and referral a doctor can act on without opening anything else. **Done 8 Oct (uncommitted):** history block
+  (on questioning, denies, allergies, medicines, past history) on the note and in the summary; flags split clinical /
+  about the data; referral letter adds pertinent negatives, allergies, medicines, timed vitals, treatment given before
+  transfer and the referring doctor, and leaves out data notices.
+- [x] Better kiosk questions. **Done 8 Oct (uncommitted):** question flow version 2 (29 questions): allergy, daily
+  medicines, long-term illness, adherence, child vaccines, possible pregnancy, NTEP cough screen, blood in stool,
+  vomiting, chills, burning urine; hi/or/kn text; rule `LOCAL-POSSIBLE-ECTOPIC`; "Not sure" no longer read as "No".
 - [ ] Finale rubric pass: innovation, technical complexity, real-world impact, UI/UX, presentation
 
 ---
@@ -367,6 +374,6 @@ The user's rule (6 Oct): nothing waits until after the mid-evaluation; every ite
 - [x] Demo start order written down (5 Oct): `docs/FEATURES.md` §6, linked from the README.
 - [x] Rules bug fixed (5 Oct): "stone-crushing unit" (an occupation) fired the crush-injury trauma rules; regression tests added.
 
-- [ ] Update the old mock-mode rules in the frontend (`frontend/src/lib/api/mock/`) or label them; live mode is the demo path
+- [x] Update the old mock-mode rules in the frontend (`frontend/src/lib/api/mock/`) or label them; live mode is the demo path. **Labelled 8 Oct (uncommitted):** the file says it is an unsynced subset, and every mock note carries a `MOCK-RULES` info flag ("Local demo mode: simplified rules").
 - [ ] Revoke the Hugging Face read token after the hackathon
 - [ ] Keep `docs/EVALUATION.md`, `docs/FEATURES.md` and this file current at every commit

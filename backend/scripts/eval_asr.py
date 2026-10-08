@@ -66,9 +66,14 @@ def main(folder: str, lang: str) -> None:
         we, ce = edits(ref.split(), hyp.split()), edits(list(ref.replace(" ", "")), list(hyp.replace(" ", "")))
         w_err, w_tot, c_err, c_tot = w_err + we, w_tot + len(ref.split()), c_err + ce, c_tot + len(ref.replace(" ", ""))
         rows.append({"file": p.name, "reference": refs[p.name], "heard": out["text"], "wer": round(we / max(1, len(ref.split())), 3), "confidence": out.get("confidence")})
+        print(f"{p.name} {out['seconds_audio']:.1f}s audio, {time.perf_counter() - t:.1f}s, wer {rows[-1]['wer']}", file=sys.stderr, flush=True)
     # Process memory with only the speech model loaded (translation below loads more).
     mem = proc.memory_info() if proc else None
-    english = language.translate([r["heard"] for r in rows], lang, "en")["texts"] if rows else []
+    english = []
+    for r in rows:  # one at a time: a sentence the translator cannot end shows up here, not as a stalled batch
+        t = time.perf_counter()
+        english += language.translate([r["heard"]], lang, "en")["texts"]
+        print(f"translated {r['file']} in {time.perf_counter() - t:.1f}s", file=sys.stderr, flush=True)
     for r, e in zip(rows, english):
         r["english"] = e
     summary = {

@@ -206,6 +206,26 @@ export function toPdf(lines: string[]): Blob {
   return new Blob([out], { type: "application/pdf" });
 }
 
+const xmlEsc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/** Mock mode only: a narrative-only CDA R2 document. The backend's export (live mode) adds structured entries and is schema-tested. */
+function toCdaMock(e: Encounter) {
+  const items = (xs: string[]) => (xs.length ? `<list>${xs.map((x) => `<item>${xmlEsc(x)}</item>`).join("")}</list>` : "None.");
+  const sec = (title: string, xs: string[]) => `<component><section><title>${xmlEsc(title)}</title><text>${items(xs)}</text></section></component>`;
+  const n = e.note;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3"><realmCode code="IN"/><typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/><id root="2.25.276318398723961874165418342187521543" extension="${xmlEsc(e.id)}"/><code code="54094-8" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Emergency department Triage note"/><title>Jeevia triage note (non-diagnostic, synthetic data)</title><effectiveTime value="${new Date(e.created_at).toISOString().replace(/[-:T]/g, "").slice(0, 14)}"/><confidentialityCode code="R" codeSystem="2.16.840.1.113883.5.25"/><languageCode code="en-IN"/><recordTarget><patientRole><id root="2.25.276318398723961874165418342187521543.1" extension="${xmlEsc(e.patient.code)}"/><patient><name><given>${xmlEsc(e.patient.name)}</given></name><administrativeGenderCode code="${e.patient.sex === "F" || e.patient.sex === "M" ? e.patient.sex : "UN"}" codeSystem="2.16.840.1.113883.5.1"/></patient></patientRole></recordTarget><author><time value="${new Date(e.created_at).toISOString().replace(/[-:T]/g, "").slice(0, 14)}"/><assignedAuthor><id root="2.25.276318398723961874165418342187521543.2" extension="rules-engine"/><assignedAuthoringDevice><softwareName>Jeevia triage assistant (mock mode)</softwareName></assignedAuthoringDevice></assignedAuthor></author><custodian><assignedCustodian><representedCustodianOrganization><id root="2.25.276318398723961874165418342187521543.3" extension="demo"/><name>Demo facility</name></representedCustodianOrganization></assignedCustodian></custodian><component><structuredBody>${[
+    sec("Disclaimer", ["Triage support only. Not a diagnosis. All content must be reviewed by a qualified medical professional before any clinical decision."]),
+    sec("Chief complaint", [e.chief_complaint]),
+    sec("Triage urgency", [`Rules-engine urgency: ${e.urgency ?? "not set"}`]),
+    sec("Summary", n?.summary ? [n.summary] : []),
+    sec("Vital signs", (n?.vitals ?? []).map((v) => `${v.label}: ${v.value} ${v.unit ?? ""}`)),
+    sec("Report values", (n?.labs ?? []).map((v) => `${v.label}: ${v.value} ${v.unit ?? ""}`)),
+    sec("Flags", (n?.flags ?? []).map((f) => `[${f.severity.toUpperCase()}] ${f.label} (${f.code})`)),
+    sec("Rules fired", (n?.rules_fired ?? []).map((r) => `${r.rule_id} (${r.protocol}): ${r.description} -> ${r.urgency}`)),
+  ].join("")}</structuredBody></component></ClinicalDocument>`;
+}
+
 export function buildExport(e: Encounter, format: ExportFormat, facility?: Facility | null) {
   const base = `jeevia-${e.patient.code}-${e.id.slice(-6)}`;
   switch (format) {
@@ -215,6 +235,8 @@ export function buildExport(e: Encounter, format: ExportFormat, facility?: Facil
       return { filename: `${base}.csv`, mime: "text/csv", blob: new Blob([toCsv(e)], { type: "text/csv" }) };
     case "fhir":
       return { filename: `${base}.fhir.json`, mime: "application/fhir+json", blob: new Blob([JSON.stringify(toFhir(e), null, 2)], { type: "application/fhir+json" }) };
+    case "cda":
+      return { filename: `${base}.cda.xml`, mime: "application/xml", blob: new Blob([toCdaMock(e)], { type: "application/xml" }) };
     case "print":
       return { filename: `${base}.html`, mime: "text/html", blob: new Blob([toPrintHtml(e, facility)], { type: "text/html" }) };
     case "pdf":
@@ -223,28 +245,50 @@ export function buildExport(e: Encounter, format: ExportFormat, facility?: Facil
 }
 
 /** Referral text built from the note and the facility's specialist configuration. */
-export function referralText(e: Encounter, facility: Facility | null, destination: string, specialty: string, reason: string) {
+/** Extra lines the referring doctor adds in the referral form. */
+export interface ReferralExtra {
+  given?: string;
+  referrer?: { name: string; role?: string; phone?: string | null } | null;
+}
+
+/** A letter the receiving doctor can act on without opening the app: who, why, what was found, what was ruled out,
+ * what was already done here and when, allergies and medicines. Notices about how the data was captured stay in the app. */
+export function referralText(e: Encounter, facility: Facility | null, destination: string, specialty: string, reason: string, extra: ReferralExtra = {}) {
   const n = e.note;
+  const h = n?.history;
+  const unit = (v: { value: string | number; unit?: string | null }) => `${v.value}${v.unit ? " " + v.unit : ""}`;
+  const clinical = (n?.flags ?? []).filter((f) => f.severity !== "info" && f.group !== "data");
+  const intakeAt = new Date(e.created_at).toLocaleString("en-IN");
   const lines = [
     `REFERRAL NOTE — ${new Date().toLocaleString("en-IN")}`,
     `From: ${facility ? `${facility.name}, ${facility.district}` : "—"}`,
     `To: ${destination} (${specialty})`,
     "",
     `Patient: ${e.patient.name}, ${e.patient.age}/${e.patient.sex}, ID ${e.patient.code}, preferred language ${e.patient.language}`,
-    `Reason for referral: ${reason}`,
-    `Chief complaint: ${e.chief_complaint}`,
     e.urgency ? `Triage category (rules engine): ${URGENCY_LABEL[e.urgency]}` : "",
+    `Reason for referral: ${reason}`,
     "",
-    "Summary:",
-    n?.summary ?? "",
+    "History:",
+    n?.summary ?? `Chief complaint: ${e.chief_complaint}`,
+    ...(h?.negatives.length ? [`Denies: ${h.negatives.join("; ")}`] : []),
+    `Allergies: ${h?.allergies ?? "not recorded"}`,
+    `Regular medicines: ${[...(h?.medicines ?? []), ...(n?.medications ?? []).map((m) => `${m.name}${m.strength ? " " + m.strength : ""}`)].filter((x, i, a) => a.indexOf(x) === i).join("; ") || "none reported"}`,
+    ...(h?.past.length ? [`Past history: ${h.past.join("; ")}`] : []),
     "",
-    "Key findings:",
-    ...(n?.vitals ?? []).map((v) => `  ${v.label}: ${v.value}${v.unit ? " " + v.unit : ""}${v.needs_check ? " (needs re-check)" : ""}`),
-    ...(n?.labs ?? []).filter((l) => l.status !== "normal").map((v) => `  ${v.label}: ${v.value}${v.unit ? " " + v.unit : ""} (ref ${v.reference})`),
+    `Vital signs (at intake, ${intakeAt}):`,
+    ...((n?.vitals ?? []).length ? (n?.vitals ?? []).map((v) => `  ${v.label}: ${unit(v)}${v.status === "abnormal" ? " — abnormal" : ""}${v.needs_check ? " (needs re-check)" : ""}`) : ["  not recorded"]),
+    ...((n?.labs ?? []).some((l) => l.status !== "normal")
+      ? ["", "Report values outside range:", ...(n?.labs ?? []).filter((l) => l.status !== "normal").map((v) => `  ${v.label}: ${unit(v)}${v.reference ? ` (ref ${v.reference})` : ""}`)]
+      : []),
     "",
-    "Flags for receiving team:",
-    ...(n?.flags ?? []).filter((f) => f.severity !== "info").map((f) => `  • ${f.label}`),
+    "Why the rules flagged this case:",
+    ...(clinical.length ? clinical.map((f) => `  • ${f.label}`) : ["  • no red or yellow criteria"]),
+    "",
+    "Treatment given here before transfer:",
+    `  ${extra.given?.trim() || "none recorded"}`,
     ...(n?.missing_info.length ? ["", "Not yet available:", ...n.missing_info.map((m) => `  • ${m}`)] : []),
+    "",
+    extra.referrer ? `Referred by: ${extra.referrer.name}${extra.referrer.role ? `, ${extra.referrer.role.replace(/_/g, " ")}` : ""}${extra.referrer.phone ? `, ${extra.referrer.phone}` : ""}${facility ? `, ${facility.name}` : ""}` : "",
     "",
     DISCLAIMER,
     originLine(e),

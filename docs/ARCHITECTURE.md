@@ -101,7 +101,11 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | `routers/directory.py` | Public workplace search and state list. |
 | `routers/kiosk.py` | Kiosk links (create/revoke), public kiosk session and returning-patient identify, token board. |
 | `routers/shares.py` | QR summary links: create/list/revoke, public meta, open with access code (lockout, expiry, audit). |
-| `exports.py` | PDF (fpdf2), print HTML, JSON, CSV, FHIR R4 document bundle. |
+| `exports.py` | PDF (fpdf2), print HTML, JSON, CSV, FHIR R4 document bundle, HL7 CDA R2 document (LOINC 54094-8, schema-tested). |
+| `triage/question_flow.yaml` + `question_flow.py` | The kiosk's context questions, their conditions and the findings each answer sets; one versioned file read by the rules and (as `frontend/src/lib/question_flow.json`) by the kiosk. CI checks it against `findings.FINDINGS`. |
+| `triage/vlm.py` | Optional second document-type label from Qwen3-VL-4B on a local llama-server; a disagreement adds a warning, never changes the label. |
+| `triage/tables.py` | Optional PP-StructureV3 table reading of report photos in a separate Python (subprocess); a different value marks the row for checking. |
+| `scenarios.synthea_histories` | Seeds 12 patients with earlier visits from Synthea (`synthea_histories.json`, built by `scripts/import_synthea.py`). |
 | `observability.py` | JSON logs with request id (no request bodies → no PHI in logs), `/metrics` in Prometheus text format, `/health`. |
 | `seed.py` | Synthetic facilities, staff, patients and encounters (same scenarios as the frontend mock). |
 
@@ -173,7 +177,7 @@ Patients have no login and no portal (plan: staff-only surfaces). They use a kio
 | G1 | Consent capture — self, proxy, privacy context | `POST /consents`; intake refuses without `consent_id` |
 | G4 | Append-only audit writes incl. VIEW | `audit.py`, DB trigger in `db.py`, VIEW on every clinical read |
 | A4, H4 | File storage — upload, retrieve, expiry; documents open only for the treating doctors / nurses, the patient, or a QR summary holder | `routers/files.py`, `storage.py` |
-| E7 | Export — PDF, print, JSON, CSV, FHIR | `exports.py`, `GET /encounters/{id}/export` |
+| E7 | Export — PDF, print, JSON, CSV, FHIR, HL7 CDA | `exports.py`, `GET /encounters/{id}/export` |
 | F1 | Facility admin screens | `PATCH /facilities/{id}` + `frontend/src/app/admin/*` |
 | H8 | Logging and observability | `observability.py`, `/metrics`, `/health` |
 | H9 | Docker Compose | `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile` |

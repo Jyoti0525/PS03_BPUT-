@@ -108,6 +108,13 @@ class Settings(BaseSettings):
     llm_model_name: str = "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)"
     llm_timeout_s: float = 30
     llm_urgency_opinion: bool = True  # C8: the model's own urgency tier, shown beside the rules' result (never replaces it)
+    # Third reading of report tables (TODO 9): PP-StructureV3 in its own Python (scripts/ppstructure_tables.py). Unset = off.
+    table_python: str | None = None
+    table_timeout_s: float = 180
+    # Second document-type label (TODO 9): Qwen3-VL-4B on llama-server (scripts/start_vlm.sh). Unset = off.
+    vlm_url: str | None = None
+    vlm_model_name: str = "Qwen3-VL-4B-Instruct Q4_K_M (llama.cpp, offline)"
+    vlm_timeout_s: float = 60
     preload_language_models: bool = False  # load at start-up instead of on the first request
     # Sarvam AI (online, India-hosted): Bulbul voice for reminder-call lines, Saaras speech-to-text as a second engine.
     # Unset = calls fall back to the device's own voice. JEEVIA_SARVAM_API_KEY or SARVAM_API_KEY.
@@ -136,6 +143,7 @@ class Settings(BaseSettings):
     timezone: str = "Asia/Kolkata"
     seed_demo: bool = True
     seed_scenarios: bool = True  # demo scenarios for campus fevers, missed visits, capacity, workplace screening (app/scenarios.py)
+    seed_synthea: bool = True  # with seed_scenarios: 12 patients with earlier visits from Synthea (app/synthea_histories.json)
     log_level: str = "INFO"
     # Rate limits (app/ratelimit.py): requests per minute from one device or address, and per phone number.
     # 0 switches them off (the test session shares one address; test_security.py switches them on).
@@ -151,13 +159,15 @@ class Settings(BaseSettings):
     def _profile(self):
         given = self.model_fields_set
         preset = {"stub": {"language_models": False, "ocr_enabled": False, "asr_second_offline": False, "llm_url": None,
-                           "llm_urgency_opinion": False, "preload_language_models": False, "sarvam_api_key": None,
+                           "llm_urgency_opinion": False, "vlm_url": None, "table_python": None, "preload_language_models": False, "sarvam_api_key": None,
                            "bhashini_user_id": None, "bhashini_api_key": None},
                   "demo": {},
                   "full": {"preload_language_models": True}}[self.profile]
         for k, v in preset.items():
             if k not in given:
                 object.__setattr__(self, k, v)
+        if self.vlm_url and not self.vlm_url.startswith(("http://", "https://")):
+            raise ValueError("JEEVIA_VLM_URL must be an http(s) URL")
         if self.llm_url and not self.llm_url.startswith(("http://", "https://")):
             raise ValueError("JEEVIA_LLM_URL must be an http(s) address")
         if self.env == "production":

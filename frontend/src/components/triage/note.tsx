@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePrefs } from "@/components/providers";
 import { fmtDateTime } from "@/lib/hooks";
 import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays } from "lucide-react";
-import type { AiOpinion, Encounter, ExtractedValue, Flag, TrendRow, Urgency } from "@/lib/types";
+import type { AiOpinion, Encounter, ExtractedValue, Flag, NoteHistory, TrendRow, Urgency } from "@/lib/types";
 import { Badge, Card, CardHeader, cx } from "@/components/ui";
 import { SourceEvidence } from "./source";
 import { URGENCY_LABEL } from "@/lib/export";
@@ -42,6 +42,21 @@ export function FlagList({ flags, limit }: { flags: Flag[]; limit?: number }) {
   const order = { critical: 0, warning: 1, info: 2 };
   const list = [...flags].sort((a, b) => order[a.severity] - order[b.severity]).slice(0, limit);
   if (!list.length) return <p className="text-sm text-muted">{tr("No flags raised.")}</p>;
+  // Clinical warnings first; how the data was captured (translation, OCR, offline…) after, under its own heading.
+  const data = list.filter((f) => f.group === "data");
+  if (data.length && data.length < list.length)
+    return (
+      <div className="space-y-3">
+        <FlagRows list={list.filter((f) => f.group !== "data")} />
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted">{tr("About the data")}</p>
+        <FlagRows list={data} />
+      </div>
+    );
+  return <FlagRows list={list} />;
+}
+
+function FlagRows({ list }: { list: Flag[] }) {
+  const { tr } = usePrefs();
   return (
     <ul className="space-y-1.5">
       {list.map((f, i) => (
@@ -55,6 +70,28 @@ export function FlagList({ flags, limit }: { flags: Flag[]; limit?: number }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Pertinent positives and negatives, allergies, medicines, past history: the lines a doctor looks for first. */
+function HistoryList({ h }: { h: NoteHistory }) {
+  const { tr } = usePrefs();
+  const rows: [string, string][] = [
+    [tr("On questioning"), h.positives.join("; ")],
+    [tr("Denies"), h.negatives.join("; ")],
+    [tr("Allergies"), tr(h.allergies)],
+    [tr("Regular medicines"), h.medicines.join("; ") || tr("none reported")],
+    [tr("Past history"), h.past.join("; ") || tr("none reported")],
+  ];
+  return (
+    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 border-t border-line px-4 py-3 text-sm">
+      {rows.filter(([, v]) => v).map(([k, v]) => (
+        <div key={k} className="contents">
+          <dt className="font-medium text-muted">{k}</dt>
+          <dd className={k === tr("Allergies") && h.allergies === "not asked" ? "text-semi" : "text-ink"}>{v}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -292,6 +329,7 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
           {n.llm?.status === "UNAVAILABLE" && <Badge>{tr("AI summary unavailable")}</Badge>}
         </div>
         <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
+        {n.history && <HistoryList h={n.history} />}
         {n.renderer === "LLM" && n.summary_template && (
           <details className="border-t border-line px-4 py-2.5 text-sm">
             <summary className="cursor-pointer font-medium text-muted">{tr("Template summary (facts as recorded)")}</summary>

@@ -1059,6 +1059,12 @@ def extract_document(data: bytes, content_type: str, *, patient_name: str | None
     second_check = None
     if res.second is not None and res.lines:
         rows, second_check = cross_check(rows, parse_labs(res.second, sex, pregnant) if res.second.lines else [], res.second.engine)
+    table_check = None
+    if second and rows and content_type.startswith("image/"):  # a report photo: also read its table structure
+        from . import tables
+
+        if (found := tables.read_tables(data, ".png" if content_type == "image/png" else ".jpg")) is not None:
+            table_check = tables.check(rows, tables.rows_from_tables(found, sex, pregnant))
     meta = report_meta(res)
     warnings = list(res.quality.get("issues", []))
     if res.error:
@@ -1072,15 +1078,26 @@ def extract_document(data: bytes, content_type: str, *, patient_name: str | None
         warnings += document_checks(meta, patient_name)
     if res.lines and not rows and kind["type"] not in ("medicine_strip", "prescription"):
         warnings.append("No recognised lab values — the reviewer should read the document directly")
+    vlm_kind = None
+    if content_type.startswith("image/"):  # only pictures; a PDF is always a document
+        from . import vlm
+
+        if vlm.enabled():
+            vlm_kind, differs = vlm.compare(kind, data, content_type)
+            if differs:
+                warnings.append(differs)
     meds = medicines(text) if kind["type"] in ("prescription", "medicine_strip") else []
     if kind["type"] in ("prescription", "medicine_strip") and rows:
         rows = []  # numbers on a strip or prescription are strengths, not lab values
         second_check = None
+        table_check = None
     return {
         "engine": res.engine,
         "second_check": second_check,
+        "table_check": table_check,
         "consistency": consistency(rows),
         "doc_type": kind,
+        "doc_type_image_model": vlm_kind,
         "medicines": meds,
         "quality": res.quality,
         "rows": rows,

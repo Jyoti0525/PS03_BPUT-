@@ -58,6 +58,11 @@ def test_incomplete_patients_are_never_green():
     ("hi", "एक हफ्ते से दोनों हाथों पर खुजली वाले दाने, बुखार नहीं", "green"),  # खुजली contains जल; not a burn
     ("en", "Cough for three weeks with weight loss and sweating at night", "yellow"),  # NTEP presumptive TB
     ("hi", "तीन हफ्ते से खांसी, वजन कम हो रहा है और रात को पसीना आता है", "yellow"),
+    ("en", "Slipped and cut my forearm, I take warfarin for my heart valve", "red"),  # IITT card: trauma on anticoagulation
+    ("en", "Slipped and cut my forearm, not on any blood thinners", "yellow"),
+    ("hi", "फिसल कर हाथ में चोट लगी, खून पतला करने की दवा लेता हूँ", "red"),
+    ("or", "ଖସି ପଡ଼ି ହାତରେ ଆଘାତ, ରକ୍ତ ପତଳା ଔଷଧ ଖାଉଛି", "red"),
+    ("en", "Burn in a house fire with smoke inhalation, hoarse voice", "red"),  # IITT card: inhalation injury
 ])
 def test_phrases_found_by_the_set(lang, text, want):
     i = {"category": "normal", "language": lang, "chief_complaint": text, "symptoms": [], "selected_symptoms": [], "answers": [],

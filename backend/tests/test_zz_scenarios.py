@@ -78,3 +78,28 @@ def test_scenarios_load_once_and_each_demo_moment_works(client, employer):
     e = next(i for i in q if i["patient_code"] == "JVA-KSW-2103")
     note = client.get(f"{API}/encounters/{e['encounter_id']}", headers=ksw).json()["note"]
     assert any(h["rule_id"] == "OCC-FEV1-DECLINE" and "3.6 L" in h["evidence"][0] for h in note["rules_fired"])
+
+
+def test_synthea_histories_load_once_and_show_a_trend(client, nurse, doctor):
+    from sqlalchemy import func, select
+
+    from app.db import SessionLocal
+    from app.models import Encounter, Patient
+    from app.scenarios import synthea_histories
+
+    with SessionLocal() as db:
+        assert synthea_histories(db) is True
+        assert synthea_histories(db) is False
+        p = db.scalar(select(Patient).where(Patient.code == "SYN-002"))
+        n = db.scalar(select(func.count()).select_from(Encounter).where(Encounter.patient_id == p.id, Encounter.status == "closed"))
+        assert n >= 3
+    con = client.post(f"{API}/consents", json={"patient_id": p.id, "mode": "self", "privacy_context": "private", "language": "hi", "scopes": ["triage"]}, headers=nurse).json()
+    body = {"patient_id": p.id, "facility_id": "fac_phc_manikpur", "category": "chronic", "language": "en", "chief_complaint": "Follow-up, feeling well",
+            "consent_id": con["id"], "client_ref": f"z_{uuid.uuid4().hex}",
+            "vitals": {"bp_systolic": 150, "bp_diastolic": 92, "pulse": 80, "resp_rate": 16, "spo2": 98, "temp_f": 98.4, "avpu": "A"}}
+    r = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": "dev_kiosk_manikpur_1"})
+    assert r.status_code == 200, r.text
+    enc = r.json()
+    trend = client.get(f"{API}/encounters/{enc['id']}", headers=doctor).json()["note"]["trend"]
+    bp = next(t for t in trend if t["parameter"].startswith("Systolic"))
+    assert len(bp["points"]) >= 4 and bp["points"][-1] == {"label": "Today", "value": 150}

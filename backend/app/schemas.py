@@ -9,7 +9,7 @@ Role = Literal["doctor", "medical_officer", "nurse", "health_worker", "reception
 Urgency = Literal["red", "yellow", "green"]
 Category = Literal["normal", "maternal", "chronic"]
 FileKind = Literal["report", "image", "audio"]
-ExportFormat = Literal["pdf", "json", "csv", "fhir", "print"]
+ExportFormat = Literal["pdf", "json", "csv", "fhir", "cda", "print"]
 
 STAFF_ROLES = {"doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor"}
 FacilityType = Literal[

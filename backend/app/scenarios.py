@@ -9,6 +9,9 @@
 * Reminder calls (E6): at PHC Manikpur, Rina (pregnant, 31 weeks, her own phone, Odia) and Ramprasad (blood pressure
   and diabetes, Hindi) each missed a check-up and ASHA Kamla Devi could not reach them twice, so a reminder call is due
   and the agent may make it. Kusum's last visit was RED (diastolic 114), so for her a person must call, not the agent.
+* Long histories (Synthea): 12 people at PHC Manikpur with up to six earlier visits each, from Synthea's simulated
+  lives re-cast with synthetic Indian names (app/synthea_histories.json, scripts/import_synthea.py). A new visit by any
+  of them shows the blood-pressure (and glucose) trend across those visits.
 * Occupational (D2): Kalinga Steel Works workers screened today in three departments (6 crusher, 6 furnace, 5
   stores); the crusher workers were also screened last year, so FEV1 is compared with their own earlier value.
 
@@ -194,6 +197,25 @@ def call_scenarios(db) -> bool:
     return True
 
 
+def synthea_histories(db) -> bool:
+    """Patients SYN-001... with their earlier visits, all closed. Returns False when already there or the base seed is missing."""
+    import json
+    from pathlib import Path
+
+    if db.scalar(select(Patient.id).where(Patient.code == "SYN-001")) or not db.get(Facility, "fac_phc_manikpur"):
+        return False
+    data = json.loads(Path(__file__).with_name("synthea_histories.json").read_text(encoding="utf-8"))
+    for person in data["people"]:
+        p = _patient(db, person["code"], person["name"], person["age"], person["sex"], language=person["language"], village=person["village"],
+                     category="chronic" if person["conditions"] else "normal")
+        for v in person["visits"]:
+            when = datetime.fromisoformat(v["date"]).replace(hour=10, tzinfo=timezone.utc)
+            _visit(db, p, "fac_phc_manikpur", when, v["chief_complaint"], lang="en", vitals={**v["vitals"], "avpu": "A"}, closed=True,
+                   category="chronic" if person["conditions"] else "normal")
+    db.commit()
+    return True
+
+
 def main() -> None:
     from .db import SessionLocal, init_db
 
@@ -201,6 +223,8 @@ def main() -> None:
     with SessionLocal() as db:
         print("Demo scenarios added." if scenarios(db) else "Demo scenarios already present (or base seed missing).")
         print("Call scenarios added." if call_scenarios(db) else "Call scenarios already present (or base seed missing).")
+        if get_settings().seed_synthea:
+            print("Synthea histories added." if synthea_histories(db) else "Synthea histories already present (or base seed missing).")
 
 
 if __name__ == "__main__":

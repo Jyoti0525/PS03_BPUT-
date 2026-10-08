@@ -57,7 +57,7 @@ rules:
     source: ada
     when: { vital_if_measured: [glucose, lt, 70] }
   - id: IITT-A-HIGH-RISK-TRAUMA
-    description: High-risk trauma — fall from height, road crash mechanism, penetrating, crush, or injury in pregnancy
+    description: High-risk trauma — fall from height, road crash mechanism, penetrating, crush, injury in pregnancy, or injury on blood thinners / with a bleeding disorder
     urgency: red
     source: iitt_card
     when:
@@ -66,6 +66,7 @@ rules:
         - finding: road_traffic_high_risk
         - finding: penetrating_injury
         - finding: crush_injury
+        - all: [ { finding: injury }, { finding: anticoagulated } ]
         - all: [ { finding: injury }, { finding: pregnant } ]
   - id: IITT-A-MAJOR-BURN-AGE
     description: Any burn at age over 70
@@ -73,7 +74,7 @@ rules:
     source: iitt_card
     when: { all: [ { finding: burn }, { age_years: [gt, 70] } ] }
   - id: IITT-A-MAJOR-BURN
-    description: Major burn — face or neck, circumferential, or more than 15 % of the body (both arms are 18 %)
+    description: Major burn — face or neck, circumferential, inhalation injury, or more than 15 % of the body (both arms are 18 %)
     urgency: red
     source: iitt_card
     when: { all: [ { finding: burn }, { finding: burn_major } ] }

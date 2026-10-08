@@ -47,9 +47,9 @@ def main(lang: str) -> None:
     new = phrases((ROOT / path).read_text(encoding="utf-8"))
     changed = [(en, tr) for en, tr in new.items() if old.get(en) != tr]
     back: list[str] = []
-    for i in range(0, len(changed), 16):
-        back += language.translate([t for _, t in changed[i : i + 16]], lang, "en")["texts"]
-        print(f"read back {min(i + 16, len(changed))}/{len(changed)}", flush=True)
+    for i in range(0, len(changed), 4):  # small batches: one sentence the model cannot end holds up only three others
+        back += language.translate([t for _, t in changed[i : i + 4]], lang, "en")["texts"]
+        print(f"read back {min(i + 4, len(changed))}/{len(changed)}", flush=True)
     scored = sorted(((len(words(en) & words(bt)) / len(words(en)) if words(en) else 1.0, en, tr, bt) for (en, tr), bt in zip(changed, back)), key=lambda r: r[0])
     rows += [["Screen phrase" + (" (check first)" if ov < 0.4 else ""), en, tr, bt] + ["", ""] for ov, en, tr, bt in scored]
 
