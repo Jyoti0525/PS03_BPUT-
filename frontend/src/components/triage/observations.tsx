@@ -80,6 +80,7 @@ export function ObservationForm({ enc, onSaved, compact }: { enc: Encounter; onS
       vitals[f.key] = n;
     }
     if (!!vitals.bp_systolic !== !!vitals.bp_diastolic) return setErr(tr("Enter both BP values"));
+    if (vitals.bp_systolic && vitals.bp_diastolic && vitals.bp_systolic <= vitals.bp_diastolic) return setErr(tr("BP systolic (top number) must be higher than diastolic (bottom number). Check they are not swapped."));
     if (avpu) vitals.avpu = avpu;
     if (!Object.keys(vitals).length && !note.trim() && !signs.length && !examDone) return setErr(tr("Enter at least one vital sign, danger sign or observation"));
     setBusy(true);

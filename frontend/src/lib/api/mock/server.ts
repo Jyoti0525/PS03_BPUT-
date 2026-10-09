@@ -989,6 +989,23 @@ export const mockApi: JeeviaApi = {
       return clone(enc); // the in-browser demo never reads medicine strips (no OCR), so there is nothing to confirm
     }),
 
+  answerFollowup: (eid, input) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor", "nurse", "health_worker", "medical_officer"]);
+      const e = d.encounters.find((x) => x.id === eid);
+      if (!e || !e.note) throw new ApiError(404, "Encounter not found");
+      const q = e.note.followup_questions.find((x) => (x.id ?? x.tag) === input.qid);
+      if (!q) throw new ApiError(422, "This question is not open for you on this case");
+      const text = input.text?.trim() || null;
+      if (!input.answer && !text) throw new ApiError(422, "Write what the patient said");
+      // The in-browser demo keeps the answer in the history; it has no rules engine to re-run.
+      e.note.followup_questions = e.note.followup_questions.filter((x) => x !== q);
+      e.note.followup_answered = [...(e.note.followup_answered ?? []), { qid: input.qid, tag: q.tag, question: q.question, answer: input.answer || "Told", text, by: `${me.name} (${me.role})`, role: me.role, at: new Date().toISOString() }];
+      await audit(d, me, "UPDATE", "encounter", e.id, `Follow-up answered by ${me.role}: ${q.tag}`);
+      return e as unknown as Encounter;
+    }),
+
   addObservations: (eid, input) =>
     withDb(async (d) => {
       const me = await current(d);

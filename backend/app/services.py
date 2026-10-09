@@ -185,6 +185,22 @@ def record_observations(db: Session, e: Encounter, user: User, vitals: dict, not
             "by": f"{user.name} ({user.role})",
             "at": now().isoformat(),
         }
+    _rerun(db, e, intake, {"by": user.name, "role": user.role, "at": now().isoformat(), "vitals": vitals, "note": note or None,
+                           "signs": signs or [], "exam_done": exam_done})
+
+
+def record_answer(db: Session, e: Encounter, user: User, q: dict, answer: str, text: str | None) -> None:
+    """A follow-up question from the note, put to the patient at the bedside. The answer joins the history; where it
+    settles a finding (followups.ANSWER_FINDINGS) the rules run again on it, as for new vitals."""
+    intake = dict(e.intake or {})
+    prior = [a for a in intake.get("staff_answers") or [] if a["qid"] != q["id"]]
+    intake["staff_answers"] = prior + [{"qid": q["id"], "tag": q["tag"], "question": q["question"], "answer": answer, "text": text or None,
+                                        "by": f"{user.name} ({user.role})", "role": user.role, "at": now().isoformat()}]
+    _rerun(db, e, intake, None)
+
+
+def _rerun(db: Session, e: Encounter, intake: dict, observation: dict | None) -> None:
+    """Rebuild the note from the updated intake and run the rules again. A doctor's override is kept."""
     files = [f for f in (db.get(FileObject, fid) for fid in intake.get("file_ids", [])) if f]
     if labs := lab_values([f.extraction for f in files if f.extraction]):
         intake["lab_values"] = labs
@@ -199,10 +215,7 @@ def record_observations(db: Session, e: Encounter, user: User, vitals: dict, not
                      **calendar_context(db.get(Facility, e.facility_id), e.created_at))
     if old.get("edited_by"):  # keep what a clinician wrote by hand
         new.update({k: old[k] for k in ("summary", "missing_info", "edited_by", "edited_at") if k in old})
-    obs = list(old.get("observations") or [])
-    obs.append({"by": user.name, "role": user.role, "at": now().isoformat(), "vitals": vitals, "note": note or None,
-                "signs": signs or [], "exam_done": exam_done})
-    new["observations"] = obs
+    new["observations"] = list(old.get("observations") or []) + ([observation] if observation else [])
     e.note = new
     e.rules_urgency = urgency
     if e.urgency_source == "rules" and urgency != e.urgency:

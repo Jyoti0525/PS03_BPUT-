@@ -84,6 +84,16 @@ class ObservationIn(BaseModel):
     _scrub = field_validator("note")(_no_id_numbers)
 
 
+class AnswerIn(BaseModel):
+    """A follow-up question from the note, answered by the patient at the bedside."""
+
+    qid: str = Field(max_length=80)
+    answer: str | None = Field(default=None, max_length=80)
+    text: str | None = Field(default=None, max_length=300)
+
+    _scrub = field_validator("text")(_no_id_numbers)
+
+
 class Tokens(BaseModel):
     access_token: str
     refresh_token: str

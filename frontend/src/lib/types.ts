@@ -557,9 +557,25 @@ export interface TimelineEvent {
 }
 
 export interface FollowUpQuestion {
+  /** Stable id the answer is recorded against (older notes and the in-browser demo may lack it). */
+  id?: string;
   tag: string;
   question: string;
   for_role: "nurse" | "doctor" | "health_worker" | "medical_officer";
+  /** Answer buttons; empty means the patient's words are written instead. */
+  options?: string[];
+}
+
+/** A follow-up question put to the patient at the bedside, and what they said. */
+export interface FollowUpAnswer {
+  qid: string;
+  tag: string;
+  question: string;
+  answer: string;
+  text: string | null;
+  by: string;
+  role: string;
+  at: string;
 }
 
 export interface TriageResult {
@@ -584,6 +600,7 @@ export interface TriageNote {
   timeline: TimelineEvent[];
   missing_info: string[];
   followup_questions: FollowUpQuestion[];
+  followup_answered?: FollowUpAnswer[];
   trend: TrendRow[];
   disagreements: Disagreement[];
   transcript?: { original: string; translated: string; language: string } | null;

@@ -152,7 +152,7 @@ export default function NursePatient() {
           <ObservationList items={enc.note?.observations} />
         </div>
         <div className="space-y-4">
-          {enc.note ? <NoteView enc={enc} density={user?.role === "health_worker" ? "health_worker" : "nurse"} /> : null}
+          {enc.note ? <NoteView enc={enc} density={user?.role === "health_worker" ? "health_worker" : "nurse"} onUpdated={setData} /> : null}
           {!!enc.intake?.file_ids.length && (
             <Card>
               <CardHeader title={tr("Reports and photos")} icon={<Paperclip className="size-4" />} />

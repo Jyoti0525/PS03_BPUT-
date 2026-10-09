@@ -160,6 +160,8 @@ export interface JeeviaApi {
   setDuty(userId: string, onDuty: boolean): Promise<User>;
   /** Confirm or reject medicine names read from a photo (B10). */
   reviewMedications(encounterId: string, confirm: string[], reject: string[]): Promise<Encounter>;
+  /** Record the patient's answer to a follow-up question from the note; the rules run again on it. */
+  answerFollowup(encounterId: string, input: { qid: string; answer?: string | null; text?: string | null }): Promise<Encounter>;
   addObservations(encounterId: string, input: { vitals?: VitalsInput | null; note?: string | null; signs?: string[]; exam_done?: boolean }): Promise<Encounter>;
 
   // Patients

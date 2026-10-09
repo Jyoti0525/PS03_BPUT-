@@ -303,7 +303,7 @@ export default function CasePage() {
             />
           </div>
           )}
-      <div className="mt-4">{n ? <NoteView enc={enc} density={density} /> : <p className="text-sm text-muted">{tr("No note generated.")}</p>}</div>
+      <div className="mt-4">{n ? <NoteView enc={enc} density={density} onUpdated={setData} /> : <p className="text-sm text-muted">{tr("No note generated.")}</p>}</div>
 
       {!!enc.intake?.file_ids.length && (
         <Card className="mt-4">

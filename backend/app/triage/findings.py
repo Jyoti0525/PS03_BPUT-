@@ -20,6 +20,7 @@ import unicodedata
 from dataclasses import dataclass, field
 
 from app.triage import question_flow
+from app.triage.followups import answer_findings
 
 SYMPTOM, SIGN = "symptom", "sign"
 
@@ -450,6 +451,10 @@ def extract(intake: dict, category: str | None = None) -> dict[str, Finding]:
         for fid, f in scan_text(t, src).items():
             for ev in f.evidence:
                 _merge(out, fid, f.value, ev.replace(f"{src}:", f"{src} (machine translation only — not found in the patient's words):", 1) if fid in unconfirmed else ev)
+
+    # Follow-up questions answered at the bedside (followups.ANSWER_FINDINGS): same trust as a kiosk answer.
+    for fid, val, ev in answer_findings(intake):
+        _merge(out, fid, val, ev)
 
     # Clinician danger-sign check (nurse observations). Checked signs are present; once the
     # check is recorded, every unchecked sign is absent rather than unknown.

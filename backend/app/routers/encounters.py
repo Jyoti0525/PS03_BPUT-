@@ -18,6 +18,7 @@ from ..schemas import (
     REVIEWER_ROLES,
     STAFF_ROLES,
     AckIn,
+    AnswerIn,
     EncounterOut,
     EncounterPatch,
     EscalationIn,
@@ -37,7 +38,8 @@ from ..schemas import (
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
 from ..triage.findings import FINDINGS
-from ..services import (auto_escalate, aware, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, record_observations, sign_off_role,
+from ..triage.pipeline import questions_for
+from ..services import (auto_escalate, aware, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, record_answer, record_observations, sign_off_role,
                         summarise_later, wait_minutes)
 from .facilities import get_facility
 
@@ -337,6 +339,29 @@ def add_observations(eid: str, body: ObservationIn, user: Reviewer, db: DB):
         alerts.check_capacity(db, e.facility_id)
     if (e.intake or {}).get("ai_assist", True):
         summarise_later(e.id)  # the note was rebuilt from the new vitals, so its summary is rewritten too
+    return encounter_out(e, user)
+
+
+@router.post("/encounters/{eid}/answers", response_model=EncounterOut)
+def add_answer(eid: str, body: AnswerIn, user: Reviewer, db: DB):
+    """Staff record the patient's answer to a follow-up question the note asked them to put. Rules re-run on it."""
+    e = load_encounter(db, eid, user)
+    q = next((x for x in questions_for((e.note or {}).get("followup_questions") or [], user.role) if x.get("id") == body.qid), None)
+    if not q:
+        raise HTTPException(422, "This question is not open for you on this case")
+    text = (body.text or "").strip() or None
+    if q.get("options") and body.answer not in q["options"]:
+        raise HTTPException(422, "Choose one of the answers shown")
+    if not q.get("options") and not text:
+        raise HTTPException(422, "Write what the patient said")
+    before = e.urgency
+    record_answer(db, e, user, q, body.answer or "Told", text)
+    change = f"; urgency {before} → {e.urgency} (rules)" if e.urgency != before else ""
+    audit.record(db, user, "UPDATE", "encounter", e.id, f"Follow-up answered by {user.role}: {q['tag']} — {body.answer or 'text'}{change}", e.patient.code, e.facility_id)
+    if e.urgency != before:
+        alerts.check_capacity(db, e.facility_id)
+    if (e.intake or {}).get("ai_assist", True):
+        summarise_later(e.id)
     return encounter_out(e, user)
 
 

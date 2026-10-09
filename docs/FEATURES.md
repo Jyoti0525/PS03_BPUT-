@@ -242,6 +242,16 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - **Code:** `frontend/src/components/triage/observations.tsx`, `frontend/src/components/intake/intake-flow.tsx`;
   `Vitals` in `backend/app/schemas.py`; `POST /encounters/{id}/observations`.
 
+**A9 Bedside follow-up answers** · Working
+- **What:** the note's follow-up questions ("Ask the patient" for the nurse, "Still to ask or do" for the doctor) are
+  answered in place: Yes / No / Not sure, or a choice such as "At rest / During effort", plus the patient's own words.
+  The answer joins History under "Asked at the bedside" with who asked and when, and the question leaves the list.
+- **Rules:** an answer that settles a finding without doubt (one-sided weakness, can't speak full sentences, visual
+  change, fever with chills) re-runs the rules exactly like a kiosk answer, so it can raise urgency; the change is
+  audited. "Not sure" never sets anything. Other answers are history for people to read; no model interprets them.
+- **Code:** `backend/app/triage/followups.py`, `record_answer` in `backend/app/services.py`;
+  `POST /encounters/{id}/answers`; `AskQuestion` in `frontend/src/components/triage/note.tsx`.
+
 ### B. Reading and understanding
 
 **H0 Text layer before OCR** · Working

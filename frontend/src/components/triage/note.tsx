@@ -4,8 +4,10 @@ import { useState } from "react";
 import { usePrefs } from "@/components/providers";
 import { fmtDateTime } from "@/lib/hooks";
 import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays } from "lucide-react";
-import type { AiOpinion, Encounter, ExtractedValue, Flag, NoteHistory, TrendRow, Urgency } from "@/lib/types";
-import { Badge, Card, CardHeader, cx } from "@/components/ui";
+import type { AiOpinion, Encounter, ExtractedValue, Flag, FollowUpAnswer, FollowUpQuestion, NoteHistory, TrendRow, Urgency } from "@/lib/types";
+import { Badge, Button, Card, CardHeader, cx, Input } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { toast } from "@/components/ui/toast";
 import { SourceEvidence } from "./source";
 import { URGENCY_LABEL } from "@/lib/export";
 import { langByCode } from "@/lib/i18n/languages";
@@ -101,49 +103,95 @@ function statusTone(v: ExtractedValue) {
 
 const attention = (v: ExtractedValue) => (v.status === "abnormal" ? 0 : v.needs_check ? 1 : v.status === "borderline" ? 2 : 3);
 
-/** Each value sits beside the evidence that produced it. Out-of-range and to-check values come first, with a word label;
- * in a long list the within-range values fold away so the reviewer reads what matters first (4-minute budget). */
+/** A lab-style table: test, result, normal range, status. What to check sits under the result; the report crop the value
+ * was read from opens on demand. Out-of-range and to-check values come first; in a long list the within-range values fold
+ * away so the reviewer reads what matters first (4-minute budget). */
 export function ValueTable({ values, compact }: { values: ExtractedValue[]; compact?: boolean }) {
   const { tr } = usePrefs();
   const [open, setOpen] = useState(false);
+  const [src, setSrc] = useState<string | null>(null);
   if (!values.length) return <p className="px-4 py-3 text-sm text-muted">{tr("Nothing recorded.")}</p>;
   const sorted = [...values].sort((a, b) => attention(a) - attention(b));
   const ok = sorted.filter((v) => attention(v) === 3);
   const fold = !compact && values.length >= 6 && ok.length >= 3 && ok.length < values.length;
   const shown = fold && !open ? sorted.filter((v) => attention(v) < 3) : sorted;
+  const hasSource = !compact && values.some((v) => v.source.kind === "image_crop" || v.source.kind === "transcript");
   return (
-    <div className="divide-y divide-line">
-      {shown.map((v) => (
-        <div key={v.id} className={cx("grid items-center gap-3 px-4 py-2.5", compact ? "grid-cols-[1fr_auto]" : "grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.2fr)]")}>
-          <div className="min-w-0">
-            <p className="truncate text-sm text-muted">{tr(v.label)}</p>
-            <p className={cx("text-base font-bold tabular-nums", statusTone(v))}>
-              {v.value}
-              {v.unit && <span className="ml-1 text-xs font-medium text-muted">{v.unit}</span>}
-            </p>
-          </div>
-          <div className={cx("flex flex-col items-start gap-1", compact ? "items-end" : "sm:items-start")}>
-            {v.status === "abnormal" && <Badge tone="crit">{tr("Out of range")}</Badge>}
-            {v.status === "borderline" && <Badge tone="semi">{tr("Borderline")}</Badge>}
-            {v.needs_check && <Badge tone="semi">{tr("Needs checking")}</Badge>}
-            {v.reference && !compact && <span className="text-[11px] text-subtle">{tr("ref")} {v.reference}</span>}
-            {!compact && v.checks?.map((c) => (
-              <span key={c} className="text-[11px] text-semi">{tr(c)}</span>
-            ))}
-          </div>
-          {!compact && (
-            <div className="col-span-2 min-w-0 sm:col-span-1">
-              <SourceEvidence v={v} />
-            </div>
-          )}
-        </div>
-      ))}
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-line text-left text-[11px] font-semibold tracking-wide text-subtle uppercase">
+            <th className="px-4 py-2 font-semibold">{tr("Test")}</th>
+            <th className="px-2 py-2 text-right font-semibold">{tr("Result")}</th>
+            {!compact && <th className="hidden px-3 py-2 font-semibold sm:table-cell">{tr("Normal range")}</th>}
+            <th className="px-2 py-2 font-semibold">{tr("Status")}</th>
+            {hasSource && <th className="px-4 py-2 text-right font-semibold">{tr("Source")}</th>}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-line">
+          {shown.map((v) => (
+            <ValueRow key={v.id} v={v} compact={compact} hasSource={hasSource} open={src === v.id} onSource={() => setSrc(src === v.id ? null : v.id)} />
+          ))}
+        </tbody>
+      </table>
       {fold && (
-        <button type="button" onClick={() => setOpen((o) => !o)} className="w-full px-4 py-2.5 text-left text-sm font-medium text-teal-700 hover:bg-canvas">
+        <button type="button" onClick={() => setOpen((o) => !o)} className="w-full border-t border-line px-4 py-2.5 text-left text-sm font-medium text-teal-700 hover:bg-canvas">
           {open ? tr("Hide the values within range") : tr("Show {n} values within range", { n: ok.length })}
         </button>
       )}
     </div>
+  );
+}
+
+function ValueRow({ v, compact, hasSource, open, onSource }: { v: ExtractedValue; compact?: boolean; hasSource: boolean; open: boolean; onSource: () => void }) {
+  const { tr } = usePrefs();
+  const cols = 3 + (compact ? 0 : 1) + (hasSource ? 1 : 0);
+  return (
+    <>
+      <tr className={cx("align-top", v.status === "abnormal" && "bg-crit-bg/40")}>
+        <td className="px-4 py-2.5">
+          <p className="font-medium text-ink">{tr(v.label)}</p>
+          {!compact && v.reference && <p className="text-[11px] text-subtle sm:hidden">{tr("Normal")}: {v.reference}</p>}
+          {v.needs_check && !compact && (v.checks?.length ?? 0) > 0 && (
+            <p className="mt-0.5 flex items-start gap-1 text-[11px] text-semi">
+              <AlertTriangle className="mt-px size-3 shrink-0" /> {v.checks!.map((c) => tr(c)).join(" · ")}
+            </p>
+          )}
+        </td>
+        <td className={cx("px-2 py-2.5 text-right whitespace-nowrap tabular-nums", statusTone(v))}>
+          <span className="text-base font-bold">{v.value}</span>
+          {v.unit && <span className="ml-1 text-xs font-medium text-muted">{v.unit}</span>}
+        </td>
+        {!compact && <td className="hidden px-3 py-2.5 text-muted tabular-nums sm:table-cell">{v.reference ?? "—"}</td>}
+        <td className="px-2 py-2.5">
+          <span className="flex flex-wrap gap-1">
+            {v.status === "abnormal" ? <Badge tone="crit">{tr("Out of range")}</Badge> : v.status === "borderline" ? <Badge tone="semi">{tr("Borderline")}</Badge> : <Badge tone="rout">{tr("Normal")}</Badge>}
+            {v.needs_check && <Badge tone="semi">{tr("Check")}</Badge>}
+          </span>
+        </td>
+        {hasSource && (
+          <td className="px-4 py-2.5 text-right">
+            {v.source.kind === "image_crop" || v.source.kind === "transcript" ? (
+              <button type="button" onClick={onSource} aria-expanded={open} className="text-xs font-semibold text-teal-700 hover:underline">
+                {open ? tr("Hide") : v.source.kind === "image_crop" ? tr("See in report") : tr("See words")}
+              </button>
+            ) : (
+              <span className="text-[11px] text-subtle">{tr(v.source.kind === "sensor" ? "Device" : "Typed")}</span>
+            )}
+          </td>
+        )}
+      </tr>
+      {open && (
+        <tr>
+          <td colSpan={cols} className="bg-canvas px-4 py-3">
+            <div className="max-w-xl">
+              <SourceEvidence v={v} />
+              <p className="mt-1 text-[11px] text-muted">{tr("Read by")} {tr(v.source.engine)}</p>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -254,191 +302,339 @@ export function Undetermined({ note, compact }: { note: NonNullable<Encounter["n
 
 /** Note density by role (E2): the doctor and medical officer see everything; the nurse a working view; the health worker
  * a short form (summary, flags, what is missing, their own questions, vital signs). */
-export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" | "nurse" | "health_worker" }) {
-  const { tr } = usePrefs();
-  const n = enc.note;
-  if (!n) return null;
-  const needsCheck = [...n.vitals, ...(n.labs ?? [])].filter((v) => v.needs_check);
+export function NoteView({ enc, density, onUpdated }: { enc: Encounter; density: "doctor" | "nurse" | "health_worker"; onUpdated?: (e: Encounter) => void }) {
+  if (!enc.note) return null;
+  return density === "doctor" ? <ClinicalNote enc={enc} onUpdated={onUpdated} /> : <BedsideNote enc={enc} density={density} onUpdated={onUpdated} />;
+}
 
-  if (density !== "doctor") {
-    const sees = density === "health_worker" ? ["health_worker"] : ["health_worker", "nurse"];
-    const nurseQs = n.followup_questions.filter((q) => sees.includes(q.for_role));
-    return (
-      <div className="grid gap-4 2xl:grid-cols-2">
-        {density === "health_worker" && (
-          <Card className="2xl:col-span-2">
-            <CardHeader title={tr("Summary")} subtitle={tr("Short form for the health worker; the full note is with the nurse and doctor")} icon={<Scale className="size-4" />} />
-            <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
-          </Card>
-        )}
-        <Card>
-          <CardHeader title={tr("Do now")} subtitle={tr("Flags from the rules engine and source checks")} icon={<ListChecks className="size-4" />} />
-          <div className="p-4">
-            <FlagList flags={n.flags} />
-          </div>
-        </Card>
-        <Card>
-          <CardHeader title={tr("Vitals")} subtitle={needsCheck.length ? `${needsCheck.length} value(s) need re-measuring` : tr("As captured at intake")} icon={<Activity className="size-4" />} />
-          <ValueTable values={n.vitals} compact />
-        </Card>
-        <Card>
-          <CardHeader title={tr("Ask the patient")} icon={<MessageCircleQuestion className="size-4" />} />
-          <ol className="space-y-2 p-4 text-sm">
-            {nurseQs.map((q, i) => (
-              <li key={i} className="flex gap-2">
-                <span className="font-semibold text-teal-700">{i + 1}.</span>
-                <span>
-                  {tr(q.question)} <span className="text-xs text-subtle">({tr(q.tag)})</span>
-                </span>
-              </li>
-            ))}
-            {!nurseQs.length && <li className="text-muted">{density === "health_worker" ? tr("No health-worker questions for this case.") : tr("No nurse questions for this case.")}</li>}
-          </ol>
-        </Card>
-        <Card>
-          <CardHeader title={tr("Still missing")} icon={<Clock3 className="size-4" />} />
-          <ul className="space-y-1.5 p-4 text-sm">
-            {n.missing_info.map((m) => (
-              <li key={m} className="flex gap-2">
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-coral-500" />
-                {tr(m)}
-              </li>
-            ))}
-            {!n.missing_info.length && <li className="text-muted">{tr("Nothing missing.")}</li>}
-          </ul>
-        </Card>
+const YES_NO = ["Yes", "No", "Not sure"];
+
+/** One follow-up question the patient can answer at the bedside: answer buttons (or their words), saved to the record.
+ * The rules run again on the answer, so a "yes" to a danger question raises urgency. Read-only without onUpdated. */
+function AskQuestion({ enc, q, n, onUpdated }: { enc: Encounter; q: FollowUpQuestion; n: number; onUpdated?: (e: Encounter) => void }) {
+  const { tr } = usePrefs();
+  const options = q.options ?? YES_NO;
+  const [pick, setPick] = useState<string | null>(null);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const ready = options.length ? !!pick : !!text.trim();
+  const save = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      const before = enc.urgency;
+      const e = await api.answerFollowup(enc.id, { qid: q.id ?? q.tag, answer: pick, text: text.trim() || null });
+      toast(e.urgency !== before ? tr("Answer saved — the rules raised the urgency; the doctor has been alerted in the queue") : tr("Answer saved to the patient's history"), e.urgency !== before ? "info" : "success");
+      onUpdated!(e);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : tr("Could not save"));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <li className="px-4 py-3">
+      <div className="flex gap-2 text-sm">
+        <span className="font-semibold text-teal-700 tabular-nums">{n}.</span>
+        <div className="min-w-0 flex-1">
+          <p className="text-ink">
+            {tr(q.question)} <span className="ml-1 text-[11px] font-medium text-subtle uppercase">{tr(q.tag)}</span>
+          </p>
+          {onUpdated && (
+            <div className="mt-2 space-y-2">
+              {options.length > 0 && (
+                <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={tr(q.question)}>
+                  {options.map((o) => (
+                    <button key={o} type="button" role="radio" aria-checked={pick === o} onClick={() => setPick(pick === o ? null : o)}
+                      className={cx("rounded-lg border px-3 py-1 text-sm font-medium transition-colors", pick === o ? "border-teal-700 bg-teal-700 text-white" : "border-line bg-surface text-ink hover:bg-canvas")}>
+                      {tr(o)}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Input value={text} onChange={(e) => setText(e.target.value)} maxLength={300} className="h-9 flex-1 text-sm"
+                  placeholder={options.length ? tr("Patient's words (optional)") : tr("What the patient said")} aria-label={tr("Patient's words")} />
+                <Button size="sm" variant="teal" className="h-9" disabled={!ready} loading={busy} onClick={save}>{tr("Save")}</Button>
+              </div>
+              {err && <p className="text-xs text-crit">{err}</p>}
+            </div>
+          )}
+        </div>
       </div>
-    );
-  }
+    </li>
+  );
+}
+
+/** Questions put to the patient at the bedside and their answers, with who asked and when. */
+function AnsweredList({ answers }: { answers: FollowUpAnswer[] }) {
+  const { tr } = usePrefs();
+  if (!answers.length) return null;
+  return (
+    <div className="border-t border-line px-4 py-3">
+      <p className="text-xs font-semibold text-muted uppercase">{tr("Asked at the bedside")}</p>
+      <ul className="mt-1.5 space-y-2 text-sm">
+        {answers.map((a) => (
+          <li key={a.qid}>
+            <p className="text-ink-2">{tr(a.question)}</p>
+            <p className="text-ink">
+              <span className="font-semibold">{tr(a.answer === "Told" ? "Answer" : a.answer)}</span>
+              {a.text && <span> — “{a.text}”</span>}
+            </p>
+            <p className="text-[11px] text-subtle">{a.by} · {fmtDateTime(a.at)}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** A numbered section of the clinical note. */
+function Section({ n, title, aside, icon, children, tone }: { n: number; title: string; aside?: React.ReactNode; icon: React.ReactNode; children: React.ReactNode; tone?: "crit" | "semi" }) {
+  return (
+    <section className={cx("border-t border-line", tone === "crit" && "bg-crit-bg/30", tone === "semi" && "bg-semi-bg/30")}>
+      <div className="flex flex-wrap items-baseline justify-between gap-2 px-4 pt-3 sm:px-5">
+        <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-ink uppercase">
+          <span className="grid size-5 place-items-center rounded-full bg-ink text-[11px] text-white">{n}</span>
+          <span className="text-muted [&>svg]:size-4">{icon}</span>
+          {title}
+        </h3>
+        {aside && <span className="text-xs text-muted">{aside}</span>}
+      </div>
+      <div className="pb-3">{children}</div>
+    </section>
+  );
+}
+
+/** Vitals as tiles: value, unit and a word status; "not measured" is shown, never left blank. */
+function VitalsGrid({ values }: { values: ExtractedValue[] }) {
+  const { tr } = usePrefs();
+  const KEYS: [string, string][] = [
+    ["BP", "BP"], ["Pulse", "Pulse"], ["SpO", "SpO₂"], ["Resp", "Resp. rate"], ["Temp", "Temperature"], ["Glucose", "Glucose"], ["AVPU", "AVPU"],
+  ];
+  const tiles = KEYS.map(([k, label]) => {
+    const vs = values.filter((v) => v.label.toLowerCase().includes(k.toLowerCase()));
+    return { label, vs };
+  });
+  const others = values.filter((v) => !KEYS.some(([k]) => v.label.toLowerCase().includes(k.toLowerCase())));
+  return (
+    <div className="grid grid-cols-2 gap-2 px-4 pt-2 sm:grid-cols-4 sm:px-5 lg:grid-cols-7">
+      {tiles.map(({ label, vs }) => {
+        const worst = vs.find((v) => v.status === "abnormal") ?? vs.find((v) => v.status === "borderline") ?? vs[0];
+        const value = label === "BP" && vs.length === 2 ? `${vs.find((v) => /systolic/i.test(v.label))?.value ?? "?"}/${vs.find((v) => /diastolic/i.test(v.label))?.value ?? "?"}` : vs.map((v) => v.value).join(" / ");
+        return (
+          <div key={label} className={cx("rounded-xl border px-3 py-2", !worst ? "border-dashed border-line" : worst.status === "abnormal" ? "border-crit-line bg-crit-bg" : worst.status === "borderline" ? "border-semi-line bg-semi-bg" : "border-line bg-surface")}>
+            <p className="text-[11px] font-semibold tracking-wide text-muted uppercase">{tr(label)}</p>
+            {worst ? (
+              <p className={cx("text-lg font-bold tabular-nums", statusTone(worst))}>
+                {value}
+                {worst.unit && <span className="ml-1 text-[11px] font-medium text-muted">{worst.unit}</span>}
+                {vs.some((v) => v.needs_check) && <AlertTriangle className="ml-1 inline size-3.5 text-semi" aria-label={tr("Check")} />}
+              </p>
+            ) : (
+              <p className="text-sm text-subtle">{tr("Not measured")}</p>
+            )}
+          </div>
+        );
+      })}
+      {others.map((v) => (
+        <div key={v.id} className={cx("rounded-xl border px-3 py-2", v.status === "abnormal" ? "border-crit-line bg-crit-bg" : "border-line")}>
+          <p className="truncate text-[11px] font-semibold tracking-wide text-muted uppercase">{tr(v.label)}</p>
+          <p className={cx("text-lg font-bold tabular-nums", statusTone(v))}>
+            {v.value}
+            {v.unit && <span className="ml-1 text-[11px] font-medium text-muted">{v.unit}</span>}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** The doctor's note, read top to bottom in the order a clinician decides: why this urgency, what the patient says,
+ * history, vitals, investigations, what to do next. How the note was produced (rule IDs, engines, timeline, AI checks)
+ * is kept at the end, folded, for audit. */
+function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Encounter) => void }) {
+  const { tr } = usePrefs();
+  const n = enc.note!;
+  const answered = n.followup_answered ?? [];
+  const t = n.triage;
+  const tier = enc.urgency;
+  const decisive = n.rules_fired.filter((r) => r.rule_id !== "SAFE-PROVISIONAL" && r.urgency === (t?.urgency ?? tier));
+  const supporting = n.rules_fired.filter((r) => r.rule_id !== "SAFE-PROVISIONAL" && !decisive.includes(r));
+  const measure = [...new Set([...(t?.missing_for_green ?? []), ...(t?.unresolved ?? []).flatMap((u) => u.needs.map((x) => (x.startsWith("danger-sign") ? "clinician danger-sign check" : x)))])];
+  const clinicalFlags = n.flags.filter((f) => f.group !== "data" && f.code !== "SAFE-PROVISIONAL");
+  const dataFlags = n.flags.filter((f) => f.group === "data");
+  const words = n.original_words?.length ? n.original_words : n.transcript ? [n.transcript] : [];
+  const otherMissing = n.missing_info.filter((m) => !/needed before the case can be routine|^Ask \/ measure:/.test(m));
+  const byRole = (["doctor", "medical_officer", "nurse", "health_worker"] as const)
+    .map((r) => ({ r, qs: n.followup_questions.filter((q) => q.for_role === r) }))
+    .filter((x) => x.qs.length);
+  const redOpen = t?.unresolved.filter((u) => u.urgency === "red") ?? [];
+  let s = 0;
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader
-          title={tr("Summary")}
-          subtitle={`${tr("Organised from patient-provided information")} · ${n.generated_by}${n.edited_by ? ` · ${tr("edited by {name}", { name: n.edited_by })}` : ""}`}
-          icon={<Scale className="size-4" />}
-        />
-        <div className="flex flex-wrap items-center gap-2 px-4 pt-3 text-xs">
-          {n.renderer === "LLM" && !n.edited_by ? (
-            <Badge tone="teal">{tr("Written by {model} · checked against the record", { model: n.llm?.model.split(" (")[0] ?? "AI" })}</Badge>
-          ) : (
-            <Badge>{tr("Template summary")}</Badge>
-          )}
-          {n.llm?.status === "FAIL_FELL_BACK" && <Badge tone="semi">{tr("AI summary rejected by the checks")}</Badge>}
-          {n.llm?.status === "UNAVAILABLE" && <Badge>{tr("AI summary unavailable")}</Badge>}
-        </div>
-        <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
-        {n.history && <HistoryList h={n.history} />}
-        {n.renderer === "LLM" && n.summary_template && (
-          <details className="border-t border-line px-4 py-2.5 text-sm">
-            <summary className="cursor-pointer font-medium text-muted">{tr("Template summary (facts as recorded)")}</summary>
-            <p className="mt-2 text-ink-2">{tr(n.summary_template)}</p>
-          </details>
-        )}
-        {n.llm?.status === "FAIL_FELL_BACK" && n.llm.rejected_text && (
-          <details className="border-t border-line px-4 py-2.5 text-sm">
-            <summary className="cursor-pointer font-medium text-muted">{tr("Rejected AI text and why")}</summary>
-            <p className="mt-2 rounded-lg bg-canvas p-2.5 text-ink-2 line-through decoration-crit/60">{n.llm.rejected_text}</p>
-            <ul className="mt-1.5 list-disc pl-5 text-xs text-crit">
-              {[...(n.llm.guard ?? []), ...(n.llm.faithfulness ?? [])].map((r) => <li key={r}>{r}</li>)}
-            </ul>
-          </details>
-        )}
-        {(n.original_words?.length ? n.original_words : n.transcript ? [n.transcript] : []).length > 0 && (
-          <details open className="border-t border-line px-4 py-2.5 text-sm">
-            <summary className="flex cursor-pointer items-center gap-1.5 font-medium text-muted">
-              <Languages className="size-4" /> {tr("Original words (")}{tr(langByCode((n.original_words?.[0] ?? n.transcript)!.language).name)})
-            </summary>
-            {(n.original_words?.length ? n.original_words : [n.transcript!]).map((w, i) => (
-              <div key={i} className="mt-2 grid gap-2 sm:grid-cols-2">
-                <p lang={w.language} className="rounded-lg bg-canvas p-2.5 text-ink">{w.original}</p>
-                <div>
-                  <p className="rounded-lg border border-line p-2.5 text-ink-2">{w.translated}</p>
-                  <p className="mt-1 text-xs text-muted">
-                    {tr("Machine translated")}
-                    {"translation_engine" in w && w.translation_engine ? ` (${w.translation_engine})` : ""}
-                    {tr(" — check against the patient's own words")}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </details>
-        )}
-      </Card>
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Card>
-          <CardHeader title={tr("Flags")} subtitle={tr("Shown instead of model confidence scores")} icon={<AlertTriangle className="size-4" />} />
-          <div className="p-4">
-            <FlagList flags={n.flags} />
+      <Card className="overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-5">
+          <div>
+            <h2 className="text-lg font-bold text-ink">{tr("Triage note")}</h2>
+            <p className="text-xs text-muted">
+              {tr("Organised from patient-provided information")} · {fmtDateTime(n.generated_at)}
+              {n.edited_by ? ` · ${tr("edited by {name}", { name: n.edited_by })}` : ""}
+            </p>
           </div>
-        </Card>
-        <Card>
-          <CardHeader
-            title={tr("Rules engine trace")}
-            subtitle={`${tr("Urgency comes only from these deterministic rules")}${n.triage ? ` · ${n.triage.protocols.map((p) => p.key).join(" + ")} · rulepack ${n.triage.rulepack_version}` : ""}`}
-            icon={<ListChecks className="size-4" />}
-          />
-          <Undetermined note={n} />
-          <ul className="divide-y divide-line">
-            {n.rules_fired.map((r) => (
-              <li key={r.rule_id} className="flex items-start gap-3 px-4 py-2.5">
-                <span className={cx("mt-0.5 h-6 w-1 shrink-0 rounded-full", urgencyBar(r.urgency))} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm text-ink" title={english(tr, r.description)}>
-                    {tr(r.description)}
-                    {r.non_downgradable && r.urgency === "red" && (
-                      <span title={tr("Non-downgradable: only a doctor can lower it, with a written reason that is audited")} className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-crit-bg px-1.5 text-[10px] font-semibold uppercase text-crit">
-                        <Lock className="size-3" /> {tr("locked")}
-                      </span>
-                    )}
+          <div className="flex flex-wrap gap-1.5">
+            {n.renderer === "LLM" && !n.edited_by ? <Badge tone="teal">{tr("Written by {model} · checked against the record", { model: n.llm?.model.split(" (")[0] ?? "AI" })}</Badge> : <Badge>{tr("Template summary")}</Badge>}
+            {n.llm?.status === "FAIL_FELL_BACK" && <Badge tone="semi">{tr("AI summary rejected by the checks")}</Badge>}
+          </div>
+        </div>
+
+        {/* 1. Assessment: why this urgency */}
+        <Section n={++s} title={tr("Assessment")} icon={<Scale />} tone={tier === "red" ? "crit" : t?.provisional ? "semi" : undefined} aside={t ? `${t.protocols.map((p) => p.key).join(" + ")} · ${tr("rulepack")} ${t.rulepack_version}` : undefined}>
+          <div className="space-y-2 px-4 pt-2 sm:px-5">
+            <p className="flex flex-wrap items-center gap-2 text-[15px] text-ink">
+              <UrgencyBadge u={tier} size="lg" />
+              <span className="font-semibold">
+                {t?.provisional && !decisive.length ? tr("Held at YELLOW: not yet safe to call routine") : decisive.length ? tr("Because:") : tr("No urgent rule matched")}
+              </span>
+            </p>
+            {decisive.length > 0 && (
+              <ul className="space-y-1.5">
+                {decisive.map((r) => (
+                  <li key={r.rule_id} className="flex items-start gap-2 text-sm">
+                    <span className={cx("mt-1 h-4 w-1 shrink-0 rounded-full", urgencyBar(r.urgency))} />
+                    <span className="min-w-0">
+                      <span className="font-medium text-ink" title={english(tr, r.description)}>{tr(r.description)}</span>
+                      {r.non_downgradable && r.urgency === "red" && (
+                        <span title={tr("Non-downgradable: only a doctor can lower it, with a written reason that is audited")} className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-crit-bg px-1.5 text-[10px] font-semibold text-crit uppercase">
+                          <Lock className="size-3" /> {tr("locked")}
+                        </span>
+                      )}
+                      {(r.evidence?.length ?? 0) > 0 && <span className="block text-xs text-ink-2">{r.evidence!.join(" · ")}</span>}
+                      <span className="block font-mono text-[10px] text-subtle">{r.rule_id} · {r.source ?? r.protocol}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {measure.length > 0 && (
+              <div className="text-sm">
+                <p className="text-ink-2">{tr("To rule out a more urgent tier, measure:")}</p>
+                <ul className="mt-1 flex flex-wrap gap-1.5">
+                  {measure.map((x) => (
+                    <li key={x} className="rounded-md border border-semi-line bg-surface px-2 py-0.5 text-xs font-medium text-ink">{tr(x)}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {clinicalFlags.length > 0 && (
+              <ul className="space-y-1 pt-1">
+                {clinicalFlags.map((f, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <FlagIcon s={f.severity} />
+                    <span>
+                      <span className="font-medium text-ink">{tr(f.label)}</span> <span className="text-muted">— {tr(f.reason)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {enc.override && (
+              <div className="rounded-lg border border-coral-200 bg-coral-50 px-3 py-2 text-sm">
+                <p className="font-semibold text-coral-700">
+                  {tr("Clinician override:")} {tr(URGENCY_LABEL[enc.override.from_urgency])} → {tr(URGENCY_LABEL[enc.override.to_urgency])}
+                </p>
+                <p className="text-ink-2">“{tr(enc.override.reason)}”</p>
+                <p className="text-xs text-muted">{enc.override.by} · {fmtDateTime(enc.override.at)} · {tr(enc.override.category)}</p>
+              </div>
+            )}
+          </div>
+        </Section>
+
+        {/* 2. Presenting complaint */}
+        <Section n={++s} title={tr("Presenting complaint")} icon={<MessageCircleQuestion />}>
+          <p className="px-4 pt-2 text-[15px] leading-relaxed text-ink sm:px-5">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
+          {words.length > 0 && (
+            <div className="space-y-2 px-4 pt-3 sm:px-5">
+              {words.map((w, i) => (
+                <div key={i} className="grid gap-2 text-sm sm:grid-cols-2">
+                  <p lang={w.language} className="rounded-lg bg-canvas p-2.5 text-ink">
+                    <span className="mb-0.5 block text-[11px] font-semibold text-muted uppercase">{tr("Patient's words")} · {tr(langByCode(w.language).name)}</span>
+                    {w.original}
                   </p>
-                  {(r.evidence?.length ?? 0) > 0 && (
-                    <ul className="mt-0.5 space-y-0.5">
-                      {r.evidence!.map((ev, i) => (
-                        <li key={i} className="text-xs text-ink-2">→ {ev}</li>
-                      ))}
-                    </ul>
-                  )}
-                  <p className="font-mono text-[11px] text-subtle">
-                    {r.rule_id} · {r.source ?? r.protocol}
+                  <p className="rounded-lg border border-line p-2.5 text-ink-2">
+                    <span className="mb-0.5 block text-[11px] font-semibold text-muted uppercase">{tr("Machine translation: check against the patient's words")}</span>
+                    {w.translated}
                   </p>
                 </div>
-                <UrgencyBadge u={r.urgency} size="sm" />
-              </li>
-            ))}
-          </ul>
-          {(n.triage?.unresolved.filter((u) => u.urgency === "red").length ?? 0) > 0 && (
-            <details className="border-t border-line px-4 py-2.5 text-sm">
-              <summary className="cursor-pointer font-medium text-muted">
-                {tr("RED rules not yet ruled out")} ({n.triage!.unresolved.filter((u) => u.urgency === "red").length})
-              </summary>
-              <ul className="mt-1.5 space-y-1">
-                {n.triage!.unresolved
-                  .filter((u) => u.urgency === "red")
-                  .map((u) => (
-                    <li key={u.rule_id} className="text-xs text-ink-2">
-                      <span className="font-mono text-subtle">{u.rule_id}</span> <span title={english(tr, u.description)}>{tr(u.description)}</span> — {tr("needs")}: {u.needs.map((x) => tr(x)).join(", ")}
-                    </li>
-                  ))}
-              </ul>
-            </details>
-          )}
-          {n.llm_opinion && <SecondOpinion op={n.llm_opinion} />}
-          {enc.override && (
-            <div className="border-t border-line bg-coral-50 px-4 py-2.5 text-sm">
-              <p className="font-semibold text-coral-700">
-                {tr("Clinician override:")} {tr(URGENCY_LABEL[enc.override.from_urgency])} → {tr(URGENCY_LABEL[enc.override.to_urgency])}
-              </p>
-              <p className="text-ink-2">“{tr(enc.override.reason)}”</p>
-              <p className="text-xs text-muted">
-                {enc.override.by} · {fmtDateTime(enc.override.at)} · {tr(enc.override.category)}
-              </p>
+              ))}
             </div>
           )}
-        </Card>
-      </div>
+        </Section>
+
+        {/* 3. History */}
+        {(n.history || answered.length > 0) && (
+          <Section n={++s} title={tr("History")} icon={<ListChecks />}>
+            {n.history && <HistoryList h={n.history} />}
+            <AnsweredList answers={answered} />
+          </Section>
+        )}
+
+        {/* 4. Vitals */}
+        <Section n={++s} title={tr("Vitals")} icon={<Activity />} aside={valueSummary(n.vitals, tr) ?? undefined}>
+          <VitalsGrid values={n.vitals} />
+        </Section>
+
+        {/* 5. Investigations */}
+        {n.labs.length > 0 && (
+          <Section n={++s} title={tr("Investigations")} icon={<FlaskConical />} aside={valueSummary(n.labs, tr) ?? tr("Read from uploaded reports")}>
+            <div className="pt-1">
+              <ValueTable values={n.labs} />
+            </div>
+          </Section>
+        )}
+
+        {/* 6. Trend */}
+        {n.trend.length > 0 && (
+          <Section n={++s} title={enc.category === "maternal" ? tr("Across antenatal visits") : tr("Compared with previous visits")} icon={<TrendingUp />}>
+            <div className="space-y-3 px-4 pt-2 sm:px-5">
+              {n.trend.map((r) => (
+                <Sparkline key={r.parameter} row={r} />
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* 7. Plan */}
+        {(byRole.length > 0 || otherMissing.length > 0) && (
+          <Section n={++s} title={tr("Still to ask or do")} icon={<Clock3 />}>
+            {byRole.length > 0 && onUpdated && <p className="px-4 pt-1 text-xs text-muted sm:px-5">{tr("Ask the patient and save the answer: it joins the history and the rules re-check the urgency.")}</p>}
+            <div className="grid gap-4 px-4 pt-2 sm:px-5">
+              {byRole.map(({ r, qs }) => (
+                <div key={r}>
+                  <p className="text-xs font-semibold text-teal-700 uppercase">{tr("For the {r}", { r: tr(r.replace("_", " ")) })}</p>
+                  <ol className="-mx-4 mt-1 divide-y divide-line">
+                    {qs.map((q, i) => (
+                      <AskQuestion key={q.id ?? q.tag} enc={enc} q={q} n={i + 1} onUpdated={onUpdated} />
+                    ))}
+                  </ol>
+                </div>
+              ))}
+              {otherMissing.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-coral-700 uppercase">{tr("Missing information")}</p>
+                  <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-ink">
+                    {otherMissing.map((m) => (
+                      <li key={m}>{tr(m)}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </Section>
+        )}
+      </Card>
 
       {n.disagreements.length > 0 && (
         <Card className="border-semi-line">
@@ -461,78 +657,219 @@ export function NoteView({ enc, density }: { enc: Encounter; density: "doctor" |
         </Card>
       )}
 
+      {n.llm_opinion && (
+        <Card>
+          <SecondOpinion op={n.llm_opinion} />
+        </Card>
+      )}
+
+      {/* Audit: how the note was produced */}
+      <details className="group rounded-[var(--radius-card)] border border-line bg-surface">
+        <summary className="flex cursor-pointer items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-ink sm:px-5">
+          <span className="flex items-center gap-2"><Bot className="size-4 text-muted" /> {tr("How this note was made")}</span>
+          <span className="text-xs font-normal text-muted">{tr("Full rule trace, timeline, capture checks")} · {n.generated_by}</span>
+        </summary>
+        <div className="grid gap-4 border-t border-line p-4 sm:p-5 xl:grid-cols-2">
+          <div>
+            <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">{tr("Rules engine trace")}</p>
+            <ul className="divide-y divide-line rounded-xl border border-line">
+              {[...decisive, ...supporting, ...n.rules_fired.filter((r) => r.rule_id === "SAFE-PROVISIONAL")].map((r) => (
+                <li key={r.rule_id} className="flex items-start gap-2 px-3 py-2 text-sm">
+                  <span className={cx("mt-1 h-4 w-1 shrink-0 rounded-full", urgencyBar(r.urgency))} />
+                  <span className="min-w-0 flex-1">
+                    <span className="text-ink">{tr(r.description)}</span>
+                    <span className="block font-mono text-[10px] text-subtle">{r.rule_id} · {r.source ?? r.protocol}</span>
+                  </span>
+                  <UrgencyBadge u={r.urgency} size="sm" />
+                </li>
+              ))}
+            </ul>
+            {redOpen.length > 0 && (
+              <>
+                <p className="mt-3 mb-1 text-xs font-semibold tracking-wide text-muted uppercase">{tr("RED rules not yet ruled out")} ({redOpen.length})</p>
+                <ul className="space-y-1 text-xs text-ink-2">
+                  {redOpen.map((u) => (
+                    <li key={u.rule_id}>
+                      <span className="font-mono text-subtle">{u.rule_id}</span> {tr(u.description)} — {tr("needs")}: {u.needs.map((x) => tr(x)).join(", ")}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+          <div className="space-y-4">
+            {n.timeline.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">{tr("Timeline")}</p>
+                <ol className="space-y-1.5 text-sm">
+                  {n.timeline.map((e, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="w-28 shrink-0 text-xs text-subtle">{tr(e.when)}</span>
+                      <span className="text-ink">
+                        {tr(e.event)}
+                        {e.certainty && e.certainty !== "RECORDED" && <span className="ml-1 text-[10px] text-muted uppercase">({tr(e.certainty)})</span>}
+                        {e.basis && <span className="block text-xs text-subtle"><CalendarDays className="mr-1 inline size-3" />{e.basis}</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+            {dataFlags.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">{tr("Capture checks")}</p>
+                <FlagRows list={dataFlags} />
+              </div>
+            )}
+            {n.renderer === "LLM" && n.summary_template && (
+              <div>
+                <p className="mb-1 text-xs font-semibold tracking-wide text-muted uppercase">{tr("Template summary (facts as recorded)")}</p>
+                <p className="text-sm text-ink-2">{tr(n.summary_template)}</p>
+              </div>
+            )}
+            {n.llm?.status === "FAIL_FELL_BACK" && n.llm.rejected_text && (
+              <div>
+                <p className="mb-1 text-xs font-semibold tracking-wide text-muted uppercase">{tr("Rejected AI text and why")}</p>
+                <p className="rounded-lg bg-canvas p-2.5 text-sm text-ink-2 line-through decoration-crit/60">{n.llm.rejected_text}</p>
+                <ul className="mt-1.5 list-disc pl-5 text-xs text-crit">
+                  {[...(n.llm.guard ?? []), ...(n.llm.faithfulness ?? [])].map((r) => <li key={r}>{r}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </details>
+    </div>
+  );
+}
+
+/** What a nurse or health worker needs at the bedside, in order: what the patient said, what to do now, what to measure
+ * before the case can be routine, and what to ask. Rule IDs, engines and the full trace stay in the doctor's view. */
+function BedsideNote({ enc, density, onUpdated }: { enc: Encounter; density: "nurse" | "health_worker"; onUpdated?: (e: Encounter) => void }) {
+  const { tr } = usePrefs();
+  const n = enc.note!;
+  const answered = n.followup_answered ?? [];
+  const sees = density === "health_worker" ? ["health_worker"] : ["health_worker", "nurse"];
+  const questions = n.followup_questions.filter((q) => sees.includes(q.for_role));
+  const clinical = n.flags.filter((f) => f.group !== "data" && f.code !== "SAFE-PROVISIONAL" && f.severity !== "info");
+  const dataFlags = n.flags.filter((f) => f.group === "data");
+  const t = n.triage;
+  // One list of what to measure or check, instead of the same items in a flag, a rule list and a "still missing" card.
+  const measure = [
+    ...new Set([
+      ...(t?.missing_for_green ?? []),
+      ...(t?.unresolved ?? []).flatMap((u) => u.needs.map((x) => (x.startsWith("danger-sign") ? "clinician danger-sign check" : x))),
+    ]),
+  ];
+  const otherMissing = n.missing_info.filter((m) => !/needed before the case can be routine|^Ask \/ measure:/.test(m));
+  const words = n.original_words?.length ? n.original_words : n.transcript ? [n.transcript] : [];
+  const recorded = n.vitals.filter((v) => v.value !== null && v.value !== undefined && v.value !== "");
+  const abnormalLabs = (n.labs ?? []).filter((v) => v.status === "abnormal" || v.status === "borderline" || v.needs_check);
+
+  return (
+    <div className="space-y-4">
       <Card>
-        <CardHeader title={tr("Vitals")} subtitle={valueSummary(n.vitals, tr) ?? tr("Each value with the source that produced it")} icon={<Activity className="size-4" />} />
-        <ValueTable values={n.vitals} />
+        <CardHeader title={tr("What the patient told us")} icon={<Languages className="size-4" />} />
+        <div className="space-y-3 px-4 py-3 text-[15px]">
+          {words.map((w, i) => (
+            <div key={i} className="grid gap-2 sm:grid-cols-2">
+              <p lang={w.language} className="rounded-lg bg-canvas p-2.5 text-ink">
+                <span className="mb-0.5 block text-xs text-muted">{tr(langByCode(w.language).name)}</span>
+                {w.original}
+              </p>
+              <p className="rounded-lg border border-line p-2.5 text-ink-2">
+                <span className="mb-0.5 block text-xs text-muted">{tr("Machine translation: check with the patient")}</span>
+                {w.translated}
+              </p>
+            </div>
+          ))}
+          <p className="leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
+        </div>
+        {n.history && <HistoryList h={n.history} />}
+        <AnsweredList answers={answered} />
+        {abnormalLabs.length > 0 && (
+          <div className="border-t border-line">
+            <p className="flex items-center gap-1.5 px-4 pt-3 text-sm font-semibold text-ink">
+              <FlaskConical className="size-4" /> {tr("From the uploaded reports")}
+            </p>
+            <ValueTable values={abnormalLabs} compact />
+          </div>
+        )}
       </Card>
 
-      {n.labs.length > 0 && (
-        <Card>
-          <CardHeader title={tr("Report values")} subtitle={valueSummary(n.labs, tr) ?? tr("Read from uploaded reports — cropped region shown beside each value")} icon={<FlaskConical className="size-4" />} />
-          <ValueTable values={n.labs} />
-        </Card>
-      )}
-
-      {n.trend.length > 0 && (
-        <Card>
-          <CardHeader title={enc.category === "maternal" ? tr("Across antenatal visits") : tr("Compared with previous visits")} subtitle={tr("Longitudinal values from this patient's earlier encounters")} icon={<TrendingUp className="size-4" />} />
-          <div className="space-y-3 p-4">
-            {n.trend.map((r) => (
-              <Sparkline key={r.parameter} row={r} />
-            ))}
-          </div>
-        </Card>
-      )}
-
-      <div className="grid gap-4 xl:grid-cols-3">
-        <Card>
-          <CardHeader title={tr("Timeline")} icon={<Clock3 className="size-4" />} />
-          <ol className="relative space-y-3 p-4 pl-6 text-sm before:absolute before:top-5 before:bottom-5 before:left-[18px] before:w-px before:bg-line">
-            {n.timeline.map((t, i) => (
-              <li key={i} className="relative">
-                <span className="absolute top-1.5 -left-[11px] size-2 rounded-full bg-teal-600 ring-2 ring-white" />
-                <p className="flex flex-wrap items-center gap-1.5 text-xs text-subtle">
-                  {tr(t.when)}
-                  {t.certainty && t.certainty !== "RECORDED" && (
-                    <Badge tone={t.certainty === "STATED" ? "teal" : t.certainty === "INFERRED" ? "info" : "semi"}>{tr(t.certainty)}</Badge>
-                  )}
-                </p>
-                <p className="text-ink">{tr(t.event)}</p>
-                {t.raw && <p className="text-xs text-muted">“{t.raw}”</p>}
-                {t.basis && (
-                  <p className="mt-0.5 flex items-center gap-1 text-xs text-subtle" title={tr("Approximate: from the regional calendar. Confirm the date with the patient.")}>
-                    <CalendarDays className="size-3 shrink-0" /> {t.basis}
-                  </p>
-                )}
+      {clinical.length > 0 && (
+        <Card className="border-crit-line">
+          <CardHeader title={tr("Act on this now")} icon={<AlertOctagon className="size-4 text-crit" />} />
+          <ul className="space-y-2 p-4 text-sm">
+            {clinical.map((f, i) => (
+              <li key={i} className="flex gap-2">
+                <FlagIcon s={f.severity} />
+                <span>
+                  <span className="font-semibold text-ink">{tr(f.label)}</span>
+                  <span className="block text-muted">{tr(f.reason)}</span>
+                </span>
               </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {(measure.length > 0 || otherMissing.length > 0) && (
+        <Card className="border-semi-line">
+          <CardHeader
+            title={tr("Measure before this can be routine")}
+            subtitle={t?.provisional ? tr("Held at YELLOW until these are recorded: unknown is never treated as normal.") : undefined}
+            icon={<ListChecks className="size-4 text-semi" />}
+          />
+          <ul className="flex flex-wrap gap-2 p-4">
+            {measure.map((x) => (
+              <li key={x} className="rounded-lg border border-semi-line bg-semi-bg px-2.5 py-1 text-sm font-medium text-ink">
+                {tr(x)}
+              </li>
+            ))}
+          </ul>
+          {otherMissing.length > 0 && (
+            <ul className="space-y-1 border-t border-line px-4 py-3 text-sm text-ink-2">
+              {otherMissing.map((m) => (
+                <li key={m}>• {tr(m)}</li>
+              ))}
+            </ul>
+          )}
+          <p className="border-t border-line px-4 py-2.5 text-xs text-muted">{tr("Use the form on the left; the urgency is re-checked as soon as you save.")}</p>
+        </Card>
+      )}
+
+      {questions.length > 0 && (
+        <Card>
+          <CardHeader title={tr("Ask the patient")} subtitle={onUpdated ? tr("Save each answer: it joins the history and the rules re-check the urgency.") : undefined} icon={<MessageCircleQuestion className="size-4" />} />
+          <ol className="divide-y divide-line">
+            {questions.map((q, i) => (
+              <AskQuestion key={q.id ?? q.tag} enc={enc} q={q} n={i + 1} onUpdated={onUpdated} />
             ))}
           </ol>
         </Card>
+      )}
+
+      {recorded.length > 0 && (
         <Card>
-          <CardHeader title={tr("Missing information")} icon={<ListChecks className="size-4" />} />
-          <ul className="space-y-1.5 p-4 text-sm">
-            {n.missing_info.map((m) => (
-              <li key={m} className="flex gap-2">
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-coral-500" /> {tr(m)}
-              </li>
-            ))}
-            {!n.missing_info.length && <li className="text-muted">{tr("Nothing flagged as missing.")}</li>}
-          </ul>
+          <CardHeader title={tr("Vitals recorded")} icon={<Activity className="size-4" />} />
+          <ValueTable values={n.vitals} compact />
         </Card>
-        <Card>
-          <CardHeader title={tr("Follow-up questions")} icon={<MessageCircleQuestion className="size-4" />} />
-          <ul className="space-y-2.5 p-4 text-sm">
-            {n.followup_questions.map((q, i) => (
+      )}
+
+      {dataFlags.length > 0 && (
+        <details className="rounded-2xl border border-line bg-surface px-4 py-3 text-sm">
+          <summary className="cursor-pointer font-medium text-muted">{tr("How this was captured")} ({dataFlags.length})</summary>
+          <ul className="mt-2 space-y-1.5">
+            {dataFlags.map((f, i) => (
               <li key={i}>
-                <span className="text-xs font-semibold text-teal-700">
-                  {tr(q.tag)} {tr("· for")} {tr(q.for_role.replace("_", " "))}
-                </span>
-                <p className="text-ink">{tr(q.question)}</p>
+                <span className="font-medium text-ink">{tr(f.label)}</span>
+                <span className="block text-xs text-muted">{tr(f.reason)}</span>
               </li>
             ))}
           </ul>
-        </Card>
-      </div>
+        </details>
+      )}
     </div>
   );
 }

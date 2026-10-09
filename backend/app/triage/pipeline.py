@@ -12,31 +12,9 @@ from datetime import date, datetime, timezone
 from .. import asr_check, regions
 from .extraction import document_checks
 from .findings import FINDINGS, translation_check
+from .followups import CONTEXT_ID, FOLLOWUPS, answered_ids, options_for, question_id
 from .timeline import onset
 
-# Follow-up questions keyed by findings (negation-aware), so "no chest pain" never asks about chest pain. A key may
-# also be "urgency:<tier>" or "rule:<id prefix>" (a fired rule). Each role sees its own questions, at most 3 per role
-# (B7): health worker → health worker; nurse → health worker + nurse; doctor and medical officer → all.
-FOLLOWUPS = [
-    ("urgency:red", {"tag": "Transfer", "question": "If this patient must go on, are a vehicle (108 / 102) and a bed at the receiving hospital confirmed before they leave?", "for_role": "medical_officer"}),
-    ("pregnant", {"tag": "Specialist", "question": "Does she need the obstetrician at the first referral unit today, and is blood available there?", "for_role": "medical_officer"}),
-    ("rule:OCC-", {"tag": "Workplace", "question": "Should the worker be kept away from the exposure until reviewed? If silicosis or another listed disease is confirmed, it is notifiable (Factories Act 1948, s.89).", "for_role": "medical_officer"}),
-    ("rule:OCC-SILICA-TB", {"tag": "TB test", "question": "Has a sputum sample been sent for NAAT (CBNAAT / Truenat) under NTEP?", "for_role": "nurse"}),
-    ("rule:OCC-", {"tag": "PPE", "question": "Which mask or respirator does the worker wear, and is it worn for the whole shift?", "for_role": "health_worker"}),
-    ("chest_pain", {"tag": "Onset", "question": "Did the chest discomfort start at rest or during effort?", "for_role": "doctor"}),
-    ("chest_pain", {"tag": "ECG", "question": "Has a 12-lead ECG been recorded since arrival?", "for_role": "nurse"}),
-    ("fever", {"tag": "Fever pattern", "question": "Is the fever continuous or does it come with chills at a fixed time?", "for_role": "health_worker"}),
-    ("fever", {"tag": "Rash / bleeding", "question": "Any rash, gum bleeding or black stools since the fever began?", "for_role": "nurse"}),
-    ("fever", {"tag": "Contacts", "question": "Is anyone else in the same hostel, household or workplace ill with fever?", "for_role": "health_worker"}),
-    ("breathless", {"tag": "Speech", "question": "Can the patient speak full sentences without pausing for breath?", "for_role": "nurse"}),
-    ("headache", {"tag": "Visual change", "question": "Any flashing lights, spots or blurred vision right now?", "for_role": "nurse"}),
-    ("cough", {"tag": "Duration", "question": "Has the cough lasted more than 2 weeks? Any blood in sputum?", "for_role": "health_worker"}),
-    ("abdominal_pain", {"tag": "Location", "question": "Where exactly is the pain — upper, lower, right or left side?", "for_role": "doctor"}),
-    ("injury", {"tag": "Mechanism", "question": "How and when did the injury happen? Any loss of consciousness?", "for_role": "nurse"}),
-    ("diarrhoea", {"tag": "Hydration", "question": "How many times has the patient passed urine in the last 6 hours?", "for_role": "health_worker"}),
-    ("weakness_general", {"tag": "Weakness", "question": "Is the weakness all over, or in one arm, leg or side of the face?", "for_role": "nurse"}),
-    ("snake_bite", {"tag": "Envenomation", "question": "Time of bite? Any bleeding gums, drooping eyelids or difficulty swallowing?", "for_role": "doctor"}),
-]
 
 
 
@@ -359,13 +337,17 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     if cat == "chronic" and not any(f.kind == "report" for f in files):
         missing.append("No recent lab report for chronic follow-up")
 
+    # A question already answered at the bedside leaves the list and its answer joins the history (followup_answered).
+    done = answered_ids(intake)
     followup, per_role = [], {}
     for key, q in FOLLOWUPS:
-        if _asks(triage, key) and per_role.get(q["for_role"], 0) < PER_ROLE and q not in followup:
-            followup.append(q)
+        qid = question_id(key, q)
+        if _asks(triage, key) and per_role.get(q["for_role"], 0) < PER_ROLE and all(f["id"] != qid for f in followup):
             per_role[q["for_role"]] = per_role.get(q["for_role"], 0) + 1
-    if not per_role.get("health_worker"):
-        followup.append({"tag": "Context", "question": "Anything else that changed recently — food, work, travel or medicines?", "for_role": "health_worker"})
+            if qid not in done:
+                followup.append({**q, "id": qid, "options": options_for(qid)})
+    if not per_role.get("health_worker") and CONTEXT_ID not in done:
+        followup.append({"id": CONTEXT_ID, "tag": "Context", "question": "Anything else that changed recently — food, work, travel or medicines?", "for_role": "health_worker", "options": []})
 
     timeline = []
     # Each entry says how sure it is (B4): RECORDED (a dated record here), STATED, INFERRED, VAGUE or UNKNOWN.
@@ -497,6 +479,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         "timeline": timeline,
         "missing_info": missing,
         "followup_questions": followup,
+        "followup_answered": list(intake.get("staff_answers") or []),
         "trend": trend,
         "disagreements": disagreements,
         "documents": documents,

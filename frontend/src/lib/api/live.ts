@@ -52,7 +52,12 @@ async function raw(path: string, init: RequestInit = {}, retry = true): Promise<
     let msg = res.statusText;
     try {
       const body = await res.json();
-      msg = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail ?? body);
+      msg =
+        typeof body.detail === "string"
+          ? body.detail
+          : Array.isArray(body.detail) // FastAPI validation errors: show the sentence, never the raw JSON
+            ? body.detail.map((d: { msg?: string }) => String(d.msg ?? "").replace(/^Value error, /, "")).filter(Boolean).join(". ") || "Some values are not valid"
+            : JSON.stringify(body.detail ?? body);
     } catch {
       /* non-JSON error */
     }
@@ -164,6 +169,7 @@ export const liveApi: JeeviaApi = {
   listUsers: () => json("/users"),
   setDuty: (id, on_duty) => patch(`/users/${id}/duty`, { on_duty }),
   reviewMedications: (eid, confirm, reject) => post(`/encounters/${eid}/medications`, { confirm, reject }),
+  answerFollowup: (eid, input) => post(`/encounters/${eid}/answers`, input),
   addObservations: (eid, input) => post(`/encounters/${eid}/observations`, input),
 
   searchPatients: (q) => json(`/patients?q=${encodeURIComponent(q)}`),
