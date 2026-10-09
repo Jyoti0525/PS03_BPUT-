@@ -404,13 +404,13 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     sex = {"F": "female", "M": "male"}.get(patient.sex, "patient")
     parts = [
         f"{patient.age}-year-old {sex}, {'general' if cat == 'normal' else cat} visit.",
-        f"Chief complaint: {intake['chief_complaint']}{_for(intake.get('duration'))}.",
+        f"Chief complaint: {intake['chief_complaint'].strip().rstrip('.!?')}{_for(intake.get('duration'))}.",
         *([f"Onset vague: \"{began['raw']}\"."] if began["certainty"] == "VAGUE" else []),
     ]
     if also := [x for x in intake.get("selected_symptoms") or [] if x.lower() not in intake["chief_complaint"].lower()]:
         parts.append(f"Also reports: {', '.join(also)}.")
     if intake.get("severity") is not None:
-        parts.append(f"Self-rated severity {intake['severity']}/10.")
+        parts.append(f"Rates it {intake['severity']}/10.")
     if (intake.get("maternal") or {}).get("gestation_weeks"):
         parts.append(f"Pregnant, {intake['maternal']['gestation_weeks']} weeks by history.")
     if intake.get("chronic"):
@@ -425,6 +425,26 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         if occ.get("fev1_l"):
             base = f" (earliest recorded {occ['fev1_baseline_l']:g} L)" if occ.get("fev1_baseline_l") else ""
             parts.append(f"FEV1 {occ['fev1_l']:g} L{', FVC ' + format(occ['fvc_l'], 'g') + ' L' if occ.get('fvc_l') else ''}{base}.")
+    hpi = " ".join(parts)  # the presenting complaint alone; the history rows carry the rest
+    # The same facts as label/value rows: the note shows these instead of a paragraph.
+    presenting = [{"label": "Patient", "value": f"{patient.age}-year-old {sex}, {'general' if cat == 'normal' else cat} visit"},
+                  {"label": "Complaint", "value": intake["chief_complaint"].strip().rstrip(".!?")}]
+    if intake.get("duration"):
+        presenting.append({"label": "How long", "value": _for(intake["duration"]).strip()})
+    if began["certainty"] == "VAGUE":
+        presenting.append({"label": "Onset", "value": f'vague: "{began["raw"]}"'})
+    if intake.get("severity") is not None:
+        presenting.append({"label": "Severity", "value": f"{intake['severity']}/10 (patient's rating)"})
+    if also:
+        presenting.append({"label": "Also reports", "value": ", ".join(also)})
+    if (intake.get("maternal") or {}).get("gestation_weeks"):
+        presenting.append({"label": "Pregnancy", "value": f"{intake['maternal']['gestation_weeks']} weeks by history"})
+    if intake.get("chronic"):
+        presenting.append({"label": "Since last visit", "value": f"feels {intake['chronic'].get('feeling_vs_last', 'unsure')} (patient's account)"})
+    if occ.get("exposures"):
+        from .rules import EXPOSURE_LABEL
+
+        presenting.append({"label": "Work exposure", "value": ", ".join(EXPOSURE_LABEL.get(x, x) for x in occ["exposures"])})
     photos = [f for f in files if f.kind == "image"]
     for f in photos:
         d = (f.extraction or {}).get("description") or {}
@@ -453,15 +473,20 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         missing.append("Medicine allergies not recorded — ask before prescribing")
     abn = [x for x in labs if x["status"] == "abnormal"]
     if abn:
-        parts.append("Uploaded report shows " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in abn) + " outside reference range.")
-    parts.append("Summary organises patient-provided information only; it is not a diagnosis.")
+        parts.append("Report values out of range: " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in abn) + ".")
+    parts.append("Patient-reported; not a diagnosis.")
 
     rule_codes = {h["rule_id"] for h in hits} | {f["id"] for f in triage.get("followups", [])} | {"PPE-GAP", "PHOTO"}
     for f in flags:  # the reviewer reads clinical warnings first; notices about how the data was captured come after
         f["group"] = "clinical" if f["code"] in rule_codes else "data"
 
+    since_last = _since_last(history[0], hx, vitals, intake) if history else None
+
     return {
         "summary": " ".join(parts),
+        "presenting": presenting,
+        "since_last": since_last,
+        "hpi": hpi,
         "history": hx,
         "flags": flags,
         "rules_fired": hits,
@@ -499,13 +524,47 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
 PAST = ("diabetes_known", "hypertension_known", "heart_disease_known", "tb_history", "asthma", "anticoagulated", "chemo_recent", "immunisation_incomplete", "adherence_poor")
 
 
+def _since_last(prev, hx: dict, vitals: list, intake: dict) -> dict:
+    """The last visit beside this one, so the doctor sees what changed in between: complaint, urgency and who decided
+    it, symptoms new / gone / still there, vital signs then and now, medicines. Only what both visits recorded."""
+    pn = getattr(prev, "note", None) or {}
+    ph = pn.get("history") or {}
+    then_pos, now_pos = ph.get("positives") or [], hx["positives"]
+    then_v = {v["label"]: v for v in pn.get("vitals") or [] if v.get("value") not in (None, "")}
+    rows = []
+    for v in vitals:
+        if v.get("value") in (None, "") or v["label"] not in then_v:
+            continue
+        t = then_v[v["label"]]
+        rows.append({"label": v["label"], "unit": v.get("unit") or "", "then": t["value"], "now": v["value"],
+                     "then_status": t.get("status"), "now_status": v.get("status")})
+    ov = getattr(prev, "override", None) or {}
+    return {
+        "encounter_id": getattr(prev, "id", None),
+        "date": prev.created_at.date().isoformat(),
+        "days_ago": (date.today() - prev.created_at.date()).days,
+        "complaint": getattr(prev, "chief_complaint", ""),
+        "urgency": getattr(prev, "urgency", None),
+        "decided_by": ov.get("by") or getattr(prev, "reviewed_by", None),
+        "override_reason": ov.get("reason"),
+        "new_symptoms": [x for x in now_pos if x not in then_pos],
+        "gone_symptoms": [x for x in then_pos if x not in now_pos],
+        "same_symptoms": [x for x in now_pos if x in then_pos],
+        "vitals": rows,
+        "medicines_then": ph.get("medicines") or [],
+        "medicines_now": hx["medicines"],
+        "feeling": (intake.get("chronic") or {}).get("feeling_vs_last"),
+    }
+
+
 def clinical_history(intake: dict, triage: dict) -> dict:
     """What a doctor reads before the complaint details: positives and pertinent negatives from the kiosk's closed
     questions, allergies, regular medicines and past history. Only answers the patient gave; nothing inferred."""
     fnd = triage.get("findings") or {}
     asked = lambda f: any(e.startswith("answer to") for e in (fnd.get(f) or {}).get("evidence") or [])  # noqa: E731
-    pos = [fnd[k]["label"].lower() if not fnd[k]["label"][:2].isupper() else fnd[k]["label"] for k in fnd if fnd[k]["value"] is True and asked(k) and k not in PAST and k != "allergy_drug"]
-    neg = [fnd[k]["label"].lower() if not fnd[k]["label"][:2].isupper() else fnd[k]["label"] for k in fnd if fnd[k]["value"] is False and asked(k) and k not in PAST and k != "allergy_drug"]
+    say = lambda lb: (lb if lb[:2].isupper() else lb.lower()).replace(" / ", " or ")  # noqa: E731
+    pos = [say(fnd[k]["label"]) for k in fnd if fnd[k]["value"] is True and asked(k) and k not in PAST and k != "allergy_drug"]
+    neg = [say(fnd[k]["label"]) for k in fnd if fnd[k]["value"] is False and asked(k) and k not in PAST and k != "allergy_drug"]
     a = (fnd.get("allergy_drug") or {}).get("value")
     allergies = "reports a medicine allergy — confirm which medicine" if a is True else "no known medicine allergy" if a is False else "not asked"
     meds = [f"{m['name']}{' ' + m['strength'] if m.get('strength') else ''} (confirmed)" for m in intake.get("medications_confirmed") or []]

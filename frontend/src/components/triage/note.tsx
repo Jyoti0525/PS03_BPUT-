@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { usePrefs } from "@/components/providers";
-import { fmtDateTime } from "@/lib/hooks";
-import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays } from "lucide-react";
-import type { AiOpinion, Encounter, ExtractedValue, Flag, FollowUpAnswer, FollowUpQuestion, NoteHistory, TrendRow, Urgency } from "@/lib/types";
+import { fmtDate, fmtDateTime } from "@/lib/hooks";
+import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays, History as HistoryIcon, ArrowRight } from "lucide-react";
+import type { AiOpinion, Encounter, ExtractedValue, Flag, FollowUpAnswer, FollowUpQuestion, NoteHistory, SinceLast, TrendRow, Urgency } from "@/lib/types";
 import { Badge, Button, Card, CardHeader, cx, Input } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { toast } from "@/components/ui/toast";
@@ -94,6 +94,106 @@ function HistoryList({ h }: { h: NoteHistory }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+function PresentingRows({ rows }: { rows: { label: string; value: string }[] }) {
+  const { tr } = usePrefs();
+  return (
+    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 px-4 pt-2 text-[15px] sm:px-5">
+      {rows.map((r) => (
+        <div key={r.label} className="contents">
+          <dt className="text-sm font-medium text-muted">{tr(r.label)}</dt>
+          <dd className={cx("text-ink", r.label === "Complaint" && "font-semibold")}>{tr(r.value)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** The last visit beside this one: what changed in between, so a follow-up is read as a change, not from scratch. */
+function SinceLastVisit({ s }: { s: SinceLast }) {
+  const { tr } = usePrefs();
+  const chips = (xs: string[], tone: "crit" | "semi" | "rout") => xs.map((x) => <Badge key={x} tone={tone}>{tr(x)}</Badge>);
+  const medsChanged = s.medicines_then.join("|") !== s.medicines_now.join("|");
+  const num = (v: string | number) => (typeof v === "number" ? v : parseFloat(String(v)));
+  return (
+    <div className="space-y-3 px-4 pt-2 text-sm sm:px-5">
+      <p className="flex flex-wrap items-center gap-2 text-ink">
+        <span className="font-semibold">{fmtDate(s.date)}</span>
+        <span className="text-muted">({s.days_ago === 0 ? tr("earlier today") : tr("{n} days ago", { n: s.days_ago })})</span>
+        {s.urgency && <UrgencyBadge u={s.urgency} size="sm" />}
+        {s.decided_by && <span className="text-muted">· {tr("seen by")} {s.decided_by}</span>}
+      </p>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+        <dt className="font-medium text-muted">{tr("Came with")}</dt>
+        <dd className="text-ink">{tr(s.complaint)}</dd>
+        {s.override_reason && (
+          <>
+            <dt className="font-medium text-muted">{tr("Doctor's note")}</dt>
+            <dd className="text-ink-2">“{tr(s.override_reason)}”</dd>
+          </>
+        )}
+        {s.feeling && (
+          <>
+            <dt className="font-medium text-muted">{tr("Patient feels")}</dt>
+            <dd className="text-ink">{tr(s.feeling)}</dd>
+          </>
+        )}
+        {s.new_symptoms.length > 0 && (
+          <>
+            <dt className="font-medium text-muted">{tr("New since then")}</dt>
+            <dd className="flex flex-wrap gap-1">{chips(s.new_symptoms, "crit")}</dd>
+          </>
+        )}
+        {s.same_symptoms.length > 0 && (
+          <>
+            <dt className="font-medium text-muted">{tr("Still there")}</dt>
+            <dd className="flex flex-wrap gap-1">{chips(s.same_symptoms, "semi")}</dd>
+          </>
+        )}
+        {s.gone_symptoms.length > 0 && (
+          <>
+            <dt className="font-medium text-muted">{tr("Gone")}</dt>
+            <dd className="flex flex-wrap gap-1">{chips(s.gone_symptoms, "rout")}</dd>
+          </>
+        )}
+        {medsChanged && (
+          <>
+            <dt className="font-medium text-muted">{tr("Medicines")}</dt>
+            <dd className="text-ink">
+              {s.medicines_then.join("; ") || tr("none reported")} <ArrowRight className="inline size-3.5 text-muted" /> {s.medicines_now.join("; ") || tr("none reported")}
+            </dd>
+          </>
+        )}
+      </dl>
+      {s.vitals.length > 0 && (
+        <table className="w-full max-w-md text-sm">
+          <thead>
+            <tr className="border-b border-line text-left text-[11px] font-semibold tracking-wide text-subtle uppercase">
+              <th className="py-1.5 pr-2 font-semibold">{tr("Vital")}</th>
+              <th className="px-2 py-1.5 text-right font-semibold">{tr("Then")}</th>
+              <th className="px-2 py-1.5 text-right font-semibold">{tr("Now")}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {s.vitals.map((v) => {
+              const d = num(v.now) - num(v.then);
+              return (
+                <tr key={v.label}>
+                  <td className="py-1.5 pr-2 text-ink">{tr(v.label)}</td>
+                  <td className={cx("px-2 py-1.5 text-right tabular-nums", v.then_status === "abnormal" ? "text-crit" : "text-muted")}>{v.then}</td>
+                  <td className={cx("px-2 py-1.5 text-right font-semibold tabular-nums", v.now_status === "abnormal" ? "text-crit" : "text-ink")}>
+                    {v.now} {v.unit && <span className="text-xs font-normal text-muted">{v.unit}</span>}
+                    {!Number.isNaN(d) && d !== 0 && <span className="ml-1 text-xs font-normal text-muted">({d > 0 ? "+" : ""}{Math.round(d * 10) / 10})</span>}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 }
 
@@ -454,6 +554,18 @@ function VitalsGrid({ values }: { values: ExtractedValue[] }) {
 /** The doctor's note, read top to bottom in the order a clinician decides: why this urgency, what the patient says,
  * history, vitals, investigations, what to do next. How the note was produced (rule IDs, engines, timeline, AI checks)
  * is kept at the end, folded, for audit. */
+/** "Blurred vision — answer to \"…\" (asked by X): Yes — WHO … age ≥12" → "Blurred vision — answered Yes at the bedside".
+ * The full reason stays in the tooltip; the protocol source is already on the rule line. */
+function shortReason(reason: string) {
+  const parts = reason.split(" — ");
+  if (parts.length < 2) return reason;
+  const what = parts[0];
+  const how = parts[1];
+  const m = how.match(/^answer to ".*" \(asked by .*\): (.+)$/);
+  if (m) return `${what} — answered ${m[1]} at the bedside`;
+  return what;
+}
+
 function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Encounter) => void }) {
   const { tr } = usePrefs();
   const n = enc.note!;
@@ -463,7 +575,8 @@ function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Enco
   const decisive = n.rules_fired.filter((r) => r.rule_id !== "SAFE-PROVISIONAL" && r.urgency === (t?.urgency ?? tier));
   const supporting = n.rules_fired.filter((r) => r.rule_id !== "SAFE-PROVISIONAL" && !decisive.includes(r));
   const measure = [...new Set([...(t?.missing_for_green ?? []), ...(t?.unresolved ?? []).flatMap((u) => u.needs.map((x) => (x.startsWith("danger-sign") ? "clinician danger-sign check" : x)))])];
-  const clinicalFlags = n.flags.filter((f) => f.group !== "data" && f.code !== "SAFE-PROVISIONAL");
+  // A rule already listed under "Because" is not repeated as a flag below it.
+  const clinicalFlags = n.flags.filter((f) => f.group !== "data" && f.code !== "SAFE-PROVISIONAL" && !decisive.some((r) => r.rule_id === f.code));
   const dataFlags = n.flags.filter((f) => f.group === "data");
   const words = n.original_words?.length ? n.original_words : n.transcript ? [n.transcript] : [];
   const otherMissing = n.missing_info.filter((m) => !/needed before the case can be routine|^Ask \/ measure:/.test(m));
@@ -511,7 +624,7 @@ function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Enco
                           <Lock className="size-3" /> {tr("locked")}
                         </span>
                       )}
-                      {(r.evidence?.length ?? 0) > 0 && <span className="block text-xs text-ink-2">{r.evidence!.join(" · ")}</span>}
+                      {(r.evidence?.length ?? 0) > 0 && <span className="block text-xs text-ink-2" title={r.evidence!.join(" | ")}>{tr("Found")}: {r.evidence!.map((e) => tr(e.split(" — ")[0])).join(", ")}</span>}
                       <span className="block font-mono text-[10px] text-subtle">{r.rule_id} · {r.source ?? r.protocol}</span>
                     </span>
                   </li>
@@ -534,7 +647,7 @@ function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Enco
                   <li key={i} className="flex items-start gap-2 text-sm">
                     <FlagIcon s={f.severity} />
                     <span>
-                      <span className="font-medium text-ink">{tr(f.label)}</span> <span className="text-muted">— {tr(f.reason)}</span>
+                      <span className="font-medium text-ink">{tr(f.label)}</span> <span className="text-muted" title={f.reason}>— {tr(shortReason(f.reason))}</span>
                     </span>
                   </li>
                 ))}
@@ -554,7 +667,7 @@ function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Enco
 
         {/* 2. Presenting complaint */}
         <Section n={++s} title={tr("Presenting complaint")} icon={<MessageCircleQuestion />}>
-          <p className="px-4 pt-2 text-[15px] leading-relaxed text-ink sm:px-5">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
+          {n.presenting?.length ? <PresentingRows rows={n.presenting} /> : <p className="px-4 pt-2 text-[15px] leading-relaxed text-ink sm:px-5">{n.renderer === "LLM" ? n.summary : tr(n.hpi ?? n.summary)}</p>}
           {words.length > 0 && (
             <div className="space-y-2 px-4 pt-3 sm:px-5">
               {words.map((w, i) => (
@@ -572,6 +685,13 @@ function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Enco
             </div>
           )}
         </Section>
+
+        {/* Follow-up visit: what changed since the last one */}
+        {n.since_last && (
+          <Section n={++s} title={tr("Since the last visit")} icon={<HistoryIcon />}>
+            <SinceLastVisit s={n.since_last} />
+          </Section>
+        )}
 
         {/* 3. History */}
         {(n.history || answered.length > 0) && (
@@ -783,7 +903,7 @@ function BedsideNote({ enc, density, onUpdated }: { enc: Encounter; density: "nu
               </p>
             </div>
           ))}
-          <p className="leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.summary)}</p>
+          {n.presenting?.length ? <PresentingRows rows={n.presenting} /> : <p className="leading-relaxed text-ink">{n.renderer === "LLM" ? n.summary : tr(n.hpi ?? n.summary)}</p>}
         </div>
         {n.history && <HistoryList h={n.history} />}
         <AnsweredList answers={answered} />

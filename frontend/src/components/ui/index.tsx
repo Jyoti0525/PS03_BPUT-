@@ -188,9 +188,13 @@ export function Modal({
 }) {
   const T = useT();
   const ref = useRef<HTMLDivElement>(null);
+  // Kept in a ref: callers pass a fresh onClose each render, and re-running the effect would pull focus off the field
+  // being typed in (one word at a time) and shut an open dropdown.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeRef.current();
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -199,7 +203,7 @@ export function Modal({
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [open, onClose]);
+  }, [open]);
   if (!open) return null;
   const w = { sm: "max-w-md", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" }[size];
   return (

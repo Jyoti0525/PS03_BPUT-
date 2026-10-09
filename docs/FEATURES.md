@@ -252,6 +252,15 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
 - **Code:** `backend/app/triage/followups.py`, `record_answer` in `backend/app/services.py`;
   `POST /encounters/{id}/answers`; `AskQuestion` in `frontend/src/components/triage/note.tsx`.
 
+**A10 Since the last visit** · Working
+- **What:** when the patient has been seen before, the note sets the last visit beside this one: date and days ago,
+  urgency then and who saw them, what they came with, the doctor's override note, symptoms new / still there / gone,
+  vital signs then → now with the change, medicines if they changed, and how the patient feels compared with last time.
+  It sits above the BP / sugar / HbA1c trend, so a follow-up visit is read as a change, not from scratch.
+- **Where:** `backend/app/triage/pipeline.py` `_since_last` → `note.since_last`; `SinceLastVisit` in
+  `frontend/src/components/triage/note.tsx`; test `backend/tests/test_since_last.py`.
+- **Presenting complaint** is now label/value rows (`note.presenting`), not a paragraph.
+
 ### B. Reading and understanding
 
 **H0 Text layer before OCR** · Working

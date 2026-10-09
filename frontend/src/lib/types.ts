@@ -539,6 +539,23 @@ export interface Disagreement {
   action: string;
 }
 
+export interface SinceLast {
+  encounter_id: string | null;
+  date: string;
+  days_ago: number;
+  complaint: string;
+  urgency: Urgency | null;
+  decided_by: string | null;
+  override_reason: string | null;
+  new_symptoms: string[];
+  gone_symptoms: string[];
+  same_symptoms: string[];
+  vitals: { label: string; unit: string; then: string | number; now: string | number; then_status?: string; now_status?: string }[];
+  medicines_then: string[];
+  medicines_now: string[];
+  feeling: string | null;
+}
+
 export interface TrendRow {
   parameter: string;
   points: { label: string; value: number }[];
@@ -591,6 +608,12 @@ export interface TriageResult {
 
 export interface TriageNote {
   summary: string;
+  /** The presenting complaint alone (age, complaint, duration, severity); history rows carry the rest. */
+  hpi?: string;
+  /** The presenting complaint as label/value rows (Patient, Complaint, How long, Severity…). */
+  presenting?: { label: string; value: string }[];
+  /** The patient's previous visit beside this one; null on a first visit. */
+  since_last?: SinceLast | null;
   history?: NoteHistory;
   flags: Flag[];
   rules_fired: RuleHit[];
