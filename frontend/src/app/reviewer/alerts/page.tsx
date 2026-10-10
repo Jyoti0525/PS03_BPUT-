@@ -17,6 +17,7 @@ const KIND: Record<AlertKind, { label: string; icon: React.ReactNode }> = {
   missed_visit: { label: "Missed check-up", icon: <Baby className="size-5" /> },
   call_escalation: { label: "Reminder call", icon: <PhoneCall className="size-5" /> },
   referral_overdue: { label: "Referral overdue", icon: <Send className="size-5" /> },
+  referral_in: { label: "Incoming referral", icon: <Send className="size-5" /> },
 };
 
 /** What the alert's numbers mean, in words. Cluster alerts carry counts only — never names. */
@@ -35,7 +36,13 @@ function Detail({ a }: { a: Alert }) {
   if (a.kind === "referral_overdue")
     return (
       <p className="mt-1 text-sm text-ink-2">
-        {tr("Not confirmed received at {d}; was due {when}. Phone the destination, then close it on the Referrals page.", { d: String(d.destination), when: timeAgo(String(d.due)) })}
+        {tr("Care is not yet confirmed (due {when}). Check with the patient or receiving clinician; the suggested destination is not exclusive.", { when: timeAgo(String(d.due)) })}
+      </p>
+    );
+  if (a.kind === "referral_in")
+    return (
+      <p className="mt-1 text-sm text-ink-2">
+        {tr("From {f}: {s}, {r}. Arriving by {t}. Open it under Referrals → Incoming; record the arrival there.", { f: String(d.from), s: tr(String(d.specialty)), r: tr(String(d.reason)), t: tr(String(d.transport).replace(/_/g, " ")) })}
       </p>
     );
   if (a.kind === "capacity")

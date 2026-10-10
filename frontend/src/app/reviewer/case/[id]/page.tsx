@@ -5,12 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
   ArrowLeft, CheckCircle2, Pencil, ShieldAlert, Siren, Send, Printer, FileJson, FileSpreadsheet, FileText, Stethoscope, Baby, HeartPulse,
-  UserRoundCheck, Users, Timer, Paperclip, Copy, Ambulance, ChevronDown, Eye, QrCode,
+  UserRoundCheck, Users, Timer, Paperclip, Copy, Ambulance, ChevronDown, Eye, QrCode, CalendarClock,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
-import { useAsync, useNow, timeAgo, fmtDate } from "@/lib/hooks";
+import { useAsync, useNow, timeAgo, fmtDate, refCode } from "@/lib/hooks";
 import { useSession, usePrefs } from "@/components/providers";
-import { Badge, Button, Card, CardHeader, ErrorNote, FieldError, Label, Modal, Segmented, Select, Spinner, Textarea, cx } from "@/components/ui";
+import { Badge, Button, Card, CardHeader, ErrorNote, FieldError, Input, Label, Modal, Segmented, Select, Spinner, Textarea, cx } from "@/components/ui";
 import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
 import { DocumentLabels, MedicationsPanel } from "@/components/triage/medications";
@@ -21,6 +21,7 @@ import { PatientEditModal } from "@/components/triage/patient-edit";
 import { WorkerPanel } from "@/components/triage/worker-panel";
 import { ObservationList } from "@/components/triage/observations";
 import { URGENCY_LABEL, downloadBlob, referralText } from "@/lib/export";
+import { DestinationPicker, type PickedDestination } from "@/components/triage/destination-picker";
 import { langByCode } from "@/lib/i18n/languages";
 
 const OVERRIDE_CATEGORIES = [
@@ -66,6 +67,59 @@ function ReviewClock({ start }: { start: number }) {
     <span className={cx("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums", over ? "bg-semi-bg text-semi" : "bg-canvas text-muted")} title={tr("Target: review within 4 minutes")}>
       <Timer className="size-3.5" /> {Math.floor(s / 60)}:{String(s % 60).padStart(2, "0")} / 4:00
     </span>
+  );
+}
+
+function FollowupSchedulePanel({ enc, onSaved }: { enc: Encounter; onSaved: (e: Encounter) => void }) {
+  const { tr } = usePrefs();
+  const scheduled = enc.intake?.followup ?? enc.intake?.chronic;
+  const { data: workers } = useAsync(() => api.listHealthWorkers(), [enc.facility_id]);
+  const workerList = workers ?? [];
+  const [dueDate, setDueDate] = useState(scheduled?.next_checkup?.slice(0, 10) ?? "");
+  const [workerId, setWorkerId] = useState(scheduled?.assigned_worker_id ?? "");
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    if (!dueDate) return;
+    setSaving(true);
+    try {
+      const updated = await api.scheduleFollowup(enc.id, dueDate, workerId || null);
+      onSaved(updated);
+      toast(tr("Patient follow-up scheduled"));
+    } catch (e) {
+      toast(e instanceof ApiError ? e.message : tr("Could not schedule follow-up"), "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <Card className="mt-4 overflow-hidden">
+    <div className="bg-canvas/40 p-4 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-2 text-sm font-semibold text-ink"><CalendarClock className="size-4 text-teal-700" /> {tr("Schedule a patient follow-up")}</p>
+          <p className="mt-1 text-xs text-muted">{tr("Choose when the patient should return and the health worker responsible. This is for follow-up after the immediate care plan.")}</p>
+        </div>
+        {scheduled?.next_checkup && <Badge tone="teal">{tr("Next check-up")}: {fmtDate(scheduled.next_checkup)}</Badge>}
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(180px,1fr)_minmax(220px,1.3fr)_auto] sm:items-end">
+        <div>
+          <Label htmlFor="patient-followup-date">{tr("Follow-up date")}</Label>
+          <Input id="patient-followup-date" type="date" min={new Date().toISOString().slice(0, 10)} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="patient-followup-worker">{tr("Responsible health worker")}</Label>
+          <Select id="patient-followup-worker" value={workerId} onChange={(e) => setWorkerId(e.target.value)}>
+            <option value="">{tr("Unassigned — visible to the facility team")}</option>
+            {workerList.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+          </Select>
+        </div>
+        <Button variant="teal" loading={saving} disabled={!dueDate || saving} onClick={save} icon={<CalendarClock className="size-4" />}>
+          {scheduled?.next_checkup ? tr("Update follow-up") : tr("Add to follow-up list")}
+        </Button>
+      </div>
+      {workerList.length === 0 && <p className="mt-2 text-xs text-semi">{tr("No health workers are registered at this facility. The follow-up will remain visible to the facility team as unassigned.")}</p>}
+    </div>
+    </Card>
   );
 }
 
@@ -123,11 +177,26 @@ export default function CasePage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <Link href="/reviewer" className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-ink">
           <ArrowLeft className="size-4" /> {tr("Queue")}
         </Link>
-        <ReviewClock start={start} />
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <ReviewClock start={start} />
+          {isDoctor && (
+            <div className="no-print">
+              <Segmented
+                value={density}
+                onChange={setDensity}
+                options={[
+                  { value: "doctor", label: <span className="inline-flex items-center gap-1"><Stethoscope className="size-3.5" /> {tr("Doctor view")}</span> },
+                  { value: "nurse", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Nurse view")}</span> },
+                  { value: "health_worker", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Health-worker view")}</span> },
+                ]}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Patient card */}
@@ -172,7 +241,7 @@ export default function CasePage() {
               </div>
 
               {/* Referral yes / no + triage status (from system design) */}
-              <div className="w-full rounded-xl border border-line bg-canvas p-3 sm:w-auto sm:min-w-56">
+              {/* <div className="w-full rounded-xl border border-line bg-canvas p-3 sm:w-auto sm:min-w-56">
                 <p className="text-xs font-semibold tracking-wide text-muted uppercase">{tr("Referral needed?")}</p>
                 <div className="mt-2 flex gap-1.5">
                   {[true, false].map((v) => (
@@ -194,7 +263,7 @@ export default function CasePage() {
                     })()}
                   </p>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -256,6 +325,10 @@ export default function CasePage() {
         </div>
       </Card>
 
+      {isDoctor && (enc.urgency === "red" || enc.category === "chronic") && (
+        <FollowupSchedulePanel key={enc.id} enc={enc} onSaved={setData} />
+      )}
+
       {/* Scenario panels */}
       {enc.category === "maternal" && enc.intake?.maternal && (
         <Card className="mt-4">
@@ -268,14 +341,14 @@ export default function CasePage() {
           </dl>
         </Card>
       )}
-      {enc.category === "chronic" && enc.intake?.chronic && (
+      {enc.category === "chronic" && (
         <Card className="mt-4">
           <CardHeader title={tr("Chronic follow-up")} subtitle={tr("Compare with the last check-up before deciding")} icon={<HeartPulse className="size-4" />} />
           <dl className="grid grid-cols-2 gap-4 p-4 text-sm sm:grid-cols-4">
-            <div><dt className="text-muted">{tr("Condition")}</dt><dd className="font-semibold">{tr(enc.intake.chronic.condition)}</dd></div>
-            <div><dt className="text-muted">{tr("Last check-up")}</dt><dd className="font-semibold">{enc.intake.chronic.last_checkup ?? "—"}</dd></div>
-            <div><dt className="text-muted">{tr("Patient feels")}</dt><dd className={cx("font-semibold capitalize", enc.intake.chronic.feeling_vs_last === "worse" && "text-crit")}>{enc.intake.chronic.feeling_vs_last} {tr("than last time")}</dd></div>
-            <div className="col-span-2 sm:col-span-1"><dt className="text-muted">{tr("Medicines")}</dt><dd className="font-semibold">{enc.intake.chronic.current_medicines ?? "—"}</dd></div>
+            <div><dt className="text-muted">{tr("Condition")}</dt><dd className="font-semibold">{tr(enc.intake?.chronic?.condition ?? "long-term condition")}</dd></div>
+            <div><dt className="text-muted">{tr("Last check-up")}</dt><dd className="font-semibold">{enc.intake?.chronic?.last_checkup ?? "—"}</dd></div>
+            <div><dt className="text-muted">{tr("Patient feels")}</dt><dd className={cx("font-semibold capitalize", enc.intake?.chronic?.feeling_vs_last === "worse" && "text-crit")}>{tr(enc.intake?.chronic?.feeling_vs_last ?? "unsure")} {tr("than last time")}</dd></div>
+            <div className="col-span-2 sm:col-span-1"><dt className="text-muted">{tr("Medicines")}</dt><dd className="font-semibold">{enc.intake?.chronic?.current_medicines ?? "—"}</dd></div>
           </dl>
         </Card>
       )}
@@ -290,19 +363,6 @@ export default function CasePage() {
 
       <MedicationsPanel enc={enc} canReview onDone={setData} />
 
-          {isDoctor && (
-          <div className="no-print mt-4 flex justify-end">
-            <Segmented
-              value={density}
-              onChange={setDensity}
-              options={[
-                { value: "doctor", label: <span className="inline-flex items-center gap-1"><Stethoscope className="size-3.5" /> {tr("Doctor view")}</span> },
-                { value: "nurse", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Nurse view")}</span> },
-                { value: "health_worker", label: <span className="inline-flex items-center gap-1"><Eye className="size-3.5" /> {tr("Health-worker view")}</span> },
-              ]}
-            />
-          </div>
-          )}
       <div className="mt-4">{n ? <NoteView enc={enc} density={density} onUpdated={setData} /> : <p className="text-sm text-muted">{tr("No note generated.")}</p>}</div>
 
       {!!enc.intake?.file_ids.length && (
@@ -512,14 +572,14 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
   const { tr } = usePrefs();
   const spec = facility?.specialists.find((s) => s.key === enc.specialist_required);
   const defaultDest = spec?.available ? `${facility?.name} — ${spec.label} (in-house)` : spec?.refer_to || (facility?.referral_destination ?? "");
-  const [destination, setDestination] = useState(defaultDest);
+  const [dest, setDest] = useState<PickedDestination>({ name: defaultDest, facility_id: null, directory_ref: null, on_jeevia: false });
+  const destination = dest.name;
   const [specialty, setSpecialty] = useState(spec?.label ?? "General Medicine");
   const [reason, setReason] = useState("");
   const [given, setGiven] = useState("");
   const { user } = useSession();
   const [transport, setTransport] = useState<"self" | "ambulance_108" | "facility_vehicle">(enc.urgency === "red" ? "ambulance_108" : "self");
   const [edited, setEdited] = useState<string | null>(null);
-  const [withQr, setWithQr] = useState(true);
   const [busy, setBusy] = useState(false);
 
   const generated = useMemo(() => referralText(enc, facility, destination, specialty, reason || enc.chief_complaint, { given, referrer: user ? { name: user.name, role: user.role, phone: user.phone } : null }),
@@ -535,7 +595,7 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
       onClose={onClose}
       size="xl"
       title={tr("Referral note")}
-      subtitle={tr("Prepared from the triage note and this facility's specialist configuration. Review before sending.")}
+      subtitle={tr("Prepared from the triage note. A destination is optional guidance; the patient may attend any suitable facility.")}
       footer={
         <>
           <Button variant="secondary" icon={<Copy className="size-4" />} onClick={() => { navigator.clipboard?.writeText(text); toast(tr("Copied")); }}>{tr("Copy")}</Button>
@@ -560,12 +620,10 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
             onClick={async () => {
               setBusy(true);
               try {
-                const share = withQr ? await api.createShare(enc.id, 168, "referral") : null;
-                const note = share
-                  ? `${text}\n\nPatient summary and documents (scan QR or open): ${share.url}\nAccess code: ${share.access_code} · valid until ${new Date(share.expires_at).toLocaleString("en-IN")}`
-                  : text;
-                await api.createReferral(enc.id, { destination, specialty, reason: reason || enc.chief_complaint, transport, note_text: note });
-                toast(share ? tr("Referral sent — print the QR slip for the patient") : tr("Referral sent and logged"));
+                const share = await api.createShare(enc.id, 168, "referral");
+                const note = `${text}\n\nPatient summary and documents (scan QR or open): ${share.url}\nAccess code: ${share.access_code} · valid until ${new Date(share.expires_at).toLocaleString("en-IN")}`;
+                const sent = await api.createReferral(enc.id, { destination: destination.trim() || "Patient's choice — no specific facility selected", specialty, reason: reason || enc.chief_complaint, transport, note_text: note, to_facility_id: dest.facility_id, to_directory_ref: dest.directory_ref });
+                toast(sent.to_facility_id ? tr("Referral {code} sent to {f}; destination is a recommendation", { code: refCode(sent.id), f: sent.to_facility_name ?? destination }) : tr("Referral sent — print the QR slip for the patient"));
                 onDone(share);
               } catch (e) {
                 toast(e instanceof Error ? e.message : tr("Failed"), "error");
@@ -582,14 +640,17 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         <div className="space-y-3">
           <div>
-            <Label htmlFor="rf-dest">{tr("Destination")}</Label>
-            <Select id="rf-dest" value={destination} onChange={(e) => setDestination(e.target.value)}>
-              {spec?.available && <option value={`${facility?.name} — ${spec.label} (in-house)`}>{`${facility?.name} — ${tr(spec.label)} (${tr("in-house")})`}</option>}
-              {/* E4: each specialty's referral place from the facility's configuration, then the default referral hospital */}
-              {[...new Set([spec?.refer_to, ...(facility?.specialists ?? []).filter((s) => !s.available).map((s) => s.refer_to)].filter((x): x is string => !!x))].map((d) => <option key={d}>{d}</option>)}
-              {facility && <option>{facility.referral_destination}</option>}
-              <option>{tr("Tele-consultation (eSanjeevani hub)")}</option>
-            </Select>
+            <Label>{tr("Suggested destination (optional)")}</Label>
+            <DestinationPicker
+              value={dest}
+              onChange={setDest}
+              quick={[...new Set([
+                spec?.available ? `${facility?.name} — ${spec.label} (in-house)` : null,
+                // E4: each specialty's referral place from the facility's configuration, then the default referral hospital
+                spec?.refer_to, ...(facility?.specialists ?? []).filter((s) => !s.available).map((s) => s.refer_to),
+                facility?.referral_destination, tr("Tele-consultation (eSanjeevani hub)"),
+              ].filter((x): x is string => !!x))]}
+            />
             {spec && !spec.available && <p className="mt-1 text-xs text-muted">{tr(spec.label)} {tr("is not on site today")}{spec.schedule ? ` (${spec.schedule})` : ""}.</p>}
           </div>
           <div>
@@ -606,13 +667,10 @@ function ReferralModal({ open, enc, facility, onClose, onDone }: { open: boolean
             <Label htmlFor="rf-given">{tr("Treatment given here")}</Label>
             <Textarea id="rf-given" rows={3} value={given} onChange={(e) => setGiven(e.target.value)} placeholder={tr("e.g. Aspirin 300 mg chewed at 10:40; oxygen 4 L/min")} />
           </div>
-          <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-teal-200 bg-teal-50/60 p-3 text-sm">
-            <input type="checkbox" checked={withQr} onChange={(e) => setWithQr(e.target.checked)} className="mt-0.5 size-4 accent-teal-700" />
-            <span>
-              <span className="font-semibold text-ink">{tr("Attach QR summary")}</span>
-              <span className="block text-xs text-muted">{tr("Receiving team scans it for details and uploaded documents (valid 7 days, needs access code).")}</span>
-            </span>
-          </label>
+          <div className="rounded-xl border border-teal-200 bg-teal-50/60 p-3 text-sm">
+            <p className="font-semibold text-ink">{tr("QR hand-off included")}</p>
+            <p className="mt-1 text-xs text-muted">{tr("Any receiving clinician can scan the summary, enter its access code, review this visit and confirm care. Valid for 7 days.")}</p>
+          </div>
           <div>
             <Label htmlFor="rf-tr">{tr("Transport")}</Label>
             <Select id="rf-tr" value={transport} onChange={(e) => setTransport(e.target.value as typeof transport)}>

@@ -60,7 +60,7 @@ export async function printShareSlip(enc: Encounter, link: ShareLink, facilityNa
 <p class="muted">${esc(facilityName ?? "")}</p>
 <p><b>${esc(enc.patient.name)}</b> · ${enc.patient.age}/${enc.patient.sex} · ${esc(enc.patient.code)}${enc.token ? ` · Token ${esc(enc.token)}` : ""}</p>
 ${svg.replace(/width="\d+"/, 'width="260"').replace(/height="\d+"/, 'height="260"')}
-${extras.referral ? `<p style="margin-top:12px"><b>${esc(both("Referred to"))}:</b> ${esc(extras.referral.destination)}${extras.referral.specialty ? ` (${esc(extras.referral.specialty)})` : ""}</p>` : ""}
+${extras.referral ? `<p style="margin-top:12px"><b>${esc(both("Suggested destination"))}:</b> ${esc(extras.referral.destination)}${extras.referral.specialty ? ` (${esc(extras.referral.specialty)})` : ""}<br/><span>${esc(both("This is guidance only; the patient may attend any suitable facility."))}</span></p>` : ""}
 ${extras.nextVisit ? `<p><b>${esc(both("Next visit"))}:</b> ${new Date(extras.nextVisit).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
 ${advice.trim() ? `<div style="margin-top:12px;text-align:left"><p><b>${esc(both("Advice"))}:</b> ${esc(advice.trim())}</p>${pl.advice ? `<p lang="${pl.lang}" style="font-size:18px">${esc(pl.advice.text)}</p><p class="muted">${esc(both("Machine translated — please read it out to the patient."))} (${esc(pl.advice.engine ?? "")})</p>` : ""}</div>` : ""}
 <p class="muted">Access code</p><p class="code">${esc(link.access_code ?? "••••••")}</p>

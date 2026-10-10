@@ -104,57 +104,60 @@ export function ObservationForm({ enc, onSaved, compact }: { enc: Encounter; onS
   return (
     <Card>
       <CardHeader title={tr("Record vitals & observations")} subtitle={tr("Saved to the patient record with your name. Urgency is re-checked by the fixed rules.")} icon={<ClipboardPen className="size-4" />} />
-      <div className="space-y-4 p-4">
-        <div className={compact ? "grid grid-cols-2 gap-3" : "grid grid-cols-2 gap-3 sm:grid-cols-4"}>
+      <div className="space-y-5 p-4 sm:p-5">
+        <section>
+          <h3 className="mb-2.5 text-xs font-bold tracking-wide text-muted uppercase">{tr("Vitals")}</h3>
+          <div className={compact ? "grid grid-cols-2 gap-3" : "grid grid-cols-2 gap-3 sm:grid-cols-4"}>
           {FIELDS.map((f) => (
-            <div key={f.key}>
+            <div key={f.key} className="min-w-0">
               <Label htmlFor={`ob-${f.key}`} hint={f.unit}>
                 {tr(f.label)}
               </Label>
-              <Input id={`ob-${f.key}`} inputMode="decimal" type="number" step={f.step ?? 1} min={f.min} max={f.max} value={v[f.key] ?? ""} onChange={(e) => setV({ ...v, [f.key]: e.target.value })} />
+              <Input id={`ob-${f.key}`} inputMode="decimal" type="number" step={f.step ?? 1} min={f.min} max={f.max} value={v[f.key] ?? ""} onChange={(e) => setV({ ...v, [f.key]: e.target.value })} className="mt-1 h-11 rounded-xl bg-canvas/40 text-base tabular-nums" />
             </div>
           ))}
-        </div>
-        <fieldset>
-          <legend className="mb-1.5 text-sm font-medium text-ink">{tr("Level of consciousness (AVPU)")}</legend>
-          <div className="flex flex-wrap gap-2">
+          </div>
+        </section>
+        <fieldset className="rounded-xl border border-line bg-canvas/35 p-3.5">
+          <legend className="px-1 text-sm font-semibold text-ink">{tr("Level of consciousness (AVPU)")}</legend>
+          <div className="grid grid-cols-2 gap-2">
             {AVPU.map((a) => (
               <button
                 key={a.v}
                 type="button"
                 aria-pressed={avpu === a.v}
                 onClick={() => setAvpu(avpu === a.v ? null : a.v)}
-                className={cx("min-h-10 rounded-lg border-2 px-3 text-sm", avpu === a.v ? (a.v === "A" ? "border-teal-600 bg-teal-50 text-teal-800" : "border-crit bg-crit-bg text-crit") : "border-line text-ink-2")}
+                className={cx("min-h-11 rounded-lg border px-2.5 text-left text-sm font-medium transition-colors", avpu === a.v ? (a.v === "A" ? "border-teal-600 bg-teal-50 text-teal-800 ring-1 ring-teal-600" : "border-crit bg-crit-bg text-crit ring-1 ring-crit") : "border-line bg-white text-ink-2 hover:border-teal-300")}
               >
                 <strong>{a.v}</strong> · {tr(a.label)}
               </button>
             ))}
           </div>
         </fieldset>
-        <fieldset className="rounded-xl border border-line p-3">
-          <legend className="px-1 text-sm font-medium text-ink">{tr("Danger-sign check")}</legend>
-          <p className="mb-2 text-xs text-muted">{tr("Tick every sign present. Until the check is saved, these count as unknown — the case cannot be routine.")}</p>
-          <div className={compact ? "grid gap-1.5" : "grid gap-1.5 sm:grid-cols-2"}>
+        <fieldset className="rounded-xl border border-line p-3.5">
+          <legend className="px-1 text-sm font-semibold text-ink">{tr("Danger-sign check")}</legend>
+          <p className="mb-2.5 text-xs leading-relaxed text-muted">{tr("Tick every sign present. Until the check is saved, these count as unknown — the case cannot be routine.")}</p>
+          <div className={compact ? "grid gap-1" : "grid gap-1.5 sm:grid-cols-2"}>
             {SIGNS.filter((s) => child || !s.child).map((s) => (
-              <label key={s.id} className="flex items-start gap-2 text-sm text-ink-2">
-                <input type="checkbox" className="mt-0.5 size-4 accent-current" checked={signs.includes(s.id)} onChange={(e) => setSigns(e.target.checked ? [...signs, s.id] : signs.filter((x) => x !== s.id))} />
-                {tr(s.label)}
+              <label key={s.id} className={cx("flex cursor-pointer items-start gap-2.5 rounded-lg border px-2.5 py-2 text-sm leading-snug transition-colors", signs.includes(s.id) ? "border-crit-line bg-crit-bg text-crit" : "border-transparent text-ink-2 hover:bg-canvas")}>
+                <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-rose-700" checked={signs.includes(s.id)} onChange={(e) => setSigns(e.target.checked ? [...signs, s.id] : signs.filter((x) => x !== s.id))} />
+                <span>{tr(s.label)}</span>
               </label>
             ))}
           </div>
-          <label className="mt-3 flex items-center gap-2 border-t border-line pt-2.5 text-sm font-medium text-ink">
+          <label className={cx("mt-3 flex cursor-pointer items-start gap-2.5 rounded-lg border-t border-line pt-3 text-sm font-semibold text-ink", examDone && "text-teal-800")}>
             <input type="checkbox" className="size-4" checked={examDone} onChange={(e) => setExamDone(e.target.checked)} />
             {priorExam ? tr("Danger-sign check repeated (already recorded once)") : tr("I have checked for all the signs above")}
           </label>
         </fieldset>
-        <div>
+        <div className="rounded-xl border border-line bg-canvas/35 p-3.5">
           <Label htmlFor="ob-note" hint={tr("(optional)")}>
             {tr("Nursing observation")}
           </Label>
-          <Textarea id="ob-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={tr("e.g. Breathless on walking, pale, pain 6/10, vomited once")} />
+          <Textarea id="ob-note" rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={tr("e.g. Breathless on walking, pale, pain 6/10, vomited once")} className="mt-1.5 bg-white" />
         </div>
         <FieldError>{err}</FieldError>
-        <Button onClick={save} loading={busy} icon={<Activity className="size-4" />}>
+        <Button className="w-full" onClick={save} loading={busy} icon={<Activity className="size-4" />}>
           {tr("Save observations")}
         </Button>
       </div>

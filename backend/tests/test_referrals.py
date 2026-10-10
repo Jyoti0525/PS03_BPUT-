@@ -22,6 +22,31 @@ def test_referral_stays_open_until_care_is_received(client, nurse, doctor):
     assert client.post(f"{API}/referrals/{r['id']}/received", json={"confirmed_by": "again"}, headers=doctor).status_code == 409
 
 
+def test_referral_without_destination_uses_qr_handoff_at_patient_chosen_facility(client, nurse, doctor):
+    _, e = intake(client, nurse, chief_complaint="Needs specialist review")
+    payload = {k: v for k, v in REF.items() if k != "destination"}
+    payload["note_text"] = "Referral note. Destination is advisory; patient may choose another facility."
+    sent = client.post(f"{API}/encounters/{e['id']}/referrals", json=payload, headers=doctor)
+    assert sent.status_code == 200, sent.text
+    referral = sent.json()
+    assert referral["destination"] == "Patient's choice — no specific facility selected"
+    assert referral["to_facility_id"] is None
+
+    share = client.post(f"{API}/encounters/{e['id']}/shares", json={"hours": 168, "purpose": "referral"}, headers=doctor).json()
+    token = share["url"].rstrip("/").split("/")[-1]
+    opened = client.post(f"{API}/share/{token}/open", json={"access_code": share["access_code"]})
+    assert opened.status_code == 200, opened.text
+    summary = opened.json()
+    assert summary["referral"]["note_text"] == payload["note_text"]
+    assert "Patient's choice" in summary["referral"]["destination"]
+
+    # The public QR confirmation has no destination-facility constraint: a clinician elsewhere can confirm care.
+    confirmed = client.post(f"{API}/share/{token}/received", json={"access_code": share["access_code"], "confirmed_by": "Nurse Rao (ANM), patient-chosen clinic"})
+    assert confirmed.status_code == 200, confirmed.text
+    final = next(x for x in client.get(f"{API}/referrals", headers=doctor).json() if x["id"] == referral["id"])
+    assert final["status"] == "received" and "patient-chosen clinic" in final["received_by"]
+
+
 def test_overdue_referral_raises_an_alert_until_confirmed(client, nurse, doctor, mo):
     from app.db import SessionLocal
     from app.models import Referral

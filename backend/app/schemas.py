@@ -524,6 +524,11 @@ class Chronic(BaseModel):
     assigned_worker_id: str | None = None
 
 
+class FollowupScheduleIn(BaseModel):
+    due_date: date
+    assigned_worker_id: str | None = None
+
+
 class IntakeIn(BaseModel):
     patient_id: str
     facility_id: str
@@ -656,11 +661,26 @@ class EscalationOut(BaseModel):
 
 
 class ReferralIn(BaseModel):
-    destination: str = Field(min_length=2, max_length=300)
+    destination: str = Field(default="Patient's choice — no specific facility selected", min_length=2, max_length=300)
     specialty: str = Field(min_length=2, max_length=120)
     reason: str = Field(min_length=2, max_length=1000)
     transport: Literal["self", "ambulance_108", "facility_vehicle"]
     note_text: str = Field(min_length=10, max_length=20000)
+    # The receiving facility: one already in Jeevia (facility id) or a national directory entry (activated on send).
+    # Neither = a place outside the system (tele-consultation, a typed name): the QR slip carries the hand-off.
+    to_facility_id: str | None = Field(None, max_length=64)
+    to_directory_ref: str | None = Field(None, max_length=40)
+
+
+class ReferralDestination(BaseModel):
+    key: str
+    name: str
+    kind_label: str
+    district: str | None
+    state: str
+    facility_id: str | None
+    directory_ref: str | None
+    on_jeevia: bool  # has staff signed in: its doctors will see the referral under Incoming
 
 
 class ReferralOut(BaseModel):
@@ -681,6 +701,18 @@ class ReferralOut(BaseModel):
     received_by: str | None = None
     received_note: str | None = None
     received_via: str | None = None
+    from_facility_id: str = ""
+    from_facility_name: str = ""
+    to_facility_id: str | None = None
+    to_facility_name: str | None = None
+    patient_code: str = ""
+    urgency: str | None = None
+    chief_complaint: str = ""
+
+
+class ReferralArrivedIn(BaseModel):
+    """The receiving doctor, signed in, records the arrival; who confirmed it comes from the account."""
+    note: str = Field("", max_length=1000)
 
 
 class ReferralReceivedIn(BaseModel):

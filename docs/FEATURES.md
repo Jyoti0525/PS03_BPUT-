@@ -683,8 +683,10 @@ call after two failed ASHA attempts; Kusum's last visit was RED, so only a perso
   Escalations must be acknowledged.
 
 **E4 Referral preparation** · Working
-- **What:** the referral destination is suggested from the specialists on duty; a specialty not on site is referred
-  to its configured place (`refer_to`), then the facility's default referral hospital.
+- **What:** an optional referral destination is suggested from the specialists on duty; a specialty not on site uses
+  its configured place (`refer_to`), then the facility's default referral hospital. The doctor can search the national
+  directory, type an unlisted destination or leave it unspecified. The recommendation does not restrict patient choice;
+  the QR hand-off can be reviewed at any facility.
 - **Closed only when care is received:** the receiving clinician confirms from the QR summary (with the access code),
   or the referring doctor records who confirmed it. Due in 6 h (RED), 48 h (YELLOW) or 14 days (GREEN); past due
   it is listed first on the Referrals page and raises a "Referral overdue" alert to the medical officer.

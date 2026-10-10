@@ -255,6 +255,7 @@ class Encounter(Base):
     data_origin: Mapped[str] = mapped_column(String(16), default=_data_origin, server_default="SYNTHETIC")  # G8
     patient: Mapped[Patient] = relationship(lazy="joined")
     consent: Mapped[Consent | None] = relationship(lazy="joined")
+    facility: Mapped["Facility"] = relationship(lazy="select", viewonly=True)
 
 
 class KioskLink(Base):
@@ -317,6 +318,8 @@ class Referral(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True, default=lambda: new_id("ref"))
     encounter_id: Mapped[str] = mapped_column(ForeignKey("encounters.id"), index=True)
     destination: Mapped[str] = mapped_column(String(300))
+    # The receiving facility when it was picked from the directory: its doctors see the referral under Incoming.
+    to_facility_id: Mapped[str | None] = mapped_column(ForeignKey("facilities.id"), nullable=True, index=True)
     specialty: Mapped[str] = mapped_column(String(120))
     reason: Mapped[str] = mapped_column(Text)
     note_text: Mapped[str] = mapped_column(Text)
@@ -329,8 +332,9 @@ class Referral(Base):
     received_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     received_by: Mapped[str | None] = mapped_column(String(200), nullable=True)
     received_note: Mapped[str | None] = mapped_column(Text, nullable=True)
-    received_via: Mapped[str | None] = mapped_column(String(16), nullable=True)  # qr (receiving clinician) | phone (referring doctor)
+    received_via: Mapped[str | None] = mapped_column(String(16), nullable=True)  # qr | account (receiving clinician) | phone (referring doctor)
     encounter: Mapped[Encounter] = relationship(lazy="joined")
+    to_facility: Mapped[Facility | None] = relationship(lazy="select", viewonly=True)
 
 
 class FileObject(Base):

@@ -175,6 +175,7 @@ export const liveApi: JeeviaApi = {
   searchPatients: (q) => json(`/patients?q=${encodeURIComponent(q)}`),
   getPatient: (id) => json(`/patients/${id}`),
   getPatientByCode: (code) => json(`/patients/by-code/${encodeURIComponent(code)}`),
+  getPatientByReference: (reference) => json(`/patients/by-reference/${encodeURIComponent(reference)}`),
   pickPatient: (id, match_reason, candidates) => post(`/patients/${id}/pick`, { match_reason, candidates }),
   createPatient: (input) => post("/patients", input),
   patientEncounters: (id) => json(`/patients/${id}/encounters`),
@@ -184,6 +185,7 @@ export const liveApi: JeeviaApi = {
   submitIntake: (payload) => post("/encounters", payload),
   queue: (facilityId) => json(`/queue?facility_id=${encodeURIComponent(facilityId)}`),
   getEncounter: (id) => json(`/encounters/${id}`),
+  scheduleFollowup: (id, due_date, assigned_worker_id) => post(`/encounters/${id}/followup`, { due_date, assigned_worker_id }),
   confirmEncounter: (id) => post(`/encounters/${id}/confirm`),
   editNote: (id, note) => patch(`/encounters/${id}/note`, note),
   overrideUrgency: (id, to_urgency, category, reason) =>
@@ -215,6 +217,11 @@ export const liveApi: JeeviaApi = {
 
   createReferral: (encounterId, input) => post(`/encounters/${encounterId}/referrals`, input),
   listReferrals: () => json("/referrals"),
+  referralDestinations: (q) => json(`/referral-destinations?q=${encodeURIComponent(q)}`),
+  incomingReferrals: () => json("/referrals/incoming"),
+  findReferral: (idOrCode) => json(`/referrals/${encodeURIComponent(idOrCode.trim())}`),
+  referralVisit: (id) => json(`/referrals/${encodeURIComponent(id)}/visit`),
+  referralArrived: (id, note) => post(`/referrals/${encodeURIComponent(id)}/arrived`, { note }),
   referralReceived: (id, confirmed_by, note) => post(`/referrals/${id}/received`, { confirmed_by, note }),
 
   uploadFile: (file, kind, encounterId, sampleKey, read = true, online = false) => {

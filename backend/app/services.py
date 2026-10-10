@@ -361,7 +361,8 @@ def auto_escalate(db: Session) -> None:
 
 def _auto_escalate(db: Session) -> None:
     t = now()
-    due = list(db.scalars(select(Encounter).where(Encounter.status == "queued", Encounter.escalation_due_at.is_not(None))))
+    # in_review too: opening a case is not deciding it, so a RED someone only looked at still escalates on time.
+    due = list(db.scalars(select(Encounter).where(Encounter.status.in_(("queued", "in_review")), Encounter.escalation_due_at.is_not(None))))
     changed = False
     for e in due:
         if aware(e.escalation_due_at) > t:

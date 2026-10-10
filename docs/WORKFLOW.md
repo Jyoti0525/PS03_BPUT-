@@ -50,7 +50,7 @@ These are **not** in the public list. They appear only after their organisation 
 4. When a worker checks in at that workplace, the kiosk asks for the **employee / student ID**; the visit is linked to the roster entry (same name or phone), and the doctor records the fitness outcome on the case.
 
 ### 3.3 Then, for every facility
-2. **Facility setup** (`/admin/facility`): pick the facility type, answer the "what is available here" questions (lab, ECG, X-ray, oxygen…), switch specialists on/off as they arrive or leave, set the default referral hospital and kiosk languages. Referral notes use this automatically.
+2. **Facility setup** (`/admin/facility`): pick the facility type, answer the "what is available here" questions (lab, ECG, X-ray, oxygen…), switch specialists on/off as they arrive or leave, set the default referral hospital and kiosk languages. These settings pre-fill a suggested destination in the referral note; the doctor can change or clear it.
 3. **Kiosk links** (`/admin/kiosk-links`): create one link per place patients check in ("OPD waiting area", "Camp tablet 2"). Each link has a URL like `https://ps-03-bput.vercel.app/k/7QX4MPA2`, a short code and a printable QR poster. Revoking a link stops every device using it immediately.
 4. **Staff join**: doctors, nurses and receptionists register themselves at `/auth`, searching for this facility (doctors and nurses give their council registration number) and creating their PIN. The supervisor sees them under **Staff**, where they can change a role, deactivate or reactivate an account, and reset a forgotten PIN.
 
@@ -104,16 +104,16 @@ If the network is down, the intake is saved on the device and sent automatically
    - **Edit** — change the summary or missing-information list (attributed to them).
    - **Override urgency** — choose the new level, a category and a written reason (≥ 15 characters). The original rules output is kept for audit.
    - **Escalate** to a senior MO / specialist; the receiver must **acknowledge** it in *Escalations*.
-   - **Referral note** — destination is suggested from the facility's specialist settings; choose transport (108 / facility vehicle / self), edit, send, print.
+   - **Referral note** — an optional, advisory destination is suggested from facility specialist settings; search the national facility directory or use a typed suggestion. The patient may attend any suitable facility. A seven-day QR hand-off is included so a clinician at any facility can review the referral; choose transport, edit and send/print.
    - **Export** — PDF, print, JSON, CSV or FHIR R4.
    - **Edit details** — correct the patient's registration details.
    - **Record fitness** — for workers on an organisation's roster: fit / fit with restrictions / temporarily unfit / pending, restrictions and a validity date. The employer sees only this outcome.
 4. **Safety nets** — unreviewed *Critical* cases auto-escalate after 15 minutes (*Semi-urgent* after 60).
 
 ### 4.7 Referral hand-off with a QR summary
-1. On the case, the doctor presses **Share QR** (or keeps **Attach QR summary** ticked when sending a referral).
-2. Jeevia creates a link valid for 24 hours to 30 days and shows a **QR code** plus a **6-digit access code** (shown once). **Print slip** gives a one-page slip with both.
-3. The receiving clinician scans the QR (`/s/…`), enters the code and sees: patient details, token, urgency and any override, the reviewed summary, flags, vitals and report values, the referral, and the **uploaded documents** (prescriptions, lab slips, photos) to view or print.
+1. On the case, the doctor prepares a referral note. A national-directory or typed destination may be included as an **advisory recommendation**, or left unspecified; the patient may attend any suitable facility.
+2. Sending a referral always creates a seven-day QR hand-off and shows a **QR code** plus a **6-digit access code** (shown once). **Print slip** gives a one-page slip with both.
+3. Any receiving clinician at the facility the patient chooses can scan the QR (`/s/…`), enter the code and see: patient details, token, urgency and any override, the reviewed summary, flags, vitals, the full referral note, and **uploaded documents** (prescriptions, lab slips, photos) to view or print. The clinician can record their name and role to confirm care; this does not require the referral destination to match.
 4. Eight wrong codes lock the link; the doctor can revoke it any time from the same dialog; every opening is in the audit log.
 
 ### 4.8 Who can open a patient's documents and photos

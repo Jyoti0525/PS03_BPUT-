@@ -262,7 +262,8 @@ export function referralText(e: Encounter, facility: Facility | null, destinatio
   const lines = [
     `REFERRAL NOTE — ${new Date().toLocaleString("en-IN")}`,
     `From: ${facility ? `${facility.name}, ${facility.district}` : "—"}`,
-    `To: ${destination} (${specialty})`,
+    `Suggested destination: ${destination.trim() || "Patient's choice — no specific facility selected"} (${specialty})`,
+    "This destination is a recommendation only. The patient may attend any suitable healthcare facility of their choice.",
     "",
     `Patient: ${e.patient.name}, ${e.patient.age}/${e.patient.sex}, ID ${e.patient.code}, preferred language ${e.patient.language}`,
     e.urgency ? `Triage category (rules engine): ${URGENCY_LABEL[e.urgency]}` : "",

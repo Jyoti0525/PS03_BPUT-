@@ -1,5 +1,7 @@
 """Patients (identity + household disambiguation) and consent capture (G1)."""
 
+import re
+from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -10,14 +12,15 @@ from .. import audit
 from ..config import get_settings
 from ..crypto import blind
 from ..models import Consent, Encounter, Facility, Patient, User
-from ..schemas import ADMIN_ROLES, STAFF_ROLES, ConsentIn, ConsentOut, EncounterOut, PatientCandidate, PatientIn, PatientOut, PatientPatch
+from ..schemas import ADMIN_ROLES, DOCTOR_ROLES, STAFF_ROLES, ConsentIn, ConsentOut, EncounterOut, PatientCandidate, PatientIn, PatientOut, PatientPatch
 from ..security import DB, CurrentUser, require
 
 GUARDIANS = ("Mother", "Father", "Guardian")
-from ..services import aware, encounter_out, next_patient_code
+from ..services import ANY_FACILITY, aware, encounter_out, next_patient_code, now
 
 router = APIRouter(tags=["patients"])
 Staff = Annotated[User, Depends(require(*STAFF_ROLES))]
+Clinician = Annotated[User, Depends(require("nurse", "health_worker", *DOCTOR_ROLES))]
 Registrar = Annotated[User, Depends(require(*STAFF_ROLES, "kiosk"))]
 
 
@@ -74,6 +77,26 @@ def by_code(code: str, user: Staff, db: DB):
     if not p:
         raise HTTPException(404, f"No patient with ID {code}")
     audit.record(db, user, "VIEW", "patient", p.id, "Patient opened by ID / QR scan", p.code)
+    return p
+
+
+@router.get("/patients/by-reference/{reference}", response_model=PatientOut)
+def by_reference(reference: str, user: Clinician, db: DB):
+    """Resolve an any-centre J- form reference for a clinician without claiming/checking it in."""
+    ref = reference.strip().upper().removeprefix("JEEVIA:")
+    ref = ref if ref.startswith("J-") else f"J-{ref}"
+    if not re.fullmatch(r"J-[A-Z2-9]{6}", ref):
+        raise HTTPException(404, "No patient found for this form reference")
+
+    e = db.scalar(select(Encounter).where(Encounter.channel == "home_link", Encounter.token == ref))
+    if e is None:
+        since = now() - timedelta(hours=get_settings().home_intake_valid_h * 2)
+        e = next((row for row in db.scalars(select(Encounter).where(Encounter.channel == "home_link", Encounter.created_at >= since).order_by(Encounter.created_at.desc()))
+                  if (row.intake or {}).get("any_centre_ref") == ref), None)
+    if not e or e.facility_id not in {user.facility_id, ANY_FACILITY}:
+        raise HTTPException(404, "No patient found for this form reference at your facility")
+    p = e.patient
+    audit.record(db, user, "VIEW", "patient", p.id, "Patient opened by any-centre form reference / QR scan", p.code, e.facility_id)
     return p
 
 

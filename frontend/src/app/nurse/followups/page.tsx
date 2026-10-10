@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Baby, Phone, PhoneOff, Home, CheckCircle2, CalendarClock, HeartPulse, Bot, UserRound, Siren, MessageSquare } from "lucide-react";
+import { Baby, Phone, PhoneOff, Home, CheckCircle2, CalendarClock, HeartPulse, Bot, UserRound, Siren, MessageSquare, Stethoscope } from "lucide-react";
 import { api } from "@/lib/api";
-import { fmtDate, useAsync, timeAgo } from "@/lib/hooks";
+import { fmtDate, useAsync, timeAgo, useNow } from "@/lib/hooks";
 import { usePrefs, useSession } from "@/components/providers";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, Empty, ErrorNote, Segmented, Spinner } from "@/components/ui";
@@ -29,6 +29,7 @@ const PHONE: Record<string, string> = {
 };
 // The pregnancy warning is for pregnancy follow-ups; a chronic patient's shared phone only needs naming.
 const PHONE_CHRONIC: Record<string, string> = { husband: "Husband's phone", household: "Family phone" };
+const PHONE_GENERAL: Record<string, string> = { husband: "Husband's phone — neutral reminder", household: "Family phone — neutral reminder" };
 
 const WHO: Record<Followup["who_calls"]["who"], { label: string; icon: React.ReactNode; tone: "teal" | "semi" | "neutral" }> = {
   agent: { label: "Agent may call", icon: <Bot className="size-3.5" />, tone: "teal" },
@@ -41,7 +42,8 @@ export default function FollowupsPage() {
   const { tr } = usePrefs();
   const { user } = useSession();
   const [scope, setScope] = useState<"active" | "all">("active");
-  const [programme, setProgramme] = useState<"all" | "maternal" | "chronic">("all");
+  const [programme, setProgramme] = useState<"all" | "maternal" | "chronic" | "general">("all");
+  const currentTime = useNow(30_000);
   const { data, error, loading, reload, setData } = useAsync(() => api.listFollowups(scope, programme), [scope, programme], { pollMs: 30_000 });
   const [busy, setBusy] = useState<string | null>(null);
   const tel = useAsync(() => api.telephonyStatus(), []);
@@ -79,16 +81,16 @@ export default function FollowupsPage() {
         title={tr("Follow-ups")}
         subtitle={
           user?.role === "health_worker"
-            ? tr("Pregnancy and long-term-condition check-ups assigned to you that are due or were missed. Visit or phone; after 2 failed attempts a reminder call is due.")
-            : tr("Every maternal and chronic check-up at this facility. A check-up becomes missed one day after its due date.")
+            ? tr("Follow-ups assigned to you or waiting for a worker at this facility. Visit or phone; after 2 failed attempts a reminder call is due.")
+            : tr("Maternal, chronic and doctor-scheduled patient follow-ups at this facility. A check-up becomes missed one day after its due date.")
         }
       />
       <div className="mb-4 flex flex-wrap gap-2">
-        <Segmented value={programme} onChange={setProgramme} options={[{ value: "all", label: tr("All") }, { value: "maternal", label: tr("Pregnancy") }, { value: "chronic", label: tr("Long-term conditions") }]} />
+        <Segmented value={programme} onChange={setProgramme} options={[{ value: "all", label: tr("All") }, { value: "maternal", label: tr("Pregnancy") }, { value: "chronic", label: tr("Long-term conditions") }, { value: "general", label: tr("Doctor follow-ups") }]} />
         <Segmented value={scope} onChange={setScope} options={[{ value: "active", label: tr("Open") }, { value: "all", label: tr("All, including closed") }]} />
       </div>
       {error ? <ErrorNote error={error} onRetry={reload} /> : loading && !data ? <Spinner /> : !data?.length ? (
-        <Card><Empty icon={<CalendarClock className="size-6" />} title={tr("No follow-ups due")} body={tr("Check-ups appear here when a pregnancy or chronic visit sets the next check-up date.")} /></Card>
+        <Card><Empty icon={<CalendarClock className="size-6" />} title={tr("No follow-ups due")} body={tr("Follow-ups appear here when a doctor schedules a return check-in or a maternal or chronic visit sets the next check-up date.")} /></Card>
       ) : (
         <div className="space-y-3">
           {data.map((f) => {
@@ -98,7 +100,7 @@ export default function FollowupsPage() {
               <Card key={f.id} className={f.status === "flagged" || f.status === "call_due" ? "border-crit-line" : ""}>
                 <div className="p-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    {f.programme === "maternal" ? <Baby className="size-4 text-coral-700" /> : <HeartPulse className="size-4 text-teal-700" />}
+                    {f.programme === "maternal" ? <Baby className="size-4 text-coral-700" /> : f.programme === "chronic" ? <HeartPulse className="size-4 text-teal-700" /> : <Stethoscope className="size-4 text-crit" />}
                     <span className="font-semibold text-ink">{f.patient_name}</span>
                     <span className="font-mono text-xs text-subtle">{f.patient_code}</span>
                     {f.village && <span className="text-sm text-muted">{f.village}</span>}
@@ -110,7 +112,7 @@ export default function FollowupsPage() {
                     <span className="inline-flex items-center gap-1"><CalendarClock className="size-4" /> {tr("Due")} {fmtDate(f.due_at)}</span>
                     <span className="inline-flex items-center gap-1">
                       {f.phone_belongs_to === "none" || !f.phone ? <PhoneOff className="size-4" /> : <Phone className="size-4" />}
-                      {f.phone ?? tr("no phone")} · {tr((f.programme === "chronic" && PHONE_CHRONIC[f.phone_belongs_to ?? "household"]) || PHONE[f.phone_belongs_to ?? "household"] || PHONE.household)}
+                      {f.phone ?? tr("no phone")} · {tr((f.programme === "chronic" && PHONE_CHRONIC[f.phone_belongs_to ?? "household"]) || (f.programme === "general" && PHONE_GENERAL[f.phone_belongs_to ?? "household"]) || PHONE[f.phone_belongs_to ?? "household"] || PHONE.household)}
                     </span>
                     {f.assigned_name && <span className="text-muted">{tr("Assigned to")} {f.assigned_name}</span>}
                   </p>
@@ -136,9 +138,6 @@ export default function FollowupsPage() {
                         <>
                           <Button size="sm" variant="secondary" icon={<Home className="size-4" />} loading={busy === `${f.id}:reached`} onClick={() => act(f, "reached")}>{tr("Reached")}</Button>
                           <Button size="sm" variant="secondary" icon={<PhoneOff className="size-4" />} loading={busy === `${f.id}:not_reached`} onClick={() => act(f, "not_reached")}>{tr("Could not reach")}</Button>
-                          {tel.data?.sms && f.who_calls.who !== "home_visit" && (
-                            <Button size="sm" variant="secondary" icon={<MessageSquare className="size-4" />} loading={busy === `${f.id}:sms`} onClick={() => sms(f)}>{tr("Send SMS")}</Button>
-                          )}
                           {f.who_calls.who !== "home_visit" && (
                             <Link href={`/nurse/followups/${f.id}/call`}>
                               <Button size="sm" variant={f.status === "call_due" ? "danger" : "outline"} icon={f.status === "flagged" ? <Siren className="size-4" /> : <Phone className="size-4" />}>
@@ -147,6 +146,9 @@ export default function FollowupsPage() {
                             </Link>
                           )}
                         </>
+                      )}
+                      {tel.data?.sms && (open || Date.parse(f.due_at) <= currentTime) && f.who_calls.who !== "home_visit" && (
+                        <Button size="sm" variant="secondary" icon={<MessageSquare className="size-4" />} loading={busy === `${f.id}:sms`} onClick={() => sms(f)}>{tr("Send SMS")}</Button>
                       )}
                     </div>
                   )}

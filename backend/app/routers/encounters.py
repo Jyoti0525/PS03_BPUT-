@@ -1,11 +1,12 @@
 """Intake submission, triage queue, review actions (confirm / edit / override), escalation,
 referral and export (E1–E7)."""
 
-from datetime import timedelta
+import re
+from datetime import datetime, time, timedelta, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 
 from .. import alerts, audit, exports, language, privacy
@@ -13,6 +14,7 @@ from ..config import get_settings
 from ..models import Consent, Device, Encounter, FileObject, Escalation, Facility, FitnessAssessment, KioskLink, Patient, Referral, Reminder, User
 from ..schemas import (
     ClaimIn,
+    FollowupScheduleIn,
     DOCTOR_ROLES,
     NO_AI_SCOPE,
     REVIEWER_ROLES,
@@ -32,14 +34,17 @@ from ..schemas import (
     ObservationIn,
     OverrideIn,
     QueueItem,
+    ReferralArrivedIn,
+    ReferralDestination,
     ReferralIn,
     ReferralReceivedIn,
     ReferralOut,
+    SharedSummary,
 )
 from ..security import DB, CurrentUser, DeviceHeader, require
 from ..triage.findings import FINDINGS
 from ..triage.pipeline import questions_for
-from ..services import (auto_escalate, aware, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, record_answer, record_observations, sign_off_role,
+from ..services import (auto_escalate, aware, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, waiting_since, record_answer, record_observations, sign_off_role,
                         summarise_later, wait_minutes)
 from .facilities import get_facility
 
@@ -114,6 +119,7 @@ def submit_intake(body: IntakeIn, user: CurrentUser, db: DB, device_id: DeviceHe
         alerts.close_on_visit(db, p.id, user)  # she came: earlier check-up reminders are done
     if body.category == "chronic" or body.chronic:
         alerts.close_on_visit(db, p.id, user, kind="chronic_checkin")
+    alerts.close_on_visit(db, p.id, user, kind="clinical_checkin")
     fac = db.get(Facility, enc.facility_id)
     if m and m.next_checkup:
         due = _visit_day(fac, "anc_checkup", _date(m.next_checkup))
@@ -164,6 +170,61 @@ def _date(s: str):
         return datetime.fromisoformat(s).replace(tzinfo=timezone.utc)
     except ValueError:
         return None
+
+
+@router.post("/encounters/{eid}/followup", response_model=EncounterOut)
+def schedule_followup(eid: str, body: FollowupScheduleIn, user: Doctor, db: DB):
+    """A doctor or medical officer schedules a return check-in for a RED case or long-term-condition visit."""
+    e = load_encounter(db, eid, user)
+    if e.urgency != "red" and e.category != "chronic":
+        raise HTTPException(422, "Follow-up scheduling is available for RED cases or chronic-condition visits")
+    if body.due_date < now().date():
+        raise HTTPException(422, "The follow-up date must be today or later")
+
+    worker = db.get(User, body.assigned_worker_id) if body.assigned_worker_id else None
+    if body.assigned_worker_id and (not worker or worker.role != "health_worker" or worker.facility_id != e.facility_id or not worker.is_active):
+        raise HTTPException(422, "Choose an active health worker at this facility")
+
+    due = datetime.combine(body.due_date, time.min, tzinfo=timezone.utc)
+    chronic = dict((e.intake or {}).get("chronic") or {})
+    intake = dict(e.intake or {})
+    if e.category == "chronic":
+        chronic.update({"condition": chronic.get("condition") or "long-term condition", "next_checkup": due.date().isoformat(),
+                        "assigned_worker_id": body.assigned_worker_id})
+        intake["chronic"] = chronic
+    intake["followup"] = {"next_checkup": due.date().isoformat(), "assigned_worker_id": body.assigned_worker_id}
+    e.intake = intake
+
+    reminder = db.scalar(select(Reminder).where(Reminder.encounter_id == e.id, Reminder.kind == "chronic_checkin",
+                                                 Reminder.status.in_(alerts.ACTIVE)).order_by(Reminder.due_at.desc()))
+    if not reminder:
+        reminder = db.scalar(select(Reminder).where(Reminder.encounter_id == e.id, Reminder.kind == "clinical_checkin",
+                                                     Reminder.status.in_(alerts.ACTIVE)).order_by(Reminder.due_at.desc()))
+    phone_owner = "self" if e.patient.phone else "none"
+    facility_name = alerts.facility_name(db, e.facility_id)
+    message = alerts.reminder_message(e.patient, facility_name, due, phone_owner, kind="clinical_checkin")
+    if reminder:
+        reminder.kind = "clinical_checkin"
+        reminder.due_at = due
+        reminder.assigned_to = body.assigned_worker_id
+        reminder.phone_belongs_to = phone_owner
+        reminder.channel = "voice" if e.patient.phone else "none"
+        reminder.status = "scheduled"
+        reminder.missed_at = None
+        reminder.message = message
+    else:
+        reminder = Reminder(patient_id=e.patient_id, kind="clinical_checkin", due_at=due,
+                            channel="voice" if e.patient.phone else "none", status="scheduled", message=message,
+                            facility_id=e.facility_id, assigned_to=body.assigned_worker_id, phone_belongs_to=phone_owner,
+                            encounter_id=e.id)
+        db.add(reminder)
+
+    db.flush()
+    audit.record(db, user, "UPDATE", "reminder", reminder.id,
+                 f"Clinical follow-up scheduled for {due.date().isoformat()}" + (f"; assigned to {worker.name}" if worker else "; unassigned"),
+                 e.patient.code, e.facility_id)
+    db.commit()
+    return encounter_out(e, user)
 
 
 @router.get("/queue", response_model=list[QueueItem])
@@ -373,6 +434,7 @@ def confirm(eid: str, user: Reviewer, db: DB):
         need = "a doctor or medical officer" if e.urgency == "red" else "a nurse, doctor or medical officer"
         raise HTTPException(403, f"A {user.role.replace('_', ' ')} cannot confirm a {e.urgency.upper()} note — it needs {need}")
     e.status, e.reviewed_by, e.reviewed_at = "confirmed", user.name, now()
+    close_escalations(db, e, user, "note confirmed")
     audit.record(db, user, "CONFIRM", "encounter", eid, f"Triage note ({e.urgency.upper()}) reviewed and confirmed by {user.role.replace('_', ' ')}", e.patient.code, e.facility_id)
     if e.urgency == "red":
         alerts.check_capacity(db, e.facility_id)
@@ -414,7 +476,7 @@ def override(eid: str, body: OverrideIn, user: Reviewer, db: DB):
     e.urgency = body.to_urgency
     e.urgency_source = "override"
     esc = escalate_after(body.to_urgency)
-    e.escalation_due_at = e.created_at + timedelta(minutes=esc) if esc else None
+    e.escalation_due_at = waiting_since(e) + timedelta(minutes=esc) if esc else None  # from arrival, as at check-in (C3)
     audit.record(db, user, "OVERRIDE", "encounter", eid, f'Urgency {frm} → {body.to_urgency} ({"lowered" if down else "raised"}; {body.category}). Reason: "{body.reason or "none given"}". Rules-engine output ({e.rules_urgency}) retained.{(" Overrules non-downgradable rule(s): " + ", ".join(overruled)) if overruled else ""}', e.patient.code, e.facility_id)
     return encounter_out(e, user)
 
@@ -477,6 +539,13 @@ def list_escalations(user: Reviewer, db: DB, status: str | None = None):
     return [esc_out(x) for x in db.scalars(q).unique()]
 
 
+def close_escalations(db, e: Encounter, user: User, why: str) -> None:
+    """A decision on the case answers its open escalations: they stop counting as waiting and say who decided."""
+    for x in db.scalars(select(Escalation).where(Escalation.encounter_id == e.id, Escalation.status == "open")):
+        x.status, x.acknowledged_by, x.acknowledged_at, x.ack_note = "acknowledged", user.name, now(), f"Closed: {why}"
+        audit.record(db, user, "ACKNOWLEDGE", "escalation", x.id, f"Escalation closed by the decision ({why})", e.patient.code, e.facility_id)
+
+
 @router.post("/escalations/{xid}/acknowledge", response_model=EscalationOut)
 def acknowledge(xid: str, body: AckIn, user: Doctor, db: DB):
     x = db.get(Escalation, xid)
@@ -491,11 +560,14 @@ def acknowledge(xid: str, body: AckIn, user: Doctor, db: DB):
 
 # ── Referrals ─────────────────────────────────────────
 def ref_out(r: Referral) -> ReferralOut:
+    e = r.encounter
     return ReferralOut(
-        id=r.id, encounter_id=r.encounter_id, patient_name=r.encounter.patient.name, destination=r.destination, specialty=r.specialty,
+        id=r.id, encounter_id=r.encounter_id, patient_name=e.patient.name, destination=r.destination, specialty=r.specialty,
         reason=r.reason, note_text=r.note_text, transport=r.transport, created_by=r.created_by, created_at=r.created_at, status=r.status,
         due_at=aware(r.due_at), overdue=r.status != "received" and r.due_at is not None and aware(r.due_at) < now(),
         received_at=aware(r.received_at), received_by=r.received_by, received_note=r.received_note, received_via=r.received_via,
+        from_facility_id=e.facility_id, from_facility_name=e.facility.name if e.facility else "", to_facility_id=r.to_facility_id,
+        to_facility_name=r.to_facility.name if r.to_facility else None, patient_code=e.patient.code, urgency=e.urgency, chief_complaint=e.chief_complaint,
     )
 
 
@@ -503,16 +575,68 @@ def ref_out(r: Referral) -> ReferralOut:
 REFERRAL_DUE = {"red": timedelta(hours=6), "yellow": timedelta(hours=48), "green": timedelta(days=14)}
 
 
+@router.get("/referral-destinations", response_model=list[ReferralDestination])
+def referral_destinations(user: Doctor, db: DB, q: str = Query("", max_length=80), state: str | None = None):
+    """Where a doctor can refer: facilities already on Jeevia, then every match in the national directory (115,000
+    facilities). Without a search, the facilities on Jeevia nearest the doctor's own come first."""
+    from .. import directory
+
+    own = db.get(Facility, user.facility_id) if user.facility_id else None
+    words = [w for w in " ".join(q.lower().split()).split(" ") if w][:5]
+    fq = select(Facility).where(Facility.id != user.facility_id, Facility.source != "system")
+    for w in words:
+        fq = fq.where(or_(func.lower(Facility.name).like(f"%{w}%"), func.lower(Facility.district).like(f"%{w}%"), Facility.pincode == w))
+    if state:
+        fq = fq.where(Facility.state == state)
+    on = list(db.scalars(fq.limit(30 if words else 200)))
+    if own:
+        on.sort(key=lambda f: (f.state != own.state, f.district != own.district, f.name))
+    out = [ReferralDestination(key=f"fac:{f.id}", name=f.name, kind_label=directory.KIND_LABEL.get(f.type, f.type.replace("_", " ").title()),
+                               district=f.district or None, state=f.state, facility_id=f.id, directory_ref=f.directory_ref, on_jeevia=True) for f in on]
+    if len(" ".join(words)) >= 2:
+        seen = {f.directory_ref for f in on if f.directory_ref}
+        for h in directory.search(db, " ".join(words), state, 30):
+            if h["source"] != "directory" or h["directory_ref"] in seen or (h["facility_id"] and h["facility_id"] == user.facility_id):
+                continue
+            out.append(ReferralDestination(key=h["key"], name=h["name"], kind_label=h["kind_label"], district=h["district"], state=h["state"],
+                                           facility_id=h["facility_id"], directory_ref=h["directory_ref"], on_jeevia=bool(h["facility_id"])))
+    return out
+
+
 @router.post("/encounters/{eid}/referrals", response_model=ReferralOut)
 def create_referral(eid: str, body: ReferralIn, user: Doctor, db: DB):
+    from .. import directory
+
     e = load_encounter(db, eid, user)
-    r = Referral(encounter_id=e.id, created_by=user.name, due_at=now() + REFERRAL_DUE.get(e.urgency or "green", REFERRAL_DUE["green"]), **body.model_dump())
+    to = None
+    if body.to_facility_id:
+        to = db.get(Facility, body.to_facility_id)
+        if not to:
+            raise HTTPException(404, "Receiving facility not found")
+    elif body.to_directory_ref:
+        try:
+            to = directory.activate(db, body.to_directory_ref, user.id)  # a directory entry becomes a facility so its doctors can receive
+        except LookupError as x:
+            raise HTTPException(404, str(x))
+    if to and to.id == e.facility_id:
+        raise HTTPException(400, "Choose another facility: this case is already here")
+    data = body.model_dump(exclude={"to_facility_id", "to_directory_ref"})
+    r = Referral(encounter_id=e.id, created_by=user.name, to_facility_id=to.id if to else None,
+                 due_at=now() + REFERRAL_DUE.get(e.urgency or "green", REFERRAL_DUE["green"]), **data)
     db.add(r)
     e.status, e.referral_needed = "referred", True
+    close_escalations(db, e, user, f"referred to {body.destination}")
     e.reviewed_by = e.reviewed_by or user.name
     e.reviewed_at = e.reviewed_at or now()
     db.flush()
-    audit.record(db, user, "REFERRAL", "encounter", e.id, f"Referral to {body.destination} ({body.specialty}); transport: {body.transport}", e.patient.code, e.facility_id)
+    audit.record(db, user, "REFERRAL", "encounter", e.id, f"Referral {r.id} to {body.destination} ({body.specialty}); transport: {body.transport}", e.patient.code, e.facility_id)
+    if to:
+        # The receiving side is told at once: its doctors see it under Incoming referrals, its medical officer under Alerts.
+        tier = (e.urgency or "").upper() or "triage pending"
+        alerts._raise(db, to.id, "referral_in", r.id, "medical_officer", f"Incoming referral {r.id} ({tier}) from {e.facility.name}",
+                      {"referral_id": r.id, "patient_code": e.patient.code, "urgency": e.urgency, "from": e.facility.name, "specialty": body.specialty,
+                       "reason": body.reason, "transport": body.transport})
+        audit.record(db, user, "REFERRAL", "referral", r.id, f"Referral {r.id} received from {e.facility.name}", e.patient.code, to.id)
     db.refresh(r)
     return ref_out(r)
 
@@ -534,12 +658,69 @@ def mark_received(db, r: Referral, by: str, note: str, via: str, user) -> None:
         raise HTTPException(409, f"Already confirmed received by {r.received_by}")
     r.status, r.received_at, r.received_by, r.received_note, r.received_via = "received", now(), by.strip(), note.strip() or None, via
     _resolve(db, r.encounter.facility_id, "referral_overdue", r.id, f"care received ({by.strip()})")
-    how = "the receiving clinician (QR summary)" if via == "qr" else "the referring doctor"
+    how = {"qr": "the receiving clinician (QR summary)", "account": "the receiving doctor (signed in)"}.get(via, "the referring doctor")
     audit.record(db, user, "REFERRAL", "referral", r.id, f"Care received at {r.destination}; confirmed by {by.strip()}, recorded by {how}",
                  r.encounter.patient.code, r.encounter.facility_id)
+    if r.to_facility_id:
+        _resolve(db, r.to_facility_id, "referral_in", r.id, f"patient arrived ({by.strip()})")
+        audit.record(db, user, "REFERRAL", "referral", r.id, f"Patient arrived on referral {r.id}; confirmed by {by.strip()}", r.encounter.patient.code, r.to_facility_id)
 
 
 @router.get("/referrals", response_model=list[ReferralOut])
 def list_referrals(user: Doctor, db: DB):
     q = select(Referral).join(Encounter).where(Encounter.facility_id == user.facility_id).order_by(Referral.created_at.desc())
     return [ref_out(r) for r in db.scalars(q).unique()]
+
+
+@router.get("/referrals/incoming", response_model=list[ReferralOut])
+def incoming_referrals(user: Doctor, db: DB):
+    """Referrals other facilities sent here. Opening one shows that visit only."""
+    q = select(Referral).where(Referral.to_facility_id == user.facility_id).order_by(Referral.created_at.desc())
+    return [ref_out(r) for r in db.scalars(q).unique()]
+
+
+def _referral_for(db, rid: str, user: User) -> Referral:
+    """A referral the doctor may see: sent from their facility, or sent to it. Anything else reads as not found, so an
+    ID belonging to two other facilities reveals nothing."""
+    r = db.get(Referral, rid.strip())
+    tail = re.sub(r"^(ref[-_ ]?)", "", rid.strip().lower())
+    if not r and re.fullmatch(r"[0-9a-f]{6,12}", tail) and user.facility_id:
+        # The short code on slips and screens (REF-3F9A2C = the end of the ID), among referrals this facility can see
+        mine = select(Referral).join(Encounter).where(Referral.id.like(f"%{tail}"), or_(Encounter.facility_id == user.facility_id, Referral.to_facility_id == user.facility_id))
+        hits = list(db.scalars(mine.limit(2)).unique())
+        r = hits[0] if len(hits) == 1 else None
+    if not r or not user.facility_id or user.facility_id not in (r.encounter.facility_id, r.to_facility_id):
+        raise HTTPException(404, "No referral with this ID was sent to or from your facility")
+    return r
+
+
+@router.get("/referrals/{rid}", response_model=ReferralOut)
+def get_referral(rid: str, user: Doctor, db: DB):
+    return ref_out(_referral_for(db, rid, user))
+
+
+@router.get("/referrals/{rid}/visit", response_model=SharedSummary)
+def referral_visit(rid: str, request: Request, user: Doctor, db: DB):
+    """The referred visit, for a doctor at the receiving facility (or the sender): that visit only, never the patient's
+    other visits. Every opening goes into the audit log of both facilities."""
+    from .shares import summary
+
+    r = _referral_for(db, rid, user)
+    e = r.encounter
+    where = db.get(Facility, user.facility_id)
+    what = f"Referred visit {r.id} opened by {user.name} ({where.name if where else user.facility_id})"
+    audit.record(db, user, "VIEW", "referral", r.id, what, e.patient.code, e.facility_id)
+    if r.to_facility_id and r.to_facility_id != e.facility_id:
+        audit.record(db, user, "VIEW", "referral", r.id, what, e.patient.code, r.to_facility_id)
+    return summary(db, e, request, "referral:" + r.id, r.created_by, aware(r.created_at) + timedelta(days=30))
+
+
+@router.post("/referrals/{rid}/arrived", response_model=ReferralOut)
+def referral_arrived(rid: str, body: ReferralArrivedIn, user: Doctor, db: DB):
+    """The receiving doctor, signed in, records that the patient arrived. Closes the referral on both sides."""
+    r = _referral_for(db, rid, user)
+    if r.to_facility_id != user.facility_id:
+        raise HTTPException(403, "Only the facility the patient was referred to can record the arrival")
+    where = db.get(Facility, user.facility_id)
+    mark_received(db, r, f"{user.name} ({user.role.replace('_', ' ')}, {where.name if where else ''})", body.note, "account", user)
+    return ref_out(r)

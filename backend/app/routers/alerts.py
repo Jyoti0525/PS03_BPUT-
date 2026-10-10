@@ -115,8 +115,8 @@ def _reminder(db, rid: str, user: User) -> Reminder:
 
 @router.get("/followups", response_model=list[FollowupOut])
 def followups(user: Reviewer, db: DB, scope: str = Query("active", pattern="^(active|all)$"),
-              programme: str = Query("all", pattern="^(all|maternal|chronic)$")):
-    """A health worker sees the patients assigned to them (and unassigned ones); nurses, doctors and the MO see the facility."""
+              programme: str = Query("all", pattern="^(all|maternal|chronic|general)$")):
+    """A health worker sees assigned and unassigned patient follow-ups; other clinical staff see the facility."""
     al.check_missed_visits(db, user.facility_id)
     kinds = [k for k, v in calls.PROGRAMME.items() if programme in ("all", v)]
     q = select(Reminder).where(Reminder.facility_id == user.facility_id, Reminder.kind.in_(kinds)).order_by(Reminder.due_at)

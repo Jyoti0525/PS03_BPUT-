@@ -43,6 +43,7 @@ import type {
   PatientCandidate,
   QueueItem,
   Referral,
+  ReferralDestination,
   RegisterInput,
   Role,
   RetentionStatus,
@@ -168,6 +169,8 @@ export interface JeeviaApi {
   searchPatients(q: string): Promise<PatientCandidate[]>;
   getPatient(id: string): Promise<Patient>;
   getPatientByCode(code: string): Promise<Patient>;
+  /** Read-only patient lookup by an any-centre J- form reference or its QR payload. */
+  getPatientByReference(reference: string): Promise<Patient>;
   /** A6: a person chose this patient from the candidates; logged, never an automatic merge. */
   pickPatient(id: string, matchReason: string, candidates: number): Promise<Patient>;
   createPatient(input: Omit<Patient, "id" | "code" | "created_at">): Promise<Patient>;
@@ -180,6 +183,7 @@ export interface JeeviaApi {
   submitIntake(payload: IntakePayload): Promise<Encounter>;
   queue(facilityId: string): Promise<QueueItem[]>;
   getEncounter(id: string): Promise<Encounter>;
+  scheduleFollowup(id: string, dueDate: string, assignedWorkerId: string | null): Promise<Encounter>;
   confirmEncounter(id: string): Promise<Encounter>;
   editNote(id: string, note: Partial<TriageNote>): Promise<Encounter>;
   overrideUrgency(id: string, to: Urgency, category: string, reason: string): Promise<Encounter>;
@@ -197,7 +201,7 @@ export interface JeeviaApi {
   capacity(): Promise<Capacity>;
   /** Doctor / medical officer: daily counts per place and syndrome, small counts written as "<5". */
   syndromicCsv(days?: number): Promise<ExportResult>;
-  listFollowups(scope?: "active" | "all", programme?: "all" | "maternal" | "chronic"): Promise<Followup[]>;
+  listFollowups(scope?: "active" | "all", programme?: "all" | "maternal" | "chronic" | "general"): Promise<Followup[]>;
   /** Active health workers at the caller's facility (names only), to assign a maternal follow-up. */
   listHealthWorkers(): Promise<{ id: string; name: string }[]>;
   followupAttempt(id: string, outcome: Exclude<FollowupAttempt["outcome"], "call">, note?: string): Promise<Followup>;
@@ -223,9 +227,19 @@ export interface JeeviaApi {
   // Referrals
   createReferral(
     encounterId: string,
-    input: Pick<Referral, "destination" | "specialty" | "reason" | "transport" | "note_text">,
+    input: Pick<Referral, "specialty" | "reason" | "transport" | "note_text"> & { destination?: string; to_facility_id?: string | null; to_directory_ref?: string | null },
   ): Promise<Referral>;
   listReferrals(): Promise<Referral[]>;
+  /** Facilities on Jeevia (nearest first) and, with a search, the national directory. */
+  referralDestinations(q: string): Promise<ReferralDestination[]>;
+  /** Referrals other facilities sent to this one. */
+  incomingReferrals(): Promise<Referral[]>;
+  /** By full ID or the short code on the slip (REF-3F9A2C); only referrals sent to or from this facility. */
+  findReferral(idOrCode: string): Promise<Referral>;
+  /** The referred visit only (audited at both facilities). */
+  referralVisit(id: string): Promise<SharedSummary>;
+  /** The receiving doctor records the arrival; closes the referral on both sides. */
+  referralArrived(id: string, note: string): Promise<Referral>;
   /** E4: the referring doctor records that care was received (e.g. confirmed by phone). */
   referralReceived(id: string, confirmedBy: string, note: string): Promise<Referral>;
 

@@ -613,8 +613,8 @@ export function IntakeFlow({
             <WifiOff className="size-4" /> {t("kiosk.offline")}
           </p>
         )}
-        <Button size="xl" className="mt-8 w-full" variant="teal" onClick={() => (onReset ? onReset() : window.location.reload())}>
-          {mode === "kiosk" ? t("kiosk.done.next") : t("common.done")}
+        <Button size="xl" className="mt-8 w-full" variant="teal" icon={mode === "link" ? <ArrowLeft className="size-5" /> : undefined} onClick={() => (onReset ? onReset() : window.location.reload())}>
+          {mode === "kiosk" ? t("kiosk.done.next") : mode === "link" ? tr("Back to landing page") : t("common.done")}
         </Button>
       </Card>
     );

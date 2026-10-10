@@ -230,6 +230,8 @@ def reminder_message(p: Patient, facility: str, due: datetime, phone_belongs_to:
     family or unknown phone it asks for her by first name and says nothing reproductive. A chronic check-in never
     names the condition."""
     when = aware(due).strftime("%d %b")
+    if kind == "clinical_checkin":
+        return f"Namaste {first_name(p)}. Your follow-up at {facility} is due on {when}. Please come this week."
     if kind == "chronic_checkin":
         return f"Namaste {first_name(p)}. Your check-up at {facility} is due on {when}. Please bring your medicines and your last report."
     if phone_belongs_to == "self":
@@ -240,6 +242,9 @@ def reminder_message(p: Patient, facility: str, due: datetime, phone_belongs_to:
 def call_script(r: Reminder, p: Patient, facility: str) -> str | None:
     if r.phone_belongs_to == "none" or not p.phone:
         return None
+    if r.kind == "clinical_checkin":
+        return (f"Namaste {first_name(p)}. This is {facility}. Your follow-up was due on {aware(r.due_at).strftime('%d %b')}. "
+                "Please come this week for your check-up.")
     if r.kind == "chronic_checkin":
         return (f"Namaste {first_name(p)}. This is {facility}. Your check-up was due on {aware(r.due_at).strftime('%d %b')}. "
                 f"Please come this week and bring your medicines.")

@@ -1,68 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { ScanLine, Search, Camera, Phone, X, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { ScanLine, Search, Phone, ArrowRight } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { PageHeader } from "@/components/layout/app-shell";
 import { Badge, Button, Card, CardHeader, Empty, ErrorNote, Input, Spinner } from "@/components/ui";
 import type { Encounter, Patient, PatientCandidate } from "@/lib/types";
 import { UrgencyBadge } from "@/components/triage/note";
+import { QrScanner } from "@/components/triage/qr-scanner";
 import { timeAgo, fmtDate } from "@/lib/hooks";
 import { langByCode } from "@/lib/i18n/languages";
 import { useSession, usePrefs } from "@/components/providers";
-
-type Detector = { detect(src: CanvasImageSource): Promise<{ rawValue: string }[]> };
-
-function QrScanner({ onCode, onClose }: { onCode: (c: string) => void; onClose: () => void }) {
-  const { tr } = usePrefs();
-  const video = useRef<HTMLVideoElement>(null);
-  const [msg, setMsg] = useState("Starting camera…");
-  useEffect(() => {
-    let stream: MediaStream | null = null;
-    let raf = 0;
-    let stopped = false;
-    (async () => {
-      const BD = (window as unknown as { BarcodeDetector?: new (o: { formats: string[] }) => Detector }).BarcodeDetector;
-      if (!BD) {
-        setMsg(tr("This browser cannot scan QR codes. Type the patient ID printed under the code instead."));
-        return;
-      }
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        if (!video.current) return;
-        video.current.srcObject = stream;
-        await video.current.play();
-        setMsg(tr("Point the camera at the patient's token QR"));
-        const det = new BD({ formats: ["qr_code"] });
-        const tick = async () => {
-          if (stopped || !video.current) return;
-          try {
-            const codes = await det.detect(video.current);
-            if (codes[0]?.rawValue) return onCode(codes[0].rawValue);
-          } catch {
-            /* frame not ready */
-          }
-          raf = requestAnimationFrame(tick);
-        };
-        tick();
-      } catch {
-        setMsg(tr("Camera permission denied. Type the patient ID instead."));
-      }
-    })();
-    return () => {
-      stopped = true;
-      cancelAnimationFrame(raf);
-      stream?.getTracks().forEach((t) => t.stop());
-    };
-  }, [onCode, tr]);
-  return (
-    <Card className="overflow-hidden">
-      <CardHeader title={tr("Scan patient QR")} subtitle={msg} icon={<Camera className="size-4" />} action={<Button size="sm" variant="ghost" onClick={onClose} icon={<X className="size-4" />}>{tr("Close")}</Button>} />
-      <video ref={video} className="aspect-video w-full bg-ink object-cover" muted playsInline />
-    </Card>
-  );
-}
 
 export default function LookupPage() {
   const { tr } = usePrefs();
@@ -93,9 +42,17 @@ export default function LookupPage() {
     setPatient(null);
     setBusy(true);
     try {
-      const code = v.replace(/^jeevia:/i, "");
+      let code = v;
+      try {
+        const url = new URL(code);
+        code = url.searchParams.get("claim") ?? url.searchParams.get("patient") ?? code;
+      } catch { /* QR payloads can be plain IDs, not URLs */ }
+      code = code.replace(/^jeevia:/i, "").trim();
       if (/^jva-/i.test(code)) {
         await open(await api.getPatientByCode(code));
+        setCandidates(null);
+      } else if (/^j-/i.test(code)) {
+        await open(await api.getPatientByReference(code));
         setCandidates(null);
       } else {
         const c = await api.searchPatients(v);
@@ -111,12 +68,12 @@ export default function LookupPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title={tr("Find patient")} subtitle={tr("By patient ID, QR on the intake token, or phone. Every lookup is written to the audit log.")} />
+      <PageHeader title={tr("Find patient")} subtitle={tr("By patient ID, QR or J- form reference, or phone. Every lookup is written to the audit log.")} />
       <Card className="p-4">
         <form className="flex flex-col gap-2 sm:flex-row" onSubmit={(e) => { e.preventDefault(); search(); }}>
           <div className="relative flex-1">
             <Search className="absolute top-3.5 left-3 size-4 text-subtle" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("JVA-P001, 98765 43210, or name")} className="h-12 pl-9 text-base" aria-label={tr("Patient ID, phone or name")} />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr("JVA-P001, J-2XJFND, phone, or name")} className="h-12 pl-9 text-base" aria-label={tr("Patient ID, phone or name")} />
           </div>
           <Button type="submit" size="lg" loading={busy}>{tr("Search")}</Button>
           <Button type="button" size="lg" variant="secondary" onClick={() => setScan(true)} icon={<ScanLine className="size-5" />}>{tr("Scan QR")}</Button>

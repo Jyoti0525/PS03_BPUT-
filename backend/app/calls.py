@@ -34,7 +34,7 @@ from .triage.findings import FINDINGS, _loose, scan_text
 
 LANGS = ("en", "hi", "or", "bn", "ta", "te", "gu", "kn", "ml", "mr", "pa")  # what Sarvam's Bulbul voice speaks
 LEXICON_LANGS = ("en", "hi", "or")  # danger-sign word lists in triage/findings.py
-PROGRAMME = {"anc_checkup": "maternal", "chronic_checkin": "chronic"}
+PROGRAMME = {"anc_checkup": "maternal", "chronic_checkin": "chronic", "clinical_checkin": "general"}
 ENDED_BY_CALLER = ("no_answer", "hung_up")
 
 
@@ -93,6 +93,8 @@ def gestation_now(db: Session, r: Reminder) -> int | None:
 
 
 def condition_of(db: Session, r: Reminder) -> str | None:
+    if r.kind != "chronic_checkin":
+        return None
     enc = db.get(Encounter, r.encounter_id) if r.encounter_id else None
     return ((enc.intake or {}).get("chronic") or {}).get("condition") if enc else None
 
@@ -214,7 +216,7 @@ def start(db: Session, r: Reminder, user: User, operator: str = "agent", languag
     p = db.get(Patient, r.patient_id)
     programme = PROGRAMME.get(r.kind)
     if not programme:
-        raise CallRefused(422, "Calls are for maternal and chronic follow-ups")
+        raise CallRefused(422, "This follow-up type does not support reminder calls")
     if r.status not in ("missed", "call_due", "contacted"):
         raise CallRefused(409, "A call is placed only after a missed check-up")
     mode = who_calls(db, r, p)

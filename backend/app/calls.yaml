@@ -342,6 +342,22 @@ scripts:
       ml: "നഴ്സിനോട് മറ്റെന്തെങ്കിലും പറയാനുണ്ടോ?"
       mr: "तुम्हाला नर्सला आणखी काही सांगायचे आहे का?"
       pa: "ਕੀ ਤੁਸੀਂ ਨਰਸ ਨੂੰ ਹੋਰ ਕੁਝ ਦੱਸਣਾ ਚਾਹੁੰਦੇ ਹੋ?"
+  general:
+    - key: identity
+      kind: identity
+    - key: come
+      kind: logistics
+      en: "Your follow-up check-up was due on {date}. Can you come to {facility} this week?"
+      hi: "आपकी अगली जाँच {date} को होनी थी। क्या आप इस हफ़्ते {facility} आ सकते हैं?"
+      or: "ଆପଣଙ୍କ ପରବର୍ତ୍ତୀ ଯାଞ୍ଚ {date}ରେ ହେବାର ଥିଲା। ଆପଣ ଏହି ସପ୍ତାହରେ {facility} ଆସିପାରିବେ କି?"
+      bn: "আপনার পরবর্তী পরীক্ষা {date} তারিখে হওয়ার কথা ছিল। আপনি কি এই সপ্তাহে {facility}-তে আসতে পারবেন?"
+      ta: "உங்கள் அடுத்த பரிசோதனை {date} அன்று இருந்தது. இந்த வாரம் நீங்கள் {facility}-க்கு வர முடியுமா?"
+      te: "మీ తదుపరి పరీక్ష {date}న జరగాల్సింది. మీరు ఈ వారం {facility}కి రాగలరా?"
+      gu: "તમારી આગામી તપાસ {date}ના રોજ થવાની હતી. શું તમે આ અઠવાડિયે {facility} આવી શકશો?"
+      kn: "ನಿಮ್ಮ ಮುಂದಿನ ತಪಾಸಣೆ {date} ರಂದು ಆಗಬೇಕಿತ್ತು. ನೀವು ಈ ವಾರ {facility}ಗೆ ಬರಬಹುದೇ?"
+      ml: "നിങ്ങളുടെ അടുത്ത പരിശോധന {date}-ന് ആയിരുന്നു. ഈ ആഴ്ച നിങ്ങൾക്ക് {facility}-ൽ വരാൻ കഴിയുമോ?"
+      mr: "तुमची पुढील तपासणी {date} रोजी व्हायची होती. तुम्ही या आठवड्यात {facility} येथे येऊ शकाल का?"
+      pa: "ਤੁਹਾਡਾ ਅਗਲਾ ਚੈੱਕਅੱਪ {date} ਨੂੰ ਹੋਣਾ ਸੀ। ਕੀ ਤੁਸੀਂ ਇਸ ਹਫ਼ਤੇ {facility} ਆ ਸਕਦੇ ਹੋ?"
 
 # How a short answer is read. Checked in this order (so "पता नहीं" is unsure, not no). Whole words or phrases only.
 answers:

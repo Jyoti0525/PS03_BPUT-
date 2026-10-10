@@ -107,7 +107,13 @@ def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
         left = MAX_FAILED - s.failed_attempts
         raise HTTPException(403, f"Wrong access code. {left} attempt{'s' if left != 1 else ''} left.")
     s.views += 1
-    e = s.encounter
+    audit.record(db, None, "VIEW", "share", s.id, f"QR summary opened (view {s.views}) from {request.client.host if request.client else 'unknown'}", s.encounter.patient.code, s.encounter.facility_id)
+    return summary(db, s.encounter, request, "share:" + s.id, s.created_by, s.expires_at)
+
+
+def summary(db, e, request: Request, scope: str, shared_by: str, expires_at) -> SharedSummary:
+    """The referred visit as the receiving clinician sees it: by QR and access code, or signed in as a doctor at the
+    facility it was referred to. One visit only, never the patient's other visits; no phone, village or employer."""
     f = db.get(Facility, e.facility_id)
     ref = db.scalar(select(Referral).where(Referral.encounter_id == e.id).order_by(Referral.created_at.desc()))
     files = [x for x in db.scalars(select(FileObject).where(FileObject.encounter_id == e.id, FileObject.kind != "audio"))]
@@ -115,13 +121,12 @@ def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
     for x in files:
         url = None
         if not x.purged_at and x.expires_at > now():
-            url = str(request.url_for("file_content", fid=x.id)) + f"?sig={file_token(x.id, 'share:' + s.id)}"
+            url = str(request.url_for("file_content", fid=x.id)) + f"?sig={file_token(x.id, scope)}"
         docs.append(SharedDocument(id=x.id, filename=x.filename, kind=x.kind, content_type=x.content_type, uploaded_at=x.uploaded_at, url=url))
     note = None
     if e.note:
         n = e.note
         note = {k: n.get(k) for k in ("summary", "flags", "vitals", "labs", "timeline", "missing_info", "disagreements", "rules_fired")}
-    audit.record(db, None, "VIEW", "share", s.id, f"QR summary opened (view {s.views}) from {request.client.host if request.client else 'unknown'}", e.patient.code, e.facility_id)
     p = e.patient
     return SharedSummary(
         facility={"name": f.name, "district": f.district, "state": f.state, "type": f.type} if f else {},
@@ -137,7 +142,7 @@ def open_share(token: str, body: ShareOpenIn, request: Request, db: DB):
         referral={"id": ref.id, "destination": ref.destination, "specialty": ref.specialty, "reason": ref.reason, "transport": ref.transport, "created_by": ref.created_by, "created_at": ref.created_at, "note_text": ref.note_text,
                   "status": ref.status, "received_by": ref.received_by, "received_at": ref.received_at} if ref else None,
         documents=docs,
-        shared_by=s.created_by,
-        expires_at=s.expires_at,
+        shared_by=shared_by,
+        expires_at=expires_at,
         disclaimer=DISCLAIMER,
     )

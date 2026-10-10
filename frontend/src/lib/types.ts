@@ -426,6 +426,8 @@ export interface ChronicIntake {
   last_checkup?: string | null;
   current_medicines?: string | null;
   feeling_vs_last: "better" | "same" | "worse" | "unsure";
+  next_checkup?: string | null;
+  assigned_worker_id?: string | null;
 }
 
 export interface VitalsInput {
@@ -456,6 +458,7 @@ export interface IntakePayload {
   vitals?: VitalsInput | null;
   maternal?: MaternalIntake | null;
   chronic?: ChronicIntake | null;
+  followup?: { next_checkup?: string | null; assigned_worker_id?: string | null } | null;
   occupational?: OccupationalIntake | null;
   /** D3: hostel block (campus) — fevers are counted per place, never shown by name. */
   cluster_key?: string | null;
@@ -839,7 +842,7 @@ export interface QueueItem {
   sign_off?: "health_worker" | "nurse" | "doctor" | null;
 }
 
-export type AlertKind = "capacity" | "fever_cluster" | "missed_visit" | "call_escalation" | "referral_overdue";
+export type AlertKind = "capacity" | "fever_cluster" | "missed_visit" | "call_escalation" | "referral_overdue" | "referral_in";
 
 export interface Alert {
   id: string;
@@ -913,7 +916,7 @@ export interface Call {
   reminder_id: string;
   patient_name: string;
   patient_code: string;
-  programme: "maternal" | "chronic";
+  programme: "maternal" | "chronic" | "general";
   operator: "agent" | "human";
   language: CallLanguage;
   audience: "patient" | "other";
@@ -953,6 +956,7 @@ export interface TelephonyStatus {
 
 export interface Followup {
   id: string;
+  encounter_id?: string;
   patient_id: string;
   patient_code: string;
   patient_name: string;
@@ -960,7 +964,7 @@ export interface Followup {
   phone: string | null;
   phone_belongs_to: PhoneOwner | null;
   kind: string;
-  programme: "maternal" | "chronic";
+  programme: "maternal" | "chronic" | "general";
   /** Chronic: the long-term condition. */
   condition: string | null;
   who_calls: WhoCalls;
@@ -1026,7 +1030,28 @@ export interface Referral {
   received_at?: string | null;
   received_by?: string | null;
   received_note?: string | null;
-  received_via?: "qr" | "phone" | null;
+  received_via?: "qr" | "phone" | "account" | null;
+  /** Doctor-to-doctor hand-off: the receiving facility, when it was picked from the list (not typed). */
+  from_facility_id?: string;
+  from_facility_name?: string;
+  to_facility_id?: string | null;
+  to_facility_name?: string | null;
+  patient_code?: string;
+  urgency?: Urgency | null;
+  chief_complaint?: string;
+}
+
+/** A place a doctor can refer to: a facility on Jeevia, or a national directory entry (made a facility on send). */
+export interface ReferralDestination {
+  key: string;
+  name: string;
+  kind_label: string;
+  district: string | null;
+  state: string;
+  facility_id: string | null;
+  directory_ref: string | null;
+  /** Its doctors will see the referral under Incoming. */
+  on_jeevia: boolean;
 }
 
 export type AuditAction =

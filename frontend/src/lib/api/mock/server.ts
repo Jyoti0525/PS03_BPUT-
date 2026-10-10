@@ -33,6 +33,7 @@ import type {
   Alert,
   Capacity,
   OverrideStats,
+  SharedSummary,
 } from "@/lib/types";
 import { ADMIN_ROLES, DOCTOR_ROLES, PIN_ROLES, REVIEWER_ROLES, SIGN_OFF, STAFF_ROLES } from "@/lib/types";
 import { SAMPLE_PIN, pinProblem } from "@/lib/pin";
@@ -466,6 +467,46 @@ async function withDb<T>(fn: (d: DB) => Promise<T>): Promise<T> {
 
 /* ── API implementation ──────────────────────────────── */
 
+
+/** The referred visit as the receiving clinician sees it (QR, or signed in at the receiving facility): one visit only. */
+function summaryOf(d: DB, e: Encounter, sharedBy: string, expiresAt: string): SharedSummary {
+  const f = d.facilities.find((x) => x.id === e.facility_id);
+  const ref = d.referrals.filter((r) => r.encounter_id === e.id).pop() ?? null;
+  const docs = (e.intake?.file_ids ?? []).map((id) => d.files.find((x) => x.id === id)).filter((x): x is StoredFile => !!x && x.kind !== "audio");
+  const n = e.note;
+  return {
+    facility: { name: f?.name, district: f?.district, state: f?.state, type: f?.type },
+    patient: { name: e.patient.name, code: e.patient.code, age: e.patient.age, sex: e.patient.sex, language: e.patient.language },
+    encounter: { token: e.token ?? null, created_at: e.created_at, category: e.category, chief_complaint: e.chief_complaint, status: e.status, urgency: e.urgency, urgency_source: e.urgency_source, override: e.override ?? null, reviewed_by: e.reviewed_by ?? null, reviewed_at: e.reviewed_at ?? null, maternal: e.intake?.maternal ?? null, chronic: e.intake?.chronic ?? null, consent: e.consent ? { mode: e.consent.mode, proxy_relation: e.consent.proxy_relation ?? null } : null },
+    note: n ? { summary: n.summary, flags: n.flags, vitals: n.vitals, labs: n.labs, timeline: n.timeline, missing_info: n.missing_info, disagreements: n.disagreements, rules_fired: n.rules_fired } : null,
+    referral: ref ? { id: ref.id, destination: ref.destination, specialty: ref.specialty, reason: ref.reason, transport: ref.transport, created_by: ref.created_by, created_at: ref.created_at, note_text: ref.note_text, status: ref.status, received_by: ref.received_by ?? null, received_at: ref.received_at ?? null } : null,
+    documents: docs.map((x) => ({ id: x.id, filename: x.filename, kind: x.kind, content_type: x.content_type, uploaded_at: x.uploaded_at, url: x.purged_at ? null : x.data_url })),
+    shared_by: sharedBy,
+    expires_at: expiresAt,
+    disclaimer: "Educational prototype for triage support only. Not a diagnosis.",
+  };
+}
+
+/** A referral sent to or from the user's facility, by full ID or the short code on the slip (REF-3F9A2C). */
+function refVisible(d: DB, me: User, idOrCode: string): Referral {
+  const full = idOrCode.trim().toLowerCase();
+  const tail = full.replace(/^ref[-_ ]?/, "");
+  const r = d.referrals.find((x) => x.id.toLowerCase() === full || (tail.length >= 6 && x.id.toLowerCase().endsWith(tail)));
+  const from = r && d.encounters.find((e) => e.id === r.encounter_id)?.facility_id;
+  if (!r || !me.facility_id || (from !== me.facility_id && r.to_facility_id !== me.facility_id)) throw new ApiError(404, "No referral with this ID was sent to or from your facility");
+  return r;
+}
+
+function refView(d: DB, r: Referral): Referral {
+  const e = d.encounters.find((x) => x.id === r.encounter_id);
+  const from = d.facilities.find((f) => f.id === e?.facility_id);
+  const to = d.facilities.find((f) => f.id === r.to_facility_id);
+  return {
+    ...clone(r), from_facility_id: from?.id ?? "", from_facility_name: from?.name ?? "", to_facility_name: to?.name ?? null, patient_code: e?.patient.code ?? "",
+    urgency: e?.urgency ?? null, chief_complaint: e?.chief_complaint ?? "", overdue: r.status !== "received" && !!r.due_at && Date.parse(r.due_at) < Date.now(),
+  };
+}
+
 export const mockApi: JeeviaApi = {
   mode: "mock",
 
@@ -850,22 +891,8 @@ export const mockApi: JeeviaApi = {
       }
       s.views++;
       const e = d.encounters.find((x) => x.id === s.encounter_id)!;
-      const f = d.facilities.find((x) => x.id === e.facility_id);
-      const ref = d.referrals.filter((r) => r.encounter_id === e.id).pop() ?? null;
-      const docs = (e.intake?.file_ids ?? []).map((id) => d.files.find((x) => x.id === id)).filter((x): x is StoredFile => !!x && x.kind !== "audio");
       await audit(d, null, "VIEW", "share", s.id, `QR summary opened (view ${s.views})`, e.patient.code);
-      const n = e.note;
-      return {
-        facility: { name: f?.name, district: f?.district, state: f?.state, type: f?.type },
-        patient: { name: e.patient.name, code: e.patient.code, age: e.patient.age, sex: e.patient.sex, language: e.patient.language, phone: e.patient.phone },
-        encounter: { token: e.token ?? null, created_at: e.created_at, category: e.category, chief_complaint: e.chief_complaint, status: e.status, urgency: e.urgency, urgency_source: e.urgency_source, override: e.override ?? null, reviewed_by: e.reviewed_by ?? null, reviewed_at: e.reviewed_at ?? null, maternal: e.intake?.maternal ?? null, chronic: e.intake?.chronic ?? null, consent: e.consent ? { mode: e.consent.mode, proxy_name: e.consent.proxy_name ?? null, proxy_relation: e.consent.proxy_relation ?? null } : null },
-        note: n ? { summary: n.summary, flags: n.flags, vitals: n.vitals, labs: n.labs, timeline: n.timeline, missing_info: n.missing_info, disagreements: n.disagreements, rules_fired: n.rules_fired } : null,
-        referral: ref ? { id: ref.id, destination: ref.destination, specialty: ref.specialty, reason: ref.reason, transport: ref.transport, created_by: ref.created_by, created_at: ref.created_at, note_text: ref.note_text, status: ref.status, received_by: ref.received_by ?? null, received_at: ref.received_at ?? null } : null,
-        documents: docs.map((x) => ({ id: x.id, filename: x.filename, kind: x.kind, content_type: x.content_type, uploaded_at: x.uploaded_at, url: x.purged_at ? null : x.data_url })),
-        shared_by: s.created_by,
-        expires_at: s.expires_at,
-        disclaimer: "Educational prototype for triage support only. Not a diagnosis.",
-      };
+      return summaryOf(d, e, s.created_by, s.expires_at);
     }),
 
   shareReceived: (token, accessCode, confirmedBy, note) =>
@@ -1063,6 +1090,18 @@ export const mockApi: JeeviaApi = {
       return clone(p);
     }),
 
+  getPatientByReference: (reference) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      if (!(me.role === "nurse" || me.role === "health_worker" || me.role === "doctor" || me.role === "medical_officer")) throw new ApiError(403, "Not allowed");
+      const ref = reference.trim().toUpperCase().replace(/^JEEVIA:/, "");
+      const canonical = ref.startsWith("J-") ? ref : `J-${ref}`;
+      const e = d.encounters.find((x) => x.channel === "home_link" && (x.token === canonical || (x.intake as unknown as Record<string, unknown> | undefined)?.any_centre_ref === canonical));
+      if (!e || (e.facility_id !== me.facility_id && e.facility_id !== "fac_any_centre")) throw new ApiError(404, "No patient found for this form reference at your facility");
+      await audit(d, me, "VIEW", "patient", e.patient.id, "Patient opened by any-centre form reference / QR scan", e.patient.code);
+      return clone(e.patient);
+    }),
+
   createPatient: (input) =>
     withDb(async (d) => {
       const me = await current(d);
@@ -1199,6 +1238,39 @@ export const mockApi: JeeviaApi = {
       return forRole(e, me);
     }),
 
+  scheduleFollowup: (id, dueDate, assignedWorkerId) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, ["doctor", "medical_officer"]);
+      const e = d.encounters.find((x) => x.id === id);
+      if (!e) throw new ApiError(404, "Encounter not found");
+      if (e.facility_id !== me.facility_id || (e.urgency !== "red" && e.category !== "chronic"))
+        throw new ApiError(422, "Follow-up scheduling is available for RED cases or chronic-condition visits");
+      const worker = assignedWorkerId ? d.users.find((u) => u.id === assignedWorkerId && u.facility_id === me.facility_id && u.role === "health_worker" && u.is_active) : null;
+      if (assignedWorkerId && !worker) throw new ApiError(422, "Choose an active health worker at this facility");
+      const due = new Date(`${dueDate}T00:00:00.000Z`);
+      if (Number.isNaN(due.getTime()) || due.getTime() < new Date(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z").getTime())
+        throw new ApiError(422, "The follow-up date must be today or later");
+      const dueDay = due.toISOString().slice(0, 10);
+      e.intake = { ...e.intake!, followup: { next_checkup: dueDay, assigned_worker_id: assignedWorkerId } };
+      if (e.category === "chronic") e.intake.chronic = { ...(e.intake.chronic ?? { condition: "long-term condition", feeling_vs_last: "unsure" as const }), next_checkup: dueDay, assigned_worker_id: assignedWorkerId };
+      const p = d.patients.find((x) => x.id === e.patient.id)!;
+      const existing = mockFollowups.find((f) => f.encounter_id === e.id && f.kind === "clinical_checkin" && !["done", "cancelled"].includes(f.status));
+      const followup: Followup = {
+        id: existing?.id ?? uid("rem"), encounter_id: e.id, patient_id: p.id, patient_code: p.code, patient_name: p.name, village: p.village ?? null,
+        phone: p.phone ?? null, phone_belongs_to: p.phone ? "self" : "none", kind: "clinical_checkin", programme: "general",
+        condition: null, who_calls: { who: !p.phone ? "home_visit" : e.urgency === "red" ? "human" : "agent", why: !p.phone ? "No phone: a home visit is needed" : e.urgency === "red" ? "The last visit was RED: a person calls, not the agent" : "Routine follow-up: the agent may call" }, due_at: due.toISOString(),
+        status: "scheduled", missed_at: null, attempts: existing?.attempts ?? [], assigned_to: assignedWorkerId,
+        assigned_name: worker?.name ?? null, gestation_weeks: null,
+        call_script: p.phone ? `Namaste ${p.name.split(" ")[0]}. Your follow-up is due on ${due.toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" })}. Please come this week for your check-up.` : null,
+        resolved_at: null,
+      };
+      if (existing) Object.assign(existing, followup);
+      else mockFollowups.push(followup);
+      await audit(d, me, "UPDATE", "reminder", followup.id, `Clinical follow-up scheduled for ${dueDay}${worker ? `; assigned to ${worker.name}` : "; unassigned"}`, p.code);
+      return clone(e);
+    }),
+
   confirmEncounter: (id) =>
     withDb(async (d) => {
       const me = await current(d);
@@ -1311,13 +1383,19 @@ export const mockApi: JeeviaApi = {
       const e = d.encounters.find((x) => x.id === encounterId);
       if (!e) throw new ApiError(404, "Encounter not found");
       const dueH = e.urgency === "red" ? 6 : e.urgency === "yellow" ? 48 : 336;
-      const r: Referral = { ...input, id: uid("ref"), encounter_id: e.id, patient_name: e.patient.name, created_by: me.name, created_at: new Date().toISOString(), status: "sent", due_at: new Date(Date.now() + dueH * 3600000).toISOString() };
+      const to = input.to_facility_id ? d.facilities.find((f) => f.id === input.to_facility_id) : null;
+      if (input.to_facility_id && !to) throw new ApiError(404, "Receiving facility not found");
+      if (to && to.id === e.facility_id) throw new ApiError(400, "Choose another facility: this case is already here");
+      const { to_directory_ref: _dir, destination, ...rest } = input;
+      void _dir;
+      const suggestedDestination = destination?.trim() || "Patient's choice — no specific facility selected";
+      const r: Referral = { ...rest, destination: suggestedDestination, to_facility_id: to?.id ?? null, id: uid("ref"), encounter_id: e.id, patient_name: e.patient.name, created_by: me.name, created_at: new Date().toISOString(), status: "sent", due_at: new Date(Date.now() + dueH * 3600000).toISOString() };
       d.referrals.push(r);
       e.status = "referred";
       e.referral_needed = true;
       e.reviewed_by ??= me.name;
       e.reviewed_at ??= r.created_at;
-      await audit(d, me, "REFERRAL", "encounter", e.id, `Referral to ${input.destination} (${input.specialty}); transport: ${input.transport}`, e.patient.code);
+      await audit(d, me, "REFERRAL", "encounter", e.id, `Referral destination suggestion: ${suggestedDestination} (${input.specialty}); transport: ${input.transport}`, e.patient.code);
       return r;
     }),
 
@@ -1333,13 +1411,62 @@ export const mockApi: JeeviaApi = {
       return clone(r);
     }),
 
+  referralDestinations: (q) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, DOCTOR_ROLES);
+      const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+      const own = d.facilities.find((f) => f.id === me.facility_id);
+      return d.facilities
+        .filter((f) => f.id !== me.facility_id && f.id !== "fac_any_centre" && words.every((w) => `${f.name} ${f.district}`.toLowerCase().includes(w)))
+        .sort((a, b) => Number(a.state !== own?.state) - Number(b.state !== own?.state) || a.name.localeCompare(b.name))
+        .map((f) => ({ key: `fac:${f.id}`, name: f.name, kind_label: f.type.replace(/_/g, " "), district: f.district, state: f.state, facility_id: f.id, directory_ref: null, on_jeevia: true }));
+    }),
+
+  incomingReferrals: () =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, DOCTOR_ROLES);
+      return d.referrals.filter((r) => r.to_facility_id && r.to_facility_id === me.facility_id).map((r) => refView(d, r)).sort((a, b) => b.created_at.localeCompare(a.created_at));
+    }),
+
+  findReferral: (idOrCode) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, DOCTOR_ROLES);
+      return refView(d, refVisible(d, me, idOrCode));
+    }),
+
+  referralVisit: (id) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, DOCTOR_ROLES);
+      const r = refVisible(d, me, id);
+      const e = d.encounters.find((x) => x.id === r.encounter_id)!;
+      await audit(d, me, "VIEW", "referral", r.id, `Referred visit ${r.id} opened by ${me.name}`, e.patient.code);
+      return summaryOf(d, e, r.created_by, new Date(Date.parse(r.created_at) + 30 * 86400000).toISOString());
+    }),
+
+  referralArrived: (id, note) =>
+    withDb(async (d) => {
+      const me = await current(d);
+      requireRole(me, DOCTOR_ROLES);
+      const r = refVisible(d, me, id);
+      if (r.to_facility_id !== me.facility_id) throw new ApiError(403, "Only the facility the patient was referred to can record the arrival");
+      if (r.status === "received") throw new ApiError(409, `Already confirmed received by ${r.received_by}`);
+      const where = d.facilities.find((f) => f.id === me.facility_id)?.name ?? "";
+      Object.assign(r, { status: "received", received_at: new Date().toISOString(), received_by: `${me.name} (${me.role.replace("_", " ")}, ${where})`, received_note: note.trim() || null, received_via: "account" });
+      await audit(d, me, "REFERRAL", "referral", r.id, `Patient arrived on referral ${r.id}; recorded by the receiving doctor (signed in)`);
+      return refView(d, r);
+    }),
+
   listReferrals: () =>
     withDb(async (d) => {
       const me = await current(d);
       requireRole(me, REVIEWER_ROLES);
       const t = Date.now();
       return clone(d.referrals)
-        .map((r) => ({ ...r, overdue: r.status !== "received" && !!r.due_at && Date.parse(r.due_at) < t }))
+        .map((r) => ({ ...refView(d, r), overdue: r.status !== "received" && !!r.due_at && Date.parse(r.due_at) < t }))
         .sort((a, b) => b.created_at.localeCompare(a.created_at));
     }),
 
@@ -1562,7 +1689,7 @@ export const mockApi: JeeviaApi = {
   listHealthWorkers: () =>
     withDb(async (d) => {
       const me = await current(d);
-      return d.users.filter((u) => u.facility_id === me.facility_id && u.role === "health_worker").map((u) => ({ id: u.id, name: u.name }));
+      return d.users.filter((u) => u.facility_id === me.facility_id && u.role === "health_worker" && u.is_active).map((u) => ({ id: u.id, name: u.name }));
     }),
   followupAttempt: (id, outcome, note = "") =>
     withDb(async (d) => {
