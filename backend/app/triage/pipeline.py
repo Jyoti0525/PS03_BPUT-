@@ -174,8 +174,17 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
     confirmed = {m["name"] for m in intake.get("medications_confirmed") or []} | set(intake.get("medications_rejected") or [])
     for f in files:
         ex = f.extraction or {}
+        readings = []
+        if f.kind == "report" and ex.get("text"):
+            readings.append({"engine": ex.get("engine", "OCR"), "lines": [x.get("text", "") for x in ex["text"][:200] if x.get("text")],
+                             "confidence": round(sum(float(x.get("conf", 0)) for x in ex["text"][:200]) / max(1, len(ex["text"][:200])), 2)})
+        online_reading = ex.get("online_reading") or {}
+        if online_reading.get("text"):
+            readings.append({"engine": online_reading.get("engine", "Online handwriting OCR"),
+                             "lines": [x.get("text", "") for x in online_reading["text"][:200] if x.get("text")],
+                             "confidence": round(sum(float(x.get("conf", 0)) for x in online_reading["text"][:200]) / max(1, len(online_reading["text"][:200])), 2)})
         documents.append({"file_id": f.id, "filename": f.filename, "kind": f.kind, "doc_type": ex.get("doc_type"), "redaction": ex.get("redaction"),
-                          "read": bool(ex) and ex.get("engine") not in (None, "none")})
+                          "read": bool(ex) and ex.get("engine") not in (None, "none"), "readings": readings})
         for m in ex.get("medicines") or []:
             if m["name"] not in confirmed and all(x["name"] != m["name"] for x in meds_pending):
                 meds_pending.append({**m, "file_id": f.id, "filename": f.filename})
@@ -293,7 +302,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
                       "reason": " | ".join(f'{s["stage"]}: {s["detail"]}' for s in bad)})
     if meds_pending:
         flags.append({"code": "MEDS-UNCONFIRMED", "label": f"{len(meds_pending)} medicine name(s) read from a strip or prescription — awaiting confirmation", "severity": "warning",
-                      "reason": "Read by OCR and matched to the PMBJP generic list; not part of the record until a nurse or doctor confirms each one"})
+                      "reason": "OCR candidates are not part of the confirmed medication history until a doctor checks them against the source image"})
     if intake.get("ai_assist") is False:
         flags.append({"code": "NO-AI", "label": "Patient chose to continue without AI", "severity": "info",
                       "reason": "No speech recognition, translation or report reading ran; the note is the fixed template and urgency comes from the rules alone"})

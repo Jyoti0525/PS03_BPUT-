@@ -46,6 +46,7 @@ from ..triage.findings import FINDINGS
 from ..triage.pipeline import questions_for
 from ..services import (auto_escalate, aware, can_confirm, check_in, create_encounter, encounter_out, escalate_after, load_encounter, now, waiting_since, record_answer, record_observations, sign_off_role,
                         summarise_later, wait_minutes)
+from ..services import _rerun as rebuild_note
 from .facilities import get_facility
 
 router = APIRouter(tags=["encounters"])
@@ -354,28 +355,26 @@ def patch_encounter(eid: str, body: EncounterPatch, user: Doctor, db: DB):
 
 
 @router.post("/encounters/{eid}/medications", response_model=EncounterOut)
-def review_medications(eid: str, body: MedicationReview, user: Clinician, db: DB):
-    """Medicines read from a photo enter the record only here, one by one, by a nurse or doctor."""
+def review_medications(eid: str, body: MedicationReview, user: Doctor, db: DB):
+    """Only a doctor or medical officer may confirm/reject OCR-read medicines against the source document."""
     e = load_encounter(db, eid, user)
     note, intake = dict(e.note or {}), dict(e.intake or {})
     pending = {m["name"]: m for m in note.get("medications_pending") or []}
     unknown = [n for n in body.confirm + body.reject if n not in pending]
     if unknown:
         raise HTTPException(422, f"Not awaiting confirmation: {', '.join(unknown)}")
-    stamp = {"by": f"{user.name} ({user.role})", "at": now().isoformat()}
-    added = [{"name": n, "strength": pending[n].get("strength"), "source": f"read from {pending[n]['filename']}", **stamp} for n in body.confirm]
+    stamp = {"by": f"{user.name} ({user.role})", "at": now().isoformat(), "confirmed_by": user.name, "confirmed_by_role": user.role}
+    added = [{"name": n, "strength": pending[n].get("strength"), "source": f"read from {pending[n]['filename']}",
+              "file_id": pending[n].get("file_id"), "seen": pending[n].get("seen"),
+              "prescription_details": pending[n].get("prescription_details"), "ocr_engine": pending[n].get("read_by"),
+              "ocr_confidence": pending[n].get("confidence"), **stamp} for n in body.confirm]
     intake["medications_confirmed"] = list(intake.get("medications_confirmed") or []) + added
     intake["medications_rejected"] = list(intake.get("medications_rejected") or []) + body.reject
-    left = [m for n, m in pending.items() if n not in body.confirm and n not in body.reject]
-    note["medications"] = intake["medications_confirmed"]
-    note["medications_pending"] = left
-    flags = [f for f in note.get("flags") or [] if f.get("code") != "MEDS-UNCONFIRMED"]
-    if left:
-        flags.append({"code": "MEDS-UNCONFIRMED", "label": f"{len(left)} medicine name(s) read from a strip or prescription — awaiting confirmation", "severity": "warning",
-                      "reason": "Read by OCR and matched to the PMBJP generic list; not part of the record until a nurse or doctor confirms each one"})
-    note["flags"] = flags
-    e.intake, e.note = intake, note
-    audit.record(db, user, "UPDATE", "encounter", e.id, f"Medicines read from photo — confirmed: {', '.join(body.confirm) or 'none'}; rejected: {', '.join(body.reject) or 'none'}", e.patient.code, e.facility_id)
+    e.intake = intake
+    # Rebuild the final triage note from the newly doctor-reviewed medication history. The original OCR
+    # candidates remain linked to their source file, and only confirmed medicines enter the history.
+    rebuild_note(db, e, intake, None)
+    audit.record(db, user, "UPDATE", "encounter", e.id, f"Prescription OCR reviewed by doctor — confirmed: {', '.join(body.confirm) or 'none'}; rejected: {', '.join(body.reject) or 'none'}", e.patient.code, e.facility_id)
     return encounter_out(e, user)
 
 
@@ -447,37 +446,52 @@ def edit_note(eid: str, body: NotePatch, user: Reviewer, db: DB):
     if not e.note:
         raise HTTPException(404, "No note")
     patch = body.model_dump(exclude_none=True)
-    e.note = {**e.note, **patch, "edited_by": user.name, "edited_at": now().isoformat()}
-    audit.record(db, user, "UPDATE", "encounter", eid, f"Note edited: {', '.join(patch) or 'nothing'}", e.patient.code, e.facility_id)
+    clinician_input = (patch.pop("clinician_input", None) or "").strip()
+    # The editor submits its full form; unchanged fields are not counted as manual edits, so a new
+    # clarification still gets the fresh checked summary.
+    patch = {key: value for key, value in patch.items() if e.note.get(key) != value}
+    if not patch and not clinician_input:
+        raise HTTPException(422, "Add a note change or a clinician clarification")
+    at = now().isoformat()
+    note = {**e.note, **patch}
+    if clinician_input:
+        note["clinician_inputs"] = [*(note.get("clinician_inputs") or []),
+                                    {"text": clinician_input, "by": user.name, "role": user.role, "at": at}]
+    # Only an actual hand edit of note fields suppresses the guarded model summary. Adding attributed
+    # clinical context alone should trigger a fresh summary from the richer fact sheet.
+    if patch:
+        note.update({"edited_by": user.name, "edited_at": at})
+    e.note = note
+    changes = [*patch, *( ["clinician_input"] if clinician_input else [])]
+    audit.record(db, user, "UPDATE", "encounter", eid, f"Note edited: {', '.join(changes)}", e.patient.code, e.facility_id)
+    if clinician_input and not patch:
+        summarise_later(e.id)
     return encounter_out(e, user)
 
 
 @router.post("/encounters/{eid}/override", response_model=EncounterOut)
 def override(eid: str, body: OverrideIn, user: Reviewer, db: DB):
-    """Human-in-the-loop override (E9). The rules-engine output stays in `rules_urgency`.
+    """First-review staff may raise priority after bedside reassessment; the rule result remains in the record.
 
-    Raising the urgency is free: any reviewer may do it, a reason is optional. Lowering it needs a doctor or
-    medical officer and a written reason of at least 15 characters."""
+    Lowering a rules-derived priority is deliberately not available through this action. New clinical inputs rerun
+    the deterministic rules; RED cases can be escalated for senior review."""
     e = load_encounter(db, eid, user)
+    if user.role not in {"nurse", "health_worker"}:
+        raise HTTPException(403, "Triage priority adjustments are made by the nurse or health worker at first review")
+    if len(body.reason) < 5:
+        raise HTTPException(422, "Add a short bedside reason of at least 5 characters")
     frm = e.urgency
     rank = {"green": 0, "yellow": 1, "red": 2}
     if body.to_urgency == frm:
         raise HTTPException(400, "The urgency is already " + frm.upper())
-    down = rank[body.to_urgency] < rank.get(frm, 0)
-    if down and user.role not in DOCTOR_ROLES:
-        raise HTTPException(403, "Only a doctor or medical officer can lower the urgency; you can raise it or escalate")
-    if down and len(body.reason) < 15:
-        raise HTTPException(422, "A written reason of at least 15 characters is required to lower the urgency")
-    # Rules marked non-downgradable can still be overruled by a doctor (humans decide), but never
-    # silently: the audit entry names every such rule that the new urgency goes below.
-    overruled = [h["rule_id"] for h in ((e.note or {}).get("rules_fired") or [])
-                 if h.get("non_downgradable") and rank.get(h["urgency"], 0) > rank[body.to_urgency]]
-    e.override = {"from_urgency": frm, "to_urgency": body.to_urgency, "category": body.category, "reason": body.reason, "by": user.name, "by_role": user.role, "at": now().isoformat(), "direction": "down" if down else "up", "overruled_non_downgradable": overruled}
+    if rank[body.to_urgency] < rank.get(frm, 0):
+        raise HTTPException(403, "First-review staff can raise priority only; clinical inputs rerun the rules")
+    e.override = {"from_urgency": frm, "to_urgency": body.to_urgency, "category": body.category, "reason": body.reason, "by": user.name, "by_role": user.role, "at": now().isoformat(), "direction": "up"}
     e.urgency = body.to_urgency
     e.urgency_source = "override"
     esc = escalate_after(body.to_urgency)
     e.escalation_due_at = waiting_since(e) + timedelta(minutes=esc) if esc else None  # from arrival, as at check-in (C3)
-    audit.record(db, user, "OVERRIDE", "encounter", eid, f'Urgency {frm} → {body.to_urgency} ({"lowered" if down else "raised"}; {body.category}). Reason: "{body.reason or "none given"}". Rules-engine output ({e.rules_urgency}) retained.{(" Overrules non-downgradable rule(s): " + ", ".join(overruled)) if overruled else ""}', e.patient.code, e.facility_id)
+    audit.record(db, user, "OVERRIDE", "encounter", eid, f'Triage priority raised {frm} → {body.to_urgency} ({body.category}). Reason: "{body.reason}". Rules-engine output ({e.rules_urgency}) retained.', e.patient.code, e.facility_id)
     return encounter_out(e, user)
 
 

@@ -241,6 +241,7 @@ export const liveApi: JeeviaApi = {
     fd.append("audio", new File([audio], "speech.webm", { type: audio.type || "audio/webm" }));
     fd.append("language", language);
     if (opts?.secondOpinion) fd.append("second_opinion", "true");
+    if (opts?.translate === false) fd.append("translate", "false");
     return json("/speech/transcribe", { method: "POST", body: fd });
   },
   secondCheck: (id) => json(`/speech/second/${encodeURIComponent(id)}`),

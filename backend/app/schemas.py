@@ -68,7 +68,7 @@ class DutyIn(BaseModel):
 
 
 class MedicationReview(BaseModel):
-    """Nurse/doctor decision on medicine names read from a strip or prescription (B10)."""
+    """Doctor / medical officer decision on medicine candidates read from a strip or prescription (B10)."""
     confirm: list[str] = []  # generic names exactly as listed in medications_pending
     reject: list[str] = []
 
@@ -614,6 +614,7 @@ class NotePatch(BaseModel):
     summary: str | None = Field(default=None, max_length=5000)
     missing_info: list[str] | None = None
     followup_questions: list[dict[str, Any]] | None = None
+    clinician_input: str | None = Field(default=None, max_length=3000)
 
 
 class EncounterPatch(BaseModel):
@@ -623,7 +624,7 @@ class EncounterPatch(BaseModel):
 class OverrideIn(BaseModel):
     to_urgency: Urgency
     category: str = Field("Clinical judgement — other", min_length=3, max_length=120)
-    reason: str = Field("", max_length=2000)  # required (15+ characters) only to lower the urgency
+    reason: str = Field(min_length=5, max_length=2000)  # first-review staff document why they are raising priority
 
     @field_validator("reason")
     @classmethod

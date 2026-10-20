@@ -85,6 +85,20 @@ def ocr_available() -> bool:
         return False
 
 
+def preload_ocr() -> None:
+    """Load both OCR engines before the first upload so their startup cost is not paid by a patient."""
+    if not ocr_available():
+        return
+    try:
+        _rapidocr()
+        if get_settings().ocr_deep_checks and second_available():
+            _onnxtr()
+    except Exception:  # OCR remains optional; upload reports the unavailable engine normally.
+        import logging
+
+        logging.getLogger("jeevia.ocr").exception("OCR preload failed")
+
+
 SECOND_DET, SECOND_RECO = "db_mobilenet_v3_large", "crnn_mobilenet_v3_large"
 SECOND_ENGINE = "docTR DBNet + CRNN models (OnnxTR, ONNX Runtime, offline)"
 _ocr2 = None
@@ -1123,13 +1137,40 @@ def add_online_reading(ex: dict, data: bytes, filename: str, lines: list[dict] |
     from .. import sarvam
     from .images import doc_type, medicines
 
-    if lines is None:
+    is_prescription = (ex.get("doc_type") or {}).get("type") == "prescription"
+    structured = None
+    if lines is None and is_prescription:
+        try:
+            structured = sarvam.read_prescription(data, filename)
+            lines = []
+            for med in structured.get("medications", []):
+                text = "Rx medicine: " + " · ".join(med.get(k, "") for k in ("name", "strength", "dose", "frequency", "duration", "route", "instructions") if med.get(k))
+                if text:
+                    try:
+                        confidence = float(med.get("confidence") or 0)
+                    except (TypeError, ValueError):
+                        confidence = 0.0
+                    lines.append({"text": text, "conf": confidence, "bbox": [0, 0, 1, 1]})
+            lines.extend({"text": f"Unreadable: {word}", "conf": 0.0, "bbox": [0, 0, 1, 1]} for word in structured.get("unreadable_text", []))
+        except sarvam.SarvamUnavailable as e:
+            ex["warnings"].append(f"Structured prescription reading unavailable ({e}); trying the full-page reader")
+            try:
+                lines = sarvam.read_page(data, filename)
+            except sarvam.SarvamUnavailable as fallback_error:
+                ex["warnings"].append(f"Online prescription reading not available ({fallback_error}) — the clinician should read the original directly")
+                return ex
+    elif lines is None:
         try:
             lines = sarvam.read_page(data, filename)
         except sarvam.SarvamUnavailable as e:
             ex["warnings"].append(f"Online reading not available ({e}) — the reviewer should read the page directly")
             return ex
-    ex["online_reading"] = {"engine": sarvam.VISION_ENGINE, "text": lines[:200]}
+    engine = structured.get("engine", sarvam.VISION_ENGINE) if structured else sarvam.VISION_ENGINE
+    ex["online_reading"] = {"engine": engine, "text": lines[:200]}
+    if structured:
+        ex["online_reading"]["structured_medications"] = structured.get("medications", [])
+        if not structured.get("medications"):
+            ex["warnings"].append("The prescription reader could not identify a medicine with confidence — review the original image directly")
     have = {m["name"].lower(): m for m in ex.get("medicines") or []}
     for m in medicines(lines):
         if m["name"].lower() in have:
@@ -1138,6 +1179,34 @@ def add_online_reading(ex: dict, data: bytes, filename: str, lines: list[dict] |
             ex.setdefault("medicines", []).append({**m, "read_by": sarvam.VISION_ENGINE})
     for m in ex.get("medicines") or []:
         m.setdefault("read_by", ex["engine"])
+    # Preserve model-read names that the local medicine dictionary cannot match. They remain
+    # explicitly unverified and the source line is shown; never substitute a guessed generic.
+    for candidate in (structured or {}).get("medications", []):
+        name = (candidate.get("name") or "").strip()
+        if not name:
+            continue
+        conf = candidate.get("confidence")
+        try:
+            conf = max(0.0, min(1.0, float(conf))) if conf is not None else 0.0
+        except (TypeError, ValueError):
+            conf = 0.0
+        detail = candidate.get("instructions") or ""
+        seen = " · ".join(x for x in (name, candidate.get("strength"), candidate.get("dose"), candidate.get("frequency"), candidate.get("duration"), candidate.get("route"), detail) if x)[:240]
+        prescription_details = {"dose": candidate.get("dose") or None, "frequency": candidate.get("frequency") or None,
+                                "duration": candidate.get("duration") or None, "route": candidate.get("route") or None,
+                                "timing": detail or None}
+        existing = next((m for m in ex.get("medicines", []) if m["name"].casefold() == name.casefold()), None)
+        if existing:
+            existing["strength"] = candidate.get("strength") or existing.get("strength")
+            existing["seen"] = seen
+            existing["prescription_details"] = prescription_details
+            existing["read_by"] = "both"
+            continue
+        ex.setdefault("medicines", []).append({
+            "name": name, "strength": candidate.get("strength") or None,
+            "seen": seen, "prescription_details": prescription_details,
+            "confidence": conf, "status": "awaiting_confirmation", "kind": "unverified", "read_by": engine,
+        })
     # Its boxes are fractions of the page; the row grouping works in pixels (a 4-pixel floor), so scale to 1000.
     online = OcrResult(sarvam.VISION_ENGINE, [Line(x["text"], [v * 1000 for v in x["bbox"]], float(x["conf"])) for x in lines], (1000.0, 1000.0))
     keys = {r["test_key"] for r in ex.get("rows") or []}

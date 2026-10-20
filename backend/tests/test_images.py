@@ -35,6 +35,15 @@ def test_medicine_names_are_matched_to_the_generic_list_with_strength():
     assert all(m["status"] == "awaiting_confirmation" for m in meds)
 
 
+def test_prescription_sig_is_extracted_only_when_explicit_on_the_order_line():
+    meds = images.medicines(lines("1 Tab Dolo 650 - 1-0-1 x 5 days after food"))
+    assert len(meds) == 1
+    assert meds[0]["prescription_details"] == {
+        "dose": "1 Tab", "frequency": "1-0-1", "duration": "5 days", "route": None, "timing": "after food",
+    }
+    assert images._prescription_details("Tab Dolo 650")["frequency"] is None
+
+
 def test_real_strip_photo_reads_each_medicine_once_with_its_strength_column():
     """OCR lines (text, box) from a phone photo of a paracetamol + phenylephrine + chlorpheniramine strip, 5 Oct.
     The strength column is a separate box on the same row; the torn lower half left "heniramine", which used to

@@ -52,8 +52,9 @@ Jeevia helps in three moments:
 2. **Prioritisation.** A deterministic rules engine (AIIMS Triage Protocol, IMCI for under-fives, maternal red flags)
    sets the urgency — *Critical*, *Semi-urgent* or *Routine* — and builds a structured note where every value sits
    next to the report crop or transcript it came from.
-3. **Review and hand-off.** Doctors work a queue ordered by urgency, confirm or edit notes, override urgency only with
-   a written reason, escalate, and refer — with a **QR summary** the receiving hospital can scan to see the patient's
+3. **Review and hand-off.** Nurses / health workers add bedside measurements and can raise queue priority with a
+   documented reason; updated clinical inputs rerun the deterministic rules. Doctors review, confirm or edit notes,
+   escalate internally, and refer — with a **QR summary** the receiving hospital can scan to see the patient's
    details and uploaded documents.
 
 Everything anyone views or changes is written to a tamper-evident audit log.
@@ -64,7 +65,7 @@ Everything anyone views or changes is written to a tamper-evident audit log.
 |---|---|
 | Non-diagnostic | Notes only restate patient-provided information; a disclaimer is on every screen, export and share page. |
 | Urgency only from fixed rules | `backend/app/triage/rules/*.yaml`, evaluated by `rules.py`. The note pipeline cannot set or lower urgency. |
-| Human in the loop | Only doctors confirm, override (≥ 15-character written reason; the original rules result is kept) and refer. Escalations must be acknowledged. |
+| Human in the loop | Nurses / health workers can raise queue priority with a reason at first review; new clinical inputs rerun rules. Doctors confirm, edit, escalate or refer. Escalations must be acknowledged. |
 | Patients never see triage status | The API strips urgency and notes from every response to patient and kiosk sessions. |
 | Least privilege | Front-desk staff see names, tokens and status only; employers see fitness status only; kiosk links can only submit check-ins. Patient documents and photos open only for the doctors and nurses treating that visit (or via a QR summary with its code). |
 | Two-factor staff sign-in | Doctors, nurses, receptionists, supervisors and employers need a phone OTP **and** their personal 4–6 digit PIN; weak PINs refused, lock after 5 wrong tries, OTP rate limits per phone and per address. |
@@ -168,7 +169,7 @@ real capture time so waiting time is never understated.
 - Queue ordered by urgency then waiting time, with auto-escalation timers.
 - Case view: summary with a history block (on questioning, denies, allergies, medicines, past history), flags (clinical first, data notices apart; not confidence scores), rules trace, source disagreements, vitals and report values with image crops, trends against earlier visits, timeline, missing information, follow-up questions.
 - Doctor and nurse views of the same note.
-- Confirm, edit, override with reason, escalate and acknowledge, refer (destination suggested from on-duty specialists).
+- Confirm and edit notes; first-review nurses / health workers can raise priority with a reason; clinicians can escalate and acknowledge, or refer (destination suggested from on-duty specialists).
 - Export as PDF, print, JSON, CSV, FHIR R4 or HL7 CDA R2 (schema-valid).
 - Record occupational fitness (fit / restrictions / temporarily unfit) for rostered workers; correct patient details.
 - **QR summary**: time-limited link + 6-digit code showing patient details, the reviewed note, the referral and uploaded documents; locks after 8 wrong codes; revocable; every opening audited.

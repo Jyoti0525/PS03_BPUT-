@@ -189,7 +189,10 @@ def test_a_handwritten_page_goes_online_only_with_the_patients_consent(client, n
     sent = []
     monkeypatch.setattr(files, "extract_document", _fake_prescription)
     monkeypatch.setattr(sarvam, "enabled", lambda: True)
-    monkeypatch.setattr(sarvam, "read_page", lambda data, name, lang="en": sent.append(name) or rx("Tab Dolo 650 1-0-1"))
+    monkeypatch.setattr(sarvam, "read_prescription", lambda data, name, lang="en": sent.append(name) or {
+        "engine": sarvam.PRESCRIPTION_ENGINE, "medications": [{"name": "Dolo", "strength": "650 mg", "dose": "1 tablet",
+        "frequency": "1-0-1", "duration": "5 days", "route": "", "instructions": "", "confidence": 0.9, "sources": []}],
+        "unreadable_text": []})
     png = cv2.imencode(".png", np.full((600, 600, 3), 240, np.uint8))[1].tobytes()
 
     def up(**form):

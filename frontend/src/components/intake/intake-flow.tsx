@@ -166,35 +166,57 @@ export function IntakeFlow({
   const [recording, setRecording] = useState(false);
   const [partial, setPartial] = useState("");
   // second: the other speech engine's hearing of the same recording (B9); `differences` non-empty = they disagree
-  const [pending, setPending] = useState<{ original: string; text: string; engine: string; audio: Blob | null; mt?: string; second?: Hearing; confidence?: number | null; low?: boolean } | null>(null);
+  const [pending, setPending] = useState<{ original: string; text: string; engine: string; audio: Blob | null; mt?: string; second?: Hearing; confidence?: number | null; low?: boolean; verifying?: boolean; choice?: "primary" | "second" | null } | null>(null);
   const [transcribing, setTranscribing] = useState(false);
   const recRef = useRef<Recorder | null>(null);
   // B9 offline check still running: its result goes to the read-back, or to the entry if already confirmed
-  const [checking, setChecking] = useState<{ id: string; original: string } | null>(null);
+  const [checking, setChecking] = useState<{ id: string; original: string; browser?: boolean } | null>(null);
   useEffect(() => {
     if (!checking) return;
     let stop = false;
     let timer: ReturnType<typeof setTimeout>;
     const started = Date.now();
+    let keepWaiting = false;
     const tick = async () => {
+      keepWaiting = false;
       try {
         const so = await api.secondCheck(checking.id);
         if (stop) return;
-        if (so.pending && Date.now() - started < 180_000) {
-          timer = setTimeout(tick, 3000);
+        if (so.pending && Date.now() - started < 20_000) {
+          keepWaiting = true;
+          timer = setTimeout(tick, 1000);
           return;
         }
+        keepWaiting = false;
         if (so.text) {
-          const h: Hearing = { engine: so.engine, text: so.text, translation: so.translation ?? null, differences: so.disagree ? (so.differences ?? []) : [] };
-          setPending((p) => (p && p.original === checking.original && !p.second ? { ...p, second: h } : p));
-          setEntries((es) => es.map((e) => (e.original_text === checking.original && !e.second_hearing ? { ...e, second_hearing: { engine: h.engine, text: h.text, translation: h.translation ?? null } } : e)));
+          const differences = checking.browser
+            ? [
+                ...(so.disagree ? ["The two server speech engines disagree; check the words with the patient."] : []),
+                ...(so.text.trim().toLocaleLowerCase() !== checking.original.trim().toLocaleLowerCase() ? ["This server hearing differs from the live read-back; confirm which words are correct."] : []),
+              ]
+            : so.disagree ? (so.differences ?? []) : [];
+          const h: Hearing = { engine: so.engine, text: so.text, translation: so.translation ?? null, differences };
+          setPending((p) => (p && p.original === checking.original && (checking.browser || !p.second)
+            ? { ...p, second: h, verifying: false, choice: h.differences.length ? (h.engine.toLowerCase().includes("sarvam") ? "second" : null) : (p.choice ?? "primary") }
+            : p));
+          setEntries((es) => es.map((e) => (e.original_text === checking.original && (checking.browser || !e.second_hearing)
+            ? { ...e, second_hearing: { engine: h.engine, text: h.text, translation: h.translation ?? null } }
+            : e)));
+          if (checking.browser && h.engine.toLowerCase().includes("sarvam") && h.differences.length) {
+            speak(`${t("kiosk.symptoms.readback")} ${h.text}`, lang, undefined, { online: aiAssist });
+          }
         }
       } catch {
         /* the check is optional — the patient already confirmed what they said */
       }
-      if (!stop) setChecking(null);
+      if (!stop) {
+        if (checking.browser && !keepWaiting) {
+          setPending((p) => p?.original === checking.original ? { ...p, verifying: false } : p);
+        }
+        setChecking(null);
+      }
     };
-    timer = setTimeout(tick, 3000);
+    timer = setTimeout(tick, 500);
     return () => {
       stop = true;
       clearTimeout(timer);
@@ -224,6 +246,13 @@ export function IntakeFlow({
     if (selected.length) return selected.join(", ");
     return category === "maternal" ? "Antenatal check-up" : category === "chronic" ? `${chronic.condition || "Chronic"} follow-up` : "";
   }, [entries, typed, selected, category, chronic.condition, lowHeard]);
+
+  const activeTranscript = pending?.choice === "second" && pending.second
+    ? { original: pending.second.text, text: pending.second.translation ?? pending.second.text, engine: pending.second.engine, low: false }
+    : pending;
+  const alternateTranscript = pending?.choice === "second" && pending.second
+    ? { engine: pending.engine, text: pending.original, translation: pending.text !== pending.original ? pending.text : null, differences: pending.second.differences }
+    : pending?.second;
 
   const questions = useMemo(
     () => (category ? contextQuestions({ chief_complaint: chief, selected_symptoms: selected, category, symptoms: entries, duration, sex: patient?.sex ?? newP.sex }, age, patientLoad) : []),
@@ -359,11 +388,14 @@ export function IntakeFlow({
     const heard = r?.transcript?.trim() ?? "";
     const audio = r?.audio ?? null;
     let next: typeof pending = null;
-    if (audio && !offline) {
+    // Web Speech gives an immediate patient read-back. The consented server engines verify it in
+    // the background so that this independent check does not hold up the patient's next step.
+    if (!heard && audio && !offline) {
       // Server first: offline IndicConformer transcript + IndicTrans2 English, both engines named.
       setTranscribing(true);
       try {
-        const res = await api.transcribe(audio, lang, { secondOpinion: aiAssist });
+        // Translation is applied when the intake is submitted; don't hold the patient's read-back for it.
+        const res = await api.transcribe(audio, lang, { secondOpinion: aiAssist, translate: false });
         const so = res.second_opinion;
         // IndicWhisper (offline) answers after the read-back has started; picked up below when ready
         setChecking(so?.pending ? { id: so.pending, original: res.text } : null);
@@ -387,29 +419,52 @@ export function IntakeFlow({
         setTranscribing(false);
       }
     }
-    // Browser fallback: English is kept as heard; other languages are translated when the intake is submitted.
-    if (!next && heard) next = { original: heard, text: heard, engine: BROWSER_ASR, audio };
+    // Browser recognition is kept in the speaker's language; other languages are translated when
+    // the intake is submitted. The existing read-back gives the patient a chance to correct it.
+    if (heard) next = { original: heard, text: heard, engine: BROWSER_ASR, audio,
+      verifying: !!(audio && !offline && aiAssist), choice: null };
     if (!next) {
       setErr(tr("Could not understand the recording — please speak again, or type or tap your symptoms"));
       return;
     }
     setPending(next);
-    speak(`${t("kiosk.symptoms.readback")} ${next.original}`, lang, undefined, { online: aiAssist });
+    if (!next.verifying) speak(`${t("kiosk.symptoms.readback")} ${next.original}`, lang, undefined, { online: aiAssist });
+    if (heard && audio && !offline && aiAssist) {
+      const browserWords = heard;
+      void api.transcribe(audio, lang, { secondOpinion: true, translate: false }).then((res) => {
+        const so = res.second_opinion;
+        const engine = so?.text ? so.engine : res.engine;
+        const text = so?.text ?? res.text;
+        const hearing: Hearing = {
+          engine,
+          text,
+          translation: null,
+          differences: res.text.trim().toLocaleLowerCase() !== browserWords.trim().toLocaleLowerCase()
+            ? ["The server transcription differs from the live read-back; confirm which words are correct."]
+            : [],
+        };
+        setPending((current) => current?.original === browserWords && !current.second
+          ? { ...current, second: hearing, verifying: !!so?.pending, choice: hearing.differences.length ? (hearing.engine.toLowerCase().includes("sarvam") ? "second" : null) : "primary" }
+          : current);
+        setEntries((current) => current.map((entry) => entry.original_text === browserWords && !entry.second_hearing
+          ? { ...entry, second_hearing: { engine: hearing.engine, text: hearing.text, translation: null } }
+          : entry));
+        if (so?.pending) setChecking({ id: so.pending, original: browserWords, browser: true });
+        else speak(`${t("kiosk.symptoms.readback")} ${hearing.text}`, lang, undefined, { online: aiAssist });
+      }).catch(() => {
+        setPending((current) => current?.original === browserWords ? { ...current, verifying: false } : current);
+        /* The live transcript and patient read-back remain usable if a verification engine is unavailable. */
+      });
+    }
   };
 
-  // B9: the patient says the second engine heard them right; the first engine's words are kept beside it
+  // B9: select the independent server hearing without discarding the browser transcript.
   const useOtherHearing = () => {
     if (!pending?.second) return;
-    const s = pending.second;
-    const first = pending.engine.split(" + ")[0];
-    setPending({
-      ...pending,
-      original: s.text,
-      text: s.translation ?? s.text,
-      engine: s.translation && pending.mt ? `${s.engine} + ${pending.mt}` : s.engine,
-      second: { engine: first, text: pending.original, translation: pending.text !== pending.original ? pending.text : null, differences: s.differences },
-    });
-    speak(`${t("kiosk.symptoms.readback")} ${s.text}`, lang, undefined, { online: aiAssist });
+    const useSecond = pending.choice !== "second";
+    const selected = useSecond ? pending.second.text : pending.original;
+    setPending({ ...pending, choice: useSecond ? "second" : "primary" });
+    speak(`${t("kiosk.symptoms.readback")} ${selected}`, lang, undefined, { online: aiAssist });
   };
 
   const confirmVoice = async (ok: boolean) => {
@@ -419,9 +474,15 @@ export function IntakeFlow({
       setPending(null);
       return;
     }
-    const second_hearing = pending.second ? { engine: pending.second.engine, text: pending.second.text, translation: pending.second.translation ?? null } : null;
-    setEntries((e) => [...e, { text: pending.text, original_text: pending.original, language: lang, source: "voice", confirmed_by_readback: true, engine: pending.engine, second_hearing, confidence: pending.confidence ?? null }]);
-    if (pending.low) setLowHeard((s) => new Set(s).add(pending.original));
+    const choseSecond = pending.choice === "second" && !!pending.second;
+    const original = choseSecond ? pending.second!.text : pending.original;
+    const text = choseSecond ? pending.second!.translation ?? pending.second!.text : pending.text;
+    const engine = choseSecond ? pending.second!.engine : pending.engine;
+    const second_hearing = choseSecond
+      ? { engine: pending.engine, text: pending.original, translation: pending.text !== pending.original ? pending.text : null }
+      : pending.second ? { engine: pending.second.engine, text: pending.second.text, translation: pending.second.translation ?? null } : null;
+    setEntries((e) => [...e, { text, original_text: original, language: lang, source: "voice", confirmed_by_readback: true, engine, second_hearing, confidence: choseSecond ? null : pending.confidence ?? null }]);
+    if (!choseSecond && pending.low) setLowHeard((s) => new Set(s).add(pending.original));
     if (pending.audio && !offline) {
       try {
         const f = await api.uploadFile(new File([pending.audio], `voice_${Date.now()}.webm`, { type: pending.audio.type }), "audio");
@@ -848,35 +909,36 @@ export function IntakeFlow({
             {pending && (
               <div className="rounded-2xl border-2 border-coral-300 bg-coral-50 p-4">
                 <p className="text-sm font-semibold text-coral-700">{t("kiosk.symptoms.readback")}</p>
-                <p className="mt-1 text-xl font-medium text-ink">“{pending.original}”</p>
-                {pending.text !== pending.original && <p className="mt-1 text-sm text-muted" lang="en">→ {pending.text}</p>}
-                <p className="mt-1 text-xs text-subtle">{pending.engine}</p>
-                {pending.low && (
+                <p className="mt-1 text-xl font-medium text-ink">“{activeTranscript?.original}”</p>
+                {activeTranscript && activeTranscript.text !== activeTranscript.original && <p className="mt-1 text-sm text-muted" lang="en">→ {activeTranscript.text}</p>}
+                <p className="mt-1 text-xs text-subtle">{activeTranscript?.engine}</p>
+                {activeTranscript?.low && (
                   <p className="mt-3 flex items-start gap-2 rounded-xl border border-semi/40 bg-white p-3 text-sm text-ink" role="alert"><AlertTriangle className="mt-0.5 size-4 shrink-0 text-semi" />{tr("We are not sure we heard this correctly. A health worker will ask you about it. You can also say it again or tap the pictures.")}</p>
                 )}
-                {checking?.original === pending.original && !pending.second && (
+                {(pending.verifying || (checking?.original === pending.original && !pending.second)) && (
                   <p className="mt-2 text-xs text-muted" role="status">{tr("A second engine is still checking what it heard…")}</p>
                 )}
-                {pending.second && pending.second.differences.length > 0 && (
+                {alternateTranscript && (pending.second?.differences.length ?? 0) > 0 && (
                   <div className="mt-3 rounded-xl border border-semi/40 bg-white p-3" role="alert">
                     <p className="flex items-center gap-2 text-sm font-semibold text-semi"><AlertTriangle className="size-4" />{tr("A second engine heard something different")}</p>
-                    <p className="mt-1 text-lg text-ink">“{pending.second.text}”</p>
-                    {pending.second.translation && <p className="mt-1 text-sm text-muted" lang="en">→ {pending.second.translation}</p>}
-                    <p className="mt-1 text-xs text-subtle">{pending.second.engine}</p>
+                    <p className="mt-1 text-lg text-ink">“{alternateTranscript.text}”</p>
+                    {alternateTranscript.translation && <p className="mt-1 text-sm text-muted" lang="en">→ {alternateTranscript.translation}</p>}
+                    <p className="mt-1 text-xs text-subtle">{alternateTranscript.engine}</p>
                     <ul className="mt-2 list-disc pl-5 text-xs text-ink-2" lang="en">
-                      {pending.second.differences.map((d) => <li key={d}>{d}</li>)}
+                      {alternateTranscript.differences.map((d) => <li key={d}>{d}</li>)}
                     </ul>
                     <p className="mt-2 text-sm text-ink-2">{tr("Ask the patient which is right.")}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <Button size="sm" variant="secondary" onClick={useOtherHearing}>{tr("Use this one instead")}</Button>
-                      <Button size="sm" variant="ghost" onClick={() => speak(pending.second!.text, lang, undefined, { online: aiAssist })} icon={<Volume2 className="size-4" />}>{t("common.listen")}</Button>
+                      <Button size="sm" variant={pending.choice === "primary" ? "teal" : "secondary"} aria-pressed={pending.choice === "primary"} onClick={() => { setPending((p) => p ? { ...p, choice: "primary" } : p); speak(`${t("kiosk.symptoms.readback")} ${pending.original}`, lang, undefined, { online: aiAssist }); }}>{tr("Keep this transcript")}</Button>
+                      <Button size="sm" variant={pending.choice === "second" ? "teal" : "secondary"} aria-pressed={pending.choice === "second"} onClick={useOtherHearing}>{tr("Use this one instead")}</Button>
+                      <Button size="sm" variant="ghost" onClick={() => speak(alternateTranscript.text, lang, undefined, { online: aiAssist })} icon={<Volume2 className="size-4" />}>{t("common.listen")}</Button>
                     </div>
                   </div>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Button size="lg" variant="teal" onClick={() => confirmVoice(true)} icon={<Check className="size-5" />}>{t("kiosk.symptoms.correct")}</Button>
+                  <Button size="lg" variant="teal" onClick={() => confirmVoice(true)} disabled={pending.verifying || (!!pending.second?.differences.length && !pending.choice)} icon={<Check className="size-5" />}>{t("kiosk.symptoms.correct")}</Button>
                   <Button size="lg" variant="secondary" onClick={() => confirmVoice(false)} icon={<RotateCcw className="size-5" />}>{t("kiosk.symptoms.again")}</Button>
-                  <Button size="lg" variant="ghost" onClick={() => speak(pending.original, lang, undefined, { online: aiAssist })} icon={<Volume2 className="size-5" />}>{t("common.listen")}</Button>
+                  <Button size="lg" variant="ghost" onClick={() => speak(activeTranscript?.original ?? pending.original, lang, undefined, { online: aiAssist })} icon={<Volume2 className="size-5" />}>{t("common.listen")}</Button>
                 </div>
               </div>
             )}

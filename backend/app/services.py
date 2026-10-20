@@ -173,7 +173,7 @@ def _create_encounter(db: Session, intake: dict, patient: Patient, created: date
 def record_observations(db: Session, e: Encounter, user: User, vitals: dict, note: str, signs: list[str] | None = None, exam_done: bool = False) -> None:
     """Bedside vitals / observations from a nurse or doctor. The note is rebuilt from the updated intake and the
     deterministic rules run again, so new vitals (e.g. SpO2 88%) or a danger sign can raise urgency, and a completed
-    danger-sign check can release a provisional case. A doctor's override is kept."""
+    danger-sign check can release a provisional case. A first-review priority raise is kept."""
     intake = dict(e.intake or {})
     if vitals:
         intake["vitals"] = {**(intake.get("vitals") or {}), **vitals}
@@ -200,7 +200,7 @@ def record_answer(db: Session, e: Encounter, user: User, q: dict, answer: str, t
 
 
 def _rerun(db: Session, e: Encounter, intake: dict, observation: dict | None) -> None:
-    """Rebuild the note from the updated intake and run the rules again. A doctor's override is kept."""
+    """Rebuild the note from the updated intake and run the rules again. A first-review priority raise is kept."""
     files = [f for f in (db.get(FileObject, fid) for fid in intake.get("file_ids", [])) if f]
     if labs := lab_values([f.extraction for f in files if f.extraction]):
         intake["lab_values"] = labs
@@ -215,12 +215,18 @@ def _rerun(db: Session, e: Encounter, intake: dict, observation: dict | None) ->
                      **calendar_context(db.get(Facility, e.facility_id), e.created_at))
     if old.get("edited_by"):  # keep what a clinician wrote by hand
         new.update({k: old[k] for k in ("summary", "missing_info", "edited_by", "edited_at") if k in old})
+    if old.get("clinician_inputs"):
+        new["clinician_inputs"] = old["clinician_inputs"]
     new["observations"] = list(old.get("observations") or []) + ([observation] if observation else [])
     e.note = new
     e.rules_urgency = urgency
-    if e.urgency_source == "rules" and urgency != e.urgency:
-        e.urgency = urgency
-        esc = escalate_after(urgency)
+    rank = {"green": 0, "yellow": 1, "red": 2}
+    raised_to = (e.override or {}).get("to_urgency") if (e.override or {}).get("direction") == "up" else None
+    effective = max((urgency, raised_to), key=lambda tier: rank.get(tier or "green", 0))
+    e.urgency_source = "override" if raised_to and rank.get(raised_to, 0) > rank[urgency] else "rules"
+    if effective != e.urgency:
+        e.urgency = effective
+        esc = escalate_after(effective)
         e.escalation_due_at = (waiting_since(e) + timedelta(minutes=esc) if esc else None) if e.status != "expected" else None
 
 
@@ -301,7 +307,7 @@ def encounter_out(e: Encounter, viewer: User) -> EncounterOut:
     return out
 
 
-HW_NOTE_KEYS = ("summary", "flags", "missing_info", "followup_questions", "vitals", "generated_by", "renderer", "ai_assist", "generated_at", "observations")
+HW_NOTE_KEYS = ("summary", "flags", "missing_info", "followup_questions", "vitals", "generated_by", "renderer", "ai_assist", "generated_at", "observations", "clinician_inputs")
 
 
 def note_for(note: dict, role: str) -> dict:

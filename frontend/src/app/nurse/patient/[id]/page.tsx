@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { ArrowLeft, Baby, BellRing, CheckCircle2, HeartPulse, Paperclip, UserRoundCheck, Users } from "lucide-react";
+import { ArrowLeft, Baby, BellRing, CheckCircle2, HeartPulse, Paperclip, Pencil, UserRoundCheck, Users } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { useAsync, timeAgo } from "@/lib/hooks";
 import { usePrefs, useSession } from "@/components/providers";
@@ -12,7 +12,9 @@ import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
 import { useFile } from "@/components/triage/source";
 import { ObservationForm, ObservationList } from "@/components/triage/observations";
+import { PriorityAdjuster } from "@/components/triage/priority-adjuster";
 import { langByCode } from "@/lib/i18n/languages";
+import { NoteEditor } from "@/components/triage/note-editor";
 
 function FileThumb({ id }: { id: string }) {
   const f = useFile(id);
@@ -45,6 +47,7 @@ export default function NursePatient() {
   const { tr } = usePrefs();
   const { user } = useSession();
   const [confirming, setConfirming] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const { data: enc, error, reload, setData } = useAsync(() => api.getEncounter(id), [id]);
   const [alertOpen, setAlertOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -112,6 +115,7 @@ export default function NursePatient() {
               </div>
             </div>
             <div className="flex flex-col items-end gap-2">
+              {user?.role === "nurse" || user?.role === "health_worker" ? <PriorityAdjuster enc={enc} onSaved={setData} /> : null}
               <Button variant="danger" icon={<BellRing className="size-4" />} onClick={() => setAlertOpen(true)}>
                 {tr("Alert doctor")}
               </Button>
@@ -152,7 +156,14 @@ export default function NursePatient() {
           <ObservationList items={enc.note?.observations} />
         </div>
         <div className="space-y-4">
-          {enc.note ? <NoteView enc={enc} density={user?.role === "health_worker" ? "health_worker" : "nurse"} onUpdated={setData} /> : null}
+          {enc.note && (
+            <>
+              <div className="flex justify-end">
+                <Button variant="secondary" icon={<Pencil className="size-4" />} onClick={() => setEditOpen(true)}>{tr("Edit / add clinical note")}</Button>
+              </div>
+              <NoteView enc={enc} density={user?.role === "health_worker" ? "health_worker" : "nurse"} onUpdated={setData} />
+            </>
+          )}
           {!!enc.intake?.file_ids.length && (
             <Card>
               <CardHeader title={tr("Reports and photos")} icon={<Paperclip className="size-4" />} />
@@ -165,6 +176,8 @@ export default function NursePatient() {
           )}
         </div>
       </div>
+
+      {editOpen && <NoteEditor open enc={enc} onClose={() => setEditOpen(false)} onDone={(updated) => { setData(updated); setEditOpen(false); }} />}
 
       <Modal
         open={alertOpen}

@@ -10,11 +10,13 @@ class Settings(BaseSettings):
 
     env: str = "dev"
     # H3: how much runs on this machine. stub = rules only (no speech, translation, OCR, summary model or online engines:
-    # CI and the free cloud demo); demo = everything loads on first use (laptop default); full = models load at
+    # CI and the free cloud demo); demo = ASR/OCR warm at startup, other models on first use; full = models warm at
     # start-up and the summary model is expected. A setting given explicitly always wins over the profile.
     profile: Literal["stub", "demo", "full"] = "demo"
     language_models: bool = True  # offline speech recognition and translation
     ocr_enabled: bool = True
+    # Keep the second OCR / optional table-reader cross-check enabled by default; its models are warmed on startup.
+    ocr_deep_checks: bool = True
     # G8: where this deployment's records come from. Only SYNTHETIC or PUBLIC_SAMPLE; real patient data is out of scope.
     data_origin: Literal["SYNTHETIC", "PUBLIC_SAMPLE"] = "SYNTHETIC"
     # DPDP Act s. 13: who a patient complains to about their data. Printed on the patient slip; set per deployment.
@@ -115,7 +117,7 @@ class Settings(BaseSettings):
     vlm_url: str | None = None
     vlm_model_name: str = "Qwen3-VL-4B-Instruct Q4_K_M (llama.cpp, offline)"
     vlm_timeout_s: float = 60
-    preload_language_models: bool = False  # load at start-up instead of on the first request
+    preload_language_models: bool = True  # warm ASR during start-up instead of charging the first recording
     # Sarvam AI (online, India-hosted): Bulbul voice for reminder-call lines, Saaras speech-to-text as a second engine.
     # Unset = calls fall back to the device's own voice. JEEVIA_SARVAM_API_KEY or SARVAM_API_KEY.
     sarvam_api_key: str | None = Field(None, validation_alias=AliasChoices("JEEVIA_SARVAM_API_KEY", "SARVAM_API_KEY"))

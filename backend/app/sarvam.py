@@ -11,6 +11,7 @@ name never carries anything about health, and the questions never carry a name.
 """
 
 import base64
+import json
 import logging
 from functools import lru_cache
 
@@ -73,6 +74,7 @@ def _speak(text: str, lang: str, codec: str, sample_rate: int, speaker: str) -> 
 
 
 VISION_ENGINE = "Sarvam Vision document digitisation (online)"
+PRESCRIPTION_ENGINE = "Sarvam Vision 1.5 structured prescription reading (online)"
 VISION_LANGS = {**STT_LANGS}  # Sarvam Vision reads English and the 22 scheduled languages, same codes
 
 
@@ -113,6 +115,89 @@ def read_page(data: bytes, filename: str, lang: str = "en", wait_s: float = 90) 
                 x0, y0, x1, y1 = b.get("bbox_norm") or [0, 0, 1, 1]
                 out += block_lines(b.get("text") or "", float(b.get("confidence") or 0), [x0, y0, x1 - x0, y1 - y0])
     return out
+
+
+def read_prescription(data: bytes, filename: str, lang: str = "en", wait_s: float = 90) -> dict:
+    """Extract prescription fields with Document AI's structured Vision model.
+
+    Values are verbatim candidates only. The returned confidence/source annotations are retained so
+    downstream code can keep every candidate unconfirmed and show it beside the original image.
+    """
+    import time
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "medications": {
+                "type": "array",
+                "description": "Every medicine explicitly written as prescribed. Do not infer or complete illegible words or instructions.",
+                "items": {"type": "object", "description": "One medicine order read from the prescription.", "properties": {
+                    "name": {"type": "string", "description": "Medicine or brand name exactly as written; empty if unreadable."},
+                    "strength": {"type": "string", "description": "Strength exactly as written, including units; empty if absent or unreadable."},
+                    "dose": {"type": "string", "description": "Dose per administration exactly as written; empty if absent or unreadable."},
+                    "frequency": {"type": "string", "description": "Frequency or schedule exactly as written; empty if absent or unreadable."},
+                    "duration": {"type": "string", "description": "Course duration exactly as written; empty if absent or unreadable."},
+                    "route": {"type": "string", "description": "Route exactly as written; empty if absent or unreadable."},
+                    "instructions": {"type": "string", "description": "Other directions written for this medicine; empty if absent or unreadable."},
+                }},
+            },
+            "unreadable_text": {"type": "array", "description": "Prescription text that cannot be read confidently; do not guess.",
+                                "items": {"type": "string", "description": "A short unreadable word or instruction exactly where visible."}},
+        },
+    }
+    try:
+        r = httpx.post(f"{BASE}/doc-ai/v1/job/extract", headers=_headers(),
+                       data={"schema": json.dumps(schema), "output_format": "json", "classification": "false",
+                             "model": "sarvam-vision-v1"},
+                       files={"file": (filename, data)}, timeout=get_settings().sarvam_timeout_s)
+    except httpx.HTTPError as e:
+        raise SarvamUnavailable("Could not reach Sarvam Vision") from e
+    if r.status_code >= 400:
+        log.warning("sarvam prescription extraction error", extra={"status": r.status_code})
+        raise SarvamUnavailable(f"Sarvam Vision extraction error {r.status_code}")
+    try:
+        job = r.json().get("job_id")
+    except ValueError as e:
+        raise SarvamUnavailable("Sarvam Vision returned an invalid job response") from e
+    if not job:
+        raise SarvamUnavailable("Sarvam Vision returned no extraction job")
+
+    deadline = time.monotonic() + wait_s
+    while True:
+        try:
+            response = httpx.get(f"{BASE}/doc-ai/v1/job/{job}/status", headers=_headers(), timeout=get_settings().sarvam_timeout_s)
+            response.raise_for_status()
+            status = response.json()
+        except (httpx.HTTPError, ValueError) as e:
+            raise SarvamUnavailable("Could not check Sarvam Vision job") from e
+        state = str(status.get("status", "")).lower()
+        if state in ("completed", "partially_completed"):
+            break
+        if state in ("failed", "rejected") or time.monotonic() > deadline:
+            raise SarvamUnavailable(f"Sarvam Vision extraction job {state or 'timed out'}")
+        time.sleep(1.0)
+    try:
+        response = httpx.get(f"{BASE}/doc-ai/v1/job/{job}/results", headers=_headers(), params={"format": "json"},
+                             timeout=get_settings().sarvam_timeout_s)
+        response.raise_for_status()
+        result = response.json()
+    except (httpx.HTTPError, ValueError) as e:
+        raise SarvamUnavailable("Sarvam Vision extraction results could not be read") from e
+    fields = result.get("result") or {}
+    annotations = result.get("annotations") or {}
+    candidates = fields.get("medications") or []
+    candidate_annotations = annotations.get("medications") or []
+    cleaned = []
+    for i, candidate in enumerate(candidates):
+        if not isinstance(candidate, dict):
+            continue
+        ann = candidate_annotations[i] if i < len(candidate_annotations) and isinstance(candidate_annotations[i], dict) else {}
+        name_ann = ann.get("name") if isinstance(ann.get("name"), dict) else {}
+        cleaned.append({**{key: str(candidate.get(key) or "").strip() for key in
+                          ("name", "strength", "dose", "frequency", "duration", "route", "instructions")},
+                        "confidence": name_ann.get("confidence"), "sources": name_ann.get("sources") or []})
+    return {"engine": PRESCRIPTION_ENGINE, "medications": cleaned,
+            "unreadable_text": [str(x) for x in fields.get("unreadable_text", []) if str(x).strip()]}
 
 
 def block_lines(text: str, conf: float, bbox: list[float]) -> list[dict]:

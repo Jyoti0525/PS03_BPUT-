@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePrefs } from "@/components/providers";
 import { fmtDate, fmtDateTime } from "@/lib/hooks";
-import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays, History as HistoryIcon, ArrowRight } from "lucide-react";
+import { AlertOctagon, AlertTriangle, Info, TrendingUp, TrendingDown, Minus, ListChecks, MessageCircleQuestion, Clock3, Scale, FlaskConical, Activity, Languages, Split, Lock, Bot, CalendarDays, History as HistoryIcon, ArrowRight, Stethoscope } from "lucide-react";
 import type { AiOpinion, Encounter, ExtractedValue, Flag, FollowUpAnswer, FollowUpQuestion, NoteHistory, SinceLast, TrendRow, Urgency } from "@/lib/types";
 import { Badge, Button, Card, CardHeader, cx, Input } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -646,7 +646,7 @@ function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Enco
                     <span className="min-w-0 flex-1">
                       <span className="font-semibold leading-snug text-ink" title={english(tr, r.description)}>{tr(r.description)}</span>
                       {r.non_downgradable && r.urgency === "red" && (
-                        <span title={tr("Non-downgradable: only a doctor can lower it, with a written reason that is audited")} className="ml-2 inline-flex items-center gap-0.5 rounded-full bg-crit-bg px-2 py-0.5 align-middle text-[10px] font-semibold text-crit uppercase">
+                        <span title={tr("Fixed RED rule: this finding contributes to urgency. New measurements and answers are rechecked by the rules.")} className="ml-2 inline-flex items-center gap-0.5 rounded-full bg-crit-bg px-2 py-0.5 align-middle text-[10px] font-semibold text-crit uppercase">
                           <Lock className="size-3" /> {tr("locked")}
                         </span>
                       )}
@@ -710,6 +710,12 @@ function ClinicalNote({ enc, onUpdated }: { enc: Encounter; onUpdated?: (e: Enco
             </div>
           )}
         </Section>
+
+        {n.clinician_inputs?.length ? (
+          <Section n={++s} title={tr("Clinician clarifications")} icon={<Stethoscope />}>
+            <ClinicianInputList items={n.clinician_inputs} />
+          </Section>
+        ) : null}
 
         {/* Follow-up visit: what changed since the last one */}
         {n.since_last && (
@@ -963,6 +969,13 @@ function BedsideNote({ enc, density, onUpdated }: { enc: Encounter; density: "nu
         )}
       </Card>
 
+      {!!n.clinician_inputs?.length && (
+        <Card className="overflow-hidden border-teal-200 shadow-sm">
+          <CardHeader title={tr("Clinician clarifications")} subtitle={tr("Kept separate from the patient's original words")} icon={<Stethoscope className="size-4 text-teal-700" />} />
+          <ClinicianInputList items={n.clinician_inputs} />
+        </Card>
+      )}
+
       {clinical.length > 0 && (
         <Card className="overflow-hidden border-crit-line shadow-sm">
           <div className="border-b border-crit-line bg-crit-bg/60">
@@ -1042,5 +1055,24 @@ function BedsideNote({ enc, density, onUpdated }: { enc: Encounter; density: "nu
         </details>
       )}
     </div>
+  );
+}
+
+function ClinicianInputList({ items }: { items: NonNullable<Encounter["note"]>["clinician_inputs"] }) {
+  const { tr } = usePrefs();
+  if (!items?.length) return null;
+  return (
+    <ul className="divide-y divide-line">
+      {items.map((item, i) => (
+        <li key={`${item.at}-${i}`} className="px-4 py-3 sm:px-5">
+          <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
+            <span className="font-semibold text-ink">{item.by}</span>
+            <span>{tr(item.role.replaceAll("_", " "))}</span>
+            <span>{fmtDateTime(item.at)}</span>
+          </div>
+          <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-ink">{item.text}</p>
+        </li>
+      ))}
+    </ul>
   );
 }

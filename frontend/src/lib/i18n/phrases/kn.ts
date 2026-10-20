@@ -58,6 +58,7 @@ const kn: Record<string, string> = {
   "A second engine heard something different": "ಎರಡನೇ ಎಂಜಿನ್ ಬೇರೆ ಏನನ್ನೋ ಕೇಳಿತು",
   "Ask the patient which is right.": "ಯಾವುದು ಸರಿ ಎಂದು ರೋಗಿಯನ್ನು ಕೇಳಿ.",
   "Use this one instead": "ಬದಲಿಗೆ ಇದನ್ನು ಬಳಸಿ",
+  "Keep this transcript": "ಈ ಪ್ರತಿಲಿಪಿಯನ್ನೇ ಇರಿಸಿ",
   "Remove": "ತೆಗೆದುಹಾಕಿ",
   "Pregnancy details": "ಗರ್ಭಾವಸ್ಥೆಯ ವಿವರಗಳು",
   "Weeks of pregnancy": "ಗರ್ಭಾವಸ್ಥೆಯ ವಾರಗಳು",

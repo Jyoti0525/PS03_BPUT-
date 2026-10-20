@@ -638,11 +638,15 @@ export interface TriageNote {
   /** H5: what ran on this case; `degraded` when a stage failed, fell back or is unsure. */
   processing_status?: { overall: "ok" | "degraded"; stages: { stage: string; status: "ok" | "failed" | "fallback" | "unsure" | "unconfirmed"; detail: string }[] };
   /** Uploads: what kind of document each is (B10) and what was hidden before storage (G3). */
-  documents?: { file_id: string; filename: string; kind: string; read: boolean; doc_type: { type: string; label: string; why: string } | null; redaction: { faces: number; id_numbers: number; engine?: string; skipped?: string } | null }[];
+  documents?: { file_id: string; filename: string; kind: string; read: boolean; doc_type: { type: string; label: string; why: string } | null; redaction: { faces: number; id_numbers: number; engine?: string; skipped?: string } | null;
+    readings?: { engine: string; lines: string[]; confidence: number }[] }[];
   /** Medicine names read from a strip or prescription — not part of the record until confirmed. */
   medications_pending?: { name: string; strength: string | null; seen: string; confidence: number; file_id: string; filename: string;
-    kind?: "generic" | "brand"; contains?: string; read_by?: string }[];
-  medications?: { name: string; strength: string | null; source: string; by: string; at: string }[];
+    kind?: "generic" | "brand" | "unverified"; contains?: string; read_by?: string;
+    prescription_details?: { dose: string | null; frequency: string | null; duration: string | null; route: string | null; timing: string | null } }[];
+  medications?: { name: string; strength: string | null; source: string; by: string; at: string; confirmed_by?: string; confirmed_by_role?: string;
+    file_id?: string | null; seen?: string | null; ocr_engine?: string | null; ocr_confidence?: number | null;
+    prescription_details?: { dose: string | null; frequency: string | null; duration: string | null; route: string | null; timing: string | null } | null }[];
   summary_template?: string;
   llm?: { status: "PASS" | "FAIL_FELL_BACK" | "UNAVAILABLE"; model: string; ms?: number; reason?: string; rejected_text?: string; faithfulness?: string[]; guard?: string[] };
   /** C8: the model's own tier for this case, beside the rules' result. It never changes urgency. */
@@ -650,6 +654,8 @@ export interface TriageNote {
   generated_at: string;
   edited_by?: string | null;
   observations?: Observation[];
+  /** Attributed clinician clarifications; the original patient wording remains in original_words/transcript. */
+  clinician_inputs?: { text: string; by: string; role: string; at: string }[];
   edited_at?: string | null;
   /** "summary" for a health worker: summary, flags, missing items, their questions and vital signs only. */
   detail_level?: "summary" | "full";
@@ -663,7 +669,7 @@ export interface Override {
   by: string;
   by_role?: string;
   at: string;
-  /** Raising is open to any reviewer; lowering needs a doctor and a reason (E9). */
+  /** First-review nurse / health-worker priority raise; rules_urgency preserves the deterministic result. */
   direction?: "up" | "down";
 }
 
@@ -779,7 +785,7 @@ export interface SharedSummary {
     chronic: ChronicIntake | null;
     consent: { mode: ConsentMode; proxy_relation: string | null } | null;
   };
-  note: Pick<TriageNote, "summary" | "flags" | "vitals" | "labs" | "timeline" | "missing_info" | "disagreements" | "rules_fired"> | null;
+  note: Pick<TriageNote, "summary" | "flags" | "vitals" | "labs" | "timeline" | "missing_info" | "disagreements" | "rules_fired" | "clinician_inputs"> | null;
   referral: { id?: string; destination: string; specialty: string; reason: string; transport: string; created_by: string; created_at: string; note_text: string; status?: string; received_by?: string | null; received_at?: string | null } | null;
   documents: { id: string; filename: string; kind: string; content_type: string; uploaded_at: string; url: string | null }[];
   shared_by: string;

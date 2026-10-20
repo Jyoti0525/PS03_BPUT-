@@ -1,6 +1,5 @@
 """Speech-to-text and translation for intake (offline AI4Bharat models; see app/language.py)."""
 
-import asyncio
 import logging
 import secrets
 import time
@@ -48,11 +47,9 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
     """Recorded audio → transcript in the speaker's language, plus an English translation. Audio is not stored here.
 
     second_opinion (only when the patient allowed AI assistance): a second engine hears the same audio and the two
-    transcripts are compared (B9); where they differ on a number, a symptom or most words, both are returned so the
-    patient can be asked. The second engine is Sarvam Saaras (online); with no key, no connection, nothing heard or a
-    language Sarvam does not take, IndicWhisper (offline) hears it instead, after this reply: second_opinion is then
-    {engine, pending: id} until GET /speech/second/{id} has the comparison. Where IndicConformer is not installed (the
-    hosted link), the second engine alone transcribes, named as such."""
+    transcripts are compared (B9). The primary transcript returns without waiting for the second engine; the client
+    polls GET /speech/second/{id}. Sarvam Saaras (online) is preferred; if unavailable, IndicWhisper (offline) checks
+    it instead. Where IndicConformer is not installed, a successful available engine is named as the only transcript."""
     _clinical(user)
     s = get_settings()
     data = await audio.read(s.max_upload_mb * 1024 * 1024 + 1)
@@ -60,17 +57,14 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
         raise HTTPException(413, f"Recording too large (max {s.max_upload_mb} MB)")
     if filetypes.family(filetypes.sniff(data) or "none") != "audio":
         raise HTTPException(422, "That does not look like a recording — please speak again, or type instead")
-    online = None
-    if second_opinion and sarvam.enabled() and language_code in sarvam.STT_LANGS:
-        online = asyncio.create_task(_sarvam(data, language_code, audio.filename or "speech.webm"))
     try:
         result = await run_in_threadpool(language.transcribe, data, language_code)
     except language.AudioRejected as e:
-        if online:
-            online.cancel()
         raise HTTPException(422, str(e)) from e
     except language.LanguageUnavailable as e:
-        second = await online if online else None
+        second = None
+        if second_opinion and sarvam.enabled() and language_code in sarvam.STT_LANGS:
+            second = await _sarvam(data, language_code, audio.filename or "speech.webm")
         if second_opinion and not _heard(second) and _offline_second(language_code):
             second = await run_in_threadpool(_whisper, data, language_code)  # the only engine left: wait for it
         if isinstance(second, dict) and not second["text"]:
@@ -83,17 +77,13 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
         result["confidence_threshold"] = language.min_confidence(language_code)
         result["low_confidence"] = result["confidence"] < result["confidence_threshold"]
     if second_opinion:
-        second = await online if online else None
-        if _heard(second):
-            result["second_opinion"] = asr_check.compare(result["text"], second["text"], language_code, result["engine"], second["engine"])
+        if sarvam.enabled() and language_code in sarvam.STT_LANGS:
+            result["second_opinion"] = {"engine": sarvam.STT_ENGINE, "pending": _start_sarvam_check(
+                user.id, data, language_code, audio.filename or "speech.webm", result["text"], result["engine"], translate)}
         elif _offline_second(language_code):
-            # Sarvam unset, unreachable, deaf to this language or heard nothing: IndicWhisper (offline) hears it. It
-            # is ~3x slower than real time on a laptop, so the patient is not kept waiting: the check runs after
-            # this reply and the screen asks for it (GET /speech/second/{id}).
+            # IndicWhisper is slower than real time on some CPUs; keep its independent verification off the response path.
             result["second_opinion"] = {"engine": whisper_asr.ENGINE, "pending": _start_check(
                 user.id, data, language_code, result["text"], result["engine"], translate)}
-        elif online:
-            result["second_opinion"] = {"engine": sarvam.STT_ENGINE, "error": str(second) if second else "No words were recognised"}
     result["translation"] = None
     if translate:
         try:
@@ -170,6 +160,40 @@ def _start_check(user_id, data: bytes, lang: str, first_text: str, first_engine:
             log.exception("offline second check failed")
             out = {"engine": whisper_asr.ENGINE, "error": f"The second engine failed: {type(e).__name__}"}
         _checks[job]["result"] = out
+
+    _check_pool.submit(run)
+    return job
+
+
+def _start_sarvam_check(user_id, data: bytes, lang: str, filename: str, first_text: str, first_engine: str, translate: bool) -> str:
+    """Sarvam second hearing off the request path, with the same offline Whisper fallback as before."""
+    now = time.monotonic()
+    for k in [k for k, v in _checks.items() if now - v["at"] > CHECK_KEEP_S]:
+        del _checks[k]
+    job = secrets.token_urlsafe(12)
+    _checks[job] = {"user": user_id, "at": now, "result": None}
+
+    def run():
+        try:
+            try:
+                heard = sarvam.transcribe(data, lang, filename)
+            except sarvam.SarvamUnavailable:
+                heard = None
+            if not _heard(heard) and _offline_second(lang):
+                heard = _whisper(data, lang)
+            if not _heard(heard):
+                out = {"engine": sarvam.STT_ENGINE, "error": "The second speech engine could not recognise this recording"}
+            else:
+                out = asr_check.compare(first_text, heard["text"], lang, first_engine, heard["engine"])
+                if translate and out.get("disagree") and lang != "en":
+                    try:
+                        out["translation"] = (_english(out["text"], lang) or {}).get("text")
+                    except language.LanguageUnavailable:
+                        out["translation"] = None
+            _checks[job]["result"] = out
+        except Exception as e:  # noqa: BLE001 — tell the client the check failed rather than leaving it pending
+            log.exception("online second speech check failed")
+            _checks[job]["result"] = {"engine": sarvam.STT_ENGINE, "error": f"The second engine failed: {type(e).__name__}"}
 
     _check_pool.submit(run)
     return job

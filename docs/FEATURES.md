@@ -74,8 +74,9 @@ Each step names the feature code (see section 4) and the main file.
 8. **Token and queue** (C3). The patient gets a token (T-001…). The case enters the doctor's queue, ordered by
    urgency and then waiting time, and each row says why it is there. If open RED cases outnumber the doctors and
    medical officers on duty, the medical officer gets a capacity alert.
-9. **Review** (E1, E3). The nurse adds vitals, which re-runs the rules. The doctor confirms, edits, overrides with
-   a reason, or escalates. Unreviewed RED cases escalate on their own after 15 minutes.
+9. **Review** (E1, E3). The nurse / health worker adds vitals, which re-runs the rules, and can raise the queue
+   priority with a documented bedside reason. The doctor confirms, edits, or escalates internally. Unreviewed RED
+   cases escalate on their own after 15 minutes.
 10. **Hand-off** (D7, E4, E7). The case is referred with a QR summary, or exported as PDF, JSON, CSV, FHIR or HL7 CDA.
 
 Every view and change along the way is written to the audit log (G4).
@@ -778,15 +779,15 @@ call after two failed ASHA attempts; Kusum's last visit was RED, so only a perso
   and the disclaimer. It never shows an urgency tier; patient screens hide it too.
 - **Code:** `frontend/src/components/triage/share-qr.tsx` (`printShareSlip`).
 
-**E9 Overrides with reasons** · Working
-- **Raising** the urgency is free: any reviewer (nurse, health worker, doctor), reason optional.
-- **Lowering** needs a doctor or medical officer and a written reason of at least 15 characters. Lowering below a
-  RED rule is allowed (people decide) but the audit entry names every such rule.
-- The rules' own result and every rule that fired stay on the note.
-- **Override rate per rule:** the supervisor's "Urgency overrides" page lists, for each rule, how often it fired,
-  was lowered and was raised. A rule that doctors often lower is a rule to review.
+**E9 First-review priority raise** · Working
+- Nurses and health workers can raise a case from the bedside after reassessment, with a reason that is written to
+  the audit log. This raises queue priority; the rules-engine result remains visible beside it.
+- This action cannot lower a rules-derived priority. New measurements and answers rerun the deterministic rules;
+  RED cases can be escalated for senior review. Doctors do not get a generic urgency-override action on their case page.
+- **Priority-change stats:** the supervisor's "Urgency overrides" page records rule triggers and priority raises.
+  Historical records from earlier builds may still include clinician downgrades.
 - **Code:** `POST /encounters/{id}/override`, `GET /override-stats` (`backend/app/routers/admin.py`),
-  `frontend/src/app/admin/overrides/page.tsx`.
+  `frontend/src/components/triage/priority-adjuster.tsx`.
 
 ### F. India context and set-up
 
@@ -1048,7 +1049,7 @@ cd frontend && npx tsc --noEmit && npm run lint
 | `test_timeline.py` | 22 | Onset labels and conflicts |
 | `test_regions.py` | 28 | Regional calendar: festival and season dates by state, two-meaning words, no guessing, facility overrides, cadre names, every date sourced, every directory state covered |
 | `test_referrals.py` | 7 | E4 referral closed only on receipt (QR code or doctor), overdue alert raised and resolved; E5 clinic days, facility's own days and holidays, follow-up moved; F2 patient load; A7 online voice; H3 profiles |
-| `test_override.py` | 7 | E9 raise free and lower by a doctor with a reason, override rate per rule; G6/G8 disclaimer and data origin in every export; H5 stage status and fallback flag; A6 logged pick, no merge; A8 Celsius, BP order and range refused |
+| `test_override.py` | 7 | E9 first-review priority raise with a reason, manual lowering denied for all roles, raise statistics; G6/G8 disclaimer and data origin in every export; H5 stage status and fallback flag; A6 logged pick, no merge; A8 Celsius, BP order and range refused |
 | `test_api.py` | 20 | Sign-in, roles, consent, offline replay, overrides, escalations, exports, audit |
 | `test_wednesday.py` | 27 | AIIMS high-risk floor; occupational rules, FEV1 baseline, PPE gap, employer rates without symptoms; sign-off limits and note density by role; queue reasons and capacity alert; fever cluster and suppressed export; missed visit, neutral call, no-phone refusal; SQLite column patch |
 | `test_telephony.py` | 8 | Real calls and SMS against a fake Twilio and Vonage: only the demo phone is dialled, unsigned webhooks refused, keypad answers, a keyed danger sign texts staff without a name, no key twice hands over, a recorded answer is read and deleted, not answered and cut off, SMS says nothing about health; Vonage: keypad danger sign over NCCO, recorded answer read and deleted |

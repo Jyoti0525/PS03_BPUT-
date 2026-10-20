@@ -332,13 +332,28 @@ def status() -> dict:
     }
 
 
+def preload_asr() -> None:
+    """Load the speech model and run a short dummy pass before the API accepts patient recordings."""
+    try:
+        import torch
+
+        model = _conformer()
+        with torch.inference_mode():
+            enc, _ = model.encode(torch.zeros((1, SAMPLE_RATE), dtype=torch.float32))
+            _ctc(model, enc, "or")
+    except LanguageUnavailable as e:
+        log.info("speech model not preloaded: %s", e)
+    except Exception:
+        log.exception("speech model preload failed")
+
+
 def preload() -> None:
-    """Warm the models in the background so the first patient does not wait for loading."""
+    """Warm the translation model in the background; speech is warmed before startup completes."""
 
     def run():
         # The first generate() call is several times slower than later ones, so translate one phrase.
         # English → Indic (~1.4 GB) is not warmed: intake never needs it, so it loads only when asked for.
-        warm = (("asr", _conformer), ("indic-en", lambda: translate(["ଜ୍ୱର"], "or", "en")))
+        warm = (("indic-en", lambda: translate(["ଜ୍ୱର"], "or", "en")),)
         for name, fn in warm:
             try:
                 fn()

@@ -205,7 +205,8 @@ mispronounced. Licence CC-BY-NC 4.0.
   headache was GREEN. Added `LOCAL-SEVERE-HTN` (a local facility rule, labelled as such): ≥ 180 / ≥ 110, or ≥ 160 /
   ≥ 100 with headache, visual change, chest pain, breathlessness or one-sided weakness → YELLOW, doctor review.
 - **Meningism:** kept as the WHO IITT card states it (any two of altered mental status, stiff neck, fever or
-  hypothermia, headache → RED). Fever with headache is over-triaged on purpose; the doctor can override with a reason.
+  hypothermia, headache → RED). Fever with headache is over-triaged on purpose; its source rule stays visible for
+  clinician review and can be escalated, but the interface does not offer a manual downgrade.
 
 ## Rule correctness: every rule tested four ways (8 Oct)
 

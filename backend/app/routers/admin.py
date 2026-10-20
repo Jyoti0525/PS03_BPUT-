@@ -100,10 +100,10 @@ def ai_opinions(user: Auditor, db: DB, days: int = 28):
 
 @router.get("/override-stats")
 def override_stats(user: Auditor, db: DB, days: int = 28):
-    """How often clinicians changed the rules' urgency, per rule (E9). A rule overruled often is a rule to review.
+    """How often first-review staff raised priority relative to each fired rule (E9).
 
-    For each rule that fired: cases, cases lowered below it by a doctor, cases raised. Only the rules' own output is
-    counted (`rules_fired`); the override never rewrites it."""
+    Historical records may include manual downgrades from earlier builds. Current requests only raise priority;
+    only the rules' own output is counted (`rules_fired`), and it is never rewritten."""
     days = max(1, min(days, 180))
     since = now() - timedelta(days=days)
     rank = {"green": 0, "yellow": 1, "red": 2}

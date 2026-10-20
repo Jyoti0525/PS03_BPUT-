@@ -216,6 +216,27 @@ def _strength(lines: list[dict], i: int, word: str) -> str | None:
     return None
 
 
+def _prescription_details(text: str) -> dict:
+    """Extract only explicit sig details from the same OCR line; never fill a missing dose by inference."""
+    details = {"dose": None, "frequency": None, "duration": None, "route": None, "timing": None}
+    dose = re.search(r"\b(\d+(?:\.\d+)?|½|1/2)\s*(tablets?|tabs?|capsules?|caps?|ml|drops?|puffs?|sachets?)\b", text, re.I)
+    if dose:
+        details["dose"] = re.sub(r"\s+", " ", dose.group(0)).strip()
+    freq = re.search(r"\b\d\s*[-–]\s*\d\s*[-–]\s*\d(?:\s*[-–]\s*\d)?\b|\b(OD|BD|BID|TDS|TID|QID|SOS|HS|Q\s*\d+\s*H|once|twice|thrice)(?:\s+(?:a|per)\s+day|\s+daily)?\b|\bevery\s+\d+\s+hours?\b", text, re.I)
+    if freq:
+        details["frequency"] = re.sub(r"\s+", " ", freq.group(0)).strip()
+    duration = re.search(r"\b(?:for|x|×|course\s+of)\s*(\d+(?:\.\d+)?)\s*(days?|d|weeks?|wks?|months?|mos?)\b|\b(\d+)\s*/\s*7\b", text, re.I)
+    if duration:
+        details["duration"] = f"{duration.group(1) or duration.group(3)} {duration.group(2) or 'days'}"
+    route = re.search(r"\b(oral|orally|topical|apply|inhale|inhaled|intramuscular|intravenous|\bIM\b|\bIV\b|\bPO\b|\bPR\b|\bSL\b)\b", text, re.I)
+    if route:
+        details["route"] = route.group(0)
+    timing = re.search(r"\b(before|after|with)\s+(?:food|meals?)\b|\b(empty\s+stomach|morning|afternoon|evening|night|bedtime)\b", text, re.I)
+    if timing:
+        details["timing"] = re.sub(r"\s+", " ", timing.group(0)).strip()
+    return details
+
+
 def medicines(lines: list[dict]) -> list[dict]:
     """Medicine names (and strength, when printed next to them) found in OCR lines [{'text','conf','bbox'}]."""
     names, keys = _names()
@@ -266,6 +287,7 @@ def medicines(lines: list[dict]) -> list[dict]:
             "name": brand["brand"] if brand else names[key],
             "strength": strength or (cur or {}).get("strength"),
             "seen": text[:120],
+            "prescription_details": _prescription_details(text),
             "confidence": max(conf, (cur or {}).get("confidence", 0)),
             "status": "awaiting_confirmation",
             **({"kind": "brand", "contains": brand["contains"]} if brand else {"kind": "generic"}),

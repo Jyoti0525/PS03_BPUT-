@@ -94,18 +94,25 @@ def test_consent_required(client, nurse):
     assert client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).status_code == 422
 
 
-def test_override_requires_reason_and_keeps_rules_output(client, nurse, doctor):
+def test_priority_raise_is_first_review_only_and_cannot_lower(client, nurse, doctor):
     _, body = new_intake(client, nurse)
     enc = client.post(f"{API}/encounters", json=body, headers={**nurse, "X-Device-Id": DEVICE}).json()
-    short = {"to_urgency": "yellow", "category": "Vitals re-measured", "reason": "too short"}
-    assert client.post(f"{API}/encounters/{enc['id']}/override", json=short, headers=doctor).status_code == 422
-    ok = {**short, "reason": "Repeat ECG normal, chest wall tenderness reproduces the pain."}
-    assert client.post(f"{API}/encounters/{enc['id']}/override", json=ok, headers=nurse).status_code == 403  # doctors only
-    r = client.post(f"{API}/encounters/{enc['id']}/override", json=ok, headers=doctor).json()
-    assert r["urgency"] == "yellow" and r["urgency_source"] == "override"
-    assert r["override"]["from_urgency"] == "red"
+    short = {"to_urgency": "yellow", "category": "Vitals re-measured", "reason": "no"}
+    assert client.post(f"{API}/encounters/{enc['id']}/override", json=short, headers=nurse).status_code == 422
+    lower = {**short, "reason": "Repeat measurements reviewed by first reviewer."}
+    assert client.post(f"{API}/encounters/{enc['id']}/override", json=lower, headers=nurse).status_code == 403
+    assert client.post(f"{API}/encounters/{enc['id']}/override", json=lower, headers=doctor).status_code == 403
+    _, mild_body = new_intake(client, nurse, chief_complaint="Mild cough for two days", vitals={})
+    mild = client.post(f"{API}/encounters", json=mild_body, headers={**nurse, "X-Device-Id": DEVICE}).json()
+    assert mild["urgency"] in ("green", "yellow")
+    higher = {"to_urgency": "red", "category": "Bedside reassessment", "reason": "Breathing worsened at bedside"}
+    assert client.post(f"{API}/encounters/{mild['id']}/override", json=higher, headers=doctor).status_code == 403
+    r = client.post(f"{API}/encounters/{mild['id']}/override", json=higher, headers=nurse).json()
+    assert r["urgency"] == "red" and r["urgency_source"] == "override"
+    assert r["override"]["direction"] == "up" and r["override"]["from_urgency"] == mild["urgency"]
+    assert r["note"]["rules_fired"] == mild["note"]["rules_fired"]
     log = client.get(f"{API}/audit?action=OVERRIDE", headers=doctor).json()
-    assert any(enc["patient"]["code"] == a["patient_code"] and "retained" in a["detail"] for a in log)
+    assert any(mild["patient"]["code"] == a["patient_code"] and "retained" in a["detail"] for a in log)
 
 
 def test_escalation_and_acknowledgement(client, nurse, doctor):

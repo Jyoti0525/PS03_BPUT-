@@ -83,7 +83,12 @@ async def lifespan(_: FastAPI):
     if settings.preload_language_models:
         from . import language
 
+        language.preload_asr()
         language.preload()
+    if settings.ocr_enabled:
+        from .triage.extraction import preload_ocr
+
+        preload_ocr()
     stop = threading.Event()
     threading.Thread(target=_housekeeping_loop, args=(stop,), name="housekeeping", daemon=True).start()
     log.info("Jeevia API ready", extra={"path": settings.database_url.split("@")[-1]})

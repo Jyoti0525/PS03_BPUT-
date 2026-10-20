@@ -9,8 +9,7 @@ import { PageHeader } from "@/components/layout/app-shell";
 import { Card, CardHeader, ErrorNote, Segmented, Spinner, Stat, cx } from "@/components/ui";
 import { UrgencyBadge } from "@/components/triage/note";
 
-/** E9: how often clinicians changed the rules' urgency, per rule. A rule that doctors often lower is a rule to review;
- *  the rules' own output is never rewritten by an override. */
+/** E9: view rules and first-review priority raises; the rules' own output is never rewritten. */
 export default function OverridesPage() {
   const { tr } = usePrefs();
   const [days, setDays] = useState<"7" | "28" | "90">("28");
@@ -23,7 +22,7 @@ export default function OverridesPage() {
     <div className="mx-auto max-w-5xl">
       <PageHeader
         title={tr("Urgency overrides")}
-        subtitle={tr("Any reviewer can raise a case's urgency; only a doctor can lower it, with a written reason. The rules' own output is kept on every case.")}
+        subtitle={tr("Nurses and health workers can raise queue priority at first review with a reason. New clinical inputs rerun the rules; priority cannot be manually lowered.")}
         actions={<Segmented value={days} onChange={setDays} options={[{ value: "7", label: tr("7 days") }, { value: "28", label: tr("28 days") }, { value: "90", label: tr("90 days") }]} />}
       />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

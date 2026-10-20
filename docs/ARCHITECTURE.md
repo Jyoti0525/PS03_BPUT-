@@ -50,8 +50,8 @@ For each feature with the tools, models and data it uses, see [FEATURES.md](FEAT
 | `src/lib/offline/precache.ts` | After a kiosk opens online, sends the service worker the page URL and every loaded `/_next/static` asset so the kiosk reloads with no network. |
 | `src/components/intake/*` | Kiosk / patient intake flow: consent → identity (household phone disambiguation) → visit type → voice / icons / text → duration & severity (+ maternal / chronic branches) → uploads → follow-ups → staff vitals → review → token + QR. |
 | `src/components/triage/*` | Urgency badge, flag list, value table with **source evidence** (image crop / transcript / device), sparkline trends, `NoteView` at doctor or nurse density. |
-| `src/app/reviewer/*` | **Doctor only.** Queue, case view (confirm / edit / override / escalate / referral / export / QR, nurses' observations), lookup by ID · QR · phone, escalations with acknowledgement, referrals. |
-| `src/app/nurse/*` | **Nursing station.** Patients to attend (vitals needed first), patient view with vitals & observations form, nurse checklist, reports, alert doctor; lookup. |
+| `src/app/reviewer/*` | **Doctor only.** Queue, case view (confirm / edit / escalate / referral / export / QR, nurses' observations), lookup by ID · QR · phone, escalations with acknowledgement, referrals. |
+| `src/app/nurse/*` | **Nursing station.** Patients to attend (vitals needed first), patient view with vitals & observations form, first-review priority raise, nurse checklist, reports, alert doctor; lookup. |
 | `src/app/desk/*` | **Front desk (receptionist).** Today's patients and waiting times, token board with corrections, find & register patients, doctors & nurses on/off duty. |
 | `src/app/admin/*` | **Supervisor only.** Overview (counts only), staff & duty, facility setup wizard, kiosk links, devices, audit log (verify chain, CSV), data retention. |
 | `components/layout/app-shell.tsx` | Shared shell; each workspace has its own colour and label (doctor ink, nurse teal, front desk blue, supervisor coral). |
@@ -118,7 +118,7 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | Devices | `GET/POST /devices`, `DELETE /devices/{id}` |
 | Facilities / users | `GET /facilities`, `GET/PATCH /facilities/{id}` (PATCH: supervisor), `GET /facilities/{id}/stats`, `GET /users` (supervisor: all staff; receptionist: doctors & nurses), `PATCH /users/{id}` (role, active), `POST /users/{id}/reset-pin`, `PATCH /users/{id}/duty` (receptionist / supervisor) |
 | Patients / consent | `GET /patients?q=`, `POST /patients` (optional `employee_code` at organisation workplaces), `GET /patients/{id}`, `PATCH /patients/{id}` (correction), `GET /patients/by-code/{code}`, `GET /patients/{id}/encounters`, `POST /consents` |
-| Encounters | `POST /encounters`, `GET /queue?facility_id=`, `GET/PATCH /encounters/{id}`, `POST /encounters/{id}/confirm`, `PATCH /encounters/{id}/note`, `POST /encounters/{id}/observations` (nurse/doctor: vitals + note, rules re-run), `POST /encounters/{id}/override`, `GET /encounters/{id}/export?format=pdf|print|json|csv|fhir` |
+| Encounters | `POST /encounters`, `GET /queue?facility_id=`, `GET/PATCH /encounters/{id}`, `POST /encounters/{id}/confirm`, `PATCH /encounters/{id}/note`, `POST /encounters/{id}/observations` (nurse/doctor: vitals + note, rules re-run), `POST /encounters/{id}/override` (nurse / health worker can raise priority at first review; no manual lowering), `GET /encounters/{id}/export?format=pdf|print|json|csv|fhir` |
 | Escalation / referral | `POST /encounters/{id}/escalations`, `GET /escalations`, `POST /escalations/{id}/acknowledge`, `POST /encounters/{id}/referrals`, `GET /referrals` |
 | Files | `POST /files` (multipart, `kind`, optional `sample_key`), `GET /files/{id}`, `GET /files/{id}/content?sig=` |
 | Governance | `GET /audit`, `GET /audit/verify`, `GET /audit/export`, `GET /retention`, `GET /me/record`, `GET /employer/cohorts` |
@@ -135,11 +135,12 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | Queue, case notes | ✔ | ✔ | ✘ (names, tokens, waits only) | ✘ (counts only) | ✘ |
 | Vitals & bedside observations | ✔ | ✔ | ✘ | ✘ | ✘ |
 | Patient documents and photos | ✔ at the treating facility | ✔ at the treating facility | ✘ | ✘ | ✘ |
+| Raise queue priority at first review (reason required) | ✘ | ✔ | ✘ | ✘ | ✘ |
 | Find / correct patient details | ✔ | ✔ | ✔ | ✔ | ✘ |
 | Doctors & nurses on/off duty | ✘ | ✘ | ✔ | ✔ | ✘ |
 | Check in a patient who filled in from home (C3) | ✔ | ✔ | ✔ | ✔ | ✘ |
 | Edit note, escalate (alert doctor) | ✔ | ✔ | ✘ | ✘ | ✘ |
-| Confirm, override, referral, export, QR summary, acknowledge, fitness | ✔ | ✘ | ✘ | ✘ | ✘ |
+| Confirm, referral, export, QR summary, acknowledge, fitness | ✔ | ✘ | ✘ | ✘ | ✘ |
 | Facility config, kiosk links, devices, retention | ✘ | ✘ | ✘ | ✔ | ✘ |
 | Staff role / deactivate / reset PIN | ✘ | ✘ | ✘ | ✔ | ✘ |
 | Audit log | ✔ | ✘ | ✘ | ✔ | ✘ |

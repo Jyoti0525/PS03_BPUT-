@@ -134,7 +134,7 @@ def test_typed_destination_still_works_and_own_facility_is_refused(client, nurse
 def _red_case(client, nurse, doctor) -> dict:
     enc = new_case(client, nurse)
     if enc["urgency"] != "red":
-        client.post(f"{API}/encounters/{enc['id']}/override", json={"to_urgency": "red", "category": "clinical_judgement", "reason": "raised for the test"}, headers=doctor)
+        client.post(f"{API}/encounters/{enc['id']}/override", json={"to_urgency": "red", "category": "Bedside reassessment", "reason": "raised for the test"}, headers=nurse)
     return enc
 
 
@@ -177,7 +177,7 @@ def test_override_timer_counts_from_arrival(client, nurse, doctor):
         if e.urgency == "red":
             e.urgency = "yellow"
         db.commit()
-    client.post(f"{API}/encounters/{enc['id']}/override", json={"to_urgency": "red", "category": "clinical_judgement", "reason": "looks worse"}, headers=doctor)
+    client.post(f"{API}/encounters/{enc['id']}/override", json={"to_urgency": "red", "category": "Bedside reassessment", "reason": "looks worse"}, headers=nurse)
     with SessionLocal() as db:
         due = db.get(Encounter, enc["id"]).escalation_due_at
     assert due.replace(tzinfo=None) > (now() + timedelta(minutes=10)).replace(tzinfo=None)  # 15 min from arrival, not already past

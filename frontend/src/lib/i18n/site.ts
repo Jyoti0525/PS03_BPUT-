@@ -112,7 +112,7 @@ const en: SiteCopy = {
       { title: "Lab report extraction", body: "Photograph a printed or handwritten report. Values are extracted and shown beside the exact cropped region they came from." },
       { title: "Structured triage note", body: "A concise, non-diagnostic summary with timeline, missing information and follow-up questions for the reviewing clinician." },
       { title: "22-language support", body: "Every scheduled Indian language for patient speech, 21 of them measured on public test sets; full screens in English, Hindi and Odia, patient screens in Kannada too." },
-      { title: "Human-review workflow", body: "A red / yellow / green queue from fixed clinical rules. Doctors confirm, override with a written reason, escalate or refer." },
+      { title: "Human-review workflow", body: "A red / yellow / green queue from fixed clinical rules. First-review staff can raise queue priority with a reason; doctors confirm, escalate or refer." },
       { title: "Privacy-first design", body: "Consent before intake, role-based access, tamper-evident audit log and automatic deletion of raw audio and photos." },
     ],
   },

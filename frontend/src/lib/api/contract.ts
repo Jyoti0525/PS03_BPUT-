@@ -185,7 +185,7 @@ export interface JeeviaApi {
   getEncounter(id: string): Promise<Encounter>;
   scheduleFollowup(id: string, dueDate: string, assignedWorkerId: string | null): Promise<Encounter>;
   confirmEncounter(id: string): Promise<Encounter>;
-  editNote(id: string, note: Partial<TriageNote>): Promise<Encounter>;
+  editNote(id: string, note: Partial<TriageNote> & { clinician_input?: string }): Promise<Encounter>;
   overrideUrgency(id: string, to: Urgency, category: string, reason: string): Promise<Encounter>;
   setReferralNeeded(id: string, needed: boolean): Promise<Encounter>;
   exportEncounter(id: string, format: ExportFormat): Promise<ExportResult>;
@@ -253,7 +253,7 @@ export interface JeeviaApi {
   // Speech — offline models on the facility server; the audio itself is not stored by this call
   /** secondOpinion: a second engine also hears the audio (B9); only when the patient allowed AI help. Sarvam (online)
    *  answers at once; IndicWhisper (offline, when Sarvam cannot) answers through `secondCheck`. */
-  transcribe(audio: Blob, language: string, opts?: { secondOpinion?: boolean }): Promise<Transcription>;
+  transcribe(audio: Blob, language: string, opts?: { secondOpinion?: boolean; translate?: boolean }): Promise<Transcription>;
   secondCheck(id: string): Promise<SecondOpinion>;
 
   // Audit

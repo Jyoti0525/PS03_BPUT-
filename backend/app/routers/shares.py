@@ -126,7 +126,7 @@ def summary(db, e, request: Request, scope: str, shared_by: str, expires_at) -> 
     note = None
     if e.note:
         n = e.note
-        note = {k: n.get(k) for k in ("summary", "flags", "vitals", "labs", "timeline", "missing_info", "disagreements", "rules_fired")}
+        note = {k: n.get(k) for k in ("summary", "flags", "vitals", "labs", "timeline", "missing_info", "disagreements", "rules_fired", "clinician_inputs")}
     p = e.patient
     return SharedSummary(
         facility={"name": f.name, "district": f.district, "state": f.state, "type": f.type} if f else {},

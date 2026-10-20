@@ -61,9 +61,8 @@ async def upload(
         boxes = render(sample_key, "")[1]
     extraction = None
     if kind == "report" and read:
-        # Read the document now (offline OCR / text layer) so the reviewer sees values with their source crops.
-        # Two offline OCR engines read it at once and are compared test by test (B9).
-        extraction = await run_in_threadpool(lambda: extract_document(data, ctype, second=True))
+        # Both offline OCR engines read the same page concurrently by default; their readings are compared before save.
+        extraction = await run_in_threadpool(lambda: extract_document(data, ctype, second=s.ocr_deep_checks))
         # Handwriting the offline engines cannot read: Sarvam Vision (online, India), only with the patient's consent.
         if online and ctype.startswith("image/") and ctype != "image/svg+xml" and sarvam.enabled() and wants_online_reading(extraction):
             extraction = await run_in_threadpool(add_online_reading, extraction, data, file.filename or "page.jpg")

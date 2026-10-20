@@ -1314,6 +1314,7 @@ const hi: Record<string, string> = {
   "A second engine heard something different": "दूसरे सिस्टम ने कुछ अलग सुना",
   "A second engine is still checking what it heard…": "दूसरा सिस्टम अभी जाँच रहा है कि उसने क्या सुना…",
   "Use this one instead": "इसके बजाय यह लें",
+  "Keep this transcript": "इसी ट्रांसक्रिप्ट को रखें",
   "Ask the patient which is right.": "मरीज़ से पूछें कि कौन-सा सही है।",
   "Continue without AI": "AI के बिना आगे बढ़ें",
   "Type or tap only. Staff read your reports themselves. Your care is the same.": "केवल लिखें या छुएँ। स्टाफ़ आपकी रिपोर्ट खुद पढ़ेगा। आपकी देखभाल वैसी ही रहेगी।",

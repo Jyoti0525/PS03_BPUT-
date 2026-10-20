@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft, CheckCircle2, Pencil, ShieldAlert, Siren, Send, Printer, FileJson, FileSpreadsheet, FileText, Stethoscope, Baby, HeartPulse,
+  ArrowLeft, CheckCircle2, Pencil, Siren, Send, Printer, FileJson, FileSpreadsheet, FileText, Stethoscope, Baby, HeartPulse,
   UserRoundCheck, Users, Timer, Paperclip, Copy, Ambulance, ChevronDown, Eye, QrCode, CalendarClock,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
@@ -15,22 +15,15 @@ import { toast } from "@/components/ui/toast";
 import { NoteView, UrgencyBadge, urgencyBar } from "@/components/triage/note";
 import { DocumentLabels, MedicationsPanel } from "@/components/triage/medications";
 import { useFile } from "@/components/triage/source";
-import { DOCTOR_ROLES, type Encounter, type ExportFormat, type Facility, type ShareLink, type Urgency } from "@/lib/types";
+import { DOCTOR_ROLES, type Encounter, type ExportFormat, type Facility, type ShareLink } from "@/lib/types";
 import { ShareQrModal } from "@/components/triage/share-qr";
 import { PatientEditModal } from "@/components/triage/patient-edit";
+import { NoteEditor } from "@/components/triage/note-editor";
 import { WorkerPanel } from "@/components/triage/worker-panel";
 import { ObservationList } from "@/components/triage/observations";
 import { URGENCY_LABEL, downloadBlob, referralText } from "@/lib/export";
 import { DestinationPicker, type PickedDestination } from "@/components/triage/destination-picker";
 import { langByCode } from "@/lib/i18n/languages";
-
-const OVERRIDE_CATEGORIES = [
-  "Examination findings differ from intake",
-  "Vitals re-measured",
-  "Known chronic baseline for this patient",
-  "Rule triggered on ambiguous wording",
-  "Clinical judgement — other",
-];
 
 function FileThumb({ id }: { id: string }) {
   const { tr } = usePrefs();
@@ -134,7 +127,7 @@ export default function CasePage() {
   const [density, setDensity] = useState<"doctor" | "nurse" | "health_worker">(isDoctor ? "doctor" : "nurse");
   const [start] = useState(() => Date.now());
   const now = useNow(1000);
-  const [modal, setModal] = useState<null | "override" | "escalate" | "referral" | "edit" | "share" | "patient">(null);
+  const [modal, setModal] = useState<null | "escalate" | "referral" | "edit" | "share" | "patient">(null);
   const [freshShare, setFreshShare] = useState<ShareLink | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -211,7 +204,7 @@ export default function CasePage() {
                   {enc.token && <span className="rounded-lg bg-coral-50 px-2 py-0.5 font-mono text-sm font-bold text-coral-700">{enc.token}</span>}
                   <h1 className="text-xl font-bold text-ink sm:text-2xl">{p.name}</h1>
                   <UrgencyBadge u={enc.urgency} size="lg" />
-                  {enc.urgency_source === "override" && <Badge tone="coral">{tr("Overridden")}</Badge>}
+                  {enc.urgency_source === "override" && <Badge tone="coral">{tr("Raised at first review")}</Badge>}
                   <button onClick={() => setModal("patient")} className="inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-xs font-medium text-muted hover:bg-canvas hover:text-ink" title={tr("Correct name, age, phone…")}>
                     <Pencil className="size-3.5" /> {tr("Edit details")}
                   </button>
@@ -280,10 +273,6 @@ export default function CasePage() {
               {tr("Next patient")} <ArrowLeft className="size-4 rotate-180" />
             </Link>
           )}
-          {/* E9: anyone reviewing may raise the urgency; only a doctor may lower it. */}
-          <Button variant="secondary" onClick={() => setModal("override")} icon={<ShieldAlert className="size-4" />}>
-            {tr(isDoctor ? "Override urgency" : "Raise urgency")}
-          </Button>
           <Button variant="secondary" onClick={() => setModal("escalate")} icon={<Siren className="size-4" />}>
             {tr("Escalate")}
           </Button>
@@ -361,7 +350,7 @@ export default function CasePage() {
 
       {enc.worker && <WorkerPanel encounterId={enc.id} worker={enc.worker} canRecord={isDoctor} onRecorded={reload} />}
 
-      <MedicationsPanel enc={enc} canReview onDone={setData} />
+      <MedicationsPanel enc={enc} canReview={isDoctor} onDone={setData} />
 
       <div className="mt-4">{n ? <NoteView enc={enc} density={density} onUpdated={setData} /> : <p className="text-sm text-muted">{tr("No note generated.")}</p>}</div>
 
@@ -378,9 +367,8 @@ export default function CasePage() {
       )}
 
       {/* Mounted only while open, so each opening starts from fresh state. */}
-      {modal === "override" && <OverrideModal open enc={enc} onClose={() => setModal(null)} onDone={(e) => { setData(e); setModal(null); }} />}
       {modal === "escalate" && <EscalateModal open enc={enc} onClose={() => setModal(null)} onDone={() => { setModal(null); reload(); }} />}
-      {modal === "edit" && <EditModal open enc={enc} onClose={() => setModal(null)} onDone={(e) => { setData(e); setModal(null); }} />}
+      {modal === "edit" && <NoteEditor open enc={enc} onClose={() => setModal(null)} onDone={(e) => { setData(e); setModal(null); }} />}
       {modal === "referral" && (
         <ReferralModal
           open
@@ -402,72 +390,6 @@ export default function CasePage() {
       {modal === "patient" && <PatientEditModal patient={p} onClose={() => setModal(null)} onDone={() => { setModal(null); reload(); }} />}
       {modal === "share" && <ShareQrModal enc={enc} facilityName={facility?.name} initial={freshShare} onClose={() => setModal(null)} />}
     </div>
-  );
-}
-
-function OverrideModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encounter; onClose: () => void; onDone: (e: Encounter) => void }) {
-  const { tr } = usePrefs();
-  const [to, setTo] = useState<Urgency | "">("");
-  const [category, setCategory] = useState(OVERRIDE_CATEGORIES[0]);
-  const [reason, setReason] = useState("");
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const { user } = useSession();
-  const isDoctor = !!user && DOCTOR_ROLES.includes(user.role);
-  const rank: Record<Urgency, number> = { green: 0, yellow: 1, red: 2 };
-  const cur = enc.urgency ?? "green";
-  // E9: raising is free for every reviewer; lowering is a doctor's decision with a written reason.
-  const options = (["red", "yellow", "green"] as Urgency[]).filter((u) => u !== cur && (isDoctor || rank[u] > rank[cur]));
-  const down = !!to && rank[to] < rank[cur];
-  const submit = async () => {
-    setErr(null);
-    if (!to) return setErr(tr("Choose the new urgency"));
-    if (down && reason.trim().length < 15) return setErr(tr("Write a reason of at least 15 characters"));
-    setBusy(true);
-    try {
-      onDone(await api.overrideUrgency(enc.id, to, category, reason));
-      toast(tr("Override recorded in audit log"));
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : tr("Failed"));
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={tr("Override rules-engine urgency")}
-      subtitle={tr(isDoctor ? "The original rules output is kept. Your reason is permanently written to the audit log." : "You can raise the urgency at any time; only a doctor can lower it. The original rules output is kept.")}
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>{tr("Cancel")}</Button>
-          <Button variant="danger" onClick={submit} loading={busy}>{tr("Record override")}</Button>
-        </>
-      }
-    >
-      {!options.length && <p className="mb-2 text-sm text-muted">{tr("This case is already RED. Only a doctor can lower it; use Escalate to call one.")}</p>}
-      <p className="text-sm text-muted">{tr("Current:")} <UrgencyBadge u={enc.urgency} size="sm" /> {tr("from rules")} {enc.note?.rules_fired.map((r) => r.rule_id).join(", ")}</p>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {options.map((u) => (
-          <button key={u} onClick={() => setTo(u)} className={cx("rounded-xl border p-3 text-left", to === u ? "border-ink bg-canvas" : "border-line")}>
-            <UrgencyBadge u={u} />
-            <p className="mt-1 text-xs text-muted">{u === "red" ? tr("Immediate") : u === "yellow" ? tr("Within 30–60 min") : tr("Standard OPD order")}</p>
-          </button>
-        ))}
-      </div>
-      <div className="mt-4">
-        <Label htmlFor="ov-cat">{tr("Category")}</Label>
-        <Select id="ov-cat" value={category} onChange={(e) => setCategory(e.target.value)}>
-          {OVERRIDE_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-        </Select>
-      </div>
-      <div className="mt-4">
-        <Label htmlFor="ov-reason" hint={down ? tr("{n}/15 characters minimum", { n: reason.trim().length }) : undefined}>{tr(down ? "Written reason (required)" : "Reason (optional)")}</Label>
-        <Textarea id="ov-reason" rows={4} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr("e.g. Repeat BP 132/84 after rest; chest wall tenderness reproduces pain; ECG normal.")} />
-      </div>
-      <FieldError>{err}</FieldError>
-    </Modal>
   );
 }
 
@@ -520,50 +442,6 @@ function EscalateModal({ open, enc, onClose, onDone }: { open: boolean; enc: Enc
         <Textarea id="esc-reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={tr("e.g. SpO₂ dropping on repeat, needs senior review now")} />
       </div>
       <FieldError>{err}</FieldError>
-    </Modal>
-  );
-}
-
-function EditModal({ open, enc, onClose, onDone }: { open: boolean; enc: Encounter; onClose: () => void; onDone: (e: Encounter) => void }) {
-  const { tr } = usePrefs();
-  const [summary, setSummary] = useState(enc.note?.summary ?? "");
-  const [missing, setMissing] = useState((enc.note?.missing_info ?? []).join("\n"));
-  const [busy, setBusy] = useState(false);
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      size="lg"
-      title={tr("Edit triage note")}
-      subtitle={tr("Edits are attributed to you and logged. Urgency cannot be changed here — use Override.")}
-      footer={
-        <>
-          <Button variant="secondary" onClick={onClose}>{tr("Cancel")}</Button>
-          <Button
-            loading={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                onDone(await api.editNote(enc.id, { summary, missing_info: missing.split("\n").map((s) => s.trim()).filter(Boolean) }));
-                toast(tr("Note updated"));
-              } catch (e) {
-                toast(e instanceof Error ? e.message : tr("Failed"), "error");
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            {tr("Save changes")}
-          </Button>
-        </>
-      }
-    >
-      <Label htmlFor="ed-sum">{tr("Summary")}</Label>
-      <Textarea id="ed-sum" rows={6} value={summary} onChange={(e) => setSummary(e.target.value)} />
-      <div className="mt-4">
-        <Label htmlFor="ed-miss" hint={tr("(one per line)")}>{tr("Missing information")}</Label>
-        <Textarea id="ed-miss" rows={4} value={missing} onChange={(e) => setMissing(e.target.value)} />
-      </div>
     </Modal>
   );
 }

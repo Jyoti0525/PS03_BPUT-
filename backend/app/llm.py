@@ -33,7 +33,8 @@ log = logging.getLogger("jeevia.llm")
 SYSTEM = (
     "You write the summary paragraph of a triage note for a nurse or doctor in an Indian public health facility. "
     "You are given a fact sheet. Rewrite it as 2 to 4 plain sentences in English: who the patient is, what they "
-    "report in their own words, and the values that were measured or read from a report.\n"
+    "report in their own words, any separate clinician bedside observations or clarifications, and the values that "
+    "were measured or read from a report. Keep patient-reported information distinct from clinician-recorded information.\n"
     "Rules you must follow:\n"
     "- Use only the facts given. Do not add, guess or infer anything.\n"
     "- Copy every number and unit exactly as written. Do not convert or round.\n"
@@ -94,6 +95,12 @@ def fact_sheet(note: dict, intake: dict, patient) -> str:
         lines.append(f"Current medicines (as reported): {c['current_medicines']}")
     for v in note.get("vitals") or []:
         lines.append(f"Measured {v['label']}: {v['value']}{' ' + v['unit'] if v.get('unit') else ''}")
+    for o in note.get("observations") or []:
+        if o.get("note"):
+            lines.append(f"Bedside observation ({o.get('role') or 'clinician'}): {o['note']}")
+    for item in note.get("clinician_inputs") or []:
+        if item.get("text"):
+            lines.append(f"Clinician clarification ({item.get('role') or 'clinician'}): {item['text']}")
     for x in note.get("labs") or []:
         if x.get("status") == "abnormal":
             lines.append(f"Report value outside reference range: {x['label']} {x['value']}{' ' + x['unit'] if x.get('unit') else ''}")
@@ -134,8 +141,13 @@ def faithfulness(output: str, facts: str, findings: dict) -> list[str]:
             for m in rx.finditer(output_guard.normalise(output)):
                 if m.group(0) not in facts_n and re.search(r"[a-z]{4,}", m.group(0)):
                     problems.append(f'medicine or treatment word not in the record: "{m.group(0)}"')
+    clinician_findings = {}
+    supplemental = [o.get("note", "") for o in note.get("observations") or []]
+    supplemental += [i.get("text", "") for i in note.get("clinician_inputs") or []]
+    for source in supplemental:
+        clinician_findings.update({fid: {"value": f.value} for fid, f in scan_text(source, "summary").items()})
     for fid, f in scan_text(output, "summary").items():
-        recorded = (findings.get(fid) or {}).get("value")
+        recorded = (findings.get(fid) or clinician_findings.get(fid) or {}).get("value")
         if f.value is True and recorded is not True:
             problems.append(f"states {fid.replace('_', ' ')}, which the record does not")
         if f.value is False and recorded is True:

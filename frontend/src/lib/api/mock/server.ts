@@ -24,6 +24,7 @@ import type {
   Referral,
   Reminder,
   Role,
+  TriageNote,
   Tokens,
   Urgency,
   User,
@@ -1292,8 +1293,16 @@ export const mockApi: JeeviaApi = {
       requireRole(me, REVIEWER_ROLES);
       const e = d.encounters.find((x) => x.id === id);
       if (!e?.note) throw new ApiError(404, "Encounter not found");
-      Object.assign(e.note, patch, { edited_by: me.name, edited_at: new Date().toISOString() });
-      await audit(d, me, "UPDATE", "encounter", id, `Note edited: ${Object.keys(patch).join(", ")}`, e.patient.code);
+      const { clinician_input, ...fields } = patch;
+      const changes = Object.fromEntries(Object.entries(fields).filter(([key, value]) => e!.note![key as keyof TriageNote] !== value));
+      const at = new Date().toISOString();
+      if (Object.keys(changes).length) Object.assign(e.note, changes, { edited_by: me.name, edited_at: at });
+      if (clinician_input?.trim()) {
+        e.note.clinician_inputs = [...(e.note.clinician_inputs ?? []), { text: clinician_input.trim(), by: me.name, role: me.role, at }];
+      }
+      const changed = [...Object.keys(changes), ...(clinician_input?.trim() ? ["clinician_input"] : [])];
+      if (!changed.length) throw new ApiError(422, "Add a note change or a clinician clarification");
+      await audit(d, me, "UPDATE", "encounter", id, `Note edited: ${changed.join(", ")}`, e.patient.code);
       return clone(e);
     }),
 
@@ -1302,17 +1311,16 @@ export const mockApi: JeeviaApi = {
       const me = await current(d);
       const e = d.encounters.find((x) => x.id === id);
       if (!e || !e.urgency) throw new ApiError(404, "Encounter not found");
+      if (me.role !== "nurse" && me.role !== "health_worker") throw new ApiError(403, "Triage priority adjustments are made by the nurse or health worker at first review");
       if (to === e.urgency) throw new ApiError(400, `The urgency is already ${e.urgency.toUpperCase()}`);
-      // E9: raising is open to any reviewer; lowering needs a doctor and a written reason.
-      const down = RANK[to] < RANK[e.urgency];
-      if (down && !DOCTOR_ROLES.includes(me.role)) throw new ApiError(403, "Only a doctor or medical officer can lower the urgency; you can raise it or escalate");
-      if (down && reason.trim().length < 15) throw new ApiError(422, "A written reason of at least 15 characters is required to lower the urgency");
-      e.override = { from_urgency: e.urgency, to_urgency: to, category, reason: reason.trim(), by: me.name, by_role: me.role, at: new Date().toISOString(), direction: down ? "down" : "up" };
+      if (RANK[to] < RANK[e.urgency]) throw new ApiError(403, "First-review staff can raise priority only; clinical inputs rerun the rules");
+      if (reason.trim().length < 5) throw new ApiError(422, "Add a short reason of at least 5 characters");
+      e.override = { from_urgency: e.urgency, to_urgency: to, category, reason: reason.trim(), by: me.name, by_role: me.role, at: new Date().toISOString(), direction: "up" };
       e.urgency = to;
       e.urgency_source = "override";
       const esc = ESCALATE_AFTER_MIN[to];
       e.escalation_due_at = esc ? new Date(Date.parse(e.created_at) + esc * 60000).toISOString() : null;
-      await audit(d, me, "OVERRIDE", "encounter", id, `Urgency ${e.override.from_urgency} → ${to} (${category}). Reason: "${reason.trim()}". Rules-engine output retained for audit.`, e.patient.code);
+      await audit(d, me, "OVERRIDE", "encounter", id, `Triage priority raised ${e.override.from_urgency} → ${to} (${category}). Reason: "${reason.trim()}". Rules-engine output retained for audit.`, e.patient.code);
       return clone(e);
     }),
 

@@ -1,4 +1,4 @@
-# How Jeevia works — roles, dashboards and the patient journey
+﻿# How Jeevia works — roles, dashboards and the patient journey
 
 Written for the Jeevia team and for facility staff learning the system.
 
@@ -10,7 +10,7 @@ Written for the Jeevia team and for facility staff learning the system.
  Kiosk link /k/CODE  ─┐                                                  Doctor / Nurse
  (tablet or own phone)│   consent → symptoms → reports →   ┌──────────►  /reviewer  queue ordered by
  Staff kiosk /kiosk  ─┼─► follow-up questions → submit ────┤             urgency → case → confirm /
- From home /k/MKHOME ┘             │                       │             override / escalate / refer
+ From home /k/MKHOME ┘             │                       │             escalate / refer
                                    ▼                       │
                      Rules engine sets urgency (red /      │             Receptionist / Supervisor
                      yellow / green) from fixed AIIMS      ├──────────►  /admin  tokens board, kiosk
@@ -29,8 +29,8 @@ One idea runs through everything: **the system organises and prioritises; a qual
 |---|---|---|---|---|
 | **Supervisor** | `/auth` | `/admin` *(Facility supervisor)* | Picks the facility from the national directory (or adds a missing public one), sets facility type and specialists on duty, creates kiosk links / QR posters, manages staff (role, deactivate, **reset PIN**, on/off duty), staff devices, audit log and data retention | Symptoms, triage notes, reports, patient documents |
 | **Receptionist** | `/auth` | `/desk` *(Front desk)* | Today's patients and waiting times, finds and registers patients, corrects registration mistakes, marks doctors and nurses on/off duty, runs the check-in kiosk | Symptoms, urgency, notes, documents; facility setup, kiosk links, devices, audit, staff accounts |
-| **Nurse / ANM** | `/auth` | `/nurse` *(Nursing station)* and `/kiosk` | Patients to attend, **records vitals and bedside observations**, works the "Do now" checklist and questions, alerts the doctor, runs assisted intake | Referrals, QR summaries, exports, overrides, sign-off, fitness |
-| **Doctor / MO** | `/auth` | `/reviewer` *(Medical officer)* | Works the queue top-down, reviews the note with its sources and the nurses' observations, confirms or edits, overrides urgency with a written reason, acknowledges escalations, sends referrals, exports, shares QR summaries | — |
+| **Nurse / ANM** | `/auth` | `/nurse` *(Nursing station)* and `/kiosk` | Patients to attend, **records vitals and bedside observations**, works the "Do now" checklist and questions, raises queue priority with a bedside reason, alerts the doctor, runs assisted intake | Referrals, QR summaries, exports, priority downgrades, fitness |
+| **Doctor / MO** | `/auth` | `/reviewer` *(Medical officer)* | Works the queue top-down, reviews the note with its sources and the nurses' observations, confirms or edits, acknowledges escalations, sends referrals, exports, shares QR summaries | — |
 | **Employer / organisation** | `/auth` | `/employer` | Registers the organisation and its workplaces (company clinic, industrial unit, campus, health camp), keeps the worker roster, sees each worker's fitness outcome (fit / restricted / unfit / pending) | Symptoms, notes, documents — any clinical record |
 | **Kiosk link** (no login) | opens `/k/CODE` | intake only | Registers a patient, records consent, takes symptoms and reports, issues a token | Everything else — it cannot read any data |
 
@@ -92,9 +92,9 @@ If the network is down, the intake is saved on the device and sent automatically
 
 ### 4.5 Nurse (`/nurse`)
 - **Patients to attend** lists everyone waiting, with *Vitals needed* first, urgency colour and waiting time.
-- Opening a patient (`/nurse/patient/…`) shows **Record vitals & observations** (BP, pulse, SpO₂, temperature, respiratory rate, glucose and a free-text nursing observation), the nurse checklist (*Do now*, questions to ask, still missing), the visit's reports and photos, and **Alert doctor**.
-- Saved observations go on the patient's record with the nurse's name. The fixed rules run again on the new vitals, so a low SpO₂ raises urgency automatically; the doctor sees every observation on the case.
-- Nurses have no referral, QR summary, export, override, sign-off or fitness tools — the API enforces this too.
+- Opening a patient (`/nurse/patient/…`) shows **Record vitals & observations** (BP, pulse, SpO₂, temperature, respiratory rate, glucose and a free-text nursing observation), the nurse checklist (*Do now*, questions to ask, still missing), the visit's reports and photos, **Raise triage priority**, and **Alert doctor**.
+- Saved observations go on the patient's record with the nurse's name. The fixed rules run again on new vitals and answers, so a low SpO₂ or danger sign can raise urgency automatically; the doctor sees every observation on the case. If bedside assessment needs faster attention, the nurse / health worker can manually raise queue priority with a short reason; it cannot be lowered by this action.
+- Nurses have no referral, QR summary, export, priority downgrade or fitness tools; sign-off is limited to the role's GREEN/YELLOW scope.
 
 ### 4.6 Doctor
 1. **Queue** (`/reviewer`) — ordered by urgency, then waiting time; each row shows the token, flags, "needs checking" counts and an auto-escalation timer.
@@ -102,8 +102,7 @@ If the network is down, the intake is saved on the device and sent automatically
 3. **Decide**
    - **Confirm note** — marks it reviewed and signed.
    - **Edit** — change the summary or missing-information list (attributed to them).
-   - **Override urgency** — choose the new level, a category and a written reason (≥ 15 characters). The original rules output is kept for audit.
-   - **Escalate** to a senior MO / specialist; the receiver must **acknowledge** it in *Escalations*.
+   - **Escalate** — request internal review by a senior MO / specialist; the receiver must **acknowledge** it in *Escalations*.
    - **Referral note** — an optional, advisory destination is suggested from facility specialist settings; search the national facility directory or use a typed suggestion. The patient may attend any suitable facility. A seven-day QR hand-off is included so a clinician at any facility can review the referral; choose transport, edit and send/print.
    - **Export** — PDF, print, JSON, CSV or FHIR R4.
    - **Edit details** — correct the patient's registration details.
@@ -127,7 +126,7 @@ Receptionists, supervisors, employers and staff at other facilities get *"Only t
 ### 4.9 After the visit
 - The patient gets the clinician-issued slip (follow-up date, referral, QR for staff; never an urgency tier) and any check-up reminders (SMS or voice). There is no patient portal.
 - Raw voice recordings are deleted after 24 hours, photos after 3 days and reports after 30 days (`/admin/retention`); the structured note stays.
-- Every view, edit, override, referral and export is in the hash-chained audit log (`/admin/audit` → *Verify chain*).
+- Every view, edit, priority raise, referral and export is in the hash-chained audit log (`/admin/audit` → *Verify chain*).
 
 ## 5. System status
 

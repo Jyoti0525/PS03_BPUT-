@@ -1,38 +1,49 @@
-"""E9: raising the urgency is free; lowering it needs a doctor and a reason; the rules' output stays; rates per rule."""
+"""First-review staff can raise queue priority with a reason; nobody can manually downgrade the rules output."""
 from conftest import API
-from test_wednesday import hw, intake  # noqa: F401  (hw is a fixture)
+from test_wednesday import NORMAL, hw, intake  # noqa: F401  (hw is a fixture)
 
 
-def test_any_reviewer_can_raise_without_a_reason(client, nurse, hw):
-    _, e = intake(client, nurse, chief_complaint="Mild cough for two days")
-    assert e["urgency"] != "red"
-    r = client.post(f"{API}/encounters/{e['id']}/override", json={"to_urgency": "red"}, headers=hw)
+def test_first_review_staff_can_raise_with_a_reason(client, nurse, hw):
+    _, e = intake(client, nurse, chief_complaint="mild headache", vitals=NORMAL, severity=2, duration="3-7 days", exam={"done": True})
+    e = client.post(f"{API}/encounters/{e['id']}/observations", json={"exam_done": True}, headers=nurse).json()
+    assert e["urgency"] == "green"
+    url = f"{API}/encounters/{e['id']}/override"
+    assert client.post(url, json={"to_urgency": "red"}, headers=nurse).status_code == 422
+    r = client.post(url, json={"to_urgency": "red", "reason": "Bedside assessment"}, headers=hw)
     assert r.status_code == 200, r.text
     o = r.json()
     assert o["urgency"] == "red" and o["override"]["direction"] == "up" and o["override"]["by_role"] == "health_worker"
     assert o["override"]["from_urgency"] == e["urgency"]
 
 
-def test_lowering_needs_a_doctor_and_a_reason(client, nurse, doctor):
+def test_manual_lowering_is_rejected_for_first_review_staff_and_doctors(client, nurse, doctor):
     _, e = intake(client, nurse, chief_complaint="Chest pain spreading to left arm")
     assert e["urgency"] == "red"
     url = f"{API}/encounters/{e['id']}/override"
     assert client.post(url, json={"to_urgency": "yellow", "reason": "Repeat ECG normal and pain reproducible."}, headers=nurse).status_code == 403
-    assert client.post(url, json={"to_urgency": "yellow", "reason": "ok"}, headers=doctor).status_code == 422
-    assert client.post(url, json={"to_urgency": "red"}, headers=doctor).status_code == 400  # no change
-    o = client.post(url, json={"to_urgency": "yellow", "reason": "Repeat ECG normal and pain reproducible."}, headers=doctor).json()
-    assert o["override"]["direction"] == "down" and o["override"]["from_urgency"] == "red"
-    assert any(h["urgency"] == "red" for h in o["note"]["rules_fired"])  # locked flags stay on record
-    assert o["override"]["overruled_non_downgradable"]
+    assert client.post(url, json={"to_urgency": "yellow", "reason": "Repeat ECG normal and pain reproducible."}, headers=doctor).status_code == 403
 
 
-def test_override_rate_per_rule(client, nurse, doctor):
-    _, e = intake(client, nurse, chief_complaint="Chest pain spreading to left arm")
-    client.post(f"{API}/encounters/{e['id']}/override", json={"to_urgency": "green", "reason": "Musculoskeletal pain, reproducible on palpation."}, headers=doctor)
+def test_new_measurements_can_raise_above_first_review_priority(client, nurse, hw, doctor):
+    _, e = intake(client, nurse, chief_complaint="mild headache", vitals=NORMAL, severity=2, duration="3-7 days", exam={"done": True})
+    e = client.post(f"{API}/encounters/{e['id']}/observations", json={"exam_done": True}, headers=nurse).json()
+    assert e["urgency"] == "green"
+    priority = client.post(f"{API}/encounters/{e['id']}/override", json={"to_urgency": "yellow", "category": "Bedside reassessment", "reason": "Recheck for queue"}, headers=hw)
+    assert priority.status_code == 200, priority.text
+    updated = client.post(f"{API}/encounters/{e['id']}/observations", json={"vitals": {"spo2": 86, "pulse": 118}}, headers=nurse)
+    assert updated.status_code == 200, updated.text
+    enc = updated.json()
+    assert enc["urgency"] == "red" and enc["urgency_source"] == "rules"
+    queued = next(x for x in client.get(f"{API}/queue?facility_id=fac_phc_manikpur", headers=doctor).json() if x["encounter_id"] == e["id"])
+    assert queued["urgency"] == "red"
+
+
+def test_priority_raise_stats_show_no_manual_downgrades(client, nurse, doctor):
+    _, e = intake(client, nurse, chief_complaint="Mild cough for two days")
+    assert e["urgency"] != "red"
+    client.post(f"{API}/encounters/{e['id']}/override", json={"to_urgency": "red", "category": "Bedside reassessment", "reason": "Breathing worsened"}, headers=nurse)
     s = client.get(f"{API}/override-stats", headers=doctor).json()
-    assert s["lowered"] >= 1 and s["overrides"] >= s["lowered"]
-    red = [r for r in s["rules"] if r["urgency"] == "red" and r["lowered"]]
-    assert red and 0 < red[0]["lowered_rate"] <= 1
+    assert s["raised"] >= 1 and s["lowered"] == 0
 
 
 # ── G6 / G8: disclaimer and data origin on every record and export ─────────
