@@ -85,7 +85,7 @@ async def lifespan(_: FastAPI):
 
         language.preload_asr()
         language.preload()
-    if settings.ocr_enabled:
+    if settings.ocr_enabled and settings.preload_ocr:
         from .triage.extraction import preload_ocr
 
         preload_ocr()

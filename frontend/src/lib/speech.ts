@@ -116,14 +116,17 @@ export interface Recorder {
 }
 
 /**
- * Starts capturing speech. Resolves the transcript when stopped. Also records raw audio (for the
- * server ASR + audit) when MediaRecorder is available.
+ * Starts capturing speech. Records raw audio (for the server ASR + audit) when MediaRecorder is available.
+ *
+ * `live` also runs the browser's own recognition for a transcript. In Chrome that sends the audio to Google, which the
+ * patient never agreed to, so it is only for when the facility server cannot be reached; otherwise the server's
+ * offline engine transcribes the recording.
  */
-export async function startCapture(lang: string, onPartial: (t: string) => void): Promise<Recorder> {
+export async function startCapture(lang: string, onPartial: (t: string) => void, { live = false }: { live?: boolean } = {}): Promise<Recorder> {
   let transcript = "";
   let rec: RecognitionLike | null = null;
   const W = window as unknown as { SpeechRecognition?: new () => RecognitionLike; webkitSpeechRecognition?: new () => RecognitionLike };
-  const Ctor = W.SpeechRecognition ?? W.webkitSpeechRecognition;
+  const Ctor = live ? W.SpeechRecognition ?? W.webkitSpeechRecognition : undefined;
   if (Ctor) {
     rec = new Ctor();
     rec.lang = langByCode(lang).bcp47;

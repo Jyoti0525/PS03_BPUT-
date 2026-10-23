@@ -191,7 +191,9 @@ export function Modal({
   // Kept in a ref: callers pass a fresh onClose each render, and re-running the effect would pull focus off the field
   // being typed in (one word at a time) and shut an open dropdown.
   const closeRef = useRef(onClose);
-  closeRef.current = onClose;
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeRef.current();

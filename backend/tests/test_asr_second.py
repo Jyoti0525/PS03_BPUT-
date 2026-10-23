@@ -109,7 +109,9 @@ def _post(client, headers, data=b"audio", lang="hi", second=True):
 def test_second_engine_hears_the_same_recording_and_both_are_returned(client, nurse, engines):
     r = _post(client, nurse).json()
     assert r["engine"] == OFFLINE and r["translation"]["text"] == "EN<मुझे तीन दिन से बुखार है>"
-    s = r["second_opinion"]
+    # The reply does not wait for Sarvam: the comparison is fetched once it has heard the recording
+    assert r["second_opinion"]["engine"] == sarvam.STT_ENGINE and r["second_opinion"]["pending"]
+    s = _check(client, nurse, r["second_opinion"]["pending"]).json()
     assert s["engine"] == sarvam.STT_ENGINE and s["text"] == "मुझे तेरह दिन से बुखार है" and s["disagree"]
     assert s["differences"] == [f"numbers: 3 ({OFFLINE}) vs 13 ({sarvam.STT_ENGINE})"]
     assert s["translation"] == "EN<मुझे तेरह दिन से बुखार है>"  # the doctor reads both in English
@@ -163,7 +165,7 @@ def test_with_no_connection_the_offline_second_engine_checks_after_the_reply(cli
     r = _post(client, nurse).json()
     assert r["engine"] == OFFLINE and r["translation"]  # the patient hears the read-back without waiting
     s = r["second_opinion"]
-    assert s["engine"] == whisper_asr.ENGINE and s["pending"]
+    assert s["pending"]  # announced as Sarvam; IndicWhisper answers when Sarvam cannot be reached
     assert _check(client, doctor, s["pending"]).status_code == 404  # only the one who recorded it
     done = _check(client, nurse, s["pending"]).json()
     assert done["engine"] == whisper_asr.ENGINE and done["disagree"] and f"cough: heard by {whisper_asr.ENGINE} only" in done["differences"]

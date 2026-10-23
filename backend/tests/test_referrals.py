@@ -80,10 +80,17 @@ def test_follow_up_lands_on_the_facility_clinic_day(client, nurse, supervisor):
     assert client.patch(f"{API}/facilities/fac_phc_manikpur", json={"region_config": cfg}, headers=supervisor).status_code == 200
     v = client.get(f"{API}/facilities/fac_phc_manikpur/visit-days?kind=anc_checkup&after=2026-10-10", headers=nurse).json()
     assert v["days"][0] == "2026-10-22"  # Thursday 15th is a holiday
+    # A check-up asked for on a Tuesday moves to that Thursday's clinic, or a week on when that Thursday is a holiday
+    from datetime import timedelta
+
+    tuesday = date.today() + timedelta(days=14 + (1 - date.today().weekday()) % 7)
+    holiday = tuesday + timedelta(days=2)
+    cfg["visits"]["closed_dates"].append(holiday.isoformat())
+    assert client.patch(f"{API}/facilities/fac_phc_manikpur", json={"region_config": cfg}, headers=supervisor).status_code == 200
     p, e = intake(client, nurse, category="maternal", chief_complaint="Routine ANC visit",
-                  maternal={"gestation_weeks": 20, "next_checkup": "2026-10-13", "reminder_channel": "none"})
+                  maternal={"gestation_weeks": 20, "next_checkup": tuesday.isoformat(), "reminder_channel": "none"})
     fu = [f for f in client.get(f"{API}/followups?scope=all", headers=nurse).json() if f["patient_id"] == p["id"]]
-    assert fu and fu[0]["due_at"].startswith("2026-10-22")
+    assert fu and fu[0]["due_at"].startswith((holiday + timedelta(days=7)).isoformat())
     client.patch(f"{API}/facilities/fac_phc_manikpur", json={"region_config": {}}, headers=supervisor)
     assert visits.snap(type("F", (), {"type": "industrial_unit", "region_config": None})(), "chronic_checkin", date(2026, 10, 11))[0] == date(2026, 10, 12)
 
@@ -116,9 +123,11 @@ def test_profiles_switch_what_runs(monkeypatch):
 
     stub = Settings(profile="stub", _env_file=None)
     assert not stub.language_models and not stub.ocr_enabled and stub.llm_url is None and stub.sarvam_api_key is None
+    assert not stub.preload_language_models and not stub.preload_ocr
     assert Settings(profile="full", _env_file=None).preload_language_models
     demo = Settings(profile="demo", _env_file=None)
-    assert demo.language_models and demo.ocr_enabled and not demo.preload_language_models
+    assert demo.language_models and demo.ocr_enabled and demo.preload_language_models and demo.preload_ocr  # warm for the first patient
+    assert not Settings(profile="demo", preload_ocr=False, _env_file=None).preload_ocr  # a low-RAM machine opts out
     # an explicit setting wins over the profile
     assert Settings(profile="stub", ocr_enabled=True, _env_file=None).ocr_enabled
 

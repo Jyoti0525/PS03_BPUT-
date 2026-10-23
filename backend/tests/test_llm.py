@@ -53,6 +53,16 @@ def test_unfaithful_or_diagnostic_summary_falls_back(monkeypatch, case, text, re
     assert any(f["code"] == "LLM-FELL-BACK" for f in note["flags"])
 
 
+def test_a_finding_a_clinician_recorded_counts_as_in_the_record():
+    """A bedside observation or clarification on the note is part of the record the summary may state."""
+    facts = "Patient reports fever for 3 days."
+    out = "Patient reports fever for 3 days. The nurse notes chest pain."
+    assert "states chest pain, which the record does not" in llm.faithfulness(out, facts, {})
+    for note in ({"observations": [{"note": "Complains of chest pain at the bedside"}]},
+                 {"clinician_inputs": [{"text": "Asked again: has chest pain"}]}):
+        assert "states chest pain, which the record does not" not in llm.faithfulness(out, facts, {}, note)
+
+
 def test_no_server_keeps_the_template(monkeypatch, case):
     def down(facts):
         raise llm.LlmUnavailable("not reachable")

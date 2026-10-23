@@ -117,7 +117,10 @@ class Settings(BaseSettings):
     vlm_url: str | None = None
     vlm_model_name: str = "Qwen3-VL-4B-Instruct Q4_K_M (llama.cpp, offline)"
     vlm_timeout_s: float = 60
-    preload_language_models: bool = True  # warm ASR during start-up instead of charging the first recording
+    # Warm the models during start-up so the first patient does not wait. Peak memory is the same once every model has
+    # been used; set both false on a machine short of RAM to load each model only when it is first needed.
+    preload_language_models: bool = True  # speech recognition (and translation, in the background)
+    preload_ocr: bool = True  # both OCR engines
     # Sarvam AI (online, India-hosted): Bulbul voice for reminder-call lines, Saaras speech-to-text as a second engine.
     # Unset = calls fall back to the device's own voice. JEEVIA_SARVAM_API_KEY or SARVAM_API_KEY.
     sarvam_api_key: str | None = Field(None, validation_alias=AliasChoices("JEEVIA_SARVAM_API_KEY", "SARVAM_API_KEY"))
@@ -163,10 +166,10 @@ class Settings(BaseSettings):
     def _profile(self):
         given = self.model_fields_set
         preset = {"stub": {"language_models": False, "ocr_enabled": False, "asr_second_offline": False, "llm_url": None,
-                           "llm_urgency_opinion": False, "vlm_url": None, "table_python": None, "preload_language_models": False, "sarvam_api_key": None,
+                           "llm_urgency_opinion": False, "vlm_url": None, "table_python": None, "preload_language_models": False, "preload_ocr": False, "sarvam_api_key": None,
                            "bhashini_user_id": None, "bhashini_api_key": None},
                   "demo": {},
-                  "full": {"preload_language_models": True}}[self.profile]
+                  "full": {"preload_language_models": True, "preload_ocr": True}}[self.profile]
         for k, v in preset.items():
             if k not in given:
                 object.__setattr__(self, k, v)

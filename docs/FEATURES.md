@@ -160,7 +160,11 @@ Feature codes match [TODO.md](TODO.md). Paths are from the repo root.
   - The transcript is read back aloud; the patient confirms or records again.
   - Silent, too-short or unreadable recordings are refused with a message. No transcript is ever made up.
   - If the server is unreachable, the browser's own speech recognition is used where available, and labelled as
-    such.
+    such. Only then: in Chrome it sends the audio to Google, which the patient's consent does not cover, so it is
+    never started while the server can be reached (`startCapture(..., { live })`; fixed 23 Oct after a 20 Oct change
+    had made it the first engine).
+  - The reply does not wait for the second engine (B9): Sarvam, or IndicWhisper when Sarvam cannot be reached, checks
+    the recording in the background and the kiosk polls for it for up to 3 minutes.
 - **Uses:** IndicConformer-600M (8-bit, CTC decoding) on ONNX Runtime; MediaRecorder in the browser; browser speech
   synthesis for the read-back.
 - **Code:** `backend/app/language.py`, `backend/app/routers/language.py` (`POST /speech/transcribe`);
@@ -688,6 +692,13 @@ call after two failed ASHA attempts; Kusum's last visit was RED, so only a perso
   its configured place (`refer_to`), then the facility's default referral hospital. The doctor can search the national
   directory, type an unlisted destination or leave it unspecified. The recommendation does not restrict patient choice;
   the QR hand-off can be reviewed at any facility.
+- **Hospital search** (`directory.search`): name, district, town or PIN; a short form matches the initials of the name
+  ("SCB Cuttack" finds Srirama Chandra Bhanja Medical College); a word the directory lacks is dropped only when a
+  place or name word is left, never leaving just "CHC" or "hospital"; a district or town match ranks first. A facility
+  OpenStreetMap does not have (CHC Nimapara) can still be typed as an advisory destination.
+- **Hand-off between doctors:** a destination on Jeevia (or a directory entry, activated on send) gets the referral
+  under Incoming; its doctors find it by ID or the short code on the slip (REF-xxxxxx), open that visit only (audited at
+  both facilities) and record "Patient arrived", which closes it on both sides. Any other facility gets "not found".
 - **Closed only when care is received:** the receiving clinician confirms from the QR summary (with the access code),
   or the referring doctor records who confirmed it. Due in 6 h (RED), 48 h (YELLOW) or 14 days (GREEN); past due
   it is listed first on the Referrals page and raises a "Referral overdue" alert to the medical officer.
@@ -952,7 +963,7 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 |---|---|---|
 | **H1** Database | Working | `backend/app/models.py`; migrations `backend/migrations/versions/0001`–`0013`, applied at start-up |
 | **H2** API | Working | FastAPI under `/api/v1`, routers in `backend/app/routers/`. Interactive docs at `/docs` |
-| **H3** Model serving | Working | `JEEVIA_PROFILE`: `stub` (rules only, no models or online engines; the cloud instance), `demo` (models load on first use), `full` (models load at start-up). An explicit setting wins over the profile. The summary model is a separate llama.cpp `llama-server` process |
+| **H3** Model serving | Working | `JEEVIA_PROFILE`: `stub` (rules only, no models or online engines; the cloud instance), `demo` (speech, translation and both OCR engines warmed at start-up so the first patient does not wait), `full` (the same, and the summary model is expected). On a machine short of RAM, `JEEVIA_PRELOAD_LANGUAGE_MODELS=false` and `JEEVIA_PRELOAD_OCR=false` load each model when it is first needed (peak memory is the same once all are used). An explicit setting wins over the profile. The summary model is a separate llama.cpp `llama-server` process |
 | **H4** File storage with expiry | Working | `backend/app/storage.py` |
 | **H5** Visible fallback when an engine is down | Working | `GET /language/engines` lists what is installed and loaded; a missing engine answers 503 and never a fake result. Every note has `processing_status`: report reading, translation, speech and AI summary, each ok / failed / fallback / unsure. A failed stage raises `STAGE-DEGRADED`; a missing summary model raises `LLM-OFF` |
 | **H6** Offline kiosk | Working | `frontend/src/lib/offline/outbox.ts`, `precache.ts`, `public/sw.js`. Check-ins wait in IndexedDB and replay without duplicates (`client_ref`) |

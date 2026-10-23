@@ -123,8 +123,9 @@ def _units(text: str) -> set[str]:
     return {u.rstrip("s") for u in re.findall(rf"(?<![a-z])({_UNITS})(?![a-z])", text.lower())}
 
 
-def faithfulness(output: str, facts: str, findings: dict) -> list[str]:
-    """Reasons the output is not faithful to the facts (empty = faithful)."""
+def faithfulness(output: str, facts: str, findings: dict, note: dict | None = None) -> list[str]:
+    """Reasons the output is not faithful to the facts (empty = faithful). A finding a clinician recorded on the note
+    (bedside observation or clarification) counts as recorded."""
     from .output_guard import _compiled
     from .triage.findings import scan_text
 
@@ -142,6 +143,7 @@ def faithfulness(output: str, facts: str, findings: dict) -> list[str]:
                 if m.group(0) not in facts_n and re.search(r"[a-z]{4,}", m.group(0)):
                     problems.append(f'medicine or treatment word not in the record: "{m.group(0)}"')
     clinician_findings = {}
+    note = note or {}
     supplemental = [o.get("note", "") for o in note.get("observations") or []]
     supplemental += [i.get("text", "") for i in note.get("clinician_inputs") or []]
     for source in supplemental:
@@ -193,7 +195,7 @@ def write_summary(note: dict, intake: dict, patient) -> dict:
         return {"status": "UNAVAILABLE", "model": model_name(), "reason": str(e)}
     ms = round((time.perf_counter() - t) * 1000)
     base = {"model": model_name(), "ms": ms, "guard_version": output_guard.version()}
-    problems = faithfulness(text, facts, (note.get("triage") or {}).get("findings") or {})
+    problems = faithfulness(text, facts, (note.get("triage") or {}).get("findings") or {}, note)
     verdict = output_guard.check(text, facts)
     if problems or not verdict.ok:
         return {**base, "status": "FAIL_FELL_BACK", "rejected_text": text, "faithfulness": problems, "guard": verdict.reasons()}
@@ -254,7 +256,7 @@ def urgency_opinion(note: dict, intake: dict, patient) -> dict | None:
     rank = TIERS.index(tier) - TIERS.index(rules)
     out |= {"status": "AGREE" if rank == 0 else "DISAGREE", "model_urgency": tier, "direction": None if rank == 0 else ("higher" if rank > 0 else "lower")}
     if reason:
-        problems = faithfulness(reason, facts, (note.get("triage") or {}).get("findings") or {})
+        problems = faithfulness(reason, facts, (note.get("triage") or {}).get("findings") or {}, note)
         verdict = output_guard.check(reason, facts)
         if problems or not verdict.ok:
             out["reason_withheld"] = verdict.reasons() + problems  # the tier is shown; the reason that failed the checks is not

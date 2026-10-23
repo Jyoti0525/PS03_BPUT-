@@ -18,7 +18,7 @@ import threading
 import uuid
 from pathlib import Path
 
-from sqlalchemy import func, or_, select, text
+from sqlalchemy import case, func, or_, select, text
 from sqlalchemy.orm import Session
 
 from .models import DirectoryFacility, Facility, Organisation
@@ -191,6 +191,24 @@ def load_in_background_if_empty(session_factory) -> None:
     threading.Thread(target=run, name="directory-load", daemon=True).start()
 
 
+# Words that say what kind of facility it is, not which one: alone they never narrow a search to a facility.
+GENERIC_WORDS = {"chc", "phc", "uphc", "sdh", "dh", "hwc", "hospital", "hospitals", "clinic", "centre", "center", "health",
+                 "community", "primary", "medical", "college", "district", "sub", "divisional", "govt", "government",
+                 "dispensary", "nursing", "home", "and", "of", "the", "general", "multispeciality", "multispecialty", "care"}
+
+
+def _word_matches(t: str):
+    """One search word against a directory row: in the name, district or city, or (2–5 letters) the initials of the
+    name, so "SCB" finds "Srirama Chandra Bhanja Medical College" and "MKCG" finds "Maharaja Krishna Chandra Gajapati"."""
+    like = f"%{t}%"
+    cond = [func.lower(DirectoryFacility.name).like(like), func.lower(func.coalesce(DirectoryFacility.district, "")).like(like),
+            func.lower(func.coalesce(DirectoryFacility.city, "")).like(like)]
+    if 2 <= len(t) <= 5 and t.isalpha() and t not in GENERIC_WORDS:
+        initials = "% ".join(t) + "%"  # "scb" → "s% c% b%": words starting with s, then c, then b
+        cond += [func.lower(DirectoryFacility.name).like(initials), func.lower(DirectoryFacility.name).like("% " + initials)]
+    return or_(*cond)
+
+
 def search(db: Session, q: str, state: str | None = None, limit: int = 20) -> list[dict]:
     """Directory facilities plus registered workplaces (organisation / user-added / sample), best match first."""
     q = " ".join(q.lower().split())[:80]
@@ -219,18 +237,23 @@ def search(db: Session, q: str, state: str | None = None, limit: int = 20) -> li
         if pin:
             dq = dq.where(DirectoryFacility.pincode == pin)
         for t in required:
-            like = f"%{t}%"
-            dq = dq.where(or_(func.lower(DirectoryFacility.name).like(like), func.lower(func.coalesce(DirectoryFacility.district, "")).like(like), func.lower(func.coalesce(DirectoryFacility.city, "")).like(like)))
+            dq = dq.where(_word_matches(t))
         if state:
             dq = dq.where(DirectoryFacility.state == state)
+        # A word that is the district or town itself ("puri") ranks above one inside another name ("Aashapuri").
+        place = case((or_(func.lower(func.coalesce(DirectoryFacility.district, "")).in_(words), func.lower(func.coalesce(DirectoryFacility.city, "")).in_(words)), 0), else_=1)
         if pg and words:
-            return dq.order_by(func.similarity(func.lower(DirectoryFacility.name), " ".join(words)).desc())
-        return dq.order_by(func.length(DirectoryFacility.name))
+            return dq.order_by(place, func.similarity(func.lower(DirectoryFacility.name), " ".join(words)).desc())
+        return dq.order_by(place, func.length(DirectoryFacility.name))
 
     rows = list(db.scalars(directory_query(words).limit(limit)))
     if not rows and len(words) > 1:
-        # Every word must match normally; if that finds nothing, keep the first word and rank by similarity.
-        rows = list(db.scalars(directory_query(words[:1]).limit(limit)))
+        # Every word must match normally. If that finds nothing, drop the words that match no facility at all (a
+        # misspelling, or a village the directory does not have), but only when what is left still names a place or
+        # a facility: "CHC Nimapara" must not turn into thirty CHCs from other states.
+        known = [t for t in words if db.scalar(directory_query([t]).limit(1))]
+        if known and len(known) < len(words) and any(t not in GENERIC_WORDS for t in known):
+            rows = list(db.scalars(directory_query(known).limit(limit)))
     active = {f.directory_ref: f.id for f in db.scalars(select(Facility).where(Facility.directory_ref.in_([r.ref for r in rows])))} if rows else {}
     for r in rows:
         out.append({

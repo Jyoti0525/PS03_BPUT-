@@ -146,7 +146,7 @@ export default function CallPage() {
     if (!recording) {
       silence();
       try {
-        recRef.current = await startCapture(call.language, () => {});
+        recRef.current = await startCapture(call.language, () => {}, { live: !navigator.onLine });
         setRecording(true);
       } catch {
         toast(tr("Microphone not available — type or tap instead"), "error");

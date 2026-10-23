@@ -58,6 +58,31 @@ def test_destinations_list_facilities_on_jeevia_and_the_national_directory(clien
     assert client.get(f"{API}/referral-destinations", headers=staff_at("fac_phc_manikpur", "nurse")).status_code == 403
 
 
+def test_hospital_search_finds_short_names_and_never_pads_with_strangers(client, doctor):
+    from app import directory
+
+    rows = [("osm:srch1", "Srirama Chandra Bhanja Medical College and Hospital", "medical_college", "Cuttack"),
+            ("osm:srch2", "Community Health Centre Zorvapur", "chc", "Puri"),
+            ("osm:srch3", "Zorvapuri Nursing Home", "hospital", "Nashik"),
+            ("osm:srch4", "District Headquarter Hospital Zorvapur", "district_hospital", "Zorvapur")]
+    with SessionLocal() as db:
+        for ref, name, kind, district in rows:
+            if not db.query(DirectoryFacility).filter_by(ref=ref).first():
+                db.add(DirectoryFacility(ref=ref, name=name, kind=kind, state="Odisha", district=district))
+        db.commit()
+        names = lambda q: [h["name"] for h in directory.search(db, q, None, 30)]  # noqa: E731
+        # A short form is matched by the initials of the name ("SCB"), with the town to narrow it
+        assert names("SCB Cuttack")[0] == "Srirama Chandra Bhanja Medical College and Hospital"
+        # A word the directory does not know is dropped, but "CHC" alone never fills the list with other CHCs
+        assert "Community Health Centre Zorvapur" in names("CHC Zorvapur Qxqxqx")
+        assert names("CHC Qxqxqx") == []
+        # The district itself ranks above a name that only contains it
+        assert names("hospital zorvapur")[0] == "District Headquarter Hospital Zorvapur"
+    # The same search through the referral picker
+    hits = client.get(f"{API}/referral-destinations?q=SCB%20Cuttack", headers=doctor).json()
+    assert any(h["directory_ref"] == "osm:srch1" and not h["on_jeevia"] for h in hits)
+
+
 def test_referral_reaches_the_receiving_doctor_and_only_them(client, nurse, doctor):
     receiving_hospital()
     enc = new_case(client, nurse)

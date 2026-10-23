@@ -131,7 +131,10 @@ export const liveApi: JeeviaApi = {
   kioskInfo: (code) => json(`/kiosk/${encodeURIComponent(code)}`),
   kioskFinder: (q, lat, lon) => {
     const p = new URLSearchParams({ q });
-    if (lat != null && lon != null) p.set("lat", String(lat)), p.set("lon", String(lon));
+    if (lat != null && lon != null) {
+      p.set("lat", String(lat));
+      p.set("lon", String(lon));
+    }
     return json(`/kiosk-finder?${p}`);
   },
   kioskSession: async (code, device_id) => {
