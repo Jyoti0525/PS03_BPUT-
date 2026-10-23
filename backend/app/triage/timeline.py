@@ -56,6 +56,9 @@ VAGUE = re.compile(
 
 # Tapped answers (kiosk catalogue) → day range
 TAPPED = {"today": (0, 0), "1-2 days": (1, 2), "3-7 days": (3, 7), "1-4 weeks": (7, 28), "more than a month": (30, 10_000)}
+# Not an onset: "3 times a day", "every 4 hours" (words before the number); "32 weeks pregnant", "2 years old" (after it).
+NOT_ONSET_BEFORE = r"(times|twice|once|thrice|per|every|aged?|baar)\s*$"
+NOT_ONSET_AFTER = r"\s*(pregnan|of pregnancy|gestation|old\b|of age|ki umar|की उम्र|ଗର୍ଭ)"
 
 
 def _days(phrase_num: str, unit: str) -> float:
@@ -77,9 +80,9 @@ def _when(days: float) -> str:
 def _is_onset(t: str, m: re.Match) -> bool:
     """Not an onset: "3 times a day", "every 4 hours", "32 weeks pregnant", "2 years old", "aged 40 years"."""
     before, after = t[: m.start()].lower()[-12:], t[m.end():].lower()[:14]
-    if re.search(r"(times|twice|once|thrice|per|every|aged?|baar)\s*$", before):
+    if re.search(NOT_ONSET_BEFORE, before):
         return False
-    return not re.match(r"\s*(pregnan|of pregnancy|gestation|old\b|of age|ki umar|की उम्र|ଗର୍ଭ)", after)
+    return not re.match(NOT_ONSET_AFTER, after)
 
 
 def _texts(intake: dict) -> list[str]:

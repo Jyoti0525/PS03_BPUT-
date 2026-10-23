@@ -784,6 +784,8 @@ const hi: Record<string, string> = {
   "Uploaded documents": "अपलोड किए दस्तावेज़",
   "Uploaded files": "अपलोड की गई फ़ाइलें",
   "Uploads need a connection": "अपलोड के लिए इंटरनेट चाहिए",
+  "Saved on this device — sent when the connection returns": "इस डिवाइस पर सहेजा गया — इंटरनेट आने पर भेजा जाएगा",
+  "On this device — sent when online": "इस डिवाइस पर — इंटरनेट आने पर भेजा जाएगा",
   "Uploads need a connection — ask staff to add reports after syncing": "अपलोड के लिए इंटरनेट चाहिए — सिंक के बाद स्टाफ़ से रिपोर्ट जुड़वाएँ",
   "Upper": "ऊपर",
   "Urgency comes only from these deterministic rules": "तात्कालिकता केवल इन नियत नियमों से आती है",

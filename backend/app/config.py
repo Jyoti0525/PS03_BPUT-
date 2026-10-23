@@ -110,6 +110,13 @@ class Settings(BaseSettings):
     llm_model_name: str = "Qwen3-4B-Instruct-2507 Q4_K_M (llama.cpp, offline)"
     llm_timeout_s: float = 30
     llm_urgency_opinion: bool = True  # C8: the model's own urgency tier, shown beside the rules' result (never replaces it)
+    # Cloud backup for the summary model, used only when the model above is not set or not reachable, and only for
+    # synthetic or public-sample records (app/llm.py). Any OpenAI-compatible endpoint; the default is Groq, whose API
+    # does not train on requests. Unset key = no backup. Gemini's free tier may use requests for training: do not use it.
+    llm_backup_url: str = "https://api.groq.com/openai/v1"
+    llm_backup_model: str = "openai/gpt-oss-120b"
+    llm_backup_name: str = "gpt-oss-120b on Groq (cloud backup, synthetic data only)"
+    llm_backup_key: str | None = Field(None, validation_alias=AliasChoices("JEEVIA_LLM_BACKUP_KEY", "GROQ_API_KEY"))
     # Third reading of report tables (TODO 9): PP-StructureV3 in its own Python (scripts/ppstructure_tables.py). Unset = off.
     table_python: str | None = None
     table_timeout_s: float = 180
@@ -167,7 +174,7 @@ class Settings(BaseSettings):
         given = self.model_fields_set
         preset = {"stub": {"language_models": False, "ocr_enabled": False, "asr_second_offline": False, "llm_url": None,
                            "llm_urgency_opinion": False, "vlm_url": None, "table_python": None, "preload_language_models": False, "preload_ocr": False, "sarvam_api_key": None,
-                           "bhashini_user_id": None, "bhashini_api_key": None},
+                           "bhashini_user_id": None, "bhashini_api_key": None, "llm_backup_key": None},
                   "demo": {},
                   "full": {"preload_language_models": True, "preload_ocr": True}}[self.profile]
         for k, v in preset.items():
@@ -177,6 +184,8 @@ class Settings(BaseSettings):
             raise ValueError("JEEVIA_VLM_URL must be an http(s) URL")
         if self.llm_url and not self.llm_url.startswith(("http://", "https://")):
             raise ValueError("JEEVIA_LLM_URL must be an http(s) address")
+        if self.llm_backup_key and not self.llm_backup_url.startswith("https://"):
+            raise ValueError("JEEVIA_LLM_BACKUP_URL must be an https address")
         if self.env == "production":
             self.check_production()
         return self

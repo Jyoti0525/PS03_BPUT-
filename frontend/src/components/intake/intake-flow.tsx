@@ -5,7 +5,7 @@ import { QRCodeSVG } from "qrcode.react";
 import {
   Mic, Square, Volume2, Check, RotateCcw, Camera, FileText, UserRound, Users, Lock, Eye, HandHeart, Stethoscope, Baby, HeartPulse, ArrowLeft, ArrowRight,
   Search, UserPlus, WifiOff, Trash2, Keyboard, CheckCircle2, Activity, Sparkles, HardHat, Building2, AlertTriangle,
-  PhoneCall,
+  PhoneCall, BellRing,
 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { usePrefs } from "@/components/providers";
@@ -13,6 +13,8 @@ import { Button, Card, FieldError, Input, Label, Select, Textarea, cx } from "@/
 import { toast } from "@/components/ui/toast";
 import { canRecognise, hasVoice, speak, startCapture, stopSpeaking, type Recorder } from "@/lib/speech";
 import { enqueue } from "@/lib/offline/outbox";
+import { dropFile, isLocalFile, keepFile, sendFile, type QueuedFile } from "@/lib/offline/blobs";
+import { offlineCheck, type DeviceCheck } from "@/lib/triage/device";
 import { compressImage } from "@/lib/image";
 import { SAMPLE_FACILITY_ID, SAMPLE_REPORTS, sampleReportImage } from "@/lib/sample-reports";
 import { API_MODE } from "@/lib/api";
@@ -43,6 +45,8 @@ export interface IntakeResult {
   homeAdvice?: "emergency" | "show_at_desk" | null;
   /** Who to complain to about data handling (DPDP s. 13), from the server; printed on the slip. */
   grievanceContact?: string | null;
+  /** Offline: the device's own run of the server's rules (lib/triage). A RED rule means "tell the nurse now". */
+  deviceCheck?: DeviceCheck | null;
 }
 
 /** DPDP Act s. 9: under 18, consent comes from a parent or lawful guardian. Same list as the server. */
@@ -80,6 +84,7 @@ export function IntakeFlow({
   onFinished,
   onReset,
   organisationName,
+  forHome = false,
 }: {
   /** kiosk = staff-unlocked tablet · link = public kiosk link (/k/CODE) · patient = patient's own account */
   mode: "kiosk" | "patient" | "link";
@@ -95,6 +100,8 @@ export function IntakeFlow({
   onReset?: () => void;
   /** Set when the facility is an organisation's workplace (company clinic, campus…): asks for the employee / student ID. */
   organisationName?: string | null;
+  /** A "fill in before you come" link: an offline danger sign sends the patient to emergency / 108, not to a nurse here. */
+  forHome?: boolean;
 }) {
   const { tr, t, lang, readAloud } = usePrefs();
   // F5: the helper list names the state's community health worker (ASHA, Mitanin, Sahiya…). Facility details are public.
@@ -216,6 +223,8 @@ export function IntakeFlow({
 
   // uploads / follow-up / vitals
   const [files, setFiles] = useState<FileObject[]>([]);
+  // Taken while offline: kept on this device (lib/offline/blobs.ts) and uploaded when the intake syncs.
+  const [kept, setKept] = useState<QueuedFile[]>([]);
   const [answers, setAnswers] = useState<Record<string, IntakeAnswer>>({});
   const [vitals, setVitals] = useState<Record<NumericVital, string>>({ bp_systolic: "", bp_diastolic: "", pulse: "", temp_f: "", spo2: "", resp_rate: "", glucose: "" });
 
@@ -266,6 +275,13 @@ export function IntakeFlow({
     return () => stopSpeaking();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, readAloud, lang]);
+
+  // Offline danger sign: said aloud whatever the read-aloud setting, so a patient who cannot read, and staff nearby, hear it.
+  const nurseNow = !!result?.offline && !!result.deviceCheck?.red && !forHome;
+  useEffect(() => {
+    if (nurseNow) speak(`${t("kiosk.nurse.title")}. ${t("kiosk.nurse.body")}`, lang);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nurseNow]);
 
   useEffect(() => {
     if (!readAloud || step !== "followup") return;
@@ -447,17 +463,27 @@ export function IntakeFlow({
   };
 
   /* ── uploads ── */
+  const keepOffline = async (file: File, kind: QueuedFile["kind"], sampleKey?: string) => {
+    const { queued, preview } = await keepFile(file, kind, sampleKey);
+    setKept((cur) => [...cur, queued]);
+    setFiles((cur) => [...cur, preview]);
+  };
+
   const onPick = async (list: FileList | null, kind: "report" | "image") => {
     if (!list?.length) return;
-    if (offline) return setErr(tr("Uploads need a connection — ask staff to add reports after syncing"));
+    if (offline && !offlineQueue) return setErr(tr("Uploads need a connection — ask staff to add reports after syncing"));
     setBusy(true);
     try {
       for (const f of Array.from(list)) {
         if (f.size > 20 * 1024 * 1024) throw new Error("File too large (max 20 MB before compression)");
+        if (offline) {
+          await keepOffline(await compressImage(f), kind);
+          continue;
+        }
         const up = await api.uploadFile(await compressImage(f), kind, null, null, aiAssist, aiAssist);
         setFiles((cur) => [...cur, up]);
       }
-      toast(tr("Uploaded"));
+      toast(offline ? tr("Saved on this device — sent when the connection returns") : tr("Uploaded"));
     } catch (e) {
       setErr(e instanceof Error ? e.message : tr("Upload failed"));
     } finally {
@@ -466,13 +492,19 @@ export function IntakeFlow({
   };
 
   const addSample = async (key: string) => {
-    if (offline) return setErr(tr("Uploads need a connection"));
+    if (offline && !offlineQueue) return setErr(tr("Uploads need a connection"));
     setBusy(true);
     try {
       const img = sampleReportImage(key, patient?.name ?? (newP.name || "Patient"));
       // Decoded here, not with fetch(): the page's security policy does not allow fetching data: URLs.
       const blob = new Blob([decodeURIComponent(img.dataUrl.slice(img.dataUrl.indexOf(",") + 1))], { type: "image/svg+xml" });
-      const up = await api.uploadFile(new File([blob], `${key}_sample_report.svg`, { type: "image/svg+xml" }), "report", null, key, aiAssist);
+      const file = new File([blob], `${key}_sample_report.svg`, { type: "image/svg+xml" });
+      if (offline) {
+        await keepOffline(file, "report", key);
+        toast(tr("Saved on this device — sent when the connection returns"));
+        return;
+      }
+      const up = await api.uploadFile(file, "report", null, key, aiAssist);
       setFiles((cur) => [...cur, up]);
       toast(tr("Sample report attached"));
     } catch (e) {
@@ -508,7 +540,7 @@ export function IntakeFlow({
       duration: duration ?? durAnswer ?? null,
       severity,
       answers: Object.values(answers),
-      file_ids: files.map((f) => f.id),
+      file_ids: files.filter((f) => !isLocalFile(f.id)).map((f) => f.id),
       vitals: Object.values(v).some((x) => x != null) ? v : null,
       maternal:
         category === "maternal"
@@ -546,15 +578,25 @@ export function IntakeFlow({
         return;
       }
       if (offline) {
-        await enqueue({ client_ref: clientRef.current, new_patient: newPatient, consent, intake: { ...intake, patient_id: patient?.id ?? null } });
-        const r = { token: `OFF-${clientRef.current.slice(3, 7).toUpperCase()}`, patientCode: patient?.code ?? null, offline: true };
+        // No server: run its rules here, so a danger sign is acted on now rather than when the network returns.
+        const deviceCheck = offlineCheck(intake, patient?.age ?? Number(newP.age), patient?.sex ?? (newP.sex || null));
+        await enqueue({ client_ref: clientRef.current, new_patient: newPatient, consent, intake: { ...intake, patient_id: patient?.id ?? null }, device_check: deviceCheck, files: kept });
+        const r = { token: `OFF-${clientRef.current.slice(3, 7).toUpperCase()}`, patientCode: patient?.code ?? null, offline: true, deviceCheck };
         setResult(r);
         onFinished?.(r);
         return;
       }
+      // Taken while offline, and the connection is back before Submit: upload them now, then clear them from the device.
+      const late: string[] = [];
+      for (const q of kept) {
+        const id = await sendFile(q, aiAssist);
+        if (id) late.push(id);
+      }
       const p = patient ?? (await api.createPatient(newPatient!));
       const c = await api.captureConsent({ ...consent, patient_id: p.id });
-      const enc = await api.submitIntake({ ...intake, patient_id: p.id, consent_id: c.id });
+      const enc = await api.submitIntake({ ...intake, file_ids: [...intake.file_ids, ...late], patient_id: p.id, consent_id: c.id });
+      await Promise.all(kept.map((q) => dropFile(q.key)));
+      setKept([]);
       const r = { token: enc.token ?? `A-${enc.id.slice(-3).toUpperCase()}`, patientCode: p.code, offline: false, homeAdvice: enc.home_advice ?? null, grievanceContact: c.grievance_contact ?? null };
       setResult(r);
       onFinished?.(r);
@@ -566,12 +608,50 @@ export function IntakeFlow({
   };
 
   /* ── Result (token) — never shows urgency ── */
-  if (result?.homeAdvice === "emergency") {
+  if (nurseNow && result) {
+    const check = result.deviceCheck!;
+    return (
+      <Card className="fade-up mx-auto max-w-xl border-crit-line p-8 text-center" role="alert">
+        <BellRing className="mx-auto size-14 text-crit" />
+        <h2 className="mt-3 text-3xl font-bold text-crit">{t("kiosk.nurse.title")}</h2>
+        <p className="mt-3 text-lg text-ink-2">{t("kiosk.nurse.body")}</p>
+        <button type="button" onClick={() => speak(`${t("kiosk.nurse.title")}. ${t("kiosk.nurse.body")}`, lang)} className="mt-3 inline-flex min-h-12 items-center gap-1 rounded-full bg-canvas px-4 text-sm font-semibold text-ink-2 hover:bg-line" aria-label={t("common.listen")}>
+          <Volume2 className="size-4" /> {t("common.listen")}
+        </button>
+        <p className="mt-6 text-sm font-semibold tracking-wider text-muted uppercase">{t("kiosk.done.token")}</p>
+        <p className="text-6xl font-extrabold tracking-tight text-ink tabular-nums">{result.token}</p>
+        <div className="mt-6 rounded-xl border border-crit-line bg-crit-bg px-4 py-3 text-left text-sm text-ink-2">
+          <p className="font-semibold text-crit">{tr("For staff: danger sign found on this device while offline")}</p>
+          <ul className="mt-1.5 list-disc space-y-1 pl-5">
+            {check.rules.map((r) => (
+              <li key={r.id}>
+                {r.description} <span className="font-mono text-xs text-muted">{r.id}</span>
+                {r.evidence.length > 0 && <span className="block text-xs text-muted">{r.evidence.join(" · ")}</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-muted">{tr("The server's rules (rulepack {v}) ran on this device. The intake is queued and is triaged again when the connection returns.", { v: check.rulepack })}</p>
+        </div>
+        <p className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-semi-bg px-4 py-2 text-sm font-medium text-semi">
+          <WifiOff className="size-4" /> {t("kiosk.offline")}
+        </p>
+        <Button size="xl" className="mt-8 w-full" variant="teal" onClick={() => (onReset ? onReset() : window.location.reload())}>
+          {mode === "kiosk" ? t("kiosk.done.next") : mode === "link" ? tr("Back to landing page") : t("common.done")}
+        </Button>
+      </Card>
+    );
+  }
+
+  if (result?.homeAdvice === "emergency" || (result?.offline && result.deviceCheck?.red && forHome)) {
     return (
       <Card className="fade-up mx-auto max-w-xl border-crit-line p-8 text-center" role="alert">
         <PhoneCall className="mx-auto size-14 text-crit" />
         <h2 className="mt-3 text-3xl font-bold text-crit">{t("kiosk.home.emergency.title")}</h2>
-        <p className="mt-3 text-lg text-ink-2">{result.token.startsWith("J-") ? tr("Go to the nearest hospital emergency now, or call 108. Show this reference there.") : t("kiosk.home.emergency.body")}</p>
+        <p className="mt-3 text-lg text-ink-2">
+          {result.offline
+            ? tr("Go to the nearest hospital emergency now, or call 108. Your details will be sent when the connection returns.")
+            : result.token.startsWith("J-") ? tr("Go to the nearest hospital emergency now, or call 108. Show this reference there.") : t("kiosk.home.emergency.body")}
+        </p>
         <a href="tel:108" className="mt-6 block">
           <Button size="xl" variant="danger" className="w-full" icon={<PhoneCall className="size-5" />}>
             108
@@ -1134,7 +1214,7 @@ export function IntakeFlow({
           <div className="space-y-5">
             <p className="text-lg text-muted">{t("kiosk.upload.body")}</p>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className={cx("flex min-h-24 cursor-pointer items-center gap-4 rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/50 p-4", offline && "pointer-events-none opacity-50")}>
+              <label className={cx("flex min-h-24 cursor-pointer items-center gap-4 rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/50 p-4", offline && !offlineQueue && "pointer-events-none opacity-50")}>
                 <Camera className="size-9 text-teal-700" />
                 <span>
                   <span className="block text-lg font-semibold text-ink">{t("kiosk.upload.camera")}</span>
@@ -1142,7 +1222,7 @@ export function IntakeFlow({
                 </span>
                 <input type="file" accept="image/*,application/pdf" capture="environment" className="sr-only" onChange={(e) => onPick(e.target.files, "report")} />
               </label>
-              <label className={cx("flex min-h-24 cursor-pointer items-center gap-4 rounded-2xl border-2 border-dashed border-coral-300 bg-coral-50/50 p-4", offline && "pointer-events-none opacity-50")}>
+              <label className={cx("flex min-h-24 cursor-pointer items-center gap-4 rounded-2xl border-2 border-dashed border-coral-300 bg-coral-50/50 p-4", offline && !offlineQueue && "pointer-events-none opacity-50")}>
                 <Activity className="size-9 text-coral-600" />
                 <span>
                   <span className="block text-lg font-semibold text-ink">{tr("Photo of the problem")}</span>
@@ -1156,7 +1236,7 @@ export function IntakeFlow({
               <p className="mb-2 text-sm font-semibold text-ink-2">{t("kiosk.upload.sample")} <span className="font-normal text-muted">{tr("(synthetic, for the demo — OCR values are traced to the image)")}</span></p>
               <div className="flex flex-wrap gap-2">
                 {SAMPLE_REPORTS.map((s) => (
-                  <Button key={s.key} variant="secondary" size="sm" className="min-h-12" onClick={() => addSample(s.key)} disabled={busy || offline} icon={<FileText className="size-4" />}>
+                  <Button key={s.key} variant="secondary" size="sm" className="min-h-12" onClick={() => addSample(s.key)} disabled={busy || (offline && !offlineQueue)} icon={<FileText className="size-4" />}>
                     {tr(s.title)}
                   </Button>
                 ))}
@@ -1179,6 +1259,7 @@ export function IntakeFlow({
                         {f.read_quality.issues.map((i) => tr(i)).join(" · ")}
                       </p>
                     )}
+                    {isLocalFile(f.id) && <p className="mt-0.5 text-xs text-semi">{tr("On this device — sent when online")}</p>}
                     {f.read_quality?.ok && f.kind === "report" && (
                       <p className="mt-0.5 text-xs text-rout">{tr("Readable")} ✓</p>
                     )}

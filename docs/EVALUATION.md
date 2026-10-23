@@ -856,6 +856,41 @@ Odia voice: 10 public FLEURS dev clips (CC-BY). Reports: 16 synthetic report ima
   backend/scripts/eval_latency.py <odia clips> models/eval/ocr_synth docs/evaluation/latency.json`. The script reads no
   `.env`, so it never calls Sarvam, Twilio or Vonage.
 
+## Rules on the device: same answers as the server (23 Oct)
+
+The offline kiosk runs a TypeScript port of the rules engine (`frontend/src/lib/triage/engine.ts`) on a rule pack built
+from the backend's own files (`rulepack.json`). `backend/tests/test_device_rules.py` gives both engines the same input:
+
+| Set | Cases | Different colour, rule fired or rule left undecided |
+|---|---|---|
+| The 300-patient set as recorded | 300 | 0 |
+| The same 300 as an offline kiosk captures them (no vitals, no nurse check) | 300 | 0 |
+| Every kiosk answer (two ages), every symptom tile × 7 durations, infant, pregnancy, labs, workplace, second hearing, spoken onset, nurse check | 293 | 0 |
+| Word matcher alone: every sentence in the backend tests and vignettes, plus denied forms ("no …", "… नहीं") | 1,899 | 0 |
+
+- The test catches a real difference: ignoring Odia/Hindi denials in the browser made 8 patients and 19 sentences
+  differ; a one-year error in an age gate made 8 patients differ.
+- Offline, from the patient's words alone, 102 of the 112 RED patients in the set are RED on the device, so the kiosk
+  says "Tell the nurse now". The other 10 (vignettes R08, R09, R13: high BP, low SpO₂, stiff neck with confusion) need a
+  measurement or the nurse's check; the device holds them at provisional, as the server does.
+- Size: 21 KB compressed for the rule pack, 27.5 KB for the chunk with the engine; loaded with the intake wizard.
+
+## Data on the wire (23 Oct)
+
+Production build (`next build`, `next start`) with the API on the same laptop, Chromium. Resource Timing
+`transferSize`: compressed bytes with headers, each download counted once, 0 for the browser's cache.
+
+| What | Bytes |
+|---|---|
+| First visit to a kiosk link, until it works offline (page, intake wizard, offline shell) | 522 KB (was 752 KB) |
+| Opening it again with no network, intake wizard included | 0 (works) |
+| One typed intake, no photo (patient, consent, encounter; request and reply) | 8.8 KB |
+
+- The fix: the service worker re-downloaded every build file it kept for offline use with `cache: "reload"` (515 KB).
+  The files are content-hashed and immutable, so it now takes them from the browser's cache; pages still reload.
+- Not measured: photos (compressed in the browser before upload; size depends on the picture) and voice.
+- Reproduce: `node frontend/scripts/measure-bytes.mjs http://localhost:3010/k/MANIKPUR` against a production build.
+
 ## Photo of the problem, described live (8 Oct)
 
 The local image model (Qwen3-VL-4B, CPU) describes a photo the patient adds (a rash, a cut, a swelling) for the

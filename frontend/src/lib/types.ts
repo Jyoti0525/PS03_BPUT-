@@ -468,6 +468,10 @@ export interface IntakePayload {
   captured_offline?: boolean;
   /** When the intake was actually captured (differs from submit time for offline replays). */
   captured_at?: string | null;
+  /** Offline kiosk: the device's own run of the rules at capture (rule ids only; the server triages again). */
+  device_check?: { red: boolean; rules: { id: string; description: string }[]; rulepack: string; at: string } | null;
+  /** Offline photos or reports that did not reach the server (lost from the device, or refused). */
+  files_not_sent?: { kind: "report" | "image"; reason: string }[];
 }
 
 /* ── Triage note ──────────────────────────────────────── */
@@ -527,7 +531,7 @@ export interface NoteHistory {
 
 export interface RuleHit {
   rule_id: string;
-  protocol: "ATP" | "IITT" | "IMCI" | "MATERNAL" | "LAB" | "LOCAL" | "SAFETY" | "FACILITY";
+  protocol: "ATP" | "AIIMS-HRC" | "IITT" | "IMCI" | "MATERNAL" | "LAB" | "LOCAL" | "OCC" | "SAFETY" | "FACILITY";
   description: string;
   urgency: Urgency;
   source?: string;

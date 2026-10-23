@@ -172,8 +172,8 @@ export function buildNote(args: {
   if (voice && !voice.confirmed_by_readback)
     flags.push({ code: "ASR-UNCONFIRMED", label: "Voice transcript not confirmed by read-back", severity: "warning", reason: "Patient skipped the spoken confirmation step" });
   if (args.proxy) flags.push({ code: "PROXY", label: "History given by a proxy", severity: "info", reason: "Consent and history captured from a family member or caregiver" });
-  // Mock mode is labelled on every note: these rules are a small, unsynced subset of the backend rulepacks.
-  flags.push({ code: "MOCK-RULES", label: "Local demo mode: simplified rules", severity: "info", reason: "Made in the browser without the server. Only a small subset of the backend rules ran; start the backend for the real triage." });
+  // Mock mode is labelled on every note: the server's rules ran in the browser, but the note itself is simplified.
+  flags.push({ code: "MOCK-RULES", label: "Local demo mode: rules ran in the browser", severity: "info", reason: "Made without the server. The colour comes from the server's own rule pack run on this device; the note, report reading and AI summary are simplified. Start the backend for the full note." });
   if (intake.captured_offline) flags.push({ code: "OFFLINE", label: "Captured offline, synced later", severity: "info", reason: "Wait time is counted from the original capture time" });
 
   if (!v.bp_systolic) missing.push("Blood pressure not recorded");

@@ -37,6 +37,9 @@ calls Render; the Render key never reaches a browser. One restart per minute.
 
 Before pushing: `cd backend && .venv/bin/pytest -q` and `cd frontend && npm run lint && npx tsc --noEmit && npm run build`.
 
+After changing a rule, a word list or the question flow: `cd backend && python scripts/build_rulepack.py` (and
+`scripts/build_question_flow.py`), so the offline kiosk runs the same rules; `tests/test_device_rules.py` fails until you do.
+
 ## Secrets and where they live
 
 | Secret | Stored in | Rotate by |
@@ -47,6 +50,7 @@ Before pushing: `cd backend && .venv/bin/pytest -q` and `cd frontend && npm run 
 | `JEEVIA_BREVO_API_KEY` (+ `JEEVIA_EMAIL_PROVIDER=brevo`, `JEEVIA_EMAIL_FROM`) | Render env | Brevo → SMTP & API → API keys → generate, update Render, delete the old key |
 | Cloudinary `CLOUD_NAME`, `API_KEY`, `API_SECRET` | Render env | Cloudinary console → API keys → generate, update Render, revoke the old key |
 | `RENDER_API_KEY`, `RENDER_SERVICE_ID` | Vercel env (server-only) | Render → Account settings → API keys |
+| `GROQ_API_KEY` (optional: AI summary on the hosted demo, synthetic records only) | Render env | console.groq.com → API keys → create, update Render, delete the old key. Unset = template summary |
 
 Nothing secret is committed. Local development uses `backend/.env` (git-ignored).
 

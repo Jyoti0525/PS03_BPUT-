@@ -96,8 +96,12 @@ self.addEventListener("message", (event) => {
       Promise.all(
         urls.map(async (u) => {
           if (!u.startsWith("/_next/static/") && !u.startsWith("/k/") && !u.startsWith("/kiosk")) return u.includes(".") ? c.add(u).catch(() => null) : null;
-          if (u.startsWith("/_next/static/") && (await c.match(u))) return null;
-          return c.add(new Request(u, { cache: "reload" })).catch(() => null);
+          if (u.startsWith("/_next/static/")) {
+            // Hashed, immutable files the page has just downloaded: the browser's HTTP cache answers, so keeping them
+            // costs no data. ({ cache: "reload" } here downloaded every file a second time: 515 KB on the first visit.)
+            return (await c.match(u)) ? null : c.add(u).catch(() => null);
+          }
+          return c.add(new Request(u, { cache: "reload" })).catch(() => null); // pages: always the current version
         }),
       ),
     ),

@@ -1,5 +1,6 @@
 """B5 + C4: the model's summary is used only when it is faithful to the record and passes the output guard."""
 
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -186,3 +187,74 @@ def test_disagreement_view_lists_cases_for_supervisor_and_doctor_only(client, nu
     assert v["matrix"][rules]["red"] >= 1
     assert client.get(f"{API}/ai-opinions", headers=doctor).status_code == 200
     assert client.get(f"{API}/ai-opinions", headers=nurse).status_code == 403
+
+
+# ---------------------------------------------------------------- cloud backup (no network: urlopen is replaced)
+
+class _Reply:
+    def __init__(self, text):
+        self.body = json.dumps({"choices": [{"message": {"content": text}}]}).encode()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def read(self):
+        return self.body
+
+
+@pytest.fixture
+def cloud(monkeypatch):
+    """A backup key is set, the facility model is not; every request is captured instead of sent. Request it after
+    `case`, or the background summary of that intake also reaches the fake cloud."""
+    from app.config import get_settings
+
+    s = get_settings()
+    monkeypatch.setattr(s, "llm_url", None)
+    monkeypatch.setattr(s, "llm_backup_key", "test-key-not-real")
+    monkeypatch.setattr(s, "llm_urgency_opinion", False)
+    sent = []
+
+    def urlopen(req, timeout=None):
+        sent.append(req)
+        return _Reply("A 40-year-old man has had fever for 3 days and denies chest pain.")
+
+    monkeypatch.setattr(llm.urllib.request, "urlopen", urlopen)
+    return s, sent
+
+
+def test_cloud_backup_writes_the_summary_for_synthetic_records_only(case, cloud):
+    s, sent = cloud
+    note, intake = case
+    intake = {**intake, "chief_complaint": "Fever for 3 days, no chest pain, call me on 9876543210"}
+    out = llm.apply(note, intake, SimpleNamespace(age=40, sex="M", name="Test Person", data_origin="SYNTHETIC"))
+    assert out["llm"]["status"] == "PASS" and out["llm"]["model"] == s.llm_backup_name and out["renderer"] == "LLM"
+    req = sent[0]
+    assert req.full_url == "https://api.groq.com/openai/v1/chat/completions" and req.get_header("Authorization") == "Bearer test-key-not-real"
+    body = json.loads(req.data)
+    assert body["model"] == "openai/gpt-oss-120b" and "9876543210" not in body["messages"][1]["content"]  # scrubbed before it leaves
+
+    sent.clear()
+    for origin in ("REAL", None):  # anything not synthetic or a public sample never leaves the facility
+        out = llm.apply(note, intake, SimpleNamespace(age=40, sex="M", name="Test Person", data_origin=origin))
+        assert out["llm"]["status"] == "UNAVAILABLE" and not sent
+
+
+def test_cloud_backup_never_runs_without_ai_consent(case, cloud):
+    _, sent = cloud
+    note, intake = case
+    assert llm.apply(note, {**intake, "ai_assist": False}, SimpleNamespace(age=40, sex="M", data_origin="SYNTHETIC")) is note and not sent
+
+
+def test_cloud_error_is_reported_without_the_response_body(case, cloud, monkeypatch):
+    import io
+    import urllib.error
+
+    def refuse(req, timeout=None):
+        raise urllib.error.HTTPError(req.full_url, 401, "Unauthorized", {}, io.BytesIO(b"invalid key test-key-not-real"))
+
+    monkeypatch.setattr(llm.urllib.request, "urlopen", refuse)
+    out = llm.apply(*case, SimpleNamespace(age=40, sex="M", data_origin="SYNTHETIC"))
+    assert out["llm"]["status"] == "UNAVAILABLE" and "HTTP 401" in out["llm"]["reason"] and "test-key" not in json.dumps(out)

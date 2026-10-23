@@ -192,6 +192,7 @@ export default function PublicKiosk() {
             mode="link"
             facilityId={info.facility_id}
             organisationName={info.organisation_name}
+            forHome={!!info.for_home}
             offline={!online}
             onReset={() => {
               setRound((n) => n + 1);

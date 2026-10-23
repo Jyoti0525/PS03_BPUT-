@@ -326,6 +326,17 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
             missing.append("Spirometry (FEV1) not recorded for a dust-exposed worker")
     if intake.get("captured_offline"):
         flags.append({"code": "OFFLINE", "label": "Captured offline, synced later", "severity": "info", "reason": "Wait time is counted from the original capture time"})
+    if lost := intake.get("files_not_sent"):
+        what = {"report": "report", "image": "photo"}
+        flags.append({"code": "OFFLINE-FILES", "label": f"{len(lost)} offline photo(s) or report(s) did not arrive", "severity": "warning",
+                      "reason": "; ".join(f"{what.get(x.get('kind'), 'file')}: {x.get('reason')}" for x in lost) + ". Ask the patient to show it again"})
+    if (dc := intake.get("device_check") or {}).get("red"):
+        # The offline kiosk ran the same rules and told the patient to call a nurse at once (frontend/src/lib/triage).
+        ids = [r["id"] for r in dc.get("rules") or []]
+        missed = sorted(set(ids) - {h["rule_id"] for h in triage.get("hits", [])})
+        flags.append({"code": "DEVICE-RED", "label": "Offline kiosk told the patient to call a nurse now", "severity": "critical",
+                      "reason": f"Danger sign found on the device at capture ({', '.join(ids)}; rulepack {dc.get('rulepack')}). Check the patient was seen"
+                      + (f". The server did not fire {', '.join(missed)}: the rules changed since the device was updated" if missed else "")})
 
     cat = intake.get("category")
     for m in triage.get("missing_for_green", []):
@@ -485,7 +496,7 @@ def build_note(*, intake: dict, patient, triage: dict, files: list, history: lis
         parts.append("Report values out of range: " + ", ".join(f"{x['label']} {x['value']}{' ' + x['unit'] if x['unit'] else ''}" for x in abn) + ".")
     parts.append("Patient-reported; not a diagnosis.")
 
-    rule_codes = {h["rule_id"] for h in hits} | {f["id"] for f in triage.get("followups", [])} | {"PPE-GAP", "PHOTO"}
+    rule_codes = {h["rule_id"] for h in hits} | {f["id"] for f in triage.get("followups", [])} | {"PPE-GAP", "PHOTO", "DEVICE-RED"}
     for f in flags:  # the reviewer reads clinical warnings first; notices about how the data was captured come after
         f["group"] = "clinical" if f["code"] in rule_codes else "data"
 

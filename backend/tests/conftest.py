@@ -18,9 +18,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.config import Settings  # noqa: E402
 
-# Never the developer's backend/.env: tests must not spend Sarvam credits, place Twilio calls or send SMS
+# Never the developer's backend/.env: tests must not spend Sarvam credits, call a cloud model, place Twilio calls or send SMS
 Settings.model_config["env_file"] = None
-for _k in [k for k in os.environ if k.startswith(("SARVAM_", "JEEVIA_SARVAM_", "JEEVIA_TWILIO_", "JEEVIA_VONAGE_", "JEEVIA_TELEPHONY_", "JEEVIA_PUBLIC_BASE_URL"))]:
+for _k in [k for k in os.environ if k.startswith(("SARVAM_", "JEEVIA_SARVAM_", "JEEVIA_TWILIO_", "JEEVIA_VONAGE_", "JEEVIA_TELEPHONY_", "JEEVIA_PUBLIC_BASE_URL", "GROQ_", "JEEVIA_GROQ_", "JEEVIA_LLM_BACKUP_"))]:
     del os.environ[_k]
 
 from fastapi.testclient import TestClient  # noqa: E402

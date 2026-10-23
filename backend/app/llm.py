@@ -14,18 +14,22 @@ and only a doctor can change it (audited override). An opinion higher than the r
 flag; a lower one is only shown. Its reason goes through the same checks; a reason that fails is withheld.
 
 Engine: Qwen3-4B-Instruct-2507 (Alibaba Qwen, Apache-2.0), 4-bit GGUF, served by llama.cpp's llama-server on the
-facility machine (`JEEVIA_LLM_URL`, OpenAI-compatible). No server configured or reachable → template note, and the
-note says so. Patients who chose "continue without AI" never reach this module.
+facility machine (`JEEVIA_LLM_URL`, OpenAI-compatible). When that is not set or not reachable (the hosted demo has no
+GPU), a cloud backup answers if a key is set (`GROQ_API_KEY`; gpt-oss-120b on Groq by default), only for synthetic or
+public-sample records, with phone numbers and names scrubbed from the fact sheet first; the note names the model that
+wrote it. Neither available → template note, and the note says so. Patients who chose "continue without AI" never
+reach this module, so nothing of theirs goes to any model.
 """
 
 import json
 import logging
 import re
+import threading
 import time
 import urllib.error
 import urllib.request
 
-from . import output_guard
+from . import output_guard, privacy
 from .config import get_settings
 
 log = logging.getLogger("jeevia.llm")
@@ -61,6 +65,15 @@ class LlmUnavailable(RuntimeError):
 
 def model_name() -> str:
     return get_settings().llm_model_name
+
+
+# Which model answered the last call on this thread, and whether this record may go to the cloud backup (set by apply).
+_call = threading.local()
+CLOUD_ORIGINS = ("SYNTHETIC", "PUBLIC_SAMPLE")
+
+
+def used_model() -> str:
+    return getattr(_call, "model", None) or model_name()
 
 
 # ---------------------------------------------------------------- facts
@@ -160,23 +173,39 @@ def faithfulness(output: str, facts: str, findings: dict, note: dict | None = No
 # ---------------------------------------------------------------- model call
 
 
+def _post(url: str, model: str, key: str | None, system: str, user: str, max_tokens: int) -> str:
+    body = {"model": model, "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}], "temperature": 0, "max_tokens": max_tokens}
+    headers = {"Content-Type": "application/json"} | ({"Authorization": f"Bearer {key}"} if key else {})
+    req = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers)
+    with urllib.request.urlopen(req, timeout=get_settings().llm_timeout_s) as r:  # nosec B310: http(s) URL checked in config
+        out = json.loads(r.read())
+    return re.sub(r"<think>.*?</think>", "", out["choices"][0]["message"]["content"] or "", flags=re.S).strip()
+
+
 def _chat(system: str, user: str, max_tokens: int) -> str:
+    """The facility's own model first; the cloud backup only when that fails and the record may leave the facility."""
     s = get_settings()
-    if not s.llm_url:
-        raise LlmUnavailable("No language model server configured")
-    body = {
-        "model": s.llm_model_name,
-        "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-        "temperature": 0,
-        "max_tokens": max_tokens,
-    }
-    req = urllib.request.Request(s.llm_url.rstrip("/") + "/v1/chat/completions", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=s.llm_timeout_s) as r:  # nosec B310: http(s) URL checked in config
-            out = json.loads(r.read())
-    except (urllib.error.URLError, TimeoutError, OSError) as e:
-        raise LlmUnavailable(f"Language model server not reachable: {e}") from e
-    return re.sub(r"<think>.*?</think>", "", out["choices"][0]["message"]["content"], flags=re.S).strip()
+    why = []
+    if s.llm_url:
+        try:
+            text = _post(s.llm_url.rstrip("/") + "/v1/chat/completions", s.llm_model_name, None, system, user, max_tokens)
+            _call.model = s.llm_model_name
+            return text
+        except (urllib.error.URLError, TimeoutError, OSError, KeyError, ValueError) as e:
+            why.append(f"Language model server not reachable: {e}")
+    else:
+        why.append("No language model server configured")
+    if s.llm_backup_key and getattr(_call, "cloud_ok", False):
+        scrubbed, _ = privacy.scrub(user, getattr(_call, "names", None))
+        try:
+            text = _post(s.llm_backup_url.rstrip("/") + "/chat/completions", s.llm_backup_model, s.llm_backup_key, system, scrubbed or "", max_tokens)
+            _call.model = s.llm_backup_name
+            return text
+        except urllib.error.HTTPError as e:
+            why.append(f"cloud backup refused the request (HTTP {e.code})")  # never the body: it can echo the key
+        except (urllib.error.URLError, TimeoutError, OSError, KeyError, ValueError) as e:
+            why.append(f"cloud backup not reachable: {type(e).__name__}")
+    raise LlmUnavailable("; ".join(why))
 
 
 def _complete(facts: str) -> str:
@@ -189,12 +218,13 @@ def write_summary(note: dict, intake: dict, patient) -> dict:
     """Return the `llm` block for the note: status, text (when it passed) and the checks that ran."""
     facts = fact_sheet(note, intake, patient)
     t = time.perf_counter()
+    _call.model = None
     try:
         text = _complete(facts)
     except LlmUnavailable as e:
         return {"status": "UNAVAILABLE", "model": model_name(), "reason": str(e)}
     ms = round((time.perf_counter() - t) * 1000)
-    base = {"model": model_name(), "ms": ms, "guard_version": output_guard.version()}
+    base = {"model": used_model(), "ms": ms, "guard_version": output_guard.version()}
     problems = faithfulness(text, facts, (note.get("triage") or {}).get("findings") or {}, note)
     verdict = output_guard.check(text, facts)
     if problems or not verdict.ok:
@@ -245,11 +275,12 @@ def urgency_opinion(note: dict, intake: dict, patient) -> dict | None:
         return None
     facts = fact_sheet(note, intake, patient)
     t = time.perf_counter()
+    _call.model = None
     try:
         text = _opinion_text(facts)
     except LlmUnavailable as e:
         return {"status": "UNAVAILABLE", "model": model_name(), "rules_urgency": rules, "reason_unavailable": str(e)}
-    out = {"model": model_name(), "ms": round((time.perf_counter() - t) * 1000), "rules_urgency": rules, "guard_version": output_guard.version()}
+    out = {"model": used_model(), "ms": round((time.perf_counter() - t) * 1000), "rules_urgency": rules, "guard_version": output_guard.version()}
     tier, reason = parse_opinion(text)
     if tier is None:
         return {**out, "status": "UNREADABLE", "raw": text[:300]}
@@ -270,6 +301,9 @@ def apply(note: dict, intake: dict, patient) -> dict:
     Also adds the model's second opinion on urgency (C8) beside the rules' result."""
     if intake.get("ai_assist") is False:
         return note
+    # The cloud backup may see only synthetic or public-sample records; anything else stays with the facility's model.
+    _call.cloud_ok = getattr(patient, "data_origin", None) in CLOUD_ORIGINS
+    _call.names = [n for n in [getattr(patient, "name", None)] if n]
     result = write_summary(note, intake, patient)
     note = dict(note)
     note["llm"] = result

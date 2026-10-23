@@ -784,6 +784,8 @@ const or: Record<string, string> = {
   "Uploaded documents": "ଅପଲୋଡ୍ ଦସ୍ତାବିଜ",
   "Uploaded files": "ଅପଲୋଡ୍ ଫାଇଲ୍",
   "Uploads need a connection": "ଅପଲୋଡ୍ ପାଇଁ ଇଣ୍ଟରନେଟ୍ ଦରକାର",
+  "Saved on this device — sent when the connection returns": "ଏହି ଡିଭାଇସରେ ସେଭ୍ ହେଲା — ଇଣ୍ଟରନେଟ୍ ଆସିଲେ ପଠାଯିବ",
+  "On this device — sent when online": "ଏହି ଡିଭାଇସରେ — ଇଣ୍ଟରନେଟ୍ ଆସିଲେ ପଠାଯିବ",
   "Uploads need a connection — ask staff to add reports after syncing": "ଅପଲୋଡ୍ ପାଇଁ ଇଣ୍ଟରନେଟ୍ ଦରକାର — ସିଙ୍କ ପରେ କର୍ମଚାରୀଙ୍କୁ ରିପୋର୍ଟ ଯୋଡ଼ିବାକୁ କୁହନ୍ତୁ",
   "Upper": "ଉପର",
   "Urgency comes only from these deterministic rules": "ଜରୁରୀତା କେବଳ ଏହି ସ୍ଥିର ନିୟମରୁ ଆସେ",

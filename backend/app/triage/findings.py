@@ -328,7 +328,7 @@ def _indic_regex(pattern: str) -> re.Pattern:
     parts = []
     for part in pattern.split(" … "):
         start, end = part.startswith("^"), part.endswith("$")
-        body = re.escape(_loose(part.strip("^$")))
+        body = re.sub(r"([\\^$.|?*+()\[\]{}])", r"\\\1", _loose(part.strip("^$")))  # metacharacters only: the same pattern runs in the browser
         parts.append(("(?<!\\S)" if start else "") + body + ("(?!\\S)" if end else ""))
     return re.compile(r"\S*(?:\s+\S+){0,2}?\s+\S*?".join(parts))
 
@@ -395,6 +395,13 @@ def translation_check(symptom: dict) -> dict | None:
     if not missed and not added:
         return None
     return {"language": lang, "original": orig, "english": english, "missed": missed, "added": added}
+
+
+# Specific findings imply their general parent (chest pain spreading to the arm is chest pain, and pain).
+IMPLIES: list[tuple[str, str]] = [("chest_pain_radiating", "chest_pain"), ("bleeding_heavy", "bleeding"), ("haematemesis", "bleeding"), ("epistaxis", "bleeding"), ("gum_bleed", "bleeding"),
+           ("vomits_everything", "vomiting"), ("headache_sudden", "headache"), ("abdominal_pain_sudden", "abdominal_pain"), ("upper_abdominal_pain", "abdominal_pain"),
+           ("head_injury", "injury"), ("fall_from_height", "injury"), ("road_traffic_high_risk", "injury"), ("penetrating_injury", "injury"), ("crush_injury", "injury"),
+           ("limb_deformity", "injury"), ("rash_spreading", "rash"), ("chest_pain", "pain"), ("abdominal_pain", "pain"), ("headache", "pain"), ("scrotal_pain", "pain")]
 
 
 def _merge(into: dict[str, Finding], fid: str, value: bool, evidence: str) -> None:
@@ -473,10 +480,7 @@ def extract(intake: dict, category: str | None = None) -> dict[str, Finding]:
         _merge(out, "vaginal_bleeding", True, "bleeding reported during a pregnancy visit")
 
     # Specific findings imply their general parent.
-    for child, parent in [("chest_pain_radiating", "chest_pain"), ("bleeding_heavy", "bleeding"), ("haematemesis", "bleeding"), ("epistaxis", "bleeding"), ("gum_bleed", "bleeding"),
-                          ("vomits_everything", "vomiting"), ("headache_sudden", "headache"), ("abdominal_pain_sudden", "abdominal_pain"), ("upper_abdominal_pain", "abdominal_pain"),
-                          ("head_injury", "injury"), ("fall_from_height", "injury"), ("road_traffic_high_risk", "injury"), ("penetrating_injury", "injury"), ("crush_injury", "injury"),
-                          ("limb_deformity", "injury"), ("rash_spreading", "rash"), ("chest_pain", "pain"), ("abdominal_pain", "pain"), ("headache", "pain"), ("scrotal_pain", "pain")]:
+    for child, parent in IMPLIES:
         c = out.get(child)
         if c and c.value is True:
             _merge(out, parent, True, c.evidence[0])

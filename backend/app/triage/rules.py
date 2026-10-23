@@ -119,6 +119,8 @@ DURATION_HOURS = [
     (r"^1\s*-\s*4 weeks?|more than a week", (168, 720)),
     (r"more than a month|months?|years?", (720, 10**6)),
 ]
+# A typed duration such as "2-3 days" or "6 hours" when no kiosk option matched.
+DURATION_NUMBER = r"(\d+(?:\.\d+)?)\s*(?:-\s*(\d+(?:\.\d+)?)\s*)?(hour|hr|h\b|day|week|month)"
 
 
 @dataclass
@@ -148,7 +150,7 @@ def onset_hours(intake: dict) -> tuple[float, float] | None:
         for pat, rng in DURATION_HOURS:  # the kiosk's own options first
             if re.search(pat, t):
                 return rng
-        m = re.search(r"(\d+(?:\.\d+)?)\s*(?:-\s*(\d+(?:\.\d+)?)\s*)?(hour|hr|h\b|day|week|month)", t)
+        m = re.search(DURATION_NUMBER, t)
         if m:
             lo, hi, unit = float(m.group(1)), float(m.group(2) or m.group(1)), m.group(3)
             per = {"hour": 1, "hr": 1, "h": 1, "day": 24, "week": 168, "month": 720}[unit]

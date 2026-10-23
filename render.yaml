@@ -26,6 +26,8 @@ services:
         value: production
       - key: JEEVIA_PROFILE  # H3: the free cloud instance runs rules only; models run on the facility laptop
         value: stub
+      - key: GROQ_API_KEY  # optional: cloud backup for the note summary (app/llm.py), synthetic records only; unset = template summary
+        sync: false
       - key: JEEVIA_CORS_ORIGINS
         value: https://ps-03-bput.vercel.app
       - key: JEEVIA_WEB_BASE_URL

@@ -529,6 +529,28 @@ class FollowupScheduleIn(BaseModel):
     assigned_worker_id: str | None = None
 
 
+class DeviceRule(BaseModel):
+    id: str = Field(max_length=40)
+    description: str = Field(max_length=300)
+
+
+class DeviceCheck(BaseModel):
+    """What an offline kiosk's own run of the rules found before the intake reached the server (frontend/src/lib/triage).
+    Shown on the note; the server triages again and its result is the record. Rule ids only: the evidence quotes the
+    patient's words and stays on the device."""
+
+    red: bool
+    rules: list[DeviceRule] = Field(default=[], max_length=20)
+    rulepack: str = Field(max_length=20)
+    at: datetime
+
+
+class FileNotSent(BaseModel):
+    """A photo or report taken on the offline kiosk that did not reach the server (lost from the device, or refused)."""
+    kind: Literal["report", "image"]
+    reason: str = Field(max_length=200)
+
+
 class IntakeIn(BaseModel):
     patient_id: str
     facility_id: str
@@ -552,6 +574,8 @@ class IntakeIn(BaseModel):
     client_ref: str = Field(min_length=4, max_length=80)
     captured_offline: bool = False
     captured_at: datetime | None = None
+    device_check: DeviceCheck | None = None
+    files_not_sent: list[FileNotSent] = Field(default=[], max_length=20)
 
 
 # ── Encounters ─────────────────────────────────────────

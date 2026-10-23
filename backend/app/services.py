@@ -385,10 +385,10 @@ def _auto_escalate(db: Session) -> None:
 
 
 def summarise_later(encounter_id: str) -> None:
-    """Ask the local language model for a readable summary in the background (B5), so intake is never slowed.
+    """Ask the local language model (or its cloud backup, app/llm.py) for a readable summary in the background (B5), so intake is never slowed.
     The template note is already saved; this replaces its summary only if the model's text passes every check. A note
     rebuilt meanwhile (new vitals) or edited by a clinician is left alone."""
-    if not get_settings().llm_url:
+    if not get_settings().llm_url and not get_settings().llm_backup_key:
         return
 
     def run():

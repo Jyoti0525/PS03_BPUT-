@@ -146,12 +146,13 @@ real capture time so waiting time is never understated.
 | SMS sign-in | **Twilio Verify** | Sends and checks one-time codes for phone login. |
 | Document storage | **Cloudinary** (private, `jeevia/<facility>/<yyyy-mm>/<kind>/`) | Report scans, prescription photos, voice recordings. Uploaded as authenticated assets; served only through the API with signed downloads. |
 | Rules | YAML rule files | AIIMS Triage Protocol, IMCI and maternal red flags; deterministic urgency. |
+| Rules on the device | `frontend/src/lib/triage` (TypeScript port of the rules engine) + `rulepack.json` built from the YAML | An offline kiosk runs the server's own rules, so a danger sign gets "Tell the nurse now" without a network. A test runs both engines on 893 patients and 1,899 sentences and fails on any difference. |
 | Exports | fpdf2 and built-in writers | Triage note as PDF, print, JSON, CSV, FHIR R4 and HL7 CDA R2. |
 | Speech to text | **IndicConformer-600M** (AI4Bharat, MIT), 8-bit ONNX on ONNX Runtime, offline | Voice intake in the 22 scheduled languages. Read-back uses the browser's speechSynthesis. |
 | Translation | **IndicTrans2** distilled 200M (AI4Bharat, MIT), offline | Indian language ↔ English; the original words stay beside the translation. |
 | Second speech engine | **Sarvam Saaras v3** (online, India) or, offline, **IndicWhisper** (AI4Bharat Vistaar, MIT) | Hears the same recording when the patient allowed AI help; a different number or symptom is flagged for the patient to settle (B9). |
 | Report reading | **RapidOCR** (PaddleOCR models on ONNX Runtime) and **docTR** (OnnxTR) compared value by value, pypdfium2, OpenCV; **Sarvam Vision** (online) for handwriting | Lab reports, prescriptions and medicine strips; photo quality check; face and ID-number redaction (YuNet). Medicine names matched to the PMBJP generic list and the A-Z Medicine Dataset of India (CC BY-SA 4.0). |
-| Note summary | **Qwen3-4B-Instruct-2507** (Apache-2.0), 4-bit GGUF on llama.cpp, laptop GPU | A short summary paragraph, used only if it passes the faithfulness check and the non-diagnostic output guard. |
+| Note summary | **Qwen3-4B-Instruct-2507** (Apache-2.0), 4-bit GGUF on llama.cpp, laptop GPU; cloud backup **gpt-oss-120b on Groq** (optional) | A short summary paragraph, used only if it passes the faithfulness check and the non-diagnostic output guard. The backup answers only when the laptop model is not reachable, only for synthetic records, never without the patient's AI consent. |
 | CI and uptime | **GitHub Actions** | `ci.yml` runs backend tests and frontend lint, type-check and build on every push; `keepalive.yml` pings the API every 10 minutes so the free Render instance stays awake. |
 
 ## 6. Features
@@ -161,7 +162,9 @@ real capture time so waiting time is never understated.
 - Staff kiosk on bound tablets with patient search (household-phone disambiguation) and vitals entry.
 - Voice-first intake with spoken read-back, icon mode, large text, 22 languages. **Every screen** (website, sign-in, all dashboards, kiosks) switches between English, Hindi and Odia at any time; each user's language is saved to their account and applied at sign-in; kiosk speech listens and reads aloud in the patient's language.
 - Maternal and chronic-disease branches; follow-up questions generated from what is still missing.
-- Photo capture with in-browser compression; offline queue with automatic sync. Kiosk links keep working offline after one online visit (page, facility and session cached on the device).
+- Photo capture with in-browser compression, online or offline (offline photos wait on the device and are deleted from it once uploaded); offline queue with automatic sync. Kiosk links keep working offline after one online visit (page, facility and session cached on the device).
+- Offline danger signs: with no network the kiosk runs the server's rules itself. A RED rule shows "Tell the nurse now" (read aloud; 108 for a fill-at-home link), the staff tablet counts queued intakes that need a nurse, and the synced note carries a `DEVICE-RED` flag. In the 300-patient set, 102 of the 112 RED patients are caught from their words alone; the other 10 need BP, SpO₂ or the nurse's check.
+- Light on data: first visit to a kiosk link 522 KB, then it opens with no network; one typed intake 8.8 KB (measured 23 Oct, `frontend/scripts/measure-bytes.mjs`).
 - At organisation workplaces the kiosk asks for the employee / student ID and links the visit to the roster.
 - Daily running tokens per facility.
 
@@ -257,6 +260,7 @@ then the API, then the web app, as described in [docs/FEATURES.md §6](docs/FEAT
 | `CORS_ORIGINS`, `WEB_BASE_URL` | Web app origin; used in kiosk and share links | `https://ps-03-bput.vercel.app` |
 | `SEED_DEMO` | Seed sample data into an empty database | `true` |
 | `LLM_URL` | llama.cpp server for the note summary (e.g. `http://127.0.0.1:8031`); unset = template summary only | unset |
+| `GROQ_API_KEY` (no prefix needed) | Cloud backup for the note summary when `LLM_URL` is unset or down: synthetic records with AI consent only, names and numbers scrubbed first. `LLM_BACKUP_URL` / `LLM_BACKUP_MODEL` change the OpenAI-compatible endpoint (do not use Gemini's free tier: it may train on requests) | unset |
 | `VLM_URL` | llama.cpp server with Qwen3-VL-4B for a second document-type label (`backend/scripts/start_vlm.sh`, `http://127.0.0.1:8032`); unset = off | unset |
 | `TABLE_PYTHON` | Python of a separate PaddleOCR environment (`models/venv-paddle`) for PP-StructureV3 table reading of report photos; unset = off | unset |
 | `SEED_SYNTHEA` | With the demo scenarios, add 12 patients with earlier visits from Synthea (`app/synthea_histories.json`) | `true` |

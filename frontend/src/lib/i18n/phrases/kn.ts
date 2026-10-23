@@ -9,6 +9,8 @@ const kn: Record<string, string> = {
   "Uploaded": "ಅಪ್‌ಲೋಡ್ ಆಯಿತು",
   "Upload failed": "ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಯಿತು",
   "Uploads need a connection": "ಅಪ್‌ಲೋಡ್‌ಗೆ ಸಂಪರ್ಕ ಬೇಕು",
+  "Saved on this device — sent when the connection returns": "ಈ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ — ಸಂಪರ್ಕ ಬಂದಾಗ ಕಳುಹಿಸಲಾಗುತ್ತದೆ",
+  "On this device — sent when online": "ಈ ಸಾಧನದಲ್ಲಿದೆ — ಸಂಪರ್ಕ ಬಂದಾಗ ಕಳುಹಿಸಲಾಗುತ್ತದೆ",
   "Sample report attached": "ಮಾದರಿ ವರದಿ ಲಗತ್ತಿಸಲಾಗಿದೆ",
   "No network, and this facility does not queue intakes on the device. Use the paper form and enter it when the connection is back.": "ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲ, ಮತ್ತು ಈ ಕೇಂದ್ರ ಸಾಧನದಲ್ಲಿ ಮಾಹಿತಿಯನ್ನು ಉಳಿಸುವುದಿಲ್ಲ. ಕಾಗದದ ಫಾರ್ಮ್ ಬಳಸಿ ಮತ್ತು ಸಂಪರ್ಕ ಮರಳಿದಾಗ ನಮೂದಿಸಿ.",
   "Could not submit": "ಸಲ್ಲಿಸಲು ಆಗಲಿಲ್ಲ",

@@ -91,6 +91,7 @@ Every view and change along the way is written to the audit log (G4).
 |---|---|---|
 | **Next.js 16**, React 19, TypeScript, Tailwind CSS v4 | Every screen: website, kiosk, dashboards, share pages. Installable app (PWA) with a service worker for offline use | Browser; hosted on Vercel |
 | SWR, idb-keyval, qrcode.react, lucide-react | Data fetching, offline queue in IndexedDB, QR codes, icons | Browser |
+| Rules engine on the device (`src/lib/triage/engine.ts` + `rulepack.json`) | The server's rules, word lists and negation, built from the backend files by `backend/scripts/build_rulepack.py`; the offline kiosk shows "Tell the nurse now" for a RED rule; local demo mode triages with it. Checked against the server on 893 patients and 1,899 sentences (`backend/tests/test_device_rules.py`) | Browser |
 | **FastAPI** (Python 3.12), SQLAlchemy 2, Pydantic 2, Alembic | The API, database models, input checks, database migrations | Facility machine, or Render |
 | **PostgreSQL** (Neon, Singapore) / SQLite | Database. JSONB holds intake and notes. SQLite is used for local runs and tests | Neon / local |
 | PyJWT, PBKDF2-SHA256 (Python standard library) | Sign-in sessions; PIN and code hashing | API |
@@ -98,6 +99,7 @@ Every view and change along the way is written to the audit log (G4).
 | **Brevo** (optional) | Email sign-in codes | Cloud |
 | **Cloudinary** (private), or S3 / R2, or local disk | Storing reports and photos with an expiry date | Cloud / local |
 | **Sarvam AI** (optional): Saaras v3 speech-to-text, Bulbul v3 voice, Vision document reading | Second speech engine (B9); the reminder-call voice (E6); reading handwritten prescriptions (B1). Speech and images go only with the patient's AI consent | Cloud, hosted in India |
+| **Groq** (optional): gpt-oss-120b, OpenAI-compatible | Cloud backup for the note summary when the laptop model is unset or down (the hosted demo). Only SYNTHETIC / PUBLIC_SAMPLE records with AI consent; names and numbers scrubbed first; the note names the model. Off unless `GROQ_API_KEY` is set | API (outbound) |
 | fpdf2 | PDF export | API |
 | **GitHub Actions** | Tests, lint and build on every push (`ci.yml`); a ping that keeps the free Render server awake (`keepalive.yml`) | GitHub |
 
@@ -659,7 +661,7 @@ and 17 workers screened at Kalinga Steel Works, the crusher workers also a year 
 Rina (pregnant, 31 weeks, Odia, her own phone) and Ramprasad (blood pressure and diabetes, Hindi) are due a reminder
 call after two failed ASHA attempts; Kusum's last visit was RED, so only a person may call her.
 | **D5** Chronic check-in | Working | BP, glucose and HbA1c trends against earlier visits (HbA1c from reports read at each visit) | — |
-| **D6** Health camp, offline | Working | Kiosk works with no network and syncs later | — |
+| **D6** Health camp, offline | Working | Kiosk works with no network and syncs later; a danger sign gets "Tell the nurse now" on the device (same rules as the server), and the synced note says so (`DEVICE-RED`) | — |
 | **D7** Referral notes | Working | Referral letter with history, pertinent negatives, allergies, medicines, timed vitals, treatment given before transfer and the referring doctor; QR summary, PDF, print, JSON, CSV, FHIR R4, HL7 CDA R2 | — |
 
 ### E. Human review and hand-off
@@ -966,7 +968,7 @@ translated into English, Hindi and Odia; for other languages, untranslated text 
 | **H3** Model serving | Working | `JEEVIA_PROFILE`: `stub` (rules only, no models or online engines; the cloud instance), `demo` (speech, translation and both OCR engines warmed at start-up so the first patient does not wait), `full` (the same, and the summary model is expected). On a machine short of RAM, `JEEVIA_PRELOAD_LANGUAGE_MODELS=false` and `JEEVIA_PRELOAD_OCR=false` load each model when it is first needed (peak memory is the same once all are used). An explicit setting wins over the profile. The summary model is a separate llama.cpp `llama-server` process |
 | **H4** File storage with expiry | Working | `backend/app/storage.py` |
 | **H5** Visible fallback when an engine is down | Working | `GET /language/engines` lists what is installed and loaded; a missing engine answers 503 and never a fake result. Every note has `processing_status`: report reading, translation, speech and AI summary, each ok / failed / fallback / unsure. A failed stage raises `STAGE-DEGRADED`; a missing summary model raises `LLM-OFF` |
-| **H6** Offline kiosk | Working | `frontend/src/lib/offline/outbox.ts`, `precache.ts`, `public/sw.js`. Check-ins wait in IndexedDB and replay without duplicates (`client_ref`) |
+| **H6** Offline kiosk | Working | `frontend/src/lib/offline/outbox.ts`, `precache.ts`, `public/sw.js`. Check-ins wait in IndexedDB and replay without duplicates (`client_ref`). Photos and reports can be taken offline too (`blobs.ts`): uploaded on sync, then deleted from the device |
 | **H7** Speed targets | Measured | Text to note 0.08 s and queue 0.05 s (met); report photo 14.8 s median, 9 of 16 under 15 s; Odia voice 3.4 s for 13 s clips (target 2 s, missed). See EVALUATION, Speed |
 | **H8** Logging | Working | `backend/app/observability.py`: JSON logs with request IDs and no request bodies; `/metrics`; `/health` |
 | **H9** Deployment | Partial | `docker-compose.yml`, `render.yaml`, Vercel. **Left:** update the public link and recheck Compose |
@@ -1008,10 +1010,12 @@ abnormal report values. Every line comes from an answer the patient gave; nothin
 | `AI-OPINION-HIGHER` | The AI model's own urgency is higher than the rules'. Take a second look; urgency is unchanged |
 | `PROXY` | The history was given by a family member or caregiver |
 | `OFFLINE` | Captured offline and synced later; waiting time counts from capture |
+| `OFFLINE-FILES` | Warning. A photo or report taken on the offline kiosk did not arrive (browser storage cleared, or the server refused it); says which kind and why, so staff ask the patient to show it again |
 | `PPE-GAP` | Workplace finding: protective equipment not issued, or worn only sometimes or never. Not part of urgency |
 | `SAFE-PROVISIONAL` | UNDETERMINED, held at YELLOW until the listed vitals or checks are recorded |
 | `FU-HTN-STAGE2`, `FU-JAUNDICE`, `FU-HAEMATURIA` | "Follow-up: …" info flags from `followup.yaml`: worth a doctor's look at this visit, but the colour is unchanged |
-| `MOCK-RULES` | Mock mode only (no backend): the note came from the browser's small rule subset, not the real rules |
+| `MOCK-RULES` | Mock mode only (no backend): the server's rule pack ran in the browser; the note itself is simplified |
+| `DEVICE-RED` | Critical. The offline kiosk ran the rules at capture and told the patient to call a nurse now; names the rules, and any the server no longer fires (rules changed since the device was updated) |
 
 ---
 

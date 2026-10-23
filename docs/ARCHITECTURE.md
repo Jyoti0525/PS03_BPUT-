@@ -34,7 +34,7 @@ For each feature with the tools, models and data it uses, see [FEATURES.md](FEAT
 4. Bounded follow-up questions (`components/intake/catalog.tsx → contextQuestions`) fill gaps; answers feed the rules.
 5. `POST /encounters` → `rules.evaluate()` sets urgency and returns every fired rule → `pipeline.build_note()` builds
    the note (values with `source`, flags, disagreements, missing info, follow-ups, timeline, trend).
-6. Offline: the whole payload goes to an IndexedDB outbox with a `client_ref`; it replays when the connection returns.
+6. Offline: the whole payload goes to an IndexedDB outbox with a `client_ref`; it replays when the connection returns. Photos and reports taken offline are kept on the device one per IndexedDB key, uploaded first on replay (the server blurs faces and ID numbers as for any upload), then deleted from the device.
    `client_ref` makes replays idempotent, and `captured_at` keeps the true waiting time.
 7. Reviewer queue orders by urgency then wait. Unreviewed red cases auto-escalate after 15 min (yellow 60 min).
 
@@ -47,6 +47,7 @@ For each feature with the tools, models and data it uses, see [FEATURES.md](FEAT
 | `src/lib/api/live.ts` | FastAPI adapter (JWT refresh, device header, file downloads). |
 | `src/lib/api/mock/*` | In-browser mock backend (IndexedDB) with the same RBAC, rules, audit hash chain and seed data. Default mode, used for the Vercel demo. |
 | `src/lib/offline/outbox.ts` | Offline intake queue + replay, one queue per session scope (a kiosk link's queue replays with that link's session); `public/sw.js` caches pages and build assets and wakes the page on Background Sync. |
+| `src/lib/offline/blobs.ts` | Photos and reports taken offline: one IndexedDB key per file, uploaded before the intake on replay (marked as uploaded, so a dropped connection does not upload twice) and deleted once the server has them. A file no longer on the device, or refused, is sent as `files_not_sent` (note flag `OFFLINE-FILES`). Files from an abandoned intake are removed after 6 hours. Asks the browser for persistent storage. |
 | `src/lib/offline/precache.ts` | After a kiosk opens online, sends the service worker the page URL and every loaded `/_next/static` asset so the kiosk reloads with no network. |
 | `src/components/intake/*` | Kiosk / patient intake flow: consent → identity (household phone disambiguation) → visit type → voice / icons / text → duration & severity (+ maternal / chronic branches) → uploads → follow-ups → staff vitals → review → token + QR. |
 | `src/components/triage/*` | Urgency badge, flag list, value table with **source evidence** (image crop / transcript / device), sparkline trends, `NoteView` at doctor or nurse density. |
@@ -102,6 +103,7 @@ Switch adapters with `NEXT_PUBLIC_API_MODE=mock|live` and `NEXT_PUBLIC_API_URL`.
 | `routers/kiosk.py` | Kiosk links (create/revoke), public kiosk session and returning-patient identify, token board. |
 | `routers/shares.py` | QR summary links: create/list/revoke, public meta, open with access code (lockout, expiry, audit). |
 | `exports.py` | PDF (fpdf2), print HTML, JSON, CSV, FHIR R4 document bundle, HL7 CDA R2 document (LOINC 54094-8, schema-tested). |
+| `triage/device_pack.py` | Builds `frontend/src/lib/triage/rulepack.json` (`scripts/build_rulepack.py`): every rule, word list, negation pattern and onset table the device needs, read from the modules here. `frontend/src/lib/triage/engine.ts` runs it in the browser for the offline kiosk and local demo mode; `tests/test_device_rules.py` fails when the JSON is stale or the two engines differ. |
 | `triage/question_flow.yaml` + `question_flow.py` | The kiosk's context questions, their conditions and the findings each answer sets; one versioned file read by the rules and (as `frontend/src/lib/question_flow.json`) by the kiosk. CI checks it against `findings.FINDINGS`. |
 | `triage/vlm.py` | Optional second document-type label from Qwen3-VL-4B on a local llama-server; a disagreement adds a warning, never changes the label. |
 | `triage/tables.py` | Optional PP-StructureV3 table reading of report photos in a separate Python (subprocess); a different value marks the row for checking. |

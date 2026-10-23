@@ -250,7 +250,7 @@ function buildEncounter(d: DB, payload: IntakePayload, patient: Patient, created
     .map((id) => d.files.find((f) => f.id === id))
     .filter((f): f is StoredFile => !!f)
     .map((f) => ({ id: f.id, kind: f.kind, filename: f.filename, sample_key: f.sample_key, boxes: f.boxes }));
-  const { urgency, hits } = evaluate(payload, patient.age);
+  const { urgency, hits } = evaluate(payload, patient.age, patient.sex);
   const consent = d.consents.find((c) => c.id === payload.consent_id) ?? null;
   const note = buildNote({ intake: payload, patient, hits, files, history, proxy: consent?.mode === "proxy" });
   const specialist = inferSpecialist(payload, patient);

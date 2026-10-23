@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, TabletSmartphone, WifiOff, CloudUpload, ShieldCheck, LogIn, Settings2 } from "lucide-react";
+import { Lock, TabletSmartphone, WifiOff, CloudUpload, ShieldCheck, LogIn, Settings2, BellRing } from "lucide-react";
 import { api, getDeviceId } from "@/lib/api";
 import { useSession, usePrefs } from "@/components/providers";
 import { useAsync, useOnline } from "@/lib/hooks";
@@ -126,6 +126,10 @@ export default function KioskPage() {
           <div className="ml-auto flex items-center gap-2">
             {offline && <Badge tone="semi"><WifiOff className="size-3" /> {tr("Offline")}</Badge>}
             {outbox.length > 0 && <Badge tone="info"><CloudUpload className="size-3" /> {outbox.length} {tr("queued")}</Badge>}
+            {/* Queued intakes in which this device found a danger sign: staff see them before the network returns. */}
+            {outbox.some((o) => o.device_check?.red) && (
+              <Badge tone="crit"><BellRing className="size-3" /> {outbox.filter((o) => o.device_check?.red).length} {tr("need a nurse now")}</Badge>
+            )}
             <LanguageButton offered={facility?.languages} />
             <A11yButton />
             <button
