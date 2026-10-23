@@ -8,8 +8,10 @@ truthfully. It never assigns urgency (that is rules.evaluate_full) and never sta
 import re
 import uuid
 from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 
 from .. import asr_check, regions
+from ..config import get_settings
 from .extraction import document_checks
 from .findings import FINDINGS, translation_check
 from .followups import CONTEXT_ID, FOLLOWUPS, answered_ids, options_for, question_id
@@ -559,10 +561,15 @@ def _since_last(prev, hx: dict, vitals: list, intake: dict) -> dict:
         rows.append({"label": v["label"], "unit": v.get("unit") or "", "then": t["value"], "now": v["value"],
                      "then_status": t.get("status"), "now_status": v.get("status")})
     ov = getattr(prev, "override", None) or {}
+    # Both days in the clinic's time zone: created_at is UTC, and the server's own clock may be UTC too, so a visit
+    # just after midnight in India was "1 day ago" on the laptop and the other way round on the hosted API.
+    tz = ZoneInfo(get_settings().timezone)
+    at = prev.created_at
+    then = (at if at.tzinfo else at.replace(tzinfo=timezone.utc)).astimezone(tz).date()
     return {
         "encounter_id": getattr(prev, "id", None),
-        "date": prev.created_at.date().isoformat(),
-        "days_ago": (date.today() - prev.created_at.date()).days,
+        "date": then.isoformat(),
+        "days_ago": (datetime.now(tz).date() - then).days,
         "complaint": getattr(prev, "chief_complaint", ""),
         "urgency": getattr(prev, "urgency", None),
         "decided_by": ov.get("by") or getattr(prev, "reviewed_by", None),

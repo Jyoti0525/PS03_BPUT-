@@ -9,7 +9,7 @@ from .. import audit, filetypes, sarvam, storage
 from ..config import get_settings
 from ..ratelimit import limit
 from ..models import Encounter, FileObject, User
-from ..schemas import ADMIN_ROLES, REVIEWER_ROLES, FileKind, FileOut
+from ..schemas import ADMIN_ROLES, REVIEWER_ROLES, FileKind, FileOut, form_on
 from ..security import DB, CurrentUser, decode, file_token
 from ..services import now
 from ..triage.extraction import add_online_reading, extract_document, wants_online_reading
@@ -38,11 +38,12 @@ async def upload(
     kind: Annotated[FileKind, Form()],
     encounter_id: Annotated[str | None, Form()] = None,
     sample_key: Annotated[str | None, Form()] = None,
-    read: Annotated[bool, Form()] = True,  # False: the patient chose to continue without AI — no OCR runs
+    read: Annotated[str, Form()] = "true",  # "false": the patient chose to continue without AI — no OCR runs (schemas.form_on)
     online: Annotated[bool, Form()] = False,  # the patient's AI consent covers the online reader (consent text)
 ):
     if user.role in ADMIN_ROLES or user.role == "employer":
         raise HTTPException(403, "This role cannot upload clinical files")
+    read = form_on(read)
     s = get_settings()
     ctype = file.content_type or "application/octet-stream"
     if not ctype.startswith(storage.ALLOWED_TYPES[kind]):

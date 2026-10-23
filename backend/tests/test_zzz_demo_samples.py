@@ -2,6 +2,11 @@
 
 from conftest import API, login
 
+from app.db import engine
+
+# The switch rebuilds the database, so it works only on the demo laptop's SQLite; on PostgreSQL it refuses even when enabled
+LAPTOP = engine.dialect.name == "sqlite"
+
 
 def test_switch_is_refused_unless_enabled(client):
     assert client.get(f"{API}/demo/samples").json()["available"] is False
@@ -13,6 +18,9 @@ def test_off_empties_the_queues_and_on_brings_fresh_samples_back(client, monkeyp
 
     monkeypatch.setattr(get_settings(), "demo_controls", True)
     r = client.post(f"{API}/demo/samples", json={"on": False})
+    if not LAPTOP:
+        assert r.status_code == 403
+        return
     assert r.status_code == 200 and r.json() == {"available": True, "on": False}
     doc = login(client, "9000000001")  # staff accounts stay
     assert client.get(f"{API}/queue?facility_id=fac_phc_manikpur", headers=doc).json() == []
@@ -28,6 +36,9 @@ def test_queue_preview_only_on_the_demo_laptop_and_only_synthetic(client, monkey
 
     assert client.get(f"{API}/demo/queue-preview").status_code == 404
     monkeypatch.setattr(get_settings(), "demo_controls", True)
+    if not LAPTOP:
+        assert client.get(f"{API}/demo/queue-preview").status_code == 404
+        return
     j = client.get(f"{API}/demo/queue-preview").json()
     assert j["facility"] == "PHC Manikpur" and j["rules"] > 100 and len(j["items"]) <= 4
     ranks = [{"red": 0, "yellow": 1, "green": 2}[i["urgency"]] for i in j["items"]]

@@ -13,7 +13,7 @@ from starlette.concurrency import run_in_threadpool
 from .. import asr_check, bhashini, filetypes, language, sarvam, tts, whisper_asr
 from ..config import get_settings
 from ..ratelimit import limit
-from ..schemas import ADMIN_ROLES
+from ..schemas import ADMIN_ROLES, form_on
 from ..security import CurrentUser
 
 router = APIRouter(tags=["language"])
@@ -42,7 +42,7 @@ def engines(user: CurrentUser):
 
 
 @router.post("/speech/transcribe", dependencies=[Depends(limit("ai"))])
-async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], language_code: Annotated[str, Form(alias="language")], translate: Annotated[bool, Form()] = True,
+async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], language_code: Annotated[str, Form(alias="language")], translate: Annotated[str, Form()] = "true",
                      second_opinion: Annotated[bool, Form()] = False):
     """Recorded audio → transcript in the speaker's language, plus an English translation. Audio is not stored here.
 
@@ -51,6 +51,7 @@ async def transcribe(user: CurrentUser, audio: Annotated[UploadFile, File()], la
     polls GET /speech/second/{id}. Sarvam Saaras (online) is preferred; if unavailable, IndicWhisper (offline) checks
     it instead. Where IndicConformer is not installed, a successful available engine is named as the only transcript."""
     _clinical(user)
+    translate = form_on(translate)
     s = get_settings()
     data = await audio.read(s.max_upload_mb * 1024 * 1024 + 1)
     if len(data) > s.max_upload_mb * 1024 * 1024:

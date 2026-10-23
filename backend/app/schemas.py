@@ -11,6 +11,13 @@ Category = Literal["normal", "maternal", "chronic"]
 FileKind = Literal["report", "image", "audio"]
 ExportFormat = Literal["pdf", "json", "csv", "fhir", "cda", "print"]
 
+
+def form_on(value: str) -> bool:
+    """A form flag that is on unless sent as false. FastAPI 0.15x+ reads a missing `bool` form field as an unticked
+    checkbox (False), which silently turned off translation and report reading on the hosted API: such flags are
+    strings, defaulting to "true"."""
+    return value.strip().lower() not in ("false", "0", "no", "off")
+
 STAFF_ROLES = {"doctor", "medical_officer", "nurse", "health_worker", "receptionist", "supervisor"}
 FacilityType = Literal[
     "phc", "chc", "sub_centre", "district_hospital", "hospital", "clinic", "health_camp", "company_clinic", "industrial_unit", "campus"

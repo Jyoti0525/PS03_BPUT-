@@ -224,6 +224,19 @@ def test_upload_signed_url_and_retention(client, nurse, supervisor):
     assert ret["policy_hours"]["audio"] == 24 and all(x["url"] is None for x in ret["files"])
 
 
+def test_a_report_is_read_unless_the_form_says_not_to(client, nurse, monkeypatch):
+    # FastAPI 0.15x+ reads a missing bool form field as False: the browser sends `read` only to turn it off
+    from app.routers import files
+
+    calls = []
+    monkeypatch.setattr(files, "extract_document", lambda data, ctype, second=False: calls.append(ctype) or {"engine": "stub", "quality": {"ok": True, "issues": []}, "rows": [], "meta": {}, "warnings": [], "text": [], "medicines": []})
+    svg = b'<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>'
+    for form in ({}, {"read": "false"}):
+        r = client.post(f"{API}/files", data={"kind": "report", "sample_key": "cbc", **form}, files={"file": ("r.svg", svg, "image/svg+xml")}, headers=nurse)
+        assert r.status_code == 200, r.text
+    assert calls == ["image/svg+xml"]
+
+
 def test_health_and_metrics(client):
     assert client.get("/health").json()["status"] == "ok"
     m = client.get("/metrics").text
